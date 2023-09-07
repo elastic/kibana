@@ -64,7 +64,7 @@ describe(
     const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
     const EXCEPTION_LIST_NAME = 'Newly created list';
 
-    describe('Add, Edit and delete Exception item', { tags: ['@ess', '@serverless'] }, () => {
+    describe('Add, Edit and delete Exception item', () => {
       it('should create exception item from Shared Exception List page and linked to a Rule', () => {
         // Click on "Create shared exception list" button on the header
         // Click on "Create exception item"
