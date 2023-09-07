@@ -54,7 +54,7 @@ export interface FeatureCatalogueSolution {
   /** An ordinal used to sort solutions relative to one another for display on the home page */
   readonly order: number;
   /** Optional function to control visibility of this solution. */
-  readonly visible?: (capabilities: Capabilities) => boolean;
+  readonly isVisible?: (capabilities: Capabilities) => boolean;
 }
 
 export class FeatureCatalogueRegistry {
