@@ -15,6 +15,8 @@ import type { TopNFunctions } from '@kbn/profiling-utils';
 interface EmbeddableFunctionsInput {
   data?: TopNFunctions;
   isLoading: boolean;
+  rangeFrom: number;
+  rangeTo: number;
 }
 
 export type EmbeddableFunctionsEmbeddableInput = EmbeddableFunctionsInput & EmbeddableInput;

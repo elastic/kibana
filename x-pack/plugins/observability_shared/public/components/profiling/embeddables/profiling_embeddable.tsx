@@ -22,6 +22,7 @@ export function ProfilingEmbeddable<T>({
   data,
   isLoading,
   height,
+  ...props
 }: ProfilingEmbeddableProps<T>) {
   const { embeddable: embeddablePlugin } = useKibana<ObservabilitySharedStart>().services;
   const [embeddable, setEmbeddable] = useState<any>();
@@ -46,10 +47,10 @@ export function ProfilingEmbeddable<T>({
 
   useEffect(() => {
     if (embeddable) {
-      embeddable.updateInput({ data, isLoading });
+      embeddable.updateInput({ data, isLoading, ...props });
       embeddable.reload();
     }
-  }, [data, embeddable, isLoading]);
+  }, [data, embeddable, isLoading, props]);
 
   return (
     <div

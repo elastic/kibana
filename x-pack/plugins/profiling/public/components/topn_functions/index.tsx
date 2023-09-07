@@ -40,9 +40,10 @@ interface Props {
   pageIndex: number;
   onChangePage: (nextPage: number) => void;
   sortField: TopNFunctionSortField;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection: 'asc' | 'desc';
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   dataTestSubj?: string;
+  isEmbedded?: boolean;
 }
 
 export const TopNFunctionsGrid = forwardRef(
@@ -60,9 +61,10 @@ export const TopNFunctionsGrid = forwardRef(
       pageIndex,
       onChangePage,
       sortField,
-      sortDirection = 'asc',
+      sortDirection,
       onChangeSort,
       dataTestSubj = 'topNFunctionsGrid',
+      isEmbedded = false,
     }: Props,
     ref: Ref<EuiDataGridRefProps> | undefined
   ) => {
@@ -283,6 +285,7 @@ export const TopNFunctionsGrid = forwardRef(
             // Left it empty on purpose as it is a required property on the pagination
             onChangeItemsPerPage: () => {},
             onChangePage,
+            pageSizeOptions: [],
           }}
           rowHeightsOptions={{ defaultHeight: 'auto' }}
           toolbarVisibility={{
@@ -337,6 +340,8 @@ export const TopNFunctionsGrid = forwardRef(
             }}
             totalSeconds={totalSeconds}
             totalSamples={totalCount}
+            showAIAssistant={!isEmbedded}
+            showSymbolsStatus={!isEmbedded}
           />
         )}
       </>

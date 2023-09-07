@@ -8,10 +8,9 @@ import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
 import { EmbeddableFunctionsEmbeddableInput } from './embeddable_functions_factory';
-import { TopNFunctionsGrid } from '../../components/topn_functions';
+import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
 
 export class EmbeddableFunctions extends Embeddable<
   EmbeddableFunctionsEmbeddableInput,
@@ -22,19 +21,12 @@ export class EmbeddableFunctions extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { data, isLoading } = this.input;
+    const { data, isLoading, rangeFrom, rangeTo } = this.input;
+    const totalSeconds = (rangeTo - rangeFrom) / 1000;
     render(
       <AsyncEmbeddableComponent isLoading={isLoading}>
         <div style={{ width: '100%' }}>
-          <TopNFunctionsGrid
-            topNFunctions={data}
-            totalSeconds={2}
-            isDifferentialView={false}
-            pageIndex={0}
-            onChangePage={() => {}}
-            sortField={TopNFunctionSortField.Rank}
-            onChangeSort={() => {}}
-          />
+          <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} />
         </div>
       </AsyncEmbeddableComponent>,
       domNode

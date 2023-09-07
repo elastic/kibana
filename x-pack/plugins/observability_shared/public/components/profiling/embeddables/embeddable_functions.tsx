@@ -10,7 +10,10 @@ import React from 'react';
 import { ProfilingEmbeddable, ProfilingEmbeddableProps } from './profiling_embeddable';
 import { EMBEDDABLE_FUNCTIONS } from '.';
 
-type Props = Omit<ProfilingEmbeddableProps<TopNFunctions>, 'embeddableFactoryId'>;
+type Props = Omit<ProfilingEmbeddableProps<TopNFunctions>, 'embeddableFactoryId'> & {
+  rangeFrom: number;
+  rangeTo: number;
+};
 
 export function EmbeddableFunctions(props: Props) {
   return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FUNCTIONS} />;

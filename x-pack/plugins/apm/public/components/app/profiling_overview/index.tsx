@@ -59,10 +59,15 @@ export function ProfilingOverview() {
       <EmbeddableFlamegraph
         data={data?.flamegraph}
         isLoading={isLoading}
-        height="60vh"
+        height="50vh"
       />
       <EuiHorizontalRule />
-      <EmbeddableFunctions data={data?.functions} isLoading={isLoading} />
+      <EmbeddableFunctions
+        data={data?.functions}
+        isLoading={isLoading}
+        rangeFrom={new Date(start).valueOf()}
+        rangeTo={new Date(end).valueOf()}
+      />
     </>
   );
 }
