@@ -15,7 +15,8 @@ import {
 import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-describe('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165709
+describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
