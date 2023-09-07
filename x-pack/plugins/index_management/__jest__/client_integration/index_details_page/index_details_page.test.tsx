@@ -271,6 +271,13 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Settings tab', () => {
+    it('updates the breadcrumbs to index details settings', async () => {
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsSettings
+      );
+    });
+
     it('loads settings from the API', async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       expect(httpSetup.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/settings/${testIndexName}`, {
