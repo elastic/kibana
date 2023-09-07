@@ -14,5 +14,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo 'Comment "/synthetics-stack-e2e" on the PR to trigger the\ synthetics stack e2e workflow. That job workflow is responsible for setting this status check to success or failure."'
+          echo 'Comment "/synthetics-stack-e2e" on the PR to trigger the synthetics stack e2e workflow. That job workflow is responsible for setting this status check to success or failure."'
           exit 1
