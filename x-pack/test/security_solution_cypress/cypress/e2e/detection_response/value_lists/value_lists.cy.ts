@@ -34,8 +34,9 @@ const TEXT_LIST_FILE_NAME = 'value_list.txt';
 const IPS_LIST_FILE_NAME = 'ip_list.txt';
 const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
 
+// FLAKY: https://github.com/elastic/kibana/issues/165699
 describe('value lists', () => {
-  describe('management modal', { tags: ['@ess', '@serverless'] }, () => {
+  describe('management modal', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       login();
       deleteValueLists([TEXT_LIST_FILE_NAME, IPS_LIST_FILE_NAME, CIDRS_LIST_FILE_NAME]);
