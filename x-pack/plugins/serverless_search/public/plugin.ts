@@ -42,12 +42,12 @@ export class ServerlessSearchPlugin
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
-        let userProfile: AuthenticatedUser | undefined;
+        let user: AuthenticatedUser | undefined;
         try {
           const response = await security.authc.getCurrentUser();
-          userProfile = response;
+          user = response;
         } catch {
-          userProfile = undefined;
+          user = undefined;
         }
 
         return await renderApp(element, coreStart, { user, ...services });
