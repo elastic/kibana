@@ -8,7 +8,10 @@
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import { AlertingAuthorization } from '@kbn/alerting-plugin/server';
+import {
+  AlertingAuthorization,
+  PluginStartContract as AlertingStart,
+} from '@kbn/alerting-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { IRuleDataService } from '../rule_data_plugin_service';
 import { AlertsClient } from './alerts_client';
@@ -20,6 +23,7 @@ export interface AlertsClientFactoryProps {
   securityPluginSetup: SecurityPluginSetup | undefined;
   ruleDataService: IRuleDataService | null;
   getRuleType: RuleTypeRegistry['get'];
+  getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
 }
 
 export class AlertsClientFactory {
@@ -32,6 +36,7 @@ export class AlertsClientFactory {
   private securityPluginSetup!: SecurityPluginSetup | undefined;
   private ruleDataService!: IRuleDataService | null;
   private getRuleType!: RuleTypeRegistry['get'];
+  private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
 
   public initialize(options: AlertsClientFactoryProps) {
     /**
@@ -48,6 +53,7 @@ export class AlertsClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
     this.ruleDataService = options.ruleDataService;
     this.getRuleType = options.getRuleType;
+    this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
   public async create(request: KibanaRequest): Promise<AlertsClient> {
@@ -60,6 +66,7 @@ export class AlertsClientFactory {
       esClient: this.esClient,
       ruleDataService: this.ruleDataService!,
       getRuleType: this.getRuleType,
+      getAlertIndicesAlias: this.getAlertIndicesAlias,
     });
   }
 }

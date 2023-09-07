@@ -38,16 +38,19 @@ const querySchema = schema.object({
     )
   ),
   filter: schema.maybe(schema.string()),
+  filter_consumers: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
   default_search_operator: defaultSearchOperator,
   has_reference: hasReference,
   search_fields: searchFields,
+  filter_consumers: filterConsumers,
   ...rest
 }) => ({
   ...rest,
   defaultSearchOperator,
+  filterConsumers,
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });

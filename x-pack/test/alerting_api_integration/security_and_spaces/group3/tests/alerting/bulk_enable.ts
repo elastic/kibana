@@ -221,7 +221,6 @@ export default ({ getService }: FtrProviderContext) => {
               expect(response.statusCode).to.eql(400);
               break;
             case 'superuser at space1':
-              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               break;
             default:

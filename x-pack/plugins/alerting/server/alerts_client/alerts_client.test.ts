@@ -62,6 +62,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
     shouldWrite: true,
   },
+  validLegacyConsumers: [],
 };
 
 const mockLegacyAlertsClient = legacyAlertsClientMock.create();

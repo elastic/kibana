@@ -21,7 +21,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../common/constants';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { EntityIndexExpression } from './expressions/entity_index_expression';

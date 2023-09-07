@@ -202,6 +202,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validate: {
     params: { validate: (params) => params },
   },
+  validLegacyConsumers: [],
 };
 
 const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {

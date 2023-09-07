@@ -7,4 +7,3 @@
 
 export const ActionGroupId = 'query matched';
 export const ConditionMetAlertInstanceId = 'query matched';
-export { ES_QUERY_ID } from '../../../common';

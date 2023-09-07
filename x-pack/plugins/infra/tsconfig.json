@@ -70,7 +70,6 @@
     "@kbn/licensing-plugin",
     "@kbn/aiops-utils",
     "@kbn/lens-embeddable-utils",
-    "@kbn/stack-alerts-plugin"
   ],
   "exclude": ["target/**/*"]
 }

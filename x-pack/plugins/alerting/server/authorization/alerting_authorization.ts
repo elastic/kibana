@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { fromPairs, has } from 'lodash';
+import { has, isEmpty } from 'lodash';
 import { KibanaRequest } from '@kbn/core/server';
 import { JsonObject } from '@kbn/utility-types';
 import { KueryNode } from '@kbn/es-query';
@@ -175,9 +175,11 @@ export class AlertingAuthorization {
   }: EnsureAuthorizedOpts) {
     const { authorization } = this;
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
-    // We have some rules with consumer of "alerts" which indirectly means the same as
-    // a consumer of the rule type producer. Let's simplify the code and set it accordingly
-    const consumer = legacyConsumer === ALERTS_FEATURE_ID ? ruleType.producer : legacyConsumer;
+    const consumer = getValidConsumer({
+      validLegacyConsumers: ruleType.validLegacyConsumers,
+      legacyConsumer,
+      producer: ruleType.producer,
+    });
 
     const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     if (authorization && this.shouldCheckAuthorization()) {
@@ -208,12 +210,18 @@ export class AlertingAuthorization {
 
   public async getFindAuthorizationFilter(
     authorizationEntity: AlertingAuthorizationEntity,
-    filterOpts: AlertingAuthorizationFilterOpts
+    filterOpts: AlertingAuthorizationFilterOpts,
+    featuresIds?: Set<string>
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
-    return this.getAuthorizationFilter(authorizationEntity, filterOpts, ReadOperations.Find);
+    return this.getAuthorizationFilter(
+      authorizationEntity,
+      filterOpts,
+      ReadOperations.Find,
+      featuresIds
+    );
   }
 
   public async getAuthorizedRuleTypes(
@@ -232,7 +240,8 @@ export class AlertingAuthorization {
   public async getAuthorizationFilter(
     authorizationEntity: AlertingAuthorizationEntity,
     filterOpts: AlertingAuthorizationFilterOpts,
-    operation: WriteOperations | ReadOperations
+    operation: WriteOperations | ReadOperations,
+    featuresIds?: Set<string>
   ): Promise<{
     filter?: KueryNode | JsonObject;
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
@@ -241,7 +250,8 @@ export class AlertingAuthorization {
       const { authorizedRuleTypes } = await this.augmentRuleTypesWithAuthorization(
         this.ruleTypeRegistry.list(),
         [operation],
-        authorizationEntity
+        authorizationEntity,
+        featuresIds
       );
 
       if (!authorizedRuleTypes.size) {
@@ -326,6 +336,9 @@ export class AlertingAuthorization {
         string,
         [RegistryAlertTypeWithAuth, string, HasPrivileges, IsAuthorizedAtProducerLevel]
       >();
+      const allPossibleConsumers = await this.allPossibleConsumers;
+      const addLegacyConsumerPrivileges = (legacyConsumer: string) =>
+        legacyConsumer === ALERTS_FEATURE_ID || isEmpty(featuresIds);
       for (const feature of fIds) {
         const featureDef = this.features
           .getKibanaFeatures()
@@ -351,6 +364,31 @@ export class AlertingAuthorization {
                   ruleTypeAuth.producer === feature,
                 ]
               );
+              // FUTURE ENGINEER
+              // We are just trying to add back the legacy consumers associated
+              // to the rule type to get back the privileges that was given at one point
+              if (!isEmpty(ruleTypeAuth.validLegacyConsumers)) {
+                ruleTypeAuth.validLegacyConsumers.forEach((legacyConsumer) => {
+                  if (addLegacyConsumerPrivileges(legacyConsumer)) {
+                    if (!allPossibleConsumers[legacyConsumer]) {
+                      allPossibleConsumers[legacyConsumer] = {
+                        read: true,
+                        all: true,
+                      };
+                    }
+
+                    privilegeToRuleType.set(
+                      this.authorization!.actions.alerting.get(
+                        ruleTypeId,
+                        legacyConsumer,
+                        authorizationEntity,
+                        operation
+                      ),
+                      [ruleTypeAuth, legacyConsumer, hasPrivilegeByOperation(operation), false]
+                    );
+                  }
+                });
+              }
             }
           }
         }
@@ -368,7 +406,7 @@ export class AlertingAuthorization {
             ? // has access to all features
               this.augmentWithAuthorizedConsumers(
                 new Set(ruleTypesAuthorized.values()),
-                await this.allPossibleConsumers
+                allPossibleConsumers
               )
             : // only has some of the required privileges
               privileges.kibana.reduce((authorizedRuleTypes, { authorized, privilege }) => {
@@ -383,10 +421,14 @@ export class AlertingAuthorization {
 
                     if (isAuthorizedAtProducerLevel) {
                       // granting privileges under the producer automatically authorized the Rules Management UI as well
-                      ruleType.authorizedConsumers[ALERTS_FEATURE_ID] = mergeHasPrivileges(
-                        hasPrivileges,
-                        ruleType.authorizedConsumers[ALERTS_FEATURE_ID]
-                      );
+                      ruleType.validLegacyConsumers.forEach((legacyConsumer) => {
+                        if (addLegacyConsumerPrivileges(legacyConsumer)) {
+                          ruleType.authorizedConsumers[legacyConsumer] = mergeHasPrivileges(
+                            hasPrivileges,
+                            ruleType.authorizedConsumers[legacyConsumer]
+                          );
+                        }
+                      });
                     }
                     authorizedRuleTypes.add(ruleType);
                   }
@@ -438,7 +480,10 @@ function asAuthorizedConsumers(
   consumers: string[],
   hasPrivileges: HasPrivileges
 ): AuthorizedConsumers {
-  return fromPairs(consumers.map((feature) => [feature, hasPrivileges]));
+  return consumers.reduce<AuthorizedConsumers>((acc, feature) => {
+    acc[feature] = hasPrivileges;
+    return acc;
+  }, {});
 }
 
 function getUnauthorizedMessage(
@@ -449,3 +494,16 @@ function getUnauthorizedMessage(
 ): string {
   return `Unauthorized by "${scope}" to ${operation} "${alertTypeId}" ${entity}`;
 }
+
+export const getValidConsumer = ({
+  validLegacyConsumers,
+  legacyConsumer,
+  producer,
+}: {
+  validLegacyConsumers: string[];
+  legacyConsumer: string;
+  producer: string;
+}): string =>
+  legacyConsumer === ALERTS_FEATURE_ID || validLegacyConsumers.includes(legacyConsumer)
+    ? producer
+    : legacyConsumer;

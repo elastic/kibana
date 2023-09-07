@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
   const SPACE1 = 'space1';
-  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
+  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts-default';
   const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
 
   const getAPMIndexName = async (user: User, space: string, expectedStatusCode: number = 200) => {
@@ -53,12 +53,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Users:', () => {
       it(`${obsOnlySpacesAll.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const indexNames = await getAPMIndexName(obsOnlySpacesAll, SPACE1);
-        expect(indexNames.includes(`${APM_ALERT_INDEX}-*`)).to.eql(true); // assert this here so we can use constants in the dynamically-defined test cases below
+        expect(indexNames.includes(APM_ALERT_INDEX)).to.eql(true); // assert this here so we can use constants in the dynamically-defined test cases below
       });
 
       it(`${superUser.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const indexNames = await getAPMIndexName(superUser, SPACE1);
-        expect(indexNames.includes(`${APM_ALERT_INDEX}-*`)).to.eql(true); // assert this here so we can use constants in the dynamically-defined test cases below
+        expect(indexNames.includes(APM_ALERT_INDEX)).to.eql(true); // assert this here so we can use constants in the dynamically-defined test cases below
       });
 
       it(`${secOnlyRead.username} should NOT be able to access the APM alert in ${SPACE1}`, async () => {

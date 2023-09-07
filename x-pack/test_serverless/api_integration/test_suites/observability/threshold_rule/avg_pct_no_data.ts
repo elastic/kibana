@@ -8,7 +8,7 @@
 import { Aggregators, Comparator } from '@kbn/observability-plugin/common/threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/threshold/threshold_executor';
 import expect from '@kbn/expect';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -26,13 +26,10 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { ES_QUERY_ID } from '@kbn/stack-alerts-plugin/common';
+import { ES_QUERY_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import {
-  SLO_BURN_RATE_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,

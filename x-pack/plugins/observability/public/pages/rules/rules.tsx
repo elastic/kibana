@@ -150,6 +150,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
             setRefresh(new Date());
             return Promise.resolve();
           }}
+          useRuleProducer={true}
         />
       )}
     </ObservabilityPageTemplate>

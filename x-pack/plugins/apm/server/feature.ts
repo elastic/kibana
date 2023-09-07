@@ -12,8 +12,11 @@ import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
 } from '@kbn/licensing-plugin/server';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
-import { ES_QUERY_ID } from '@kbn/stack-alerts-plugin/common';
+
+import {
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import {
   ApmRuleType,

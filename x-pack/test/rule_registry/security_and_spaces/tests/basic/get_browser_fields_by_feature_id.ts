@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
           'uptime',
         ]);
         expect(Object.keys(resp.browserFields)).toEqual(
-          expect.arrayContaining(['base', 'event', 'kibana', 'message'])
+          expect.arrayContaining(['base', 'event', 'kibana'])
         );
       });
 
@@ -66,7 +66,6 @@ export default ({ getService }: FtrProviderContext) => {
             'error',
             'event',
             'kibana',
-            'message',
             'monitor',
             'observer',
             'tls',

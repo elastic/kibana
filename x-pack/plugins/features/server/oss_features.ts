@@ -32,7 +32,6 @@ export const buildOSSFeatures = ({
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['discover', 'kibana'],
       catalogue: ['discover'],
-      alerting: ['.es-query'],
       privileges: {
         all: {
           app: ['discover', 'kibana'],
@@ -43,14 +42,6 @@ export const buildOSSFeatures = ({
             read: ['index-pattern'],
           },
           ui: ['show', 'save', 'saveQuery'],
-          alerting: {
-            rule: {
-              all: ['.es-query'],
-            },
-            alert: {
-              all: ['.es-query'],
-            },
-          },
         },
         read: {
           app: ['discover', 'kibana'],
@@ -60,14 +51,6 @@ export const buildOSSFeatures = ({
             read: ['index-pattern', 'search', 'query'],
           },
           ui: ['show'],
-          alerting: {
-            rule: {
-              all: ['.es-query'],
-            },
-            alert: {
-              all: ['.es-query'],
-            },
-          },
         },
       },
       subFeatures: [
