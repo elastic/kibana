@@ -15,20 +15,22 @@ import { MetricsSectionTitle, NginxMetricsSectionTitle } from '../../../componen
 
 interface Props {
   assetName: string;
-  timeRange: TimeRange;
+  dateRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
 }
 
+const { host, nginx } = assetDetailsDashboards;
+
 export const MetricsGrid = React.memo(
-  ({ assetName, metricsDataView, logsDataView, timeRange }: Props) => {
+  ({ assetName, metricsDataView, logsDataView, dateRange: timeRange }: Props) => {
     return (
       <>
         <Section title={MetricsSectionTitle}>
           <ChartGrid
             assetName={assetName}
             timeRange={timeRange}
-            charts={assetDetailsDashboards.host.hostMetricChartsFullPage}
+            charts={host.hostMetricChartsFullPage}
             metricsDataView={metricsDataView}
             logsDataView={logsDataView}
             data-test-subj="infraAssetDetailsMetricsChart"
@@ -40,12 +42,12 @@ export const MetricsGrid = React.memo(
             assetName={assetName}
             timeRange={timeRange}
             charts={[
-              ...assetDetailsDashboards.nginxDashboard.nginxStubstatusCharts.map((n) => ({
-                ...n,
+              ...nginx.nginxStubstatusCharts.map((chart) => ({
+                ...chart,
                 dependsOn: ['nginx.stubstatus'],
               })),
-              ...assetDetailsDashboards.nginxDashboard.nginxAccessCharts.map((n) => ({
-                ...n,
+              ...nginx.nginxAccessCharts.map((chart) => ({
+                ...chart,
                 dependsOn: ['nginx.access'],
               })),
             ]}
@@ -63,13 +65,13 @@ export const MetricsGridCompact = ({
   assetName,
   metricsDataView,
   logsDataView,
-  timeRange,
+  dateRange: timeRange,
 }: Props) => (
   <Section title={MetricsSectionTitle}>
     <ChartGrid
       assetName={assetName}
       timeRange={timeRange}
-      charts={assetDetailsDashboards.host.hostMetricCharts}
+      charts={host.hostMetricFlyoutCharts}
       metricsDataView={metricsDataView}
       logsDataView={logsDataView}
       data-test-subj="infraAssetDetailsMetricsChart"
