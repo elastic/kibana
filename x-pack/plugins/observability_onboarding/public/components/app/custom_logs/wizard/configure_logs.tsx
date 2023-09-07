@@ -174,7 +174,6 @@ export function ConfigureLogs() {
           items={[
             <BackButton onBack={goBack} />,
             <EuiButton
-              data-test-subj="observabilityOnboardingConfigureLogsButton"
               color="primary"
               fill
               onClick={onContinue}
@@ -182,6 +181,7 @@ export function ConfigureLogs() {
               isDisabled={
                 logFilePathNotConfigured || !datasetName || !namespace
               }
+              data-test-subj="obltOnboardingCustomLogsContinue"
             >
               {isCreatingIntegration
                 ? i18n.translate(
@@ -230,7 +230,10 @@ export function ConfigureLogs() {
           >
             <>
               {logFilePaths.map((filepath, index) => (
-                <div key={index}>
+                <div
+                  key={index}
+                  data-test-subj={`obltOnboardingLogFilePath-${index}`}
+                >
                   {index > 0 && <EuiSpacer size="s" />}
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem>
@@ -249,10 +252,10 @@ export function ConfigureLogs() {
                     {index > 0 && (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          data-test-subj="observabilityOnboardingConfigureLogsButton"
                           iconType="trash"
                           aria-label="Delete"
                           onClick={() => removeLogFilePath(index)}
+                          data-test-subj={`obltOnboardingLogFilePathDelete-${index}`}
                         />
                       </EuiFlexItem>
                     )}
@@ -269,9 +272,9 @@ export function ConfigureLogs() {
           >
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="observabilityOnboardingConfigureLogsAddRowButton"
                 iconType="plusInCircle"
                 onClick={addLogFilePath}
+                data-test-subj="obltOnboardingCustomLogsAddFilePath"
               >
                 {i18n.translate(
                   'xpack.observability_onboarding.configureLogs.logFile.addRow',
@@ -320,7 +323,6 @@ export function ConfigureLogs() {
             }
           >
             <EuiFieldText
-              data-test-subj="observabilityOnboardingConfigureLogsFieldText"
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
                 {
@@ -329,6 +331,7 @@ export function ConfigureLogs() {
               )}
               value={serviceName}
               onChange={(event) => setServiceName(event.target.value)}
+              data-test-subj="obltOnboardingCustomLogsServiceName"
             />
           </OptionalFormRow>
           <EuiHorizontalRule margin="m" />
@@ -357,6 +360,7 @@ export function ConfigureLogs() {
                     defaultMessage: 'Advanced settings',
                   }
                 )}
+                data-test-subj="obltOnboardingCustomLogsAdvancedSettings"
               >
                 <EuiSpacer size="l" />
                 <EuiFormRow
@@ -415,7 +419,6 @@ export function ConfigureLogs() {
                   }
                 >
                   <EuiFieldText
-                    data-test-subj="observabilityOnboardingConfigureLogsFieldText"
                     placeholder={i18n.translate(
                       'xpack.observability_onboarding.configureLogs.namespace.placeholder',
                       {
@@ -424,6 +427,7 @@ export function ConfigureLogs() {
                     )}
                     value={namespace}
                     onChange={(event) => setNamespace(event.target.value)}
+                    data-test-subj="obltOnboardingCustomLogsNamespace"
                   />
                 </EuiFormRow>
                 <EuiSpacer size="l" />
@@ -461,11 +465,11 @@ export function ConfigureLogs() {
                   }
                 >
                   <EuiTextArea
-                    data-test-subj="observabilityOnboardingConfigureLogsTextArea"
                     value={customConfigurations}
                     onChange={(event) =>
                       setCustomConfigurations(event.target.value)
                     }
+                    data-test-subj="obltOnboardingCustomLogsCustomConfig"
                   />
                 </OptionalFormRow>
               </EuiAccordion>
@@ -526,7 +530,6 @@ export function ConfigureLogs() {
             error={integrationNameError}
           >
             <EuiFieldText
-              data-test-subj="observabilityOnboardingConfigureLogsFieldText"
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.integration.placeholder',
                 {
@@ -539,6 +542,7 @@ export function ConfigureLogs() {
               }
               isInvalid={isIntegrationNameInvalid}
               onInput={() => setIntegrationNameTouched(true)}
+              data-test-subj="obltOnboardingCustomLogsIntegrationsName"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -581,7 +585,6 @@ export function ConfigureLogs() {
             error={datasetNameError}
           >
             <EuiFieldText
-              data-test-subj="observabilityOnboardingConfigureLogsFieldText"
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.dataset.placeholder',
                 {
@@ -594,6 +597,7 @@ export function ConfigureLogs() {
               }
               isInvalid={isDatasetNameInvalid}
               onInput={() => setDatasetNameTouched(true)}
+              data-test-subj="obltOnboardingCustomLogsDatasetName"
             />
           </EuiFormRow>
         </EuiForm>
@@ -624,13 +628,23 @@ const getIntegrationErrorCallout = (integrationError: IntegrationError) => {
         }
       );
       return (
-        <EuiCallOut title={title} color="danger" iconType="error">
+        <EuiCallOut
+          title={title}
+          color="danger"
+          iconType="error"
+          data-test-subj="obltOnboardingCustomIntegrationUnauthorized"
+        >
           <p>{authorizationDescription}</p>
         </EuiCallOut>
       );
     case 'UnknownError':
       return (
-        <EuiCallOut title={title} color="danger" iconType="error">
+        <EuiCallOut
+          title={title}
+          color="danger"
+          iconType="error"
+          data-test-subj="obltOnboardingCustomIntegrationUnknownError"
+        >
           <p>{integrationError.message}</p>
         </EuiCallOut>
       );

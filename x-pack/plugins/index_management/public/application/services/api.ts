@@ -347,3 +347,13 @@ export function useLoadIndexSettings(indexName: string) {
     method: 'get',
   });
 }
+
+export function createIndex(indexName: string) {
+  return sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/indices/create`,
+    method: 'put',
+    body: JSON.stringify({
+      indexName,
+    }),
+  });
+}

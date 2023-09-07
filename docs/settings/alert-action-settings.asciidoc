@@ -227,6 +227,9 @@ xpack.actions.run:
           maxAttempts: 5
 --
 
+`xpack.actions.queued.max` {ess-icon}::
+Specifies the maximum number of actions that can be queued. Default: 1000000
+
 [float]
 [[preconfigured-connector-settings]]
 === Preconfigured connector settings
