@@ -117,6 +117,7 @@ export interface ScheduleTaskOptions {
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
   from?: string;
   to?: string;
+  actions?: RuleAction[];
 }
 
 export interface IndexType {

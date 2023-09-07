@@ -158,8 +158,11 @@ export class ExecutionHandler<
   public async run(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
+    const { adHocIntervalFrom, adHocIntervalTo, adHocRuleActions } = this.taskInstance.params;
+    const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
+
     const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
-      actions: this.rule.actions,
+      actions: isAdHocRuleRun && adHocRuleActions ? adHocRuleActions : this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
     const executables = await this.generateExecutables(alerts, throttledSummaryActions);
@@ -518,7 +521,11 @@ export class ExecutionHandler<
   ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
 
-    for (const action of this.rule.actions) {
+    const { adHocIntervalFrom, adHocIntervalTo, adHocRuleActions } = this.taskInstance.params;
+    const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
+    const actions = isAdHocRuleRun && adHocRuleActions ? adHocRuleActions : this.rule.actions;
+
+    for (const action of actions) {
       const alertsArray = Object.entries(alerts);
       let summarizedAlerts = null;
 

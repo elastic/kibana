@@ -10,7 +10,7 @@ import { RulesClientContext } from '../types';
 import { ScheduleTaskOptions } from '../types';
 
 export async function scheduleAdHocTask(context: RulesClientContext, opts: ScheduleTaskOptions) {
-  const { id, consumer, ruleTypeId, throwOnConflict, from, to } = opts;
+  const { id, consumer, ruleTypeId, throwOnConflict, from, to, actions } = opts;
   if (!from || !to) {
     throw new Error(`Invalid parameters: from=${from}, to=${to}!`);
   }
@@ -22,6 +22,7 @@ export async function scheduleAdHocTask(context: RulesClientContext, opts: Sched
       consumer,
       adHocIntervalFrom: from,
       adHocIntervalTo: to,
+      adHocRuleActions: actions,
     },
     state: {
       previousStartedAt: null,

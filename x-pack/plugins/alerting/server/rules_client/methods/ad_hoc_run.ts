@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 // import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule } from '../../types';
+import { RawRule, RuleAction, IntervalSchedule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
@@ -17,7 +17,7 @@ import { resetMonitoringLastRun, getNextRun } from '../../lib';
 
 export async function adHocRun(
   context: RulesClientContext,
-  { id, from, to }: { id: string; from: string; to: string }
+  { id, from, to, actions }: { id: string; from: string; to: string; actions?: RuleAction[] }
 ) {
   const decryptedAlert =
     await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
@@ -135,6 +135,7 @@ export async function adHocRun(
       throwOnConflict: false,
       from,
       to,
+      actions,
     });
   } catch (err) {
     return i18n.translate('xpack.alerting.rulesClient.adHocRun.adHocRunError', {

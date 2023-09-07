@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedRule, RuleTypeParams } from '../types';
+import { RuleAction, SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
 
@@ -165,7 +165,7 @@ export class RulesClient {
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
-  public adHocRun = (options: { id: string; from: string; to: string }) =>
+  public adHocRun = (options: { id: string; from: string; to: string; actions?: RuleAction[] }) =>
     adHocRun(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);

@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import type { RuleSnooze } from '@kbn/alerting-plugin/common';
+import type { RuleAction, RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   RiskScore,
@@ -263,6 +263,7 @@ export interface AdHocRunProps {
   id: string;
   from: string;
   to: string;
+  actions?: RuleAction[];
   signal?: AbortSignal;
 }
 

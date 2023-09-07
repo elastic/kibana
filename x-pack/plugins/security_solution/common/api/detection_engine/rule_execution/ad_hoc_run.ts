@@ -7,15 +7,22 @@
 
 import * as t from 'io-ts';
 
+import { RuleActionArrayCamel } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { RuleObjectId } from '../model';
 
 export type AdHocRunSchema = t.TypeOf<typeof adHocRunSchema>;
 export const adHocRunSchema = t.exact(
-  t.type({
-    id: RuleObjectId,
-    from: t.string,
-    to: t.string,
-  })
+  t.intersection([
+    t.type({
+      id: RuleObjectId,
+      from: t.string,
+      to: t.string,
+    }),
+    t.partial({
+      actions: RuleActionArrayCamel,
+    }),
+  ])
 );
 
 export interface AdHocRunResponse {

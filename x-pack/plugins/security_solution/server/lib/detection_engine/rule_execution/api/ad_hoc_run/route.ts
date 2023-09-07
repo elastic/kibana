@@ -33,12 +33,12 @@ export const adHocRunRoute = (router: SecuritySolutionPluginRouter) => {
       async (context, request, response): Promise<IKibanaResponse<AdHocRunResponse>> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id, from, to } = request.body;
+          const { id, from, to, actions } = request.body;
 
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = ctx.alerting.getRulesClient();
 
-          await rulesClient.adHocRun({ id, from, to });
+          await rulesClient.adHocRun({ id, from, to, actions });
 
           return response.ok({ body: { id } });
         } catch (err) {

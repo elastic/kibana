@@ -34,3 +34,10 @@ export const AD_HOC_RUN_DESCRIPTION = i18n.translate(
     defaultMessage: 'Select the time range for the ad-hoc rule run.',
   }
 );
+
+export const AD_HOC_ACTIONS_CHECKBOX_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.adHocActionsCheckboxTitle',
+  {
+    defaultMessage: 'Apply ad-hoc actions',
+  }
+);

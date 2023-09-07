@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 import { adHocRun } from '../api/api';
 
@@ -13,18 +14,20 @@ export const useAdHocRun = ({
   id,
   timeframeStart,
   timeframeEnd,
+  actions,
 }: {
   id: string;
   timeframeStart: moment.Moment;
   timeframeEnd: moment.Moment;
+  actions?: RuleAction[];
 }) => {
   const from = useMemo(() => timeframeStart.toISOString(), [timeframeStart]);
   const to = useMemo(() => timeframeEnd.toISOString(), [timeframeEnd]);
 
   const ruleRun = useCallback(async () => {
     const abortCtrl = new AbortController();
-    await adHocRun({ signal: abortCtrl.signal, id, from, to });
-  }, [from, id, to]);
+    await adHocRun({ signal: abortCtrl.signal, id, from, to, actions });
+  }, [from, id, to, actions]);
 
   return { adHocRun: ruleRun };
 };

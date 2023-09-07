@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import moment from 'moment';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import dateMath from '@kbn/datemath';
+
 import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiCheckbox,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -19,9 +23,11 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
-import moment from 'moment';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { useAdHocRun } from '../../../../detection_engine/rule_management/logic/use_ad_hoc_run';
+import { getAllActionMessageParams } from '../../../pages/detection_engine/rules/helpers';
 import * as i18n from './translations';
+import { AdHocRuleActions } from './actions';
 
 const timeRanges = [
   { start: 'now/d', end: 'now', label: 'Today' },
@@ -56,12 +62,21 @@ const AdHocRunModalComponent: React.FC<AdHocRunModalProps> = ({ ruleId, closeMod
   const [timeframeEnd, setTimeframeEnd] = useState(moment());
 
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+  const [isAdHocActionsEnabled, setIsAdHocActionsEnabled] = useState(false);
+
+  const [actions, setActions] = useState<RuleAction[]>([]);
+  const messageVariables = useMemo(() => getAllActionMessageParams(), []);
 
   const { adHocRun: ruleAdHocRun } = useAdHocRun({
     id: ruleId,
     timeframeStart,
     timeframeEnd,
+    actions: isAdHocActionsEnabled ? actions : undefined,
   });
+
+  const updateAndHocActionsCheckbox = useCallback(() => {
+    setIsAdHocActionsEnabled(!isAdHocActionsEnabled);
+  }, [isAdHocActionsEnabled]);
 
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
@@ -117,6 +132,28 @@ const AdHocRunModalComponent: React.FC<AdHocRunModalProps> = ({ ruleId, closeMod
             data-test-subj="ad-hoc-run-time-frame"
           />
         </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiFlexGroup alignItems="center" gutterSize="s" onClick={updateAndHocActionsCheckbox}>
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              id={'ad-hoc-actions-checkbox'}
+              checked={isAdHocActionsEnabled}
+              onChange={updateAndHocActionsCheckbox}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>{i18n.AD_HOC_ACTIONS_CHECKBOX_TITLE}</EuiFlexItem>
+        </EuiFlexGroup>
+        {isAdHocActionsEnabled && (
+          <>
+            <EuiSpacer />
+            <AdHocRuleActions
+              actions={actions}
+              updateActions={setActions}
+              messageVariables={messageVariables}
+              summaryMessageVariables={messageVariables}
+            />
+          </>
+        )}
       </EuiModalBody>
 
       <EuiModalFooter>
