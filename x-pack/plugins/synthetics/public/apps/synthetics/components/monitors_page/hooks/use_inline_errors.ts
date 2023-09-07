@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { selectEncryptedSyntheticsSavedMonitors } from '../../../state';
-import { Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   getTimeSpanFilter,
@@ -70,7 +70,7 @@ export function useInlineErrors({
 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const configIds = syntheticsMonitors.map((monitor) => monitor.id);
+  const configIds = syntheticsMonitors.map((monitor) => monitor[ConfigKey.CONFIG_ID]);
 
   const doFetch = configIds.length > 0 || onlyInvalidMonitors;
 

@@ -8,7 +8,8 @@
 import React, { FC, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { DocumentCountChart as DocumentCountChartRoot } from '../document_count_content/document_count_chart';
+import { DocumentCountChart as DocumentCountChartRoot } from '@kbn/aiops-components';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { TotalCountHeader } from '../document_count_content/total_count_header';
 import type { Category, SparkLinesPerCategory } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
@@ -31,6 +32,8 @@ export const DocumentCountChart: FC<Props> = ({
   selectedCategory,
   documentCountStats,
 }) => {
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+
   const chartPointsSplitLabel = i18n.translate(
     'xpack.aiops.logCategorization.chartPointsSplitLabel',
     {
@@ -69,6 +72,7 @@ export const DocumentCountChart: FC<Props> = ({
     <>
       <TotalCountHeader totalCount={totalCount} />
       <DocumentCountChartRoot
+        dependencies={{ data, uiSettings, fieldFormats, charts }}
         chartPoints={chartPoints}
         chartPointsSplit={chartPointsSplit}
         timeRangeEarliest={eventRate[0].key}

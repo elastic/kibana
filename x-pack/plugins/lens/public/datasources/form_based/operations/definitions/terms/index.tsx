@@ -53,6 +53,7 @@ import {
   supportedTypes,
 } from './constants';
 import { IncludeExcludeRow } from './include_exclude_options';
+import { shouldShowTimeSeriesOption } from '../../../pure_utils';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -591,6 +592,12 @@ export const termsOperation: OperationDefinition<
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
           invalidFields={invalidFields}
+          showTimeSeriesDimensions={shouldShowTimeSeriesOption(
+            layer,
+            indexPattern,
+            groupId,
+            dimensionGroups
+          )}
         />
       </EuiFormRow>
     );

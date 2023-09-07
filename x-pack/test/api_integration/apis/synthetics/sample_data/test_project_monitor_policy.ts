@@ -37,7 +37,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.1' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.4' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -94,10 +94,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'yaml',
               value: '["200"]',
             },
-            config_id: {
-              type: 'text',
-              value: configId,
-            },
             enabled: {
               type: 'bool',
               value: false,
@@ -130,14 +126,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'text',
               value: 'any',
             },
-            'monitor.project.id': {
-              type: 'text',
-              value: JSON.stringify(projectId),
-            },
-            'monitor.project.name': {
-              type: 'text',
-              value: JSON.stringify(projectId),
-            },
             name: {
               type: 'text',
               value: JSON.stringify(name),
@@ -149,6 +137,22 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             password: {
               type: 'password',
               value: null,
+            },
+            processors: {
+              type: 'yaml',
+              value: JSON.stringify([
+                {
+                  add_fields: {
+                    fields: {
+                      'monitor.fleet_managed': true,
+                      config_id: configId,
+                      'monitor.project.name': projectId,
+                      'monitor.project.id': projectId,
+                    },
+                    target: '',
+                  },
+                },
+              ]),
             },
             proxy_headers: {
               type: 'yaml',
@@ -167,10 +171,6 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               value: '900',
             },
             'response.include_headers': {
-              type: 'bool',
-              value: false,
-            },
-            run_once: {
               type: 'bool',
               value: false,
             },
@@ -266,13 +266,13 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             processors: [
               {
                 add_fields: {
-                  target: '',
                   fields: {
-                    'monitor.fleet_managed': true,
                     config_id: configId,
-                    'monitor.project.name': projectId,
+                    'monitor.fleet_managed': true,
                     'monitor.project.id': projectId,
+                    'monitor.project.name': projectId,
                   },
+                  target: '',
                 },
               },
             ],
@@ -315,11 +315,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
-            config_id: { type: 'text' },
-            run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
-            'monitor.project.id': { type: 'text' },
-            'monitor.project.name': { type: 'text' },
             ipv4: { type: 'bool', value: true },
             ipv6: { type: 'bool', value: true },
             mode: { type: 'text' },
@@ -353,11 +349,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
-            config_id: { type: 'text' },
-            run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
-            'monitor.project.id': { type: 'text' },
-            'monitor.project.name': { type: 'text' },
             ipv4: { type: 'bool', value: true },
             ipv6: { type: 'bool', value: true },
             mode: { type: 'text' },
@@ -425,11 +417,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
-            config_id: { type: 'text' },
-            run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
-            'monitor.project.id': { type: 'text' },
-            'monitor.project.name': { type: 'text' },
             ...inputs,
           },
           id: `synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
@@ -532,7 +520,7 @@ export const getTestProjectSyntheticsPolicy = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.1' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.4' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -558,6 +546,7 @@ export const getTestProjectSyntheticsPolicy = (
             timeout: { type: 'text' },
             max_redirects: { type: 'integer' },
             proxy_url: { type: 'text' },
+            processors: { type: 'yaml' },
             proxy_headers: { type: 'yaml' },
             tags: { type: 'yaml' },
             username: { type: 'text' },
@@ -582,11 +571,7 @@ export const getTestProjectSyntheticsPolicy = (
             location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
-            config_id: { type: 'text' },
-            run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
-            'monitor.project.id': { type: 'text' },
-            'monitor.project.name': { type: 'text' },
             ipv4: { type: 'bool', value: true },
             ipv6: { type: 'bool', value: true },
             mode: { type: 'text' },
@@ -628,11 +613,7 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.supported_protocols': { type: 'yaml' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
-            config_id: { type: 'text' },
-            run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
-            'monitor.project.id': { type: 'text' },
-            'monitor.project.name': { type: 'text' },
             ipv4: { type: 'bool', value: true },
             ipv6: { type: 'bool', value: true },
             mode: { type: 'text' },
@@ -665,11 +646,7 @@ export const getTestProjectSyntheticsPolicy = (
             tags: { type: 'yaml' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
-            config_id: { type: 'text' },
-            run_once: { value: false, type: 'bool' },
             origin: { type: 'text' },
-            'monitor.project.id': { type: 'text' },
-            'monitor.project.name': { type: 'text' },
             ipv4: { type: 'bool', value: true },
             ipv6: { type: 'bool', value: true },
             mode: { type: 'text' },
@@ -744,11 +721,7 @@ export const getTestProjectSyntheticsPolicy = (
             location_name: { value: 'Test private location 0', type: 'text' },
             location_id: { value: 'fleet_managed', type: 'text' },
             id: { value: id, type: 'text' },
-            config_id: { value: configId, type: 'text' },
-            run_once: { value: false, type: 'bool' },
             origin: { value: 'project', type: 'text' },
-            'monitor.project.id': { value: JSON.stringify(projectId), type: 'text' },
-            'monitor.project.name': { value: JSON.stringify(projectId), type: 'text' },
             ...inputs,
           },
           id: `synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
@@ -775,19 +748,6 @@ export const getTestProjectSyntheticsPolicy = (
               testGlobalParam: 'testGlobalParamValue',
               testGlobalParam2: 'testGlobalParamValue2',
             },
-            processors: [
-              {
-                add_fields: {
-                  target: '',
-                  fields: {
-                    'monitor.fleet_managed': true,
-                    config_id: configId,
-                    'monitor.project.name': projectId,
-                    'monitor.project.id': projectId,
-                  },
-                },
-              },
-            ],
             ...Object.keys(inputs).reduce((acc: Record<string, unknown>, key) => {
               acc[key] = inputs[key].value;
               return acc;

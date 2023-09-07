@@ -40,7 +40,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import type { Certificate } from '../common';
 import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
@@ -51,6 +50,7 @@ import { useHtmlId } from './use_html_id';
 import { useKibana } from './use_kibana';
 import { useVerification } from './use_verification';
 import { useVisibility } from './use_visibility';
+import type { Certificate } from '../common';
 
 export interface ClusterConfigurationFormValues {
   username: string;

@@ -41,6 +41,8 @@ import type {
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import {
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
@@ -226,6 +228,8 @@ describe('test endpoint routes', () => {
       expect(endpointResultList.total).toEqual(1);
       expect(endpointResultList.page).toEqual(0);
       expect(endpointResultList.pageSize).toEqual(10);
+      expect(endpointResultList.sortField).toEqual(ENDPOINT_DEFAULT_SORT_FIELD);
+      expect(endpointResultList.sortDirection).toEqual(ENDPOINT_DEFAULT_SORT_DIRECTION);
     });
 
     it('should get forbidden if no security solution access', async () => {

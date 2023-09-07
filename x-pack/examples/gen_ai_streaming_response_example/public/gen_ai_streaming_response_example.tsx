@@ -75,6 +75,22 @@ export const GenAiStreamingResponseExampleApp = ({
   const [selectedConnectorId, setSelectedConnectorId] = useState<string>('');
   const [prompt, setPrompt] = useState<string>();
 
+  // The refresh behavior is implemented like this:
+  //
+  // - On refresh the current prompt gets stored in `toBeRefreshedPrompt` and
+  //   and then the actual prompt gets cleared. React will rerender and unmount
+  //   the `StreamingResponse` component because of the empty prompt.
+  // - A `useEffect` then checks if `toBeRefreshedPrompt` is populated
+  //   and will apply it to `prompt` again.
+  // - In combination with `initialIsOpen=true` this will cause the
+  //   `StreamingResponse` component to start fetching a new response
+  //   immediately after remounting.
+  //
+  // This pattern requires a bit more logic in this component but it avoids
+  // tight coupling via callbacks of this component and `StreamingResponse`.
+  const [toBeRefreshedPrompt, setToBeRefreshedPrompt] = useState<string>();
+  const [initialIsOpen, setInitialIsOpen] = useState(false);
+
   const getConnectors = useCallback(async () => {
     const result = await loadGenAiConnectors({ http });
     setConnectors(result);
@@ -103,7 +119,23 @@ export const GenAiStreamingResponseExampleApp = ({
     [setPrompt]
   );
 
-  const clearPrompt = useCallback(() => setPrompt(''), [setPrompt]);
+  const clearPromptHandler = () => {
+    setInitialIsOpen(false);
+    setPrompt('');
+  };
+
+  const refreshPromptHandler = () => {
+    setInitialIsOpen(true);
+    setToBeRefreshedPrompt(prompt);
+    setPrompt('');
+  };
+
+  useEffect(() => {
+    if (prompt === '' && toBeRefreshedPrompt && toBeRefreshedPrompt !== '') {
+      setPrompt(toBeRefreshedPrompt);
+      setToBeRefreshedPrompt('');
+    }
+  }, [prompt, toBeRefreshedPrompt]);
 
   return (
     <EuiPage>
@@ -150,16 +182,27 @@ export const GenAiStreamingResponseExampleApp = ({
                         defaultMessage: 'Enter a prompt',
                       })}
                       labelAppend={
-                        <EuiText size="xs">
-                          <EuiLink onClick={clearPrompt}>
-                            {i18n.translate(
-                              'genAiStreamingResponseExample.app.component.userPromptLabelAppend',
-                              {
-                                defaultMessage: 'Clear prompt',
-                              }
-                            )}
-                          </EuiLink>
-                        </EuiText>
+                        <>
+                          <EuiText size="xs">
+                            <EuiLink onClick={clearPromptHandler}>
+                              {i18n.translate(
+                                'genAiStreamingResponseExample.app.component.userPromptLabelAppendClearPrompt',
+                                {
+                                  defaultMessage: 'Clear prompt',
+                                }
+                              )}
+                            </EuiLink>{' '}
+                            |{' '}
+                            <EuiLink onClick={refreshPromptHandler}>
+                              {i18n.translate(
+                                'genAiStreamingResponseExample.app.component.userPromptLabelAppendRefreshPrompt',
+                                {
+                                  defaultMessage: 'Refresh prompt',
+                                }
+                              )}
+                            </EuiLink>
+                          </EuiText>
+                        </>
                       }
                     >
                       <EuiTextArea
@@ -182,6 +225,7 @@ export const GenAiStreamingResponseExampleApp = ({
                         http={http}
                         prompt={prompt}
                         selectedConnectorId={selectedConnectorId}
+                        initialIsOpen={initialIsOpen}
                       />
                     )}
                   </EuiFlexItem>

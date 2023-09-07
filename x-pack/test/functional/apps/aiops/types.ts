@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LogRateAnalysisType } from '@kbn/aiops-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 interface TestDataTableActionLogPatternAnalysis {
@@ -44,6 +45,7 @@ interface TestDataExpectedWithoutSampleProbability {
 
 export interface TestData {
   suiteTitle: string;
+  analysisType: LogRateAnalysisType;
   dataGenerator: string;
   isSavedSearch?: boolean;
   sourceIndexOrSavedSearch: string;

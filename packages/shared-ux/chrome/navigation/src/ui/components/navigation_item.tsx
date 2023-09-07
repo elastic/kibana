@@ -19,7 +19,6 @@ export interface Props<
   Id extends string = string,
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
-  element?: string;
   unstyled?: boolean;
 }
 
@@ -36,10 +35,9 @@ function NavigationItemComp<
   const navigationContext = useNavigation();
   const navNodeRef = React.useRef<ChromeProjectNavigationNodeEnhanced | null>(null);
 
-  const { element, children, node } = useMemo(() => {
-    const { element: _element, children: _children, ...rest } = props;
+  const { children, node } = useMemo(() => {
+    const { children: _children, ...rest } = props;
     return {
-      element: _element,
       children: _children,
       node: rest,
     };
@@ -70,9 +68,7 @@ function NavigationItemComp<
     return <>{children}</>;
   }
 
-  const Element = element || Fragment;
-
-  return <Element>{navNode.title}</Element>;
+  return <Fragment>{navNode.title}</Fragment>;
 }
 
 export const NavigationItem = React.memo(NavigationItemComp) as typeof NavigationItemComp;

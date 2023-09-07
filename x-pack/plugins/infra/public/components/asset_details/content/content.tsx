@@ -5,73 +5,58 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useAssetDetailsStateContext } from '../hooks/use_asset_details_state';
+import { DatePicker } from '../date_picker/date_picker';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { Anomalies, Metadata, Processes, Osquery, Logs, Overview } from '../tabs';
-import { FlyoutTabIds, type TabState } from '../types';
-import { toTimestampRange } from '../utils';
+import { FlyoutTabIds } from '../types';
 
 export const Content = () => {
-  const { node, nodeType, overrides, dateRange, onTabsStateChange } = useAssetDetailsStateContext();
-
-  const onChange = (state: TabState) => {
-    if (!onTabsStateChange) {
-      return;
-    }
-
-    onTabsStateChange(state);
-  };
-
-  const dateRangeTs = toTimestampRange(dateRange);
   return (
-    <>
-      <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
-        <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
-        <Overview
-          dateRange={dateRange}
-          nodeName={node.name}
-          nodeType={nodeType}
-          metricsDataView={overrides?.overview?.metricsDataView}
-          logsDataView={overrides?.overview?.logsDataView}
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem grow={false}>
+        <DatePickerWrapper
+          visibleFor={[
+            FlyoutTabIds.OVERVIEW,
+            FlyoutTabIds.LOGS,
+            FlyoutTabIds.METADATA,
+            FlyoutTabIds.PROCESSES,
+            FlyoutTabIds.ANOMALIES,
+          ]}
         />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.LOGS}>
-        <Logs
-          nodeName={node.name}
-          nodeType={nodeType}
-          currentTimestamp={dateRangeTs.to}
-          logViewReference={overrides?.logs?.logView?.reference}
-          logViewLoading={overrides?.logs?.logView?.loading}
-          search={overrides?.logs?.query}
-          onSearchChange={(query) => onChange({ logs: { query } })}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.METADATA}>
-        <Metadata
-          dateRange={dateRange}
-          nodeName={node.name}
-          nodeType={nodeType}
-          showActionsColumn={overrides?.metadata?.showActionsColumn}
-          search={overrides?.metadata?.query}
-          onSearchChange={(query) => onChange({ metadata: { query } })}
-        />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
-        <Osquery nodeName={node.name} nodeType={nodeType} dateRange={dateRange} />
-      </TabPanel>
-      <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
-        <Processes
-          nodeName={node.name}
-          nodeType={nodeType}
-          currentTimestamp={dateRangeTs.to}
-          search={overrides?.processes?.query}
-          onSearchFilterChange={(query) => onChange({ processes: { query } })}
-        />
-      </TabPanel>
-    </>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TabPanel activeWhen={FlyoutTabIds.ANOMALIES}>
+          <Anomalies />
+        </TabPanel>
+        <TabPanel activeWhen={FlyoutTabIds.OVERVIEW}>
+          <Overview />
+        </TabPanel>
+        <TabPanel activeWhen={FlyoutTabIds.LOGS}>
+          <Logs />
+        </TabPanel>
+        <TabPanel activeWhen={FlyoutTabIds.METADATA}>
+          <Metadata />
+        </TabPanel>
+        <TabPanel activeWhen={FlyoutTabIds.OSQUERY}>
+          <Osquery />
+        </TabPanel>
+        <TabPanel activeWhen={FlyoutTabIds.PROCESSES}>
+          <Processes />
+        </TabPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const DatePickerWrapper = ({ visibleFor }: { visibleFor: FlyoutTabIds[] }) => {
+  const { activeTabId } = useTabSwitcherContext();
+
+  return (
+    <div hidden={!visibleFor.includes(activeTabId as FlyoutTabIds)}>
+      <DatePicker />
+    </div>
   );
 };
 

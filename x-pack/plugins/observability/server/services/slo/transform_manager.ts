@@ -65,7 +65,7 @@ export class DefaultTransformManager implements TransformManager {
       await retryTransientEsErrors(
         () =>
           this.esClient.transform.stopTransform(
-            { transform_id: transformId, wait_for_completion: true },
+            { transform_id: transformId, wait_for_completion: true, force: true },
             { ignore: [404] }
           ),
         { logger: this.logger }

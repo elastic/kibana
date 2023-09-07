@@ -6,13 +6,13 @@
  */
 
 import { createHash } from 'crypto';
-import type { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   ExternalReferenceAttachmentType,
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
+import { CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {

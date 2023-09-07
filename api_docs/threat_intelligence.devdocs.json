@@ -13,7 +13,7 @@
           "\nGets the threat intelligence properties of a TI page for navigation in the security solution."
         ],
         "signature": [
-          "<TId extends string = \"threat_intelligence-indicators\">(threatIntelligencePage: \"indicators\") => TILinkItem<TId>"
+          "<TId extends string = \"threat_intelligence\">(threatIntelligencePage: \"indicators\") => TILinkItem<TId>"
         ],
         "path": "x-pack/plugins/threat_intelligence/public/utils/security_solution_links.ts",
         "deprecated": false,
@@ -509,10 +509,10 @@
         "tags": [],
         "label": "TIPageId",
         "description": [
-          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence-indicators' | 'threat_intelligence-feed';"
+          "\nAll the IDs for the threat intelligence pages.\nThis needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).\n\nExample to add more IDs:\n  export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';"
         ],
         "signature": [
-          "\"threat_intelligence-indicators\""
+          "\"threat_intelligence\""
         ],
         "path": "x-pack/plugins/threat_intelligence/public/types.ts",
         "deprecated": false,

@@ -28,7 +28,7 @@ cat <<EOF >src/dev/code_coverage/www/index_partial_2.html
   </main>
   <footer class="mastfoot mt-auto">
     <div class="inner">
-      <p>Please slack us at <a href="https://app.slack.com/client/T0CUZ52US/C0TR0FAET">#kibana-qa</a> if youve questions</p>
+      <p>Please slack us at <a href="https://app.slack.com/client/T0CUZ52US/C0TR0FAET">#appex-qa</a> if youve questions</p>
     </div>
   </footer>
 </div>

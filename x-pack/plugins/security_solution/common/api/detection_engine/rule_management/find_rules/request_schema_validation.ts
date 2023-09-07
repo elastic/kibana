@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindRulesRequestQuery } from './request_schema';
+import type { FindRulesRequestQuery } from './find_rules_route';
 
 /**
  * Additional validation that is implemented outside of the schema itself.

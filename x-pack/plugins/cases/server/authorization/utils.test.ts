@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { OWNER_FIELD } from '../../common/constants';
 import { nodeBuilder } from '@kbn/es-query';
-import { OWNER_FIELD } from '../../common/api';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,

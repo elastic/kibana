@@ -15,7 +15,6 @@ import type {
   GetCaseConnectorsResponse,
 } from '../../../common/types/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/types/api';
-import type { CaseExternalServiceBasic } from '../../../common/api';
 import { decodeOrThrow } from '../../../common/api';
 import {
   isConnectorUserAction,
@@ -29,7 +28,11 @@ import { Operations } from '../../authorization';
 import type { GetConnectorsRequest } from './types';
 import type { CaseConnectorActivity } from '../../services/user_actions/types';
 import type { CaseUserActionService } from '../../services';
-import type { CaseConnector, UserActionAttributes } from '../../../common/types/domain';
+import type {
+  CaseConnector,
+  ExternalService,
+  UserActionAttributes,
+} from '../../../common/types/domain';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,
@@ -113,7 +116,7 @@ const checkConnectorsAuthorization = async ({
 interface EnrichedPushInfo {
   latestPushDate: Date;
   oldestPushDate: Date;
-  externalService: CaseExternalServiceBasic;
+  externalService: ExternalService;
   connectorFieldsUsedInPush: CaseConnector;
 }
 
@@ -148,7 +151,7 @@ const getActionConnectors = async (
   ids: string[]
 ): Promise<ActionResult[]> => {
   try {
-    return await actionsClient.getBulk(ids);
+    return await actionsClient.getBulk({ ids });
   } catch (error) {
     // silent error and log it
     logger.error(`Failed to retrieve action connectors in the get case connectors route: ${error}`);
@@ -158,7 +161,7 @@ const getActionConnectors = async (
 
 interface PushDetails {
   connectorId: string;
-  externalService: CaseExternalServiceBasic;
+  externalService: ExternalService;
   mostRecentPush: Date;
   oldestPush: Date;
 }
@@ -225,7 +228,7 @@ const getPushDetails = (activity: CaseConnectorActivity[]) => {
 
 const getExternalServiceFromSavedObject = (
   savedObject: SavedObject<UserActionAttributes> | undefined
-): CaseExternalServiceBasic | undefined => {
+): ExternalService | undefined => {
   if (savedObject != null && isPushedUserAction(savedObject.attributes)) {
     return savedObject.attributes.payload.externalService;
   }

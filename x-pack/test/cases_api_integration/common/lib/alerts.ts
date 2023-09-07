@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
-import { Case, CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, Case } from '@kbn/cases-plugin/common';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
   getRuleForSignalTesting,
@@ -229,7 +229,7 @@ export const createCaseAndAttachAlert = async ({
           name: 'name',
         },
         owner,
-        type: CommentType.alert,
+        type: AttachmentType.alert,
       },
       auth: { user: superUser, space: 'space1' },
     });

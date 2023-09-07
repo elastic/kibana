@@ -10,6 +10,8 @@ import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constan
 import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { EndpointSortableField } from '../../../../common/endpoint/types';
 
 describe('query builder', () => {
   describe('MetadataGetQuery', () => {
@@ -38,15 +40,19 @@ describe('query builder', () => {
   });
 
   describe('buildUnitedIndexQuery', () => {
-    it('correctly builds empty query', async () => {
-      const soClient = savedObjectsClientMock.create();
+    let soClient: jest.Mocked<SavedObjectsClientContract>;
+
+    beforeEach(() => {
+      soClient = savedObjectsClientMock.create();
       soClient.find.mockResolvedValue({
         saved_objects: [],
         total: 0,
         per_page: 0,
         page: 0,
       });
+    });
 
+    it('correctly builds empty query', async () => {
       const query = await buildUnitedIndexQuery(
         soClient,
         { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
@@ -91,15 +97,27 @@ describe('query builder', () => {
       expect(query.body.query).toEqual(expected);
     });
 
-    it('correctly builds query', async () => {
-      const soClient = savedObjectsClientMock.create();
-      soClient.find.mockResolvedValue({
-        saved_objects: [],
-        total: 0,
-        per_page: 0,
-        page: 0,
-      });
+    it('adds `status` runtime field', async () => {
+      const query = await buildUnitedIndexQuery(
+        soClient,
+        { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
+        []
+      );
 
+      expect(query.body.runtime_mappings).toHaveProperty('status');
+    });
+
+    it('adds `last_checkin` runtime field', async () => {
+      const query = await buildUnitedIndexQuery(
+        soClient,
+        { page: 1, pageSize: 10, hostStatuses: [], kuery: '' },
+        []
+      );
+
+      expect(query.body.runtime_mappings).toHaveProperty('last_checkin');
+    });
+
+    it('correctly builds query', async () => {
       const query = await buildUnitedIndexQuery(
         soClient,
         {
@@ -112,6 +130,52 @@ describe('query builder', () => {
       );
       const expected = expectedCompleteUnitedIndexQuery;
       expect(query.body.query).toEqual(expected);
+    });
+
+    describe('sorting', () => {
+      it('uses default sort field if none passed', async () => {
+        const query = await buildUnitedIndexQuery(soClient, {
+          page: 1,
+          pageSize: 10,
+        });
+
+        expect(query.body.sort).toEqual([
+          { 'united.agent.enrolled_at': { order: 'desc', unmapped_type: 'date' } },
+        ]);
+      });
+
+      it.each`
+        inputField                                 | mappedField
+        ${'host_status'}                           | ${'status'}
+        ${'metadata.host.hostname'}                | ${'united.endpoint.host.hostname'}
+        ${'metadata.Endpoint.policy.applied.name'} | ${'united.endpoint.Endpoint.policy.applied.name'}
+      `('correctly maps field $inputField', async ({ inputField, mappedField }) => {
+        const query = await buildUnitedIndexQuery(soClient, {
+          page: 1,
+          pageSize: 10,
+          sortField: inputField,
+          sortDirection: 'asc',
+        });
+
+        expect(query.body.sort).toEqual([{ [mappedField]: 'asc' }]);
+      });
+
+      it.each`
+        inputField                           | mappedField
+        ${EndpointSortableField.LAST_SEEN}   | ${EndpointSortableField.LAST_SEEN}
+        ${EndpointSortableField.ENROLLED_AT} | ${'united.agent.enrolled_at'}
+      `('correctly maps date field $inputField', async ({ inputField, mappedField }) => {
+        const query = await buildUnitedIndexQuery(soClient, {
+          page: 1,
+          pageSize: 10,
+          sortField: inputField,
+          sortDirection: 'asc',
+        });
+
+        expect(query.body.sort).toEqual([
+          { [mappedField]: { order: 'asc', unmapped_type: 'date' } },
+        ]);
+      });
     });
   });
 });

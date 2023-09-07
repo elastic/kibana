@@ -136,27 +136,13 @@
             "$ref": "#/components/parameters/space_id"
           },
           {
-            "name": "name",
+            "name": "kqlQuery",
             "in": "query",
-            "description": "Filter by name",
+            "description": "A valid kql query to filter the SLO with",
             "schema": {
               "type": "string"
             },
-            "example": "awesome-service"
-          },
-          {
-            "name": "indicatorTypes",
-            "in": "query",
-            "description": "Filter by indicator type",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "example": [
-              "sli.kql.custom"
-            ]
+            "example": "slo.name:latency* and slo.tags : \"prod\""
           },
           {
             "name": "page",
@@ -176,7 +162,7 @@
               "type": "integer",
               "default": 25
             },
-            "example": 20
+            "example": 25
           },
           {
             "name": "sortBy",
@@ -185,12 +171,14 @@
             "schema": {
               "type": "string",
               "enum": [
-                "creationTime",
-                "indicatorType"
+                "sli_value",
+                "status",
+                "error_budget_consumed",
+                "error_budget_remaining"
               ],
-              "default": "creationTime"
+              "default": "status"
             },
-            "example": "creationTime"
+            "example": "status"
           },
           {
             "name": "sortDirection",
@@ -278,6 +266,15 @@
           },
           {
             "$ref": "#/components/parameters/slo_id"
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "description": "the specific instanceId used by the summary calculation",
+            "schema": {
+              "type": "string"
+            },
+            "example": "host-abcde"
           }
         ],
         "responses": {
@@ -680,6 +677,74 @@
           }
         }
       }
+    },
+    "/s/{spaceId}/api/observability/slos/_delete_instances": {
+      "post": {
+        "summary": "Batch delete rollup and summary data for the matching list of sloId and instanceId",
+        "operationId": "deleteSloInstancesOp",
+        "description": "You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/delete_slo_instances_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful request"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -801,7 +866,9 @@
             "nullable": false,
             "required": [
               "index",
-              "timestampField"
+              "timestampField",
+              "good",
+              "total"
             ],
             "properties": {
               "index": {
@@ -1267,6 +1334,12 @@
       "error_budget": {
         "title": "Error budget",
         "type": "object",
+        "required": [
+          "initial",
+          "consumed",
+          "remaining",
+          "isEstimated"
+        ],
         "properties": {
           "initial": {
             "type": "number",
@@ -1294,6 +1367,11 @@
         "title": "Summary",
         "type": "object",
         "description": "The SLO computed data",
+        "required": [
+          "status",
+          "sliValue",
+          "errorBudget"
+        ],
         "properties": {
           "status": {
             "$ref": "#/components/schemas/summary_status"
@@ -1310,6 +1388,24 @@
       "slo_response": {
         "title": "SLO response",
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "indicator",
+          "timeWindow",
+          "budgetingMethod",
+          "objective",
+          "settings",
+          "revision",
+          "summary",
+          "enabled",
+          "groupBy",
+          "instanceId",
+          "tags",
+          "createdAt",
+          "updatedAt"
+        ],
         "properties": {
           "id": {
             "description": "The identifier of the SLO.",
@@ -1333,7 +1429,8 @@
                 "sli.apm.transactionErrorRate": "#/components/schemas/indicator_properties_apm_availability",
                 "sli.kql.custom": "#/components/schemas/indicator_properties_custom_kql",
                 "sli.apm.transactionDuration": "#/components/schemas/indicator_properties_apm_latency",
-                "sli.apm.sli.metric.custom": "#/components/schemas/indicator_properties_custom_metric"
+                "sli.metric.custom": "#/components/schemas/indicator_properties_custom_metric",
+                "sli.histogram.custom": "#/components/schemas/indicator_properties_histogram"
               }
             },
             "oneOf": [
@@ -1378,6 +1475,23 @@
             "description": "Indicate if the SLO is enabled",
             "type": "boolean",
             "example": true
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
+          },
+          "instanceId": {
+            "description": "the value derived from the groupBy field, if present, otherwise '*'",
+            "type": "string",
+            "example": "host-abcde"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "createdAt": {
             "description": "The creation date",
@@ -1564,6 +1678,18 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1646,6 +1772,13 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -1653,10 +1786,10 @@
         "title": "Historical summary request",
         "type": "object",
         "required": [
-          "sloIds"
+          "list"
         ],
         "properties": {
-          "sloIds": {
+          "list": {
             "description": "The list of SLO identifiers to get the historical summary for",
             "type": "array",
             "items": {
@@ -1687,6 +1820,39 @@
               },
               "errorBudget": {
                 "$ref": "#/components/schemas/error_budget"
+              }
+            }
+          }
+        }
+      },
+      "delete_slo_instances_request": {
+        "title": "Delete SLO instances request",
+        "description": "The delete SLO instances request takes a list of SLO id and instance id, then delete the rollup and summary data. This API can be used to remove the staled data of an instance SLO that no longer get updated.\n",
+        "type": "object",
+        "required": [
+          "list"
+        ],
+        "properties": {
+          "list": {
+            "description": "An array of slo id and instance id",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "sloId",
+                "instanceId"
+              ],
+              "properties": {
+                "sloId": {
+                  "description": "The SLO unique identifier",
+                  "type": "string",
+                  "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+                },
+                "instanceId": {
+                  "description": "The SLO instance identifier",
+                  "type": "string",
+                  "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+                }
               }
             }
           }

@@ -40,6 +40,7 @@ describe('Monitor Detail Flyout', () => {
           full: 'https://www.elastic.co',
         },
         tags: ['tag1', 'tag2'],
+        observer: {},
       },
     });
     jest.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
@@ -122,6 +123,7 @@ describe('Monitor Detail Flyout', () => {
           unit: 'm',
         },
         tags: ['prod'],
+        config_id: 'test-id',
       },
       refetch: jest.fn(),
     });

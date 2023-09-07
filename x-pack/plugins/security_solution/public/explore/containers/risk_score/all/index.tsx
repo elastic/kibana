@@ -28,6 +28,7 @@ import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import type { inputsModel } from '../../../../common/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity.user> {
   data:
@@ -40,7 +41,7 @@ export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity
   refetch: inputsModel.Refetch;
   totalCount: number;
   isModuleEnabled: boolean;
-  isLicenseValid: boolean;
+  isAuthorized: boolean;
   isDeprecated: boolean;
   loading: boolean;
 }
@@ -83,10 +84,11 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const spaceId = useSpaceId();
+  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
   const defaultIndex = spaceId
     ? riskEntity === RiskScoreEntity.host
-      ? getHostRiskIndex(spaceId, onlyLatest)
-      : getUserRiskIndex(spaceId, onlyLatest)
+      ? getHostRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleAvailable)
+      : getUserRiskIndex(spaceId, onlyLatest, isNewRiskScoreModuleAvailable)
     : undefined;
   const factoryQueryType =
     riskEntity === RiskScoreEntity.host ? RiskQueries.hostsRiskScore : RiskQueries.usersRiskScore;
@@ -98,7 +100,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   const {
     isDeprecated,
     isEnabled,
-    isLicenseValid,
+    isAuthorized,
     isLoading: isDeprecatedLoading,
     refetch: refetchDeprecated,
   } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
@@ -136,20 +138,12 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       inspect,
       refetch: refetchAll,
       totalCount: response.totalCount,
-      isLicenseValid,
+      isAuthorized,
       isDeprecated,
       isModuleEnabled: isEnabled,
       isInspected: false,
     }),
-    [
-      inspect,
-      isDeprecated,
-      isEnabled,
-      isLicenseValid,
-      refetchAll,
-      response.data,
-      response.totalCount,
-    ]
+    [inspect, isDeprecated, isEnabled, isAuthorized, refetchAll, response.data, response.totalCount]
   );
 
   const requestTimerange = useMemo(
@@ -205,21 +199,13 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       !skip &&
       !isDeprecatedLoading &&
       riskScoreRequest != null &&
-      isLicenseValid &&
+      isAuthorized &&
       isEnabled &&
       !isDeprecated
     ) {
       search(riskScoreRequest);
     }
-  }, [
-    isEnabled,
-    isDeprecated,
-    isLicenseValid,
-    isDeprecatedLoading,
-    riskScoreRequest,
-    search,
-    skip,
-  ]);
+  }, [isEnabled, isDeprecated, isAuthorized, isDeprecatedLoading, riskScoreRequest, search, skip]);
 
   return { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
 };

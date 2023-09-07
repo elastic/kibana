@@ -10,7 +10,7 @@ import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
-  OTHER_BUCKET_SEPARATOR as SEP,
+  OTHER_NESTED_BUCKET_SEPARATOR as SEP,
   constructSingleTermOtherFilter,
 } from './_terms_other_bucket_helper';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
@@ -97,188 +97,121 @@ const nestedTerm = {
   ],
 };
 
-const singleTermResponse = {
-  took: 10,
-  timed_out: false,
-  _shards: {
-    total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
-  },
-  hits: {
-    total: 14005,
-    max_score: 0,
-    hits: [],
-  },
-  aggregations: {
-    '1': {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 8325,
-      buckets: [
-        { key: 'ios', doc_count: 2850 },
-        { key: 'win xp', doc_count: 2830 },
-        { key: '__missing__', doc_count: 1430 },
-      ],
-    },
-  },
-  status: 200,
-};
+function wrapResponse(aggregationResponse: Record<string, any>) {
+  return {
+    took: 3,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { total: 14005, max_score: 0, hits: [] },
+    aggregations: aggregationResponse,
+    status: 200,
+  };
+}
 
-const nestedTermResponse = {
-  took: 10,
-  timed_out: false,
-  _shards: {
-    total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
+const singleTermResponse = wrapResponse({
+  '1': {
+    doc_count_error_upper_bound: 0,
+    sum_other_doc_count: 8325,
+    buckets: [
+      { key: 'ios', doc_count: 2850 },
+      { key: 'win xp', doc_count: 2830 },
+      { key: '__missing__', doc_count: 1430 },
+    ],
   },
-  hits: {
-    total: 14005,
-    max_score: 0,
-    hits: [],
-  },
-  aggregations: {
-    '1': {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 8325,
-      buckets: [
-        {
-          '2': {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 8325,
-            buckets: [
-              { key: 'ios', doc_count: 2850 },
-              { key: 'win xp', doc_count: 2830 },
-              { key: '__missing__', doc_count: 1430 },
-            ],
-          },
-          key: 'US-with-dash',
-          doc_count: 2850,
+});
+
+const nestedTermResponse = wrapResponse({
+  '1': {
+    doc_count_error_upper_bound: 0,
+    sum_other_doc_count: 8325,
+    buckets: [
+      {
+        '2': {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 8325,
+          buckets: [
+            { key: 'ios', doc_count: 2850 },
+            { key: 'win xp', doc_count: 2830 },
+            { key: '__missing__', doc_count: 1430 },
+          ],
         },
-        {
-          '2': {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 8325,
-            buckets: [
-              { key: 'ios', doc_count: 1850 },
-              { key: 'win xp', doc_count: 1830 },
-              { key: '__missing__', doc_count: 130 },
-            ],
-          },
-          key: 'IN-with-dash',
-          doc_count: 2830,
-        },
-      ],
-    },
-  },
-  status: 200,
-};
-
-const exhaustiveNestedTermResponse = {
-  took: 10,
-  timed_out: false,
-  _shards: {
-    total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
-  },
-  hits: {
-    total: 14005,
-    max_score: 0,
-    hits: [],
-  },
-  aggregations: {
-    '1': {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 8325,
-      buckets: [
-        {
-          '2': {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              { key: 'ios', doc_count: 2850 },
-              { key: 'win xp', doc_count: 2830 },
-              { key: '__missing__', doc_count: 1430 },
-            ],
-          },
-          key: 'US-with-dash',
-          doc_count: 2850,
-        },
-        {
-          '2': {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [
-              { key: 'ios', doc_count: 1850 },
-              { key: 'win xp', doc_count: 1830 },
-              { key: '__missing__', doc_count: 130 },
-            ],
-          },
-          key: 'IN-with-dash',
-          doc_count: 2830,
-        },
-      ],
-    },
-  },
-  status: 200,
-};
-
-const nestedTermResponseNoResults = {
-  took: 10,
-  timed_out: false,
-  _shards: {
-    total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
-  },
-  hits: {
-    total: 0,
-    max_score: null,
-    hits: [],
-  },
-  aggregations: {
-    '1': {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [],
-    },
-  },
-  status: 200,
-};
-
-const singleOtherResponse = {
-  took: 3,
-  timed_out: false,
-  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  hits: { total: 14005, max_score: 0, hits: [] },
-  aggregations: {
-    'other-filter': {
-      buckets: { '': { doc_count: 2805 } },
-    },
-  },
-  status: 200,
-};
-
-const nestedOtherResponse = {
-  took: 3,
-  timed_out: false,
-  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-  hits: { total: 14005, max_score: 0, hits: [] },
-  aggregations: {
-    'other-filter': {
-      buckets: {
-        [`${SEP}US-with-dash`]: { doc_count: 2805 },
-        [`${SEP}IN-with-dash`]: { doc_count: 2804 },
+        key: 'US-with-dash',
+        doc_count: 2850,
       },
+      {
+        '2': {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 8325,
+          buckets: [
+            { key: 'ios', doc_count: 1850 },
+            { key: 'win xp', doc_count: 1830 },
+            { key: '__missing__', doc_count: 130 },
+          ],
+        },
+        key: 'IN-with-dash',
+        doc_count: 2830,
+      },
+    ],
+  },
+});
+
+const exhaustiveNestedTermResponse = wrapResponse({
+  '1': {
+    doc_count_error_upper_bound: 0,
+    sum_other_doc_count: 8325,
+    buckets: [
+      {
+        '2': {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            { key: 'ios', doc_count: 2850 },
+            { key: 'win xp', doc_count: 2830 },
+            { key: '__missing__', doc_count: 1430 },
+          ],
+        },
+        key: 'US-with-dash',
+        doc_count: 2850,
+      },
+      {
+        '2': {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [
+            { key: 'ios', doc_count: 1850 },
+            { key: 'win xp', doc_count: 1830 },
+            { key: '__missing__', doc_count: 130 },
+          ],
+        },
+        key: 'IN-with-dash',
+        doc_count: 2830,
+      },
+    ],
+  },
+});
+
+const nestedTermResponseNoResults = wrapResponse({
+  '1': {
+    doc_count_error_upper_bound: 0,
+    sum_other_doc_count: 0,
+    buckets: [],
+  },
+});
+
+const singleOtherResponse = wrapResponse({
+  'other-filter': {
+    buckets: { '': { doc_count: 2805 } },
+  },
+});
+
+const nestedOtherResponse = wrapResponse({
+  'other-filter': {
+    buckets: {
+      [`${SEP}US-with-dash`]: { doc_count: 2805 },
+      [`${SEP}IN-with-dash`]: { doc_count: 2804 },
     },
   },
-  status: 200,
-};
+});
 
 describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
@@ -326,28 +259,12 @@ describe('Terms Agg Other bucket helper', () => {
       });
 
       test('returns a function for undefined agg buckets', () => {
-        const response = {
-          took: 10,
-          timed_out: false,
-          _shards: {
-            total: 1,
-            successful: 1,
-            skipped: 0,
-            failed: 0,
+        const response = wrapResponse({
+          2: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 8325,
           },
-          hits: {
-            total: 14005,
-            max_score: 0,
-            hits: [],
-          },
-          aggregations: {
-            2: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 8325,
-            },
-          },
-          status: 200,
-        };
+        });
         const aggConfigs = getAggConfigs(nestedTerm.aggs);
         const agg = buildOtherBucketAgg(
           aggConfigs,
@@ -628,6 +545,119 @@ describe('Terms Agg Other bucket helper', () => {
 
         expect(agg).toEqual(false);
       });
+
+      test('returns true when nested filter agg has buckets', () => {
+        const aggConfigs = getAggConfigs([
+          {
+            id: '0',
+            type: BUCKET_TYPES.FILTERS,
+            params: [
+              {
+                input: {
+                  language: 'kuery',
+                  query: '',
+                },
+                label: '',
+              },
+            ],
+          },
+          ...nestedTerm.aggs,
+        ]);
+
+        const nestedTermResponseWithRootFilter = wrapResponse({
+          '0': {
+            buckets: {
+              '*': {
+                '1': {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 8325,
+                  buckets: [
+                    {
+                      '2': {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 8325,
+                        buckets: [
+                          { key: 'ios', doc_count: 2850 },
+                          { key: 'win xp', doc_count: 2830 },
+                          { key: '__missing__', doc_count: 1430 },
+                        ],
+                      },
+                      key: 'US-with-dash',
+                      doc_count: 2850,
+                    },
+                    {
+                      '2': {
+                        doc_count_error_upper_bound: 0,
+                        sum_other_doc_count: 8325,
+                        buckets: [
+                          { key: 'ios', doc_count: 1850 },
+                          { key: 'win xp', doc_count: 1830 },
+                          { key: '__missing__', doc_count: 130 },
+                        ],
+                      },
+                      key: 'IN-with-dash',
+                      doc_count: 2830,
+                    },
+                  ],
+                },
+                doc_count: 1148,
+              },
+            },
+          },
+        });
+
+        const otherAggConfig = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[2] as IBucketAggConfig,
+          enrichResponseWithSampling(nestedTermResponseWithRootFilter)
+        );
+
+        expect(otherAggConfig).toBeDefined();
+        if (otherAggConfig) {
+          const expectedResponse = {
+            'other-filter': {
+              aggs: undefined,
+              filters: {
+                filters: {
+                  [`${SEP}*${SEP}IN-with-dash`]: {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { bool: { filter: [], must: [], must_not: [], should: [] } },
+                        { match_phrase: { 'geo.src': 'IN-with-dash' } },
+                        { exists: { field: 'machine.os.raw' } },
+                      ],
+                      should: [],
+                      must_not: [
+                        { match_phrase: { 'machine.os.raw': 'ios' } },
+                        { match_phrase: { 'machine.os.raw': 'win xp' } },
+                      ],
+                    },
+                  },
+                  [`${SEP}*${SEP}US-with-dash`]: {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { bool: { filter: [], must: [], must_not: [], should: [] } },
+                        { match_phrase: { 'geo.src': 'US-with-dash' } },
+                        { exists: { field: 'machine.os.raw' } },
+                      ],
+                      should: [],
+                      must_not: [
+                        { match_phrase: { 'machine.os.raw': 'ios' } },
+                        { match_phrase: { 'machine.os.raw': 'win xp' } },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          };
+          const resp = otherAggConfig();
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
+          expect(topAgg).toEqual(expectedResponse);
+        }
+      });
     });
 
     describe(`mergeOtherBucketAggResponse${getTitlePostfix()}`, () => {
@@ -706,22 +736,15 @@ describe('Terms Agg Other bucket helper', () => {
           },
         };
 
-        const otherResponse = {
-          took: 3,
-          timed_out: false,
-          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          hits: { total: 14005, max_score: 0, hits: [] },
-          aggregations: {
-            'other-filter': {
-              buckets: {
-                [`${SEP}US-with-dash`]: { doc_count: 2805 },
-                [`${SEP}IN-with-dash`]: { doc_count: 2804 },
-                [`${SEP}`]: { doc_count: 2804 },
-              },
+        const otherResponse = wrapResponse({
+          'other-filter': {
+            buckets: {
+              [`${SEP}US-with-dash`]: { doc_count: 2805 },
+              [`${SEP}IN-with-dash`]: { doc_count: 2804 },
+              [`${SEP}`]: { doc_count: 2804 },
             },
           },
-          status: 200,
-        };
+        });
         const aggConfigs = getAggConfigs(nestedTerm.aggs);
         const otherAggConfig = buildOtherBucketAgg(
           aggConfigs,
@@ -743,6 +766,269 @@ describe('Terms Agg Other bucket helper', () => {
           const topAgg = getTopAggregations(mergedResponse);
           expect((topAgg['1'] as any).buckets[2].key).toEqual('');
           expect((topAgg['1'] as any).buckets[2]['2'].buckets[3].key).toEqual('__other__');
+        }
+      });
+
+      test('correctly merges other bucket when the term response contains an empty string', () => {
+        const response = wrapResponse({
+          '0': {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 82,
+            buckets: [
+              {
+                key: '',
+                doc_count: 657,
+              },
+              {
+                key: 'ios',
+                doc_count: 300,
+              },
+              {
+                key: 'win xp',
+                doc_count: 284,
+              },
+              {
+                doc_count: 82,
+                filters: [
+                  {
+                    meta: {
+                      type: 'phrases',
+                      key: 'machine.os.raw',
+                      params: ['ios', 'win xp', ''],
+                      negate: true,
+                    },
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'machine.os.raw': '',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.raw': 'ios',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.raw': 'win xp',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                ],
+                key: '__other__',
+              },
+            ],
+          },
+        });
+
+        const otherResponse = wrapResponse({
+          'other-filter': {
+            buckets: {
+              '': {
+                doc_count: 82,
+                filters: [
+                  {
+                    meta: {
+                      type: 'phrases',
+                      key: 'machine.os.raw',
+                      params: ['ios', 'win xp', ''],
+                      negate: true,
+                    },
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'machine.os.raw': 'ios',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.raw': 'win xp',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.raw': '',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                ],
+                key: '__other__',
+              },
+            },
+          },
+        });
+        const aggConfigs = getAggConfigs(singleTerm.aggs);
+        const otherAggConfig = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[0] as IBucketAggConfig,
+          enrichResponseWithSampling(response)
+        );
+
+        expect(otherAggConfig).toBeDefined();
+        if (otherAggConfig) {
+          const mergedResponse = mergeOtherBucketAggResponse(
+            aggConfigs,
+            enrichResponseWithSampling(response),
+            enrichResponseWithSampling(otherResponse),
+            aggConfigs.aggs[0] as IBucketAggConfig,
+            otherAggConfig(),
+            constructSingleTermOtherFilter
+          );
+
+          const topAgg = getTopAggregations(mergedResponse);
+          const topBuckets = (topAgg['1'] as any).buckets;
+          expect(topBuckets[2].key).toEqual('');
+          expect(topBuckets[2]['2'].buckets[3].key).toEqual('__other__');
+        }
+      });
+
+      test('correctly merges other bucket with both top and nested terms agg have empty string', () => {
+        const response = wrapResponse({
+          ...nestedTermResponse.aggregations,
+          '1': {
+            ...nestedTermResponse.aggregations['1'],
+            buckets: [
+              ...nestedTermResponse.aggregations['1'].buckets,
+              {
+                '2': {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 8325,
+                  buckets: [
+                    { key: 'ios', doc_count: 1850 },
+                    { key: 'win xp', doc_count: 1830 },
+                    { key: '__missing__', doc_count: 130 },
+                    { key: '', doc_count: 130 },
+                  ],
+                },
+                key: '',
+                doc_count: 2830,
+              },
+            ],
+          },
+        });
+
+        const otherRootResponse = wrapResponse({
+          'other-filter': {
+            buckets: {
+              '': {
+                '2': {
+                  doc_count_error_upper_bound: 0,
+                  sum_other_doc_count: 59,
+                  buckets: [
+                    {
+                      key: 'US-with-dash',
+                      doc_count: 13,
+                    },
+                    {
+                      key: 'IN-with-dash',
+                      doc_count: 12,
+                    },
+                    {
+                      key: '',
+                      doc_count: 12,
+                    },
+                  ],
+                },
+                doc_count: 84,
+                key: '__other__',
+                filters: [
+                  {
+                    meta: {
+                      type: 'phrases',
+                      key: 'machine.os.raw',
+                      params: ['', 'ios', 'win xp'],
+                      negate: true,
+                    },
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'machine.os.raw': '',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.raw': 'ios',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'machine.os.raw': 'win xp',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        const otherResponse = wrapResponse({
+          'other-filter': {
+            buckets: {
+              [`${SEP}US-with-dash`]: { doc_count: 2805 },
+              [`${SEP}IN-with-dash`]: { doc_count: 2804 },
+              [`${SEP}`]: { doc_count: 2804 },
+              [`${SEP}__other__`]: { doc_count: 3000 },
+            },
+          },
+        });
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        const otherRootAggConfig = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[0] as IBucketAggConfig,
+          enrichResponseWithSampling(response)
+        );
+
+        if (otherRootAggConfig) {
+          const mergedTopResponse = mergeOtherBucketAggResponse(
+            aggConfigs,
+            enrichResponseWithSampling(response),
+            enrichResponseWithSampling(otherRootResponse),
+            aggConfigs.aggs[0] as IBucketAggConfig,
+            otherRootAggConfig(),
+            constructSingleTermOtherFilter
+          );
+
+          const otherAggConfig = buildOtherBucketAgg(
+            aggConfigs,
+            aggConfigs.aggs[1] as IBucketAggConfig,
+            enrichResponseWithSampling(mergedTopResponse)
+          );
+          if (otherAggConfig) {
+            const mergedResponse = mergeOtherBucketAggResponse(
+              aggConfigs,
+              enrichResponseWithSampling(mergedTopResponse),
+              enrichResponseWithSampling(otherResponse),
+              aggConfigs.aggs[1] as IBucketAggConfig,
+              otherAggConfig(),
+              constructSingleTermOtherFilter
+            );
+
+            const topAgg = getTopAggregations(mergedResponse);
+            expect((topAgg['1'] as any).buckets[2].key).toEqual('');
+            expect((topAgg['1'] as any).buckets[2]['2'].buckets[4].key).toEqual('__other__');
+
+            expect((topAgg['1'] as any).buckets[3].key).toEqual('__other__');
+            expect((topAgg['1'] as any).buckets[3]['2'].buckets[3].key).toEqual('__other__');
+          }
         }
       });
     });

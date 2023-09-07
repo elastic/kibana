@@ -24,6 +24,7 @@
       "licensing",
       "observability",
       "observabilityShared",
+      "observabilityAIAssistant",
       "ruleRegistry",
       "security",
       "share",

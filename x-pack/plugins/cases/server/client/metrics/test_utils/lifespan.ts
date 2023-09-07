@@ -6,8 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type { UserActionAttributes } from '../../../../common/types/domain';
-import type { CaseStatuses } from '../../../../common/api';
+import type { UserActionAttributes, CaseStatuses } from '../../../../common/types/domain';
 
 export function createStatusChangeSavedObject(
   status: CaseStatuses,

@@ -17,8 +17,9 @@ import {
   FLEET_SERVER_PACKAGE,
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  API_VERSIONS,
+  APP_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
-import { APP_API_ROUTES } from '@kbn/fleet-plugin/common/constants';
 import type {
   FleetServerHost,
   GenerateServiceTokenResponse,
@@ -36,8 +37,10 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import type { FormattedAxiosError } from '../common/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
+import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
-import { isLocalhost } from '../common/localhost_services';
 import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
@@ -85,6 +88,9 @@ const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined>
     .request<GetPackagePoliciesResponse>({
       method: 'GET',
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       query: {
         perPage: 1,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${FLEET_SERVER_PACKAGE}"`,
@@ -119,6 +125,9 @@ const getOrCreateFleetServerAgentPolicyId = async (): Promise<string> => {
     .request<CreateAgentPolicyResponse>({
       method: 'POST',
       path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       body: {
         name: `Fleet Server policy (${Math.random().toString(32).substring(2)})`,
         description: `Created by CLI Tool via: ${__filename}`,
@@ -148,6 +157,9 @@ const generateFleetServiceToken = async (): Promise<string> => {
     .request<GenerateServiceTokenResponse>({
       method: 'POST',
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
       body: {},
     })
     .then((response) => response.data.value);
@@ -243,7 +255,7 @@ export const startFleetServerWithDocker = async ({
 
     containerId = (await execa('docker', dockerArgs)).stdout;
 
-    const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName);
+    const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName, 120000);
 
     log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
 
@@ -277,6 +289,9 @@ const configureFleetIfNeeded = async () => {
     const fleetOutputs = await kbnClient
       .request<GetOutputsResponse>({
         method: 'GET',
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
         path: outputRoutesService.getListPath(),
       })
       .then((response) => response.data);
@@ -313,11 +328,16 @@ const configureFleetIfNeeded = async () => {
 
             log.info(`Updating Fleet Settings for Output [${output.name} (${id})]`);
 
-            await kbnClient.request<GetOneOutputResponse>({
-              method: 'PUT',
-              path: outputRoutesService.getUpdatePath(id),
-              body: update,
-            });
+            await kbnClient
+              .request<GetOneOutputResponse>({
+                method: 'PUT',
+                headers: {
+                  'elastic-api-version': API_VERSIONS.public.v1,
+                },
+                path: outputRoutesService.getUpdatePath(id),
+                body: update,
+              })
+              .catch(catchAxiosErrorFormatAndThrow);
           }
         }
       }
@@ -352,7 +372,29 @@ const addFleetServerHostToFleetSettings = async (
       .request<PostFleetServerHostsResponse>({
         method: 'POST',
         path: fleetServerHostsRoutesService.getCreatePath(),
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
         body: newFleetHostEntry,
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
+      .catch((error: FormattedAxiosError) => {
+        if (
+          error.response.status === 403 &&
+          ((error.response?.data?.message as string) ?? '').includes('disabled')
+        ) {
+          log.error(`Update failed with [403: ${error.response.data.message}].
+
+${chalk.red('Are you running this utility against a Serverless project?')}
+If so, the following entry should be added to your local
+'config/serverless.[project_type].dev.yml' (ex. 'serverless.security.dev.yml'):
+
+${chalk.bold(chalk.cyan('xpack.fleet.internal.fleetServerStandalone: false'))}
+
+`);
+        }
+
+        throw error;
       })
       .then((response) => response.data);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloudSetup } from './plugin';
+import type { CloudSetup, CloudStart } from './plugin';
 
 function createSetupMock(): jest.Mocked<CloudSetup> {
   return {
@@ -19,6 +19,8 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isCloudEnabled: true,
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
+    projectsUrl: 'projects-url',
+    baseUrl: 'base-url',
     apm: {
       url: undefined,
       secretToken: undefined,
@@ -30,6 +32,15 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
   };
 }
 
+function createStartMock(): jest.Mocked<CloudStart> {
+  return {
+    isCloudEnabled: true,
+    projectsUrl: 'projects-url',
+    baseUrl: 'base-url',
+  };
+}
+
 export const cloudMock = {
   createSetup: createSetupMock,
+  createStart: createStartMock,
 };

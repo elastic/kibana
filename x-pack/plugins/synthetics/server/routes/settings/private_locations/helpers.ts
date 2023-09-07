@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { AgentPolicyInfo } from '../../../../common/types';
 import type { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import type {
   SyntheticsPrivateLocationsAttributes,
@@ -14,7 +14,7 @@ import { PrivateLocation } from '../../../../common/runtime_types';
 
 export const toClientContract = (
   attributes: SyntheticsPrivateLocationsAttributes,
-  agentPolicies?: AgentPolicy[]
+  agentPolicies?: AgentPolicyInfo[]
 ): SyntheticsPrivateLocations => {
   return {
     locations: attributes.locations.map((location) => ({
@@ -25,10 +25,7 @@ export const toClientContract = (
       isServiceManaged: false,
       isInvalid: !Boolean(agentPolicies?.find((policy) => policy.id === location.agentPolicyId)),
       tags: location.tags,
-      geo: {
-        lat: location.geo?.lat ?? null,
-        lon: location.geo?.lon ?? null,
-      },
+      geo: location.geo,
     })),
   };
 };
@@ -41,9 +38,6 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     concurrentMonitors: location.concurrentMonitors,
     tags: location.tags,
     isServiceManaged: false,
-    geo: {
-      lat: location.geo?.lat ?? null,
-      lon: location.geo?.lon ?? null,
-    },
+    geo: location.geo,
   };
 };

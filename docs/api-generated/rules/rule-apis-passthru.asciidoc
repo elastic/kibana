@@ -45,6 +45,7 @@ Any modifications made to this file will be overwritten.
   <li><a href="#unmuteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute</code></a></li>
   <li><a href="#unmuteAllAlerts"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all</code></a></li>
   <li><a href="#updateRule"><code><span class="http-method">put</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
+  <li><a href="#updateRuleAPIKey"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key</code></a></li>
   </ul>
 
   <h1><a name="Alerting">Alerting</a></h1>
@@ -2827,12 +2828,61 @@ Any modifications made to this file will be overwritten.
         <a href="#404_response">404_response</a>
   </div> <!-- method -->
   <hr/>
+  <div class="method"><a name="updateRuleAPIKey"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key</code></pre></div>
+    <div class="method-summary">Updates the API key for a rule. (<span class="nickname">updateRuleAPIKey</span>)</div>
+    <div class="method-notes">The new API key has the credentials of the user that submits the request.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">ruleId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the rule. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#400_response">400_response</a>
+  </div> <!-- method -->
+  <hr/>
 
   <h2><a name="__Models">Models</a></h2>
   [ Jump to <a href="#__Methods">Methods</a> ]
 
   <h3>Table of Contents</h3>
   <ol>
+    <li><a href="#400_response"><code>400_response</code> - Bad request</a></li>
     <li><a href="#401_response"><code>401_response</code> - Unsuccessful rule API response</a></li>
     <li><a href="#404_response"><code>404_response</code> - </a></li>
     <li><a href="#Count"><code>Count</code> - Count</a></li>
@@ -2969,6 +3019,19 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_rule_request"><code>update_rule_request</code> - Update rule request</a></li>
   </ol>
 
+  <div class="model">
+    <h3><a name="400_response"><code>400_response</code> - Bad request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">Bad Request</div>
+<div class="param">message </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">statusCode </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">400</div>
+    </div>  <!-- field-items -->
+  </div>
   <div class="model">
     <h3><a name="401_response"><code>401_response</code> - Unsuccessful rule API response</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
@@ -3113,14 +3176,14 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
+    <div class='model-description'>An action that runs under defined conditions.</div>
     <div class="field-items">
       <div class="param">alerts_filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter">actions_inner_alerts_filter</a></span>  </div>
 <div class="param">connector_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. This property appears in responses but cannot be set in requests. </div>
 <div class="param">frequency (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_frequency">actions_inner_frequency</a></span>  </div>
-<div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
-<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
-<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+<div class="param">group </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to <code>default</code>. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
 <div class="param">uuid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A universally unique identifier (UUID) for the action. </div>
     </div>  <!-- field-items -->
   </div>
@@ -3159,7 +3222,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="actions_inner_frequency"><code>actions_inner_frequency</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The parameters that affect how often actions are generated. NOTE: You cannot specify these parameters when <code>notify_when</code> or <code>throttle</code> are defined at the rule level.</div>
+    <div class='model-description'>The properties that affect how often actions are generated. If the rule type supports setting <code>summary</code> to <code>true</code>, the action can be a summary of alerts at the specified notification interval. Otherwise, an action runs for each alert at the specified notification interval. NOTE: You cannot specify these parameters when <code>notify_when</code> or <code>throttle</code> are defined at the rule level.</div>
     <div class="field-items">
       <div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">summary </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the action is a summary. </div>

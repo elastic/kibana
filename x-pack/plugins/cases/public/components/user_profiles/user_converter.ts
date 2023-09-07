@@ -25,7 +25,7 @@ export const convertToUserInfo = (
       // we couldn't find a valid profile so let's try the username
       return createWithUsername(username, user);
     } else {
-      // didn't the username wasn't valid so we'll show an unknown user
+      // the username wasn't valid so we'll show an unknown user
       return { key: user.profileUid, userInfo: {} };
     }
   } else if (isValidString(username)) {

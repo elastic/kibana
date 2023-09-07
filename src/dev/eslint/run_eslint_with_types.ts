@@ -20,10 +20,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import { TS_PROJECTS, type TsProject } from '@kbn/ts-projects';
 
+import { eslintBinPath } from './eslint_bin_path';
+
 export function runEslintWithTypes() {
   run(
     async ({ log, flags }) => {
-      const eslintPath = require.resolve('eslint/bin/eslint');
       const ignoreFilePath = Path.resolve(REPO_ROOT, '.eslintignore');
       const configTemplate = Fs.readFileSync(
         Path.resolve(__dirname, 'types.eslint.config.template.js'),
@@ -77,7 +78,7 @@ export function runEslintWithTypes() {
             const proc = await execa(
               process.execPath,
               [
-                Path.relative(project.directory, eslintPath),
+                Path.relative(project.directory, eslintBinPath),
                 ...(project.config.include ?? []).map((p) =>
                   p.endsWith('*') ? `${p}.{ts,tsx}` : p
                 ),

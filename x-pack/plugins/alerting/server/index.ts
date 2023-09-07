@@ -28,10 +28,11 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
-  GetSummarizedAlertsFnOpts,
   SummarizedAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
+  GetViewInAppRelativeUrlFnOpts,
+  DataStreamAdapter,
 } from './types';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
@@ -64,6 +65,7 @@ export {
   createConcreteWriteIndex,
   installWithTimeout,
 } from './alerts_service';
+export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

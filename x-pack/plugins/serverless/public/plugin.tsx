@@ -55,6 +55,7 @@ export class ServerlessPlugin
       const { currentType } = developer.projectSwitcher;
 
       core.chrome.navControls.registerRight({
+        order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
@@ -64,6 +65,9 @@ export class ServerlessPlugin
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
+    if (dependencies.cloud.projectsUrl) {
+      project.setProjectsUrl(dependencies.cloud.projectsUrl);
+    }
 
     return {
       setSideNavComponent: (sideNavigationComponent) =>

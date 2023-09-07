@@ -17,12 +17,15 @@ import {
   FieldBasedIndexPatternColumn,
   termsOperation,
   staticValueOperation,
+  minOperation,
 } from '../operations/definitions';
 import { FieldInput, getErrorMessage } from './field_input';
-import { createMockedIndexPattern } from '../mocks';
+import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';
 import { getOperationSupportMatrix } from '.';
 import { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from '../types';
 import { ReferenceBasedIndexPatternColumn } from '../operations/definitions/column_types';
+import { FieldSelect } from './field_select';
+import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../types';
 
 jest.mock('../operations/layer_helpers', () => {
   const original = jest.requireActual('../operations/layer_helpers');
@@ -41,7 +44,7 @@ const defaultProps = {
   incompleteField: null,
   incompleteOperation: undefined,
   incompleteParams: {},
-  dimensionGroups: [],
+  dimensionGroups: [] as VisualizationDimensionGroupConfig[],
   groupId: 'any',
   operationDefinitionMap: {
     terms: termsOperation,
@@ -49,6 +52,7 @@ const defaultProps = {
     count: countOperation,
     differences: derivativeOperation,
     staticValue: staticValueOperation,
+    min: minOperation,
   } as unknown as Record<string, GenericOperationDefinition>,
 };
 
@@ -102,9 +106,12 @@ function getCountOperationColumn(): GenericIndexPatternColumn {
     operationType: 'count',
   };
 }
-function getLayer(col1: GenericIndexPatternColumn = getStringBasedOperationColumn()) {
+function getLayer(
+  col1: GenericIndexPatternColumn = getStringBasedOperationColumn(),
+  indexPattern?: IndexPattern
+) {
   return {
-    indexPatternId: '1',
+    indexPatternId: defaultProps.indexPattern.id,
     columnOrder: ['col1', 'col2'],
     columns: {
       col1,
@@ -112,7 +119,11 @@ function getLayer(col1: GenericIndexPatternColumn = getStringBasedOperationColum
     },
   };
 }
-function getDefaultOperationSupportMatrix(layer: FormBasedLayer, columnId: string) {
+function getDefaultOperationSupportMatrix(
+  layer: FormBasedLayer,
+  columnId: string,
+  indexPattern?: IndexPattern
+) {
   return getOperationSupportMatrix({
     state: {
       layers: { layer1: layer },
@@ -121,7 +132,7 @@ function getDefaultOperationSupportMatrix(layer: FormBasedLayer, columnId: strin
     filterOperations: () => true,
     columnId,
     indexPatterns: {
-      [defaultProps.indexPattern.id]: defaultProps.indexPattern,
+      [defaultProps.indexPattern.id]: indexPattern ?? defaultProps.indexPattern,
     },
   });
 }
@@ -420,6 +431,80 @@ describe('FieldInput', () => {
 
     expect(onDeleteColumn).toHaveBeenCalled();
     expect(updateLayerSpy).not.toHaveBeenCalled();
+  });
+
+  describe('time series group', () => {
+    function getLayerWithTSDBMetric() {
+      const layer = getLayer();
+      layer.columns.col2 = {
+        label: 'Min of TSDB counter',
+        dataType: 'number',
+        isBucketed: false,
+        sourceField: 'bytes_counter',
+        operationType: 'min',
+      };
+      return layer;
+    }
+    it('should not render the time dimension category if it has tsdb metric column but the group is not a breakdown', () => {
+      const updateLayerSpy = jest.fn();
+      const layer = getLayerWithTSDBMetric();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
+      const instance = mount(
+        <FieldInput
+          {...defaultProps}
+          indexPattern={createMockedIndexPatternWithAdditionalFields([
+            {
+              name: 'bytes_counter',
+              displayName: 'bytes_counter',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              timeSeriesMetric: 'counter',
+            },
+          ])}
+          layer={layer}
+          columnId={'col1'}
+          updateLayer={updateLayerSpy}
+          operationSupportMatrix={operationSupportMatrix}
+        />
+      );
+
+      expect(instance.find(FieldSelect).prop('showTimeSeriesDimensions')).toBeFalsy();
+    });
+
+    it('should render the time dimension category if it has tsdb metric column and the group is a breakdown one', () => {
+      const updateLayerSpy = jest.fn();
+      const layer = getLayerWithTSDBMetric();
+      const operationSupportMatrix = getDefaultOperationSupportMatrix(layer, 'col1');
+      const instance = mount(
+        <FieldInput
+          {...defaultProps}
+          indexPattern={createMockedIndexPatternWithAdditionalFields([
+            {
+              name: 'bytes_counter',
+              displayName: 'bytes_counter',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+              timeSeriesMetric: 'counter',
+            },
+          ])}
+          dimensionGroups={defaultProps.dimensionGroups.concat([
+            {
+              groupId: 'breakdown',
+              isBreakdownDimension: true,
+            } as VisualizationDimensionGroupConfig,
+          ])}
+          groupId="breakdown"
+          layer={layer}
+          columnId={'col1'}
+          updateLayer={updateLayerSpy}
+          operationSupportMatrix={operationSupportMatrix}
+        />
+      );
+
+      expect(instance.find(FieldSelect).prop('showTimeSeriesDimensions')).toBeTruthy();
+    });
   });
 });
 

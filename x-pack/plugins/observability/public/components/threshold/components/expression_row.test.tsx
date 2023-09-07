@@ -67,15 +67,16 @@ describe('ExpressionRow', () => {
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
-      aggType: 'avg',
+      aggType: 'custom',
     };
     const { wrapper, update } = await setup(expression as MetricExpression);
     await update();
     const [valueMatch] =
       wrapper
         .html()
-        .match('<span class="euiExpression__value css-1lfq7nz-euiExpression__value">50</span>') ??
-      [];
+        .match(
+          '<span class="euiExpression__value css-uocz3u-euiExpression__value-columns">50</span>'
+        ) ?? [];
     expect(valueMatch).toBeTruthy();
   });
 
@@ -86,34 +87,15 @@ describe('ExpressionRow', () => {
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
-      aggType: 'avg',
+      aggType: 'custom',
     };
     const { wrapper } = await setup(expression as MetricExpression);
     const [valueMatch] =
       wrapper
         .html()
-        .match('<span class="euiExpression__value css-1lfq7nz-euiExpression__value">0.5</span>') ??
-      [];
+        .match(
+          '<span class="euiExpression__value css-uocz3u-euiExpression__value-columns">0.5</span>'
+        ) ?? [];
     expect(valueMatch).toBeTruthy();
-  });
-
-  it('should render a helpText for the of expression', async () => {
-    const expression = {
-      metric: 'system.load.1',
-      comparator: Comparator.GT,
-      threshold: [0.5],
-      timeSize: 1,
-      timeUnit: 'm',
-      aggType: 'avg',
-    } as MetricExpression;
-
-    const { wrapper } = await setup(expression as MetricExpression);
-
-    const helpText = wrapper
-      .find('[data-test-subj="thresholdRuleOfExpression"]')
-      .at(0)
-      .prop('helpText');
-
-    expect(helpText).toMatchSnapshot();
   });
 });

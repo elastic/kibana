@@ -15,7 +15,7 @@ import type { State } from '../../common/store/types';
 export function useAutotuneTimerange({ id }: { id: string }) {
   const { addSuccess } = useAppToasts();
   const { from: detectedFrom, to: detectedTo } = useSelector((state: State) => {
-    const detectedBounds = selectors.detectedBounds(state.analyzer.analyzerById[id]);
+    const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
     return {
       from: detectedBounds?.from ? detectedBounds.from : undefined,
       to: detectedBounds?.to ? detectedBounds.to : undefined,

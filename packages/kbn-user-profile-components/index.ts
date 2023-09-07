@@ -19,6 +19,17 @@ export { getUserDisplayName } from './src/user_profile';
 export type {
   UserProfile,
   UserProfileUserInfo,
-  UserProfileAvatarData,
   GetUserDisplayNameParams,
 } from './src/user_profile';
+export type {
+  UserProfileData,
+  UserSettingsData,
+  DarkModeValue,
+  UserProfileAvatarData,
+} from './src/types';
+export { useUpdateUserProfile, type UpdateUserProfileHook } from './src/hooks';
+export {
+  UserProfilesKibanaProvider,
+  UserProfilesProvider,
+  type UserProfilesKibanaDependencies,
+} from './src/services';

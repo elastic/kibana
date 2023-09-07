@@ -16,8 +16,12 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import type { UserActionType } from '../../../../common/types/domain';
-import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
-import { CaseStatuses, CommentType } from '../../../../common/api';
+import {
+  UserActionActions,
+  UserActionTypes,
+  CaseStatuses,
+  AttachmentType,
+} from '../../../../common/types/domain';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 import { getNoneCaseConnector } from '../../../common/utils';
 import { logError } from '../utils';
@@ -204,7 +208,7 @@ const getSingleFieldPayload = (
             }
           : {
               comment: isString(value) ? value : '',
-              type: CommentType.user,
+              type: AttachmentType.user,
               owner,
             },
       };

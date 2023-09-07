@@ -1,6 +1,10 @@
 {
   "sql.query": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "format": ""
     },
     "methods": [
@@ -10,6 +14,10 @@
     "patterns": [
       "_sql"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-search-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-search-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

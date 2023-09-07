@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type DataViewField, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { type DataViewField } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
@@ -19,6 +19,7 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import useObservable from 'react-use/lib/useObservable';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useTimeBuckets } from '../../common/hooks/use_time_buckets';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
 import type { RandomSamplerOption } from '../constants/random_sampler';
@@ -26,7 +27,6 @@ import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visua
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
 import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
-import { TimeBuckets } from '../../../../common/services/time_buckets';
 import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
   NON_AGGREGATABLE_FIELD_TYPES,
@@ -168,14 +168,7 @@ export const useDataVisualizerGridData = (
     lastRefresh,
   ]);
 
-  const _timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, [uiSettings]);
+  const _timeBuckets = useTimeBuckets();
 
   const timefilter = useTimefilter({
     timeRangeSelector: currentDataView?.timeFieldName !== undefined,

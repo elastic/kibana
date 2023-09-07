@@ -64,7 +64,7 @@ export const syncNewMonitorBulk = async ({
   privateLocations: PrivateLocationAttributes[];
   spaceId: string;
 }) => {
-  const { server, savedObjectsClient, syntheticsMonitorClient, request } = routeContext;
+  const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   let newMonitors: CreatedMonitors | null = null;
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
@@ -88,7 +88,6 @@ export const syncNewMonitorBulk = async ({
       }),
       syntheticsMonitorClient.addMonitors(
         monitorsToCreate,
-        request,
         savedObjectsClient,
         privateLocations,
         spaceId

@@ -8,7 +8,7 @@
 import { computeBurnRate } from './compute_burn_rate';
 import { toDateRange } from './date_range';
 import { createSLO } from '../../services/slo/fixtures/slo';
-import { sixHoursRolling } from '../../services/slo/fixtures/time_window';
+import { ninetyDaysRolling } from '../../services/slo/fixtures/time_window';
 
 describe('computeBurnRate', () => {
   it('computes 0 when total is 0', () => {
@@ -16,7 +16,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO(), {
         good: 10,
         total: 0,
-        dateRange: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(ninetyDaysRolling()),
       })
     ).toEqual(0);
   });
@@ -26,7 +26,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO(), {
         good: 9999,
         total: 1,
-        dateRange: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(ninetyDaysRolling()),
       })
     ).toEqual(0);
   });
@@ -36,7 +36,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO({ objective: { target: 0.9 } }), {
         good: 90,
         total: 100,
-        dateRange: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(ninetyDaysRolling()),
       })
     ).toEqual(1);
   });
@@ -46,7 +46,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO({ objective: { target: 0.99 } }), {
         good: 90,
         total: 100,
-        dateRange: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(ninetyDaysRolling()),
       })
     ).toEqual(10);
   });
@@ -56,7 +56,7 @@ describe('computeBurnRate', () => {
       computeBurnRate(createSLO({ objective: { target: 0.8 } }), {
         good: 90,
         total: 100,
-        dateRange: toDateRange(sixHoursRolling()),
+        dateRange: toDateRange(ninetyDaysRolling()),
       })
     ).toEqual(0.5);
   });

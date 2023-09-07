@@ -10,8 +10,6 @@ import { v1 as uuidv1 } from 'uuid';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
-import { CaseStatuses } from '../../common';
-import { CaseSeverity } from '../../common/api';
 import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
@@ -22,6 +20,7 @@ import {
   convertSortField,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
+import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 
 describe('utils', () => {
   describe('buildFilter', () => {

@@ -16,11 +16,15 @@ const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
-  log: defaultLog,
-  parseEsLog,
   extractConfigFiles,
+  log: defaultLog,
   NativeRealm,
+  parseEsLog,
   parseTimeoutToMs,
+  runDockerContainer,
+  runServerlessCluster,
+  stopServerlessCluster,
+  teardownServerlessClusterSync,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -31,6 +35,8 @@ const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-util
 const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
 
 /** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
+/** @typedef {import('./utils').DockerOptions} DockerOptions */
+/** @typedef {import('./utils').ServerlessOptions}ServerlessOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -272,6 +278,10 @@ exports.Cluster = class Cluster {
     }
     this._stopCalled = true;
 
+    if (this._serverlessNodes?.length) {
+      return await stopServerlessCluster(this._log, this._serverlessNodes);
+    }
+
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
     }
@@ -290,6 +300,10 @@ exports.Cluster = class Cluster {
     }
 
     this._stopCalled;
+
+    if (this._serverlessNodes?.length) {
+      return await stopServerlessCluster(this._log, this._serverlessNodes);
+    }
 
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
@@ -467,7 +481,7 @@ exports.Cluster = class Cluster {
       if (stdioTarget) {
         stdioTarget.write(chunk);
       } else {
-        this._log.error(chalk.red());
+        this._log.error(chalk.red(chunk.trim()));
       }
     });
 
@@ -483,7 +497,7 @@ exports.Cluster = class Cluster {
         });
     }
 
-    // observe the exit code of the process and reflect in _outcome promies
+    // observe the exit code of the process and reflect in _outcome promises
     const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
     this._outcome = exitCode.then((code) => {
       if (this._stopCalled) {
@@ -557,5 +571,39 @@ exports.Cluster = class Cluster {
       esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
     return esJavaOpts.trim();
+  }
+
+  /**
+   * Run an Elasticsearch Serverless Docker cluster
+   *
+   * @param {ServerlessOptions} options
+   */
+  async runServerless(options = {}) {
+    if (this._process || this._outcome) {
+      throw new Error('ES has already been started');
+    }
+
+    this._serverlessNodes = await runServerlessCluster(this._log, options);
+
+    if (options.teardown) {
+      /**
+       * Ideally would be async and an event like beforeExit or SIGINT,
+       * but those events are not being triggered in FTR child process.
+       */
+      process.on('exit', () => teardownServerlessClusterSync(this._log, options));
+    }
+  }
+
+  /**
+   * Run an Elasticsearch Docker container
+   *
+   * @param {DockerOptions} options
+   */
+  async runDocker(options = {}) {
+    if (this._process || this._outcome) {
+      throw new Error('ES has already been started');
+    }
+
+    this._process = await runDockerContainer(this._log, options);
   }
 };

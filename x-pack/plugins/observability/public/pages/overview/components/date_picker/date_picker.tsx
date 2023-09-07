@@ -26,7 +26,7 @@ export interface TimePickerTimeDefaults {
   to: string;
 }
 
-export interface DatePickerProps {
+interface DatePickerProps {
   rangeFrom?: string;
   rangeTo?: string;
   refreshPaused?: boolean;

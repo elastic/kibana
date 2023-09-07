@@ -114,7 +114,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
         const keyErrors = matchErrorsByIndex(index, 'key');
         const valueErrors = matchErrorsByIndex(index, 'value');
         return (
-          <>
+          <div key={index}>
             {index > 0 && <EuiSpacer size="m" />}
             <EuiFlexGroup alignItems="flexStart" gutterSize="none" style={{ gap: 30 }}>
               <EuiFlexItem>
@@ -173,7 +173,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
+          </div>
         );
       })}
       {displayErrors(globalErrors)}
@@ -198,6 +198,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
             defaultMessage="Client ID"
           />
         }
+        {...inputs.kafkaClientIdInput.formRowProps}
       >
         <EuiFieldText
           data-test-subj="settingsOutputsFlyout.kafkaClientIdInput"

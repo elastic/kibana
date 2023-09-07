@@ -46,15 +46,12 @@ export const configValidator = (
     assertURL(configObject.apiUrl);
     urlAllowListValidator('apiUrl')(configObject, validatorServices);
 
-    if (
-      configObject.apiProvider !== OpenAiProviderType.OpenAi &&
-      configObject.apiProvider !== OpenAiProviderType.AzureAi
-    ) {
+    const { apiProvider } = configObject;
+
+    if (apiProvider !== OpenAiProviderType.OpenAi && apiProvider !== OpenAiProviderType.AzureAi) {
       throw new Error(
         `API Provider is not supported${
-          configObject.apiProvider && configObject.apiProvider.length
-            ? `: ${configObject.apiProvider}`
-            : ``
+          apiProvider && (apiProvider as OpenAiProviderType).length ? `: ${apiProvider}` : ``
         }`
       );
     }

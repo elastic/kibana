@@ -28,6 +28,7 @@ import type {
   ConnectorActivityAggsResult,
   ConnectorFieldsBeforePushAggsResult,
   GetUsersResponse,
+  MultipleCasesUserActionsTotalAggsResult,
   ParticipantsAggsResult,
   PushInfo,
   PushTimeFrameInfo,
@@ -645,6 +646,55 @@ export class CaseUserActionService {
                   size,
                 },
               },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  public async getMultipleCasesUserActionsTotal({
+    caseIds,
+  }: {
+    caseIds: string[];
+  }): Promise<Record<string, number>> {
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      unknown,
+      MultipleCasesUserActionsTotalAggsResult
+    >({
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      hasReference: caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
+      hasReferenceOperator: 'OR',
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: CaseUserActionService.buildMultipleCasesUserActionsTotalAgg(caseIds.length),
+    });
+
+    const result: Record<string, number> = {};
+
+    response?.aggregations?.references.caseUserActions.buckets.forEach(
+      ({ key, doc_count: totalUserActions }: { key: string; doc_count: number }) => {
+        result[key] = totalUserActions;
+      }
+    );
+
+    return result;
+  }
+
+  private static buildMultipleCasesUserActionsTotalAgg(
+    idsLength: number
+  ): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      references: {
+        nested: {
+          path: `${CASE_USER_ACTION_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          caseUserActions: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.references.id`,
+              size: idsLength,
             },
           },
         },

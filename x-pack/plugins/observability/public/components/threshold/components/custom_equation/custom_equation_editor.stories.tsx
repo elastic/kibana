@@ -22,7 +22,7 @@ import { MetricExpression } from '../../types';
 import { validateMetricThreshold } from '../validation';
 
 export default {
-  title: 'infra/alerting/CustomEquationEditor',
+  title: 'app/Alerts/CustomEquationEditor',
   decorators: [
     (wrappedStory) => <div style={{ width: 550 }}>{wrappedStory()}</div>,
     decorateWithGlobalStorybookThemeProviders,
@@ -69,6 +69,7 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
   useEffect(() => {
     const validationObject = validateMetricThreshold({
       criteria: [expression as MetricExpressionParams],
+      searchConfiguration: {},
     });
     setErrors(validationObject.errors[0]);
   }, [expression]);
@@ -114,7 +115,7 @@ CustomEquationEditorWithEquationErrors.args = {
   expression: {
     ...BASE_ARGS.expression,
     equation: 'Math.round(A / B)',
-    customMetrics: [
+    metrics: [
       { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.user.pct' },
       { name: 'B', aggType: Aggregators.MAX, field: 'system.cpu.cores' },
     ],

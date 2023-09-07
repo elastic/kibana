@@ -13,22 +13,14 @@ import {
 } from 'url';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
-import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 
-function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
-  return (job as TaskPayloadPNG).relativeUrl !== undefined;
-}
-function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
-  return (job as TaskPayloadPDF).objects !== undefined;
-}
-
 export function getFullUrls(
   serverInfo: ReportingServerInfo,
   config: ReportingConfigType,
-  job: TaskPayloadPDF | TaskPayloadPNG
+  job: TaskPayloadPDF
 ) {
   const {
     kibanaServer: { protocol, hostname, port },
@@ -40,19 +32,15 @@ export function getFullUrls(
     port: port ?? serverInfo.port,
   });
 
-  // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  if (isPngJob(job)) {
-    relativeUrls = [job.relativeUrl];
-  } else if (isPdfJob(job)) {
+  try {
     relativeUrls = job.objects.map((obj) => obj.relativeUrl);
-  } else {
+  } catch (error) {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
     );
   }
-
   validateUrls(relativeUrls);
 
   const urls = relativeUrls.map((relativeUrl) => {

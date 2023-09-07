@@ -6,6 +6,9 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+
 import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
@@ -13,9 +16,7 @@ jest.mock('@kbn/dashboard-plugin/public', () => {
   const actual = jest.requireActual('@kbn/dashboard-plugin/public');
   return {
     ...actual,
-    DashboardRenderer: jest
-      .fn()
-      .mockImplementation(() => <div data-test-subj="dashboardRenderer" />),
+    DashboardRenderer: jest.fn().mockReturnValue(<div data-test-subj="dashboardRenderer" />),
   };
 });
 
@@ -40,19 +41,41 @@ describe('DashboardRenderer', () => {
     },
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders', () => {
     const { queryByTestId } = render(<DashboardRenderer {...props} />, { wrapper: TestProviders });
     expect(queryByTestId(`dashboardRenderer`)).toBeInTheDocument();
   });
 
-  it.skip('does not render when No Read Permission', () => {
+  it('renders with correct options', async () => {
+    render(<DashboardRenderer {...props} />, { wrapper: TestProviders });
+    const options = await (
+      DashboardContainerRenderer as unknown as jest.Mock
+    ).mock.calls[0][0].getCreationOptions();
+    const input = options.getInitialInput();
+
+    expect(input).toEqual(
+      expect.objectContaining({
+        timeRange: props.timeRange,
+        viewMode: ViewMode.VIEW,
+        query: undefined,
+        filters: undefined,
+      })
+    );
+    expect(options.useControlGroupIntegration).toEqual(true);
+  });
+
+  it('does not render when No Read Permission', () => {
     const testProps = {
       ...props,
       canReadDashboard: false,
     };
-    const { queryByTestId } = render(<DashboardRenderer {...testProps} />, {
+    render(<DashboardRenderer {...testProps} />, {
       wrapper: TestProviders,
     });
-    expect(queryByTestId(`dashboardRenderer`)).not.toBeInTheDocument();
+    expect(DashboardContainerRenderer).not.toHaveBeenCalled();
   });
 });

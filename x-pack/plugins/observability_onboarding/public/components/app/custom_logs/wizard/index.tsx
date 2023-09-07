@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IntegrationOptions } from '../../../../hooks/use_create_integration';
 import {
   createWizardContext,
   Step,
@@ -16,6 +17,8 @@ import { InstallElasticAgent } from './install_elastic_agent';
 import { SelectLogs } from './select_logs';
 
 interface WizardState {
+  integrationName: string;
+  lastCreatedIntegration?: IntegrationOptions;
   datasetName: string;
   serviceName: string;
   logFilePaths: string[];
@@ -37,6 +40,7 @@ interface WizardState {
 }
 
 const initialState: WizardState = {
+  integrationName: '',
   datasetName: '',
   serviceName: '',
   logFilePaths: [''],

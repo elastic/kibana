@@ -66,6 +66,17 @@ describe('Reporting server createConfig', () => {
           },
         },
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+        "export_types": Object {
+          "csv": Object {
+            "enabled": true,
+          },
+          "pdf": Object {
+            "enabled": true,
+          },
+          "png": Object {
+            "enabled": true,
+          },
+        },
         "index": ".reporting",
         "kibanaServer": Object {
           "hostname": "reportingHost",

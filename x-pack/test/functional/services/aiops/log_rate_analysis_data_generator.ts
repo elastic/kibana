@@ -7,6 +7,8 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface GeneratedDoc {
@@ -24,7 +26,7 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-function getArtificialLogsWithSpike(index: string) {
+function getArtificialLogsWithDeviation(index: string, deviationType: string) {
   const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
@@ -44,7 +46,7 @@ function getArtificialLogsWithSpike(index: string) {
           ) {
             tsOffset = 0;
             [...Array(100)].forEach(() => {
-              tsOffset += DAY_MS / 100;
+              tsOffset += Math.round(DAY_MS / 100);
               const doc: GeneratedDoc = {
                 user,
                 response_code: responseCode,
@@ -74,14 +76,16 @@ function getArtificialLogsWithSpike(index: string) {
     ['login.php', 'user.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
       [...Array(docsPerUrl1[url])].forEach(() => {
-        tsOffset += DAY_MS / docsPerUrl1[url];
+        tsOffset += Math.round(DAY_MS / docsPerUrl1[url]);
         bulkBody.push(action);
         bulkBody.push({
           user: 'Peter',
           response_code: responseCode,
           url,
           version: 'v1.0.0',
-          '@timestamp': DEVIATION_TS + tsOffset,
+          '@timestamp':
+            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
+            tsOffset,
           should_ignore_this_field: 'should_ignore_this_field',
         });
       });
@@ -97,14 +101,16 @@ function getArtificialLogsWithSpike(index: string) {
     ['login.php', 'home.php'].forEach((url) => {
       tsOffset = 0;
       [...Array(docsPerUrl2[url] + userIndex)].forEach(() => {
-        tsOffset += DAY_MS / docsPerUrl2[url];
+        tsOffset += Math.round(DAY_MS / docsPerUrl2[url]);
         bulkBody.push(action);
         bulkBody.push({
           user,
           response_code: '500',
           url,
           version: 'v1.0.0',
-          '@timestamp': DEVIATION_TS + tsOffset,
+          '@timestamp':
+            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
+            tsOffset,
           should_ignore_this_field: 'should_ignore_this_field',
         });
       });
@@ -159,17 +165,18 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_dip':
           try {
             await es.indices.delete({
-              index: 'artificial_logs_with_spike',
+              index: dataGenerator,
             });
           } catch (e) {
-            log.info(`Could not delete index 'artificial_logs_with_spike' in before() callback`);
+            log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
 
           // Create index with mapping
           await es.indices.create({
-            index: 'artificial_logs_with_spike',
+            index: dataGenerator,
             mappings: {
               properties: {
                 user: { type: 'keyword' },
@@ -184,7 +191,10 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
 
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithSpike('artificial_logs_with_spike'),
+            body: getArtificialLogsWithDeviation(
+              dataGenerator,
+              dataGenerator.split('_').pop() ?? LOG_RATE_ANALYSIS_TYPE.SPIKE
+            ),
           });
           break;
 
@@ -204,12 +214,13 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_dip':
           try {
             await es.indices.delete({
-              index: 'artificial_logs_with_spike',
+              index: dataGenerator,
             });
           } catch (e) {
-            log.error(`Error deleting index 'artificial_logs_with_spike' in after() callback`);
+            log.error(`Error deleting index '${dataGenerator}' in after() callback`);
           }
           break;
 

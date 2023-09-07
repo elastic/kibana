@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   IEmbeddable,
   EmbeddableFactory,
@@ -62,7 +62,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
         style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
-          <KibanaThemeProvider theme$={core.theme.theme$}>
+          <KibanaThemeProvider theme={{ theme$: core.theme.theme$ }}>
             <EmbeddableRenderer embeddable={embeddableObject} />
           </KibanaThemeProvider>
         </I18nContext>

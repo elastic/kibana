@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   DataStream,
@@ -93,7 +93,6 @@ describe('SyntheticsPrivateLocation', () => {
       try {
         await syntheticsPrivateLocation.createPackagePolicies(
           [{ config: testConfig, globalParams: {} }],
-          {} as unknown as KibanaRequest,
           [mockPrivateLocation],
           'test-space'
         );
@@ -116,7 +115,6 @@ describe('SyntheticsPrivateLocation', () => {
       try {
         await syntheticsPrivateLocation.editMonitors(
           [{ config: testConfig, globalParams: {} }],
-          {} as unknown as KibanaRequest,
           [mockPrivateLocation],
           'test-space'
         );
@@ -152,11 +150,7 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitors(
-        [testConfig],
-        {} as unknown as KibanaRequest,
-        'test-space'
-      );
+      await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
     } catch (e) {
       expect(e).toEqual(new Error(error));
     }

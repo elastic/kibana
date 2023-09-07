@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import ipaddr from 'ipaddr.js';
 import { sum } from 'lodash';
 import moment from 'moment';
@@ -84,8 +84,14 @@ const EncryptionKeySchema = schema.conditional(
 );
 
 const RolesSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
-  allow: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+  enabled: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+    traditional: schema.boolean({ defaultValue: true }),
+  }), // true: use ES API for access control (deprecated in 7.x). false: use Kibana API for application features (8.0)
+  allow: offeringBasedSchema({
+    serverless: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    traditional: schema.arrayOf(schema.string(), { defaultValue: ['reporting_user'] }),
+  }),
 });
 
 // Browser side polling: job completion notifier, management table auto-refresh
@@ -101,6 +107,27 @@ const PollSchema = schema.object({
   }),
 });
 
+const ExportTypeSchema = schema.object({
+  // Csv reports are enabled in all offerings
+  csv: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  // Png reports are disabled in serverless
+  png: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+  // Pdf reports are disabled in serverless
+  pdf: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+});
+
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   kibanaServer: KibanaServerSchema,
@@ -110,6 +137,7 @@ export const ConfigSchema = schema.object({
   encryptionKey: EncryptionKeySchema,
   roles: RolesSchema,
   poll: PollSchema,
+  export_types: ExportTypeSchema,
 });
 
 export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

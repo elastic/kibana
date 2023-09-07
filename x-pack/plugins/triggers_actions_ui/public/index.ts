@@ -89,6 +89,7 @@ export {
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
+  executeAction,
 } from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';
@@ -115,6 +116,7 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
   COMPARATORS,
   connectorDeprecatedMessage,

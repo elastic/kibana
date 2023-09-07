@@ -257,6 +257,43 @@ describe('AgentBulkActions', () => {
       ).toBeEnabled();
     });
 
+    it('should show correct actions when no managed policies exist', async () => {
+      const selectedAgents: Agent[] = [];
+      mockedSendGetAgentPolicies.mockResolvedValue({
+        data: {
+          items: [],
+        },
+      });
+
+      const props = {
+        totalAgents: 10,
+        totalInactiveAgents: 0,
+        selectionMode: 'query',
+        currentQuery: '(Base query)',
+        selectedAgents,
+        visibleAgents: [],
+        refreshAgents: () => undefined,
+        allTags: [],
+        agentPolicies: [],
+      };
+      const results = render(props);
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      expect(results.getByText('Add / remove tags').closest('button')!).toBeEnabled();
+      expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
+      expect(results.getByText('Unenroll 10 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Upgrade 10 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Schedule upgrade for 10 agents').closest('button')!).toBeDisabled();
+      expect(
+        results.getByText('Request diagnostics for 10 agents').closest('button')!
+      ).toBeEnabled();
+    });
+
     it('should generate a correct kuery to select agents', async () => {
       mockedSendGetAgentPolicies.mockResolvedValue({
         data: {

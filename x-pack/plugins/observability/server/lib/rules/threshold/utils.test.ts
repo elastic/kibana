@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flattenObject } from './utils';
+import { flattenObject, validateKQLStringFilter } from './utils';
 
 describe('FlattenObject', () => {
   it('flattens multi level item', () => {
@@ -54,5 +54,18 @@ describe('FlattenObject', () => {
       'key1.item1': 'value 1',
       'key1.item2.itemA': 'value 2',
     });
+  });
+});
+
+describe('validateKQLStringFilter', () => {
+  const data = [
+    // input, output
+    ['', undefined],
+    ['host.name:host-0', undefined],
+    [':*', 'filterQuery must be a valid KQL filter'],
+  ];
+
+  test.each(data)('validateKQLStringFilter(%s): %o', (input: any, output: any) => {
+    expect(validateKQLStringFilter(input)).toEqual(output);
   });
 });

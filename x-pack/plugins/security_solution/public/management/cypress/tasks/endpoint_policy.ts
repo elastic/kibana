@@ -10,7 +10,7 @@ import type {
   UpdatePackagePolicy,
   UpdatePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
-import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import { packagePolicyRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { request } from './common';
 import { ProtectionModes } from '../../../../common/endpoint/types';
 
@@ -24,6 +24,9 @@ export const enableAllPolicyProtections = (
   return request<GetOnePackagePolicyResponse>({
     method: 'GET',
     url: packagePolicyRouteService.getInfoPath(endpointPolicyId),
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
   }).then(({ body: { item: endpointPolicy } }) => {
     const {
       created_by: _createdBy,
@@ -58,6 +61,60 @@ export const enableAllPolicyProtections = (
       method: 'PUT',
       url: packagePolicyRouteService.getUpdatePath(endpointPolicyId),
       body: updatedEndpointPolicy,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
     });
+  });
+};
+
+export const setCustomProtectionUpdatesManifestVersion = (
+  endpointPolicyId: string,
+  manifestVersion: string
+) => {
+  return request<GetOnePackagePolicyResponse>({
+    method: 'GET',
+    url: packagePolicyRouteService.getInfoPath(endpointPolicyId),
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
+  }).then(({ body: { item: endpointPolicy } }) => {
+    const {
+      created_by: _createdBy,
+      created_at: _createdAt,
+      updated_at: _updatedAt,
+      updated_by: _updatedBy,
+      id,
+      version,
+      revision,
+      ...restOfPolicy
+    } = endpointPolicy;
+
+    const updatedEndpointPolicy: UpdatePackagePolicy = restOfPolicy;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const policy = updatedEndpointPolicy!.inputs[0]!.config!.policy.value;
+
+    policy.global_manifest_version = manifestVersion;
+
+    return request<UpdatePackagePolicyResponse>({
+      method: 'PUT',
+      url: packagePolicyRouteService.getUpdatePath(endpointPolicyId),
+      body: updatedEndpointPolicy,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+    });
+  });
+};
+
+export const setCustomProtectionUpdatesNote = (
+  endpointPolicyId: string,
+  note: string
+): Cypress.Chainable<Cypress.Response<{ note: string }>> => {
+  return request<{ note: string }>({
+    method: 'POST',
+    url: `/api/endpoint/protection_updates_note/${endpointPolicyId}`,
+    body: { note },
+    headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
   });
 };

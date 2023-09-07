@@ -63,13 +63,15 @@ const handleMetadataTransformStatsChanged: CaseReducer<MetadataTransformStatsCha
 /* eslint-disable-next-line complexity */
 export const endpointListReducer: StateReducer = (state = initialEndpointPageState(), action) => {
   if (action.type === 'serverReturnedEndpointList') {
-    const { data, total, page, pageSize } = action.payload;
+    const { data, total, page, pageSize, sortDirection, sortField } = action.payload;
     return {
       ...state,
       hosts: data,
       total,
       pageIndex: page,
       pageSize,
+      sortField,
+      sortDirection,
       loading: false,
       error: undefined,
     };

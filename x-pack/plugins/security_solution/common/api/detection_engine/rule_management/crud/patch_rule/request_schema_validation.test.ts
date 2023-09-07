@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { PatchRuleRequestBody, ThresholdPatchRuleRequestBody } from './patch_rule_route';
+import type { ThresholdRulePatchProps } from '../../../model';
+import type { PatchRuleRequestBody } from './patch_rule_route';
 import { getPatchRulesSchemaMock, getPatchThresholdRulesSchemaMock } from './patch_rule_route.mock';
 import { validatePatchRuleRequestBody } from './request_schema_validation';
 
@@ -72,7 +73,7 @@ describe('Patch rule request schema, additional validation', () => {
     });
 
     test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
-      const schema: ThresholdPatchRuleRequestBody = {
+      const schema: ThresholdRulePatchProps = {
         ...getPatchThresholdRulesSchemaMock(),
         threshold: {
           field: '',
@@ -84,7 +85,7 @@ describe('Patch rule request schema, additional validation', () => {
     });
 
     test('threshold.field should contain 3 items or less', () => {
-      const schema: ThresholdPatchRuleRequestBody = {
+      const schema: ThresholdRulePatchProps = {
         ...getPatchThresholdRulesSchemaMock(),
         threshold: {
           field: ['field-1', 'field-2', 'field-3', 'field-4'],
@@ -96,7 +97,7 @@ describe('Patch rule request schema, additional validation', () => {
     });
 
     test('threshold.cardinality[0].field should not be in threshold.field', () => {
-      const schema: ThresholdPatchRuleRequestBody = {
+      const schema: ThresholdRulePatchProps = {
         ...getPatchThresholdRulesSchemaMock(),
         threshold: {
           field: ['field-1', 'field-2', 'field-3'],

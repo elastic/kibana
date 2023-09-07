@@ -93,7 +93,7 @@ export type IndexPatternField = FieldSpec & {
    * Map of fields which can be used, but may fail partially (ranked lower than others)
    */
   partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter' | 'position';
   timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
@@ -344,7 +344,7 @@ export interface Datasource<T = unknown, P = unknown> {
     prevState: T;
     layerId: string;
     columnId: string;
-    indexPatterns: IndexPatternMap;
+    indexPatterns?: IndexPatternMap;
   }) => T;
   initializeDimension?: (
     state: T,
@@ -637,7 +637,10 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme'>;
+  core: Pick<
+    CoreStart,
+    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'docLinks'
+  >;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
@@ -811,6 +814,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportStaticValue?: boolean;
   // used by text based datasource to restrict the field selection only to number fields for the metric dimensions
   isMetricDimension?: boolean;
+  isBreakdownDimension?: boolean;
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   labels?: { buttonAriaLabel: string; buttonLabel: string };
@@ -1327,6 +1331,12 @@ export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: RowClickContext['data'];
 }
+
+export type TriggerEvent =
+  | BrushTriggerEvent
+  | ClickTriggerEvent
+  | MultiClickTriggerEvent
+  | LensTableRowContextMenuEvent;
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';

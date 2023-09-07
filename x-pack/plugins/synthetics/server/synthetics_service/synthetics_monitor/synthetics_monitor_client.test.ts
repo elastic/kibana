@@ -133,7 +133,6 @@ describe('SyntheticsMonitorClient', () => {
 
     await client.addMonitors(
       [{ monitor, id }],
-      mockRequest,
       savedObjectsClientMock,
       privateLocations,
       'test-space'
@@ -223,7 +222,6 @@ describe('SyntheticsMonitorClient', () => {
 
     await client.deleteMonitors(
       [monitor as unknown as SyntheticsMonitorWithId],
-      mockRequest,
       savedObjectsClientMock,
       'test-space'
     );

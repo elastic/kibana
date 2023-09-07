@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { defineRecordAnalyticsOnAuthTypeRoutes } from './authentication_type';
+import type { RouteDefinitionParams } from '..';
 
 export function defineAnalyticsRoutes(params: RouteDefinitionParams) {
   defineRecordAnalyticsOnAuthTypeRoutes(params);

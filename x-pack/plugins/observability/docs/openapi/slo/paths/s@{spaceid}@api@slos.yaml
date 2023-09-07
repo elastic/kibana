@@ -60,20 +60,12 @@ get:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/space_id.yaml
-    - name: name
+    - name: kqlQuery
       in: query
-      description: Filter by name
+      description: A valid kql query to filter the SLO with
       schema:
         type: string
-      example: awesome-service
-    - name: indicatorTypes
-      in: query
-      description: Filter by indicator type
-      schema:
-        type: array
-        items:
-          type: string
-      example: ['sli.kql.custom']
+      example: 'slo.name:latency* and slo.tags : "prod"'
     - name: page
       in: query
       description: The page number to return
@@ -87,15 +79,15 @@ get:
       schema:
         type: integer
         default: 25
-      example: 20
+      example: 25
     - name: sortBy
       in: query
       description: Sort by field
       schema:
         type: string
-        enum: [creationTime, indicatorType]
-        default: creationTime
-      example: creationTime
+        enum: [sli_value, status, error_budget_consumed, error_budget_remaining]
+        default: status
+      example: status
     - name: sortDirection
       in: query
       description: Sort order

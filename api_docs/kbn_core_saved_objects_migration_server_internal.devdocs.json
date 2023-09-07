@@ -330,7 +330,7 @@
                 "id": "def-common.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n    esCapabilities,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -831,7 +831,7 @@
           "\nMakes a clone of the source index into the target.\n"
         ],
         "signature": [
-          "({ client, source, target, timeout, }: ",
+          "({ client, esCapabilities, source, target, timeout, }: ",
           "CloneIndexParams",
           ") => ",
           "TaskEither",
@@ -856,7 +856,7 @@
             "id": "def-common.cloneIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  source,\n  target,\n  timeout = DEFAULT_TIMEOUT,\n}",
+            "label": "{\n  client,\n  esCapabilities,\n  source,\n  target,\n  timeout = DEFAULT_TIMEOUT,\n}",
             "description": [],
             "signature": [
               "CloneIndexParams"
@@ -1020,7 +1020,7 @@
           "\nCreates an index with the given mappings\n"
         ],
         "signature": [
-          "({ client, indexName, mappings, aliases, timeout, }: ",
+          "({ client, indexName, mappings, esCapabilities, aliases, timeout, }: ",
           "CreateIndexParams",
           ") => ",
           "TaskEither",
@@ -1043,7 +1043,7 @@
             "id": "def-common.createIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  indexName,\n  mappings,\n  aliases = [],\n  timeout = DEFAULT_TIMEOUT,\n}",
+            "label": "{\n  client,\n  indexName,\n  mappings,\n  esCapabilities,\n  aliases = [],\n  timeout = DEFAULT_TIMEOUT,\n}",
             "description": [],
             "signature": [
               "CreateIndexParams"
@@ -2408,7 +2408,7 @@
               "SearchResponse",
               "<TDocument, TAggregations>>; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -3370,6 +3370,8 @@
               "default",
               "; ssl: ",
               "default",
+              "; synonyms: ",
+              "default",
               "; tasks: ",
               "default",
               "; termsEnum: { (this: That, params: ",
@@ -3641,6 +3643,26 @@
                 "docId": "kibKbnCoreNodeServerPluginApi",
                 "section": "def-common.NodeRoles",
                 "text": "NodeRoles"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.KibanaMigratorOptions.esCapabilities",
+            "type": "Object",
+            "tags": [],
+            "label": "esCapabilities",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchCapabilities",
+                "text": "ElasticsearchCapabilities"
               }
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",

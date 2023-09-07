@@ -17,7 +17,7 @@ import { SecurityPageName } from '../../../../app/types';
 import type { NavigationLink } from '../../../links';
 import { getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
-import { useGetSecuritySolutionLinkProps, type GetSecuritySolutionProps } from '../../links';
+import { useGetSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from '../../links';
 import { useNavLinks } from '../../../links/nav_links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
@@ -40,7 +40,7 @@ const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.la
  */
 const formatLink = (
   navLink: NavigationLink,
-  getSecuritySolutionLinkProps: GetSecuritySolutionProps
+  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
 ): SolutionSideNavItem => ({
   id: navLink.id,
   label: navLink.title,
@@ -70,7 +70,7 @@ const formatLink = (
  */
 const formatGetStartedLink = (
   navLink: NavigationLink,
-  getSecuritySolutionLinkProps: GetSecuritySolutionProps
+  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
 ): SolutionSideNavItem => ({
   id: navLink.id,
   label: navLink.title,

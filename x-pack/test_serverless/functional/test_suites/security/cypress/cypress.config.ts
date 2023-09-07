@@ -6,6 +6,8 @@
  */
 
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { dataLoaders as setupEndpointDataLoaders } from '@kbn/security-solution-plugin/public/management/cypress/support/data_loaders';
+import { setupUserDataLoader } from './support/setup_data_loader_tasks';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -23,5 +25,10 @@ export default defineCypressConfig({
     experimentalMemoryManagement: true,
     supportFile: './support/e2e.js',
     specPattern: './e2e/**/*.cy.ts',
+    setupNodeEvents: (on, config) => {
+      // Reuse data loaders from endpoint management cypress setup
+      setupEndpointDataLoaders(on, config);
+      setupUserDataLoader(on, config, {});
+    },
   },
 });

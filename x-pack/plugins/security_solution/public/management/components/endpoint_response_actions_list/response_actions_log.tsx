@@ -17,7 +17,7 @@ import type {
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
 import { UX_MESSAGES } from './translations';

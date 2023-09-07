@@ -8,18 +8,19 @@
 import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import {
-  createGetSummarizedAlertsFn,
-  createLifecycleExecutor,
-  IRuleDataClient,
-} from '@kbn/rule-registry-plugin/server';
+import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { AlertsLocatorParams, observabilityFeatureId } from '../../../../common';
+import { searchConfigurationSchema } from './types';
+import {
+  AlertsLocatorParams,
+  observabilityFeatureId,
+  observabilityPaths,
+} from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
@@ -37,7 +38,7 @@ import {
   timestampActionVariableDescription,
   valueActionVariableDescription,
 } from './messages';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from './utils';
+import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -75,7 +76,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     metric: schema.string(),
     aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
-    customMetrics: schema.never(),
+    metrics: schema.never(),
     equation: schema.never(),
     label: schema.never(),
   });
@@ -84,7 +85,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     aggType: schema.literal('count'),
     metric: schema.never(),
-    customMetrics: schema.never(),
+    metrics: schema.never(),
     equation: schema.never(),
     label: schema.never(),
   });
@@ -93,7 +94,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     aggType: schema.literal('custom'),
     metric: schema.never(),
-    customMetrics: schema.arrayOf(
+    metrics: schema.arrayOf(
       schema.oneOf([
         schema.object({
           name: schema.string(),
@@ -104,18 +105,17 @@ export function thresholdRuleType(
         schema.object({
           name: schema.string(),
           aggType: schema.literal('count'),
-          filter: schema.maybe(schema.string()),
+          filter: schema.maybe(
+            schema.string({
+              validate: validateKQLStringFilter,
+            })
+          ),
           field: schema.never(),
         }),
       ])
     ),
     equation: schema.maybe(schema.string()),
     label: schema.maybe(schema.string()),
-  });
-  const getSummarizedAlerts = createGetSummarizedAlertsFn({
-    ruleDataClient,
-    useNamespace: false,
-    isLifecycleAlert: false,
   });
 
   return {
@@ -130,13 +130,9 @@ export function thresholdRuleType(
             schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
           ),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          filterQuery: schema.maybe(
-            schema.string({
-              validate: validateIsStringElasticsearchJSONFilter,
-            })
-          ),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
+          searchConfiguration: searchConfigurationSchema,
         },
         { unknowns: 'allow' }
       ),
@@ -184,7 +180,8 @@ export function thresholdRuleType(
       },
     },
     producer: observabilityFeatureId,
-    getSummarizedAlerts: getSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   };
 }

@@ -44,11 +44,9 @@ export class CloudLinksPlugin
       }
       if (security) {
         maybeAddCloudLinks({
+          core,
           security,
-          chrome: core.chrome,
           cloud,
-          docLinks: core.docLinks,
-          uiSettingsClient: core.uiSettings,
         });
       }
     }

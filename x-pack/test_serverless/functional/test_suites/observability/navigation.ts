@@ -14,7 +14,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const browser = getService('browser');
 
-  describe('navigation', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/165924
+  describe.skip('navigation', function () {
     before(async () => {
       await svlObltNavigation.navigateToLandingPage();
     });
@@ -35,13 +36,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
-      // navigate to discover
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover:log-explorer' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'discover:log-explorer' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'discover:log-explorer',
+      // navigate to log explorer
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-log-explorer' });
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-log-explorer',
       });
-      await expect(await browser.getCurrentUrl()).contain('/app/discover');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
+        deepLinkId: 'observability-log-explorer',
+      });
+      await expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.clickLink({ navId: 'aiops' }); // open ai ops subsection
@@ -77,13 +80,21 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
     });
 
-    it('navigate using search', async () => {
-      await svlCommonNavigation.search.showSearch();
-      await svlCommonNavigation.search.searchFor('discover log explorer');
-      await svlCommonNavigation.search.clickOnOption(0);
-      await svlCommonNavigation.search.hideSearch();
+    it('shows cases in sidebar navigation', async () => {
+      await svlCommonNavigation.expectExists();
 
-      await expect(await browser.getCurrentUrl()).contain('/app/discover#/p/log-explorer');
+      await svlCommonNavigation.sidenav.expectLinkExists({
+        deepLinkId: 'observability-overview:cases',
+      });
+    });
+
+    it('navigates to cases app', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
+
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'observability-overview:cases',
+      });
+      expect(await browser.getCurrentUrl()).contain('/app/observability/cases');
     });
   });
 }

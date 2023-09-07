@@ -95,7 +95,12 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
+              <EuiButton
+                data-test-subj="savedQueryFlyoutSaveButton"
+                isLoading={isSubmitting}
+                onClick={handleSubmit(onSubmit)}
+                fill
+              >
                 <FormattedMessage
                   id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"

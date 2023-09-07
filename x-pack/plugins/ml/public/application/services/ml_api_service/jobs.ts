@@ -9,12 +9,7 @@ import { Observable } from 'rxjs';
 import { useMemo } from 'react';
 import type { AggFieldNamePair } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import {
-  type CategorizationAnalyzer,
-  type CategoryFieldExample,
-  type FieldExampleCheck,
-  CATEGORY_EXAMPLES_VALIDATION_STATUS,
-} from '@kbn/ml-category-validator';
+import type { CategorizationAnalyzer, FieldValidationResults } from '@kbn/ml-category-validator';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 
@@ -346,7 +341,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings?: RuntimeMappings,
-    indicesOptions?: IndicesOptions
+    indicesOptions?: IndicesOptions,
+    includeExamples?: boolean
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -359,14 +355,10 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       analyzer,
       runtimeMappings,
       indicesOptions,
+      includeExamples,
     });
-    return httpService.http<{
-      examples: CategoryFieldExample[];
-      sampleSize: number;
-      overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
-      validationChecks: FieldExampleCheck[];
-    }>({
-      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_examples`,
+    return httpService.http<FieldValidationResults>({
+      path: `${ML_INTERNAL_BASE_PATH}/jobs/categorization_field_validation`,
       method: 'POST',
       body,
       version: '1',

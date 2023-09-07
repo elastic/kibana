@@ -48,7 +48,6 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
     formRowProps: { error: errors },
   } = inputs.kafkaTopicsInput;
   const theme = useTheme() as EuiTheme;
-
   const [autoFocus, setAutoFocus] = useState(false);
 
   const indexedErrors = useMemo(() => {
@@ -64,7 +63,30 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
         acc[err.index] = [];
       }
 
-      acc[err.index].push(err.message);
+      if (!err.condition) {
+        acc[err.index].push(err.message);
+      }
+
+      return acc;
+    }, []);
+  }, [errors]);
+
+  const indexedConditionErrors = useMemo(() => {
+    if (!errors) {
+      return [];
+    }
+    return errors.reduce<string[][]>((acc, err) => {
+      if (err.index === undefined) {
+        return acc;
+      }
+
+      if (!acc[err.index]) {
+        acc[err.index] = [];
+      }
+
+      if (err.condition) {
+        acc[err.index].push(err.message);
+      }
 
       return acc;
     }, []);
@@ -97,9 +119,10 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
     (index: number) => {
       const updatedTopics = topics.filter((_, i) => i !== index);
       indexedErrors.splice(index, 1);
+      indexedConditionErrors.splice(index, 1);
       onChange(updatedTopics);
     },
-    [topics, indexedErrors, onChange]
+    [topics, indexedErrors, indexedConditionErrors, onChange]
   );
 
   const displayErrors = (errorMessages?: string[]) => {
@@ -132,10 +155,13 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
         const sourceErrors = indexedErrors[source.index];
         indexedErrors.splice(source.index, 1);
         indexedErrors.splice(destination.index, 0, sourceErrors);
+        const sourceConditionErrors = indexedConditionErrors[source.index];
+        indexedConditionErrors.splice(source.index, 1);
+        indexedConditionErrors.splice(destination.index, 0, sourceConditionErrors);
         onChange(items);
       }
     },
-    [topics, indexedErrors, onChange]
+    [topics, indexedErrors, indexedConditionErrors, onChange]
   );
 
   return (
@@ -187,6 +213,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
               <EuiDroppable droppableId={`${id}Droppable`} spacing="none">
                 {topics.map((topic, index) => {
                   const topicErrors = indexedErrors[index];
+                  const topicConditionErrors = indexedConditionErrors[index];
                   return (
                     <React.Fragment key={index}>
                       <EuiDraggable
@@ -238,10 +265,15 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                                 </EuiFormRow>
                               </EuiFlexItem>
                               <EuiFlexItem style={{ flex: '40%' }}>
-                                <EuiFormRow fullWidth>
+                                <EuiFormRow
+                                  fullWidth
+                                  error={displayErrors(topicConditionErrors)}
+                                  isInvalid={(topicConditionErrors?.length ?? 0) > 0}
+                                >
                                   <EuiFieldText
                                     data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorConditionInput${index}`}
                                     value={topic.when?.condition}
+                                    isInvalid={(topicConditionErrors?.length ?? 0) > 0}
                                     onChange={(e) =>
                                       handleTopicProcessorChange(index, 'condition', e.target.value)
                                     }
@@ -301,6 +333,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
             <>
               {topics.map((topic, index) => {
                 const topicErrors = indexedErrors[index];
+                const topicConditionErrors = indexedConditionErrors[index];
                 return (
                   <>
                     <EuiSpacer size="m" />
@@ -320,10 +353,15 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
                         </EuiFormRow>
                       </EuiFlexItem>
                       <EuiFlexItem style={{ flex: '40%' }}>
-                        <EuiFormRow fullWidth>
+                        <EuiFormRow
+                          fullWidth
+                          error={displayErrors(topicConditionErrors)}
+                          isInvalid={(topicConditionErrors?.length ?? 0) > 0}
+                        >
                           <EuiFieldText
                             data-test-subj={`settingsOutputsFlyout.kafkaTopicsProcessorConditionInput${index}`}
                             value={topic.when?.condition}
+                            isInvalid={(topicConditionErrors?.length ?? 0) > 0}
                             onChange={(e) =>
                               handleTopicProcessorChange(index, 'condition', e.target.value)
                             }

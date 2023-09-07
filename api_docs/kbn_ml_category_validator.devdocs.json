@@ -53,7 +53,23 @@
           "MappingRuntimeFields",
           " | undefined, indicesOptions: ",
           "IndicesOptions",
-          " | undefined) => Promise<{ overallValidStatus: ",
+          " | undefined, includeExamples?: boolean) => Promise<{ overallValidStatus: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.CATEGORY_EXAMPLES_VALIDATION_STATUS",
+            "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
+          },
+          "; validationChecks: ",
+          {
+            "pluginId": "@kbn/ml-category-validator",
+            "scope": "common",
+            "docId": "kibKbnMlCategoryValidatorPluginApi",
+            "section": "def-common.FieldExampleCheck",
+            "text": "FieldExampleCheck"
+          },
+          "[]; sampleSize: number; examples?: undefined; } | { overallValidStatus: ",
           {
             "pluginId": "@kbn/ml-category-validator",
             "scope": "common",
@@ -229,6 +245,111 @@
             "label": "message",
             "description": [
               "\nThe message associated with the validation result."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-category-validator",
+        "id": "def-common.FieldValidationResults",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldValidationResults",
+        "description": [
+          "\nValidation results for a specific field."
+        ],
+        "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.examples",
+            "type": "Array",
+            "tags": [
+              "type"
+            ],
+            "label": "examples",
+            "description": [
+              "\nAn array of example objects representing category field examples."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.CategoryFieldExample",
+                "text": "CategoryFieldExample"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.sampleSize",
+            "type": "number",
+            "tags": [
+              "type"
+            ],
+            "label": "sampleSize",
+            "description": [
+              "\nThe total number of examples used for validation."
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.overallValidStatus",
+            "type": "Enum",
+            "tags": [
+              "type"
+            ],
+            "label": "overallValidStatus",
+            "description": [
+              "\nThe overall validation status of the category examples."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.CATEGORY_EXAMPLES_VALIDATION_STATUS",
+                "text": "CATEGORY_EXAMPLES_VALIDATION_STATUS"
+              }
+            ],
+            "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-category-validator",
+            "id": "def-common.FieldValidationResults.validationChecks",
+            "type": "Array",
+            "tags": [
+              "type"
+            ],
+            "label": "validationChecks",
+            "description": [
+              "\nAn array of validation checks performed on each example."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-category-validator",
+                "scope": "common",
+                "docId": "kibKbnMlCategoryValidatorPluginApi",
+                "section": "def-common.FieldExampleCheck",
+                "text": "FieldExampleCheck"
+              },
+              "[]"
             ],
             "path": "x-pack/packages/ml/category_validator/common/types/categories.ts",
             "deprecated": false,

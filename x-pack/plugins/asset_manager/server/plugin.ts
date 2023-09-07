@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   Plugin,
   CoreSetup,
@@ -15,22 +14,23 @@ import {
   PluginConfigDescriptor,
   Logger,
 } from '@kbn/core/server';
+
 import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
 import { assetsIndexTemplateConfig } from './templates/assets_template';
+import { AssetManagerConfig, configSchema } from './types';
+import { AssetAccessor } from './lib/asset_accessor';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
-export interface AssetManagerConfig {
-  alphaEnabled?: boolean;
-}
+export type AssetManagerServerPluginStart = ReturnType<AssetManagerServerPlugin['start']>;
 
 export const config: PluginConfigDescriptor<AssetManagerConfig> = {
-  schema: schema.object({
-    alphaEnabled: schema.maybe(schema.boolean()),
-  }),
+  schema: configSchema,
 };
 
-export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPluginSetup> {
+export class AssetManagerServerPlugin
+  implements Plugin<AssetManagerServerPluginSetup, AssetManagerServerPluginStart>
+{
   public config: AssetManagerConfig;
   public logger: Logger;
 
@@ -48,10 +48,17 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
 
     this.logger.info('Asset manager plugin [tech preview] is enabled');
 
-    const router = core.http.createRouter();
-    setupRoutes<RequestHandlerContext>({ router });
+    const assetAccessor = new AssetAccessor({
+      source: this.config.lockedSource,
+      sourceIndices: this.config.sourceIndices,
+    });
 
-    return {};
+    const router = core.http.createRouter();
+    setupRoutes<RequestHandlerContext>({ router, assetAccessor });
+
+    return {
+      assetAccessor,
+    };
   }
 
   public start(core: CoreStart) {
@@ -61,11 +68,15 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
     }
 
     // create/update assets-* index template
-    upsertTemplate({
-      esClient: core.elasticsearch.client.asInternalUser,
-      template: assetsIndexTemplateConfig,
-      logger: this.logger,
-    });
+    if (this.config.lockedSource === 'assets') {
+      upsertTemplate({
+        esClient: core.elasticsearch.client.asInternalUser,
+        template: assetsIndexTemplateConfig,
+        logger: this.logger,
+      });
+    }
+
+    return {};
   }
 
   public stop() {}

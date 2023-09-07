@@ -12,7 +12,7 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CaseSeverity } from '../../../common/api';
+import { CaseSeverity } from '../../../common/types/domain';
 import { SeveritySelector } from '../severity/selector';
 import { SEVERITY_TITLE } from '../severity/translations';
 

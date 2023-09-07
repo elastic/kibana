@@ -12,14 +12,16 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  HeaderMenuPortal,
+  InspectorContextProvider,
+} from '@kbn/observability-shared-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import { Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -31,15 +33,15 @@ import { LicenseProvider } from '../../../context/license/license_context';
 import { TimeRangeIdContextProvider } from '../../../context/time_range_id/time_range_id_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { ScrollToTopOnPathChange } from './scroll_to_top_on_path_change';
+import { ApmErrorBoundary } from '../apm_error_boundary';
+import { apmRouter } from '../apm_route_config';
+import { TrackPageview } from '../track_pageview';
 import { ApmHeaderActionMenu } from './apm_header_action_menu';
+import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
 import { RedirectWithDefaultDateRange } from './redirect_with_default_date_range';
 import { RedirectWithDefaultEnvironment } from './redirect_with_default_environment';
 import { RedirectWithOffset } from './redirect_with_offset';
-import { ApmErrorBoundary } from '../apm_error_boundary';
-import { apmRouter } from '../apm_route_config';
-import { RedirectDependenciesToDependenciesInventory } from './redirect_dependencies_to_dependencies_inventory';
-import { TrackPageview } from '../track_pageview';
+import { ScrollToTopOnPathChange } from './scroll_to_top_on_path_change';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
 
 const storage = new Storage(localStorage);
@@ -55,9 +57,6 @@ export function ApmAppRoot({
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
-  const coPilotService =
-    apmPluginContextValue.plugins.observability.getCoPilotService();
-
   return (
     <RedirectAppLinks
       application={core.application}
@@ -68,9 +67,11 @@ export function ApmAppRoot({
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>
           <i18nCore.Context>
-            <TimeRangeIdContextProvider>
-              <RouterProvider history={history} router={apmRouter as any}>
-                <CoPilotContextProvider value={coPilotService}>
+            <ObservabilityAIAssistantProvider
+              value={apmPluginContextValue.observabilityAIAssistant}
+            >
+              <TimeRangeIdContextProvider>
+                <RouterProvider history={history} router={apmRouter as any}>
                   <ApmErrorBoundary>
                     <RedirectDependenciesToDependenciesInventory>
                       <RedirectWithDefaultEnvironment>
@@ -105,9 +106,9 @@ export function ApmAppRoot({
                       </RedirectWithDefaultEnvironment>
                     </RedirectDependenciesToDependenciesInventory>
                   </ApmErrorBoundary>
-                </CoPilotContextProvider>
-              </RouterProvider>
-            </TimeRangeIdContextProvider>
+                </RouterProvider>
+              </TimeRangeIdContextProvider>
+            </ObservabilityAIAssistantProvider>
           </i18nCore.Context>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>
@@ -126,7 +127,7 @@ function MountApmHeaderActionMenu() {
   );
 }
 
-function ApmThemeProvider({ children }: { children: React.ReactNode }) {
+export function ApmThemeProvider({ children }: { children: React.ReactNode }) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (

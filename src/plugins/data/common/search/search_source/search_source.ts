@@ -106,7 +106,6 @@ import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 import {
   getEsQueryConfig,
   IKibanaSearchResponse,
-  isErrorResponse,
   isPartialResponse,
   isCompleteResponse,
   UI_SETTINGS,
@@ -138,6 +137,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  scriptedFieldsEnabled: boolean;
 }
 
 interface ExpressionAstOptions {
@@ -543,10 +543,10 @@ export class SearchSource {
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
+        // For testing timeout messages in UI, uncomment the next line
+        // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
-          if (isErrorResponse(response)) {
-            obs.error(response);
-          } else if (isPartialResponse(response)) {
+          if (isPartialResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
@@ -796,10 +796,12 @@ export class SearchSource {
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
     body.fields = body.fields || [];
-    body.script_fields = {
-      ...body.script_fields,
-      ...scriptFields,
-    };
+    body.script_fields = this.dependencies.scriptedFieldsEnabled
+      ? {
+          ...body.script_fields,
+          ...scriptFields,
+        }
+      : {};
     body.stored_fields = storedFields;
     body.runtime_mappings = runtimeFields || {};
 
@@ -915,6 +917,25 @@ export class SearchSource {
       filtersInMustClause,
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+
+    // For testing shard failure messages in the UI, follow these steps:
+    // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
+    // 2. Create a data view using the index pattern `kibana*` and don't use a timestamp field.
+    // 3. Uncomment the lines below, navigate to Discover,
+    //    and switch to the data view created in step 2.
+    // body.query.bool.must.push({
+    //   error_query: {
+    //     indices: [
+    //       {
+    //         name: 'kibana_sample_data_logs',
+    //         shard_ids: [0, 1],
+    //         error_type: 'exception',
+    //         message: 'Testing shard failures!',
+    //       },
+    //     ],
+    //   },
+    // });
+    // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));

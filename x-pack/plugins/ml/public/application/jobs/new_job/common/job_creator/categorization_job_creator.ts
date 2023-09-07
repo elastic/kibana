@@ -126,11 +126,16 @@ export class CategorizationJobCreator extends JobCreator {
   public async loadCategorizationFieldExamples() {
     const { examples, sampleSize, overallValidStatus, validationChecks } =
       await this._examplesLoader.loadExamples();
-    this._categoryFieldExamples = examples;
+    const categoryFieldExamples = examples ?? [];
+    this._categoryFieldExamples = categoryFieldExamples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
 
-    this._ccsVersionFailure = this._checkCcsFailure(examples, overallValidStatus, validationChecks);
+    this._ccsVersionFailure = this._checkCcsFailure(
+      categoryFieldExamples,
+      overallValidStatus,
+      validationChecks
+    );
     if (this._ccsVersionFailure === true) {
       // if the data view contains a cross-cluster search, one of the clusters may
       // be on a version which doesn't support the fields API (e.g. 6.8)
@@ -142,7 +147,7 @@ export class CategorizationJobCreator extends JobCreator {
     this._wizardInitialized$.next(true);
 
     return {
-      examples,
+      examples: categoryFieldExamples,
       sampleSize,
       overallValidStatus,
       validationChecks,

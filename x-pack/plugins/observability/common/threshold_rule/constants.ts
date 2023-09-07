@@ -6,7 +6,6 @@
  */
 
 export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
-export const TIMESTAMP_FIELD = '@timestamp';
 export const METRIC_EXPLORER_AGGREGATIONS = [
   'avg',
   'max',

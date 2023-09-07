@@ -1432,6 +1432,26 @@
             "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.ExploratoryViewPublicPluginsStart.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1532,7 +1552,7 @@
             "label": "defaultSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"bar\" | \"line\" | \"area\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,

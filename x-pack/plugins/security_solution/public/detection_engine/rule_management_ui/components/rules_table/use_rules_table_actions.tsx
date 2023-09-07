@@ -26,8 +26,10 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  confirmDeletion: () => Promise<boolean>;
 }): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
@@ -114,6 +116,11 @@ export const useRulesTableActions = ({
       icon: 'trash',
       name: i18n.DELETE_RULE,
       onClick: async (rule: Rule) => {
+        if ((await confirmDeletion()) === false) {
+          // User has canceled deletion
+          return;
+        }
+
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
           type: BulkActionType.delete,

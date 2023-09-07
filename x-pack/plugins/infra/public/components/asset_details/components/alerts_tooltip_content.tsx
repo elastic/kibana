@@ -34,7 +34,7 @@ export const AlertsTooltipContent = React.memo(() => {
           values={{
             documentation: (
               <EuiLink
-                data-test-subj="assetDetailsTooltipDocumentationLink"
+                data-test-subj="infraAssetDetailsTooltipDocumentationLink"
                 href={ALERTS_DOC_HREF}
                 target="_blank"
               >

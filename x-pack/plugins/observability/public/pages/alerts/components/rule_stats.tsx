@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export interface RuleStatsState {
@@ -20,7 +21,7 @@ export interface RuleStatsState {
 type StatType = 'disabled' | 'snoozed' | 'error';
 
 const Divider = euiStyled.div`
-  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-right: 1px solid ${euiThemeVars.euiColorLightShade};
   height: 100%;
 `;
 

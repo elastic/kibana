@@ -24,7 +24,8 @@ type ParsableType =
   | t.InterfaceType<any>
   | MergeType<any, any>
   | t.DictionaryType<any, any>
-  | t.ArrayType<any, any>;
+  | t.ArrayType<any, any>
+  | t.AnyType;
 
 const tags = [
   'DictionaryType',
@@ -35,6 +36,7 @@ const tags = [
   'ExactType',
   'UnionType',
   'ArrayType',
+  'AnyType',
 ];
 
 function isParsableType(type: t.Mixed): type is ParsableType {
@@ -47,6 +49,9 @@ function getHandlingTypes(type: t.Mixed, key: string, value: object): t.Mixed[] 
   }
 
   switch (type._tag) {
+    case 'AnyType':
+      return [type];
+
     case 'ArrayType':
       return [type.type];
 

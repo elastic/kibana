@@ -19,16 +19,16 @@ import {
   EuiIcon,
   EuiHealth,
   EuiToolTip,
+  RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { Status } from '@kbn/cases-components/src/status/status';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import type { ActionConnector } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
-import { CaseStatuses, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';

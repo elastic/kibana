@@ -578,6 +578,14 @@
               "path": "x-pack/plugins/cases/public/plugin.ts"
             },
             {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.test.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/public/plugin.test.ts"
+            },
+            {
               "plugin": "imageEmbeddable",
               "path": "src/plugins/image_embeddable/public/plugin.ts"
             },
@@ -969,7 +977,7 @@
               "SearchResponse",
               "<TDocument, TAggregations>>; }; helpers: ",
               "default",
-              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -1930,6 +1938,8 @@
               "; sql: ",
               "default",
               "; ssl: ",
+              "default",
+              "; synonyms: ",
               "default",
               "; tasks: ",
               "default",
@@ -5456,6 +5466,10 @@
             {
               "plugin": "cases",
               "path": "x-pack/plugins/cases/server/client/factory.ts"
+            },
+            {
+              "plugin": "cases",
+              "path": "x-pack/plugins/cases/server/plugin.test.ts"
             }
           ]
         }

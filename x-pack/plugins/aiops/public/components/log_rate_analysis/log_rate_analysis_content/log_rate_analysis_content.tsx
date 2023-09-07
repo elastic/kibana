@@ -15,7 +15,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Dictionary } from '@kbn/ml-url-state';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import {
+  LOG_RATE_ANALYSIS_TYPE,
+  type LogRateAnalysisType,
+  type WindowParameters,
+} from '@kbn/aiops-utils';
 import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { useData } from '../../../hooks/use_data';
@@ -78,6 +82,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     number | WindowParameters | undefined
   >(incomingInitialAnalysisStart);
   const [isBrushCleared, setIsBrushCleared] = useState(true);
+  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
+    LOG_RATE_ANALYSIS_TYPE.SPIKE
+  );
 
   useEffect(() => {
     setIsBrushCleared(windowParameters === undefined);
@@ -94,7 +101,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 
   const { documentStats, earliest, latest } = useData(
     dataView,
-    'explain_log_rage_spikes',
+    'log_rate_analysis',
     esSearchQuery,
     setGlobalState,
     currentSelectedSignificantTerm,
@@ -106,13 +113,18 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
 
-  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
+  function brushSelectionUpdate(
+    windowParametersUpdate: WindowParameters,
+    force: boolean,
+    logRateAnalysisTypeUpdate: LogRateAnalysisType
+  ) {
     if (!isBrushCleared || force) {
-      setWindowParameters(d);
+      setWindowParameters(windowParametersUpdate);
     }
     if (force) {
       setIsBrushCleared(false);
     }
+    setLogRateAnalysisType(logRateAnalysisTypeUpdate);
   }
 
   function clearSelection() {
@@ -148,6 +160,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
         <LogRateAnalysisResults
           dataView={dataView}
+          analysisType={logRateAnalysisType}
           earliest={earliest}
           isBrushCleared={isBrushCleared}
           latest={latest}
@@ -171,7 +184,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
             <h2>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.emptyPromptTitle"
-                defaultMessage="Click a spike in the histogram chart to start the analysis."
+                defaultMessage="Click a spike or dip in the histogram chart to start the analysis."
               />
             </h2>
           }
@@ -180,7 +193,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
             <p>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.emptyPromptBody"
-                defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or drop."
+                defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or dip."
               />
             </p>
           }

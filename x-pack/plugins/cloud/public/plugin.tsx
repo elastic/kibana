@@ -14,7 +14,7 @@ import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_i
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import type { CloudSetup, CloudStart } from './types';
-import { getFullCloudUrl } from './utils';
+import { getFullCloudUrl } from '../common/utils';
 
 export interface CloudConfigType {
   id?: string;
@@ -22,6 +22,7 @@ export interface CloudConfigType {
   base_url?: string;
   profile_url?: string;
   deployment_url?: string;
+  projects_url?: string;
   billing_url?: string;
   organization_url?: string;
   users_and_roles_url?: string;
@@ -41,6 +42,7 @@ interface CloudUrls {
   snapshotsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
+  projectsUrl?: string;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
@@ -121,6 +123,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       organizationUrl,
       performanceUrl,
       usersAndRolesUrl,
+      projectsUrl,
     } = this.getCloudUrls();
 
     let decodedId: DecodedCloudId | undefined;
@@ -136,6 +139,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       deploymentUrl,
       profileUrl,
       organizationUrl,
+      projectsUrl,
       elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       isServerlessEnabled: this.isServerlessEnabled,
@@ -158,6 +162,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       base_url: baseUrl,
       performance_url: performanceUrl,
       users_and_roles_url: usersAndRolesUrl,
+      projects_url: projectsUrl,
     } = this.config;
 
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
@@ -166,6 +171,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
     const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
     const fullCloudUsersAndRolesUrl = getFullCloudUrl(baseUrl, usersAndRolesUrl);
+    const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
@@ -176,6 +182,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       snapshotsUrl: fullCloudSnapshotsUrl,
       performanceUrl: fullCloudPerformanceUrl,
       usersAndRolesUrl: fullCloudUsersAndRolesUrl,
+      projectsUrl: fullCloudProjectsUrl,
     };
   }
 }

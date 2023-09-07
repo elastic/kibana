@@ -461,6 +461,7 @@ export const getXyVisualization = ({
           requiredMinDimensionCount:
             dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
           enableDimensionEditor: true,
+          isBreakdownDimension: true,
         },
       ],
     };

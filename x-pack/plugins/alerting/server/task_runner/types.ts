@@ -9,6 +9,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import { IAlertsClient } from '../alerts_client/types';
 import { Alert } from '../alert';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -87,15 +88,23 @@ export interface ExecutionHandlerOptions<
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
   maintenanceWindowIds?: string[];
+  alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
 }
 
-export interface Executable<
+export type Executable<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
-> {
+> = {
   action: RuleAction;
-  alert?: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
-  summarizedAlerts?: CombinedSummarizedAlerts;
-}
+} & (
+  | {
+      alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+      summarizedAlerts?: never;
+    }
+  | {
+      alert?: never;
+      summarizedAlerts: CombinedSummarizedAlerts;
+    }
+);

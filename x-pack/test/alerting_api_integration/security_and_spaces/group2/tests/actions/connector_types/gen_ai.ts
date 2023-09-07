@@ -67,7 +67,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
         simulator.close();
       });
 
-      it('should return 200 when creating the connector', async () => {
+      it('should return 200 when creating the connector without a default model', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -87,7 +87,40 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           name,
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
-          config,
+          config: {
+            ...config,
+            defaultModel: 'gpt-4',
+          },
+        });
+      });
+
+      it('should return 200 when creating the connector with a default model', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config: {
+              ...config,
+              defaultModel: 'gpt-3.5-turbo',
+            },
+            secrets,
+          })
+          .expect(200);
+
+        expect(createdAction).to.eql({
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_system_action: false,
+          is_deprecated: false,
+          name,
+          connector_type_id: connectorTypeId,
+          is_missing_secrets: false,
+          config: {
+            ...config,
+            defaultModel: 'gpt-3.5-turbo',
+          },
         });
       });
 
@@ -111,7 +144,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [apiProvider]: expected at least one defined value but got [undefined]',
+                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected at least one defined value but got [undefined]\n- [1.apiProvider]: expected at least one defined value but got [undefined]',
             });
           });
       });
@@ -132,7 +165,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+                'error validating action type config: types that failed validation:\n- [0.apiProvider]: expected value to equal [Azure OpenAI]\n- [1.apiUrl]: expected value of type [string] but got [undefined]',
             });
           });
       });

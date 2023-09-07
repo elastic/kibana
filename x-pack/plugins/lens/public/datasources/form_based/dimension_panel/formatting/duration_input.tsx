@@ -9,11 +9,32 @@ import { EuiComboBox, EuiSpacer } from '@elastic/eui';
 import { DURATION_INPUT_FORMATS, DURATION_OUTPUT_FORMATS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { Prepend } from '../../../../shared_components/prepend_provider';
 
-export const durationOutputOptions = DURATION_OUTPUT_FORMATS.map(({ text, method }) => ({
-  label: text,
-  value: method,
-}));
+function getNewHumanizeOutputLabel({ text, method }: { text: string; method: string }): {
+  label: string;
+  value: string;
+} {
+  if (method === 'humanize') {
+    return {
+      label: i18n.translate('xpack.lens.indexPattern.duration.humanizeLabel', {
+        defaultMessage: 'Friendly (approximate)',
+      }),
+      value: method,
+    };
+  }
+  if (method === 'humanizePrecise') {
+    return {
+      label: i18n.translate('xpack.lens.indexPattern.duration.humanizePreciseLabel', {
+        defaultMessage: 'Friendly (precise)',
+      }),
+      value: method,
+    };
+  }
+  return { label: text, value: method };
+}
+
+export const durationOutputOptions = DURATION_OUTPUT_FORMATS.map(getNewHumanizeOutputLabel);
 export const durationInputOptions = DURATION_INPUT_FORMATS.map(({ text, kind }) => ({
   label: text,
   value: kind,
@@ -49,9 +70,13 @@ export const DurationRowInputs = ({
   return (
     <>
       <EuiComboBox
-        prepend={i18n.translate('xpack.lens.indexPattern.duration.fromLabel', {
-          defaultMessage: 'From',
-        })}
+        prepend={
+          <Prepend>
+            {i18n.translate('xpack.lens.indexPattern.duration.fromLabel', {
+              defaultMessage: 'Convert',
+            })}
+          </Prepend>
+        }
         isClearable={false}
         options={durationInputOptions}
         selectedOptions={getSelectedOption(startValue, durationInputOptions)}
@@ -62,9 +87,13 @@ export const DurationRowInputs = ({
       />
       <EuiSpacer size="s" />
       <EuiComboBox
-        prepend={i18n.translate('xpack.lens.indexPattern.custom.toLabel', {
-          defaultMessage: 'To',
-        })}
+        prepend={
+          <Prepend>
+            {i18n.translate('xpack.lens.indexPattern.custom.toLabel', {
+              defaultMessage: 'To',
+            })}
+          </Prepend>
+        }
         isClearable={false}
         options={durationOutputOptions}
         selectedOptions={getSelectedOption(endValue, durationOutputOptions)}

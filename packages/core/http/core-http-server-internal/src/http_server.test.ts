@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
+jest.mock('@kbn/server-http-tools', () => {
+  const module = jest.requireActual('@kbn/server-http-tools');
+  return {
+    ...module,
+    createServer: jest.fn(module.createServer),
+  };
+});
+
 import { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
@@ -23,6 +31,7 @@ import type {
   RequestHandlerContextBase,
 } from '@kbn/core-http-server';
 import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
+import { createServer } from '@kbn/server-http-tools';
 import { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
@@ -1504,6 +1513,29 @@ describe('setup contract', () => {
       if (tempDir) {
         await rm(tempDir, { recursive: true });
       }
+    });
+
+    test('registers routes with expected options', async () => {
+      const { registerStaticDir } = await server.setup(config);
+      expect(createServer).toHaveBeenCalledTimes(1);
+      const [{ value: myServer }] = (createServer as jest.Mock).mock.results;
+      jest.spyOn(myServer, 'route');
+      expect(myServer.route).toHaveBeenCalledTimes(0);
+      registerStaticDir('/static/{path*}', assetFolder);
+      expect(myServer.route).toHaveBeenCalledTimes(1);
+      expect(myServer.route).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          options: {
+            app: { access: 'public' },
+            auth: false,
+            cache: {
+              privacy: 'public',
+              otherwise: 'must-revalidate',
+            },
+          },
+        })
+      );
     });
 
     test('does not throw if called after stop', async () => {

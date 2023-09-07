@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
-import { orderBy } from 'lodash';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { orderBy, isEqual } from 'lodash';
 
 import {
   useEuiBackgroundColor,
@@ -423,6 +423,36 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     };
   }, [pageIndex, pageSize, sortField, sortDirection, groupTableItems]);
 
+  useEffect(() => {
+    // If no row is hovered or pinned or the user switched to a new page,
+    // fall back to set the first row into a hovered state to make the
+    // main document count chart show a comparison view by default.
+    if (
+      (selectedGroup === null || !pageOfItems.some((item) => isEqual(item, selectedGroup))) &&
+      pinnedGroup === null &&
+      pageOfItems.length > 0
+    ) {
+      setSelectedGroup(pageOfItems[0]);
+    }
+
+    // If a user switched pages and a pinned row is no longer visible
+    // on the current page, set the status of pinned rows back to `null`.
+    if (pinnedGroup !== null && !pageOfItems.some((item) => isEqual(item, pinnedGroup))) {
+      setPinnedGroup(null);
+    }
+  }, [selectedGroup, setSelectedGroup, setPinnedGroup, pageOfItems, pinnedGroup]);
+
+  // When the analysis results table unmounts,
+  // make sure to reset any hovered or pinned rows.
+  useEffect(
+    () => () => {
+      setSelectedGroup(null);
+      setPinnedGroup(null);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const getRowStyle = (group: GroupTableItem) => {
     if (pinnedGroup && pinnedGroup.id === group.id) {
       return {
@@ -464,7 +494,9 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
             }
           },
           onMouseEnter: () => {
-            setSelectedGroup(group);
+            if (pinnedGroup === null) {
+              setSelectedGroup(group);
+            }
           },
           onMouseLeave: () => {
             setSelectedGroup(null);

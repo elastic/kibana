@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor, RollupIndexCapability } from './fetcher';
 export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
 export type {
+  DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
@@ -34,6 +37,24 @@ export type {
   DataViewsServerPluginStart as PluginStart,
 };
 export { DataViewsServerPlugin as Plugin };
+
+const configSchema = schema.object({
+  scriptedFieldsEnabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    scriptedFieldsEnabled: true,
+  },
+};
 
 export {
   SERVICE_PATH,

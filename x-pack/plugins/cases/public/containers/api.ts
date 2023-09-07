@@ -7,10 +7,20 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import type { User } from '../../common/types/domain';
+import { AttachmentType } from '../../common/types/domain';
+import type { Case, Cases } from '../../common';
 import type {
+  AttachmentRequest,
+  BulkCreateAttachmentsRequest,
+  CasePatchRequest,
+  CasePostRequest,
+  CaseResolveResponse,
+  CasesFindResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   UserActionFindResponse,
+  SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -25,20 +35,7 @@ import type {
   CasesUI,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
-import type {
-  BulkCreateCommentRequest,
-  CasePatchRequest,
-  CasePostRequest,
-  CaseResolveResponse,
-  CommentRequest,
-  User,
-  SingleCaseMetricsResponse,
-  CasesFindResponse,
-  Case,
-  Cases,
-} from '../../common/api';
 import {
-  CommentType,
   getCaseCommentsUrl,
   getCasesDeleteFileAttachmentsUrl,
   getCaseDetailsUrl,
@@ -341,7 +338,7 @@ export const updateCases = async ({
 };
 
 export const postComment = async (
-  newComment: CommentRequest,
+  newComment: AttachmentRequest,
   caseId: string,
   signal: AbortSignal
 ): Promise<CaseUI> => {
@@ -372,7 +369,7 @@ export const patchComment = async ({
     method: 'PATCH',
     body: JSON.stringify({
       comment: commentUpdate,
-      type: CommentType.user,
+      type: AttachmentType.user,
       id: commentId,
       version,
       owner,
@@ -450,7 +447,7 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
-  attachments: BulkCreateCommentRequest;
+  attachments: BulkCreateAttachmentsRequest;
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {

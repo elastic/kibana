@@ -30,7 +30,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"metrics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observabilityOnboarding\""
+          "\"metrics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observabilityOnboarding\" | \"observability-log-explorer\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,

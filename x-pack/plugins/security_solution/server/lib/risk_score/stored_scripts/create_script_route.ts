@@ -8,15 +8,16 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { createStoredScriptRequestBody } from '../../../../common/api/risk_score';
 import { RISK_SCORE_CREATE_STORED_SCRIPT } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { createStoredScriptBodySchema, createStoredScript } from './lib/create_script';
+import { createStoredScript } from './lib/create_script';
 
 export const createStoredScriptRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.put(
     {
       path: RISK_SCORE_CREATE_STORED_SCRIPT,
-      validate: { body: createStoredScriptBodySchema },
+      validate: { body: createStoredScriptRequestBody },
       options: {
         tags: ['access:securitySolution'],
       },

@@ -13,7 +13,12 @@ import type {
   IBulkInstallPackageHTTPError,
   PostFleetSetupResponse,
 } from '@kbn/fleet-plugin/common';
-import { AGENTS_SETUP_API_ROUTES, EPM_API_ROUTES, SETUP_API_ROUTE } from '@kbn/fleet-plugin/common';
+import {
+  AGENTS_SETUP_API_ROUTES,
+  EPM_API_ROUTES,
+  SETUP_API_ROUTE,
+  API_VERSIONS,
+} from '@kbn/fleet-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import { UsageTracker } from './usage_tracker';
 import { EndpointDataLoadingError, retryOnError, wrapErrorAndRejectPromise } from './utils';
@@ -43,6 +48,7 @@ export const setupFleetForEndpoint = async (
     const setupResponse = (await kbnClient
       .request({
         path: SETUP_API_ROUTE,
+        headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
         method: 'POST',
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
@@ -64,6 +70,9 @@ export const setupFleetForEndpoint = async (
       .request({
         path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
         method: 'POST',
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
 
@@ -118,6 +127,9 @@ export const installOrUpgradeEndpointFleetPackage = async (
         query: {
           prerelease: true,
         },
+        headers: {
+          'elastic-api-version': API_VERSIONS.public.v1,
+        },
       })
       .catch(wrapErrorAndRejectPromise)) as AxiosResponse<BulkInstallPackagesResponse>;
 
@@ -153,7 +165,13 @@ export const installOrUpgradeEndpointFleetPackage = async (
     return bulkResp[0] as BulkInstallPackageInfo;
   };
 
-  return retryOnError(updatePackages, ['no_shard_available_action_exception'], logger, 5, 10000)
+  return retryOnError(
+    updatePackages,
+    ['no_shard_available_action_exception', 'illegal_index_shard_state_exception'],
+    logger,
+    5,
+    10000
+  )
     .then((result) => {
       usageRecord.set('success');
 
@@ -161,6 +179,7 @@ export const installOrUpgradeEndpointFleetPackage = async (
     })
     .catch((err) => {
       usageRecord.set('failure', err.message);
+      usageTracker.dump(logger);
 
       throw err;
     });

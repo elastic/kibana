@@ -29,6 +29,7 @@ export function convertDataViewIntoLensIndexPattern(
   dataView: DataView,
   restrictionRemapper: (name: string) => string = onRestrictionMapping
 ): IndexPattern {
+  const metaKeys = new Set(dataView.metaFields);
   const newFields = dataView.fields
     .filter(isFieldLensCompatible)
     .map((field): IndexPatternField => {
@@ -40,13 +41,14 @@ export function convertDataViewIntoLensIndexPattern(
         aggregatable: field.aggregatable,
         filterable: field.filterable,
         searchable: field.searchable,
-        meta: dataView.metaFields.includes(field.name),
+        meta: metaKeys.has(field.name),
         esTypes: field.esTypes,
         scripted: field.scripted,
         isMapped: field.isMapped,
         customLabel: field.customLabel,
         runtimeField: field.runtimeField,
         runtime: Boolean(field.runtimeField),
+        timeSeriesDimension: field.timeSeriesDimension,
         timeSeriesMetric: field.timeSeriesMetric,
         timeSeriesRollup: field.isRolledUpField,
         partiallyApplicableFunctions: field.isRolledUpField

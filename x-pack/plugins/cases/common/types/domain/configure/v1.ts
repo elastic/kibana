@@ -6,8 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { UserRt } from '../../../api';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
+import { UserRt } from '../user/v1';
 
 const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 

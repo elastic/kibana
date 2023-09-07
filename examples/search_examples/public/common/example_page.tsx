@@ -7,7 +7,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 import { IBasePath } from '@kbn/core/public';
 import { PLUGIN_ID } from '../../common';
 
@@ -55,11 +55,11 @@ export const SearchExamplePage: React.FC<Props> = ({
   basePath,
 }: PropsWithChildren<Props>) => {
   return (
-    <EuiPage>
-      <EuiPageSideBar>
+    <EuiPageTemplate offset={0}>
+      <EuiPageTemplate.Sidebar>
         <SideNav exampleLinks={exampleLinks} basePath={basePath} />
-      </EuiPageSideBar>
+      </EuiPageTemplate.Sidebar>
       {children}
-    </EuiPage>
+    </EuiPageTemplate>
   );
 };

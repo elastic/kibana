@@ -11,17 +11,22 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import type { PluginSetupContract as FeaturesSetupContract } from '@kbn/features-plugin/server';
+import type {
+  PluginSetupContract as FeaturesSetupContract,
+  KibanaFeature,
+} from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initAppAuthorization } from './app_authorization';
 import { authorizationMock } from './index.mock';
 
-const createFeaturesSetupContractMock = (): FeaturesSetupContract => {
+const createFeaturesSetupContractMock = (
+  features: KibanaFeature[] = [
+    { id: 'foo', name: 'Foo', app: ['foo'], privileges: {} } as unknown as KibanaFeature,
+  ]
+): FeaturesSetupContract => {
   const mock = featuresPluginMock.createSetup();
-  mock.getKibanaFeatures.mockReturnValue([
-    { id: 'foo', name: 'Foo', app: ['foo'], privileges: {} } as any,
-  ]);
+  mock.getKibanaFeatures.mockReturnValue(features);
   return mock;
 };
 
@@ -85,6 +90,33 @@ describe('initAppAuthorization', () => {
     const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
 
     const mockRequest = httpServerMock.createKibanaRequest({ method: 'get', path: '/app/bar' });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
+
+    mockAuthz.mode.useRbacForRequest.mockReturnValue(true);
+
+    await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
+
+    expect(mockResponse.notFound).not.toHaveBeenCalled();
+    expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
+    expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
+  });
+
+  test(`unprotected route that starts with "/app/", from feature that opted out of RBAC, and "mode.useRbacForRequest()" returns true continues`, async () => {
+    const mockHTTPSetup = coreMock.createSetup().http;
+    const mockAuthz = authorizationMock.create();
+    initAppAuthorization(
+      mockHTTPSetup,
+      mockAuthz,
+      loggingSystemMock.create().get(),
+      createFeaturesSetupContractMock([
+        { id: 'foo', name: 'Foo', app: ['foo'], privileges: null } as unknown as KibanaFeature,
+      ])
+    );
+
+    const [[postAuthHandler]] = mockHTTPSetup.registerOnPostAuth.mock.calls;
+
+    const mockRequest = httpServerMock.createKibanaRequest({ method: 'get', path: '/app/foo' });
     const mockResponse = httpServerMock.createResponseFactory();
     const mockPostAuthToolkit = httpServiceMock.createOnPostAuthToolkit();
 

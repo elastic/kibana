@@ -6,7 +6,10 @@
  */
 
 import type * as t from 'io-ts';
-import { RuleUpdateProps } from '../../../model';
+import { RuleResponse, RuleUpdateProps } from '../../../model';
 
 export const UpdateRuleRequestBody = RuleUpdateProps;
 export type UpdateRuleRequestBody = t.TypeOf<typeof UpdateRuleRequestBody>;
+
+export const UpdateRuleResponse = RuleResponse;
+export type UpdateRuleResponse = t.TypeOf<typeof UpdateRuleResponse>;

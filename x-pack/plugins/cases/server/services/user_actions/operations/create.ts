@@ -7,17 +7,22 @@
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
-import type { UserActionAction, UserActionType } from '../../../../common/types/domain';
+import type {
+  CaseAssignees,
+  CaseUserProfile,
+  UserActionAction,
+  UserActionType,
+} from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import { UserActionPersistedAttributesRt } from '../../../common/types/user_actions';
 import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { arraysDifference } from '../../../client/utils';
 import { isUserActionType } from '../../../../common/utils/user_actions';
-import type { CaseAssignees, CaseUserProfile } from '../../../../common/api';
 import { decodeOrThrow } from '../../../../common/api';
 import { BuilderFactory } from '../builder_factory';
 import type {
+  BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
   BulkCreateBulkUpdateCaseUserActions,
@@ -30,6 +35,7 @@ import type {
   ServiceContext,
   TypedUserActionDiffedItems,
   UserActionEvent,
+  UserActionsDict,
 } from '../types';
 import { isAssigneesArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
@@ -51,30 +57,25 @@ export class UserActionPersister {
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }
 
-  public async bulkCreateUpdateCase({
-    originalCases,
-    updatedCases,
-    user,
-    refresh,
-  }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
-    const builtUserActions = updatedCases.reduce<UserActionEvent[]>((acc, updatedCase) => {
-      const originalCase = originalCases.find(({ id }) => id === updatedCase.id);
+  public buildUserActions({ updatedCases, user }: BuildUserActionsDictParams): UserActionsDict {
+    return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
+      const originalCase = updatedCase.originalCase;
 
       if (originalCase == null) {
         return acc;
       }
 
-      const caseId = updatedCase.id;
+      const caseId = updatedCase.caseId;
       const owner = originalCase.attributes.owner;
 
       const userActions: UserActionEvent[] = [];
-      const updatedFields = Object.keys(updatedCase.attributes);
+      const updatedFields = Object.keys(updatedCase.updatedAttributes);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
         .forEach((field) => {
           const originalValue = get(originalCase, ['attributes', field]);
-          const newValue = get(updatedCase, ['attributes', field]);
+          const newValue = get(updatedCase, ['updatedAttributes', field]);
           userActions.push(
             ...this.getUserActionItemByDifference({
               field,
@@ -87,9 +88,15 @@ export class UserActionPersister {
           );
         });
 
-      return [...acc, ...userActions];
-    }, []);
+      acc[caseId] = userActions;
+      return acc;
+    }, {});
+  }
 
+  public async bulkCreateUpdateCase({
+    builtUserActions,
+    refresh,
+  }: BulkCreateBulkUpdateCaseUserActions): Promise<void> {
     await this.bulkCreateAndLog({
       userActions: builtUserActions,
       refresh,
@@ -364,6 +371,7 @@ export class UserActionPersister {
     userAction: UserActionEvent;
   } & IndexRefresh): Promise<void> {
     const createdUserAction = await this.create({ ...userAction.parameters, refresh });
+
     this.auditLogger.log(userAction.eventDetails, createdUserAction.id);
   }
 
@@ -377,7 +385,7 @@ export class UserActionPersister {
 
       const decodedAttributes = decodeOrThrow(UserActionPersistedAttributesRt)(attributes);
 
-      return await this.context.unsecuredSavedObjectsClient.create<T>(
+      const res = await this.context.unsecuredSavedObjectsClient.create<T>(
         CASE_USER_ACTION_SAVED_OBJECT,
         decodedAttributes as unknown as T,
         {
@@ -385,6 +393,7 @@ export class UserActionPersister {
           refresh,
         }
       );
+      return res;
     } catch (error) {
       this.context.log.error(`Error on POST a new case user action: ${error}`);
       throw error;

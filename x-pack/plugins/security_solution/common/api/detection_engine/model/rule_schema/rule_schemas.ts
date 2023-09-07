@@ -50,35 +50,33 @@ import {
   IsRuleEnabled,
   IsRuleImmutable,
   MaxSignals,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
   RuleAuthorArray,
+  InvestigationFields,
   RuleDescription,
   RuleFalsePositiveArray,
   RuleFilterArray,
   RuleLicense,
   RuleMetadata,
   RuleName,
+  RuleNameOverride,
   RuleObjectId,
   RuleQuery,
   RuleReferenceArray,
   RuleSignatureId,
   RuleTagArray,
   RuleVersion,
-  SetupGuide,
-  ThreatArray,
-} from './common_attributes/misc_attributes';
-import {
-  RuleNameOverride,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-} from './common_attributes/field_overrides';
-import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from './common_attributes/saved_objects';
-import { RelatedIntegrationArray } from './common_attributes/related_integrations';
-import { RequiredFieldArray } from './common_attributes/required_fields';
-import { TimelineTemplateId, TimelineTemplateTitle } from './common_attributes/timeline_template';
+  SetupGuide,
+  ThreatArray,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
+} from './common_attributes';
 import {
   EventCategoryOverride,
   TiebreakerField,
@@ -119,6 +117,7 @@ export const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
+    investigation_fields: InvestigationFields,
     // Throttle
     throttle: RuleActionThrottle,
   },
@@ -181,8 +180,8 @@ export const BaseCreateProps = baseSchema.create;
 // with some variations for each route. These intersect with type specific schemas below
 // to create the full schema for each route.
 
-type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
-const SharedCreateProps = t.intersection([
+export type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
+export const SharedCreateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
 ]);
@@ -535,7 +534,7 @@ export const TypeSpecificResponse = t.union([
 // Final combined schemas
 
 export type RuleCreateProps = t.TypeOf<typeof RuleCreateProps>;
-export const RuleCreateProps = t.intersection([SharedCreateProps, TypeSpecificCreateProps]);
+export const RuleCreateProps = t.intersection([TypeSpecificCreateProps, SharedCreateProps]);
 
 export type RuleUpdateProps = t.TypeOf<typeof RuleUpdateProps>;
 export const RuleUpdateProps = t.intersection([TypeSpecificCreateProps, SharedUpdateProps]);
@@ -545,28 +544,3 @@ export const RulePatchProps = t.intersection([TypeSpecificPatchProps, SharedPatc
 
 export type RuleResponse = t.TypeOf<typeof RuleResponse>;
 export const RuleResponse = t.intersection([SharedResponseProps, TypeSpecificResponse]);
-
-// -------------------------------------------------------------------------------------------------
-// Rule preview schemas
-
-// TODO: Move to the rule_preview subdomain
-
-export type PreviewRulesSchema = t.TypeOf<typeof previewRulesSchema>;
-export const previewRulesSchema = t.intersection([
-  SharedCreateProps,
-  TypeSpecificCreateProps,
-  t.type({ invocationCount: t.number, timeframeEnd: t.string }),
-]);
-
-export interface RulePreviewLogs {
-  errors: string[];
-  warnings: string[];
-  startedAt?: string;
-  duration: number;
-}
-
-export interface PreviewResponse {
-  previewId: string | undefined;
-  logs: RulePreviewLogs[] | undefined;
-  isAborted: boolean | undefined;
-}

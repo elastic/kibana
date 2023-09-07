@@ -31,10 +31,10 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'discover-dashboard-alerts-slos',
           children: [
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.discover', {
-                defaultMessage: 'Discover',
+              title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
+                defaultMessage: 'Log Explorer',
               }),
-              link: 'discover:log-explorer',
+              link: 'observability-log-explorer',
             },
             {
               title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
@@ -67,10 +67,18 @@ const navigationTree: NavigationTreeDefinition = {
                   }),
                   link: 'ml:logRateAnalysis',
                   icon: 'beaker',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(prepend('/app/ml/aiops/log_rate_analysis'));
+                  },
                 },
                 {
                   link: 'ml:changePointDetections',
                   icon: 'beaker',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.includes(
+                      prepend('/app/ml/aiops/change_point_detection')
+                    );
+                  },
                 },
                 {
                   title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
@@ -93,12 +101,22 @@ const navigationTree: NavigationTreeDefinition = {
               children: [
                 {
                   link: 'apm:services',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    const regex = /app\/apm\/.*service.*/;
+                    return regex.test(pathNameSerialized);
+                  },
                 },
                 {
                   link: 'apm:traces',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+                  },
                 },
                 {
                   link: 'apm:dependencies',
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                  },
                 },
               ],
             },
