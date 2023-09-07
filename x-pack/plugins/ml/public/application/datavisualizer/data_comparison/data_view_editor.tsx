@@ -20,14 +20,14 @@ import {
   EuiFlexGrid,
   useEuiTheme,
 } from '@elastic/eui';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { canAppendWildcard, matchedIndicesDefault } from './data_drift_index_patterns_editor';
 
 interface DataViewEditorProps {
   label: ReactNode;
-  dataViewEditorService: ReturnType<DataViewEditorStart['dataViewEditorServiceFactory']>;
+  dataViewEditorService: DataViewEditorService;
   indexPattern: string;
   setIndexPattern: (ip: string) => void;
 }

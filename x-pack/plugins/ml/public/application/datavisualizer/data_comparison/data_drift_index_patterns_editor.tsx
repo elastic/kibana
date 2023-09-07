@@ -6,7 +6,6 @@
  */
 
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import {
   EuiButton,
   EuiCallOut,
@@ -23,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, map, Observable } from 'rxjs';
 import { intersectionBy } from 'lodash';
+import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { DataViewEditor } from './data_view_editor';
@@ -47,27 +47,20 @@ export const canAppendWildcard = (keyPressed: string) => {
   return true;
 };
 
-const noTimeFieldLabel = i18n.translate(
-  'xpack.ml.dataDrift.indexPatternsEditor.noTimeFieldOptionLabel',
-  {
-    defaultMessage: "--- I don't want to use the time filter ---",
-  }
-);
-
-const noTimeFieldOption = {
-  label: noTimeFieldLabel,
-  value: '',
-};
-
+type DataViewEditorServiceSpec = DataViewEditorService;
 const getDefaultIndexPattern = (referenceIndexPattern: string, productionIndexPattern: string) =>
   referenceIndexPattern === productionIndexPattern
     ? referenceIndexPattern
     : `${referenceIndexPattern},${productionIndexPattern}`;
 
 export function DataDriftIndexPatternsEditor({
+  referenceDataViewEditorService,
+  productionDataViewEditorService,
   initialReferenceIndexPattern,
   initialProductionIndexPattern,
 }: {
+  referenceDataViewEditorService: DataViewEditorServiceSpec;
+  productionDataViewEditorService: DataViewEditorServiceSpec;
   initialReferenceIndexPattern?: string;
   initialProductionIndexPattern?: string;
 }) {
@@ -78,47 +71,19 @@ export function DataDriftIndexPatternsEditor({
     },
   } = useMlKibana();
   const locator = useMlLocator()!;
-  const { dataViewEditorServiceFactory } = dataViewEditor;
   const canEditDataView = dataViewEditor?.userPermissions.editDataView();
   const [timeField, setTimeField] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [dataViewName, setDataViewName] = useState<string>('');
   const [dataViewMsg, setDataViewMsg] = useState<string | undefined>();
   const [foundDataViewId, setFoundDataViewId] = useState<string | undefined>();
-
-  const referenceDataViewEditorService = useMemo(
-    () =>
-      dataViewEditorServiceFactory({
-        initialValues: {
-          name: '',
-          type: INDEX_PATTERN_TYPE.DEFAULT,
-          indexPattern: initialReferenceIndexPattern,
-        },
-        requireTimestampField: true,
-      }),
-    [dataViewEditorServiceFactory, initialReferenceIndexPattern]
-  );
-
-  const productionDataViewEditorService = useMemo(
-    () =>
-      dataViewEditorServiceFactory({
-        initialValues: {
-          name: '',
-          type: INDEX_PATTERN_TYPE.DEFAULT,
-          indexPattern: initialProductionIndexPattern,
-        },
-        requireTimestampField: true,
-      }),
-    [dataViewEditorServiceFactory, initialProductionIndexPattern]
-  );
-
   // For the purpose of data drift, the two datasets need to have the same common timestamp field if they exist
   // In data view management, creating a data view provides union of all the timestamp fields
   // Here, we need the intersection of two sets instead
   const combinedTimeFieldOptions$: Observable<Array<EuiComboBoxOptionOption<string>>> =
     useMemo(() => {
       return combineLatest([
-        referenceDataViewEditorService.timestampFieldOptions$,
-        productionDataViewEditorService.timestampFieldOptions$,
+        referenceDataViewEditorService?.timestampFieldOptions$,
+        productionDataViewEditorService?.timestampFieldOptions$,
       ]).pipe(
         map(([referenceTimeFieldOptions, productionTimeFieldOptions]) => {
           const intersectedTimeFields = intersectionBy<TimestampOption, TimestampOption>(
@@ -129,12 +94,11 @@ export function DataDriftIndexPatternsEditor({
             label: display,
             value: fieldName,
           }));
-          return intersectedTimeFields.length > 0
-            ? [...intersectedTimeFields, noTimeFieldOption]
-            : intersectedTimeFields;
+
+          return intersectedTimeFields;
         })
       );
-    }, [referenceDataViewEditorService, productionDataViewEditorService]);
+    }, [productionDataViewEditorService, referenceDataViewEditorService]);
 
   const combinedTimeFieldOptions = useObservable(combinedTimeFieldOptions$, []);
 
@@ -204,6 +168,7 @@ export function DataDriftIndexPatternsEditor({
         dataViewMsg === undefined
           ? indicesName
           : `${indicesName}${timeFieldName ? '-' + timeFieldName : ''}`;
+
       const modifiedDataViewName = dataViewName === '' ? defaultDataViewName : dataViewName;
       if (canEditDataView && createAdHocDV === false) {
         dataView = await dataViews.createAndSave({
@@ -326,18 +291,18 @@ export function DataDriftIndexPatternsEditor({
                   defaultMessage: 'Optional data view name.',
                 }) +
                 (referenceIndexPattern && productionIndexPattern
-                  ? i18n.translate(
+                  ? ` ${i18n.translate(
                       'xpack.ml.dataDrift.indexPatternsEditor.defaultDataViewHelpText',
                       {
-                        defaultMessage: 'Default to {defaultDataViewName} if not set.',
+                        defaultMessage: 'Default to {fallbackDataViewName} if not set.',
                         values: {
-                          defaultDataViewName: getDefaultIndexPattern(
+                          fallbackDataViewName: getDefaultIndexPattern(
                             referenceIndexPattern,
                             productionIndexPattern
                           ),
                         },
                       }
-                    )
+                    )}`
                   : '')
               }
               fullWidth

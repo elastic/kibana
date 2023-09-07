@@ -20,7 +20,11 @@
 
 import { DataViewEditorPlugin } from './plugin';
 
-export type { PluginStart as DataViewEditorStart, DataViewEditorProps } from './types';
+export type {
+  PluginStart as DataViewEditorStart,
+  DataViewEditorProps,
+  DataViewEditorService,
+} from './types';
 
 export function plugin() {
   return new DataViewEditorPlugin();
