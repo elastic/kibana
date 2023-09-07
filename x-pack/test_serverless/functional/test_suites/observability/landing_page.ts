@@ -12,7 +12,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlObltNavigation = getService('svlObltNavigation');
   const SvlObltOnboardingStreamLogFilePage = getPageObject('SvlObltOnboardingStreamLogFilePage');
 
-  describe('landing page', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165885
+  describe.skip('landing page', function () {
     it('has quickstart badge', async () => {
       await svlObltNavigation.navigateToLandingPage();
       await svlObltOnboardingPage.assertQuickstartBadgeExists();
