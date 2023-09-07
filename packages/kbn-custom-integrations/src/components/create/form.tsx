@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useActor, useSelector } from '@xstate/react';
-import { replaceSpecialChars } from './utils';
 import { ErrorCallout } from './error_callout';
 import { CreateCustomIntegrationActorRef } from '../../state_machines/create/state_machine';
 import {
@@ -40,7 +39,6 @@ export const ConnectedCreateCustomIntegrationForm = ({
   machineRef: CreateCustomIntegrationActorRef;
 }) => {
   const [state, send] = useActor(machineRef);
-
   const updateIntegrationName = useCallback(
     (integrationName: string) => {
       send({ type: 'UPDATE_FIELDS', fields: { integrationName } });
@@ -148,7 +146,7 @@ export const CreateCustomIntegrationForm = ({
               }
             )}
             value={integrationName}
-            onChange={(event) => updateIntegrationName(replaceSpecialChars(event.target.value))}
+            onChange={(event) => updateIntegrationName(event.target.value)}
             isInvalid={hasErrors(errors?.fields?.integrationName) && touchedFields.integrationName}
           />
         </EuiFormRow>
@@ -183,7 +181,7 @@ export const CreateCustomIntegrationForm = ({
               defaultMessage: "Give your integration's dataset a name",
             })}
             value={datasetName}
-            onChange={(event) => updateDatasetName(replaceSpecialChars(event.target.value))}
+            onChange={(event) => updateDatasetName(event.target.value)}
             isInvalid={hasErrors(errors?.fields?.datasets?.[0].name) && touchedFields.datasets}
           />
         </EuiFormRow>

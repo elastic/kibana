@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const replaceSpecialChars = (filename: string) => filename.replaceAll(/[^a-zA-Z0-9_]/g, '_');
+export const replaceSpecialChars = (filename: string) => {
+  // Replace special characters with _
+  const replacedSpecialCharacters = filename.replaceAll(/[^a-zA-Z0-9_]/g, '_');
+  // Allow only one _ in a row
+  const noRepetitions = replacedSpecialCharacters.replaceAll(/[\_]{2,}/g, '_');
+  return noRepetitions;
+};

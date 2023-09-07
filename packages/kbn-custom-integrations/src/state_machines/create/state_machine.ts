@@ -30,6 +30,7 @@ import {
   WithTouchedFields,
   WithFields,
 } from './types';
+import { replaceSpecialChars } from '../../components/create/utils';
 
 export const createPureCreateCustomIntegrationStateMachine = (
   initialContext: DefaultCreateCustomIntegrationContext = DEFAULT_CONTEXT
@@ -200,6 +201,15 @@ export const createPureCreateCustomIntegrationStateMachine = (
                 fields: {
                   ...context.fields,
                   ...event.fields,
+                  integrationName: event.fields.integrationName
+                    ? replaceSpecialChars(event.fields.integrationName)
+                    : context.fields.integrationName,
+                  datasets: event.fields.datasets
+                    ? event.fields.datasets.map((dataset) => ({
+                        ...dataset,
+                        name: replaceSpecialChars(dataset.name),
+                      }))
+                    : context.fields.datasets,
                 },
                 touchedFields: {
                   ...context.touchedFields,
