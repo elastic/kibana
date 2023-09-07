@@ -22,7 +22,7 @@ export const hostMetricFlyoutCharts: XYConfig[] = [
   normalizedLoad1m,
   logRate,
   diskSpaceUsageAvailable,
-  diskSpaceUsageByMountPoint,
+  diskUsageByMountPoint,
   diskThroughputReadWrite,
   diskIOReadWrite,
   rxTx,
