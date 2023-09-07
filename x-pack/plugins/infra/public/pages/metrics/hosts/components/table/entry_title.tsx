@@ -7,9 +7,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip, IconType } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { AssetDetailsUrlState } from '../../../../../components/asset_details/types';
 import { useNodeDetailsRedirect } from '../../../../link_to';
 import type { CloudProvider, HostNodeRow } from '../../hooks/use_hosts_table';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 const cloudIcons: Record<CloudProvider, IconType> = {
   gcp: 'logoGCP',
@@ -21,23 +21,20 @@ const cloudIcons: Record<CloudProvider, IconType> = {
 interface EntryTitleProps {
   onClick: () => void;
   title: HostNodeRow['title'];
-  search: AssetDetailsUrlState;
 }
 
-export const EntryTitle = ({ onClick, title, search }: EntryTitleProps) => {
+export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { name, cloudProvider } = title;
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
-
-  const { dateRange, ...assetDetails } = search;
+  const { parsedDateRange } = useUnifiedSearchContext();
 
   const link = useLinkProps({
     ...getNodeDetailUrl({
       assetId: name,
       assetType: 'host',
       search: {
-        ...assetDetails,
-        from: dateRange?.from ? new Date(dateRange?.from).getTime() : undefined,
-        to: dateRange?.to ? new Date(dateRange.to).getTime() : undefined,
+        from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
+        to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,
         name,
       },
     }),

@@ -36,11 +36,7 @@ export const MetricsNodeDetailsLink = ({
       search: {
         from: parse(timerange.from)?.valueOf(),
         to: parse(timerange.to)?.valueOf(),
-        ...(nodeType === 'host'
-          ? {
-              name: id,
-            }
-          : undefined),
+        name: id,
       },
     })
   );

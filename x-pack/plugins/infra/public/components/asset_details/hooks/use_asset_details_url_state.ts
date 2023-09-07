@@ -12,9 +12,11 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { ContentTabIds } from '../types';
 import { useUrlState } from '../../../utils/use_url_state';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
+import { getDefaultDateRange } from '../utils';
 
 export const DEFAULT_STATE: AssetDetailsUrlState = {
   tabId: ContentTabIds.OVERVIEW,
+  dateRange: getDefaultDateRange(),
 };
 
 type SetAssetDetailsState = (newProp: Payload | null) => void;
@@ -50,17 +52,21 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.OSQUERY),
 ]);
 
-const AssetDetailsUrlStateRT = rt.partial({
-  tabId: TabIdRT,
-  name: rt.string,
-  dateRange: rt.type({
-    from: rt.string,
-    to: rt.string,
+const AssetDetailsUrlStateRT = rt.intersection([
+  rt.type({
+    dateRange: rt.type({
+      from: rt.string,
+      to: rt.string,
+    }),
   }),
-  processSearch: rt.string,
-  metadataSearch: rt.string,
-  logsSearch: rt.string,
-});
+  rt.partial({
+    tabId: TabIdRT,
+    name: rt.string,
+    processSearch: rt.string,
+    metadataSearch: rt.string,
+    logsSearch: rt.string,
+  }),
+]);
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
 

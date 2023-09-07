@@ -53,13 +53,15 @@ export const useNodeDetailsRedirect = () => {
       assetId,
       search,
     }: NodeDetailsRedirectParams<T>): LinkDescriptor => {
-      const { from, to, ...rest } = search;
+      const { from, to, ...additionalParams } = search;
 
       return {
         app: 'metrics',
         pathname: `link-to/${assetType}-detail/${assetId}`,
         search: {
-          ...(rest ? { [REDIRECT_ASSET_DETAILS_KEY]: rison.encodeUnknown(rest) } : undefined),
+          ...(assetType === 'host'
+            ? { [REDIRECT_ASSET_DETAILS_KEY]: rison.encodeUnknown(additionalParams) }
+            : undefined),
           ...(location.pathname
             ? {
                 [REDIRECT_NODE_DETAILS_STATE_KEY]: rison.encodeUnknown({

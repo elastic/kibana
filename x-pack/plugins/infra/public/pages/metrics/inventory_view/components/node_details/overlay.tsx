@@ -85,11 +85,7 @@ export const NodeContextPopover = ({
       search: {
         from: nodeDetailFrom,
         to: currentTime,
-        ...(nodeType === 'host'
-          ? {
-              name: node.name,
-            }
-          : undefined),
+        name: node.name,
       },
     }),
   });

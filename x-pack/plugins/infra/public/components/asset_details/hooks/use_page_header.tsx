@@ -24,7 +24,6 @@ import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links
 import { ContentTabIds, type RouteState, type LinkOptions, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
-import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -89,16 +88,15 @@ export const useTemplateHeaderBreadcrumbs = () => {
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
-  const [state] = useAssetDetailsUrlState();
-  const { asset, overrides } = useAssetDetailsRenderPropsContext();
+  const { asset, assetType, overrides } = useAssetDetailsRenderPropsContext();
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
-      nodeDetails: <LinkToNodeDetails asset={asset} search={{ name: asset.name, ...state }} />,
+      nodeDetails: <LinkToNodeDetails asset={asset} assetType={assetType} />,
       alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
       apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_HOST_FILTER_FIELD} />,
     }),
-    [asset, overrides?.alertRule?.onCreateRuleClick, state]
+    [asset, assetType, overrides?.alertRule?.onCreateRuleClick]
   );
 
   const rightSideItems = useMemo(

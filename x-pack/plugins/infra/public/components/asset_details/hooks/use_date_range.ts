@@ -10,22 +10,12 @@ import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { parseDateRange } from '../../../utils/datemath';
-import { toTimestampRange } from '../utils';
+import { getDefaultDateRange, toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 export interface UseDateRangeProviderProps {
   initialDateRange: TimeRange;
 }
-
-const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
-const getDefaultDateRange = () => {
-  const now = Date.now();
-
-  return {
-    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
-    to: new Date(now).toISOString(),
-  };
-};
 
 export function useDateRangeProvider({
   initialDateRange = getDefaultDateRange(),
