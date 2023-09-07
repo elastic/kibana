@@ -16,6 +16,3 @@ export type {
   RuleTagsRequestQuery as RuleTagsRequestQueryV1,
   RuleTagsFormattedResponse as RuleTagsFormattedResponseV1,
 } from './types/v1';
-
-export { defaultTagsPerPage } from './constants/latest';
-export { defaultTagsPerPage as defaultTagsPerPageV1 } from './constants/v1';

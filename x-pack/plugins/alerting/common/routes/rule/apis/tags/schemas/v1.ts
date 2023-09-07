@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { defaultTagsPerPageV1 } from '..';
+import { defaultTagsPerPageV1 } from '../constants/v1';
 
 export const ruleTagsRequestQuerySchema = schema.object({
   page: schema.number({ defaultValue: 1, min: 1 }),

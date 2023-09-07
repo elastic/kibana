@@ -9,7 +9,7 @@ import { KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { ruleTagsParamsSchema, RuleTagsParams, RuleTagsAggregationResult } from '.';
 import { RuleAttributes } from '../../../../data/rule/types';
 import type { RuleTagsFormattedResponse } from '../../../../../common/routes/rule/apis/tags';
-import { defaultTagsPerPage } from '../../../../../common/routes/rule/apis/tags';
+import { defaultTagsPerPage } from '../../../../../common/routes/rule/apis/tags/constants/latest';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { AlertingAuthorizationEntity } from '../../../../authorization';
 import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
