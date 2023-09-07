@@ -33,6 +33,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     originatingApp: PLUGIN_ID,
     localStorageKeyPrefix: 'examples',
     timeRangeUpdatesType: 'timefilter',
+    showSidebarToggleButton: true,
     disablePopularFields: true,
   };
 };
