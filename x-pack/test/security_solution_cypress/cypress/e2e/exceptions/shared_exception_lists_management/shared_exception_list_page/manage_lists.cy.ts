@@ -47,9 +47,10 @@ const getExceptionList2 = () => ({
 
 let exceptionListResponse: Cypress.Response<ExceptionListSchema>;
 
+// FLAKY: https://github.com/elastic/kibana/issues/165690
 describe(
   'Manage lists from "Shared Exception Lists" page',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {
