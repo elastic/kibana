@@ -90,7 +90,7 @@ export const cli = () => {
 
       let files = retrieveIntegrations(
         _.isArray(grepSpecPattern)
-          ? grepSpecPattern
+          ? globby.sync(grepSpecPattern)
           : globby.sync(argv.spec ?? cypressConfigFile.e2e.specPattern)
       );
 
