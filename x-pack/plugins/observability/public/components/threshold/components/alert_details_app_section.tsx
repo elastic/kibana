@@ -6,12 +6,10 @@
  */
 
 import moment from 'moment';
-import React, { useEffect, useMemo } from 'react';
 import { DataViewBase, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
