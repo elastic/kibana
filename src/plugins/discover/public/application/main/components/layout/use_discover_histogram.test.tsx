@@ -208,6 +208,7 @@ describe('useDiscoverHistogram', () => {
         hook.result.current.ref(api);
       });
       expect(inspectorAdapters.lensRequests).toBe(lensRequestAdapter);
+      expect(api.setIsSuggestionLoading).toHaveBeenCalledWith(false);
       expect(stateContainer.appState.update).toHaveBeenCalledWith({
         interval: state.timeInterval,
         hideChart: state.chartHidden,
@@ -251,6 +252,10 @@ describe('useDiscoverHistogram', () => {
       api.setBreakdownField = jest.fn((breakdownField) => {
         params = { ...params, breakdownField };
       });
+
+      api.setIsSuggestionLoading = jest.fn((isSuggestionLoading) => {
+        params = { ...params, isSuggestionLoading };
+      });
       act(() => {
         hook.result.current.ref(api);
       });
@@ -259,7 +264,9 @@ describe('useDiscoverHistogram', () => {
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
       expect(api.setBreakdownField).toHaveBeenCalled();
+      expect(api.setIsSuggestionLoading).toHaveBeenCalled();
       expect(Object.keys(params ?? {})).toEqual([
+        'isSuggestionLoading',
         'totalHitsStatus',
         'totalHitsResult',
         'breakdownField',

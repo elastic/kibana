@@ -50,6 +50,7 @@ describe('useStateProps', () => {
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
     jest.spyOn(stateService, 'setCurrentSuggestion');
+    jest.spyOn(stateService, 'setIsSuggestionLoading');
     return stateService;
   };
 

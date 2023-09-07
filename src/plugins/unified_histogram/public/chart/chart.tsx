@@ -419,7 +419,14 @@ export function Chart({
             })}
             css={histogramCss}
           >
-            {isSuggestionLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+            {isSuggestionLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="unifiedHistogramProgressBar"
+              />
+            )}
             <HistogramMemoized
               services={services}
               dataView={dataView}
