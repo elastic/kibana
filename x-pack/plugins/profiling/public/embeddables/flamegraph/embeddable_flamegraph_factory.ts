@@ -34,6 +34,6 @@ export class EmbeddableFlamegraphFactory
   }
 
   getDisplayName() {
-    return 'Hello World';
+    return 'Universal Profiling Flamegraph';
   }
 }
