@@ -141,7 +141,7 @@ export const Controls: FC<Props> = React.memo(
         toasts.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
             defaultMessage:
-              'To create a job from this index please create a data view for {indexTitle}.',
+              'To create a job from this index create a data view for {indexTitle}.',
             values: { indexTitle: nodeLabel },
           })
         );
