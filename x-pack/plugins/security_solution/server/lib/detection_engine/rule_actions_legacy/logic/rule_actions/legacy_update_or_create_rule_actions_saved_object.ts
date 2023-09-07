@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleDefaultAction } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
 // eslint-disable-next-line no-restricted-imports
@@ -22,7 +22,7 @@ import { legacyUpdateRuleActionsSavedObject } from './legacy_update_rule_actions
 interface LegacyUpdateOrCreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
-  actions: RuleAction[] | undefined;
+  actions: RuleDefaultAction[] | undefined;
   throttle: string | null | undefined;
   logger: Logger;
 }

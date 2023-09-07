@@ -6,6 +6,7 @@
  */
 
 import type { RuleActionFrequency, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { isSystemAction } from '../../../../../common/utils/is_system_action';
 
 import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -99,8 +100,16 @@ export const transformFromAlertThrottle = (rule: RuleAlertType): string | undefi
 };
 
 function transformFromFirstActionThrottle(rule: RuleAlertType) {
-  const frequency = rule.actions[0]?.frequency ?? null;
+  const action = rule.actions[0];
+
+  if (action != null && isSystemAction(action)) {
+    return NOTIFICATION_THROTTLE_RULE;
+  }
+
+  const frequency = action?.frequency ?? null;
+
   if (!frequency || frequency.notifyWhen !== 'onThrottleInterval' || frequency.throttle == null)
     return NOTIFICATION_THROTTLE_RULE;
+
   return frequency.throttle;
 }

@@ -7,6 +7,7 @@
 
 /* eslint-disable complexity */
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
+import type { RuleSystemAction, RuleDefaultAction } from '@kbn/alerting-plugin/common';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
 import type { RuleUpdateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
@@ -14,6 +15,7 @@ import { transformRuleToAlertAction } from '../../../../../../common/detection_e
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
+import { partitionActions } from '../../utils/utils';
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
@@ -31,7 +33,14 @@ export const updateRules = async ({
   }
 
   const alertActions = ruleUpdate.actions?.map(transformRuleToAlertAction) ?? [];
-  const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
+  const [systemActions, defaultActions] = partitionActions<RuleSystemAction, RuleDefaultAction>(
+    alertActions
+  );
+
+  const actions = [
+    ...transformToActionFrequency(defaultActions, ruleUpdate.throttle),
+    ...systemActions,
+  ];
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;

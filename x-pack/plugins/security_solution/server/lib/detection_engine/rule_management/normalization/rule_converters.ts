@@ -10,8 +10,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { validate, validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type {
+  ResolvedSanitizedRule,
+  RuleDefaultAction,
+  RuleSystemAction,
+  SanitizedRule,
+} from '@kbn/alerting-plugin/common';
 
+import { partition } from 'lodash';
+import { isSystemAction } from '../../../../../common/utils/is_system_action';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,
@@ -74,9 +81,17 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
-import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
+import {
+  convertAlertSuppressionToCamel,
+  convertAlertSuppressionToSnake,
+  partitionActions,
+} from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import type {
+  RuleAlertDefaultAction,
+  RuleAlertSystemAction,
+} from '../../../../../common/detection_engine/types';
 
 const DEFAULT_FROM = 'now-6m' as const;
 const DEFAULT_TO = 'now' as const;
@@ -403,7 +418,12 @@ export const convertPatchAPIToInternalSchema = (
 
   const alertActions = nextParams.actions?.map(transformRuleToAlertAction) ?? existingRule.actions;
   const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
-  const actions = transformToActionFrequency(alertActions, throttle);
+
+  const [systemActions, defaultActions] = partitionActions<RuleSystemAction, RuleDefaultAction>(
+    alertActions
+  );
+
+  const actions = [...transformToActionFrequency(defaultActions, throttle), ...systemActions];
 
   return {
     name: nextParams.name ?? existingRule.name,
@@ -463,7 +483,13 @@ export const convertCreateAPIToInternalSchema = (
   const newRuleId = input.rule_id ?? uuidv4();
 
   const alertActions = input.actions?.map(transformRuleToAlertAction) ?? [];
-  const actions = transformToActionFrequency(alertActions, input.throttle);
+
+  const [systemActions, defaultActions] = partition(alertActions, isSystemAction) as [
+    RuleSystemAction[],
+    RuleDefaultAction[]
+  ];
+
+  const actions = [...transformToActionFrequency(defaultActions, input.throttle), ...systemActions];
 
   return {
     name: input.name,
@@ -656,7 +682,13 @@ export const internalRuleToAPIResponse = (
 
   const alertActions = rule.actions.map(transformAlertToRuleAction);
   const throttle = transformFromAlertThrottle(rule);
-  const actions = transformToActionFrequency(alertActions, throttle);
+
+  const [systemActions, defaultActions] = partition(alertActions, isSystemAction) as [
+    RuleAlertSystemAction[],
+    RuleAlertDefaultAction[]
+  ];
+
+  const actions = [...transformToActionFrequency(defaultActions, throttle), ...systemActions];
 
   return {
     // saved object properties

@@ -7,12 +7,22 @@
 
 import type { RuleDefaultAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
 
-type RuleAlertDefaultAction = Omit<RuleDefaultAction, 'actionTypeId' | 'alertsFilter'> & {
-  action_type_id: string;
-  alerts_filter?: RuleDefaultAction['alertsFilter'];
-};
+/**
+ * TODO: Switch to RuleAction to support system actions
+ * RuleAction is defined as RuleDefaultAction | RuleSystemAction
+ */
+// export type RuleAlertAction = Omit<RuleDefaultAction, 'actionTypeId' | 'alertsFilter'> & {
+//   action_type_id: string;
+//   alerts_filter?: RuleDefaultAction['alertsFilter'];
+// };
 
-type RuleAlertSystemAction = Omit<RuleSystemAction, 'actionTypeId'> & {
+export type RuleAlertDefaultAction =
+  | Omit<RuleDefaultAction, 'actionTypeId' | 'alertsFilter'> & {
+      action_type_id: string;
+      alerts_filter?: RuleDefaultAction['alertsFilter'];
+    };
+
+export type RuleAlertSystemAction = Omit<RuleSystemAction, 'actionTypeId'> & {
   action_type_id: string;
 };
 

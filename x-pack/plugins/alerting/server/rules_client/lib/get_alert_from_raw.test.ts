@@ -8,7 +8,10 @@
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization';
@@ -27,6 +30,7 @@ describe('getAlertFromRaw()', () => {
   const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
   const authorization = alertingAuthorizationMock.create();
   const actionsAuthorization = actionsAuthorizationMock.create();
+  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
   const kibanaVersion = 'v8.0.0';
   const context: jest.Mocked<RulesClientContext> = {
@@ -48,6 +52,8 @@ describe('getAlertFromRaw()', () => {
     fieldsToExcludeFromPublicApi: [],
     isAuthenticationTypeAPIKey: jest.fn(),
     getAuthenticationAPIKey: jest.fn(),
+    maxScheduledPerMinute: 10000,
+    internalSavedObjectsRepository,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   };
 

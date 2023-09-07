@@ -8,10 +8,15 @@
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 import { transformNormalizedRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
-import type { BulkActionEditForRuleAttributes } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type {
+  BulkActionEditForRuleAttributes,
+  NormalizedDefaultRuleAction,
+  NormalizedSystemRuleAction,
+} from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { BulkActionEditType } from '../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
+import { partitionActions } from '../../utils/utils';
 
 /**
  * converts bulk edit action to format of rulesClient.bulkEdit operation
@@ -52,24 +57,40 @@ export const bulkEditActionToRulesClientOperation = (
 
     // rule actions
     case BulkActionEditType.add_rule_actions:
+      const [systemActionsToAdd, defaultActionsToAdd] = partitionActions<
+        NormalizedSystemRuleAction,
+        NormalizedDefaultRuleAction
+      >(action.value.actions);
+
+      const actionsToAdd = [
+        ...transformToActionFrequency(defaultActionsToAdd, action.value.throttle),
+        ...systemActionsToAdd,
+      ];
+
       return [
         {
           field: 'actions',
           operation: 'add',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
-            transformNormalizedRuleToAlertAction
-          ),
+          value: actionsToAdd.map(transformNormalizedRuleToAlertAction),
         },
       ];
 
     case BulkActionEditType.set_rule_actions:
+      const [systemActionsToSet, defaultActionsToSet] = partitionActions<
+        NormalizedSystemRuleAction,
+        NormalizedDefaultRuleAction
+      >(action.value.actions);
+
+      const actionsToSet = [
+        ...transformToActionFrequency(defaultActionsToSet, action.value.throttle),
+        ...systemActionsToSet,
+      ];
+
       return [
         {
           field: 'actions',
           operation: 'set',
-          value: transformToActionFrequency(action.value.actions, action.value.throttle).map(
-            transformNormalizedRuleToAlertAction
-          ),
+          value: actionsToSet.map(transformNormalizedRuleToAlertAction),
         },
       ];
 

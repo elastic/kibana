@@ -86,8 +86,7 @@ export const RuleActionAlertsFilter = t.partial({
   ]),
 });
 
-export type RuleAction = t.TypeOf<typeof RuleAction>;
-export const RuleAction = t.exact(
+export const RuleDefaultAction = t.exact(
   t.intersection([
     t.type({
       group: RuleActionGroup,
@@ -99,15 +98,26 @@ export const RuleAction = t.exact(
       uuid: RuleActionUuid,
       alerts_filter: RuleActionAlertsFilter,
       frequency: RuleActionFrequency,
+      type: t.literal('default'),
     }),
   ])
 );
 
+export const RuleSystemAction = t.strict({
+  id: RuleActionId,
+  action_type_id: RuleActionTypeId,
+  params: RuleActionParams,
+  uuid: RuleActionUuid,
+  type: t.literal('system'),
+});
+
+export type RuleAction = t.TypeOf<typeof RuleAction>;
+export const RuleAction = t.union([RuleDefaultAction, RuleSystemAction]);
+
 export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
 export const RuleActionArray = t.array(RuleAction);
 
-export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
-export const RuleActionCamel = t.exact(
+export const RuleDefaultActionCamel = t.exact(
   t.intersection([
     t.type({
       group: RuleActionGroup,
@@ -122,6 +132,17 @@ export const RuleActionCamel = t.exact(
     }),
   ])
 );
+
+export const RuleSystemActionCamel = t.strict({
+  id: RuleActionId,
+  actionTypeId: RuleActionTypeId,
+  params: RuleActionParams,
+  uuid: RuleActionUuid,
+  type: t.literal('system'),
+});
+
+export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
+export const RuleActionCamel = t.union([RuleDefaultActionCamel, RuleSystemActionCamel]);
 
 export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;
 export const RuleActionArrayCamel = t.array(RuleActionCamel);

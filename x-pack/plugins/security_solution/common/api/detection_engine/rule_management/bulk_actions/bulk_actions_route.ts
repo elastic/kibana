@@ -14,9 +14,11 @@ import {
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
+  RuleActionUuid,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '../../model';
 import type { BulkActionsDryRunErrCode } from '../../../../constants';
 
@@ -96,8 +98,9 @@ const BulkActionEditPayloadTimeline = t.type({
  * per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts)
  * normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
  */
-export type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
-export const NormalizedRuleAction = t.exact(
+
+export type NormalizedDefaultRuleAction = t.TypeOf<typeof NormalizedDefaultRuleAction>;
+export const NormalizedDefaultRuleAction = t.exact(
   t.intersection([
     t.type({
       group: RuleActionGroup,
@@ -106,8 +109,26 @@ export const NormalizedRuleAction = t.exact(
     }),
     t.partial({ frequency: RuleActionFrequency }),
     t.partial({ alerts_filter: RuleActionAlertsFilter }),
+    t.partial({ uuid: RuleActionUuid }),
+    t.partial({ type: t.literal(RuleActionTypes.DEFAULT) }),
   ])
 );
+
+export type NormalizedSystemRuleAction = t.TypeOf<typeof NormalizedSystemRuleAction>;
+export const NormalizedSystemRuleAction = t.exact(
+  t.type({
+    id: RuleActionId,
+    params: RuleActionParams,
+    uuid: RuleActionUuid,
+    type: t.literal(RuleActionTypes.SYSTEM),
+  })
+);
+
+export type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
+export const NormalizedRuleAction = t.union([
+  NormalizedDefaultRuleAction,
+  NormalizedSystemRuleAction,
+]);
 
 export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof BulkActionEditPayloadRuleActions>;
 export const BulkActionEditPayloadRuleActions = t.type({

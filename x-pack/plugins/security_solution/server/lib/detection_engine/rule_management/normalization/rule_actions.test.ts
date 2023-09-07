@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import type { SanitizedDefaultRuleAction } from '@kbn/alerting-plugin/common';
 import {
   NOTIFICATION_DEFAULT_FREQUENCY,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -209,7 +209,7 @@ describe('Rule actions normalization', () => {
 
   describe('transformToActionFrequency', () => {
     describe('actions without frequencies', () => {
-      const actionsWithoutFrequencies: SanitizedRuleAction[] = [
+      const actionsWithoutFrequencies: SanitizedDefaultRuleAction[] = [
         {
           group: 'group',
           id: 'id-123',
@@ -254,7 +254,7 @@ describe('Rule actions normalization', () => {
     });
 
     describe('actions with frequencies', () => {
-      const actionsWithFrequencies: SanitizedRuleAction[] = [
+      const actionsWithFrequencies: SanitizedDefaultRuleAction[] = [
         {
           group: 'group',
           id: 'id-123',
@@ -294,7 +294,7 @@ describe('Rule actions normalization', () => {
     });
 
     describe('some actions with frequencies', () => {
-      const someActionsWithFrequencies: SanitizedRuleAction[] = [
+      const someActionsWithFrequencies: SanitizedDefaultRuleAction[] = [
         {
           group: 'group',
           id: 'id-123',
