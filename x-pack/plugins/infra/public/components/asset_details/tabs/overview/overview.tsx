@@ -7,17 +7,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
+import {
+  MetadataSummaryList,
+  MetadataSummaryListCompact,
+} from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
-import { MetricsGrid } from './metrics/metrics_grid';
+import { MetricsGrid, MetricsGridCompact } from './metrics/metrics_grid';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { SectionSeparator } from './section_separator';
 
 export const Overview = () => {
   const { dateRange } = useDateRangeProviderContext();
@@ -28,6 +31,29 @@ export const Overview = () => {
     error: fetchMetadataError,
   } = useMetadataStateProviderContext();
   const { logs, metrics } = useDataViewsProviderContext();
+
+  const isFullPageView = renderMode.mode !== 'flyout';
+
+  const metricsSection = isFullPageView ? (
+    <MetricsGrid
+      timeRange={dateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  ) : (
+    <MetricsGridCompact
+      timeRange={dateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  );
+  const metadataSummarySection = isFullPageView ? (
+    <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+  ) : (
+    <MetadataSummaryListCompact metadata={metadata} metadataLoading={metadataLoading} />
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -62,11 +88,7 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummaryList
-            metadata={metadata}
-            metadataLoading={metadataLoading}
-            isCompactView={renderMode?.mode === 'flyout'}
-          />
+          <>{metadataSummarySection}</>
         )}
         <SectionSeparator />
       </EuiFlexItem>
@@ -74,24 +96,7 @@ export const Overview = () => {
         <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
         <SectionSeparator />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MetricsGrid
-          timeRange={dateRange}
-          logsDataView={logs.dataView}
-          metricsDataView={metrics.dataView}
-          nodeName={asset.name}
-          isCompactView={renderMode?.mode === 'flyout'}
-        />
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
-
-const SectionSeparator = () => (
-  <EuiHorizontalRule
-    margin="m"
-    css={css`
-      margin-bottom: 0;
-    `}
-  />
-);
