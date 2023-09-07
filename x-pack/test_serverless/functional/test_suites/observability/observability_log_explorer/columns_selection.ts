@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
 
-  describe('Columns selection initialization and update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165915
+  describe.skip('Columns selection initialization and update', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
