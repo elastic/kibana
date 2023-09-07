@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { monaco } from '@kbn/monaco';
 
 interface Props {
   value: string;
@@ -18,12 +19,23 @@ export function EQLCodeEditor({ value, onChange }: Props) {
     <CodeEditor
       value={value}
       height="100px"
-      languageId="text"
+      languageId="plaintext"
       languageConfiguration={{
         autoClosingPairs: [
+          { open: '"', close: '"' },
+          { open: '[', close: ']' },
+        ],
+        surroundingPairs: [
+          { open: '[', close: ']' },
+          { open: '"', close: '"' },
+        ],
+        onEnterRules: [
           {
-            open: '[',
-            close: ']',
+            beforeText: /\bsequence\b/g,
+            action: {
+              indentAction: monaco.languages.IndentAction.Indent,
+              appendText: '\t [',
+            },
           },
         ],
       }}
