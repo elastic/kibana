@@ -6,68 +6,76 @@
  */
 
 import {
-  EmbeddableFlamegraph,
-  EmbeddableFunctions,
-} from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { EuiHorizontalRule } from '@elastic/eui';
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiTabbedContentProps,
+} from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ProfilingFlamegraph } from './profiling_flamegraph';
+import { ProfilingTopNFunctions } from './profiling_top_functions';
 
 export function ProfilingOverview() {
   const {
     path: { serviceName },
-    query: { kuery, rangeFrom, rangeTo, environment },
+    query: { rangeFrom, rangeTo, environment },
   } = useApmParams('/services/{serviceName}/profiling');
   const { isProfilingAvailable } = useProfilingPlugin();
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (isProfilingAvailable) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/profiling',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                start,
-                end,
-                kuery,
-                environment,
-                startIndex: 0,
-                endIndex: 10,
-              },
-            },
-          }
-        );
-      }
-    },
-    [isProfilingAvailable, serviceName, start, end, kuery, environment]
-  );
+
+  const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
+    return [
+      {
+        id: 'flamegraph',
+        name: i18n.translate('xpack.apm.profiling.tabs.flamegraph', {
+          defaultMessage: 'Flamegraph',
+        }),
+        content: (
+          <>
+            <EuiSpacer />
+            <ProfilingFlamegraph
+              serviceName={serviceName}
+              start={start}
+              end={end}
+              environment={environment}
+            />
+          </>
+        ),
+      },
+      {
+        id: 'topNFunctions',
+        name: i18n.translate('xpack.apm.profiling.tabs.topNFunctions', {
+          defaultMessage: 'Top 10 Functions',
+        }),
+        content: (
+          <>
+            <EuiSpacer />
+            <ProfilingTopNFunctions
+              serviceName={serviceName}
+              start={start}
+              end={end}
+              environment={environment}
+              startIndex={0}
+              endIndex={10}
+            />
+          </>
+        ),
+      },
+    ];
+  }, [end, environment, serviceName, start]);
 
   if (!isProfilingAvailable) {
     return null;
   }
 
-  const isLoading = isPending(status);
-
   return (
-    <>
-      <EmbeddableFlamegraph
-        data={data?.flamegraph}
-        isLoading={isLoading}
-        height="50vh"
-      />
-      <EuiHorizontalRule />
-      <EmbeddableFunctions
-        data={data?.functions}
-        isLoading={isLoading}
-        rangeFrom={new Date(start).valueOf()}
-        rangeTo={new Date(end).valueOf()}
-      />
-    </>
+    <EuiTabbedContent
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+    />
   );
 }

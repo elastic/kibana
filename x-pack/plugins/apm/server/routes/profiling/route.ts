@@ -14,8 +14,48 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getServiceHostNames } from './get_service_host_names';
 import { hostNamesToKuery } from './utils';
 
-const profilingRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling',
+const profilingFlamegraphRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([rangeRt, kueryRt, environmentRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<BaseFlameGraph | undefined> => {
+    const { context, plugins, params } = resources;
+    const [esClient, apmEventClient, profilingDataAccessStart] =
+      await Promise.all([
+        (await context.core).elasticsearch.client,
+        await getApmEventClient(resources),
+        await plugins.profilingDataAccess?.start(),
+      ]);
+    if (profilingDataAccessStart) {
+      const { start, end, kuery, environment } = params.query;
+      const { serviceName } = params.path;
+
+      const serviceHostNames = await getServiceHostNames({
+        apmEventClient,
+        start,
+        end,
+        kuery,
+        environment,
+        serviceName,
+      });
+
+      return profilingDataAccessStart?.services.fetchFlamechartData({
+        esClient: esClient.asCurrentUser,
+        rangeFromMs: start,
+        rangeToMs: end,
+        kuery: hostNamesToKuery(serviceHostNames),
+      });
+    }
+
+    return undefined;
+  },
+});
+
+const profilingFunctionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/functions',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -26,11 +66,7 @@ const profilingRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<
-    { functions: TopNFunctions; flamegraph: BaseFlameGraph } | undefined
-  > => {
+  handler: async (resources): Promise<TopNFunctions | undefined> => {
     const { context, plugins, params } = resources;
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
@@ -52,16 +88,14 @@ const profilingRoute = createApmServerRoute({
         serviceName,
       });
 
-      return profilingDataAccessStart?.services.fetchFlamechartAndFunctionsData(
-        {
-          esClient: esClient.asCurrentUser,
-          rangeFromMs: start,
-          rangeToMs: end,
-          kuery: hostNamesToKuery(serviceHostNames),
-          startIndex,
-          endIndex,
-        }
-      );
+      return profilingDataAccessStart?.services.fetchFunction({
+        esClient: esClient.asCurrentUser,
+        rangeFromMs: start,
+        rangeToMs: end,
+        kuery: hostNamesToKuery(serviceHostNames),
+        startIndex,
+        endIndex,
+      });
     }
 
     return undefined;
@@ -69,5 +103,6 @@ const profilingRoute = createApmServerRoute({
 });
 
 export const profilingRouteRepository = {
-  ...profilingRoute,
+  ...profilingFlamegraphRoute,
+  ...profilingFunctionsRoute,
 };

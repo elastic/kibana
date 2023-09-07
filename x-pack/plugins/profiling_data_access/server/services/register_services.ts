@@ -9,7 +9,6 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { createFetchFunctions } from './functions';
-import { createFetchFlamechartAndFunctions } from './fetch_flamechart_functions';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {
@@ -22,6 +21,5 @@ export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
     fetchFunction: createFetchFunctions(params),
-    fetchFlamechartAndFunctionsData: createFetchFlamechartAndFunctions(params),
   };
 }
