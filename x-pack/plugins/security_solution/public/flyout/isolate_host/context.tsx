@@ -7,7 +7,7 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { css } from '@emotion/react';
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, memo, useContext, useMemo } from 'react';
 import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { useTimelineEventsDetails } from '../../timelines/containers/details';
@@ -53,63 +53,61 @@ export type IsolateHostPanelProviderProps = {
   children: React.ReactNode;
 } & Partial<IsolateHostPanelProps['params']>;
 
-export const IsolateHostPanelProvider = ({
-  id,
-  indexName,
-  scopeId,
-  isolateAction,
-  children,
-}: IsolateHostPanelProviderProps) => {
-  const currentSpaceId = useSpaceId();
-  // TODO Replace getAlertIndexAlias way to retrieving the eventIndex with the GET /_alias
-  //  https://github.com/elastic/kibana/issues/113063
-  const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
-  const [{ pageName }] = useRouteSpy();
-  const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-  const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, dataFormattedForFieldBrowser] = useTimelineEventsDetails({
-    indexName: eventIndex,
-    eventId: id ?? '',
-    runtimeMappings: sourcererDataView.runtimeMappings,
-    skip: !id,
-  });
+export const IsolateHostPanelProvider = memo(
+  ({ id, indexName, scopeId, isolateAction, children }: IsolateHostPanelProviderProps) => {
+    const currentSpaceId = useSpaceId();
+    // TODO Replace getAlertIndexAlias way to retrieving the eventIndex with the GET /_alias
+    //  https://github.com/elastic/kibana/issues/113063
+    const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
+    const [{ pageName }] = useRouteSpy();
+    const sourcererScope =
+      pageName === SecurityPageName.detections
+        ? SourcererScopeName.detections
+        : SourcererScopeName.default;
+    const sourcererDataView = useSourcererDataView(sourcererScope);
+    const [loading, dataFormattedForFieldBrowser] = useTimelineEventsDetails({
+      indexName: eventIndex,
+      eventId: id ?? '',
+      runtimeMappings: sourcererDataView.runtimeMappings,
+      skip: !id,
+    });
 
-  const contextValue = useMemo(
-    () =>
-      id && indexName && scopeId && isolateAction
-        ? {
-            eventId: id,
-            indexName,
-            scopeId,
-            dataFormattedForFieldBrowser,
-            isolateAction,
-          }
-        : undefined,
-    [id, indexName, scopeId, dataFormattedForFieldBrowser, isolateAction]
-  );
+    const contextValue = useMemo(
+      () =>
+        id && indexName && scopeId && isolateAction
+          ? {
+              eventId: id,
+              indexName,
+              scopeId,
+              dataFormattedForFieldBrowser,
+              isolateAction,
+            }
+          : undefined,
+      [id, indexName, scopeId, dataFormattedForFieldBrowser, isolateAction]
+    );
 
-  if (loading) {
+    if (loading) {
+      return (
+        <EuiFlexItem
+          css={css`
+            align-items: center;
+            justify-content: center;
+          `}
+        >
+          <EuiLoadingSpinner size="xxl" />
+        </EuiFlexItem>
+      );
+    }
+
     return (
-      <EuiFlexItem
-        css={css`
-          align-items: center;
-          justify-content: center;
-        `}
-      >
-        <EuiLoadingSpinner size="xxl" />
-      </EuiFlexItem>
+      <IsolateHostPanelContext.Provider value={contextValue}>
+        {children}
+      </IsolateHostPanelContext.Provider>
     );
   }
+);
 
-  return (
-    <IsolateHostPanelContext.Provider value={contextValue}>
-      {children}
-    </IsolateHostPanelContext.Provider>
-  );
-};
+IsolateHostPanelProvider.displayName = 'IsolateHostPanelProvider';
 
 export const useIsolateHostPanelContext = (): IsolateHostPanelContext => {
   const contextValue = useContext(IsolateHostPanelContext);

@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FlyoutFooter } from '../../timelines/components/side_panel/event_details/flyout';
 import { useRightPanelContext } from './context';
@@ -15,7 +15,7 @@ import { useHostIsolationTools } from '../../timelines/components/side_panel/eve
 /**
  *
  */
-export const PanelFooter: FC = memo(() => {
+export const PanelFooter: FC = () => {
   const { closeFlyout, openRightPanel } = useExpandableFlyoutContext();
   const {
     eventId,
@@ -61,6 +61,4 @@ export const PanelFooter: FC = memo(() => {
       refetchFlyoutData={refetchFlyoutData}
     />
   );
-});
-
-PanelFooter.displayName = 'PanelFooter';
+};

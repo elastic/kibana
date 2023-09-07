@@ -7,7 +7,7 @@
 
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React from 'react';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { PANEL_HEADER_ISOLATE_TITLE, PANEL_HEADER_RELEASE_TITLE } from './translations';
@@ -15,7 +15,7 @@ import { PANEL_HEADER_ISOLATE_TITLE, PANEL_HEADER_RELEASE_TITLE } from './transl
 /**
  * Document details expandable right section header for the isolate host panel
  */
-export const PanelHeader: FC = memo(() => {
+export const PanelHeader: FC = () => {
   const { isolateAction } = useIsolateHostPanelContext();
 
   const title =
@@ -28,6 +28,4 @@ export const PanelHeader: FC = memo(() => {
       </EuiTitle>
     </EuiFlyoutHeader>
   );
-});
-
-PanelHeader.displayName = 'PanelHeader';
+};

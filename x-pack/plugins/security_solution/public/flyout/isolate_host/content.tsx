@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { EuiPanel } from '@elastic/eui';
 import { RightPanelKey } from '../right';
@@ -19,7 +19,7 @@ import { HostIsolationPanel } from '../../detections/components/host_isolation';
 /**
  * Document details expandable flyout section content for the isolate host component, displaying the form or the success banner
  */
-export const PanelContent: FC = memo(() => {
+export const PanelContent: FC = () => {
   const { openRightPanel } = useExpandableFlyoutContext();
   const { dataFormattedForFieldBrowser, eventId, scopeId, indexName, isolateAction } =
     useIsolateHostPanelContext();
@@ -59,6 +59,4 @@ export const PanelContent: FC = memo(() => {
       />
     </EuiPanel>
   );
-});
-
-PanelContent.displayName = 'PanelContent';
+};

@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { PanelContent } from './content';
 import { PanelHeader } from './header';
@@ -27,13 +27,11 @@ export interface IsolateHostPanelProps extends FlyoutPanelProps {
  * Panel to be displayed right section in the document details expandable flyout when isolate host is clicked in the
  * take action button
  */
-export const IsolateHostPanel: FC<Partial<IsolateHostPanelProps>> = memo(() => {
+export const IsolateHostPanel: FC<Partial<IsolateHostPanelProps>> = () => {
   return (
     <>
       <PanelHeader />
       <PanelContent />
     </>
   );
-});
-
-IsolateHostPanel.displayName = 'IsolateHostPanel';
+};
