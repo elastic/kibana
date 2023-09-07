@@ -132,8 +132,8 @@ const SettingsSchema = schema.object({
   enabled: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
     traditional: schema.boolean({ defaultValue: false }),
-  })
-})
+  }),
+});
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
