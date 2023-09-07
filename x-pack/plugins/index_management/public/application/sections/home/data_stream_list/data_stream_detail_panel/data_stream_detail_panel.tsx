@@ -270,7 +270,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     ];
 
     const managementDetails = getManagementDetails();
-    const details = managementDetails ? [...defaultDetails, ...managementDetails] : defaultDetails;
+    const details = [...defaultDetails, ...managementDetails];
 
     content = <DetailsList details={details} />;
   }
