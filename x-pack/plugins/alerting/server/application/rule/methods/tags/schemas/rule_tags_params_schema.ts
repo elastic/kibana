@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_TAGS_PER_PAGE_LATEST as DEFAULT_TAGS_PER_PAGE } from '../../../../../../common/routes/rule/apis/tags';
+import { defaultTagsPerPage } from '../../../../../../common/routes/rule/apis/tags';
 
 export const ruleTagsParamsSchema = schema.object({
   page: schema.number({ defaultValue: 1, min: 1 }),
-  perPage: schema.maybe(schema.number({ defaultValue: DEFAULT_TAGS_PER_PAGE, min: 1 })),
+  perPage: schema.maybe(schema.number({ defaultValue: defaultTagsPerPage, min: 1 })),
   search: schema.maybe(schema.string()),
 });
