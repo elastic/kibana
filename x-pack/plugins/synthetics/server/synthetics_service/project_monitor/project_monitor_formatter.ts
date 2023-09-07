@@ -18,7 +18,6 @@ import { RouteContext } from '../../routes/types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
-import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
   ConfigKey,
@@ -67,7 +66,6 @@ export class ProjectMonitorFormatter {
   public failedMonitors: FailedError = [];
   private server: SyntheticsServerSetup;
   private projectFilter: string;
-  private syntheticsMonitorClient: SyntheticsMonitorClient;
   private routeContext: RouteContext;
 
   constructor({
@@ -88,7 +86,6 @@ export class ProjectMonitorFormatter {
     this.spaceId = spaceId;
     this.savedObjectsClient = routeContext.savedObjectsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
-    this.syntheticsMonitorClient = routeContext.syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = routeContext.server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
@@ -97,11 +94,7 @@ export class ProjectMonitorFormatter {
   }
 
   init = async () => {
-    const locationsPromise = getAllLocations({
-      server: this.server,
-      syntheticsMonitorClient: this.syntheticsMonitorClient,
-      savedObjectsClient: this.savedObjectsClient,
-    });
+    const locationsPromise = getAllLocations(this.routeContext);
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
 
     const [locations, existingMonitors] = await Promise.all([

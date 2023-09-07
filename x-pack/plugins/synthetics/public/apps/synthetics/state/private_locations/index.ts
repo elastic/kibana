@@ -6,21 +6,29 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { AgentType } from '../../../../../common/types';
 import { AgentPolicyInfo } from '../../../../../common/types';
 import { IHttpSerializedFetchError } from '..';
-import { getAgentPoliciesAction, setAddingNewPrivateLocation } from './actions';
+import {
+  getAgentPoliciesAction,
+  setAddingNewPrivateLocation,
+  getAgentPolicyIsCompleteAction,
+} from './actions';
 
 export interface AgentPoliciesState {
   data: AgentPolicyInfo[] | null;
   loading: boolean;
+  isCompleteLoading?: boolean;
   error: IHttpSerializedFetchError | null;
   isManageFlyoutOpen?: boolean;
   isAddingNewPrivateLocation?: boolean;
+  agentType?: AgentType;
 }
 
 const initialState: AgentPoliciesState = {
   data: null,
   loading: false,
+  isCompleteLoading: false,
   error: null,
   isManageFlyoutOpen: false,
   isAddingNewPrivateLocation: false,
@@ -38,6 +46,18 @@ export const agentPoliciesReducer = createReducer(initialState, (builder) => {
     .addCase(getAgentPoliciesAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
+    })
+    .addCase(getAgentPolicyIsCompleteAction.get, (state) => {
+      state.isCompleteLoading = true;
+      state.agentType = undefined;
+    })
+    .addCase(getAgentPolicyIsCompleteAction.success, (state, action) => {
+      state.agentType = action.payload;
+      state.isCompleteLoading = false;
+    })
+    .addCase(getAgentPolicyIsCompleteAction.fail, (state, action) => {
+      state.error = action.payload;
+      state.isCompleteLoading = false;
     })
     .addCase(setAddingNewPrivateLocation, (state, action) => {
       state.isAddingNewPrivateLocation = action.payload;

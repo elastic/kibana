@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('add a test private location', async () => {
       await testPrivateLocations.setTestLocations([testFleetPolicyID]);
 
-      const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
+      const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.ALL_LOCATIONS);
 
       expect(apiResponse.body.locations).eql([
         {

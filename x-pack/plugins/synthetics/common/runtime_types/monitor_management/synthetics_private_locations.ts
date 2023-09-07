@@ -17,6 +17,7 @@ export const PrivateLocationCodec = t.intersection([
   t.partial({
     isServiceManaged: t.boolean,
     isInvalid: t.boolean,
+    agentType: t.union([t.literal('complete'), t.literal('lightweight'), t.literal('unknown')]),
     tags: t.array(t.string),
     geo: t.interface({
       lat: t.number,
@@ -25,8 +26,6 @@ export const PrivateLocationCodec = t.intersection([
   }),
 ]);
 
-export const SyntheticsPrivateLocationsType = t.type({
-  locations: t.array(PrivateLocationCodec),
-});
+export const SyntheticsPrivateLocationsType = t.array(PrivateLocationCodec);
 export type PrivateLocation = t.TypeOf<typeof PrivateLocationCodec>;
 export type SyntheticsPrivateLocations = t.TypeOf<typeof SyntheticsPrivateLocationsType>;

@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
-import { getAllLocations } from '../synthetics_service/get_all_locations';
+import { getAllLocationsWithMeta } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
@@ -176,7 +176,7 @@ const parseLocationFilter = async (context: RouteContext, locations?: string | s
     return;
   }
 
-  const { allLocations } = await getAllLocations(context);
+  const { allLocations } = await getAllLocationsWithMeta(context);
 
   if (Array.isArray(locations)) {
     return locations

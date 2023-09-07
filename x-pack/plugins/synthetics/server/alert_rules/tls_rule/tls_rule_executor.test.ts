@@ -21,7 +21,7 @@ describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
   const logger = loggerMock.create();
   const soClient = savedObjectsClientMock.create();
-  jest.spyOn(locationsUtils, 'getAllLocations').mockResolvedValue({
+  jest.spyOn(locationsUtils, 'getAllLocationsWithMeta').mockResolvedValue({
     // @ts-ignore
     publicLocations: [
       {

@@ -7,10 +7,15 @@
 
 import { createAction } from '@reduxjs/toolkit';
 import { AgentPolicyInfo } from '../../../../../common/types';
+import { AgentType } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getAgentPoliciesAction = createAsyncAction<void, AgentPolicyInfo[]>(
   '[AGENT POLICIES] GET'
+);
+
+export const getAgentPolicyIsCompleteAction = createAsyncAction<string, AgentType>(
+  '[AGENT POLICY] GET COMPLETE'
 );
 
 export const setManageFlyoutOpen = createAction<boolean>('SET MANAGE FLYOUT OPEN');

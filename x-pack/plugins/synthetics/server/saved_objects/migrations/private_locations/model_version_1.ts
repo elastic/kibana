@@ -34,7 +34,7 @@ export type SyntheticsPrivateLocationsAttributesLegacy = t.TypeOf<
 
 export const transformGeoProperty: SavedObjectModelTransformationFn<
   SyntheticsPrivateLocationsAttributesLegacy,
-  SyntheticsPrivateLocationsAttributes
+  { locations: SyntheticsPrivateLocationsAttributes }
 > = (privateLocationDoc) => {
   const { locations } = privateLocationDoc.attributes;
   return {

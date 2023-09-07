@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { AgentPolicyInfo } from '../../../../common/types';
-import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import {
+  AgentsMeta,
+  getPrivateLocationsWithAgentsMeta,
+} from '../../../synthetics_service/get_private_locations';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
-import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { toClientContract } from './helpers';
 
 export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
@@ -21,31 +22,34 @@ export const getPrivateLocationsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS,
   validate: {},
-  handler: async ({ savedObjectsClient, syntheticsMonitorClient }) => {
-    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
-      savedObjectsClient,
-      syntheticsMonitorClient
+  handler: async (routeContext) => {
+    const { locations, agentPolicies, agentsMeta } = await getPrivateLocationsAndAgentPolicies(
+      routeContext
     );
-    return toClientContract({ locations }, agentPolicies);
+    return toClientContract(locations, agentPolicies, agentsMeta);
   },
 });
 
 export const getPrivateLocationsAndAgentPolicies = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  syntheticsMonitorClient: SyntheticsMonitorClient
-): Promise<SyntheticsPrivateLocationsAttributes & { agentPolicies: AgentPolicyInfo[] }> => {
+  routeContext: RouteContext
+): Promise<{
+  agentPolicies: AgentPolicyInfo[];
+  agentsMeta: AgentsMeta;
+  locations: SyntheticsPrivateLocationsAttributes;
+}> => {
   try {
-    const [privateLocations, agentPolicies] = await Promise.all([
-      getPrivateLocations(savedObjectsClient),
-      syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
+    const [{ locations, agentsMeta }, agentPolicies] = await Promise.all([
+      getPrivateLocationsWithAgentsMeta(routeContext),
+      routeContext.syntheticsMonitorClient.privateLocationAPI.getAgentPolicies(),
     ]);
     return {
-      locations: privateLocations || [],
+      locations: locations || [],
+      agentsMeta: agentsMeta || [],
       agentPolicies,
     };
   } catch (getErr) {
     if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-      return { locations: [], agentPolicies: [] };
+      return { locations: [], agentPolicies: [], agentsMeta: [] };
     }
     throw getErr;
   }

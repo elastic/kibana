@@ -13,3 +13,8 @@ export const selectAgentPolicies = createSelector(getState, (state) => state);
 
 export const selectAddingNewPrivateLocation = (state: AppState) =>
   state.agentPolicies.isAddingNewPrivateLocation ?? false;
+
+export const selectHasCompleteAgent = (state: AppState) => ({
+  agentType: state.agentPolicies.agentType,
+  isCompleteLoading: state.agentPolicies.isCompleteLoading ?? false,
+});

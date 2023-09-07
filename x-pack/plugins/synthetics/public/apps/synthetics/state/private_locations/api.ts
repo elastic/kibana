@@ -6,12 +6,19 @@
  */
 
 import { AgentPolicyInfo } from '../../../../../common/types';
+import { AgentType } from '../../../../../common/types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
 export const fetchAgentPolicies = async (): Promise<AgentPolicyInfo[]> => {
   return await apiService.get(SYNTHETICS_API_URLS.AGENT_POLICIES);
+};
+
+export const policyContainsCompleteAgent = async (policyId: string): Promise<AgentType> => {
+  return await apiService.get(
+    SYNTHETICS_API_URLS.IS_AGENT_POLICY_COMPLETE.replace('{policyId}', policyId)
+  );
 };
 
 export const addSyntheticsPrivateLocations = async (

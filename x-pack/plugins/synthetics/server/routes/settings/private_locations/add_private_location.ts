@@ -40,18 +40,18 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<
     body: PrivateLocationSchema,
   },
   writeAccess: true,
-  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }) => {
+  handler: async (routeContext) => {
+    const { request, savedObjectsClient } = routeContext;
     const location = request.body as PrivateLocation;
 
-    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(
-      savedObjectsClient,
-      syntheticsMonitorClient
-    );
+    const { locations, agentPolicies } = await getPrivateLocationsAndAgentPolicies(routeContext);
 
     const existingLocations = locations.filter((loc) => loc.id !== location.agentPolicyId);
     const formattedLocation = toSavedObjectContract(location);
 
-    const result = await savedObjectsClient.create<SyntheticsPrivateLocationsAttributes>(
+    const result = await savedObjectsClient.create<{
+      locations: SyntheticsPrivateLocationsAttributes;
+    }>(
       privateLocationsSavedObjectName,
       { locations: [...existingLocations, formattedLocation] },
       {
@@ -60,6 +60,6 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<
       }
     );
 
-    return toClientContract(result.attributes, agentPolicies);
+    return toClientContract(result.attributes.locations, agentPolicies);
   },
 });

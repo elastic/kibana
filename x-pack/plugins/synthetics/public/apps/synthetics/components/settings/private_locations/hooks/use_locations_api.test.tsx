@@ -15,12 +15,10 @@ import * as reduxHooks from 'react-redux';
 
 describe('usePrivateLocationsAPI', () => {
   const dispatch = jest.fn();
-  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue({
-    locations: [],
-  });
-  const deletedAPI = jest.spyOn(locationAPI, 'deleteSyntheticsPrivateLocations').mockResolvedValue({
-    locations: [],
-  });
+  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue([]);
+  const deletedAPI = jest
+    .spyOn(locationAPI, 'deleteSyntheticsPrivateLocations')
+    .mockResolvedValue([]);
   const getAPI = jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
   jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
 
@@ -37,14 +35,12 @@ describe('usePrivateLocationsAPI', () => {
     );
     expect(getAPI).toHaveBeenCalledTimes(1);
   });
-  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations').mockResolvedValue({
-    locations: [
-      {
-        id: 'Test',
-        agentPolicyId: 'testPolicy',
-      } as any,
-    ],
-  });
+  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations').mockResolvedValue([
+    {
+      id: 'Test',
+      agentPolicyId: 'testPolicy',
+    } as any,
+  ]);
   it('returns expected results after data', async () => {
     const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
