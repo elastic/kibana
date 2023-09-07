@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Boom } from '@hapi/boom';
+import { muteOptionsSchema } from '../../schemas/mute_options';
 import { RuleMuteAlertOptions } from '../../types';
 import { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -15,12 +17,18 @@ import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: RuleMuteAlertOptions
+  options: RuleMuteAlertOptions
 ): Promise<void> {
+  try {
+    muteOptionsSchema.validate(options);
+  } catch (error) {
+    throw Boom.badRequest(`Failed to validate params: ${error.message}`);
+  }
+
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.muteInstance('${alertId}')`,
-    async () => await muteInstanceWithOCC(context, { alertId, alertInstanceId })
+    `rulesClient.muteInstance('${options.alertId}')`,
+    async () => await muteInstanceWithOCC(context, options)
   );
 }
 
