@@ -130,8 +130,8 @@ const ExportTypeSchema = schema.object({
 
 const SettingsSchema = schema.object({
   enabled: offeringBasedSchema({
-    serverless: schema.boolean({ defaultValue: false }),
-    traditional: schema.boolean({ defaultValue: true }),
+    serverless: schema.boolean({ defaultValue: true }),
+    traditional: schema.boolean({ defaultValue: false }),
   })
 })
 

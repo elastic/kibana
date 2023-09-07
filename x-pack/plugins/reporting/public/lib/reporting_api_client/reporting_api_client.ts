@@ -167,7 +167,7 @@ export class ReportingAPIClient implements IReportingAPI {
     const params = stringify({
       jobParams: rison.encode(jobParams),
     });
-    return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}`;
+    return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}?elasticInternalOrigins=true`;
   }
 
   /**
@@ -176,7 +176,7 @@ export class ReportingAPIClient implements IReportingAPI {
   public async createReportingJob(exportType: string, jobParams: BaseParams) {
     const jobParamsRison = rison.encode(jobParams);
     const resp: { job: ReportApiJSON } = await this.http.post(
-      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}`,
+      `${INTERNAL_ROUTES.GENERATE_PREFIX}/${exportType}?elasticInternalOrigins=true`,
       {
         method: 'POST',
         body: JSON.stringify({ jobParams: jobParamsRison }),

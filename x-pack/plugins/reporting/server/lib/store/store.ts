@@ -87,12 +87,13 @@ export class ReportingStore {
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
   private ilmPolicyManager?: IlmPolicyManager;
+  config: ReportingCore['config'];
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
-    const config = reportingCore.getConfig();
+    this.config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
-    this.indexInterval = config.queue.indexInterval;
+    this.indexInterval = this.config.queue.indexInterval;
     this.logger = logger.get('store');
   }
 
@@ -109,14 +110,15 @@ export class ReportingStore {
       const client = await this.getClient();
       this.ilmPolicyManager = IlmPolicyManager.create({ client });
     }
-
-    return this.ilmPolicyManager;
+    return this.config.disableStatefulSettings.enabled ? null : this.ilmPolicyManager;
   }
 
   private async createIndex(indexName: string) {
     const client = await this.getClient();
     const exists = await client.indices.exists({ index: indexName });
-
+   
+    if (this.config.disableStatefulSettings.enabled) return
+    
     if (exists) {
       return exists;
     }
@@ -187,12 +189,12 @@ export class ReportingStore {
   public async start() {
     const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
-      if (await ilmPolicyManager.doesIlmPolicyExist()) {
+      if (this.config.disableStatefulSettings.enabled && await ilmPolicyManager!.doesIlmPolicyExist()) {
         this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
         return;
       }
       this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
-      await ilmPolicyManager.createIlmPolicy();
+      if (this.config.disableStatefulSettings.enabled) await ilmPolicyManager!.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
       this.logger.error(e.body?.error);

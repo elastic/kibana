@@ -21,7 +21,7 @@ describe('ReportingAPIClient', () => {
   beforeEach(() => {
     uiSettingsClient = uiSettingsServiceMock.createStartContract();
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
-    apiClient = new ReportingAPIClient(httpClient, uiSettingsClient, 'version');
+    apiClient = new ReportingAPIClient(httpClient, uiSettingsClient, 'version', false);
   });
 
   describe('getReportURL', () => {
