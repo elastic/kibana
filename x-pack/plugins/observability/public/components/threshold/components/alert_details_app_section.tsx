@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { DataViewBase } from '@kbn/es-query';
+import moment from 'moment';
+import React, { useEffect, useMemo } from 'react';
+import { DataViewBase, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -44,12 +46,7 @@ import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options'
 import { AlertParams, MetricExpression, MetricThresholdRuleTypeParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
-export type MetricThresholdRule = Rule<
-  MetricThresholdRuleTypeParams & {
-    filterQuery?: string;
-    groupBy?: string | string[];
-  }
->;
+export type MetricThresholdRule = Rule<MetricThresholdRuleTypeParams>;
 export type MetricThresholdAlert = TopAlert;
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
@@ -215,8 +212,8 @@ export default function AlertDetailsAppSection({
                     chartType={MetricsExplorerChartType.line}
                     derivedIndexPattern={derivedIndexPattern}
                     expression={criterion}
-                    filterQuery={ruleParams.filterQuery}
-                    groupBy={ruleParams.groupBy}
+                    filterQuery={(rule.params.searchConfiguration?.query as Query)?.query as string}
+                    groupBy={rule.params.groupBy}
                     hideTitle
                     timeRange={timeRange}
                   />

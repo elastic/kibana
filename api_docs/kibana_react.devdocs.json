@@ -3728,14 +3728,6 @@
           },
           {
             "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_top_nav_menu.tsx"
-          },
-          {
-            "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/components/workspace_layout/workspace_top_nav_menu.tsx"
-          },
-          {
-            "plugin": "graph",
             "path": "x-pack/plugins/graph/public/application.tsx"
           },
           {

@@ -433,6 +433,7 @@ export const updateCase = async ({
 
   const { body: cases } = await apiCall
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(params)
     .expect(expectedHttpCode);
