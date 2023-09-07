@@ -174,7 +174,7 @@ export const postCaseResp = (
   status: CaseStatuses.open,
   updated_by: null,
   category: null,
-  custom_fields: [],
+  customFields: [],
 });
 
 interface CommentRequestWithID {
