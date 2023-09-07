@@ -522,6 +522,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertPalette(paletteId: string, isLegacy: boolean) {
       await retry.try(async () => {
         await testSubjects.click('lns_colorEditing_trigger');
+        // open the palette picker
         if (isLegacy) {
           await testSubjects.click('lns-palettePicker');
         } else {
@@ -530,7 +531,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const currentPalette = await (
           await find.byCssSelector('[role=option][aria-selected=true]')
         ).getAttribute('id');
+        // close the palette picker
+        if (isLegacy) {
+          await testSubjects.click('lns-palettePicker');
+        } else {
+          await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
+        }
         expect(currentPalette).to.equal(paletteId);
+        await this.closePaletteEditor();
       });
     },
 
@@ -1232,7 +1240,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
         await testSubjects.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
       }
-      await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
+      await this.closePaletteEditor();
     },
 
     async closePaletteEditor() {
