@@ -136,15 +136,18 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiContextMenuItem>,
                 <AgentPolicyDeleteProvider
                   hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
+                  key="deletePolicy"
                 >
                   {(deleteAgentPolicyPrompt) => (
                     <EuiContextMenuItem
+                      data-test-subj="agentPolicyActionMenuDeleteButton"
                       disabled={hasManagedPackagePolicy}
                       toolTipContent={
                         hasManagedPackagePolicy ? (
                           <FormattedMessage
                             id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
                             defaultMessage="Agent policy with managed package policies cannot be deleted."
+                            data-test-subj="agentPolicyActionMenuDeleteButtonDisabledTooltip"
                           />
                         ) : undefined
                       }
