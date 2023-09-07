@@ -102,58 +102,29 @@ export const getFindingsByResourceAggQuery = ({
         cis_sections: {
           terms: { field: 'rule.section' },
         },
-        failed_findings: {
-          filter: { term: { 'result.evaluation': 'failed' } },
-          aggs: {
-            event_code: {
-              cardinality: {
-                field: 'event.code',
-              },
-            },
-          },
-        },
-        passed_findings: {
-          filter: { term: { 'result.evaluation': 'passed' } },
-          aggs: {
-            event_code: {
-              cardinality: {
-                field: 'event.code',
-              },
-            },
-          },
-        },
         // this field is runtime generated
         belongs_to: {
           terms: { field: 'belongs_to', size: 1 },
         },
-        compliance_score: {
-          bucket_script: {
-            buckets_path: {
-              passed: 'passed_findings>_count',
-              failed: 'failed_findings>_count',
-            },
-            script: 'params.passed / (params.passed + params.failed)',
+        unique_event_code: {
+          terms: {
+            field: 'event.code',
+            size: 65000,
           },
-        },
-        sort_by_compliance_score: {
-          bucket_sort: {
-            size: MAX_FINDINGS_TO_LOAD,
-            sort: [
-              {
-                compliance_score: { order: sortDirection },
-                _count: { order: 'desc' },
-                _key: { order: 'asc' },
+          aggs: {
+            latest_result_evaluation: {
+              top_hits: {
+                _source: ['result.evaluation'],
+                size: 1,
+                sort: [{ '@timestamp': 'desc' }],
               },
-            ],
+            },
           },
         },
       },
     },
   },
   ignore_unavailable: false,
-  collapse: {
-    field: 'event.code',
-  },
 });
 
 const getFirstKey = (
@@ -168,22 +139,37 @@ const getKeysList = (
   if (!!Array.isArray(buckets) && !!buckets.length) return buckets.map((v) => v.key);
 };
 
-const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResourcePage => ({
-  resource_id: resource.key,
-  ['resource.name']: getFirstKey(resource.name.buckets),
-  ['resource.sub_type']: getFirstKey(resource.subtype.buckets),
-  ['rule.section']: getKeysList(resource.cis_sections.buckets),
-  ['rule.benchmark.name']: getFirstKey(resource.benchmarkName.buckets),
-  belongs_to: getFirstKey(resource.belongs_to.buckets),
-  compliance_score: resource.compliance_score.value,
-  findings: {
-    failed_findings: resource.failed_findings.event_code.value,
-    normalized:
-      resource.doc_count > 0 ? resource.failed_findings.event_code.value / resource.doc_count : 0,
-    total_findings: resource.doc_count,
-    passed_findings: resource.passed_findings.event_code.value,
-  },
-});
+const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResourcePage => {
+  let totalPassed = 0;
+  let totalFailed = 0;
+  let findingsBucketsLength = resource.unique_event_code.buckets.length;
+
+  for (let i = 0; i < findingsBucketsLength; i++) {
+    const evaluationBucket = resource.unique_event_code.buckets[i];
+    const latestResultEvaluation =
+      evaluationBucket.latest_result_evaluation.hits.hits[0]._source.result.evaluation;
+    totalPassed += latestResultEvaluation === 'passed' ? 1 : 0;
+    totalFailed += latestResultEvaluation === 'failed' ? 1 : 0;
+  }
+
+  const totalFindings = totalPassed + totalFailed;
+
+  return {
+    resource_id: resource.key,
+    ['resource.name']: getFirstKey(resource.name.buckets),
+    ['resource.sub_type']: getFirstKey(resource.subtype.buckets),
+    ['rule.section']: getKeysList(resource.cis_sections.buckets),
+    ['rule.benchmark.name']: getFirstKey(resource.benchmarkName.buckets),
+    belongs_to: getFirstKey(resource.belongs_to.buckets),
+    compliance_score: totalFindings > 0 ? totalFailed / totalFindings : 0,
+    findings: {
+      failed_findings: totalFailed,
+      normalized: totalFindings > 0 ? totalFailed / totalFindings : 0,
+      total_findings: totalFindings,
+      passed_findings: totalPassed,
+    },
+  };
+};
 
 export const useFindingsByResource = (options: UseFindingsByResourceOptions) => {
   const {
@@ -211,12 +197,24 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
 
       const page = aggregations.resources.buckets.map(createFindingsByResource);
 
+      let totalPassed = 0;
+      let totalFailed = 0;
+      let findingsBucketsLength = aggregations.unique_event_code.buckets.length;
+
+      for (let i = 0; i < findingsBucketsLength; i++) {
+        const evaluationBucket = aggregations.unique_event_code.buckets[i];
+        const latestResultEvaluation =
+          evaluationBucket.latest_result_evaluation.hits.hits[0]._source.result.evaluation;
+        totalPassed += latestResultEvaluation === 'passed' ? 1 : 0;
+        totalFailed += latestResultEvaluation === 'failed' ? 1 : 0;
+      }
+
       return {
         page,
         total: aggregations.resource_total.value,
         count: {
-          failed: aggregations.failed_findings.event_code.value,
-          passed: aggregations.passed_findings.event_code.value,
+          failed: totalFailed,
+          passed: totalPassed,
         },
       };
     },

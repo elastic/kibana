@@ -38,39 +38,18 @@ export const failedFindingsAggQuery = {
       size: 60000,
     },
     aggs: {
-      failed_findings: {
-        filter: { term: { 'result.evaluation': 'failed' } },
+      unique_event_code: {
+        terms: {
+          field: 'event.code',
+          size: 65000,
+        },
         aggs: {
-          event_code: {
-            cardinality: {
-              field: 'event.code',
+          latest_result_evaluation: {
+            top_hits: {
+              _source: ['result.evaluation'],
+              size: 1,
+              sort: [{ '@timestamp': 'desc' }],
             },
-          },
-        },
-      },
-      passed_findings: {
-        filter: { term: { 'result.evaluation': 'passed' } },
-        aggs: {
-          event_code: {
-            cardinality: {
-              field: 'event.code',
-            },
-          },
-        },
-      },
-      score: {
-        bucket_script: {
-          buckets_path: {
-            passed: 'passed_findings>_count',
-            failed: 'failed_findings>_count',
-          },
-          script: 'params.passed / (params.passed + params.failed)',
-        },
-      },
-      sort_by_score: {
-        bucket_sort: {
-          sort: {
-            score: 'asc' as 'asc',
           },
         },
       },
@@ -113,12 +92,21 @@ export const getFailedFindingsFromAggs = (
   queryResult: FailedFindingsBucket[]
 ): ComplianceDashboardData['groupedFindingsEvaluation'] =>
   queryResult.map((bucket) => {
-    const totalFailed = bucket.failed_findings.event_code.value;
-    const totalPassed = bucket.passed_findings.event_code.value;
+    let totalPassed = 0;
+    let totalFailed = 0;
+    let findingsBucketsLength = bucket.unique_event_code.buckets.length;
+
+    for (let i = 0; i < findingsBucketsLength; i++) {
+      const evaluationBucket = bucket.unique_event_code.buckets[i];
+      const latestResultEvaluation =
+        evaluationBucket.latest_result_evaluation.hits.hits[0]._source.result.evaluation;
+      totalPassed += latestResultEvaluation === 'passed' ? 1 : 0;
+      totalFailed += latestResultEvaluation === 'failed' ? 1 : 0;
+    }
 
     return {
       name: bucket.key,
-      totalFindings: bucket.doc_count,
+      totalFindings: totalFailed + totalPassed,
       totalFailed,
       totalPassed,
       postureScore: calculatePostureScore(totalPassed, totalFailed),
