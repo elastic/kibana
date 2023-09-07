@@ -27681,7 +27681,6 @@
     "xpack.observability.threshold.rule.createInventoryRuleButton": "创建库存规则",
     "xpack.observability.threshold.rule.createThresholdRuleButton": "创建阈值规则",
     "xpack.observability.threshold.rule.groupByKeysActionVariableDescription": "包含正报告数据的组的对象",
-    "xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder": "搜索基础设施数据……（例如 host.name:host-1）",
     "xpack.observability.threshold.rule.hostActionVariableDescription": "ECS 定义的主机对象（如果在源中可用）。",
     "xpack.observability.threshold.rule.infrastructureDropdownMenu": "基础设施",
     "xpack.observability.threshold.rule.infrastructureDropdownTitle": "基础设施规则",
