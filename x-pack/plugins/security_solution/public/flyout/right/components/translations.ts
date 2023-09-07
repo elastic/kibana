@@ -167,8 +167,7 @@ export const PREVALENCE_TITLE = i18n.translate(
 export const PREVALENCE_NO_DATA = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceNoData',
   {
-    defaultMessage:
-      'Over the last 30 days, the highlighted fields for this alert were observed frequently on other host and user events.',
+    defaultMessage: 'No prevalence data available.',
   }
 );
 

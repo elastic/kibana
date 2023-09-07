@@ -7786,7 +7786,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ tags: string[]; }"
+              "{ tags: string[]; access?: \"public\" | \"internal\" | undefined; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false,
