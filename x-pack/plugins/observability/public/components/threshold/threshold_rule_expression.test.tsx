@@ -46,6 +46,7 @@ describe('Expression', () => {
       groupBy: undefined,
       sourceId: 'default',
       searchConfiguration: {
+        index: 'mockedIndex',
         query: {
           query: '',
           language: 'kuery',
