@@ -76,7 +76,7 @@ const CustomFieldList = rt.strict({
 
 const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle, CustomFieldList]);
 
-export const CaseCustomFields = limitedArraySchema({
+export const CaseCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
   fieldName: 'customFields',
   min: 0,
@@ -128,7 +128,7 @@ const CaseBasicRt = rt.strict({
    * An array containing the possible,
    * user-configured custom fields.
    */
-  customFields: CaseCustomFields,
+  customFields: CaseCustomFieldsRt,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -176,7 +176,7 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
-export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFields>;
+export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;

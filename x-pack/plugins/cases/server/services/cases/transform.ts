@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
-import type { ExternalService } from '../../../common/types/domain';
+import type { CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
@@ -45,6 +45,7 @@ export function transformUpdateResponseToExternalModel(
     status,
     total_alerts,
     total_comments,
+    customFields,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??
@@ -77,6 +78,7 @@ export function transformUpdateResponseToExternalModel(
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
+      ...(customFields !== undefined && (customFields as unknown as CaseCustomFields)),
     },
   };
 }
@@ -93,7 +95,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
-  const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
+  const { connector, external_service, severity, status, customFields, ...restAttributes } =
+    caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const transformedConnector = {
@@ -121,6 +124,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       ...transformedExternalService,
       ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
       ...(status && { status: STATUS_EXTERNAL_TO_ESMODEL[status] }),
+      ...(customFields !== undefined && (customFields as unknown as CaseCustomFields)),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
@@ -176,7 +180,7 @@ export function transformSavedObjectToExternalModel(
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
   const customFields = !caseSavedObjectAttributes.customFields
     ? []
-    : caseSavedObjectAttributes.customFields;
+    : (caseSavedObjectAttributes.customFields as unknown as CaseCustomFields);
 
   return {
     ...caseSavedObject,

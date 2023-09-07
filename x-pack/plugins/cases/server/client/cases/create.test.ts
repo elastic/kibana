@@ -386,12 +386,12 @@ describe('create', () => {
     const theCustomFields: CaseCustomFields = [
       {
         key: 'first_customField_key',
-        type: 'string',
+        type: 'text',
         field: { value: ['this is a text field value', 'this is second'] },
       },
       {
         key: 'second_customField_key',
-        type: 'boolean',
+        type: 'toggle',
         field: { value: [true] },
       },
     ];

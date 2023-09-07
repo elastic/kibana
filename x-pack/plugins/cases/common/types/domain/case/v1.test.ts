@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../constants';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../attachment/v1';
 import { ConnectorTypes } from '../connector/v1';
 import {
@@ -14,7 +16,7 @@ import {
   CasesRt,
   CaseStatuses,
   RelatedCaseRt,
-  CaseCustomFields,
+  CaseCustomFieldsRt,
 } from './v1';
 
 const basicCase = {
@@ -78,12 +80,12 @@ const basicCase = {
   customFields: [
     {
       key: 'first_custom_field_key',
-      type: 'string',
+      type: 'text',
       field: { value: ['this is a text field value', 'this is second'] },
     },
     {
       key: 'second_custom_field_key',
-      type: 'boolean',
+      type: 'toggle',
       field: { value: [true] },
     },
   ],
@@ -186,12 +188,12 @@ describe('CaseAttributesRt', () => {
     customFields: [
       {
         key: 'first_custom_field_key',
-        type: 'string',
+        type: 'text',
         field: { value: ['this is a text field value', 'this is second'] },
       },
       {
         key: 'second_custom_field_key',
-        type: 'boolean',
+        type: 'toggle',
         field: { value: [true] },
       },
     ],
@@ -266,26 +268,26 @@ describe('CasesRt', () => {
   });
 });
 
-describe('CustomFieldRt', () => {
+describe('CaseCustomFieldsRt', () => {
   const customFields = [
     {
       key: 'string_custom_field_1',
-      type: 'string',
+      type: 'text',
       field: { value: ['this is a text field value', 'this is second'] },
     },
     {
       key: 'string_custom_field_2',
-      type: 'string',
+      type: 'text',
       field: { value: null },
     },
     {
       key: 'boolean_custom_field_1',
-      type: 'boolean',
+      type: 'toggle',
       field: { value: [true] },
     },
     {
       key: 'boolean_custom_field_2',
-      type: 'boolean',
+      type: 'toggle',
       field: { value: null },
     },
     {
@@ -293,19 +295,22 @@ describe('CustomFieldRt', () => {
       type: 'list',
       field: { value: ['this is a text field value'] },
     },
-    {
-      key: 'list_custom_field_2',
-      type: 'list',
-      field: { value: null },
-    },
   ];
 
   it('has expected attributes in request', () => {
-    const query = CaseCustomFields.decode(customFields);
+    const query = CaseCustomFieldsRt.decode(customFields);
 
     expect(query).toStrictEqual({
       _tag: 'Right',
       right: customFields,
     });
+  });
+
+  it('throws an error when there are too many custom fields', () => {
+    const tooLongCustomFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill(customFields[0]);
+
+    expect(PathReporter.report(CaseCustomFieldsRt.decode(tooLongCustomFields))).toContain(
+      'The length of the field customFields is too long. Array must be of length <= 5.'
+    );
   });
 });
