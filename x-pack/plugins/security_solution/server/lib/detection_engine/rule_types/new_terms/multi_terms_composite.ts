@@ -46,7 +46,7 @@ interface MultiTermsCompositeArgs {
   runOpts: RunOpts<NewTermsRuleParams>;
   afterKey: Record<string, string | number | null> | undefined;
 }
-let phase2Count = 0;
+
 export const multiTermsComposite = async ({
   filterArgs,
   buckets,
@@ -80,7 +80,6 @@ export const multiTermsComposite = async ({
 
   while (i < buckets.length) {
     const batch = buckets.slice(i, i + BATCH_SIZE);
-    //  console.log('> Batch/key', internalAfterKey);
     i += BATCH_SIZE;
     const batchFilters = batch.map((b) => {
       const must = Object.keys(b.key).map((key) => ({ match: { [key]: b.key[key] } }));
@@ -122,29 +121,18 @@ export const multiTermsComposite = async ({
 
     result.searchAfterTimes.push(pageSearchDuration);
     result.errors.push(...pageSearchErrors);
-    phase2Count += 1;
-    // logger.fatal(
-    //   `>>> Time spent on phase 2 terms agg: ${pageSearchDuration}, count: ${phase2Count} `
-    // );
+    logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
     const pageSearchResultWithAggs = pageSearchResult as CompositeNewTermsAggResult;
     if (!pageSearchResultWithAggs.aggregations) {
       throw new Error('Aggregations were missing on new terms search result');
     }
 
-    // console.log(
-    //   '!!!!!',
-    //   JSON.stringify(pageSearchResultWithAggs.aggregations.new_terms.buckets, null, 2)
-    // );
     // PHASE 3: For each term that is not in the history window, fetch the oldest document in
     // the rule interval for that term. This is the first document to contain the new term, and will
     // become the basis of the resulting alert.
     // One document could become multiple alerts if the document contains an array with multiple new terms.
     if (pageSearchResultWithAggs.aggregations.new_terms.buckets.length > 0) {
-      console.log(
-        'FOUND BUCKETS',
-        JSON.stringify(pageSearchResultWithAggs.aggregations.new_terms.buckets, null, 2)
-      );
       const {
         searchResult: docFetchSearchResult,
         searchDuration: docFetchSearchDuration,
@@ -215,7 +203,6 @@ export const multiTermsComposite = async ({
     }
 
     internalAfterKey = batch[batch.length - 1]?.key;
-    //  console.log('> next batch/key', phase2Count, internalAfterKey);
   }
 
   return result;

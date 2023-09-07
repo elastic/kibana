@@ -17,14 +17,14 @@ import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import type { EventsAndTerms } from './wrap_new_terms_alerts';
 import type {
-  DocFetchAggResult,
   RecentTermsAggResult,
+  DocFetchAggResult,
   NewTermsAggResult,
 } from './build_new_terms_aggregation';
 import {
-  buildDocFetchAgg,
   buildRecentTermsAgg,
   buildNewTermsAgg,
+  buildDocFetchAgg,
 } from './build_new_terms_aggregation';
 import { validateIndexPatterns } from '../utils';
 import {
@@ -38,10 +38,11 @@ import {
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
-  getMaxSignalsWarning,
   getUnprocessedExceptionsWarnings,
+  getMaxSignalsWarning,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
+import { multiTermsComposite } from './multi_terms_composite';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -124,7 +125,7 @@ export const createNewTermsAlertType = (
         from: params.from,
       });
 
-      const esFilter = await getFilter({
+      const filterArgs = {
         filters: params.filters,
         index: inputIndex,
         language: params.language,
@@ -134,7 +135,8 @@ export const createNewTermsAlertType = (
         query: params.query,
         exceptionFilter,
         fields: inputIndexFields,
-      });
+      };
+      const esFilter = await getFilter(filterArgs);
 
       const parsedHistoryWindowSize = parseDateString({
         date: params.historyWindowStart,
@@ -188,79 +190,48 @@ export const createNewTermsAlertType = (
         result.searchAfterTimes.push(searchDuration);
         result.errors.push(...searchErrors);
 
-        afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
-
         // If the aggregation returns no after_key it signals that we've paged through all results
         // and the current page is empty so we can immediately break.
-        if (afterKey == null) {
+        if (searchResultWithAggs.aggregations.new_terms.after_key == null) {
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-        const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
-        const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
-          params.newTermsFields,
-          bucketsForField
-        );
-
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
-        const {
-          searchResult: pageSearchResult,
-          searchDuration: pageSearchDuration,
-          searchErrors: pageSearchErrors,
-        } = await singleSearchAfter({
-          aggregations: buildNewTermsAgg({
-            newValueWindowStart: tuple.from,
-            timestampField: aggregatableTimestampField,
-            field: getAggregationField(params.newTermsFields),
-            include: includeValues,
-          }),
-          runtimeMappings: {
-            ...runtimeMappings,
-            ...newTermsRuntimeMappings,
-          },
-          searchAfterSortIds: undefined,
-          index: inputIndex,
-          // For Phase 2, we expand the time range to aggregate over the history window
-          // in addition to the rule interval
-          from: parsedHistoryWindowSize.toISOString(),
-          to: tuple.to.toISOString(),
-          services,
-          ruleExecutionLogger,
-          filter: esFilter,
-          pageSize: 0,
-          primaryTimestamp,
-          secondaryTimestamp,
-        });
-        result.searchAfterTimes.push(pageSearchDuration);
-        result.errors.push(...pageSearchErrors);
 
-        logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
-
-        const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
-        if (!pageSearchResultWithAggs.aggregations) {
-          throw new Error('Aggregations were missing on new terms search result');
-        }
-
-        // PHASE 3: For each term that is not in the history window, fetch the oldest document in
-        // the rule interval for that term. This is the first document to contain the new term, and will
-        // become the basis of the resulting alert.
-        // One document could become multiple alerts if the document contains an array with multiple new terms.
-        if (pageSearchResultWithAggs.aggregations.new_terms.buckets.length > 0) {
-          const actualNewTerms = pageSearchResultWithAggs.aggregations.new_terms.buckets.map(
-            (bucket) => bucket.key
+        // separate route for multiple new terms
+        // it uses paging through composite aggregation
+        if (params.newTermsFields.length > 1) {
+          await multiTermsComposite({
+            filterArgs,
+            buckets: bucketsForField,
+            params,
+            aggregatableTimestampField,
+            parsedHistoryWindowSize,
+            services,
+            result,
+            logger,
+            spaceId,
+            runOpts: execOptions.runOpts,
+            afterKey,
+          });
+        } else {
+          const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
+          const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
+            params.newTermsFields,
+            bucketsForField
           );
-
           const {
-            searchResult: docFetchSearchResult,
-            searchDuration: docFetchSearchDuration,
-            searchErrors: docFetchSearchErrors,
+            searchResult: pageSearchResult,
+            searchDuration: pageSearchDuration,
+            searchErrors: pageSearchErrors,
           } = await singleSearchAfter({
-            aggregations: buildDocFetchAgg({
+            aggregations: buildNewTermsAgg({
+              newValueWindowStart: tuple.from,
               timestampField: aggregatableTimestampField,
               field: getAggregationField(params.newTermsFields),
-              include: actualNewTerms,
+              include: includeValues,
             }),
             runtimeMappings: {
               ...runtimeMappings,
@@ -268,8 +239,9 @@ export const createNewTermsAlertType = (
             },
             searchAfterSortIds: undefined,
             index: inputIndex,
-            // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
-            from: tuple.from.toISOString(),
+            // For Phase 2, we expand the time range to aggregate over the history window
+            // in addition to the rule interval
+            from: parsedHistoryWindowSize.toISOString(),
             to: tuple.to.toISOString(),
             services,
             ruleExecutionLogger,
@@ -278,51 +250,99 @@ export const createNewTermsAlertType = (
             primaryTimestamp,
             secondaryTimestamp,
           });
-          result.searchAfterTimes.push(docFetchSearchDuration);
-          result.errors.push(...docFetchSearchErrors);
+          result.searchAfterTimes.push(pageSearchDuration);
+          result.errors.push(...pageSearchErrors);
 
-          const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
+          logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
 
-          if (!docFetchResultWithAggs.aggregations) {
-            throw new Error('Aggregations were missing on document fetch search result');
+          const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
+          if (!pageSearchResultWithAggs.aggregations) {
+            throw new Error('Aggregations were missing on new terms search result');
           }
 
-          const eventsAndTerms: EventsAndTerms[] =
-            docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
-              const newTerms = decodeMatchedValues(params.newTermsFields, bucket.key);
-              return {
-                event: bucket.docs.hits.hits[0],
-                newTerms,
-              };
+          // PHASE 3: For each term that is not in the history window, fetch the oldest document in
+          // the rule interval for that term. This is the first document to contain the new term, and will
+          // become the basis of the resulting alert.
+          // One document could become multiple alerts if the document contains an array with multiple new terms.
+          if (pageSearchResultWithAggs.aggregations.new_terms.buckets.length > 0) {
+            const actualNewTerms = pageSearchResultWithAggs.aggregations.new_terms.buckets.map(
+              (bucket) => bucket.key
+            );
+
+            const {
+              searchResult: docFetchSearchResult,
+              searchDuration: docFetchSearchDuration,
+              searchErrors: docFetchSearchErrors,
+            } = await singleSearchAfter({
+              aggregations: buildDocFetchAgg({
+                timestampField: aggregatableTimestampField,
+                field: getAggregationField(params.newTermsFields),
+                include: actualNewTerms,
+              }),
+              runtimeMappings: {
+                ...runtimeMappings,
+                ...newTermsRuntimeMappings,
+              },
+              searchAfterSortIds: undefined,
+              index: inputIndex,
+              // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
+              from: tuple.from.toISOString(),
+              to: tuple.to.toISOString(),
+              services,
+              ruleExecutionLogger,
+              filter: esFilter,
+              pageSize: 0,
+              primaryTimestamp,
+              secondaryTimestamp,
+            });
+            result.searchAfterTimes.push(docFetchSearchDuration);
+            result.errors.push(...docFetchSearchErrors);
+
+            const docFetchResultWithAggs = docFetchSearchResult as DocFetchAggResult;
+
+            if (!docFetchResultWithAggs.aggregations) {
+              throw new Error('Aggregations were missing on document fetch search result');
+            }
+
+            const eventsAndTerms: EventsAndTerms[] =
+              docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
+                const newTerms = decodeMatchedValues(params.newTermsFields, bucket.key);
+                return {
+                  event: bucket.docs.hits.hits[0],
+                  newTerms,
+                };
+              });
+
+            const wrappedAlerts = wrapNewTermsAlerts({
+              eventsAndTerms,
+              spaceId,
+              completeRule,
+              mergeStrategy,
+              indicesToQuery: inputIndex,
+              alertTimestampOverride,
+              ruleExecutionLogger,
+              publicBaseUrl,
             });
 
-          const wrappedAlerts = wrapNewTermsAlerts({
-            eventsAndTerms,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            indicesToQuery: inputIndex,
-            alertTimestampOverride,
-            ruleExecutionLogger,
-            publicBaseUrl,
-          });
+            const bulkCreateResult = await bulkCreate(
+              wrappedAlerts,
+              params.maxSignals - result.createdSignalsCount,
+              createEnrichEventsFunction({
+                services,
+                logger: ruleExecutionLogger,
+              })
+            );
 
-          const bulkCreateResult = await bulkCreate(
-            wrappedAlerts,
-            params.maxSignals - result.createdSignalsCount,
-            createEnrichEventsFunction({
-              services,
-              logger: ruleExecutionLogger,
-            })
-          );
+            addToSearchAfterReturn({ current: result, next: bulkCreateResult });
 
-          addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-
-          if (bulkCreateResult.alertsWereTruncated) {
-            result.warningMessages.push(getMaxSignalsWarning());
-            break;
+            if (bulkCreateResult.alertsWereTruncated) {
+              result.warningMessages.push(getMaxSignalsWarning());
+              break;
+            }
           }
         }
+
+        afterKey = searchResultWithAggs.aggregations.new_terms.after_key;
       }
       return { ...result, state };
     },
