@@ -21,7 +21,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const filterBar = getService('filterBar');
   const dataViewTitle = 'logstash-2015.09.22';
 
-  describe('Field stats', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165882
+  describe.skip('Field stats', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
