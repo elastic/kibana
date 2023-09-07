@@ -52,6 +52,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/165938
+  // Failing: See https://github.com/elastic/kibana/issues/165927
   describe.skip('Fields existence info', () => {
     before(async () => {
       await esArchiver.load(
