@@ -26709,6 +26709,128 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.API_VERSIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "API_VERSIONS",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.API_VERSIONS.public",
+            "type": "Object",
+            "tags": [],
+            "label": "public",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.API_VERSIONS.public.v1",
+                "type": "string",
+                "tags": [],
+                "label": "v1",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.API_VERSIONS.internal",
+            "type": "Object",
+            "tags": [],
+            "label": "internal",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.API_VERSIONS.internal.v1",
+                "type": "string",
+                "tags": [],
+                "label": "v1",
+                "description": [],
+                "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.APP_API_ROUTES",
+        "type": "Object",
+        "tags": [],
+        "label": "APP_API_ROUTES",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.APP_API_ROUTES.HEALTH_CHECK_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "HEALTH_CHECK_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "CHECK_PERMISSIONS_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "GENERATE_SERVICE_TOKEN_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED",
+            "type": "string",
+            "tags": [],
+            "label": "GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED",
+            "description": [
+              "// deprecated since 8.0"
+            ],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.appRoutesService",
         "type": "Object",
         "tags": [],
