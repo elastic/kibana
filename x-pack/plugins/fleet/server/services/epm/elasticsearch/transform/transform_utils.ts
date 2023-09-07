@@ -34,12 +34,21 @@ export const getDestinationIndexAliases = (aliasSettings: unknown): TransformAli
   if (Array.isArray(aliasSettings)) {
     aliases = aliasSettings.reduce<TransformAliasSetting[]>((acc, aliasGroup) => {
       if (typeof aliasGroup === 'string') {
-        acc.push({ alias: aliasGroup, move_on_creation: aliasGroup.endsWith('.latest') ? true : false });
+        acc.push({
+          alias: aliasGroup,
+          move_on_creation: aliasGroup.endsWith('.latest') ? true : false,
+        });
       }
       if (isPopulatedObject(aliasGroup, ['alias', 'move_on_creation'])) {
-          if (typeof aliasGroup['alias'] === 'string' && typeof aliasGroup['move_on_creation'] === 'boolean') {
-            acc.push({ alias: aliasGroup['alias'], move_on_creation: aliasGroup['move_on_creation'] });
-          }
+        if (
+          typeof aliasGroup.alias === 'string' &&
+          typeof aliasGroup.move_on_creation === 'boolean'
+        ) {
+          acc.push({
+            alias: aliasGroup.alias,
+            move_on_creation: aliasGroup.move_on_creation,
+          });
+        }
       }
       return acc;
     }, []);
