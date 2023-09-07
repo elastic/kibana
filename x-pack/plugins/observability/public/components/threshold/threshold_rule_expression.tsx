@@ -379,7 +379,7 @@ export default function Expressions(props: Props) {
   const placeHolder = i18n.translate(
     'xpack.observability.threshold.rule.alertFlyout.searchBar.placeholder',
     {
-      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+      defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
 
