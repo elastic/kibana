@@ -31,10 +31,11 @@ export interface PanelPlacementProps {
 }
 
 export interface IProvidesPanelPlacementSettings<
-  InputType extends EmbeddableInput = EmbeddableInput
+  InputType extends EmbeddableInput = EmbeddableInput,
+  AttributesType = unknown
 > {
   getPanelPlacementSettings: (
     input: InputType,
-    placementMeta?: unknown
+    attributes?: AttributesType
   ) => Partial<PanelPlacementSettings>;
 }

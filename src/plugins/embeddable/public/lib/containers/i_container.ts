@@ -97,7 +97,7 @@ export interface IContainer<
   >(
     type: string,
     explicitInput: Partial<EEI>,
-    panelStateMeta?: unknown
+    attributes?: unknown
   ): Promise<E | ErrorEmbeddable>;
 
   replaceEmbeddable<

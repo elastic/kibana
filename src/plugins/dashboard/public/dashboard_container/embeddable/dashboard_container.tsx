@@ -219,13 +219,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {},
-    panelStateMeta?: unknown
+    attributes?: unknown
   ): {
     newPanel: DashboardPanelState<TEmbeddableInput>;
     otherPanels: DashboardContainerInput['panels'];
   } {
-    const { newPanel } = super.createNewPanelState(factory, partial, panelStateMeta);
-    return placePanel(factory, newPanel, this.input.panels, panelStateMeta);
+    const { newPanel } = super.createNewPanelState(factory, partial, attributes);
+    return placePanel(factory, newPanel, this.input.panels, attributes);
   }
 
   public render(dom: HTMLElement) {

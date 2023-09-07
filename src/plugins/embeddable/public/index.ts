@@ -76,7 +76,7 @@ export {
   EmbeddableRenderer,
   useEmbeddableFactory,
   isFilterableEmbeddable,
-  isExplicitInputWithPanelStateMeta,
+  isExplicitInputWithAttributes,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
   PANEL_HOVER_TRIGGER,

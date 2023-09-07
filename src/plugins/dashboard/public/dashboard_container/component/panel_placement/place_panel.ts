@@ -23,7 +23,7 @@ export function placePanel<TEmbeddableInput extends EmbeddableInput>(
   factory: EmbeddableFactory,
   newPanel: PanelState<TEmbeddableInput>,
   currentPanels: { [key: string]: DashboardPanelState },
-  panelStateMeta?: unknown
+  attributes?: unknown
 ): {
   newPanel: DashboardPanelState<TEmbeddableInput>;
   otherPanels: { [key: string]: DashboardPanelState };
@@ -36,7 +36,7 @@ export function placePanel<TEmbeddableInput extends EmbeddableInput>(
   if (providesPanelPlacementSettings(factory)) {
     placementSettings = {
       ...placementSettings,
-      ...factory.getPanelPlacementSettings(newPanel.explicitInput, panelStateMeta),
+      ...factory.getPanelPlacementSettings(newPanel.explicitInput, attributes),
     };
   }
   const { width, height, strategy } = placementSettings;

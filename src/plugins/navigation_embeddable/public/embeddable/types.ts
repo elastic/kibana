@@ -66,7 +66,7 @@ export const NavigationLinkInfo: {
 };
 
 export interface NavigationEmbeddableEditorFlyoutReturn {
-  panelStateMeta?: unknown;
+  attributes?: unknown;
   newInput: Partial<NavigationEmbeddableInput>;
 }
 

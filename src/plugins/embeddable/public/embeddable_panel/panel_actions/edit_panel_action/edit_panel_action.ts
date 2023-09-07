@@ -18,7 +18,7 @@ import {
   EmbeddableInput,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
-  isExplicitInputWithPanelStateMeta,
+  isExplicitInputWithAttributes,
 } from '../../../lib';
 import { ViewMode } from '../../../lib/types';
 import { EmbeddableStart } from '../../../plugin';
@@ -101,7 +101,7 @@ export class EditPanelAction implements Action<ActionContext> {
           oldExplicitInput,
           embeddable.parent
         );
-        newExplicitInput = isExplicitInputWithPanelStateMeta(explicitInputReturn)
+        newExplicitInput = isExplicitInputWithAttributes(explicitInputReturn)
           ? explicitInputReturn.newInput
           : explicitInputReturn;
       } catch (e) {

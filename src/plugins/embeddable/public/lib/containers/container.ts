@@ -160,11 +160,7 @@ export abstract class Container<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
-  >(
-    type: string,
-    explicitInput: Partial<EEI>,
-    panelStateMeta?: unknown
-  ): Promise<E | ErrorEmbeddable> {
+  >(type: string, explicitInput: Partial<EEI>, attributes?: unknown): Promise<E | ErrorEmbeddable> {
     const factory = this.getFactory(type) as EmbeddableFactory<EEI, EEO, E> | undefined;
 
     if (!factory) {
@@ -174,7 +170,7 @@ export abstract class Container<
     const { newPanel, otherPanels } = this.createNewPanelState<EEI, E>(
       factory,
       explicitInput,
-      panelStateMeta
+      attributes
     );
 
     return this.createAndSaveEmbeddable(type, newPanel, otherPanels);
@@ -351,7 +347,7 @@ export abstract class Container<
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {},
-    panelStateMeta?: unknown
+    attributes?: unknown
   ): { newPanel: PanelState<TEmbeddableInput>; otherPanels: TContainerInput['panels'] } {
     const embeddableId = partial.id || uuidv4();
 

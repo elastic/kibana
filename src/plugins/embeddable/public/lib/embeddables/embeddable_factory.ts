@@ -24,15 +24,15 @@ export interface OutputSpec {
   [key: string]: PropertySpec;
 }
 
-export interface ExplicitInputWithPanelStateMeta {
+export interface ExplicitInputWithAttributes {
   newInput: Partial<EmbeddableInput>;
-  panelStateMeta?: unknown;
+  attributes?: unknown;
 }
 
-export const isExplicitInputWithPanelStateMeta = (
-  value: ExplicitInputWithPanelStateMeta | Partial<EmbeddableInput>
-): value is ExplicitInputWithPanelStateMeta => {
-  return Boolean((value as ExplicitInputWithPanelStateMeta).newInput);
+export const isExplicitInputWithAttributes = (
+  value: ExplicitInputWithAttributes | Partial<EmbeddableInput>
+): value is ExplicitInputWithAttributes => {
+  return Boolean((value as ExplicitInputWithAttributes).newInput);
 };
 
 /**
@@ -118,13 +118,13 @@ export interface EmbeddableFactory<
    *
    * Can be used to edit an embeddable by re-requesting explicit input. Initial input can be provided to allow the editor to show the current state.
    *
-   * If meta information is needed for creation use-cases, getExplicitInput can also return an unknown typed panelStateMeta which will be passed
+   * If saved object information is needed for creation use-cases, getExplicitInput can also return an unknown typed attributes object which will be passed
    * into the container's addNewEmbeddable function.
    */
   getExplicitInput(
     initialInput?: Partial<TEmbeddableInput>,
     parent?: IContainer
-  ): Promise<Partial<TEmbeddableInput> | ExplicitInputWithPanelStateMeta>;
+  ): Promise<Partial<TEmbeddableInput> | ExplicitInputWithAttributes>;
 
   /**
    * Creates a new embeddable instance based off the saved object id.

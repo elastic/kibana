@@ -14,8 +14,8 @@ import { useEuiTheme } from '@elastic/eui';
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { isExplicitInputWithAttributes } from '@kbn/embeddable-plugin/public';
 
-import { isExplicitInputWithPanelStateMeta } from '@kbn/embeddable-plugin/public';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
@@ -85,12 +85,12 @@ export function DashboardEditingToolbar() {
       }
 
       let explicitInput: Partial<EmbeddableInput>;
-      let panelStateMeta: unknown;
+      let attributes: unknown;
       try {
         const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, dashboard);
-        if (isExplicitInputWithPanelStateMeta(explicitInputReturn)) {
+        if (isExplicitInputWithAttributes(explicitInputReturn)) {
           explicitInput = explicitInputReturn.newInput;
-          panelStateMeta = explicitInputReturn.panelStateMeta;
+          attributes = explicitInputReturn.attributes;
         } else {
           explicitInput = explicitInputReturn;
         }
@@ -102,7 +102,7 @@ export function DashboardEditingToolbar() {
       const newEmbeddable = await dashboard.addNewEmbeddable(
         embeddableFactory.type,
         explicitInput,
-        panelStateMeta
+        attributes
       );
 
       if (newEmbeddable) {

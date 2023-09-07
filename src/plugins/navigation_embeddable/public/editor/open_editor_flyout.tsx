@@ -68,8 +68,8 @@ export async function openEditorFlyout(
       resolve({
         newInput: updatedInput,
 
-        // pass attributes via panelStateMeta so that the Dashboard can choose the right panel size.
-        panelStateMeta: newAttributes,
+        // pass attributes via attributes so that the Dashboard can choose the right panel size.
+        attributes: newAttributes,
       });
       parentDashboard?.reload();
       editorFlyout.close();
@@ -91,8 +91,8 @@ export async function openEditorFlyout(
       resolve({
         newInput,
 
-        // pass attributes via panelStateMeta so that the Dashboard can choose the right panel size.
-        panelStateMeta: newAttributes,
+        // pass attributes so that the Dashboard can choose the right panel size.
+        attributes: newAttributes,
       });
       parentDashboard?.reload();
       editorFlyout.close();

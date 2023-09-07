@@ -42,10 +42,15 @@ const getDefaultNavigationEmbeddableInput = (): Partial<NavigationEmbeddableInpu
   disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
-const placementMetaContainsAttributes = (meta: unknown): meta is NavigationEmbeddableAttributes => {
-  return Boolean(
-    (meta as NavigationEmbeddableAttributes).layout ||
-      (meta as NavigationEmbeddableAttributes).links
+const isNavigationEmbeddableAttributes = (
+  attributes?: unknown
+): attributes is NavigationEmbeddableAttributes => {
+  return (
+    attributes !== undefined &&
+    Boolean(
+      (attributes as NavigationEmbeddableAttributes).layout ||
+        (attributes as NavigationEmbeddableAttributes).links
+    )
   );
 };
 
@@ -70,18 +75,21 @@ export class NavigationEmbeddableFactoryDefinition
     getIconForSavedObject: () => APP_ICON,
   };
 
-  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<NavigationEmbeddableInput>['getPanelPlacementSettings'] =
-    (input, placementMeta) => {
-      if (!placementMetaContainsAttributes(placementMeta) || !placementMeta.layout) {
-        // if we have no information about the layout of this nav embeddable defer to default panel size and placement.
-        return {};
-      }
+  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
+    NavigationEmbeddableInput,
+    NavigationEmbeddableAttributes | unknown
+  >['getPanelPlacementSettings'] = (input, attributes) => {
+    debugger;
+    if (!isNavigationEmbeddableAttributes(attributes) || !attributes.layout) {
+      // if we have no information about the layout of this nav embeddable defer to default panel size and placement.
+      return {};
+    }
 
-      const isHorizontal = placementMeta.layout === 'horizontal';
-      const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-      const height = isHorizontal ? 4 : (placementMeta.links?.length ?? 1 * 3) + 4;
-      return { width, height, strategy: 'placeAtTop' };
-    };
+    const isHorizontal = attributes.layout === 'horizontal';
+    const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
+    const height = isHorizontal ? 4 : (attributes.links?.length ?? 1 * 3) + 4;
+    return { width, height, strategy: 'placeAtTop' };
+  };
 
   public async isEditable() {
     await untilPluginStartServicesReady();
@@ -131,7 +139,7 @@ export class NavigationEmbeddableFactoryDefinition
 
     const { openEditorFlyout } = await import('../editor/open_editor_flyout');
 
-    const { newInput, panelStateMeta } = await openEditorFlyout(
+    const { newInput, attributes } = await openEditorFlyout(
       {
         ...getDefaultNavigationEmbeddableInput(),
         ...initialInput,
@@ -139,7 +147,7 @@ export class NavigationEmbeddableFactoryDefinition
       parent
     );
 
-    return { newInput, panelStateMeta };
+    return { newInput, attributes };
   }
 
   public getDisplayName() {
