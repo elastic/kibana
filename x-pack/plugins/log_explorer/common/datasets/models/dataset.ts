@@ -8,6 +8,7 @@
 import { IconType } from '@elastic/eui';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { IndexPattern } from '@kbn/io-ts-utils';
+import { TIMESTAMP_FIELD } from '../../constants';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>;
@@ -53,6 +54,7 @@ export class Dataset {
     return {
       id: this.id,
       name: this.getFullTitle(),
+      timeFieldName: TIMESTAMP_FIELD,
       title: this.name as string,
     };
   }
