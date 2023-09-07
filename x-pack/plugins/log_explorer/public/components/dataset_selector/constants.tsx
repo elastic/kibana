@@ -15,8 +15,6 @@ export const UNCATEGORIZED_TAB_ID = 'uncategorized_tab';
 
 export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
 
-export const contextMenuStyles = { height: '100%', maxHeight: 440 };
-
 export const showAllLogsLabel = i18n.translate('xpack.logExplorer.datasetSelector.showAllLogs', {
   defaultMessage: 'Show all logs',
 });

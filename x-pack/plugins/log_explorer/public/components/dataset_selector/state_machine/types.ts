@@ -19,7 +19,7 @@ export interface DefaultDatasetsSelectorContext {
   selection: DatasetSelection;
   tabId: TabId;
   panelId: PanelId;
-  searchCache: IHashedCache<PanelId, DatasetsSelectorSearchParams>;
+  searchCache: IHashedCache<PanelId | TabId, DatasetsSelectorSearchParams>;
   search: DatasetsSelectorSearchParams;
 }
 

@@ -10,7 +10,6 @@ import styled from '@emotion/styled';
 import { EuiContextMenu, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import {
-  contextMenuStyles,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
   integrationsLabel,
   INTEGRATIONS_PANEL_ID,
@@ -29,7 +28,6 @@ import {
   createIntegrationStatusItem,
   createUncategorizedStatusItem,
 } from './utils';
-import { useLazyRef } from '../../hooks/use_lazy_ref';
 
 export function DatasetSelector({
   datasets,
@@ -52,11 +50,11 @@ export function DatasetSelector({
   onUnmanagedStreamsSort,
 }: DatasetSelectorProps) {
   const {
-    isOpen,
     panelId,
     search,
-    selection,
     tabId,
+    isOpen,
+    isAllMode,
     changePanel,
     closePopover,
     scrollToIntegrationsBottom,
@@ -138,19 +136,8 @@ export function DatasetSelector({
     },
   ];
 
-  // This map allow to keep track of which tabs content have been rendered the first time.
-  // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
-  const renderedTabsSet = useLazyRef(() => new Set([tabId]));
-
   const tabEntries = tabs.map((tab) => (
-    <EuiTab
-      key={tab.id}
-      onClick={() => {
-        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
-        if (tab.onClick) tab.onClick();
-      }}
-      isSelected={tab.id === tabId}
-    >
+    <EuiTab key={tab.id} onClick={tab.onClick} isSelected={tab.id === tabId}>
       {tab.name}
     </EuiTab>
   ));
@@ -164,10 +151,7 @@ export function DatasetSelector({
     >
       <Tabs>{tabEntries}</Tabs>
       <SelectorActions>
-        <SelectorActions.ShowAllLogs
-          isSelected={selection.selectionType === 'all'}
-          onClick={selectAllLogDataset}
-        />
+        <SelectorActions.ShowAllLogs isSelected={isAllMode} onClick={selectAllLogDataset} />
       </SelectorActions>
       <EuiHorizontalRule margin="none" />
       <SearchControls
@@ -178,47 +162,49 @@ export function DatasetSelector({
         isLoading={isLoadingIntegrations || isLoadingStreams}
       />
       <EuiHorizontalRule margin="none" />
-      {renderedTabsSet.current.has(INTEGRATIONS_TAB_ID) && (
-        <EuiContextMenu
-          hidden={tabId !== INTEGRATIONS_TAB_ID}
-          initialPanelId={panelId}
-          panels={[
-            {
-              id: INTEGRATIONS_PANEL_ID,
-              title: integrationsLabel,
-              width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-              items: integrationItems,
-            },
-            ...integrationPanels,
-          ]}
-          onPanelChange={changePanel}
-          className="eui-yScroll"
-          css={contextMenuStyles}
-          data-test-subj="datasetSelectorContextMenu"
-          size="s"
-        />
-      )}
-      {renderedTabsSet.current.has(UNCATEGORIZED_TAB_ID) && (
-        <EuiContextMenu
-          hidden={tabId !== UNCATEGORIZED_TAB_ID}
-          initialPanelId={UNCATEGORIZED_PANEL_ID}
-          panels={[
-            {
-              id: UNCATEGORIZED_PANEL_ID,
-              title: uncategorizedLabel,
-              width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-              items: uncategorizedItems,
-            },
-          ]}
-          className="eui-yScroll"
-          css={contextMenuStyles}
-          size="s"
-        />
-      )}
+      {/* Integrations tab content */}
+      <ContextMenu
+        hidden={tabId !== INTEGRATIONS_TAB_ID}
+        initialPanelId={panelId}
+        panels={[
+          {
+            id: INTEGRATIONS_PANEL_ID,
+            title: integrationsLabel,
+            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            items: integrationItems,
+          },
+          ...integrationPanels,
+        ]}
+        onPanelChange={changePanel}
+        className="eui-yScroll"
+        data-test-subj="integrationsContextMenu"
+        size="s"
+      />
+      {/* Uncategorized tab content */}
+      <ContextMenu
+        hidden={tabId !== UNCATEGORIZED_TAB_ID}
+        initialPanelId={UNCATEGORIZED_PANEL_ID}
+        panels={[
+          {
+            id: UNCATEGORIZED_PANEL_ID,
+            title: uncategorizedLabel,
+            width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+            items: uncategorizedItems,
+          },
+        ]}
+        className="eui-yScroll"
+        data-test-subj="uncategorizedContextMenu"
+        size="s"
+      />
     </DatasetsPopover>
   );
 }
 
 const Tabs = styled(EuiTabs)`
   padding: 0 8px;
+`;
+
+const ContextMenu = styled(EuiContextMenu)`
+  max-height: 440px;
+  transition: none !important;
 `;

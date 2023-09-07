@@ -110,11 +110,13 @@ export const useDatasetSelector = ({
 
   return {
     // Data
-    isOpen,
     panelId,
     search,
     selection,
     tabId,
+    // Flags
+    isOpen,
+    isAllMode: selection.selectionType === 'all',
     // Actions
     changePanel,
     closePopover,
