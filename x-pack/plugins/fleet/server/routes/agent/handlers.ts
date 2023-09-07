@@ -369,7 +369,6 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
   let versionsToDisplay: string[] = [];
 
   const kibanaVersion = appContextService.getKibanaVersion();
-  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
   try {
     const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
@@ -385,9 +384,9 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
     const parsedVersions = uniq(versions) as string[];
 
     // Add current version if not already present
-    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
+    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersion);
     versionsToDisplay = !hasCurrentVersion
-      ? [kibanaVersionCoerced].concat(parsedVersions)
+      ? [kibanaVersion].concat(parsedVersions)
       : parsedVersions;
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
