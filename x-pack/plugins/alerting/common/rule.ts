@@ -108,15 +108,17 @@ export interface AlertsFilter {
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
 /**
- * This enum is being used in versioned
+ * The RuleActionTypes is being used in versioned
  * routes and rule client's schemas. Renaming
  * or removing a type will introduce a
  * breaking change
  */
-export enum RuleActionTypes {
-  DEFAULT = 'default',
-  SYSTEM = 'system',
-}
+export const RuleActionTypes = {
+  DEFAULT: 'default' as const,
+  SYSTEM: 'system' as const,
+} as const;
+
+export type RuleActionTypes = typeof RuleActionTypes[keyof typeof RuleActionTypes];
 
 export interface RuleDefaultAction {
   uuid?: string;
@@ -126,7 +128,7 @@ export interface RuleDefaultAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
-  type?: RuleActionTypes.DEFAULT;
+  type?: typeof RuleActionTypes.DEFAULT;
 }
 
 export interface RuleSystemAction {
@@ -134,7 +136,7 @@ export interface RuleSystemAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
-  type: RuleActionTypes.SYSTEM;
+  type: typeof RuleActionTypes.SYSTEM;
 }
 
 export type RuleAction = RuleDefaultAction | RuleSystemAction;

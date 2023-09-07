@@ -417,7 +417,7 @@ export interface RawDefaultAction {
     throttle: string | null;
   };
   alertsFilter?: RawRuleAlertsFilter;
-  type?: RuleActionTypes.DEFAULT;
+  type?: typeof RuleActionTypes.DEFAULT;
 }
 
 interface RawSystemAction {
@@ -425,7 +425,7 @@ interface RawSystemAction {
   actionRef: string;
   actionTypeId: string;
   params: RuleActionParams;
-  type: RuleActionTypes.SYSTEM;
+  type: typeof RuleActionTypes.SYSTEM;
 }
 
 export type RawRuleAction = RawDefaultAction | RawSystemAction;

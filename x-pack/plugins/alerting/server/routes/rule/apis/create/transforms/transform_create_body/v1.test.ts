@@ -6,7 +6,6 @@
  */
 
 import { CreateRuleRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/create';
-import { RuleActionTypes } from '../../../../../../../common';
 import { transformCreateBody } from './v1';
 
 describe('transformCreateBody', () => {
@@ -27,7 +26,7 @@ describe('transformCreateBody', () => {
     uuid: '111',
     params: { foo: 'bar' },
     actionTypeId: '.test',
-    type: RuleActionTypes.SYSTEM as const,
+    type: 'system' as const,
   };
 
   const rule: CreateRuleRequestBodyV1<{}> = {
