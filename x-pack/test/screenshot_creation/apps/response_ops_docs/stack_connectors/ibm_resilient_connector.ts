@@ -25,8 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('resilient');
       await testSubjects.setValue('nameInput', 'IBM Resilient test connector');
+      await testSubjects.setValue('config.apiUrl-input', 'https://example.com');
+      await testSubjects.setValue('config.orgId-input', 'ES');
+      await testSubjects.setValue('secrets.apiKeyId-input', 'tester');
+      await testSubjects.setValue('secrets.apiKeySecret-input', 'testkey');
       await commonScreenshots.takeScreenshot('resilient-connector', screenshotDirectories);
-      // await testSubjects.setValue('secrets.apiKey-input', 'testkey');
       // await testSubjects.click('create-connector-flyout-save-test-btn');
       // await testSubjects.click('toastCloseButton');
       // const editor = await testSubjects.find('kibanaCodeEditor');
