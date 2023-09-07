@@ -52,6 +52,7 @@ import {
   addEmailConnectorAndRuleAction,
   assertEmailRuleAction,
 } from '../../tasks/common/rule_actions';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
 import {
   openBulkActionsMenu,
@@ -72,7 +73,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
     login();
     deleteAlertsAndRules();
     deleteConnectors();
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
 
     createSlackConnector().then(({ body }) => {
       const actions: RuleActionArray = [

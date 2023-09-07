@@ -27,6 +27,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../tasks/common';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
 import {
   openBulkEditAddIndexPatternsForm,
@@ -50,7 +51,7 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
     login();
 
     postDataView(DATA_VIEW_ID);
@@ -240,7 +241,7 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
 
     postDataView(DATA_VIEW_ID);
 

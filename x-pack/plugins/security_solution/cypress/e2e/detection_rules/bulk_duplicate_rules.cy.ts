@@ -27,6 +27,7 @@ import {
   duplicateSelectedRulesWithNonExpiredExceptions,
   duplicateSelectedRulesWithoutExceptions,
 } from '../../tasks/rules_bulk_actions';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -55,7 +56,7 @@ describe('Detection rules, bulk duplicate', () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
     createRule(
       getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false })
     ).then((response) => {

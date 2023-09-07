@@ -8,6 +8,7 @@
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
 import {
   addElasticRulesButtonClick,
@@ -27,7 +28,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Error handli
     login();
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
 
     visitSecurityDetectionRulesPage();
   });

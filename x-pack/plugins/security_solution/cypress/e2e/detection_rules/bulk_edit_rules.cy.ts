@@ -52,6 +52,7 @@ import {
 import { createRule } from '../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../tasks/api_calls/timelines';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
 import {
   openBulkActionsMenu,
@@ -110,7 +111,7 @@ describe('Detection rules, bulk edit', () => {
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
+    esArchiverResetKibana();
     createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1', enabled: false }));
     createRule(
       getEqlRule({ ...defaultRuleData, rule_id: '2', name: 'New EQL Rule', enabled: false })
