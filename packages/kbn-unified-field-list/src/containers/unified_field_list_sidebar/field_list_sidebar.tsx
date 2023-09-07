@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import {
+  EuiButton,
+  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
@@ -27,7 +29,7 @@ import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-u
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
-import { FieldsGroupNames } from '../../types';
+import { FieldsGroupNames, type ButtonAddFieldVariant } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
@@ -96,6 +98,11 @@ interface UnifiedFieldListSidebarInternalProps {
   alwaysShowActionButton?: UnifiedFieldListItemProps['alwaysShowActionButton'];
 
   /**
+   * What button style type to use
+   */
+  buttonAddFieldVariant: ButtonAddFieldVariant;
+
+  /**
    * In case if sidebar is collapsible by default
    * Pass `undefined` to hide the collapse/expand buttons from the sidebar
    */
@@ -127,6 +134,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   workspaceSelectedFieldNames,
   isProcessing,
   alwaysShowActionButton,
+  buttonAddFieldVariant,
   isSidebarCollapsed,
   allFields,
   dataView,
@@ -308,6 +316,21 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     );
   }
 
+  const hasButtonAddFieldToolbarStyle = buttonAddFieldVariant === 'toolbar';
+  const buttonAddFieldCommonProps: Partial<EuiButtonProps> = {
+    size: 's',
+    iconType: 'indexOpen',
+    'data-test-subj':
+      stateService.creationOptions.dataTestSubj?.fieldListAddFieldButtonTestSubj ??
+      'unifiedFieldListAddField',
+  };
+  const buttonAddFieldLabel = i18n.translate(
+    'unifiedFieldList.fieldListSidebar.addFieldButtonLabel',
+    {
+      defaultMessage: 'Add a field',
+    }
+  );
+
   return (
     <EuiPageSidebar {...pageSidebarProps}>
       <EuiFlexGroup
@@ -362,27 +385,26 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           <EuiFlexItem
             grow={false}
             css={
-              alwaysShowActionButton
-                ? undefined
-                : css`
+              hasButtonAddFieldToolbarStyle
+                ? css`
                     padding: ${euiTheme.size.s};
                     background-color: ${buttonBackgroundColor};
                     border-top: ${euiTheme.border.thin};
                   `
+                : undefined
             }
           >
-            <ToolbarButton
-              iconType="indexOpen"
-              label={i18n.translate('unifiedFieldList.fieldListSidebar.addFieldButtonLabel', {
-                defaultMessage: 'Add a field',
-              })}
-              data-test-subj={
-                stateService.creationOptions.dataTestSubj?.fieldListAddFieldButtonTestSubj ??
-                'unifiedFieldListAddField'
-              }
-              onClick={() => onEditField()}
-              size="s"
-            />
+            {hasButtonAddFieldToolbarStyle ? (
+              <ToolbarButton
+                {...buttonAddFieldCommonProps}
+                label={buttonAddFieldLabel}
+                onClick={() => onEditField()}
+              />
+            ) : (
+              <EuiButton {...buttonAddFieldCommonProps} onChange={() => onEditField()}>
+                {buttonAddFieldLabel}
+              </EuiButton>
+            )}
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

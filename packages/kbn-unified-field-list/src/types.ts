@@ -107,6 +107,8 @@ export type OverrideFieldGroupDetails = (
 
 export type TimeRangeUpdatesType = 'search-session' | 'timefilter';
 
+export type ButtonAddFieldVariant = 'primary' | 'toolbar';
+
 export type SearchMode = 'documents' | 'text-based';
 
 export interface UnifiedFieldListSidebarContainerCreationOptions {
@@ -124,6 +126,11 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
    * Pass `timefilter` only if you are not using search sessions for the global search
    */
   timeRangeUpdatesType?: TimeRangeUpdatesType;
+
+  /**
+   * Choose how the bottom "Add a field" button should look like. Default `primary`.
+   */
+  buttonAddFieldVariant?: ButtonAddFieldVariant;
 
   /**
    * Pass `true` to make the sidebar collapsible. Additionally, define `localStorageKeyPrefix` to persist toggle state.

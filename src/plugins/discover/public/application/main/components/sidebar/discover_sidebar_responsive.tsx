@@ -44,6 +44,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     localStorageKeyPrefix: 'discover',
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
+    buttonAddFieldVariant: 'toolbar',
     buttonPropsToTriggerFlyout: {
       contentProps: {
         id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,

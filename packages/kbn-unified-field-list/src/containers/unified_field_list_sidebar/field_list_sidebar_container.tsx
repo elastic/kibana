@@ -246,6 +246,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     isAffectedByGlobalFilter,
     onEditField: editField,
     onDeleteField: deleteField,
+    buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
   };
 
   if (stateService.creationOptions.showSidebarToggleButton) {
@@ -320,6 +321,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
               <UnifiedFieldListSidebar
                 {...commonSidebarProps}
                 alwaysShowActionButton={true}
+                buttonAddFieldVariant="primary" // always for the flyout
                 isSidebarCollapsed={undefined}
                 prepend={prependInFlyout?.()}
               />
