@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import type { ComponentType } from 'react';
-import { from, of } from 'rxjs';
+import { from } from 'rxjs';
 import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 
 import { TagList } from '../mocks';
