@@ -111,6 +111,7 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
   });
 
   // Flaky on serverless
+  // FLAKY: https://github.com/elastic/kibana/issues/165740
   describe(
     'while on a happy path',
     { tags: ['@ess', '@serverless', '@brokenInServerless'] },

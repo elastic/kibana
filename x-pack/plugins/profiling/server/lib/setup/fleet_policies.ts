@@ -189,17 +189,23 @@ export async function validateProfilingInApmPackagePolicy({
   soClient,
   packagePolicyClient,
 }: ProfilingSetupOptions): Promise<PartialSetupState> {
-  const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
-
-  return {
-    policies: {
-      apm: {
-        profilingEnabled: !!(
-          apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
-        ),
+  try {
+    const apmPolicy = await getApmPolicy({ packagePolicyClient, soClient });
+    return {
+      policies: {
+        apm: {
+          profilingEnabled: !!(
+            apmPolicy && apmPolicy?.inputs[0].config?.['apm-server'].value?.profiling
+          ),
+        },
       },
-    },
-  };
+    };
+  } catch (e) {
+    // In case apm integration is not available ignore the error and return as profiling is not enabled on the integration
+    return {
+      policies: { apm: { profilingEnabled: false } },
+    };
+  }
 }
 
 export async function removeProfilingFromApmPackagePolicy({
