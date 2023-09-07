@@ -45,7 +45,6 @@ export function transformUpdateResponseToExternalModel(
     status,
     total_alerts,
     total_comments,
-    customFields,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??

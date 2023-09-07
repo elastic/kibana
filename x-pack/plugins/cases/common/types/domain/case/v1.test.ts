@@ -14,7 +14,7 @@ import {
   CasesRt,
   CaseStatuses,
   RelatedCaseRt,
-  CaseCustomFieldsArrayRt,
+  CaseCustomFields,
 } from './v1';
 
 const basicCase = {
@@ -266,7 +266,7 @@ describe('CasesRt', () => {
   });
 });
 
-describe('CustomFieldValueTypesRt', () => {
+describe('CustomFieldRt', () => {
   const customFields = [
     {
       key: 'string_custom_field_1',
@@ -301,7 +301,7 @@ describe('CustomFieldValueTypesRt', () => {
   ];
 
   it('has expected attributes in request', () => {
-    const query = CaseCustomFieldsArrayRt.decode(customFields);
+    const query = CaseCustomFields.decode(customFields);
 
     expect(query).toStrictEqual({
       _tag: 'Right',

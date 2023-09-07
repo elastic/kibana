@@ -292,11 +292,33 @@ describe('Status', () => {
     });
 
     it('removes foo:bar attributes from customFields', () => {
-      const customField = defaultRequest.customFields ? defaultRequest.customFields[0] : {};
+      const customField = {
+        key: 'first_custom_field_key',
+        type: 'string',
+        field: { value: ['this is a text field value', 'this is second'] },
+      };
 
       const query = CasePostRequestRt.decode({
         ...defaultRequest,
         customFields: [{ ...customField, foo: 'bar' }],
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, customFields: [{ ...customField }] },
+      });
+    });
+
+    it('removes foo:bar attributes from field inside customFields', () => {
+      const customField = {
+        key: 'first_custom_field_key',
+        type: 'string',
+        field: { value: ['this is a text field value', 'this is second'] },
+      };
+
+      const query = CasePostRequestRt.decode({
+        ...defaultRequest,
+        customFields: [{ ...customField, field: { ...customField.field, foo: 'bar' } }],
       });
 
       expect(query).toStrictEqual({

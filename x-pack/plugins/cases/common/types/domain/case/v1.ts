@@ -7,10 +7,12 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import { limitedArraySchema } from '../../../schema';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../constants';
 
 export { CaseStatuses };
 
@@ -54,15 +56,15 @@ export const CaseSettingsRt = rt.strict({
 const customFieldValue = <C extends rt.Mixed>(codec: C) =>
   rt.strict({ value: rt.union([rt.array(codec), rt.null]) });
 
-const CustomFieldString = rt.strict({
+const CustomFieldText = rt.strict({
   key: rt.string,
-  type: rt.literal('string'),
+  type: rt.literal('text'),
   field: customFieldValue(rt.string),
 });
 
-const CustomFieldBoolean = rt.strict({
+const CustomFieldToggle = rt.strict({
   key: rt.string,
-  type: rt.literal('boolean'),
+  type: rt.literal('toggle'),
   field: customFieldValue(rt.boolean),
 });
 
@@ -72,9 +74,14 @@ const CustomFieldList = rt.strict({
   field: customFieldValue(rt.string),
 });
 
-const CustomFieldValueTypesRt = rt.union([CustomFieldString, CustomFieldBoolean, CustomFieldList]);
+const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle, CustomFieldList]);
 
-export const CaseCustomFieldsArrayRt = rt.array(CustomFieldValueTypesRt);
+export const CaseCustomFields = limitedArraySchema({
+  codec: CustomFieldRt,
+  fieldName: 'customFields',
+  min: 0,
+  max: MAX_CUSTOM_FIELDS_PER_CASE,
+});
 
 const CaseBasicRt = rt.strict({
   /**
@@ -121,7 +128,7 @@ const CaseBasicRt = rt.strict({
    * An array containing the possible,
    * user-configured custom fields.
    */
-  customFields: CaseCustomFieldsArrayRt,
+  customFields: CaseCustomFields,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -169,7 +176,7 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
-export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsArrayRt>;
+export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFields>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;

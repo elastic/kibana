@@ -32,7 +32,7 @@ import {
   CaseRt,
   CaseSettingsRt,
   CaseSeverityRt,
-  CaseCustomFieldsArrayRt,
+  CaseCustomFields,
   CasesRt,
   CaseStatusRt,
   RelatedCaseRt,
@@ -107,7 +107,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The list of custom field values of the case.
        */
-      customFields: CaseCustomFieldsArrayRt,
+      customFields: CaseCustomFields,
     })
   ),
 ]);
@@ -365,7 +365,7 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * Custom fields of the case
        */
-      customFields: CaseCustomFieldsArrayRt,
+      customFields: CaseCustomFields,
     })
   ),
   /**
