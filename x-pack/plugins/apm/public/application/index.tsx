@@ -24,7 +24,6 @@ import { ApmAppRoot } from '../components/routing/app_root';
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
-
 export const renderApp = ({
   coreStart,
   pluginsSetup,

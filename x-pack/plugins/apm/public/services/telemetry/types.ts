@@ -32,7 +32,7 @@ export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
 }
 
-export type TelemetryEvent = {
+export interface TelemetryEvent {
   eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED;
   schema: RootSchema<SearchQuerySubmittedParams>;
-};
+}
