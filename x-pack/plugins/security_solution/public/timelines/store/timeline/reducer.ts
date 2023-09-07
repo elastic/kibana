@@ -59,6 +59,7 @@ import {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
+  updateColumnWidth,
 } from './actions';
 
 import {
@@ -98,6 +99,7 @@ import {
   applyDeltaToTableColumnWidth,
   updateTimelinePerPageOptions,
   updateTimelineItemsPerPage,
+  updateTimelineColumnWidth,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -508,6 +510,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       columnId,
       delta,
       timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateColumnWidth, (state, { id, columnId, width }) => ({
+    ...state,
+    timelineById: updateTimelineColumnWidth({
+      columnId,
+      id,
+      timelineById: state.timelineById,
+      width,
     }),
   }))
   .case(clearEventsDeleted, (state, { id }) => ({

@@ -85,7 +85,9 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   const dispatch = useDispatch();
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+  const { defaultColumns } = useDeepEqualSelector(
+    (state) => getManageTimeline(state, timelineId ?? TimelineId.active) // TODO fix
+  );
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
@@ -215,7 +217,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
         <FieldBrowserContainer>
           {triggersActionsUi.getFieldBrowser({
             browserFields,
-            columnIds: columnHeaders.map(({ id }) => id),
+            columnIds: (columnHeaders ?? []).map(({ id }) => id),
             onResetColumns,
             onToggleColumn,
             options: fieldBrowserOptions,

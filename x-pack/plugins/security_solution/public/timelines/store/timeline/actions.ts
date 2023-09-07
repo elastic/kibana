@@ -223,6 +223,12 @@ export const updateColumns = actionCreator<{
   columns: ColumnHeaderOptions[];
 }>('UPDATE_COLUMNS');
 
+export const updateColumnWidth = actionCreator<{
+  columnId: string;
+  id: string;
+  width: number;
+}>('UPDATE_COLUMN_WIDTH');
+
 export const updateSort = actionCreator<{ id: string; sort: SortColumnTimeline[] }>('UPDATE_SORT');
 
 export const upsertColumn = actionCreator<{

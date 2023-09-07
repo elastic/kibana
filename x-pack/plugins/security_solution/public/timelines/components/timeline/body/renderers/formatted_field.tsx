@@ -7,10 +7,16 @@
 
 /* eslint-disable complexity */
 
-import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumnCellActionProps,
+} from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isEmpty } from 'lodash/fp';
-import React from 'react';
+import { head, getOr, get, isEmpty, isNumber } from 'lodash/fp';
+import React, { useMemo } from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
@@ -42,9 +48,164 @@ import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
+import {
+  EmptyComponent,
+  getLinkColumnDefinition,
+} from '../../../../../common/lib/cell_actions/helpers';
+import {
+  ColumnHeaderOptions,
+  TimelineItem,
+  TimelineNonEcsData,
+} from '@kbn/timelines-plugin/common';
+import { DataTableRecord } from '@kbn/discover-utils/types';
+import { useGetMappedNonEcsValue } from '../data_driven_columns';
+import { parseValue } from './parse_value';
+import { getField, getFieldKey } from '../../../../../helpers';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
+
+export const useFormattedFieldProps1 = ({
+  dataTableRow,
+  columnId,
+  header,
+}: {
+  dataTableRow: DataTableRecord & TimelineItem;
+  header?: ColumnHeaderOptions;
+  columnId: string;
+}) => {
+  const ecs = dataTableRow.ecs;
+  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
+  const linkField = header?.linkField ? header?.linkField : link?.linkField;
+  const linkValues = header && getOr([], linkField ?? '', ecs);
+  const eventId = (header && get('_id' ?? '', ecs)) || '';
+  const rowData = useMemo(() => {
+    return {
+      data: dataTableRow,
+      fieldName: columnId,
+    };
+  }, [columnId]);
+
+  const values = useGetMappedNonEcsValue({ data: rowData.data.data, fieldName: rowData.fieldName });
+  const value = parseValue(head(values));
+  const title = values && values.length > 1 ? `${link?.label}: ${value}` : link?.label;
+  // if linkField is defined but link values is empty, it's possible we are trying to look for a column definition for an old event set
+  if (linkField !== undefined && linkValues.length === 0 && values !== undefined) {
+    const normalizedLinkValue = getField(ecs, linkField);
+    const normalizedLinkField = getFieldKey(ecs, linkField);
+    const normalizedColumnId = getFieldKey(ecs, columnId);
+    const normalizedLink = getLinkColumnDefinition(
+      normalizedColumnId,
+      header?.type,
+      normalizedLinkField
+    );
+    return {
+      link: normalizedLink,
+      eventId,
+      fieldFormat: header?.format || '',
+      fieldName: normalizedColumnId,
+      fieldType: header?.type || '',
+      value: parseValue(head(normalizedColumnId)),
+      values,
+      title,
+      linkValue: head<string>(normalizedLinkValue),
+    };
+  } else {
+    return {
+      link,
+      eventId,
+      fieldFormat: header?.format || '',
+      fieldName: columnId,
+      fieldType: header?.type || '',
+      value,
+      values,
+      title,
+      linkValue: head<string>(linkValues),
+    };
+  }
+};
+
+export const getFormattedFields = ({
+  dataTableRows,
+  headers,
+  scopeId,
+  closeCellPopover,
+}: {
+  dataTableRows: Array<DataTableRecord & TimelineItem>;
+  headers?: ColumnHeaderOptions[];
+  scopeId: string;
+  closeCellPopover?: () => void;
+}) => {
+  console.log(headers)
+
+  return [
+    ...PORT_NAMES,
+    EVENT_DURATION_FIELD_NAME,
+    HOST_NAME_FIELD_NAME,
+    USER_NAME_FIELD_NAME,
+    SIGNAL_RULE_NAME_FIELD_NAME,
+    EVENT_MODULE_FIELD_NAME,
+    SIGNAL_STATUS_FIELD_NAME,
+    AGENT_STATUS_FIELD_NAME,
+    RULE_REFERENCE_FIELD_NAME,
+    REFERENCE_URL_FIELD_NAME,
+    EVENT_URL_FIELD_NAME,
+    INDICATOR_REFERENCE,
+  ].reduce(
+    (
+      obj: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>,
+      field: string
+    ) => {
+      obj[field] = (props: EuiDataGridCellValueElementProps) => {
+        const header = headers?.find((h) => h.id === props.columnId);
+        const {
+          link,
+          eventId,
+          value,
+          values,
+          title,
+          fieldName,
+          fieldFormat,
+          fieldType,
+          linkValue,
+        } = useFormattedFieldProps1({
+          dataTableRow: dataTableRows[props.rowIndex],
+          columnId: props.columnId,
+          header,
+        });
+
+        const showEmpty = useMemo(() => {
+          const hasLink = link !== undefined && values && !isEmpty(value);
+          return hasLink !== true;
+        }, [link, value, values]);
+
+        return showEmpty === false ? (
+          <FormattedFieldValue
+            // Component={Component}
+            contextId={`expanded-value-${props.columnId}-row-${props.rowIndex}-${scopeId}`}
+            eventId={eventId}
+            fieldFormat={fieldFormat}
+            isAggregatable={header?.aggregatable ?? false}
+            fieldName={fieldName}
+            fieldType={fieldType}
+            isButton={false}
+            isDraggable={false}
+            value={value}
+            truncate={false}
+            title={title}
+            linkValue={linkValue}
+            onClick={closeCellPopover}
+          />
+        ) : (
+          // data grid expects each cell action always return an element, it crashes if returns null
+          EmptyComponent
+        );
+      };
+      return obj;
+    },
+    {}
+  );
+};
 
 const FormattedFieldValueComponent: React.FC<{
   asPlainText?: boolean;

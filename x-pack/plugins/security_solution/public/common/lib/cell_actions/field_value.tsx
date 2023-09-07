@@ -19,7 +19,7 @@ import { parseValue } from '../../../timelines/components/timeline/body/renderer
 import { EmptyComponent, getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
 
-const useFormattedFieldProps = ({
+export const useFormattedFieldProps = ({
   rowIndex,
   pageSize,
   ecsData,

@@ -9,7 +9,6 @@ import { has, get } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 
 import type { BrowserFields } from '../../../../../common/containers/source';
-import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultColumnHeaderType } from './default_headers';
 
 /**
@@ -49,9 +48,6 @@ export const getColumnHeaders = (
     : [];
 };
 
-export const getColumnWidthFromType = (type: string): number =>
-  type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;
-
 /**
  * Returns the column header with field details from the defaultHeaders
  */
@@ -61,6 +57,5 @@ export const getColumnHeader = (
 ): ColumnHeaderOptions => ({
   columnHeaderType: defaultColumnHeaderType,
   id: fieldName,
-  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   ...(defaultHeaders.find((c) => c.id === fieldName) ?? {}),
 });

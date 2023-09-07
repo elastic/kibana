@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
@@ -31,43 +31,32 @@ import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
 import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
-import { useTourContext } from '../guided_onboarding_tour';
-import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
-import { isDetectionsAlertsTable } from '../top_n/helpers';
-import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 
 const ActionsContainer = styled.div`
   align-items: center;
   display: flex;
+  height: 25px;
 `;
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
-  checked,
   columnValues,
   ecsData,
   eventId,
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
-  loadingEventIds,
-  onEventDetailsPanelOpened,
-  onRowSelected,
   onRuleChange,
-  showCheckboxes,
   showNotes,
   timelineId,
   toggleShowNotes,
   refetch,
-  setEventsLoading,
 }) => {
   const dispatch = useDispatch();
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timelineType = useShallowEqualSelector(
@@ -86,15 +75,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const onUnPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
-  );
-
-  const handleSelectEvent = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      onRowSelected({
-        eventIds: [eventId],
-        isSelected: event.currentTarget.checked,
-      }),
-    [eventId, onRowSelected]
   );
 
   const handlePinClicked = useCallback(
@@ -204,67 +184,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopedActions,
   ]);
 
-  const { activeStep, isTourShown, incrementStep } = useTourContext();
-
-  const isTourAnchor = useMemo(
-    () =>
-      isTourShown(SecurityStepId.alertsCases) &&
-      eventType === 'signal' &&
-      isDetectionsAlertsTable(timelineId) &&
-      ariaRowindex === 1,
-    [isTourShown, ariaRowindex, eventType, timelineId]
-  );
-
-  const onExpandEvent = useCallback(() => {
-    if (
-      isTourAnchor &&
-      activeStep === AlertsCasesTourSteps.expandEvent &&
-      isTourShown(SecurityStepId.alertsCases)
-    ) {
-      incrementStep(SecurityStepId.alertsCases);
-    }
-    onEventDetailsPanelOpened();
-  }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
-
   return (
     <ActionsContainer>
-      {showCheckboxes && !tGridEnabled && (
-        <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            {loadingEventIds.includes(eventId) ? (
-              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
-            ) : (
-              <EuiCheckbox
-                aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
-                data-test-subj="select-event"
-                id={eventId}
-                checked={checked}
-                onChange={handleSelectEvent}
-              />
-            )}
-          </EventsTdContent>
-        </div>
-      )}
-      <GuidedOnboardingTourStep
-        isTourAnchor={isTourAnchor}
-        onClick={onExpandEvent}
-        step={AlertsCasesTourSteps.expandEvent}
-        tourId={SecurityStepId.alertsCases}
-      >
-        <div key="expand-event">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-              <EuiButtonIcon
-                aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-                data-test-subj="expand-event"
-                iconType="expand"
-                onClick={onExpandEvent}
-                size="s"
-              />
-            </EuiToolTip>
-          </EventsTdContent>
-        </div>
-      </GuidedOnboardingTourStep>
       <>
         {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction

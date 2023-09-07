@@ -137,7 +137,7 @@ export interface ActionProps {
   isEventPinned?: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
-  onEventDetailsPanelOpened: () => void;
+  onEventDetailsPanelOpened?: () => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   refetch?: () => void;

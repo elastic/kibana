@@ -71,6 +71,7 @@ export const getPinOnClick = ({
   onUnPinEvent,
   isEventPinned,
 }: GetPinOnClickParams) => {
+  console.log(isEventPinned);
   if (!allowUnpinning) {
     return;
   }
