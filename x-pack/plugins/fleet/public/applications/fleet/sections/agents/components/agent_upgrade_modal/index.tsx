@@ -313,7 +313,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           onCreateOption={
             config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? undefined : onCreateOption
           }
-          customOptionText="Use custom version {searchValue} (not recommended)"
+          customOptionText="Use custom agent version {searchValue} (not recommended)"
         />
       </EuiFormRow>
       {!isSingleAgent &&
