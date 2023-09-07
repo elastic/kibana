@@ -167,7 +167,9 @@ export class ReportingAPIClient implements IReportingAPI {
     const params = stringify({
       jobParams: rison.encode(jobParams),
     });
-    return `${this.http.basePath.prepend(PUBLIC_ROUTES.GENERATE_PREFIX)}/${exportType}?${params}?elasticInternalOrigins=true`;
+    return `${this.http.basePath.prepend(
+      PUBLIC_ROUTES.GENERATE_PREFIX
+    )}/${exportType}?${params}?elasticInternalOrigins=true`;
   }
 
   /**
