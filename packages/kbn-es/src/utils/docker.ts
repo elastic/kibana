@@ -340,11 +340,12 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
   await execa('docker', ['pull', image], {
     // inherit is required to show Docker pull output
     stdio: ['ignore', 'inherit', 'pipe'],
-  }).catch(({ message, stderr }) => {
+  }).catch(({ message }) => {
     throw createCliError(
-      stderr.includes('unauthorized: authentication required')
-        ? `Error authenticating with ${DOCKER_REGISTRY}. Visit https://docker-auth.elastic.co/github_auth to login.`
-        : message
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
+
+${message}`
     );
   });
 }

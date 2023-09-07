@@ -35,6 +35,7 @@ const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165663
+// FLAKY: https://github.com/elastic/kibana/issues/165747
 describe(
   'Discover State',
   {

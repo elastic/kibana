@@ -11,10 +11,11 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 import { PAYWALL_DESCRIPTION } from '../../../screens/entity_analytics_serverless_splash';
 
+// FLAKY: https://github.com/elastic/kibana/issues/165685
 describe(
   'Entity Analytics Dashboard in Serverless',
   {
-    tags: '@serverless',
+    tags: ['@serverless', '@brokenInServerless'],
     env: {
       ftrConfig: {
         productTypes: [
