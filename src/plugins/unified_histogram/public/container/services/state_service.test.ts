@@ -53,6 +53,7 @@ describe('UnifiedHistogramStateService', () => {
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
     currentSuggestion: undefined,
+    suggestionIsLoading: true,
   };
 
   it('should initialize state with default values', () => {
@@ -69,6 +70,7 @@ describe('UnifiedHistogramStateService', () => {
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
       currentSuggestion: undefined,
       allSuggestions: undefined,
+      suggestionIsLoading: true,
     });
   });
 

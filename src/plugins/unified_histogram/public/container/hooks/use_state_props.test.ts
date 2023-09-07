@@ -35,6 +35,7 @@ describe('useStateProps', () => {
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
     currentSuggestion: undefined,
+    suggestionIsLoading: true,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -132,6 +133,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "suggestionIsLoading": true,
       }
     `);
   });
@@ -207,6 +209,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "suggestionIsLoading": true,
       }
     `);
   });
@@ -303,6 +306,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "suggestionIsLoading": true,
       }
     `);
   });
@@ -375,6 +379,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "suggestionIsLoading": true,
       }
     `);
   });
