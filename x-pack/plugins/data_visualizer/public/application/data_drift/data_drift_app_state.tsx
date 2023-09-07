@@ -42,7 +42,8 @@ export interface DataDriftDetectionAppStateProps {
 
 export type DataDriftSpec = typeof DataDriftDetectionAppState;
 
-const getStr = (arg: string | string[] | null) => `${arg ? arg : ''}`;
+const getStr = (arg: string | string[] | null, fallbackStr?: string) =>
+  `${arg ? arg : fallbackStr ?? ''}`;
 
 export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = ({
   dataView,
@@ -93,10 +94,10 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
   });
 
   const initialSettings: InitialSettings = {
-    index: getStr(params.index),
-    production: getStr(params.production),
-    reference: getStr(params.reference),
-    timeField: getStr(params.timeField),
+    index: getStr(params.index) ?? dataView.id,
+    production: getStr(params.production) ?? dataView.getIndexPattern(),
+    reference: getStr(params.reference) ?? dataView.getIndexPattern(),
+    timeField: getStr(params.timeField) ?? dataView.getTimeField()?.name,
   };
 
   const referenceStateManager = useDataDriftStateManager({

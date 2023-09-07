@@ -54,13 +54,13 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={i18n.translate('xpack.ml.dataDrift.customizeIndexPatternsTooltip', {
-                    defaultMessage: 'Customize index patterns',
+                    defaultMessage: 'Create a data view',
                   })}
                 >
                   <EuiButton onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}>
                     <FormattedMessage
                       id="xpack.ml.dataDrift.customizeIndexPatternsButton"
-                      defaultMessage="Customize"
+                      defaultMessage="Create a data view"
                     />
                   </EuiButton>
                 </EuiToolTip>
@@ -147,7 +147,7 @@ export const DataDriftIndexPatternsPicker: FC = () => {
   useEffect(() => {
     let unmounted = false;
     const getDataViewEditorService = async () => {
-      if (!unmounted && http && dataViews) {
+      if (!unmounted && http && dataViews && dataViewEditorServiceFactory) {
         const { DataViewEditorService } = await dataViewEditorServiceFactory();
         const referenceDataViewEditorService = new DataViewEditorService({
           // @ts-expect-error Mismatch in DataViewsServicePublic import, but should be same
