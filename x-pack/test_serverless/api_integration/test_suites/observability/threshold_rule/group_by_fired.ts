@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [0.2],
                 timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [
+                metrics: [
                   { name: 'A', field: 'system.cpu.total.norm.pct', aggType: Aggregators.AVERAGE },
                 ],
               },
@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [0.2],
                 timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [{ name: 'A', field: 'system.cpu.total.norm.pct', aggType: 'avg' }],
+                metrics: [{ name: 'A', field: 'system.cpu.total.norm.pct', aggType: 'avg' }],
               },
             ],
             alertOnNoData: true,

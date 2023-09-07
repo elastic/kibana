@@ -1,9 +1,9 @@
 title: Historical summary request
 type: object
 required:
-  - sloIds
+  - list
 properties:
-  sloIds:
+  list:
     description: The list of SLO identifiers to get the historical summary for
     type: array
     items:
