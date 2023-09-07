@@ -24,7 +24,6 @@ import {
   enableRule,
   waitForRuleToUpdate,
   getRulesManagementTableRows,
-  selectRulesByName,
 } from '../../tasks/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
