@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseErrors, parseWarning, getInlineEditorText } from './helpers';
+import { parseErrors, parseWarning, getInlineEditorText, getWrappedInPipesCode } from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -134,6 +134,29 @@ describe('helpers', function () {
       expect(text).toEqual(
         'FROM index1 | keep field1, field2 | keep field1, field2 | order field1'
       );
+    });
+  });
+
+  describe('getWrappedInPipesCode', function () {
+    it('should return the code wrapped', function () {
+      const code = getWrappedInPipesCode('FROM index1 | keep field1, field2 | order field1', false);
+      expect(code).toEqual('FROM index1\n| keep field1, field2\n| order field1');
+    });
+
+    it('should return the code unwrapped', function () {
+      const code = getWrappedInPipesCode(
+        'FROM index1 \n| keep field1, field2 \n| order field1',
+        true
+      );
+      expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
+    });
+
+    it('should return the code unwrapped and trimmed', function () {
+      const code = getWrappedInPipesCode(
+        'FROM index1       \n| keep field1, field2     \n| order field1',
+        true
+      );
+      expect(code).toEqual('FROM index1 | keep field1, field2 | order field1');
     });
   });
 });
