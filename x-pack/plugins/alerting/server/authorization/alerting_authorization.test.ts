@@ -1355,10 +1355,6 @@ describe('AlertingAuthorization', () => {
                 "all": true,
                 "read": true,
               },
-              "myOtherApp": Object {
-                "all": true,
-                "read": true,
-              },
             },
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
@@ -1584,7 +1580,7 @@ describe('AlertingAuthorization', () => {
             "actionVariables": undefined,
             "authorizedConsumers": Object {
               "myApp": Object {
-                "all": true,
+                "all": false,
                 "read": true,
               },
               "myOtherApp": Object {
@@ -2353,7 +2349,7 @@ describe('AlertingAuthorization', () => {
           ).filter
         ).toEqual(
           fromKueryExpression(
-            `(path.to.rule_type_id:.infrastructure-threshold-o11y and consumer-field:(infrastructure or alerts or logs)) or (path.to.rule_type_id:.threshold-rule-o11y and consumer-field:(infrastructure or alerts or logs)) or (path.to.rule_type_id:.logs-threshold-o11y and consumer-field:(infrastructure or alerts or logs))`
+            `(path.to.rule_type_id:.infrastructure-threshold-o11y and consumer-field:(infrastructure or alerts)) or (path.to.rule_type_id:.threshold-rule-o11y and consumer-field:(infrastructure or logs)) or (path.to.rule_type_id:.logs-threshold-o11y and consumer-field:(logs or alerts))`
           )
         );
       });

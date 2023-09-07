@@ -284,25 +284,14 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'global_read at space1':
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'No rules found for bulk delete',
               });
               expect(response.statusCode).to.eql(400);
-              objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
-              // Ensure task still exists
-              await getScheduledTask(createdRule1.scheduled_task_id);
-              break;
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'global_read at space1':
-              expect(response.body).to.eql({
-                statusCode: 403,
-                error: 'Forbidden',
-                message:
-                  'Unauthorized by "alertsFixture" to bulkDelete "test.restricted-noop" rule',
-              });
-              expect(response.statusCode).to.eql(403);
               objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
               // Ensure task still exists
               await getScheduledTask(createdRule1.scheduled_task_id);
