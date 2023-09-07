@@ -62,7 +62,7 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
             </EuiCallOut>
           ) : null}
 
-          {response._shards.failures.length ? (
+          {response._shards.failures?.length ? (
             <ShardFailureTable failures={response._shards.failures ?? []} />
           ) : null}
         </>
