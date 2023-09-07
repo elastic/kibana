@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
     return testId;
   };
 
-  describe('New terms type rules', () => {
+  describe.only('New terms type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
@@ -672,7 +672,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size', async () => {
         // historical window documents
-        // number of combinations is 1,000,000
+        // number of combinations is 50,000
         const historicalDocuments = [
           {
             host: {
@@ -686,7 +686,7 @@ export default ({ getService }: FtrProviderContext) => {
         ];
 
         // rule execution documents
-        // number of combinations is 1,000,000 + new one
+        // number of combinations is 50,000 + new one
         const ruleExecutionDocuments = [
           {
             host: {
@@ -727,6 +727,92 @@ export default ({ getService }: FtrProviderContext) => {
 
         // only 1 alert should be generated
         expect(previewAlerts.length).eql(1);
+      });
+
+      it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size spread over multiple pages', async () => {
+        // historical window documents
+        // number of combinations is 50,000
+        const historicalDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+        ];
+
+        // rule execution documents
+        // number of combinations is 50,000 + 4 new ones
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+          {
+            host: {
+              name: 'host-102',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+          {
+            host: {
+              name: 'host-140',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+          {
+            host: {
+              name: 'host-133',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+          {
+            host: {
+              name: 'host-132',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain', 'user.name'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        // only 4 alerts should be generated
+        expect(previewAlerts.length).eql(4);
       });
 
       it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have more than 100', async () => {
