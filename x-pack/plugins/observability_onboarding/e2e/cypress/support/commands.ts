@@ -114,6 +114,7 @@ Cypress.Commands.add('installCustomIntegration', (integrationName: string) => {
     },
     headers: {
       'kbn-xsrf': 'e2e_test',
+      'Elastic-Api-Version': '2023-10-31',
     },
     auth: { user: 'editor', pass: 'changeme' },
   });
