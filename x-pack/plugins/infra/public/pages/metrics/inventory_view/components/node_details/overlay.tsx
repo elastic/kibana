@@ -80,12 +80,16 @@ export const NodeContextPopover = ({
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId: node.id,
+      assetType: nodeType,
+      assetId: node.id,
       search: {
         from: nodeDetailFrom,
         to: currentTime,
-        assetName: node.name,
+        ...(nodeType === 'host'
+          ? {
+              name: node.name,
+            }
+          : undefined),
       },
     }),
   });

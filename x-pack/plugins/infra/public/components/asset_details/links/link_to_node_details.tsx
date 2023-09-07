@@ -8,29 +8,28 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+
 import { useNodeDetailsRedirect } from '../../../pages/link_to';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { Asset, AssetDetailsUrlState } from '../types';
 
 export interface LinkToNodeDetailsProps {
-  dateRangeTimestamp: { from: number; to: number };
   asset: Asset;
-  assetType: InventoryItemType;
+  search: AssetDetailsUrlState;
 }
 
-export const LinkToNodeDetails = ({
-  asset,
-  assetType,
-  dateRangeTimestamp,
-}: LinkToNodeDetailsProps) => {
+export const LinkToNodeDetails = ({ asset, search }: LinkToNodeDetailsProps) => {
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
+  const { dateRange, ...assetDetails } = search;
+
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType: assetType,
-      nodeId: asset.id,
+      assetType: 'host',
+      assetId: asset.id,
       search: {
-        from: dateRangeTimestamp.from,
-        to: dateRangeTimestamp.to,
-        assetName: asset.name,
+        ...assetDetails,
+        from: dateRange?.from ? new Date(dateRange?.from).getTime() : undefined,
+        to: dateRange?.to ? new Date(dateRange.to).getTime() : undefined,
+        name: asset.name,
       },
     }),
   });

@@ -20,7 +20,7 @@ import { EuiTitle } from '@elastic/eui';
 import type { InfraMetadata } from '../../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../../translations';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
-import { FlyoutTabIds } from '../../../types';
+import { ContentTabIds } from '../../../types';
 import { ExpandableContent } from '../../../components/expandable_content';
 import { MetadataHeader } from './metadata_header';
 import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
@@ -74,7 +74,7 @@ export const MetadataSummaryList = ({
   const { showTab } = useTabSwitcherContext();
 
   const onClick = () => {
-    showTab(FlyoutTabIds.METADATA);
+    showTab(ContentTabIds.METADATA);
   };
 
   return (

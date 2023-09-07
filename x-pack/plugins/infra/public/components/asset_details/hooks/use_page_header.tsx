@@ -21,10 +21,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
-import { FlyoutTabIds, type RouteState, type LinkOptions, type Tab, type TabIds } from '../types';
+import { ContentTabIds, type RouteState, type LinkOptions, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
-import { useDateRangeProviderContext } from './use_date_range';
 import { useTabSwitcherContext } from './use_tab_switcher';
+import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -60,7 +60,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
     // With that, we can show the return button. Otherwise, it will be hidden (ex: the user opened a shared URL or opened the page from their bookmarks)
-    location.state || history.length > 1
+    location.state || location.key
       ? [
           {
             text: (
@@ -89,22 +89,16 @@ export const useTemplateHeaderBreadcrumbs = () => {
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
-  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const { asset, assetType, overrides } = useAssetDetailsRenderPropsContext();
+  const [state] = useAssetDetailsUrlState();
+  const { asset, overrides } = useAssetDetailsRenderPropsContext();
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
-      nodeDetails: (
-        <LinkToNodeDetails
-          asset={asset}
-          assetType={assetType}
-          dateRangeTimestamp={getDateRangeInTimestamp()}
-        />
-      ),
+      nodeDetails: <LinkToNodeDetails asset={asset} search={{ name: asset.name, ...state }} />,
       alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
       apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_HOST_FILTER_FIELD} />,
     }),
-    [asset, assetType, getDateRangeInTimestamp, overrides?.alertRule?.onCreateRuleClick]
+    [asset, overrides?.alertRule?.onCreateRuleClick, state]
   );
 
   const rightSideItems = useMemo(
@@ -157,7 +151,7 @@ const useTabs = (tabs: Tab[]) => {
   const tabEntries: TabItem[] = useMemo(
     () =>
       tabs.map(({ name, ...tab }) => {
-        if (tab.id === FlyoutTabIds.LINK_TO_APM) {
+        if (tab.id === ContentTabIds.LINK_TO_APM) {
           return getTabToApmTraces(name);
         }
 

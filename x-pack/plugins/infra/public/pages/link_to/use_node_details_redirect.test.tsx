@@ -34,8 +34,8 @@ describe('useNodeDetailsRedirect', () => {
 
     expect(
       result.current.getNodeDetailUrl({
-        nodeType: 'host',
-        nodeId: 'example-01',
+        assetType: 'host',
+        assetId: 'example-01',
         search: {
           from: new Date(fromDateStrig).getTime(),
           to: new Date(toDateStrig).getTime(),

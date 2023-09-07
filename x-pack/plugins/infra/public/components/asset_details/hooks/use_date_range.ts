@@ -7,42 +7,55 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useState } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { parseDateRange } from '../../../utils/datemath';
 
 import { toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
-const DEFAULT_DATE_RANGE: TimeRange = {
-  from: 'now-15m',
-  to: 'now',
-};
+const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
+const getDefaultDateRange = () => {
+  const now = Date.now();
 
+  return {
+    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
+    to: new Date(now).toISOString(),
+  };
+};
 export interface UseDateRangeProviderProps {
   initialDateRange: TimeRange;
 }
 
 export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderProps) {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
+  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange ?? getDefaultDateRange();
+  const [parsedDateRange, setParsedDateRange] = useState(parseDateRange(dateRange));
+
+  useEffectOnce(() => {
+    const { from, to } = getParsedDateRange();
+
+    // forces the date picker to initiallize with absolute dates.
+    setUrlState({ dateRange: { from, to } });
+  });
 
   const setDateRange = useCallback(
     (newDateRange: TimeRange) => {
       setUrlState({ dateRange: newDateRange });
+      setParsedDateRange(parseDateRange(newDateRange));
     },
     [setUrlState]
   );
 
-  const parsedDateRange = useMemo(() => {
-    const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
-      parseDateRange(dateRange);
+  const getParsedDateRange = useCallback(() => {
+    const { from = dateRange.from, to = dateRange.to } = parsedDateRange;
 
     return { from, to };
-  }, [dateRange]);
+  }, [dateRange, parsedDateRange]);
 
   const getDateRangeInTimestamp = useCallback(
-    () => toTimestampRange(parsedDateRange),
-    [parsedDateRange]
+    () => toTimestampRange(getParsedDateRange()),
+    [getParsedDateRange]
   );
 
   return { dateRange, setDateRange, getDateRangeInTimestamp };
