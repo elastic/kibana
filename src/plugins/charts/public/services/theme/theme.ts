@@ -12,7 +12,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-console.log({ EUI_CHARTS_THEME_LIGHT, EUI_CHARTS_THEME_DARK });
+
 export class ThemeService {
   /** Returns default charts theme */
   public readonly chartsDefaultTheme = EUI_CHARTS_THEME_LIGHT.theme;
