@@ -170,7 +170,7 @@ export class RequestHandler {
   public async handleGenerateRequest(exportTypeId: string, jobParams: BaseParams) {
     const req = this.req;
     const reporting = this.reporting;
-    exportTypeId = exportTypeId.replace('?elasticInternalOrigins=true', '')
+    exportTypeId = exportTypeId.replace('?elasticInternalOrigins=true', '');
 
     const counters = getCounters(
       req.route.method,
