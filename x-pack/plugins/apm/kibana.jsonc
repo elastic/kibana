@@ -58,7 +58,6 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "esUiShared",
       "maps",
       "observabilityAIAssistant"
     ]
