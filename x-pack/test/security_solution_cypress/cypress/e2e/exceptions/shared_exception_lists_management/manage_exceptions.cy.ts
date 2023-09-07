@@ -149,4 +149,5 @@ describe(
         cy.get(EMPTY_EXCEPTIONS_VIEWER).should('exist');
       });
     });
-  });
+  }
+);
