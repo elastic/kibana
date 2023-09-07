@@ -16,8 +16,8 @@ import { API_VERSIONS } from '../../common/constants';
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
 function cleanUp() {
-  deleteFleetServerDocs(true);
-  deleteAgentDocs(true);
+  deleteFleetServerDocs();
+  deleteAgentDocs();
   cleanupAgentPolicies();
 }
 let kibanaVersion: string;
