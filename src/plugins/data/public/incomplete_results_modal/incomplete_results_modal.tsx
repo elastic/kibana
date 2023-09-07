@@ -10,6 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiCallOut,
   EuiCodeBlock,
   EuiTabbedContent,
   EuiCopy,
@@ -42,11 +43,28 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
       name: i18n.translate(
         'data.search.searchSource.fetch.incompleteResultsModal.tabHeaderClusterDetails',
         {
-          defaultMessage: 'Shard failures',
+          defaultMessage: 'Cluster details',
           description: 'Name of the tab displaying cluster details',
         }
       ),
-      content: <ShardFailureTable failures={response._shards.failures ?? []} />,
+      content: (
+        <>
+          {response.timed_out 
+            ? <EuiCallOut color="warning">
+                <p>
+                  {i18n.translate('data.search.searchSource.fetch.incompleteResultsModal.requestTimedOutMessage', {
+                    defaultMessage: 'Request timed out',
+                  })}
+                </p>
+              </EuiCallOut>
+            : null
+          }
+            
+          {response._shards.failures.length 
+            ? <ShardFailureTable failures={response._shards.failures ?? []} />
+            : null
+          }
+        </>),
       ['data-test-subj']: 'showClusterDetailsButton',
     },
     {
