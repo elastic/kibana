@@ -75,8 +75,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await PageObjects.indexManagement.clickIndexDetailsTab('stats');
               await a11y.testAppSnapshot();
             });
-
-
           });
         });
       });
