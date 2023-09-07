@@ -171,7 +171,6 @@ export class RequestHandler {
     const req = this.req;
     const reporting = this.reporting;
     exportTypeId = exportTypeId.replace('?elasticInternalOrigins=true', '')
-    console.log('\n\n\n\n exportTypeId', exportTypeId)
 
     const counters = getCounters(
       req.route.method,

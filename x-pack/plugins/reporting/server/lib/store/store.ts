@@ -189,12 +189,12 @@ export class ReportingStore {
   public async start() {
     const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
-      if (this.config.disableStatefulSettings.enabled && await ilmPolicyManager!.doesIlmPolicyExist()) {
+      if (!this.config.disableStatefulSettings.enabled && await ilmPolicyManager!.doesIlmPolicyExist()) {
         this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
         return;
       }
       this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
-      if (this.config.disableStatefulSettings.enabled) await ilmPolicyManager!.createIlmPolicy();
+      if (!this.config.disableStatefulSettings.enabled) await ilmPolicyManager!.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
       this.logger.error(e.body?.error);
