@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/165915
+  // FLAKY: https://github.com/elastic/kibana/issues/165916
   describe.skip('Columns selection initialization and update', () => {
     before(async () => {
       await esArchiver.load(
