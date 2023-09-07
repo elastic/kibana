@@ -32,9 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const label = await authentication.findByCssSelector('label[title="URL Authentication"]');
       await label.click();
       await commonScreenshots.takeScreenshot('xmatters-connector-url', screenshotDirectories);
-      // await testSubjects.click('create-connector-flyout-save-test-btn');
-      // await testSubjects.click('toastCloseButton');
-      // await commonScreenshots.takeScreenshot('xmatters-params-test', screenshotDirectories);
+      await testSubjects.setValue('secrets.secretsUrl', 'https://example.com');
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('toastCloseButton');
+      await commonScreenshots.takeScreenshot('xmatters-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
