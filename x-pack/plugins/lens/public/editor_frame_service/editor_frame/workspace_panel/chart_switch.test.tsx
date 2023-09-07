@@ -519,7 +519,10 @@ describe('chart_switch', () => {
   it('should query main palette from active chart and pass into suggestions', async () => {
     const visualizationMap = mockVisualizationMap();
     const mockPalette: PaletteOutput = { type: 'palette', name: 'mock' };
-    visualizationMap.visA.getMainPalette = jest.fn(() => mockPalette);
+    visualizationMap.visA.getMainPalette = jest.fn(() => ({
+      type: 'legacyPalette',
+      value: mockPalette,
+    }));
     visualizationMap.visB.getSuggestions.mockReturnValueOnce([]);
     const frame = mockFrame(['a', 'b', 'c']);
     const currentVisState = {};
