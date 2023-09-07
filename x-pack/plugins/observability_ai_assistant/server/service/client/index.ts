@@ -8,6 +8,7 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DataViewsService } from '@kbn/data-views-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { IncomingMessage } from 'http';
@@ -39,6 +40,7 @@ export class ObservabilityAIAssistantClient {
       namespace: string;
       esClient: ElasticsearchClient;
       resources: ObservabilityAIAssistantResourceNames;
+      dataviews: DataViewsService;
       logger: Logger;
       user: {
         id?: string;
@@ -383,6 +385,44 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       entry,
     });
+  };
+
+  get_dataset_info = async (
+    dataset: string,
+    fields: string[]
+  ): Promise<{
+    dataviews: string[];
+    fields: Array<{ name: string; description: string; type: string }>;
+  }> => {
+    // if empty dataview, get list of all dataviews
+    const dv = dataset !== '' && (await this.dependencies.dataviews.find(dataset));
+    if (!dv || dv.length === 0) {
+      return {
+        dataviews: await this.dependencies.dataviews.getTitles(),
+        fields: [],
+      };
+    }
+
+    if (dv.length > 1) {
+      return {
+        dataviews: dv.map((dataview) => {
+          return dataview.id || dataview.name;
+        }),
+        fields: [],
+      };
+    }
+
+    // else get all the fields for the found dataview
+    return {
+      dataviews: [dv[0].id || dv[0].name],
+      fields: dv[0].fields.map((field) => {
+        return {
+          name: field.name,
+          description: field.customLabel || '',
+          type: field.type,
+        };
+      }),
+    };
   };
 
   getKnowledgeBaseStatus = () => {

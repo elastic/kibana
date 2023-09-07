@@ -13,6 +13,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
@@ -239,7 +240,15 @@ export class ObservabilityAIAssistantService {
     const [_, [coreStart, plugins]] = await Promise.all([
       this.init(),
       this.core.getStartServices() as Promise<
-        [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
+        [
+          CoreStart,
+          {
+            security: SecurityPluginStart;
+            actions: ActionsPluginStart;
+            dataViews: DataViewsServerPluginStart;
+          },
+          unknown
+        ]
       >,
     ]);
 
@@ -253,10 +262,14 @@ export class ObservabilityAIAssistantService {
 
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
 
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+
     return new ObservabilityAIAssistantClient({
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       namespace: spaceId,
-      esClient: coreStart.elasticsearch.client.asInternalUser,
+      esClient,
+      dataviews: await plugins.dataViews.dataViewsServiceFactory(savedObjectsClient, esClient),
       resources: this.resourceNames,
       logger: this.logger,
       user: {

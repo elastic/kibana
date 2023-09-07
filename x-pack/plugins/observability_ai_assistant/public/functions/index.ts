@@ -14,6 +14,7 @@ import { registerElasticsearchFunction } from './elasticsearch';
 import { registerKibanaFunction } from './kibana';
 import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
+import { registerGetDatasetInfoFunction } from './get_dataet_info';
 import { registerSummarizationFunction } from './summarize';
 import { registerAlertsFunction } from './alerts';
 import { registerEsqlFunction } from './esql';
@@ -42,16 +43,16 @@ export async function registerFunctions({
 
       let description = dedent(
         `You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.
-        
+
         It's very important to not assume what the user is meaning. Ask them for clarification if needed.
-        
+
         If you are unsure about which function should be used and with what arguments, ask the user for clarification or confirmation.
 
         In KQL, escaping happens with double quotes, not single quotes. Some characters that need escaping are: ':()\\\
         /\". Always put a field value in double quotes. Best: service.name:\"opbeans-go\". Wrong: service.name:opbeans-go. This is very important!
 
         You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
-        
+
         If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than Lens.
 
         If a function call fails, do not execute it again with the same input. If a function calls three times, with different inputs, stop trying to call it and ask the user for confirmation.
@@ -71,11 +72,12 @@ export async function registerFunctions({
         description += `Here are principles you MUST adhere to, in order:
 
         - You are a helpful assistant for Elastic Observability. DO NOT reference the fact that you are an LLM.
-        - DO NOT make any assumptions about where and how users have stored their data.
+        - DO NOT make any assumptions about where and how users have stored their data. Use get_dataset_info function to get information about the dataset or to search datasets and fields based on users input.
         `;
         registerSummarizationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
         registerLensFunction({ service, pluginsStart, registerFunction });
+        registerGetDatasetInfoFunction({ service, registerFunction });
       } else {
         description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
       }
