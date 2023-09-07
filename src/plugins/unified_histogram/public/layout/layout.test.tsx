@@ -77,7 +77,7 @@ describe('Layout', () => {
           to: '2020-05-14T11:20:13.590',
         }}
         lensSuggestionsApi={jest.fn()}
-        suggestionIsLoading={false}
+        isSuggestionLoading={false}
         {...rest}
       />
     );

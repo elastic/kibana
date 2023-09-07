@@ -59,7 +59,7 @@ export const useDiscoverHistogram = ({
    */
 
   const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
-  unifiedHistogram?.setIsSugggestionLoading(isPlainRecord);
+  unifiedHistogram?.setIsSuggestionLoading(isPlainRecord);
 
   const getCreationOptions = useCallback(() => {
     const {
@@ -102,7 +102,7 @@ export const useDiscoverHistogram = ({
 
         if ('lensRequestAdapter' in changes) {
           inspectorAdapters.lensRequests = lensRequestAdapter;
-          unifiedHistogram?.setIsSugggestionLoading(false);
+          unifiedHistogram?.setIsSuggestionLoading(false);
         }
 
         if (!isEqual(oldState, newState)) {

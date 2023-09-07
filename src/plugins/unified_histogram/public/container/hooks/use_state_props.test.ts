@@ -35,7 +35,7 @@ describe('useStateProps', () => {
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
     currentSuggestion: undefined,
-    suggestionIsLoading: true,
+    isSuggestionLoading: true,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -85,6 +85,7 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
+        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [
@@ -133,7 +134,6 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
-        "suggestionIsLoading": true,
       }
     `);
   });
@@ -161,6 +161,7 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": true,
+        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [
@@ -209,7 +210,6 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
-        "suggestionIsLoading": true,
       }
     `);
   });
@@ -258,6 +258,7 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
+        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [
@@ -306,7 +307,6 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
-        "suggestionIsLoading": true,
       }
     `);
   });
@@ -331,6 +331,7 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
+        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [
@@ -379,7 +380,6 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
-        "suggestionIsLoading": true,
       }
     `);
   });

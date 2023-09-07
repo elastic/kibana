@@ -18,7 +18,7 @@ export const createMockUnifiedHistogramApi = () => {
     setTimeInterval: jest.fn(),
     setTotalHits: jest.fn(),
     refetch: jest.fn(),
-    setIsSugggestionLoading: jest.fn(),
+    setIsSuggestionLoading: jest.fn(),
   };
   return api;
 };

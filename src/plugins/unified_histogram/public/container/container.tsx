@@ -23,7 +23,7 @@ import { useStateSelector } from './utils/use_state_selector';
 import {
   topPanelHeightSelector,
   currentSuggestionSelector,
-  suggestionIsLoadingSelector,
+  isSuggestionLoadingSelector,
 } from './utils/state_selectors';
 
 type LayoutProps = Pick<
@@ -81,7 +81,7 @@ export type UnifiedHistogramApi = {
   | 'setBreakdownField'
   | 'setTimeInterval'
   | 'setTotalHits'
-  | 'setIsSugggestionLoading'
+  | 'setIsSuggestionLoading'
 >;
 
 export const UnifiedHistogramContainer = forwardRef<
@@ -126,14 +126,14 @@ export const UnifiedHistogramContainer = forwardRef<
         'setBreakdownField',
         'setTimeInterval',
         'setTotalHits',
-        'setIsSugggestionLoading'
+        'setIsSuggestionLoading'
       ),
     });
   }, [input$, stateService]);
   const { dataView, query, searchSessionId, requestAdapter } = containerProps;
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
-  const suggestionIsLoading = useStateSelector(stateService?.state$, suggestionIsLoadingSelector);
+  const isSuggestionLoading = useStateSelector(stateService?.state$, isSuggestionLoadingSelector);
   const stateProps = useStateProps({
     stateService,
     dataView,
@@ -153,7 +153,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...layoutProps}
       {...stateProps}
       currentSuggestion={currentSuggestion}
-      suggestionIsLoading={Boolean(suggestionIsLoading)}
+      isSuggestionLoading={Boolean(isSuggestionLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}
       lensSuggestionsApi={lensSuggestionsApi}

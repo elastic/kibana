@@ -64,7 +64,7 @@ export interface UnifiedHistogramState {
   /**
    * Flag indicating that the suggestion is currently loading
    */
-  suggestionIsLoading: boolean;
+  isSuggestionLoading: boolean;
 }
 
 /**
@@ -104,7 +104,7 @@ export interface UnifiedHistogramStateService {
   /**
    * Sets current Lens suggestion
    */
-  setIsSugggestionLoading: (flag: boolean) => void;
+  setIsSuggestionLoading: (flag: boolean) => void;
   /**
    * Sets the current top panel height
    */
@@ -157,7 +157,7 @@ export const createStateService = (
     timeInterval: 'auto',
     topPanelHeight: initialTopPanelHeight,
     totalHitsResult: undefined,
-    suggestionIsLoading: true,
+    isSuggestionLoading: true,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     ...initialState,
   });
@@ -200,8 +200,8 @@ export const createStateService = (
       updateState({ currentSuggestion: suggestion });
     },
 
-    setIsSugggestionLoading: (flag: boolean) => {
-      updateState({ suggestionIsLoading: flag });
+    setIsSuggestionLoading: (flag: boolean) => {
+      updateState({ isSuggestionLoading: flag });
     },
 
     setTimeInterval: (timeInterval: string) => {

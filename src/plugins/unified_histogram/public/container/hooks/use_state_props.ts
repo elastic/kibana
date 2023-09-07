@@ -24,7 +24,7 @@ import {
   totalHitsResultSelector,
   totalHitsStatusSelector,
   lensTablesAdapterSelector,
-  suggestionIsLoadingSelector,
+  isSuggestionLoadingSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
@@ -47,7 +47,7 @@ export const useStateProps = ({
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const lensTablesAdapter = useStateSelector(stateService?.state$, lensTablesAdapterSelector);
-  const suggestionIsLoading = useStateSelector(stateService?.state$, suggestionIsLoadingSelector);
+  const isSuggestionLoading = useStateSelector(stateService?.state$, isSuggestionLoadingSelector);
   /**
    * Contexts
    */
@@ -179,7 +179,7 @@ export const useStateProps = ({
     request,
     isPlainRecord,
     lensTablesAdapter,
-    suggestionIsLoading,
+    isSuggestionLoading,
     onTopPanelHeightChange,
     onTimeIntervalChange,
     onTotalHitsChange,

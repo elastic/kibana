@@ -71,7 +71,7 @@ export interface ChartProps {
   input$?: UnifiedHistogramInput$;
   lensTablesAdapter?: Record<string, Datatable>;
   isOnHistogramMode?: boolean;
-  suggestionIsLoading?: boolean;
+  isSuggestionLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -109,7 +109,7 @@ export function Chart({
   input$: originalInput$,
   lensTablesAdapter,
   isOnHistogramMode,
-  suggestionIsLoading,
+  isSuggestionLoading,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -419,7 +419,7 @@ export function Chart({
             })}
             css={histogramCss}
           >
-            {suggestionIsLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+            {isSuggestionLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
             <HistogramMemoized
               services={services}
               dataView={dataView}
