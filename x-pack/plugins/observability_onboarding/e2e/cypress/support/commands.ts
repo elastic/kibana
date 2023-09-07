@@ -119,6 +119,7 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
         },
         headers: {
           'kbn-xsrf': 'e2e_test',
+          'Elastic-Api-Version': '1',
         },
         auth: { user: 'editor', pass: 'changeme' },
       });
