@@ -53,7 +53,7 @@ const renderAnalyzerPreview = () =>
 
 describe('AnalyzerPreviewContainer', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('should render component and link in header', () => {

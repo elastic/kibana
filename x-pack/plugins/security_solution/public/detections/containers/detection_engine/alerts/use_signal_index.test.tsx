@@ -22,7 +22,6 @@ describe('useSignalIndex', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });

@@ -86,7 +86,7 @@ describe('SearchBarComponent', () => {
 
   const pollForSignalIndex = jest.fn();
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('calls pollForSignalIndex on Refresh button click', () => {

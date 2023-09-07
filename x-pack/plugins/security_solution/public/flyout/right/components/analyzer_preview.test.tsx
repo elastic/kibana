@@ -41,7 +41,7 @@ const contextValueEmpty = {
 
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('shows analyzer preview correctly when documentid and index are present', () => {

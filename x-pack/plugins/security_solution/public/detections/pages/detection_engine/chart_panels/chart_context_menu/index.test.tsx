@@ -21,7 +21,7 @@ import { ChartContextMenu } from '.';
 
 describe('ChartContextMenu', () => {
   const queryId = 'abcd';
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => jest.clearAllMocks());
 
   test('it renders the chart context menu button', () => {
     render(

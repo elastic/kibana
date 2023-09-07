@@ -49,7 +49,7 @@ const props = {
 };
 describe('RelatedAlertsByProcessAncestry', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('shows an accordion and does not fetch data right away', () => {
