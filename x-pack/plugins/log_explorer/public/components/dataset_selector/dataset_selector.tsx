@@ -37,6 +37,7 @@ export function DatasetSelector({
   integrationsError,
   isLoadingIntegrations,
   isLoadingStreams,
+  isSearchingIntegrations,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -86,8 +87,9 @@ export function DatasetSelector({
       return {
         items: [
           createIntegrationStatusItem({
+            data: integrations,
             error: integrationsError,
-            integrations,
+            isLoading: isLoadingIntegrations,
             onRetry: onIntegrationsReload,
           }),
         ],
@@ -100,13 +102,20 @@ export function DatasetSelector({
       onDatasetSelected: selectDataset,
       spyRef: setSpyRef,
     });
-  }, [integrations, integrationsError, selectDataset, onIntegrationsReload, setSpyRef]);
+  }, [
+    integrations,
+    integrationsError,
+    isLoadingIntegrations,
+    selectDataset,
+    onIntegrationsReload,
+    setSpyRef,
+  ]);
 
   const uncategorizedItems = useMemo(() => {
     if (!datasets || datasets.length === 0) {
       return [
         createUncategorizedStatusItem({
-          datasets,
+          data: datasets,
           error: datasetsError,
           isLoading: isLoadingStreams,
           onRetry: onUnmanagedStreamsReload,
@@ -130,7 +139,7 @@ export function DatasetSelector({
       id: UNCATEGORIZED_TAB_ID,
       name: uncategorizedLabel,
       onClick: () => {
-        onStreamsEntryClick();
+        onStreamsEntryClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
         switchToUncategorizedTab();
       },
     },
@@ -159,9 +168,12 @@ export function DatasetSelector({
         search={search}
         onSearch={searchByName}
         onSort={sortByOrder}
-        isLoading={isLoadingIntegrations || isLoadingStreams}
+        isLoading={isSearchingIntegrations || isLoadingStreams}
       />
       <EuiHorizontalRule margin="none" />
+      {/* For a smoother user experience, we keep each tab content mount and we only show the select one
+      "hiding" all the others. Unmounting mounting each tab content on change makes it feel glitchy,
+      while the tradeoff of keeping the contents in memory provide a better UX. */}
       {/* Integrations tab content */}
       <ContextMenu
         hidden={tabId !== INTEGRATIONS_TAB_ID}

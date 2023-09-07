@@ -9,20 +9,15 @@ import React, { RefCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { Dataset, Integration } from '../../../common/datasets';
-import { DATA_VIEW_POPOVER_CONTENT_WIDTH } from './constants';
+import {
+  DATA_VIEW_POPOVER_CONTENT_WIDTH,
+  noDatasetsDescriptionLabel,
+  noDatasetsLabel,
+  noIntegrationsDescriptionLabel,
+  noIntegrationsLabel,
+} from './constants';
 import { DatasetSelectionHandler } from './types';
-import { dynamic } from '../../utils/dynamic';
-import type { IntegrationsListStatusProps } from './sub_components/integrations_list_status';
-import type { UncategorizedListStatusProps } from './sub_components/uncategorized_list_status';
-import { DatasetSkeleton } from './sub_components/datasets_skeleton';
-
-const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'), {
-  fallback: <DatasetSkeleton />,
-});
-const UncategorizedListStatus = dynamic(
-  () => import('./sub_components/uncategorized_list_status'),
-  { fallback: <DatasetSkeleton /> }
-);
+import ListStatus, { ListStatusProps } from './sub_components/list_status';
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -81,28 +76,39 @@ export const buildIntegrationsTree = ({
   );
 };
 
-export const createAllLogDatasetsItem = ({ onClick }: { onClick(): void }) => {
+export const createAllLogDatasetsItem = () => {
   const allLogDataset = Dataset.createAllLogsDataset();
   return {
-    name: allLogDataset.title,
     'data-test-subj': 'allLogDatasets',
     iconType: allLogDataset.iconType,
-    onClick,
+    name: allLogDataset.title,
   };
 };
 
-export const createIntegrationStatusItem = (props: IntegrationsListStatusProps) => {
+export const createIntegrationStatusItem = (
+  props: Omit<ListStatusProps, 'description' | 'title'>
+) => {
   return {
-    disabled: true,
-    name: <IntegrationsListStatus {...props} />,
     'data-test-subj': 'integrationStatusItem',
+    disabled: true,
+    name: (
+      <ListStatus
+        description={noIntegrationsDescriptionLabel}
+        title={noIntegrationsLabel}
+        {...props}
+      />
+    ),
   };
 };
 
-export const createUncategorizedStatusItem = (props: UncategorizedListStatusProps) => {
+export const createUncategorizedStatusItem = (
+  props: Omit<ListStatusProps, 'description' | 'title'>
+) => {
   return {
-    disabled: true,
-    name: <UncategorizedListStatus {...props} />,
     'data-test-subj': 'uncategorizedStatusItem',
+    disabled: true,
+    name: (
+      <ListStatus description={noDatasetsDescriptionLabel} title={noDatasetsLabel} {...props} />
+    ),
   };
 };

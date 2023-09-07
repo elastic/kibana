@@ -9,29 +9,28 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ReloadDatasets } from '../../../hooks/use_datasets';
-import {
-  errorLabel,
-  noDatasetsDescriptionLabel,
-  noDatasetsLabel,
-  noDataRetryLabel,
-} from '../constants';
-import { Dataset } from '../../../../common/datasets';
+import { errorLabel, noDataRetryLabel } from '../constants';
+import type { Dataset, Integration } from '../../../../common/datasets';
 import { DatasetSkeleton } from './datasets_skeleton';
 
-export interface UncategorizedListStatusProps {
-  datasets: Dataset[] | null;
+export interface ListStatusProps {
+  data: Dataset[] | Integration[] | null;
+  description: string;
   error: Error | null;
   isLoading: boolean;
   onRetry: ReloadDatasets;
+  title: string;
 }
 
-export const UncategorizedListStatus = ({
-  datasets,
+export const ListStatus = ({
+  data,
+  description,
   error,
   isLoading,
   onRetry,
-}: UncategorizedListStatusProps) => {
-  const isEmpty = datasets == null || datasets.length <= 0;
+  title,
+}: ListStatusProps) => {
+  const isEmpty = data == null || data.length <= 0;
   const hasError = error !== null;
 
   if (isLoading) {
@@ -41,16 +40,16 @@ export const UncategorizedListStatus = ({
   if (hasError) {
     return (
       <EuiEmptyPrompt
-        data-test-subj="datasetErrorPrompt"
+        data-test-subj="listStatusErrorPrompt"
         iconType="warning"
         iconColor="danger"
         paddingSize="m"
-        title={<h2>{noDatasetsLabel}</h2>}
+        title={<h2>{title}</h2>}
         titleSize="s"
         body={
           <FormattedMessage
-            id="xpack.logExplorer.datasetSelector.noDatasetsError"
-            defaultMessage="An {error} occurred while getting your data streams. Please retry."
+            id="xpack.logExplorer.datasetSelector.noDataError"
+            defaultMessage="An {error} occurred while getting your data. Please retry."
             values={{
               error: (
                 <EuiToolTip content={error.message}>
@@ -68,12 +67,12 @@ export const UncategorizedListStatus = ({
   if (isEmpty) {
     return (
       <EuiEmptyPrompt
-        data-test-subj="emptyDatasetPrompt"
+        data-test-subj="listStatusEmptyPrompt"
         iconType="search"
         paddingSize="m"
-        title={<h2>{noDatasetsLabel}</h2>}
+        title={<h2>{title}</h2>}
         titleSize="s"
-        body={<p>{noDatasetsDescriptionLabel}</p>}
+        body={<p>{description}</p>}
       />
     );
   }
@@ -82,4 +81,4 @@ export const UncategorizedListStatus = ({
 };
 
 // eslint-disable-next-line import/no-default-export
-export default UncategorizedListStatus;
+export default ListStatus;

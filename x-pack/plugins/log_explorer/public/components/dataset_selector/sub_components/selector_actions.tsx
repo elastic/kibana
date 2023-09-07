@@ -27,12 +27,12 @@ export const SelectorActions = (props: DatasetsAllActionProps) => {
 };
 
 const ShowAllLogs = ({ isSelected, onClick, ...props }: ShowAllLogsProps) => {
-  const allLogs = createAllLogDatasetsItem({ onClick });
+  const allLogs = createAllLogDatasetsItem();
 
   return (
     <EuiListGroupItem
       data-test-subj={allLogs['data-test-subj']}
-      onClick={allLogs.onClick}
+      onClick={onClick}
       iconType={isSelected ? 'check' : allLogs.iconType}
       label={showAllLogsLabel}
       {...props}

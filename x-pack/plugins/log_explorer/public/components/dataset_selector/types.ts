@@ -31,6 +31,7 @@ export interface DatasetSelectorProps {
   /* Flags for loading/searching integrations or data streams*/
   isLoadingIntegrations: boolean;
   isLoadingStreams: boolean;
+  isSearchingIntegrations: boolean;
   /* Triggered when we reach the bottom of the integration list and want to load more */
   onIntegrationsLoadMore: LoadMoreIntegrations;
   /* Triggered when the user reload the list after an error */
