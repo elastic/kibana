@@ -169,6 +169,9 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           maxTimeStamp: 0,
           hidden: false,
+          lifecycle: {
+            enabled: true,
+          },
         });
       });
 
