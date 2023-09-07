@@ -10,10 +10,10 @@ import {
   createCalleeTree,
   createFlameGraph,
   decodeStackTraceResponse,
-  stackTraceFixtures,
 } from '@kbn/profiling-utils';
 import { sum } from 'lodash';
 import { createColumnarViewModel } from './columnar_view_model';
+export { stackTraceFixtures } from './__fixtures__/stacktraces';
 
 describe('Columnar view model operations', () => {
   stackTraceFixtures.forEach(({ response, seconds, upsampledBy }) => {
