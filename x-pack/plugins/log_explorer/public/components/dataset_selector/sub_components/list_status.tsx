@@ -40,7 +40,7 @@ export const ListStatus = ({
   if (hasError) {
     return (
       <EuiEmptyPrompt
-        data-test-subj="listStatusErrorPrompt"
+        data-test-subj="datasetSelectorListStatusErrorPrompt"
         iconType="warning"
         iconColor="danger"
         paddingSize="m"
@@ -67,7 +67,7 @@ export const ListStatus = ({
   if (isEmpty) {
     return (
       <EuiEmptyPrompt
-        data-test-subj="listStatusEmptyPrompt"
+        data-test-subj="datasetSelectorListStatusEmptyPrompt"
         iconType="search"
         paddingSize="m"
         title={<h2>{title}</h2>}

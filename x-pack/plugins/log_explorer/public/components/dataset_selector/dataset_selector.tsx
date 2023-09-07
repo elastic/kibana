@@ -134,6 +134,7 @@ export function DatasetSelector({
       id: INTEGRATIONS_TAB_ID,
       name: integrationsLabel,
       onClick: switchToIntegrationsTab,
+      'data-test-subj': 'datasetSelectorIntegrationsTab',
     },
     {
       id: UNCATEGORIZED_TAB_ID,
@@ -142,11 +143,17 @@ export function DatasetSelector({
         onStreamsEntryClick(); // Lazy-load uncategorized datasets only when accessing the Uncategorized tab
         switchToUncategorizedTab();
       },
+      'data-test-subj': 'datasetSelectorUncategorizedTab',
     },
   ];
 
   const tabEntries = tabs.map((tab) => (
-    <EuiTab key={tab.id} onClick={tab.onClick} isSelected={tab.id === tabId}>
+    <EuiTab
+      key={tab.id}
+      onClick={tab.onClick}
+      isSelected={tab.id === tabId}
+      data-test-subj={tab['data-test-subj']}
+    >
       {tab.name}
     </EuiTab>
   ));

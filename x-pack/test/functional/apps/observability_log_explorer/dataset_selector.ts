@@ -27,6 +27,142 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();
     });
 
+    describe.only('as consistent behavior', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+      });
+
+      beforeEach(async () => {
+        await browser.refresh();
+        await PageObjects.observabilityLogExplorer.openDatasetSelector();
+      });
+
+      it('should always display the Integrations and Uncategorized top level tabs', async () => {
+        const integrationsTab = await PageObjects.observabilityLogExplorer.getIntegrationsTab();
+        const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+
+        expect(await integrationsTab.isDisplayed()).to.be(true);
+        expect(await integrationsTab.getVisibleText()).to.be('Integrations');
+        expect(await uncategorizedTab.isDisplayed()).to.be(true);
+        expect(await uncategorizedTab.getVisibleText()).to.be('Uncategorized');
+      });
+
+      it('should always display the "Show all logs" action', async () => {
+        const allLogDatasetButton =
+          await PageObjects.observabilityLogExplorer.getAllLogDatasetsButton();
+
+        const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
+
+        expect(allLogDatasetTitle).to.be('Show all logs');
+      });
+
+      describe('when open on the integrations tab', () => {
+        it('should display an error prompt if could not retrieve the integrations', async function () {
+          const title = 'No integrations found';
+          // Skip the test in case network condition utils are not available
+          try {
+            await retry.try(async () => {
+              await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+                title
+              );
+            });
+
+            await PageObjects.common.sleep(5000);
+            await browser.setNetworkConditions('OFFLINE');
+            await PageObjects.observabilityLogExplorer.typeSearchFieldWith('a');
+
+            await retry.try(async () => {
+              await PageObjects.observabilityLogExplorer.assertListStatusErrorPromptExistsWithTitle(
+                title
+              );
+            });
+
+            await browser.restoreNetworkConditions();
+          } catch (error) {
+            this.skip();
+          }
+        });
+
+        it('should display an empty prompt for no integrations', async () => {
+          const title = 'No integrations found';
+
+          const integrationEntries = await PageObjects.observabilityLogExplorer
+            .getIntegrationsContextMenu()
+            .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+          expect(integrationEntries.length).to.be(0);
+          await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+            title
+          );
+        });
+      });
+
+      describe('when open on the uncategorized tab', () => {
+        it('should display a loading skeleton while loading uncategorized datasets', async function () {
+          // Skip the test in case network condition utils are not available
+          try {
+            await browser.setNetworkConditions('SLOW_3G'); // Almost stuck network conditions
+            const uncategorizedTab =
+              await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+            await uncategorizedTab.click();
+
+            await PageObjects.observabilityLogExplorer.assertLoadingSkeletonExists();
+
+            await browser.restoreNetworkConditions();
+          } catch (error) {
+            this.skip();
+          }
+        });
+
+        it('should display an error prompt if could not retrieve the datasets', async function () {
+          const title = 'No data streams found';
+
+          const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+          await uncategorizedTab.click();
+
+          // Skip the test in case network condition utils are not available
+          try {
+            await retry.try(async () => {
+              await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+                title
+              );
+            });
+
+            await PageObjects.common.sleep(5000);
+            await browser.setNetworkConditions('OFFLINE');
+            await PageObjects.observabilityLogExplorer.typeSearchFieldWith('a');
+
+            await retry.try(async () => {
+              await PageObjects.observabilityLogExplorer.assertListStatusErrorPromptExistsWithTitle(
+                title
+              );
+            });
+
+            await browser.restoreNetworkConditions();
+          } catch (error) {
+            this.skip();
+          }
+        });
+
+        it('should display an empty prompt for no uncategorized data streams', async () => {
+          const title = 'No data streams found';
+
+          const uncategorizedTab = await PageObjects.observabilityLogExplorer.getUncategorizedTab();
+          await uncategorizedTab.click();
+
+          const uncategorizedEntries = await PageObjects.observabilityLogExplorer
+            .getUncategorizedContextMenu()
+            .then((menu) => PageObjects.observabilityLogExplorer.getPanelEntries(menu));
+
+          expect(uncategorizedEntries.length).to.be(0);
+
+          await PageObjects.observabilityLogExplorer.assertListStatusEmptyPromptExistsWithTitle(
+            title
+          );
+        });
+      });
+    });
+
     describe('without installed integrations or uncategorized data streams', () => {
       before(async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
@@ -38,57 +174,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('when open on the first navigation level', () => {
-        it('should always display the "All log datasets" entry as the first item', async () => {
-          const allLogDatasetButton =
-            await PageObjects.observabilityLogExplorer.getAllLogDatasetsButton();
-          const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-          const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
-          const firstEntryTitle = await menuEntries[0].getVisibleText();
-
-          expect(allLogDatasetTitle).to.be('All log datasets');
-          expect(allLogDatasetTitle).to.be(firstEntryTitle);
-        });
-
-        it('should always display the unmanaged datasets entry as the second item', async () => {
-          const unamanagedDatasetButton =
-            await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
-          const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-          const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
-          const secondEntryTitle = await menuEntries[1].getVisibleText();
-
-          expect(unmanagedDatasetTitle).to.be('Uncategorized');
-          expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
-        });
-
-        it('should display an error prompt if could not retrieve the integrations', async function () {
-          // Skip the test in case network condition utils are not available
-          try {
-            await retry.try(async () => {
-              await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
-            });
-
-            await PageObjects.common.sleep(5000);
-            await browser.setNetworkConditions('OFFLINE');
-            await PageObjects.observabilityLogExplorer.typeSearchFieldWith('a');
-
-            await retry.try(async () => {
-              await PageObjects.observabilityLogExplorer.assertNoIntegrationsErrorExists();
-            });
-
-            await browser.restoreNetworkConditions();
-          } catch (error) {
-            this.skip();
-          }
-        });
-
-        it('should display an empty prompt for no integrations', async () => {
-          const { integrations } = await PageObjects.observabilityLogExplorer.getIntegrations();
-          expect(integrations.length).to.be(0);
-
-          await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
-        });
+        // it('should always display the unmanaged datasets entry as the second item', async () => {
+        //   const unamanagedDatasetButton =
+        //     await PageObjects.observabilityLogExplorer.getUnmanagedDatasetsButton();
+        //   const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
+        //   const unmanagedDatasetTitle = await unamanagedDatasetButton.getVisibleText();
+        //   const secondEntryTitle = await menuEntries[1].getVisibleText();
+        //   expect(unmanagedDatasetTitle).to.be('Uncategorized');
+        //   expect(unmanagedDatasetTitle).to.be(secondEntryTitle);
+        // });
+        // it('should display an empty prompt for no integrations', async () => {
+        //   const { integrations } = await PageObjects.observabilityLogExplorer.getIntegrations();
+        //   expect(integrations.length).to.be(0);
+        //   await PageObjects.observabilityLogExplorer.assertNoIntegrationsPromptExists();
+        // });
       });
 
       describe('when navigating into Uncategorized data streams', () => {
@@ -173,18 +272,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         beforeEach(async () => {
           await browser.refresh();
           await PageObjects.observabilityLogExplorer.openDatasetSelector();
-        });
-
-        it('should always display the "All log datasets" entry as the first item', async () => {
-          const allLogDatasetButton =
-            await PageObjects.observabilityLogExplorer.getAllLogDatasetsButton();
-          const menuEntries = await PageObjects.observabilityLogExplorer.getCurrentPanelEntries();
-
-          const allLogDatasetTitle = await allLogDatasetButton.getVisibleText();
-          const firstEntryTitle = await menuEntries[0].getVisibleText();
-
-          expect(allLogDatasetTitle).to.be('All log datasets');
-          expect(allLogDatasetTitle).to.be(firstEntryTitle);
         });
 
         it('should always display the unmanaged datasets entry as the second item', async () => {

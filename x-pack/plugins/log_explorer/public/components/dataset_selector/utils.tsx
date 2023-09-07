@@ -79,7 +79,7 @@ export const buildIntegrationsTree = ({
 export const createAllLogDatasetsItem = () => {
   const allLogDataset = Dataset.createAllLogsDataset();
   return {
-    'data-test-subj': 'allLogDatasets',
+    'data-test-subj': 'datasetSelectorshowAllLogs',
     iconType: allLogDataset.iconType,
     name: allLogDataset.title,
   };
@@ -89,10 +89,10 @@ export const createIntegrationStatusItem = (
   props: Omit<ListStatusProps, 'description' | 'title'>
 ) => {
   return {
-    'data-test-subj': 'integrationStatusItem',
     disabled: true,
     name: (
       <ListStatus
+        key="integrationStatusItem"
         description={noIntegrationsDescriptionLabel}
         title={noIntegrationsLabel}
         {...props}
@@ -105,10 +105,14 @@ export const createUncategorizedStatusItem = (
   props: Omit<ListStatusProps, 'description' | 'title'>
 ) => {
   return {
-    'data-test-subj': 'uncategorizedStatusItem',
     disabled: true,
     name: (
-      <ListStatus description={noDatasetsDescriptionLabel} title={noDatasetsLabel} {...props} />
+      <ListStatus
+        key="uncategorizedStatusItem"
+        description={noDatasetsDescriptionLabel}
+        title={noDatasetsLabel}
+        {...props}
+      />
     ),
   };
 };

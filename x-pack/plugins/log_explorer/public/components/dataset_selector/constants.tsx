@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const POPOVER_ID = 'dataset-selector-popover';
-export const INTEGRATIONS_PANEL_ID = 'integrations_panel';
-export const INTEGRATIONS_TAB_ID = 'integrations_tab';
-export const UNCATEGORIZED_PANEL_ID = 'uncategorized_panel';
-export const UNCATEGORIZED_TAB_ID = 'uncategorized_tab';
+export const INTEGRATIONS_PANEL_ID = 'dataset-selector-integrations-panel';
+export const INTEGRATIONS_TAB_ID = 'dataset-selector-integrations-tab';
+export const UNCATEGORIZED_PANEL_ID = 'dataset-selector-uncategorized-panel';
+export const UNCATEGORIZED_TAB_ID = 'dataset-selector-uncategorized-tab';
 
 export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 300;
 
