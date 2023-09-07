@@ -9,6 +9,7 @@
 import React, { Component } from 'react';
 import type { RequestDetailsProps } from '../../types';
 import { getLocalClusterDetails } from './utils';
+import { ClustersTable } from './clusters_table';
 
 export class Clusters extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) =>
@@ -33,7 +34,9 @@ export class Clusters extends Component<RequestDetailsProps> {
     console.log(clusters);
 
     return this.props.request.response?.json
-      ? <div>Cluster details go here</div>
+      ? <>
+        <ClustersTable clusters={clusters}/>
+        </>
       : null;
   }
 }
