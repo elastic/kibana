@@ -149,8 +149,8 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const onFilterChange = useCallback(
-    (filter: any) => {
-      setRuleParams('filterQueryText', filter || '');
+    (filter: string) => {
+      setRuleParams('filterQueryText', filter ?? '');
       try {
         setRuleParams(
           'filterQuery',
@@ -257,7 +257,7 @@ export const Expressions: React.FC<Props> = (props) => {
       preFillAlertCriteria();
     }
 
-    if (!ruleParams.filterQuery) {
+    if (ruleParams.filterQuery === undefined) {
       preFillAlertFilter();
     }
 
