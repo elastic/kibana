@@ -1,0 +1,23 @@
+#
+# This workflow is triggered by a comment on a PR and runs the synthetics stack e2e tests
+# It is responsible for setting the status check `synthetics-stack-e2e` to success or failure,
+# which was set to failure by the synthetics-stack-e2e-init.yml workflow.
+#
+---
+name: synthetics # This name needs to be the same as in synthetic-stack-e2e-init.yml
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  synthetics-stack-e2e: # This name needs to be the same as in synthetic-stack-e2e-init.yml
+    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/synthetics-stack-e2e') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/run-synthetics-stack-e2e@current
+        with:
+          vaultUrl: ${{ secrets.OBLT_VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
