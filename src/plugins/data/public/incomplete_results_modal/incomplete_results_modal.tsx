@@ -49,22 +49,24 @@ export function IncompleteResultsModal({ request, response, warning, onClose }: 
       ),
       content: (
         <>
-          {response.timed_out 
-            ? <EuiCallOut color="warning">
-                <p>
-                  {i18n.translate('data.search.searchSource.fetch.incompleteResultsModal.requestTimedOutMessage', {
+          {response.timed_out ? (
+            <EuiCallOut color="warning">
+              <p>
+                {i18n.translate(
+                  'data.search.searchSource.fetch.incompleteResultsModal.requestTimedOutMessage',
+                  {
                     defaultMessage: 'Request timed out',
-                  })}
-                </p>
-              </EuiCallOut>
-            : null
-          }
-            
-          {response._shards.failures.length 
-            ? <ShardFailureTable failures={response._shards.failures ?? []} />
-            : null
-          }
-        </>),
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+          ) : null}
+
+          {response._shards.failures.length ? (
+            <ShardFailureTable failures={response._shards.failures ?? []} />
+          ) : null}
+        </>
+      ),
       ['data-test-subj']: 'showClusterDetailsButton',
     },
     {
