@@ -148,7 +148,12 @@ export const NodeContextPopover = ({
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon size="s" onClick={onClose} iconType="cross" />
+                    <EuiButtonIcon
+                      data-test-subj="infraNodeContextPopoverButton"
+                      size="s"
+                      onClick={onClose}
+                      iconType="cross"
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

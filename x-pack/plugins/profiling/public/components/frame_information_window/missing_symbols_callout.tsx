@@ -41,6 +41,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             values={{
               readMore: (
                 <EuiLink
+                  data-test-subj="profilingMissingSymbolsCalloutReadMoreLink"
                   href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
                   target="_blank"
                 >
@@ -54,6 +55,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
           />
         </p>
         <EuiButton
+          data-test-subj="profilingMissingSymbolsCalloutUploadSymbolsButton"
           href={router.link('/add-data-instructions', {
             query: { selectedTab: AddDataTabs.Symbols },
           })}
@@ -83,7 +85,12 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             'Symbols are not available because of an error in the unwinder for this language or an unknown error with the interpreter.',
         })}
       </p>
-      <EuiButton href={PROFILING_FEEDBACK_LINK} target="_blank" color="warning">
+      <EuiButton
+        data-test-subj="profilingMissingSymbolsCalloutReportAProblemButton"
+        href={PROFILING_FEEDBACK_LINK}
+        target="_blank"
+        color="warning"
+      >
         {i18n.translate(
           'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
           { defaultMessage: 'Report a problem' }

@@ -167,6 +167,7 @@ export function StackTracesView() {
         {(data?.charts.length ?? 0) > limit && (
           <EuiFlexItem>
             <EuiButton
+              data-test-subj="profilingStackTracesViewShowMoreButton"
               onClick={() => {
                 profilingRouter.push(routePath, {
                   path,
