@@ -174,12 +174,14 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
     return (
       <div ref={dashboardViewport} className={viewportClasses}>
-        {dashboardViewport?.current && dashboardContainer && (
-          <MaximizePanelParent
-            viewportRef={dashboardViewport.current}
-            dashboard={dashboardContainer}
-          />
-        )}
+        {dashboardViewport?.current &&
+          dashboardContainer &&
+          !isErrorEmbeddable(dashboardContainer) && (
+            <ParentClassController
+              viewportRef={dashboardViewport.current}
+              dashboard={dashboardContainer}
+            />
+          )}
         {renderDashboardContents()}
       </div>
     );
@@ -191,7 +193,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
  * small component listens to the Dashboard's expandedPanelId state and adds and removes
  * the class to whichever element renders the Dashboard.
  */
-const MaximizePanelParent = ({
+const ParentClassController = ({
   dashboard,
   viewportRef,
 }: {
@@ -202,9 +204,9 @@ const MaximizePanelParent = ({
 
   useLayoutEffect(() => {
     const parentDiv = viewportRef.parentElement;
-    if (!parentDiv) {
-      return;
-    }
+    if (!parentDiv) return;
+
+    console.log('addin class!!!! cause it be', parentDiv.id);
     if (maximizedPanelId) {
       parentDiv.classList.add('dshDashboardViewportWrapper');
     } else {
