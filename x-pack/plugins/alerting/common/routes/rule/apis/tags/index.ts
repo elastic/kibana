@@ -6,17 +6,16 @@
  */
 
 export { ruleTagsRequestQuerySchema, ruleTagsFormattedResponseSchema } from './schemas/latest';
-export { defaultTagsPerPage } from './constants/latest';
 export type { RuleTagsRequestQuery, RuleTagsFormattedResponse } from './types/latest';
 
 export {
   ruleTagsRequestQuerySchema as ruleTagsRequestQuerySchemaV1,
   ruleTagsFormattedResponseSchema as ruleTagsFormattedResponseSchemaV1,
 } from './schemas/v1';
-
-export { defaultTagsPerPage as defaultTagsPerPageV1 } from './constants/v1';
-
 export type {
   RuleTagsRequestQuery as RuleTagsRequestQueryV1,
   RuleTagsFormattedResponse as RuleTagsFormattedResponseV1,
 } from './types/v1';
+
+export { defaultTagsPerPage } from './constants/latest';
+export { defaultTagsPerPage as defaultTagsPerPageV1 } from './constants/v1';
