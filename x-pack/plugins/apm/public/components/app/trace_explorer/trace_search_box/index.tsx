@@ -136,7 +136,7 @@ export function TraceSearchBox({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
             <EuiButton
               size="s"
               data-test-subj="apmTraceSearchBoxSearchButton"
