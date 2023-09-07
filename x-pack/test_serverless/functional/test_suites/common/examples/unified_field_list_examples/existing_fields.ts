@@ -51,7 +51,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     await PageObjects.header.waitUntilLoadingHasFinished();
   }
 
-  describe('Fields existence info', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/165938
+  describe.skip('Fields existence info', () => {
     before(async () => {
       await esArchiver.load(
         'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
