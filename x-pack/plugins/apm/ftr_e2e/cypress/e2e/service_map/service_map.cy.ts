@@ -55,25 +55,35 @@ describe('service map', () => {
     it('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
       cy.wait('@serviceMap');
-      cy.wait(500);
-      cy.getByTestSubj('serviceMap').matchImage({
-        imagesPath: '{spec_path}/snapshots',
-        matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
-        maxDiffThreshold: 0.05, // maximum threshold above which the test should fail
-      });
+      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
+
+      prepareCanvasForScreenshot();
+
+      cy.withHidden('[data-test-subj="headerGlobalNav"]', () =>
+        cy.getByTestSubj('serviceMap').matchImage({
+          imagesPath: '{spec_path}/snapshots',
+          title: 'global_service_map',
+          matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
+          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
+        })
+      );
     });
 
     it('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
       cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
-      cy.wait(500);
-      cy.getByTestSubj('serviceMap').matchImage({
-        imagesPath: '{spec_path}/snapshots',
-        matchAgainstPath:
-          'cypress/e2e/service_map/snapshots/detailed_service_map.png',
-        maxDiffThreshold: 0.05, // maximum threshold above which the test should fail
-      });
+
+      prepareCanvasForScreenshot();
+
+      cy.withHidden('[data-test-subj="headerGlobalNav"]', () =>
+        cy.getByTestSubj('serviceMap').matchImage({
+          imagesPath: '{spec_path}/snapshots',
+          matchAgainstPath:
+            'cypress/e2e/service_map/snapshots/detailed_service_map.png',
+          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
+        })
+      );
     });
 
     describe('when there is no data', () => {
@@ -89,3 +99,18 @@ describe('service map', () => {
     });
   });
 });
+
+function prepareCanvasForScreenshot() {
+  cy.get('html, body').invoke(
+    'attr',
+    'style',
+    'height: auto; scroll-behavior: auto;'
+  );
+
+  cy.wait(300);
+  cy.getByTestSubj('centerServiceMap').click();
+  cy.scrollTo('top');
+  cy.wait(300);
+  cy.getByTestSubj('centerServiceMap').click();
+  cy.wait(300);
+}
