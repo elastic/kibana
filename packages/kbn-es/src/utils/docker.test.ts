@@ -34,6 +34,11 @@ import { ESS_RESOURCES_PATHS } from '../paths';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+jest.mock('@elastic/elasticsearch', () => {
+  return {
+    Client: jest.fn(),
+  };
+});
 
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
@@ -464,6 +469,25 @@ describe('runServerlessCluster()', () => {
 
     // setupDocker execa calls then run three nodes and attach logger
     expect(execa.mock.calls).toHaveLength(8);
+  });
+  describe('waitForReady', () => {
+    test('should wait for serverless nodes to be ready to serve requests', async () => {
+      mockFs({
+        [baseEsPath]: {},
+      });
+      execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+      const health = jest.fn();
+      jest
+        .requireMock('@elastic/elasticsearch')
+        .Client.mockImplementation(() => ({ cluster: { health } }));
+
+      health.mockImplementationOnce(() => Promise.reject()); // first call fails
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'red' })); // second call return wrong status
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'green' })); // then succeeds
+
+      await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+      expect(health).toHaveBeenCalledTimes(3);
+    }, 10000);
   });
 });
 

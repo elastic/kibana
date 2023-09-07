@@ -34,8 +34,9 @@ const TEXT_LIST_FILE_NAME = 'value_list.txt';
 const IPS_LIST_FILE_NAME = 'ip_list.txt';
 const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
 
+// FLAKY: https://github.com/elastic/kibana/issues/165699
 describe('value lists', () => {
-  describe('management modal', { tags: ['@ess', '@serverless'] }, () => {
+  describe('management modal', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
       login();
       deleteValueLists([TEXT_LIST_FILE_NAME, IPS_LIST_FILE_NAME, CIDRS_LIST_FILE_NAME]);
@@ -50,7 +51,8 @@ describe('value lists', () => {
       closeValueListsModal();
     });
 
-    describe('create list types', () => {
+    // Flaky in serverless tests
+    describe('create list types', { tags: ['@brokenInServerless'] }, () => {
       beforeEach(() => {
         openValueListsModal();
       });
@@ -108,7 +110,8 @@ describe('value lists', () => {
       });
     });
 
-    describe('delete list types', () => {
+    // Flaky in serverless tests
+    describe('delete list types', { tags: ['@brokenInServerless'] }, () => {
       it('deletes a "keyword" list from an uploaded file', () => {
         importValueList(TEXT_LIST_FILE_NAME, 'keyword');
         openValueListsModal();
@@ -154,7 +157,8 @@ describe('value lists', () => {
       });
     });
 
-    describe('export list types', () => {
+    // Flaky in serverless tests
+    describe('export list types', { tags: ['@brokenInServerless'] }, () => {
       it('exports a "keyword" list from an uploaded file', () => {
         cy.intercept('POST', `/api/lists/items/_export?list_id=${TEXT_LIST_FILE_NAME}`).as(
           'exportList'
