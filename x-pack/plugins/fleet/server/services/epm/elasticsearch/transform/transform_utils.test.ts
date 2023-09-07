@@ -47,6 +47,14 @@ describe('test transform_utils', () => {
       ]);
     });
 
+    test('return transform alias settings when input is an array of alias, move_on_creation properties', () => {
+      const aliasSettings = [ {alias: 'alias1', move_on_creation: true}, {alias: 'alias2', move_on_creation: false}];
+      expect(getDestinationIndexAliases(aliasSettings)).toStrictEqual([
+        { alias: 'alias1', move_on_creation: true },
+        { alias: 'alias2', move_on_creation: false },
+      ]);
+    });
+
     test('return transform alias settings when input is a string', () => {
       expect(getDestinationIndexAliases('alias1.latest')).toStrictEqual([
         { alias: 'alias1.latest', move_on_creation: true },
