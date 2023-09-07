@@ -18,26 +18,28 @@ describe('IncompleteResultsModal', () => {
       <IncompleteResultsModal
         warning={{} as unknown as SearchResponseIncompleteWarning}
         request={{}}
-        response={{
-          _shards: {
-            total: 4,
-            successful: 3,
-            skipped: 0,
-            failed: 1,
-            failures: [
-              {
-                shard: 0,
-                index: 'sample-01-rollup',
-                node: 'VFTFJxpHSdaoiGxJFLSExQ',
-                reason: {
-                  type: 'illegal_argument_exception',
-                  reason:
-                    'Field [kubernetes.container.memory.available.bytes] of type [aggregate_metric_double] is not supported for aggregation [percentiles]',
+        response={
+          {
+            _shards: {
+              total: 4,
+              successful: 3,
+              skipped: 0,
+              failed: 1,
+              failures: [
+                {
+                  shard: 0,
+                  index: 'sample-01-rollup',
+                  node: 'VFTFJxpHSdaoiGxJFLSExQ',
+                  reason: {
+                    type: 'illegal_argument_exception',
+                    reason:
+                      'Field [kubernetes.container.memory.available.bytes] of type [aggregate_metric_double] is not supported for aggregation [percentiles]',
+                  },
                 },
-              },
-            ],
-          },
-        }as unknown as estypes.SearchResponse<any>}
+              ],
+            },
+          } as unknown as estypes.SearchResponse<any>
+        }
         onClose={jest.fn()}
       />
     );
@@ -50,15 +52,17 @@ describe('IncompleteResultsModal', () => {
       <IncompleteResultsModal
         warning={{} as unknown as SearchResponseIncompleteWarning}
         request={{}}
-        response={{
-          timed_out: true,
-          _shards: {
-            total: 4,
-            successful: 4,
-            skipped: 0,
-            failed: 0,
-          },
-        } as unknown as estypes.SearchResponse<any>}
+        response={
+          {
+            timed_out: true,
+            _shards: {
+              total: 4,
+              successful: 4,
+              skipped: 0,
+              failed: 0,
+            },
+          } as unknown as estypes.SearchResponse<any>
+        }
         onClose={jest.fn()}
       />
     );
