@@ -43,3 +43,14 @@
 .unifiedFieldListSidebar__flyoutHeader {
   align-items: center;
 }
+
+.unifiedFieldListSidebar .unifiedFieldListItemButton {
+  &.kbnFieldButton {
+    padding: 0;
+    margin-bottom: $euiSizeXS / 2;
+  }
+
+  &.domDragDrop-isDraggable {
+    box-shadow: none;
+  }
+}
