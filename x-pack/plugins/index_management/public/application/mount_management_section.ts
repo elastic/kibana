@@ -67,7 +67,6 @@ export async function mountManagementSection({
   kibanaVersion: SemVer;
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
-  enableIndexDetailsPage?: boolean;
   enableIndexStats?: boolean;
   cloud?: CloudSetup;
 }) {

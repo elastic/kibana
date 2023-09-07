@@ -379,13 +379,13 @@ export class IndexTable extends Component {
   }
 
   buildRows(appServices, config) {
-    const { indices = [], detailPanelIndexName } = this.props;
+    const { indices = [] } = this.props;
     return indices.map((index) => {
       const { name } = index;
       return (
         <EuiTableRow
           data-test-subj="indexTableRow"
-          isSelected={this.isItemSelected(name) || name === detailPanelIndexName}
+          isSelected={this.isItemSelected(name)}
           isSelectable
           key={`${name}-row`}
         >
