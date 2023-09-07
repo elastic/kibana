@@ -211,7 +211,11 @@ export function InstallElasticAgent() {
           : stepStatus === 'complete'
           ? CHECK_LOGS_LABELS.completed
           : CHECK_LOGS_LABELS.incomplete;
-      return { title, status: stepStatus };
+      return {
+        title,
+        status: stepStatus,
+        'data-test-subj': 'obltOnboardingCheckLogsStep',
+      };
     }
     return {
       title: CHECK_LOGS_LABELS.incomplete,
@@ -245,7 +249,7 @@ export function InstallElasticAgent() {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj="observabilityOnboardingInstallElasticAgentExploreLogsButton"
+                  data-test-subj="obltOnboardingExploreLogs"
                   color="success"
                   fill
                   iconType="magnifyWithPlus"
@@ -289,6 +293,7 @@ export function InstallElasticAgent() {
               )}
               color="success"
               iconType="check"
+              data-test-subj="obltOnboardingCustomIntegrationInstalled"
             />
             <EuiSpacer size="m" />
           </>
@@ -395,7 +400,7 @@ const CHECK_LOGS_LABELS = {
   ),
   loading: i18n.translate(
     'xpack.observability_onboarding.installElasticAgent.progress.logsIngest.loadingTitle',
-    { defaultMessage: 'Waiting for Logs to be shipped...' }
+    { defaultMessage: 'Waiting for logs to be shipped...' }
   ),
   completed: i18n.translate(
     'xpack.observability_onboarding.installElasticAgent.progress.logsIngest.completedTitle',
