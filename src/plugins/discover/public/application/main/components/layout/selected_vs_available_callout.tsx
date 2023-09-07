@@ -33,7 +33,7 @@ export const SelectedVSAvailableCallout = ({
             iconType="iInCircle"
             title={i18n.translate('discover.textBasedMode.selectedColumnsCallout', {
               defaultMessage:
-                'Displaying first {selectedColumnsNumber} fields out of {textBasedQueryColumnsNumber}. You can add more fields to this table using Available fields of the Field list.',
+                'Displaying {selectedColumnsNumber} of {textBasedQueryColumnsNumber} fields. Add more from the Available fields list.',
               values: {
                 textBasedQueryColumnsNumber: textBasedQueryColumns.length,
                 selectedColumnsNumber: selectedColumns.length,
