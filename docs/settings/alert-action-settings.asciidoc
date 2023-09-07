@@ -266,7 +266,7 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 --
 
 `xpack.actions.preconfigured.<connector-id>.config.configUrl`::
-For an <<xmatters-action-type,xMatters connector>>, specifies the request URL for the Elastic Alerts trigger in xMatters.
+For an <<xmatters-action-type,xMatters connector>> with basic authentication, specifies the request URL for the Elastic Alerts trigger in xMatters.
 
 `xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
 For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
@@ -303,7 +303,7 @@ A password secret that varies by connector:
 For a <<pagerduty-action-type,PagerDuty connector>>, specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl`::
-For an <<xmatters-action-type,xMatters connector>>, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.
+For an <<xmatters-action-type,xMatters connector>> with URL authentication, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.
 It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `false`.
 +
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.

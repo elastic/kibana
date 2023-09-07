@@ -241,7 +241,7 @@ xpack.actions.preconfigured:
 --
 <1> The request URL for the Elastic Alerts trigger in xMatters.
 <2> Indicates whether the connector uses HTTP basic authentication. If `true`, you must provide `user` and `password` values. Defaults to `true`.
-<3> A user name for authentication, whic his required when `usesBasic` is `true`.
+<3> A user name for authentication, which is required when `usesBasic` is `true`.
 <4> A password for authentication, which is required when `usesBasic` is `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 The following example creates an xMatters connector with URL authentication:
