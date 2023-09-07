@@ -1369,15 +1369,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await dashboardAddPanel.clickCreateNewLink();
       await this.goToTimeRange();
       await this.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-
-      await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'average',
         field: 'bytes',
+      });
+      await this.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
       });
 
       await this.configureDimension({
