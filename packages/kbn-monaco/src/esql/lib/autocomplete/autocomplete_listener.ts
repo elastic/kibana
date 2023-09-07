@@ -67,6 +67,8 @@ import {
   onOperatorDefinition,
   withOperatorDefinition,
 } from './autocomplete_definitions/operators_commands';
+import { dateExpressionDefinitions } from './autocomplete_definitions/date_math_expressions';
+import { endsWithOpenBracket, getDurationItemsWithQuantifier, isDateFunction } from './helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -346,36 +348,88 @@ export class AutocompleteListener implements ESQLParserListener {
     const isInStats = this.parentContext === ESQLParser.STATS;
     const isInEval = this.parentContext === ESQLParser.EVAL;
 
-    if (this.parentContext && (isInStats || isInEval)) {
+    if (isInStats || isInEval) {
       const hasFN =
         ctx.tryGetToken(esql_parser.UNARY_FUNCTION, 0) ||
         ctx.tryGetToken(esql_parser.MATH_FUNCTION, 0);
       const hasLP = ctx.tryGetToken(esql_parser.LP, 0);
       const hasRP = ctx.tryGetToken(esql_parser.RP, 0);
+      // handle also
+      const hasPlusOrMinus =
+        ctx.tryGetToken(esql_parser.PLUS, 0) || ctx.tryGetToken(esql_parser.MINUS, 0);
 
+      if (hasPlusOrMinus && this.isTerminalNodeExists(hasPlusOrMinus)) {
+        this.suggestions = [
+          // TODO: improve this suggesting only on non-date math context
+          ...this.fields,
+          // TODO: improve this with more specific date-specific functions
+          ...(isInEval ? mathCommandDefinition : aggregationFunctionsDefinitions),
+          // TODO: improve this suggesting dates only on date math context
+          ...(isInEval ? getDurationItemsWithQuantifier() : []),
+        ];
+        return;
+      }
+
+      // Monaco will auto close the brackets but the language listener will not pick up yet this auto-change.
+      // We try to inject it outside but it won't cover all scenarios
       if (hasFN) {
         if (!hasLP) {
           this.suggestions = [openBracketDefinition];
           return;
         }
+
+        this.suggestions = [];
+
         if (!hasRP) {
           if (ctx.childCount === 3) {
-            this.suggestions = [closeBracketDefinition, ...this.fields];
-            return;
+            // TODO: improve here to suggest comma if signature has multiple args
+            this.suggestions.push(closeBracketDefinition);
           }
         }
+        this.suggestions.push(...this.fields);
+        // Need to get the function name from the previous node (current is "(" )
+        const fnName = hasFN.text;
+        const fnsToCheck = isInEval ? mathCommandDefinition : aggregationFunctionsDefinitions;
+        if (fnName && fnsToCheck.some(({ label }) => label === fnName)) {
+          // push date suggestions only for date functions
+          // TODO: improve this checks
+          if (isInEval && isDateFunction(fnName)) {
+            if (!ctx.tryGetToken(esql_parser.DATE_LITERAL, 0)) {
+              this.suggestions.push(
+                // if it's just after the open bracket, suggest also a number together with a date period,
+                // otherwise just the date period unit
+                ...(endsWithOpenBracket(ctx.text)
+                  ? getDurationItemsWithQuantifier()
+                  : dateExpressionDefinitions)
+              );
+            }
+          }
+        }
+
+        return;
       } else {
         if (ctx.childCount === 1) {
           if (ctx.text && ctx.text.indexOf('(') === -1) {
-            this.suggestions = [
-              ...(isInEval ? mathCommandDefinition : []),
-              ...(isInStats ? aggregationFunctionsDefinitions : []),
-            ];
+            if (isInEval) {
+              this.suggestions = [
+                ...mathOperatorsCommandsDefinitions,
+                ...dateExpressionDefinitions,
+              ];
+            }
+
+            if (isInStats) {
+              this.suggestions = [...aggregationFunctionsDefinitions];
+            }
           }
           return;
         }
       }
-      this.suggestions = this.fields;
+      this.suggestions = [...this.fields];
+      if (ctx.exception && isInEval) {
+        // case: eval a = x + <here>
+        // TODO: it would be nice to detect here the previous context and suggest either date or non-date related entries
+        this.suggestions.push(...mathCommandDefinition, ...getDurationItemsWithQuantifier());
+      }
     }
   }
 
