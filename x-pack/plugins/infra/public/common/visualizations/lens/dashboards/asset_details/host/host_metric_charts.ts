@@ -16,7 +16,7 @@ import { memoryUsage, memoryUsageBreakdown } from '../metric_charts/memory';
 import { rxTx } from '../metric_charts/network';
 import type { XYConfig } from '../metric_charts/types';
 
-export const hostMetricCharts: XYConfig[] = [
+export const hostMetricFlyoutCharts: XYConfig[] = [
   cpuUsage,
   memoryUsage,
   normalizedLoad1m,

@@ -10,9 +10,12 @@ import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { parseDateRange } from '../../../utils/datemath';
-
 import { toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
+
+export interface UseDateRangeProviderProps {
+  initialDateRange: TimeRange;
+}
 
 const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
 const getDefaultDateRange = () => {
@@ -23,14 +26,14 @@ const getDefaultDateRange = () => {
     to: new Date(now).toISOString(),
   };
 };
-export interface UseDateRangeProviderProps {
-  initialDateRange: TimeRange;
-}
 
-export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderProps) {
+export function useDateRangeProvider({
+  initialDateRange = getDefaultDateRange(),
+}: UseDateRangeProviderProps) {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange ?? getDefaultDateRange();
+  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
   const [parsedDateRange, setParsedDateRange] = useState(parseDateRange(dateRange));
+  const [refreshTs, setRefreshTs] = useState(Date.now());
 
   useEffectOnce(() => {
     const { from, to } = getParsedDateRange();
@@ -43,6 +46,7 @@ export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderP
     (newDateRange: TimeRange) => {
       setUrlState({ dateRange: newDateRange });
       setParsedDateRange(parseDateRange(newDateRange));
+      setRefreshTs(Date.now());
     },
     [setUrlState]
   );
@@ -58,7 +62,13 @@ export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderP
     [getParsedDateRange]
   );
 
-  return { dateRange, setDateRange, getDateRangeInTimestamp };
+  return {
+    dateRange,
+    getDateRangeInTimestamp,
+    getParsedDateRange,
+    refreshTs,
+    setDateRange,
+  };
 }
 
 export const [DateRangeProvider, useDateRangeProviderContext] =
