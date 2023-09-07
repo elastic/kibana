@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { ErrorType } from '@kbn/ml-error-utils';
-import { type MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { MlFeatures, RouteInitialization } from '../types';
+import type { MlFeatures, RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -26,7 +26,7 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
 } from './schemas/inference_schema';
-import { TrainedModelConfigResponse } from '../../common/types/trained_models';
+import type { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';

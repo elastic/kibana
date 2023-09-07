@@ -60,7 +60,6 @@ function getSwitcher(
       }
 
       return { ml: mlCaps };
-      // return { ml: applyEnabledFeatures(mlCaps, enabledFeatures) };
     } catch (e) {
       logger.debug(`Error updating capabilities for ML based on licensing: ${e}`);
       return {};

@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
   getAnalysisType,
   INDEX_CREATED_BY,
@@ -23,21 +23,21 @@ import { flatten } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { modelsProvider } from '../model_management';
 import {
-  ExtendAnalyticsMapArgs,
-  GetAnalyticsMapArgs,
-  InitialElementsReturnType,
+  type ExtendAnalyticsMapArgs,
+  type GetAnalyticsMapArgs,
+  type InitialElementsReturnType,
+  type NextLinkReturnType,
+  type GetAnalyticsJobIdArg,
+  type GetAnalyticsModelIdArg,
   isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
-  NextLinkReturnType,
-  GetAnalyticsJobIdArg,
-  GetAnalyticsModelIdArg,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
-import { MlFeatures } from '../../types';
+import type { MlFeatures } from '../../types';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
