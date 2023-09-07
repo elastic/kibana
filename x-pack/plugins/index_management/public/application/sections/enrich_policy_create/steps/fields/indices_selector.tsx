@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
+import { uniq, isEmpty } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
@@ -77,8 +77,10 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
 
   // Load first 10 indices on mount so that the ComboBox has some options
   useEffect(() => {
-    onSearchChange('*');
-  }, [onSearchChange]);
+    if (isEmpty(field.value)) {
+      onSearchChange('*');
+    }
+  }, [field.value, onSearchChange]);
 
   return (
     <EuiFormRow

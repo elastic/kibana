@@ -102,22 +102,6 @@ export const configurationFormSchema: FormSchema = {
     },
     deserializer: (json: any) =>
       json && typeof json === 'object' ? JSON.stringify(json, null, 2) : '{\n\n}',
-    helpText: (
-      <FormattedMessage
-        id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryHelpText"
-        defaultMessage="Defaults to: {code} query."
-        values={{
-          code: (
-            <EuiLink external target="_blank" href={documentationService.getMatchAllQueryLink()}>
-              <FormattedMessage
-                id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.matchAllLink"
-                defaultMessage="match_all"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
     validations: [
       {
         validator: fieldValidators.isJsonField(
@@ -197,7 +181,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
                 value: 'range',
                 text: i18n.translate(
                   'xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeOption',
-                  { defaultMessage: 'range' }
+                  { defaultMessage: 'Range' }
                 ),
               },
             ],
@@ -232,6 +216,22 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         component={JsonEditorField}
         componentProps={{
           fullWidth: false,
+          helpText: (
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryHelpText"
+              defaultMessage="Defaults to: {code} query."
+              values={{
+                code: (
+                  <EuiLink external target="_blank" href={documentationService.getMatchAllQueryLink()}>
+                    <FormattedMessage
+                      id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.matchAllLink"
+                      defaultMessage="match_all"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          ),
           codeEditorProps: {
             height: '300px',
             allowFullScreen: true,
