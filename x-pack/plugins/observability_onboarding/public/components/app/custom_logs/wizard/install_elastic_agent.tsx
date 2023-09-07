@@ -233,7 +233,10 @@ export function InstallElasticAgent() {
             <BackButton onBack={goBack} />,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onInspect}>
+                <EuiButtonEmpty
+                  data-test-subj="observabilityOnboardingInstallElasticAgentInspectButton"
+                  onClick={onInspect}
+                >
                   {i18n.translate(
                     'xpack.observability_onboarding.steps.inspect',
                     { defaultMessage: 'Inspect' }
@@ -242,6 +245,7 @@ export function InstallElasticAgent() {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="observabilityOnboardingInstallElasticAgentExploreLogsButton"
                   color="success"
                   fill
                   iconType="magnifyWithPlus"
