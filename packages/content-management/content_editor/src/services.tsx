@@ -110,6 +110,7 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
 }) => {
   const { core, toMountPoint, savedObjectsTagging } = services;
   const { openFlyout: coreOpenFlyout } = core.overlays;
+  const { theme$ } = core.theme;
 
   const TagList = useMemo(() => {
     const Comp: Services['TagList'] = ({ references }) => {
@@ -125,9 +126,9 @@ export const ContentEditorKibanaProvider: FC<ContentEditorKibanaDependencies> = 
 
   const openFlyout = useCallback(
     (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
-      return coreOpenFlyout(toMountPoint(node, { theme$: core.theme.theme$ }), options);
+      return coreOpenFlyout(toMountPoint(node, { theme$ }), options);
     },
-    [coreOpenFlyout, toMountPoint, core]
+    [coreOpenFlyout, toMountPoint, theme$]
   );
 
   return (
