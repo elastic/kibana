@@ -89,7 +89,7 @@ describe('Reporting Config Schema', () => {
     expect(ConfigSchema.validate({}, { serverless: true }).disableStatefulSettings)
       .toMatchInlineSnapshot(`
       Object {
-        "enabled": false,
+        "enabled": true,
       }
     `);
   });
