@@ -22,7 +22,6 @@ import {
   actionSchema,
   ruleSchema,
   ruleDomainSchema,
-  muteOptionsSchema,
 } from '../schemas';
 
 export type RuleNotifyWhen = typeof ruleNotifyWhen[keyof typeof ruleNotifyWhen];
@@ -42,7 +41,6 @@ export type Monitoring = TypeOf<typeof monitoringSchema>;
 export type Action = TypeOf<typeof actionSchema>;
 type RuleSchemaType = TypeOf<typeof ruleSchema>;
 type RuleDomainSchemaType = TypeOf<typeof ruleDomainSchema>;
-export type RuleMuteAlertOptions = TypeOf<typeof muteOptionsSchema>;
 
 type RuleExecutionStatusWithDateString = TypeOf<typeof ruleExecutionStatusSchema>;
 export interface RuleExecutionStatus {

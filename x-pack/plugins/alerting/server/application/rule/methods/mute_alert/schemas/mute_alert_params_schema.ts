@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 
-export const muteOptionsSchema = schema.object({
+export const muteAlertParamsSchema = schema.object({
   alertId: schema.string(),
   alertInstanceId: schema.string(),
 });

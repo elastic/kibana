@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-export type {
-  Rule,
-  RuleDomain,
-  RuleLastRun,
-  Monitoring,
-  RuleParams,
-  RuleNotifyWhen,
-  RuleSnoozeSchedule,
-  RuleMuteAlertParams,
-} from './rule';
+import { TypeOf } from '@kbn/config-schema';
+import { muteAlertParamsSchema } from '../schemas';
+
+export type MuteAlertParams = TypeOf<typeof muteAlertParamsSchema>;

@@ -6,8 +6,8 @@
  */
 
 import { Boom } from '@hapi/boom';
-import { muteOptionsSchema } from '../../schemas/mute_options';
-import { RuleMuteAlertOptions } from '../../types';
+import { muteAlertParamsSchema } from './schemas';
+import type { MuteAlertParams } from './types';
 import { Rule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -17,24 +17,24 @@ import { updateMeta } from '../../../../rules_client/lib';
 
 export async function muteInstance(
   context: RulesClientContext,
-  options: RuleMuteAlertOptions
+  params: MuteAlertParams
 ): Promise<void> {
   try {
-    muteOptionsSchema.validate(options);
+    muteAlertParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Failed to validate params: ${error.message}`);
   }
 
   return await retryIfConflicts(
     context.logger,
-    `rulesClient.muteInstance('${options.alertId}')`,
-    async () => await muteInstanceWithOCC(context, options)
+    `rulesClient.muteInstance('${params.alertId}')`,
+    async () => await muteInstanceWithOCC(context, params)
   );
 }
 
 async function muteInstanceWithOCC(
   context: RulesClientContext,
-  { alertId, alertInstanceId }: RuleMuteAlertOptions
+  { alertId, alertInstanceId }: MuteAlertParams
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
     'alert',

@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-export type {
-  Rule,
-  RuleDomain,
-  RuleLastRun,
-  Monitoring,
-  RuleParams,
-  RuleNotifyWhen,
-  RuleSnoozeSchedule,
-  RuleMuteAlertParams,
-} from './rule';
+export type { MuteAlertParams } from './mute_alert_params';
