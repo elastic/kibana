@@ -25,7 +25,7 @@ import {
 
 import { css } from '@emotion/react';
 import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SectionLoading } from '../../../../../shared_imports';
+import { SectionLoading, Error } from '../../../../../shared_imports';
 import { loadIndexStatistics, documentationService } from '../../../../services';
 
 interface Props {
@@ -41,7 +41,7 @@ export const DetailsPageStats: FunctionComponent<
   isIndexOpen,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const [error, setError] = useState<Error | null>();
   const [indexStats, setIndexStats] = useState<IndicesStatsResponse | null>();
 
   const fetchIndexStats = useCallback(async () => {
