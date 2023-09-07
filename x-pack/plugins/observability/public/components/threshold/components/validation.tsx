@@ -49,8 +49,8 @@ export function validateMetricThreshold({
         threshold1: string[];
       };
       metric: string[];
-      customMetricsError?: string;
-      customMetrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
+      metricsError?: string;
+      metrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
       equation?: string;
     };
   } & { filterQuery?: string[]; searchConfiguration?: string[] } = {};
@@ -100,7 +100,7 @@ export function validateMetricThreshold({
         threshold1: [],
       },
       metric: [],
-      customMetrics: {},
+      metrics: {},
     };
     if (!c.aggType) {
       errors[id].aggField.push(
@@ -179,19 +179,19 @@ export function validateMetricThreshold({
     }
 
     if (isCustomMetricExpressionParams(c)) {
-      if (!c.customMetrics || (c.customMetrics && c.customMetrics.length < 1)) {
-        errors[id].customMetricsError = i18n.translate(
-          'xpack.observability.threshold.rule.alertFlyout.error.customMetricsError',
+      if (!c.metrics || (c.metrics && c.metrics.length < 1)) {
+        errors[id].metricsError = i18n.translate(
+          'xpack.observability.threshold.rule.alertFlyout.error.metricsError',
           {
             defaultMessage: 'You must define at least 1 custom metric',
           }
         );
       } else {
-        c.customMetrics.forEach((metric) => {
+        c.metrics.forEach((metric) => {
           const customMetricErrors: { aggType?: string; field?: string; filter?: string } = {};
           if (!metric.aggType) {
             customMetricErrors.aggType = i18n.translate(
-              'xpack.observability.threshold.rule.alertFlyout.error.customMetrics.aggTypeRequired',
+              'xpack.observability.threshold.rule.alertFlyout.error.metrics.aggTypeRequired',
               {
                 defaultMessage: 'Aggregation is required',
               }
@@ -199,7 +199,7 @@ export function validateMetricThreshold({
           }
           if (metric.aggType !== 'count' && !metric.field) {
             customMetricErrors.field = i18n.translate(
-              'xpack.observability.threshold.rule.alertFlyout.error.customMetrics.fieldRequired',
+              'xpack.observability.threshold.rule.alertFlyout.error.metrics.fieldRequired',
               {
                 defaultMessage: 'Field is required',
               }
@@ -213,7 +213,7 @@ export function validateMetricThreshold({
             }
           }
           if (!isEmpty(customMetricErrors)) {
-            errors[id].customMetrics[metric.name] = customMetricErrors;
+            errors[id].metrics[metric.name] = customMetricErrors;
           }
         });
       }
