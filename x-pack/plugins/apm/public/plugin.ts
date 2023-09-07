@@ -82,7 +82,7 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
-import { TelemetryService } from './services/telemetry';
+import { ITelemetryClient, TelemetryService } from './services/telemetry';
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
 export type ApmPluginStart = void;
@@ -104,6 +104,10 @@ export interface ApmPluginSetupDeps {
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
+}
+
+export interface ApmServices {
+  telemetry: ITelemetryClient;
 }
 
 export interface ApmPluginStartDeps {
@@ -401,7 +405,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           config,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
-          services: {
+          apmServices: {
             telemetry,
           },
         });

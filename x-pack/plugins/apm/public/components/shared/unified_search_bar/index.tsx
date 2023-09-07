@@ -22,7 +22,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import { UIProcessorEvent } from '../../../../common/processor_event';
 import { TimePickerTimeDefaults } from '../date_picker/typings';
-import { ApmPluginStartDeps } from '../../../plugin';
+import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmDataView } from '../../../hooks/use_apm_data_view';
 import { useProcessorEvent } from '../../../hooks/use_processor_event';
@@ -140,7 +140,7 @@ export function UnifiedSearchBar({
     },
     core,
   } = useApmPluginContext();
-  const { services } = useKibana<ApmPluginStartDeps>();
+  const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const {
     data: {
       query: { queryString: queryStringService, timefilter: timeFilterService },
@@ -244,7 +244,7 @@ export function UnifiedSearchBar({
     payload: { dateRange: TimeRange; query?: Query },
     isUpdate?: boolean
   ) => {
-    let action = 'submit';
+    let action = SearchQueryActions.Submit;
     if (dataView == null) {
       return;
     }
