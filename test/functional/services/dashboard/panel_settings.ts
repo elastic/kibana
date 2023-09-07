@@ -136,9 +136,9 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       log.debug('enableCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
       await retry.try(async () => {
-        if (!(await toggle.isSelected())) {
+        if ((await toggle.getAttribute('aria-checked')) === 'false') {
           await toggle.click();
-          if (!(await toggle.isSelected())) {
+          if ((await toggle.getAttribute('aria-checked')) === 'false') {
             throw new Error('enableCustomTimeRange click missed');
           }
         }
@@ -149,9 +149,9 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       log.debug('disableCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
       await retry.try(async () => {
-        if (await toggle.isSelected()) {
+        if ((await toggle.getAttribute('aria-checked')) === 'true') {
           await toggle.click();
-          if (await toggle.isSelected()) {
+          if ((await toggle.getAttribute('aria-checked')) === 'true') {
             throw new Error('disableCustomTimeRange click missed');
           }
         }
