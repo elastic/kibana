@@ -6,13 +6,19 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import {
+  ExecutionResponseItem,
+  ExecutionResponseType,
+} from '@kbn/actions-plugin/server/create_execute_function';
+import type { Logger } from '@kbn/core/server';
 import type { EmailService, PlainTextEmail, HTMLEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
   constructor(
     private requesterId: string,
     private connectorId: string,
-    private actionsClient: IUnsecuredActionsClient
+    private actionsClient: IUnsecuredActionsClient,
+    private logger: Logger
   ) {}
 
   async sendPlainTextEmail(params: PlainTextEmail): Promise<void> {
@@ -25,7 +31,11 @@ export class ConnectorsEmailService implements EmailService {
       },
       relatedSavedObjects: params.context?.relatedObjects,
     }));
-    return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
+
+    const response = await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
+    if (response.errors) {
+      this.logEnqueueExecutionResponse(response.items);
+    }
   }
 
   async sendHTMLEmail(params: HTMLEmail): Promise<void> {
@@ -40,6 +50,19 @@ export class ConnectorsEmailService implements EmailService {
       relatedSavedObjects: params.context?.relatedObjects,
     }));
 
-    return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
+    const response = await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
+    if (response.errors) {
+      this.logEnqueueExecutionResponse(response.items);
+    }
+  }
+
+  private logEnqueueExecutionResponse(items: ExecutionResponseItem[]) {
+    for (const r of items) {
+      if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+        this.logger.warn(
+          `Skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
+        );
+      }
+    }
   }
 }
