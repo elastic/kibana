@@ -103,7 +103,9 @@ export const useValidation = ({
   );
 
   useEffect(() => {
+    if (isMounted.current) {
     onNameChange(tagAttributes.name);
+    }
   }, [onNameChange, tagAttributes.name]);
 
   useEffect(() => {
