@@ -54,9 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
-            'All log datasets'
-          );
+          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
         });
 
         await retry.try(async () => {
