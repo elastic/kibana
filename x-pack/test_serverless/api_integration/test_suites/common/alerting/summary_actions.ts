@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('Alerting summary rules', () => {
+  describe('Summary actions', () => {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;
@@ -30,11 +30,13 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .delete(`/api/actions/connector/${actionId}`)
         .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set('x-elastic-internal-origin', 'foo')
+        .expect(204);
       await supertest
         .delete(`/api/alerting/rule/${ruleId}`)
         .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set('x-elastic-internal-origin', 'foo')
+        .expect(204);
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'alerts' } },
@@ -43,12 +45,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should schedule actions for summary of alerts per rule run', async () => {
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -96,7 +98,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       const resp = await waitForDocumentInIndex({
         esClient,
@@ -117,12 +118,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should filter alerts by kql', async () => {
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -170,7 +171,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       const resp = await waitForDocumentInIndex({
         esClient,
@@ -201,12 +201,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -259,7 +259,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       // Should not have executed any action
       const resp = await getDocumentsInIndex({
@@ -270,12 +269,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should schedule actions for summary of alerts on a custom interval', async () => {
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -321,7 +320,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       await runRule({
         supertest,
