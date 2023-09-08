@@ -115,6 +115,63 @@ export async function createEsQueryRule({
   return body;
 }
 
+export async function createInventoryRule({
+  supertest,
+  name,
+  actions = [],
+  tags = ['foo', 'bar'],
+  schedule,
+  consumer,
+  notifyWhen,
+  enabled = true,
+}: {
+  supertest: SuperTest<Test>;
+  name: string;
+  consumer: string;
+  actions?: any[];
+  tags?: any[];
+  schedule?: { interval: string };
+  notifyWhen?: string;
+  enabled?: boolean;
+}) {
+  const { body } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      enabled,
+      params: {
+        nodeType: 'host',
+        criteria: [
+          {
+            metric: 'cpu',
+            comparator: '>',
+            threshold: [5],
+            timeSize: 1,
+            timeUnit: 'm',
+            customMetric: {
+              type: 'custom',
+              id: 'alert-custom-metric',
+              field: '',
+              aggregation: 'avg',
+            },
+          },
+        ],
+        sourceId: 'default',
+      },
+      consumer,
+      schedule: schedule || {
+        interval: '1m',
+      },
+      tags,
+      name,
+      rule_type_id: 'metrics.alert.inventory.threshold',
+      actions,
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
+    });
+  return body;
+}
+
 export async function disableRule({
   supertest,
   ruleId,
