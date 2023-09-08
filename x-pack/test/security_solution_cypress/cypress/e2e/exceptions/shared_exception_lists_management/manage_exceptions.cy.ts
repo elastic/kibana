@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -20,7 +19,7 @@ import {
   submitNewExceptionItem,
   deleteFirstExceptionItemInListDetailPage,
 } from '../../../tasks/exceptions';
-import { EXCEPTIONS_URL, ruleDetailsUrl } from '../../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
