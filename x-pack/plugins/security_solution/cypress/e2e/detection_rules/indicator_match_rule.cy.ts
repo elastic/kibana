@@ -105,7 +105,7 @@ import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { goBackToRulesTable, getDetails } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL, RULE_CREATION } from '../../urls/navigation';
-import { duplicateSelectedRulesWithExceptions } from '../../tasks/rules_bulk_actions';
+import { duplicateSelectedRulesWithExceptions } from '../../tasks/rules_bulk_edit';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
