@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import type {
   EventAnnotationGroupSavedObjectAttributes,
   EventAnnotationGroupCreateIn,
+  EventAnnotationGroupCreateOut,
   EventAnnotationGroupUpdateIn,
   EventAnnotationGroupSearchIn,
   EventAnnotationGroupSearchOut,
@@ -297,9 +298,73 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('create', () => {
-      it(`should create a new group`, async () => {});
+      it(`should create a new group`, async () => {
+        const payload: EventAnnotationGroupCreateIn = {
+          contentTypeId: CONTENT_ID,
+          data: DEFAULT_EVENT_ANNOTATION_GROUP,
+          options: {
+            references: DEFAULT_REFERENCES,
+          },
+          version: API_VERSION,
+        };
 
-      it(`should reject malformed groups`, async () => {});
+        const resp = await supertest
+          .post(`${CONTENT_ENDPOINT}/create`)
+          .set('kbn-xsrf', 'kibana')
+          .send(payload)
+          .expect(200);
+
+        const result = resp.body.result.result as EventAnnotationGroupCreateOut;
+
+        expect(result.item.attributes).to.eql(DEFAULT_EVENT_ANNOTATION_GROUP);
+        expect(result.item.id).to.be.a('string');
+        expect(result.item.namespaces).to.eql(['default']);
+      });
+
+      it(`should reject malformed groups`, async () => {
+        const badGroups = [
+          // extra property
+          {
+            ...DEFAULT_EVENT_ANNOTATION_GROUP,
+            extraProp: 'some-value',
+          },
+          // missing title
+          {
+            ...DEFAULT_EVENT_ANNOTATION_GROUP,
+            title: undefined,
+          },
+          // wrong type for property
+          {
+            ...DEFAULT_EVENT_ANNOTATION_GROUP,
+            ignoreGlobalFilters: 'not-a-boolean',
+          },
+        ] as unknown as EventAnnotationGroupSavedObjectAttributes[]; // (coerce the types because these are intentionally malformed)
+
+        const expectedMessages = [
+          'Invalid data. [extraProp]: definition for this key is missing',
+          'Invalid data. [title]: expected value of type [string] but got [undefined]',
+          'Invalid data. [ignoreGlobalFilters]: expected value of type [boolean] but got [string]',
+        ];
+
+        for (let i = 0; i < badGroups.length; i++) {
+          const payload: EventAnnotationGroupCreateIn = {
+            contentTypeId: CONTENT_ID,
+            data: badGroups[i],
+            options: {
+              references: DEFAULT_REFERENCES,
+            },
+            version: API_VERSION,
+          };
+
+          const resp = await supertest
+            .post(`${CONTENT_ENDPOINT}/create`)
+            .set('kbn-xsrf', 'kibana')
+            .send(payload)
+            .expect(400);
+
+          expect(resp.body.message).to.be(expectedMessages[i]);
+        }
+      });
 
       it(`should require dataViewSpec to be specified`, async () => {
         const createWithDataViewSpec = (dataViewSpec: any) => {

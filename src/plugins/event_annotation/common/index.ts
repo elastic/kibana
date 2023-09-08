@@ -31,6 +31,7 @@ export type {
   EventAnnotationGroupGetOut,
   EventAnnotationGroupSavedObjectAttributes,
   EventAnnotationGroupCreateIn,
+  EventAnnotationGroupCreateOut,
   EventAnnotationGroupUpdateIn,
   EventAnnotationGroupSearchIn,
   EventAnnotationGroupSearchOut,
