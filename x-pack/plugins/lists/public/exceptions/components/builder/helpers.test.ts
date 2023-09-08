@@ -25,6 +25,7 @@ import {
   FormattedBuilderEntry,
   OperatorOption,
   doesNotExistOperator,
+  doesNotMatchOperator,
   existsOperator,
   filterExceptionItems,
   getCorrespondingKeywordField,
@@ -50,6 +51,7 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  matchesOperator,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -509,25 +511,57 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it returns "isOperator" and "isOneOfOperator" if item is nested and "listType" is "endpoint"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator, isOneOfOperator];
-      expect(output).toEqual(expected);
-    });
+    describe('"endpoint" list type', () => {
+      test('it returns operators "is", "isOneOf", "matches" and "doesNotMatch" if item is nested and field supports "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [
+          isOperator,
+          isOneOfOperator,
+          matchesOperator,
+          doesNotMatchOperator,
+        ];
+        expect(output).toEqual(expected);
+      });
 
-    test('it returns "isOperator" and "isOneOfOperator" if "listType" is "endpoint"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator, isOneOfOperator];
-      expect(output).toEqual(expected);
-    });
+      test('it returns operators "is" and "isOneOf" if item is nested and field does not support "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = {
+          ...getMockNestedBuilderEntry(),
+          field: getField('ip'),
+        };
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
+        expect(output).toEqual(expected);
+      });
 
-    test('it returns "isOperator" if "listType" is "endpoint" and field type is boolean', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint', true);
-      const expected: OperatorOption[] = [isOperator];
-      expect(output).toEqual(expected);
+      test('it returns operators "is", "isOneOf", "matches" and "doesNotMatch" if field supports "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = {
+          ...getMockBuilderEntry(),
+          field: getField('@tags'),
+        };
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [
+          isOperator,
+          isOneOfOperator,
+          matchesOperator,
+          doesNotMatchOperator,
+        ];
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns "isOperator" and "isOneOfOperator" if field does not support "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns "isOperator" and field type is boolean', () => {
+        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+        const output = getOperatorOptions(payloadItem, 'endpoint', true);
+        const expected: OperatorOption[] = [isOperator];
+        expect(output).toEqual(expected);
+      });
     });
 
     test('it returns "isOperator", "isOneOfOperator", and "existsOperator" if item is nested and "listType" is "detection"', () => {
