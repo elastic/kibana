@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
-import { EnterpriseSearchPluginStart } from '@kbn/enterprise-search-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
 import { registerIndicesRoutes } from './routes/indices_routes';
 
@@ -28,9 +27,9 @@ import type {
 import { registerConnectorsRoutes } from './routes/connectors_routes';
 
 export interface RouteDependencies {
+  http: CoreSetup<StartDependencies>['http'];
   logger: Logger;
   router: IRouter;
-  search: EnterpriseSearchPluginStart;
   security: SecurityPluginStart;
 }
 
@@ -47,7 +46,6 @@ export class ServerlessSearchPlugin
   private readonly config: ServerlessSearchConfig;
   private readonly logger: Logger;
   private security?: SecurityPluginStart;
-  private enterpriseSearch?: EnterpriseSearchPluginStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ServerlessSearchConfig>();
@@ -59,13 +57,12 @@ export class ServerlessSearchPlugin
     pluginsSetup: SetupDependencies
   ) {
     const router = http.createRouter();
-    getStartServices().then(([, { enterpriseSearch, security }]) => {
+    getStartServices().then(([, { security }]) => {
       this.security = security;
-      this.enterpriseSearch = enterpriseSearch;
       const dependencies = {
+        http,
         logger: this.logger,
         router,
-        search: this.enterpriseSearch,
         security: this.security,
       };
 
