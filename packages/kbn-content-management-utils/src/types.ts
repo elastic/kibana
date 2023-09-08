@@ -161,8 +161,6 @@ export interface SavedObjectSearchOptions {
 
 /** Saved Object update options  - Pick and Omit to customize */
 export interface SavedObjectUpdateOptions<Attributes = unknown> {
-  /** Overwrite existing documents (defaults to false) */
-  overwrite?: boolean;
   /** Array of referenced saved objects. */
   references?: Reference[];
   version?: string;

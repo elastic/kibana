@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UpdateIn } from '@kbn/content-management-plugin/common';
 import type { ContentManagementCrudTypes } from '@kbn/content-management-utils';
 
 import type { LensContentType } from '../types';
@@ -39,13 +40,17 @@ export type LensSavedObjectAttributes = {
   state?: unknown;
 };
 
-export type LensCrudTypes = ContentManagementCrudTypes<
-  LensContentType,
-  LensSavedObjectAttributes,
-  CreateOptions,
-  UpdateOptions,
-  LensSearchQuery
->;
+// Need to handle update in Lens in a bit different way
+export type LensCrudTypes = Omit<
+  ContentManagementCrudTypes<
+    LensContentType,
+    LensSavedObjectAttributes,
+    CreateOptions,
+    UpdateOptions,
+    LensSearchQuery
+  >,
+  'UpdateIn'
+> & { UpdateIn: UpdateIn<LensContentType, LensSavedObjectAttributes, UpdateOptions> };
 
 export type LensSavedObject = LensCrudTypes['Item'];
 export type PartialLensSavedObject = LensCrudTypes['PartialItem'];

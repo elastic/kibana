@@ -39,11 +39,6 @@ const createOptionsSchema = schema.object({
   references: schema.maybe(createOptionsSchemas.references),
 });
 
-const updateOptionsSchema = schema.object({
-  overwrite: schema.maybe(createOptionsSchemas.overwrite),
-  references: schema.maybe(createOptionsSchemas.references),
-});
-
 // Content management service definition.
 // We need it for BWC support between different versions of the content
 export const serviceDefinition: ServicesDefinition = {
@@ -72,7 +67,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: updateOptionsSchema,
+        schema: createOptionsSchema, // same as create
       },
       data: {
         schema: mapAttributesSchema,

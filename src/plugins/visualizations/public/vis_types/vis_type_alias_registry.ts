@@ -45,7 +45,7 @@ export type GenericVisualizationCrudTypes<
   ContentType,
   Attr,
   Pick<SavedObjectCreateOptions, 'overwrite' | 'references'>,
-  Pick<SavedObjectUpdateOptions, 'overwrite' | 'references'>,
+  Pick<SavedObjectUpdateOptions, 'references'>,
   object
 >;
 
