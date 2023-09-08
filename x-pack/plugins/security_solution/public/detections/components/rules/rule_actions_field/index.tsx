@@ -18,12 +18,15 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
   RuleAction,
-  RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
   RuleActionParam,
+  RuleDefaultAction,
+  SanitizedAlertsFilter,
 } from '@kbn/alerting-plugin/common';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { omitBy } from 'lodash';
 import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
 import type { FieldHook } from '../../../../shared_imports';
 import { useFormContext } from '../../../../shared_imports';
@@ -192,21 +195,30 @@ export const RuleActionsField: React.FC<Props> = ({
   );
 
   const setActionAlertsFilterProperty = useCallback(
-    (key: string, value: RuleActionAlertsFilterProperty, index: number) => {
-      field.setValue((prevValue: RuleAction[]) => {
+    (
+      key: keyof SanitizedAlertsFilter,
+      value: SanitizedAlertsFilter[keyof SanitizedAlertsFilter] | null,
+      index: number
+    ) => {
+      field.setValue((prevValue: RuleDefaultAction[]) => {
         const updatedActions = [...prevValue];
         const { alertsFilter, ...rest } = updatedActions[index];
-        const updatedAlertsFilter = { ...alertsFilter };
+        const updatedAlertsFilter = { ...alertsFilter, [key]: value };
 
-        if (value) {
-          updatedAlertsFilter[key] = value;
-        } else {
-          delete updatedAlertsFilter[key];
-        }
+        /**
+         * If a value is null it means that we need to delete
+         * it from the object.
+         */
+        const updatedAlertsFilterWithoutNullValues = omitBy(
+          updatedAlertsFilter,
+          (filter, filterKey) => filter == null && filterKey === key
+        );
 
         updatedActions[index] = {
           ...rest,
-          ...(!isEmpty(updatedAlertsFilter) ? { alertsFilter: updatedAlertsFilter } : {}),
+          ...(!isEmpty(updatedAlertsFilterWithoutNullValues)
+            ? { alertsFilter: updatedAlertsFilterWithoutNullValues }
+            : {}),
         };
         return updatedActions;
       });
@@ -215,8 +227,12 @@ export const RuleActionsField: React.FC<Props> = ({
   );
 
   const setActionFrequency = useCallback(
-    (key: string, value: RuleActionParam, index: number) => {
-      field.setValue((prevValue: RuleAction[]) => {
+    (
+      key: keyof RuleActionFrequency,
+      value: RuleActionFrequency[keyof RuleActionFrequency] | null,
+      index: number
+    ) => {
+      field.setValue((prevValue: RuleDefaultAction[]) => {
         const updatedActions = [...prevValue];
         updatedActions[index] = {
           ...updatedActions[index],

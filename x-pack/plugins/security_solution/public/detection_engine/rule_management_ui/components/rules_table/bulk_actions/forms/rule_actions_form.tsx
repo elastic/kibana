@@ -13,6 +13,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import type { RuleDefaultAction } from '@kbn/alerting-plugin/common';
 import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
@@ -38,7 +39,7 @@ import { debouncedValidateRuleActionsField } from '../../../../../../detections/
 
 const CommonUseField = getUseField({ component: Field });
 
-type BulkActionsRuleAction = RuleAction & Required<Pick<RuleAction, 'frequency'>>;
+type BulkActionsRuleAction = RuleAction & Required<Pick<RuleDefaultAction, 'frequency'>>;
 
 export interface RuleActionsFormData {
   actions: BulkActionsRuleAction[];

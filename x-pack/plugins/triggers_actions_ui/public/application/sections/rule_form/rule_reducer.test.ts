@@ -386,6 +386,43 @@ describe('rule reducer', () => {
     });
   });
 
+  test('does not remove the null values of other properties', () => {
+    initialRule.actions.push({
+      id: '1',
+      actionTypeId: 'testId',
+      group: 'Rule',
+      params: {
+        testActionParam: 'some value',
+      },
+      uuid: '123-456',
+      alertsFilter: {
+        // @ts-expect-error: null values are not allowed
+        query: null,
+        timeframe: {
+          days: [1, 2, 3, 4, 5, 6, 7],
+          hours: { start: '08:00', end: '17:00' },
+          timezone: 'UTC',
+        },
+      },
+    });
+
+    const updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setRuleActionAlertsFilter' },
+        payload: {
+          key: 'timeframe',
+          value: null,
+          index: 0,
+        },
+      }
+    );
+
+    expect((updatedRule.rule.actions[0] as RuleDefaultAction).alertsFilter).toEqual({
+      query: null,
+    });
+  });
+
   test('does not update the state if the action alerts filter is the same', () => {
     initialRule.actions.push({
       id: '1',

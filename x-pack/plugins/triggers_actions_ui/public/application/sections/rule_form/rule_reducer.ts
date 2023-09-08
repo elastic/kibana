@@ -288,7 +288,7 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
          */
         const updatedAlertsFilterWithoutNullValues = omitBy(
           updatedAlertsFilter,
-          (filter) => filter == null
+          (filter, filterKey) => filter == null && filterKey === key
         );
 
         const updatedAction = {
