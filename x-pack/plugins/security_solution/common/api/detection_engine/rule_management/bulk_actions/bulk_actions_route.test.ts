@@ -12,6 +12,7 @@ import {
   BulkActionType,
   BulkActionEditType,
 } from './bulk_actions_route';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 const retrieveValidationMessage = (payload: unknown) => {
   const decoded = PerformBulkActionRequestBody.decode(payload);
@@ -574,6 +575,40 @@ describe('Perform bulk action request schema', () => {
         expect(message.schema).toEqual({});
       });
 
+      test('invalid request: invalid action_type_id property in actions array for system actions', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
+            {
+              type: BulkActionEditType.add_rule_actions,
+              value: {
+                throttle: '1h',
+                actions: [
+                  {
+                    action_type_id: '.webhook',
+                    id: '458a50e0-1a28-11ed-9098-47fd8e1f3345',
+                    uuid: '123',
+                    params: {
+                      body: {
+                        rule_id: '{{rule.id}}',
+                      },
+                    },
+                    type: RuleActionTypes.SYSTEM,
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining(['invalid keys "action_type_id"'])
+        );
+        expect(message.schema).toEqual({});
+      });
+
       test('valid request: add_rule_actions edit action', () => {
         const payload: PerformBulkActionRequestBody = {
           query: 'name: test',
@@ -592,6 +627,38 @@ describe('Perform bulk action request schema', () => {
                         rule_id: '{{rule.id}}',
                       },
                     },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('valid request: add_rule_actions edit action system action', () => {
+        const payload: PerformBulkActionRequestBody = {
+          query: 'name: test',
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
+            {
+              type: BulkActionEditType.add_rule_actions,
+              value: {
+                throttle: '1h',
+                actions: [
+                  {
+                    id: '458a50e0-1a28-11ed-9098-47fd8e1f3345',
+                    uuid: '123',
+                    params: {
+                      body: {
+                        rule_id: '{{rule.id}}',
+                      },
+                    },
+                    type: RuleActionTypes.SYSTEM,
                   },
                 ],
               },
@@ -625,6 +692,38 @@ describe('Perform bulk action request schema', () => {
                         },
                       ],
                     },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('valid request: set_rule_actions edit action system action', () => {
+        const payload: PerformBulkActionRequestBody = {
+          query: 'name: test',
+          action: BulkActionType.edit,
+          [BulkActionType.edit]: [
+            {
+              type: BulkActionEditType.set_rule_actions,
+              value: {
+                throttle: '1h',
+                actions: [
+                  {
+                    id: '458a50e0-1a28-11ed-9098-47fd8e1f3345',
+                    uuid: '123',
+                    params: {
+                      body: {
+                        rule_id: '{{rule.id}}',
+                      },
+                    },
+                    type: RuleActionTypes.SYSTEM,
                   },
                 ],
               },

@@ -330,24 +330,49 @@ components:
             actions:
               type: array
               items:
-                type: object
-                properties:
-                  group:
-                    type: string
-                    description: Action group
-                  id:
-                    type: string
-                    description: Action ID
-                  params:
-                    type: object
-                    description: Action parameters
-                  frequency:
-                    $ref: '#/components/schemas/RuleActionFrequency'
-                    description: Action frequency
-                required:
-                  - group
-                  - id
-                  - params
+                oneOf:
+                  - type: object
+                    properties:
+                      group:
+                        type: string
+                        description: Action group
+                      id:
+                        type: string
+                        description: Action ID
+                      params:
+                        type: object
+                        description: Action parameters
+                      frequency:
+                        $ref: '#/components/schemas/RuleActionFrequency'
+                        description: Action frequency
+                      type:
+                        type: string
+                        enum: [default]
+                        description: Action type
+                    required:
+                      - group
+                      - id
+                      - params
+                  - type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Action ID
+                      uuid:
+                        type: string
+                        description: Action UUID
+                      params:
+                        type: object
+                        description: Action parameters
+                      type:
+                        type: string
+                        enum: [system]
+                        description: Action type
+                    required:
+                      - id
+                      - uuid
+                      - params
+                      - type
           required:
             - actions
       required:
