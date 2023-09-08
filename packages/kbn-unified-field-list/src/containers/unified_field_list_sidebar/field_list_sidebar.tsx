@@ -401,7 +401,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 onClick={() => onEditField()}
               />
             ) : (
-              <EuiButton {...buttonAddFieldCommonProps} onChange={() => onEditField()}>
+              <EuiButton {...buttonAddFieldCommonProps} onClick={() => onEditField()}>
                 {buttonAddFieldLabel}
               </EuiButton>
             )}
