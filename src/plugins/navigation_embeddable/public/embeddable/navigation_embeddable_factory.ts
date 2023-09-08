@@ -80,7 +80,6 @@ export class NavigationEmbeddableFactoryDefinition
     NavigationEmbeddableInput,
     NavigationEmbeddableAttributes | unknown
   >['getPanelPlacementSettings'] = (input, attributes) => {
-    debugger;
     if (!isNavigationEmbeddableAttributes(attributes) || !attributes.layout) {
       // if we have no information about the layout of this nav embeddable defer to default panel size and placement.
       return {};
