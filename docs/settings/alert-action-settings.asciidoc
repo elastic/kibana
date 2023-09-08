@@ -262,6 +262,7 @@ The configuration details, which are specific to the type of preconfigured conne
 A configuration URL that varies by connector:
 +
 --
+* For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
 * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
 * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
 
@@ -318,6 +319,9 @@ For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a set of k
 `xpack.actions.preconfigured.<connector-id>.config.index`::
 For an <<index-action-type,index connector>>, specifies the {es} index.
 
+`xpack.actions.preconfigured.<connector-id>.config.projectKey`::
+For a <<jira-action-type,Jira connector>>, specifies the Jira project key.
+
 `xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson`::
 For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the update case URL to update a case. Required variables are `case.title` and `case.description`.
 +
@@ -349,6 +353,12 @@ An API key secret that varies by connector:
 --
 * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} API authentication key for HTTP basic authentication.
 --
+
+`xpack.actions.preconfigured.<connector-id>.secrets.apiToken`::
+For a <<jira-action-type,Jira connector>>, specifies the API authentication token for HTTP basic authentication.
+
+`xpack.actions.preconfigured.<connector-id>.secrets.email`::
+For a <<jira-action-type,Jira connector>>, specifies the account email for HTTP basic authentication.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.password`::
 A password secret that varies by connector:
