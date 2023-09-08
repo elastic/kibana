@@ -44,9 +44,14 @@ describe('Expression', () => {
     const ruleParams = {
       criteria: [],
       groupBy: undefined,
-      filterQuery: '',
       sourceId: 'default',
-      searchConfiguration: {},
+      searchConfiguration: {
+        index: 'mockedIndex',
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      },
     };
     const wrapper = mountWithIntl(
       <QueryClientProvider client={queryClient}>
@@ -90,7 +95,7 @@ describe('Expression', () => {
     };
     const { ruleParams } = await setup(currentOptions);
     expect(ruleParams.groupBy).toBe('host.hostname');
-    expect(ruleParams.filterQuery).toBe('foo');
+    expect(ruleParams.searchConfiguration.query.query).toBe('foo');
     expect(ruleParams.criteria).toEqual([
       {
         metric: 'system.load.1',
@@ -114,7 +119,6 @@ describe('Expression', () => {
   it('should show an error message when searchSource throws an error', async () => {
     const currentOptions = {
       groupBy: 'host.hostname',
-      filterQuery: 'foo',
       metrics: [
         { aggregation: 'avg', field: 'system.load.1' },
         { aggregation: 'cardinality', field: 'system.cpu.user.pct' },
@@ -154,7 +158,6 @@ describe('Expression', () => {
   it('should show no timestamp error when selected data view does not have a timeField', async () => {
     const currentOptions = {
       groupBy: 'host.hostname',
-      filterQuery: 'foo',
       metrics: [
         { aggregation: 'avg', field: 'system.load.1' },
         { aggregation: 'cardinality', field: 'system.cpu.user.pct' },

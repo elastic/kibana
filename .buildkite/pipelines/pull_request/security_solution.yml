@@ -10,8 +10,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - 'target/kibana-security-solution/**/*'
 
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
     label: 'Explore - Security Solution Cypress Tests'
@@ -24,8 +22,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - 'target/kibana-security-solution/**/*'
 
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
@@ -38,8 +34,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - 'target/kibana-security-solution/**/*'
 
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
     label: 'Security Solution Cypress tests, burning changed specs'
@@ -51,8 +45,6 @@ steps:
     retry:
       automatic: false
     soft_fail: true
-    artifact_paths:
-      - 'target/kibana-security-solution/**/*'
 
   - command: .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
     label: 'Security Solution OpenAPI codegen'

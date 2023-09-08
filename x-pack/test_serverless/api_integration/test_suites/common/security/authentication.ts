@@ -144,7 +144,8 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: {},
             operator: true,
             roles: ['superuser'],
-            username: 'elastic_serverless',
+            // We use `elastic` for MKI, and `elastic_serverless` for any other testing environment.
+            username: expect.stringContaining('elastic'),
           });
           expect(status).toBe(200);
         });

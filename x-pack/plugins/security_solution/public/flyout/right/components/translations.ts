@@ -41,7 +41,7 @@ export const RISK_SCORE_TITLE = i18n.translate(
 export const RULE_SUMMARY_TEXT = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.ruleSummaryText',
   {
-    defaultMessage: 'Rule summary',
+    defaultMessage: 'Show rule summary',
   }
 );
 
@@ -133,13 +133,13 @@ export const ENTITIES_TITLE = i18n.translate(
 export const ENTITIES_NO_DATA_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.entitiesNoDataMessage',
   {
-    defaultMessage: 'No user or host data available',
+    defaultMessage: 'Host and user information are unavailable for this alert',
   }
 );
 
 export const THREAT_INTELLIGENCE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle',
-  { defaultMessage: 'Threat Intelligence' }
+  { defaultMessage: 'Threat intelligence' }
 );
 
 export const INSIGHTS_TITLE = i18n.translate(
@@ -166,7 +166,9 @@ export const PREVALENCE_TITLE = i18n.translate(
 
 export const PREVALENCE_NO_DATA = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.prevalenceNoData',
-  { defaultMessage: 'No field/value pairs are uncommon' }
+  {
+    defaultMessage: 'No prevalence data available.',
+  }
 );
 
 export const THREAT_MATCH_DETECTED = i18n.translate(
@@ -214,13 +216,6 @@ export const ANALYZER_PREVIEW_TITLE = i18n.translate(
   { defaultMessage: 'Analyzer preview' }
 );
 
-export const ANALYZER_PREVIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.analyzerPreview.error',
-  {
-    defaultMessage: 'No analyzer graph data available',
-  }
-);
-
 export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
   defaultMessage: 'Share Alert',
 });
@@ -242,7 +237,7 @@ export const INVESTIGATION_GUIDE_BUTTON = i18n.translate(
 export const INVESTIGATION_GUIDE_NO_DATA = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.investigationGuideNoData',
   {
-    defaultMessage: 'An investigation guide has not been created for this rule.',
+    defaultMessage: 'There’s no investigation guide for this rule.',
   }
 );
 
@@ -250,21 +245,6 @@ export const SESSION_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
   {
     defaultMessage: 'Session viewer preview',
-  }
-);
-
-export const SESSION_PREVIEW_UPSELL = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.sessionPreview.upsell',
-  {
-    defaultMessage:
-      'Session preview is disabled because your license does not support it. Please upgrade your license.',
-  }
-);
-
-export const SESSION_PREVIEW_ERROR = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.sessionPreview.error',
-  {
-    defaultMessage: 'No session view data available',
   }
 );
 

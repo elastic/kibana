@@ -10,10 +10,16 @@ import execa from 'execa';
 import fs from 'fs';
 import Fsp from 'fs/promises';
 import { resolve, basename, join } from 'path';
+import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
-import { ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
+import {
+  CA_CERT_PATH,
+  ES_P12_PASSWORD,
+  ES_P12_PATH,
+  kibanaDevServiceAccount,
+} from '@kbn/dev-utils';
 
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
@@ -24,12 +30,19 @@ import {
   ESS_CONFIG_PATH,
   ESS_FILES_PATH,
 } from '../paths';
+import {
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+} from './ess_file_realm';
+import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
+import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
 interface BaseOptions {
   tag?: string;
   image?: string;
   port?: number;
   ssl?: boolean;
+  /** Kill running cluster before starting a new cluster  */
   kill?: boolean;
   files?: string | string[];
 }
@@ -39,10 +52,16 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
+  /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
+  /** Path to the directory where the ES cluster will store data */
   basePath: string;
+  /** If this process exits, teardown the ES cluster as well */
   teardown?: boolean;
+  /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
   background?: boolean;
+  /** Wait for the ES cluster to be ready to serve requests */
+  waitForReady?: boolean;
 }
 
 interface ServerlessEsNodeArgs {
@@ -320,10 +339,15 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
   log.info(chalk.bold(`Checking for image: ${image}`));
 
   await execa('docker', ['pull', image], {
-    // inherit is required to show Docker output
-    stdio: ['ignore', 'inherit', 'inherit'],
+    // inherit is required to show Docker pull output
+    stdio: ['ignore', 'inherit', 'pipe'],
   }).catch(({ message }) => {
-    throw createCliError(message);
+    throw createCliError(
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
+
+${message}`
+    );
   });
 }
 
@@ -393,6 +417,14 @@ export function resolveEsArgs(
 
     args.forEach((arg) => {
       const [key, ...value] = arg.split('=');
+
+      // Guide the user to use SSL flag instead of manual setup
+      if (key === 'xpack.security.enabled' && value?.[0] === 'true') {
+        throw createCliError(
+          'Use the --ssl flag to automatically enable and set up the security plugin.'
+        );
+      }
+
       esArgs.set(key.trim(), value.join('=').trim());
     });
   }
@@ -522,6 +554,13 @@ export async function runServerlessEsNode(
   );
 }
 
+function getESClient(clientOptions: ClientOptions): Client {
+  return new Client({
+    Connection: HttpConnection,
+    ...clientOptions,
+  });
+}
+
 /**
  * Runs an ES Serverless Cluster through Docker
  */
@@ -530,6 +569,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   await setupDocker({ log, image, options });
 
   const volumeCmd = await setupServerlessVolumes(log, options);
+  const portCmd = resolvePort(options);
 
   const nodeNames = await Promise.all(
     SERVERLESS_NODES.map(async (node, i) => {
@@ -544,7 +584,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
             ),
             options
           ),
-          i === 0 ? resolvePort(options) : [],
+          i === 0 ? portCmd : [],
           volumeCmd
         ),
       });
@@ -555,6 +595,50 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   log.success(`Serverless ES cluster running.
       Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
+
+  if (options.ssl) {
+    log.success(`SSL and Security have been enabled for ES.
+      Login through your browser with username ${chalk.bold.cyan(
+        ELASTIC_SERVERLESS_SUPERUSER
+      )} or ${chalk.bold.cyan(SYSTEM_INDICES_SUPERUSER)} and password ${chalk.bold.magenta(
+      ELASTIC_SERVERLESS_SUPERUSER_PASSWORD
+    )}.
+    `);
+
+    log.warning(`Kibana should be started with the SSL flag so that it can authenticate with ES.
+      See packages/kbn-es/src/ess_resources/README.md for additional information on authentication.
+    `);
+  }
+
+  if (options.waitForReady) {
+    log.info('Waiting until ES is ready to serve requests...');
+
+    const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
+      0,
+      portCmd[1].lastIndexOf(':')
+    )}`;
+
+    const client = getESClient({
+      node: esNodeUrl,
+      ...(options.ssl
+        ? {
+            auth: { bearer: kibanaDevServiceAccount.token },
+            tls: {
+              ca: [fs.readFileSync(CA_CERT_PATH)],
+              // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+              // for the ip which is not validated. As such we are getting the error
+              // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+              // To work around that we are overriding the function checkServerIdentity too
+              checkServerIdentity: () => {
+                return undefined;
+              },
+            },
+          }
+        : {}),
+    });
+    await waitUntilClusterReady({ client, log });
+    log.success('ES is ready');
+  }
 
   if (!options.background) {
     // The ESS cluster has to be started detached, so we attach a logger afterwards for output
