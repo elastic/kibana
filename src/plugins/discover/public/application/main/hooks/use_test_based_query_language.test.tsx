@@ -142,6 +142,7 @@ describe('useTextBasedQueryLanguage', () => {
           flattened: { field1: 1 },
         } as unknown as DataTableRecord,
       ],
+      // transformational command
       query: { esql: 'from the-data-view-title | keep field1' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
@@ -150,6 +151,35 @@ describe('useTextBasedQueryLanguage', () => {
       expect(replaceUrlState).toHaveBeenCalledWith({
         index: 'the-data-view-id',
         columns: ['field1'],
+      });
+    });
+  });
+
+  test('changing a text based query with no transformational commands should only change dataview state when loading and finished', async () => {
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    stateContainer.dataState.data$.documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    replaceUrlState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      // non transformational command
+      query: { esql: 'from the-data-view-title | where field1 > 0' },
+    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
       });
     });
   });
@@ -253,6 +283,65 @@ describe('useTextBasedQueryLanguage', () => {
       query: { esql: 'from the-data-view-title | keep field 1 | WHERE field1=1' },
     });
 
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | keep field1' },
+    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      columns: ['field1'],
+    });
+  });
+
+  test('it should not overwrite existing state columns on initial fetch and non transformational commands', async () => {
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
+      columns: ['field1'],
+      index: 'the-data-view-id',
+    });
+    const documents$ = stateContainer.dataState.data$.documents$;
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1, field2: 2 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | WHERE field2=1' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
+
+  test('it should overwrite existing state columns on transitioning from a query with non transformational commands to a query with transformational', async () => {
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
+      index: 'the-data-view-id',
+    });
+    const documents$ = stateContainer.dataState.data$.documents$;
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1, field2: 2 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title | WHERE field2=1' },
+    });
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
