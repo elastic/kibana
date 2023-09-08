@@ -9,7 +9,7 @@ import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { MetricExplorerCustomMetricAggregations } from '../../../../common/threshold_rule/metrics_explorer';
-import { MetricExpressionCustomMetric } from '../../../../common/threshold_rule/types';
+import { CustomThresholdExpressionMetric } from '../../../../common/threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
@@ -43,8 +43,7 @@ export const useMetricsExplorerChartData = (
           ? {
               aggregation: 'custom',
               custom_metrics:
-                expression?.customMetrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ??
-                [],
+                expression?.metrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ?? [],
               equation: expression.equation,
             }
           : { field: expression.metric, aggregation: expression.aggType },
@@ -57,7 +56,7 @@ export const useMetricsExplorerChartData = (
       expression.equation,
       expression.metric,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(expression.customMetrics),
+      JSON.stringify(expression.metrics),
       filterQuery,
       groupBy,
     ]
@@ -78,7 +77,9 @@ export const useMetricsExplorerChartData = (
   return useMetricsExplorerData(options, derivedIndexPattern, timestamps);
 };
 
-const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {
+const mapMetricThresholdMetricToMetricsExplorerMetric = (
+  metric: CustomThresholdExpressionMetric
+) => {
   if (metric.aggType === 'count') {
     return {
       name: metric.name,

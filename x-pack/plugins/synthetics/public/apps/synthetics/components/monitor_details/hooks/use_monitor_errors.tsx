@@ -8,7 +8,7 @@ import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useSelectedLocation } from './use_selected_location';
-import { PingState } from '../../../../../../common/runtime_types';
+import { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -113,10 +113,11 @@ export function useMonitorErrors(monitorIdArg?: string) {
         return prev;
       }, defaultValues) ?? defaultValues;
 
+    const hits = data?.aggregations?.latest.hits.hits ?? [];
+
     const hasActiveError: boolean =
-      data?.aggregations?.latest.hits.hits.length === 1 &&
-      (data?.aggregations?.latest.hits.hits[0]._source as { monitor: { status: string } }).monitor
-        .status === 'down' &&
+      hits.length === 1 &&
+      (hits[0]?._source as Ping).monitor?.status === 'down' &&
       !!errorStates?.length;
 
     return {
