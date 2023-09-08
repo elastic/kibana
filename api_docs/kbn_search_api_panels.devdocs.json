@@ -526,7 +526,7 @@
         "label": "WelcomeBanner",
         "description": [],
         "signature": [
-          "({ userProfile, assetBasePath, image, showDescription, }: React.PropsWithChildren<",
+          "({ user, assetBasePath, image, showDescription, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/search-api-panels",
             "scope": "common",
@@ -545,7 +545,7 @@
             "id": "def-common.WelcomeBanner.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  userProfile,\n  assetBasePath,\n  image,\n  showDescription = true,\n}",
+            "label": "{\n  user,\n  assetBasePath,\n  image,\n  showDescription = true,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -926,6 +926,34 @@
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.ingestPipeline",
+            "type": "string",
+            "tags": [],
+            "label": "ingestPipeline",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.LanguageDefinitionSnippetArguments.extraIngestDocumentValues",
+            "type": "Object",
+            "tags": [],
+            "label": "extraIngestDocumentValues",
+            "description": [],
+            "signature": [
+              "Record<string, boolean> | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1121,13 +1149,20 @@
         "children": [
           {
             "parentPluginId": "@kbn/search-api-panels",
-            "id": "def-common.WelcomeBannerProps.userProfile",
+            "id": "def-common.WelcomeBannerProps.user",
             "type": "Object",
             "tags": [],
-            "label": "userProfile",
+            "label": "user",
             "description": [],
             "signature": [
-              "{ user: { full_name?: string | undefined; username?: string | undefined; }; }"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-search-api-panels/index.tsx",
             "deprecated": false,

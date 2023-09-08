@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { Status } from '../../../../../../../common/types/api';
-
 import {
   FilteringConfig,
   FilteringPolicy,
@@ -18,7 +16,10 @@ import {
   FilteringRuleRule,
   FilteringValidation,
   FilteringValidationState,
-} from '../../../../../../../common/types/connectors';
+} from '@kbn/search-connectors';
+
+import { Status } from '../../../../../../../common/types/api';
+
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import {

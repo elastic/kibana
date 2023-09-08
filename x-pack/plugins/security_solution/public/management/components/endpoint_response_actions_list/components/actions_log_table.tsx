@@ -33,7 +33,7 @@ import { FormattedDate } from '../../../../common/components/formatted_date';
 import { ARIA_LABELS, TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
 import { getActionStatus, getUiCommand } from './hooks';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { StatusBadge } from './status_badge';
+import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { ActionsLogExpandedTray } from './action_log_expanded_tray';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
@@ -42,7 +42,7 @@ import { useUrlPagination } from '../../../hooks/use_url_pagination';
 const emptyValue = getEmptyValue();
 
 // Truncated usernames
-const StyledFacetButton = euiStyled(EuiFacetButton)`
+const StyledFacetButton = euiStyled(EuiFacetButton).attrs({ title: undefined })`
   .euiText {
     margin-top: 0.38rem;
     overflow-y: visible !important;
@@ -128,6 +128,10 @@ const getResponseActionListTableColumns = ({
           <StyledFacetButton
             icon={
               <EuiAvatar
+                // We've a EuiTooltip that shows for createdBy below,
+                // Thus we don't need to add a title tooltip as well.
+                aria-hidden={true}
+                title=""
                 name={createdBy}
                 data-test-subj={getTestId('column-user-avatar')}
                 size="s"
@@ -219,7 +223,7 @@ const getResponseActionListTableColumns = ({
 
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-            <StatusBadge
+            <ResponseActionStatusBadge
               color={
                 _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
               }

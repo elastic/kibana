@@ -16,6 +16,11 @@ export const toggleDetails = (
   expandedRows: Record<string, JSX.Element>,
   setExpandedRows: (update: Record<string, JSX.Element>) => any
 ) => {
+  // prevent expanding on row click if not expandable
+  if (!rowShouldExpand(ping)) {
+    return;
+  }
+
   // If already expanded, collapse
   if (expandedRows[ping.docId]) {
     delete expandedRows[ping.docId];

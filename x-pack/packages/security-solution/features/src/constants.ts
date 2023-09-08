@@ -15,6 +15,9 @@ export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;
 
+// Same as the plugin id defined by Defend for containers (cloud_defend)
+export const CLOUD_DEFEND_APP_ID = 'cloudDefend' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
