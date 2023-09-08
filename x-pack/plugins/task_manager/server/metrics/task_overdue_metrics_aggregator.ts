@@ -6,8 +6,6 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { merge } from 'lodash';
-import { isOk, Ok, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { ITaskMetricsAggregator } from './types';
 
