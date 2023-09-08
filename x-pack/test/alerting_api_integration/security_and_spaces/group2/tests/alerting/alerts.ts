@@ -1676,7 +1676,7 @@ instanceStateValue: true
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'create',
                   'test.always-firing-alert-as-data',
                   'alertsFixture'
