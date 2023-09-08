@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export const EQL_MODE_NAME = 'ace/mode/eql';
-export const EQL_THEME_NAME = 'ace/theme/eql';
-
-export enum EQLCodeEditorSuggestionType {
-  EventType = 'eventType',
-  Field = 'field',
-  Value = 'value',
-}
+export * from './telemetry_client';
+export * from './telemetry_service';
+export * from './types';

@@ -19,7 +19,7 @@ export { diskReadThroughput } from './disk_read_throughput';
 export { diskWriteThroughput } from './disk_write_throughput';
 export { diskSpaceAvailability } from './disk_space_availability';
 export { diskSpaceAvailable } from './disk_space_available';
-export { diskSpaceUsage } from './disk_space_usage';
+export { diskUsage } from './disk_usage';
 export { hostCount } from './host_count';
 export { logRate } from './log_rate';
 export { normalizedLoad1m } from './normalized_load_1m';

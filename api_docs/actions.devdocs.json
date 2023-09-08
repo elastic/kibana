@@ -2094,7 +2094,9 @@
             "signature": [
               "(requesterId: string, actionsToExecute: ",
               "ExecuteOptions",
-              "[]) => Promise<void>"
+              "[]) => Promise<",
+              "ExecutionResponse",
+              ">"
             ],
             "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
@@ -2967,7 +2969,9 @@
             "signature": [
               "(requesterId: string, actionsToExecute: ",
               "ExecuteOptions",
-              "[]) => Promise<void>"
+              "[]) => Promise<",
+              "ExecutionResponse",
+              ">"
             ],
             "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
@@ -3249,7 +3253,9 @@
           },
           "<unknown>>; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
-          "[]) => Promise<void>; ephemeralEnqueuedExecution: (options: ",
+          "[]) => Promise<",
+          "ExecutionResponse",
+          ">; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<",
           {
