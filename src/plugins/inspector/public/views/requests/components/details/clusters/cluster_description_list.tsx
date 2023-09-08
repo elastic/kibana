@@ -25,7 +25,8 @@ export function ClusterDescriptionList({ clusterDetails }: Props) {
       description: (
         <EuiText size="xs" color="subdued">
           {i18n.translate('inspector.requests.clusterDetails.timedOutDescription', {
-            defaultMessage: 'Request timed out before completion. Results may be incomplete or empty.',
+            defaultMessage:
+              'Request timed out before completion. Results may be incomplete or empty.',
           })}
         </EuiText>
       ),
@@ -39,7 +40,10 @@ export function ClusterDescriptionList({ clusterDetails }: Props) {
       }),
       description: (
         <EuiText size="xs" color="subdued">
-          <ShardsDetails failures={clusterDetails.failures ?? []} shardsDetails={clusterDetails._shards} />
+          <ShardsDetails
+            failures={clusterDetails.failures ?? []}
+            shardsDetails={clusterDetails._shards}
+          />
         </EuiText>
       ),
     });
