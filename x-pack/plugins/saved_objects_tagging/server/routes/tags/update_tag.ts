@@ -30,7 +30,7 @@ export const registerUpdateTagRoute = (router: TagsPluginRouter) => {
         const { tagsClient } = await ctx.tags;
 
         const existingTag = await tagsClient.findByName(req.body.name, { exact: true });
-        if (existingTag) {
+        if (existingTag && existingTag.id !== id) {
           return res.conflict({
             body: `A tag with the name "${req.body.name}" already exists.`,
           });

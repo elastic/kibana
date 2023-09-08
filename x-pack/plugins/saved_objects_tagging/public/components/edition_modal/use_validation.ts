@@ -73,13 +73,11 @@ export const useValidation = ({
             name: duplicateTagNameErrorMessage,
           },
         }));
-      } else {
-        setValidation(validateTag(tagAttributes));
       }
 
       setIsValidating(false);
     },
-    [tagClient, setIsValidating, tagAttributes]
+    [tagClient, setIsValidating]
   );
 
   const onNameChange = useCallback(
@@ -107,6 +105,12 @@ export const useValidation = ({
       onNameChange(tagAttributes.name);
     }
   }, [onNameChange, tagAttributes.name]);
+
+  useEffect(() => {
+    if (isMounted.current) {
+      setValidation(validateTag(tagAttributes));
+    }
+  }, [tagAttributes]);
 
   useEffect(() => {
     if (validateDuplicateNameOnMount && tagAttributes.name && !isMounted.current) {
