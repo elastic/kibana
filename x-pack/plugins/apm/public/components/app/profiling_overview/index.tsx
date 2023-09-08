@@ -11,6 +11,8 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 
 export function ProfilingOverview() {
   const {
@@ -20,9 +22,16 @@ export function ProfilingOverview() {
   const { isProfilingAvailable } = useProfilingPlugin();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.TransactionMetric,
+    numBuckets: 20,
+  });
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (isProfilingAvailable) {
+      if (isProfilingAvailable && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
           {
@@ -33,13 +42,23 @@ export function ProfilingOverview() {
                 end,
                 kuery,
                 environment,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
               },
             },
           }
         );
       }
     },
-    [isProfilingAvailable, serviceName, start, end, kuery, environment]
+    [
+      isProfilingAvailable,
+      preferred,
+      serviceName,
+      start,
+      end,
+      kuery,
+      environment,
+    ]
   );
 
   if (!isProfilingAvailable) {
