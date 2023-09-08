@@ -21,7 +21,6 @@ import {
   filterByCustomRules,
   filterBySearchTerm,
   filterByTags,
-  goToRuleDetails,
   expectFilterSearchTerm,
   expectFilterByTags,
   expectFilterByCustomRules,
@@ -35,6 +34,7 @@ import {
   expectFilterByPrebuiltRules,
   expectFilterByEnabledRules,
   expectManagementTableRules,
+  goToRuleDetailsOf,
 } from '../../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import {
@@ -111,6 +111,7 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
   });
 
   // Flaky on serverless
+  // FLAKY: https://github.com/elastic/kibana/issues/165740
   describe(
     'while on a happy path',
     { tags: ['@ess', '@serverless', '@brokenInServerless'] },
@@ -227,7 +228,7 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
           changeRulesTableState();
           goToTablePage(2);
 
-          goToRuleDetails();
+          goToRuleDetailsOf('rule 6');
           cy.go('back');
 
           expectRulesManagementTab();

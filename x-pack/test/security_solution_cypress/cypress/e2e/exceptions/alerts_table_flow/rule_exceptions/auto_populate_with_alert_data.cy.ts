@@ -7,7 +7,6 @@
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { getEndpointRule } from '../../../../objects/rule';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
   expandFirstAlert,
@@ -27,7 +26,7 @@ import {
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { goToExceptionsTab } from '../../../../tasks/rule_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/common';
 import {
   ADD_AND_BTN,
@@ -52,9 +51,10 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
-      createRule(getEndpointRule());
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
+      createRule(getEndpointRule()).then((rule) =>
+        visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+      );
+
       waitForAlertsToPopulate();
     });
     after(() => {

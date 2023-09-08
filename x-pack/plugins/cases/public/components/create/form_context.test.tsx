@@ -306,6 +306,49 @@ describe('Create case', () => {
       });
     });
 
+    it('should trim fields correctly while submit', async () => {
+      const newTags = ['coke     ', '     pepsi'];
+      const newCategory = 'First           ';
+
+      appMockRender.render(
+        <FormContext onSuccess={onFormSubmitSuccess}>
+          <CreateCaseFormFields {...defaultCreateCaseForm} />
+          <SubmitCaseButton />
+        </FormContext>
+      );
+
+      await waitForFormToRender(screen);
+
+      const titleInput = within(screen.getByTestId('caseTitle')).getByTestId('input');
+
+      userEvent.paste(titleInput, `${sampleDataWithoutTags.title}       `);
+
+      const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+        'euiMarkdownEditorTextArea'
+      );
+
+      userEvent.paste(descriptionInput, `${sampleDataWithoutTags.description}           `);
+
+      const caseTags = screen.getByTestId('caseTags');
+
+      for (const tag of newTags) {
+        const tagsInput = await within(caseTags).findByTestId('comboBoxInput');
+        userEvent.type(tagsInput, `${tag}{enter}`);
+      }
+
+      const categoryComboBox = within(screen.getByTestId('categories-list')).getByRole('combobox');
+
+      userEvent.type(categoryComboBox, `${newCategory}{enter}`);
+
+      userEvent.click(screen.getByTestId('create-case-submit'));
+
+      await waitFor(() => {
+        expect(postCase).toHaveBeenCalled();
+      });
+
+      expect(postCase).toBeCalledWith({ request: { ...sampleData, category: 'First' } });
+    });
+
     it('should toggle sync settings', async () => {
       useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
