@@ -107,9 +107,9 @@ describe('AlertDetailsAppSection', () => {
   it('should render annotations', async () => {
     const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
     (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
-    renderComponent();
+    const alertDetailsAppSectionComponent = renderComponent();
 
-    expect(mockedExpressionChart).toHaveBeenCalledTimes(3);
+    expect(alertDetailsAppSectionComponent.getAllByTestId('ExpressionChart').length).toBe(3);
     expect(mockedExpressionChart.mock.calls[0]).toMatchSnapshot();
   });
 });
