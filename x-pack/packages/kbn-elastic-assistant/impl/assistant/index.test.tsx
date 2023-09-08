@@ -46,10 +46,10 @@ const getInitialConversations = (): Record<string, Conversation> => ({
   },
 });
 
-const renderAssistant = () =>
+const renderAssistant = (extraProps = {}) =>
   render(
     <TestProviders getInitialConversations={getInitialConversations}>
-      <Assistant isAssistantEnabled />
+      <Assistant isAssistantEnabled {...extraProps} />
     </TestProviders>
   );
 
@@ -142,6 +142,22 @@ describe('Assistant', () => {
         fireEvent.click(previousConversationButton);
       });
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
+    });
+    it('should call the setConversationId callback if it is defined and the conversation id changes', async () => {
+      const connectors: unknown[] = [{}];
+      const setConversationId = jest.fn();
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isSuccess: true,
+        data: connectors,
+      } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
+
+      renderAssistant({ setConversationId });
+
+      await act(async () => {
+        fireEvent.click(screen.getByLabelText('Previous conversation'));
+      });
+
+      expect(setConversationId).toHaveBeenLastCalledWith('electric sheep');
     });
   });
 

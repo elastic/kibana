@@ -1,15 +1,19 @@
 {
   "indices.segments": {
     "url_params": {
-      "ignore_unavailable": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
+      "ignore_unavailable": "__flag__",
       "verbose": "__flag__"
     },
     "methods": [
@@ -19,6 +23,10 @@
       "_segments",
       "{index}/_segments"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-segments.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

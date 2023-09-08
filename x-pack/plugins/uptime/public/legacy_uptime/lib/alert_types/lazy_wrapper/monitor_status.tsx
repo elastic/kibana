@@ -19,16 +19,21 @@ interface Props {
   core: CoreStart;
   plugins: ClientPluginsStart;
   params: any;
+  stackVersion?: string;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function MonitorStatusAlert({ core, plugins, params }: Props) {
+export default function MonitorStatusAlert({ core, plugins, params, stackVersion }: Props) {
   kibanaService.core = core;
   return (
     <ReduxProvider store={store}>
       <KibanaContextProvider services={{ ...core, ...plugins }}>
         <UptimeDataViewContextProvider dataViews={plugins.dataViews}>
-          <AlertMonitorStatus {...params} autocomplete={plugins.unifiedSearch.autocomplete} />
+          <AlertMonitorStatus
+            {...params}
+            autocomplete={plugins.unifiedSearch.autocomplete}
+            stackVersion={stackVersion}
+          />
         </UptimeDataViewContextProvider>
       </KibanaContextProvider>
     </ReduxProvider>

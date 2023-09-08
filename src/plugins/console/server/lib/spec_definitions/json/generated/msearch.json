@@ -1,16 +1,33 @@
 {
   "msearch": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
+      "ccs_minimize_roundtrips": "__flag__",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "ignore_throttled": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "max_concurrent_searches": "",
+      "max_concurrent_shard_requests": [
+        "5"
+      ],
+      "pre_filter_shard_size": "",
+      "rest_total_hits_as_int": "__flag__",
+      "routing": "",
       "search_type": [
         "query_then_fetch",
         "dfs_query_then_fetch"
       ],
-      "max_concurrent_searches": "",
-      "typed_keys": "__flag__",
-      "pre_filter_shard_size": "",
-      "max_concurrent_shard_requests": "",
-      "rest_total_hits_as_int": "__flag__",
-      "ccs_minimize_roundtrips": "__flag__"
+      "typed_keys": "__flag__"
     },
     "methods": [
       "GET",
@@ -20,6 +37,10 @@
       "_msearch",
       "{index}/_msearch"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -34,3 +34,23 @@ export const request = <T = unknown>({
     headers: { ...COMMON_API_HEADERS, ...headers },
     ...options,
   });
+
+const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const rootRequest = <T = unknown>(
+  options: Partial<Cypress.RequestOptions>
+): Cypress.Chainable<Cypress.Response<T>> =>
+  cy.request<T>({
+    auth: API_AUTH,
+    headers: API_HEADERS,
+    ...options,
+  });
+
+export const disableExpandableFlyoutAdvancedSettings = () => {
+  const body = { changes: { 'securitySolution:enableExpandableFlyout': false } };
+  rootRequest({
+    method: 'POST',
+    url: 'internal/kibana/settings',
+    body,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+};

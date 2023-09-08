@@ -118,6 +118,10 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardPublicState['lastSavedInput']>
   ) => {
     state.componentState.lastSavedInput = action.payload;
+
+    // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
+    // been serialized into the SO.
+    state.componentState.hasRunClientsideMigrations = false;
   },
 
   /**

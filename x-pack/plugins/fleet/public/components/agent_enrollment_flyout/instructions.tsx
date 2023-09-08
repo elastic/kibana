@@ -81,7 +81,10 @@ export const Instructions = (props: InstructionProps) => {
 
   useEffect(() => {
     // If we detect a CloudFormation integration, we want to hide the selection type
-    if (props.cloudSecurityIntegration?.isCloudFormation) {
+    if (
+      props.cloudSecurityIntegration?.isCloudFormation ||
+      props.cloudSecurityIntegration?.cloudShellUrl
+    ) {
       setSelectionType(undefined);
     } else if (!isIntegrationFlow && showAgentEnrollment) {
       setSelectionType('radio');
@@ -103,7 +106,7 @@ export const Instructions = (props: InstructionProps) => {
     } else if (showAgentEnrollment) {
       return (
         <>
-          {selectionType === 'tabs' && (
+          {selectionType === 'tabs' && !props.cloudSecurityIntegration?.cloudShellUrl && (
             <>
               <EuiText>
                 <FormattedMessage

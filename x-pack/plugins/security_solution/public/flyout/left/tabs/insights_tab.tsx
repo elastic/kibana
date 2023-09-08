@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
+import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
@@ -16,7 +17,8 @@ import {
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
 } from './test_ids';
-
+import { useLeftPanelContext } from '../context';
+import { LeftPanelKey, LeftPanelInsightsTab } from '..';
 import {
   INSIGHTS_BUTTONGROUP_OPTIONS,
   ENTITIES_BUTTON,
@@ -59,11 +61,36 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  * Insights view displayed in the document details expandable flyout left section
  */
 export const InsightsTab: React.FC = memo(() => {
-  const [activeInsightsId, setActiveInsightsId] = useState(ENTITIES_TAB_ID);
+  const { eventId, indexName, scopeId } = useLeftPanelContext();
+  const { panels, openLeftPanel } = useExpandableFlyoutContext();
+  const [activeInsightsId, setActiveInsightsId] = useState(
+    panels.left?.path?.subTab ?? ENTITIES_TAB_ID
+  );
 
-  const onChangeCompressed = useCallback((optionId: string) => {
-    setActiveInsightsId(optionId);
-  }, []);
+  const onChangeCompressed = useCallback(
+    (optionId: string) => {
+      setActiveInsightsId(optionId);
+      openLeftPanel({
+        id: LeftPanelKey,
+        path: {
+          tab: LeftPanelInsightsTab,
+          subTab: optionId,
+        },
+        params: {
+          id: eventId,
+          indexName,
+          scopeId,
+        },
+      });
+    },
+    [eventId, indexName, scopeId, openLeftPanel]
+  );
+
+  useEffect(() => {
+    if (panels.left?.path?.subTab) {
+      setActiveInsightsId(panels.left?.path?.subTab);
+    }
+  }, [panels.left?.path?.subTab]);
 
   return (
     <>

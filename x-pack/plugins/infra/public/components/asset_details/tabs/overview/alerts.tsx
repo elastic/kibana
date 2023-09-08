@@ -6,23 +6,21 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPopover, EuiIcon, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
-import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import { infraAlertFeatureIds } from '../../../../pages/metrics/hosts/components/tabs/config';
-
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { LinkToAlertsRule } from '../../links/link_to_alerts';
 import { LinkToAlertsPage } from '../../links/link_to_alerts_page';
 import { AlertFlyout } from '../../../../alerting/inventory/components/alert_flyout';
 import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
+import { AlertsSectionTitle } from '../../components/section_titles';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -105,39 +103,3 @@ const MemoAlertSummaryWidget = React.memo(
     );
   }
 );
-
-const AlertsSectionTitle = () => {
-  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
-
-  return (
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiTitle data-test-subj="infraAssetDetailsAlertsTitle" size="xxs">
-          <h5>
-            <FormattedMessage
-              id="xpack.infra.assetDetails.overview.alertsSectionTitle"
-              defaultMessage="Alerts"
-            />
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={
-            <EuiIcon
-              data-test-subj="infraAssetDetailsAlertsPopoverButton"
-              type="iInCircle"
-              onClick={togglePopover}
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          repositionOnScroll
-          anchorPosition="upCenter"
-        >
-          <AlertsTooltipContent />
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};

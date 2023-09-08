@@ -11,7 +11,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
-import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
+import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
@@ -68,7 +68,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     if (mode === 'standalone') {
       const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-      setBreadcrumbsTitle({ title: savedSearch.title, services });
+      setBreadcrumbs({ titleBreadcrumbText: savedSearch.title, services });
     }
   }, [mode, chrome.docTitle, savedSearch.id, savedSearch.title, services]);
 

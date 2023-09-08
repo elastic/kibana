@@ -711,7 +711,7 @@
           "\nValidate if a number is greater than a specified minimum & lesser than specified maximum"
         ],
         "signature": [
-          "(conditions: { min?: number | undefined; max?: number | undefined; integerOnly?: boolean | undefined; } | undefined) => (value: number) => ",
+          "(conditions: { min?: number | undefined; max?: number | undefined; integerOnly?: boolean | undefined; } | undefined) => ((value: number) => ",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
@@ -719,7 +719,8 @@
             "section": "def-common.NumberValidationResult",
             "text": "NumberValidationResult"
           },
-          " | null"
+          " | null) & ",
+          "MemoizedFunction"
         ],
         "path": "x-pack/packages/ml/agg_utils/src/validate_number.ts",
         "deprecated": false,

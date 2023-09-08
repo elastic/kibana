@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
@@ -28,8 +29,11 @@ export const InsightsSection: React.FC<InsightsSectionProps> = ({ expanded = fal
   return (
     <ExpandableSection title={INSIGHTS_TITLE} expanded={expanded} data-test-subj={INSIGHTS_TEST_ID}>
       <EntitiesOverview />
+      <EuiSpacer size="s" />
       <ThreatIntelligenceOverview />
+      <EuiSpacer size="s" />
       <CorrelationsOverview />
+      <EuiSpacer size="s" />
       <PrevalenceOverview />
     </ExpandableSection>
   );

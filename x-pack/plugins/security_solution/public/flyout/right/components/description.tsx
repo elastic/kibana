@@ -23,7 +23,7 @@ import {
   RULE_SUMMARY_TEXT,
   PREVIEW_RULE_DETAILS,
 } from './translations';
-import { PreviewPanelKey, type PreviewPanelProps } from '../../preview';
+import { PreviewPanelKey, type PreviewPanelProps, RulePreviewPanel } from '../../preview';
 
 /**
  * Displays the description of a document.
@@ -36,7 +36,7 @@ export const Description: FC = () => {
   );
   const { openPreviewPanel } = useExpandableFlyoutContext();
   const openRulePreview = useCallback(() => {
-    const PreviewPanelRulePreview: PreviewPanelProps['path'] = ['rule-preview'];
+    const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: RulePreviewPanel };
     openPreviewPanel({
       id: PreviewPanelKey,
       path: PreviewPanelRulePreview,
@@ -61,7 +61,7 @@ export const Description: FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"
-            iconType="arrowRight"
+            iconType="expand"
             onClick={openRulePreview}
             iconSide="right"
             data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}

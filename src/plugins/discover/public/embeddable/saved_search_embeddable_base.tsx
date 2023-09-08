@@ -20,7 +20,7 @@ const containerStyles = css`
 
 export interface SavedSearchEmbeddableBaseProps {
   isLoading: boolean;
-  totalHitCount: number;
+  totalHitCount?: number;
   prepend?: React.ReactElement;
   append?: React.ReactElement;
   dataTestSubj?: string;
@@ -55,7 +55,7 @@ export const SavedSearchEmbeddableBase: React.FC<SavedSearchEmbeddableBaseProps>
         >
           {Boolean(prepend) && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
 
-          {Boolean(totalHitCount) && (
+          {!!totalHitCount && (
             <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
               <TotalDocuments totalHitCount={totalHitCount} />
             </EuiFlexItem>

@@ -88,7 +88,7 @@ export const SUMMARY_OCCURRENCES_WEEKLY_ALIGNED: TransformPutTransformRequest = 
             totalEvents: 'totalEvents',
           },
           script:
-            'if (params.totalEvents == 0) { return -1 } else { return params.goodEvents / params.totalEvents }',
+            'if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }',
         },
       },
       errorBudgetInitial: {

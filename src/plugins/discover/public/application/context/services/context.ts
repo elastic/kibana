@@ -18,7 +18,7 @@ import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
 import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
-import { getEsQuerySort } from '../utils/get_es_query_sort';
+import { getEsQuerySort } from '../../../../common/utils/sorting/get_es_query_sort';
 import type { DiscoverServices } from '../../../build_services';
 
 export enum SurrDocType {
@@ -88,16 +88,14 @@ export async function fetchSurroundingDocs(
       break;
     }
 
-    const searchAfter = getEsQuerySearchAfter(
-      type,
-      rows,
-      timeField,
-      anchor,
-      nanos,
-      useNewFieldsApi
-    );
+    const searchAfter = getEsQuerySearchAfter(type, rows, anchor);
 
-    const sort = getEsQuerySort(timeField, tieBreakerField, sortDirToApply, nanos);
+    const sort = getEsQuerySort({
+      timeFieldName: timeField,
+      tieBreakerFieldName: tieBreakerField,
+      sortDir: sortDirToApply,
+      isTimeNanosBased: dataView.isTimeNanosBased(),
+    });
 
     const result = await fetchHitsInInterval(
       searchSource,

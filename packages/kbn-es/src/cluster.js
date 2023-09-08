@@ -16,13 +16,15 @@ const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
-  log: defaultLog,
-  parseEsLog,
   extractConfigFiles,
+  log: defaultLog,
   NativeRealm,
+  parseEsLog,
   parseTimeoutToMs,
-  runServerlessCluster,
   runDockerContainer,
+  runServerlessCluster,
+  stopServerlessCluster,
+  teardownServerlessClusterSync,
 } = require('./utils');
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
@@ -34,7 +36,7 @@ const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
 
 /** @typedef {import('./cluster_exec_options').EsClusterExecOptions} ExecOptions */
 /** @typedef {import('./utils').DockerOptions} DockerOptions */
-/** @typedef {import('./utils').ServerlessOptions}ServerlessrOptions */
+/** @typedef {import('./utils').ServerlessOptions}ServerlessOptions */
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
@@ -276,6 +278,10 @@ exports.Cluster = class Cluster {
     }
     this._stopCalled = true;
 
+    if (this._serverlessNodes?.length) {
+      return await stopServerlessCluster(this._log, this._serverlessNodes);
+    }
+
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
     }
@@ -294,6 +300,10 @@ exports.Cluster = class Cluster {
     }
 
     this._stopCalled;
+
+    if (this._serverlessNodes?.length) {
+      return await stopServerlessCluster(this._log, this._serverlessNodes);
+    }
 
     if (!this._process || !this._outcome) {
       throw new Error('ES has not been started');
@@ -573,7 +583,15 @@ exports.Cluster = class Cluster {
       throw new Error('ES has already been started');
     }
 
-    await runServerlessCluster(this._log, options);
+    this._serverlessNodes = await runServerlessCluster(this._log, options);
+
+    if (options.teardown) {
+      /**
+       * Ideally would be async and an event like beforeExit or SIGINT,
+       * but those events are not being triggered in FTR child process.
+       */
+      process.on('exit', () => teardownServerlessClusterSync(this._log, options));
+    }
   }
 
   /**

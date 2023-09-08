@@ -81,6 +81,8 @@ interface IntegrationInfoFieldsProps {
 
 export const AWS_SINGLE_ACCOUNT = 'single-account';
 export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
+export const GCP_SINGLE_ACCOUNT = 'single-account-gcp';
+export const GCP_ORGANIZATION_ACCOUNT = 'organization-account-gcp';
 type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
@@ -99,6 +101,28 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
   {
     id: AWS_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
+      defaultMessage: 'Single Account',
+    }),
+  },
+];
+
+const getGcpAccountTypeOptions = (): CspRadioGroupProps['options'] => [
+  {
+    id: GCP_ORGANIZATION_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationLabel', {
+      defaultMessage: 'GCP Organization',
+    }),
+    disabled: true,
+    tooltip: i18n.translate(
+      'xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationDisabledTooltip',
+      {
+        defaultMessage: 'Coming Soon',
+      }
+    ),
+  },
+  {
+    id: GCP_SINGLE_ACCOUNT,
+    label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel', {
       defaultMessage: 'Single Account',
     }),
   },
@@ -203,6 +227,53 @@ const AwsAccountTypeSelect = ({
           </EuiText>
         </>
       )}
+      <EuiSpacer size="l" />
+    </>
+  );
+};
+
+const GcpAccountTypeSelect = ({
+  input,
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+}: {
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
+  packageInfo: PackageInfo;
+}) => {
+  return (
+    <>
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
+          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+        />
+      </EuiText>
+      <EuiSpacer size="l" />
+      <RadioGroup
+        idSelected={GCP_SINGLE_ACCOUNT}
+        options={getGcpAccountTypeOptions()}
+        onChange={(accountType) => {
+          updatePolicy(
+            getPosturePolicy(newPolicy, input.type, {
+              gcp_account_type: {
+                value: accountType,
+                type: 'text',
+              },
+            })
+          );
+        }}
+        size="m"
+      />
+      <EuiSpacer size="l" />
+      <EuiText color="subdued" size="s">
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.gcpAccountType.singleAccountDescription"
+          defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+        />
+      </EuiText>
       <EuiSpacer size="l" />
     </>
   );
@@ -368,6 +439,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {/* AWS account type selection box */}
         {input.type === 'cloudbeat/cis_aws' && (
           <AwsAccountTypeSelect
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+          />
+        )}
+
+        {input.type === 'cloudbeat/cis_gcp' && (
+          <GcpAccountTypeSelect
             input={input}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}

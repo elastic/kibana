@@ -8,9 +8,10 @@
 import { createStaticDataView } from './create_static_data_view';
 import * as HistoricalAgentData from '../historical_data/has_historical_agent_data';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { APMRouteHandlerResources, APMCore } from '../typings';
+import { APMCore } from '../typings';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMConfig } from '../..';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
 function getMockedDataViewService(existingDataViewTitle: string) {
   return {
@@ -42,7 +43,7 @@ const apmEventClientMock = {
     span: 'apm-*-span-*',
     error: 'apm-*-error-*',
     metric: 'apm-*-metrics-*',
-  } as APMConfig['indices'],
+  } as APMIndices,
 } as unknown as APMEventClient;
 
 describe('createStaticDataView', () => {

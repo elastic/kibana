@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiButtonIcon, EuiPopover, EuiToolTip, EuiContextMenu } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
@@ -15,6 +15,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
@@ -35,7 +36,7 @@ import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
-import { useExceptionActions } from './use_add_exception_actions';
+import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
@@ -195,7 +196,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     closePopover();
   }, [closePopover, onAddEventFilterClick]);
 
-  const { exceptionActionItems } = useExceptionActions({
+  const { exceptionActionItems } = useAlertExceptionActions({
     isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
     onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
   });
@@ -384,6 +385,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   alertStatus,
 }) => {
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
 
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
     query: buildGetAlertByIdQuery(eventId),
@@ -429,32 +431,13 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return ruleDataViewId;
   }, [enrichedAlert, ruleDataViewId]);
 
-  // TODO: Do we want to notify user when they are working off of an older version of a rule
-  // if they select to add an exception from an alert referencing an older rule version?
   const memoRule = useMemo(() => {
-    if (enrichedAlert != null && enrichedAlert['kibana.alert.rule.parameters'] != null) {
-      return [
-        {
-          ...enrichedAlert['kibana.alert.rule.parameters'],
-          id: ruleId,
-          rule_id: ruleRuleId,
-          name: ruleName,
-          index: memoRuleIndices,
-          data_view_id: memoDataViewId,
-        },
-      ] as Rule[];
+    if (maybeRule) {
+      return [maybeRule];
     }
 
-    return [
-      {
-        id: ruleId,
-        rule_id: ruleRuleId,
-        name: ruleName,
-        index: memoRuleIndices,
-        data_view_id: memoDataViewId,
-      },
-    ] as Rule[];
-  }, [enrichedAlert, memoDataViewId, memoRuleIndices, ruleId, ruleName, ruleRuleId]);
+    return null;
+  }, [maybeRule]);
 
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
@@ -466,7 +449,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
       rules={memoRule}
       isEndpointItem={exceptionListType === ExceptionListTypeEnum.ENDPOINT}
       alertData={enrichedAlert}
-      isAlertDataLoading={isLoading}
+      isAlertDataLoading={isLoading || isRuleLoading}
       alertStatus={alertStatus}
       isBulkAction={false}
       showAlertCloseOptions

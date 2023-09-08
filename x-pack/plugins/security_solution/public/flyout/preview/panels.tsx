@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { AlertReasonPreview } from './components/alert_reason_preview';
 import type { PreviewPanelPaths } from '.';
-import { RULE_PREVIEW } from './translations';
+import { ALERT_REASON_PREVIEW, RULE_PREVIEW } from './translations';
 import { RulePreview } from './components/rule_preview';
 import { RulePreviewFooter } from './components/rule_preview_footer';
 
@@ -27,7 +28,7 @@ export type PreviewPanelType = Array<{
   /**
    * Footer section in the panel
    */
-  footer: React.ReactElement;
+  footer?: React.ReactElement;
 }>;
 
 /**
@@ -39,5 +40,10 @@ export const panels: PreviewPanelType = [
     name: RULE_PREVIEW,
     content: <RulePreview />,
     footer: <RulePreviewFooter />,
+  },
+  {
+    id: 'alert-reason-preview',
+    name: ALERT_REASON_PREVIEW,
+    content: <AlertReasonPreview />,
   },
 ];

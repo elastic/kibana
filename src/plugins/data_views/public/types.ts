@@ -109,8 +109,9 @@ export interface DataViewsPublicStartDependencies {
 /**
  * Data plugin public Setup contract
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewsPublicPluginSetup {}
+export interface DataViewsPublicPluginSetup {
+  enableRollups: () => void;
+}
 
 export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
   getCanSaveSync: () => boolean;
@@ -120,6 +121,8 @@ export interface DataViewsServicePublic extends DataViewsServicePublicMethods {
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
   }) => Promise<MatchedItem[]>;
+  getRollupsEnabled: () => boolean;
+  scriptedFieldsEnabled: boolean;
 }
 
 export type DataViewsContract = DataViewsServicePublic;

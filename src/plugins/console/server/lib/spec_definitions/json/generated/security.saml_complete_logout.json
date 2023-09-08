@@ -1,11 +1,21 @@
 {
   "security.saml_complete_logout": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_security/saml/complete_logout"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-complete-logout.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-complete-logout.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

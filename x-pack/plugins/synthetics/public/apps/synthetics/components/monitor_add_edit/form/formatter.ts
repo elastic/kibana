@@ -15,7 +15,7 @@ export const serializeNestedFormField = (fields: Record<string, any>) => {
   Object.keys(defaults).map((key) => {
     /* split key names on dot to handle dot notation fields,
      * which are changed to nested fields by react-hook-form */
-    monitorFields[key] = get(fields, key.split('.')) ?? defaults[key as ConfigKey];
+    monitorFields[key] = get(fields, key.split('.')) ?? fields[key] ?? defaults[key as ConfigKey];
   });
   return monitorFields as MonitorFields;
 };

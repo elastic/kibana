@@ -15,7 +15,7 @@ import {
   INDEX_LIFECYCLE_MANAGEMENT_PHASES,
   SELECT_ONE_OR_MORE_ILM_PHASES,
 } from '@kbn/ecs-data-quality-dashboard';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFormControlLayout,
@@ -25,9 +25,11 @@ import {
   EuiText,
   EuiToolTip,
   useGeneratedHtmlId,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
 import { SecurityPageName } from '../../app/types';
@@ -49,6 +51,10 @@ import {
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
+import type {
+  ReportDataQualityCheckAllCompletedParams,
+  ReportDataQualityIndexCheckedParams,
+} from '../../common/lib/telemetry';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -116,6 +122,9 @@ const defaultOptions: EuiComboBoxOptionOption[] = [
   },
 ];
 
+const DEFAULT_START_TIME = 'now-7d';
+const DEFAULT_END_TIME = 'now';
+
 const renderOption = (
   option: EuiComboBoxOptionOption<string | number | string[] | undefined>
 ): React.ReactNode => (
@@ -133,6 +142,9 @@ const DataQualityComponent: React.FC = () => {
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
+  const {
+    services: { telemetry },
+  } = useKibana();
   const addSuccessToast = useCallback(
     (toast: { title: string }) => {
       toasts.addSuccess(toast);
@@ -145,6 +157,26 @@ const DataQualityComponent: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
+  const { isILMAvailable$, cases } = useKibana().services;
+  const isILMAvailable = useObservable(isILMAvailable$);
+
+  const [startDate, setStartTime] = useState<string>();
+  const [endDate, setEndTime] = useState<string>();
+  const onTimeChange = ({ start, end, isInvalid }: OnTimeChangeProps) => {
+    if (isInvalid) {
+      return;
+    }
+
+    setStartTime(start);
+    setEndTime(end);
+  };
+
+  useEffect(() => {
+    if (isILMAvailable != null && isILMAvailable === false) {
+      setStartTime(DEFAULT_START_TIME);
+      setEndTime(DEFAULT_END_TIME);
+    }
+  }, [isILMAvailable]);
 
   const alertsAndSelectedPatterns = useMemo(
     () =>
@@ -185,7 +217,6 @@ const DataQualityComponent: React.FC = () => {
     [userCasesPermissions.create, userCasesPermissions.read]
   );
 
-  const { cases } = useKibana().services;
   const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
     toastContent: i18n.ADD_TO_CASE_SUCCESS,
   });
@@ -204,45 +235,77 @@ const DataQualityComponent: React.FC = () => {
     [createCaseFlyout]
   );
 
+  const reportDataQualityIndexChecked = useCallback(
+    (params: ReportDataQualityIndexCheckedParams) => {
+      telemetry.reportDataQualityIndexChecked(params);
+    },
+    [telemetry]
+  );
+
+  const reportDataQualityCheckAllCompleted = useCallback(
+    (params: ReportDataQualityCheckAllCompletedParams) => {
+      telemetry.reportDataQualityCheckAllCompleted(params);
+    },
+    [telemetry]
+  );
+
   if (isSourcererLoading || isSignalIndexNameLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
   }
 
   return (
     <>
-      {indicesExist ? (
+      {indicesExist && isILMAvailable != null ? (
         <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
           <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
-            <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
-              <FormControlLayout prepend={ilmFormLabel}>
-                <EuiComboBox
-                  id={labelInputId}
-                  data-test-subj="selectIlmPhases"
-                  placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
-                  renderOption={renderOption}
-                  selectedOptions={selectedOptions}
-                  style={comboBoxStyle}
-                  options={options}
-                  onChange={setSelectedOptions}
+            {isILMAvailable && (
+              <EuiToolTip content={INDEX_LIFECYCLE_MANAGEMENT_PHASES}>
+                <FormControlLayout prepend={ilmFormLabel}>
+                  <EuiComboBox
+                    id={labelInputId}
+                    data-test-subj="selectIlmPhases"
+                    placeholder={SELECT_ONE_OR_MORE_ILM_PHASES}
+                    renderOption={renderOption}
+                    selectedOptions={selectedOptions}
+                    style={comboBoxStyle}
+                    options={options}
+                    onChange={setSelectedOptions}
+                  />
+                </FormControlLayout>
+              </EuiToolTip>
+            )}
+            {!isILMAvailable && startDate && endDate && (
+              <EuiToolTip content={i18n.DATE_PICKER_TOOLTIP}>
+                <EuiSuperDatePicker
+                  start={startDate}
+                  end={endDate}
+                  onTimeChange={onTimeChange}
+                  showUpdateButton={false}
+                  isDisabled={true}
                 />
-              </FormControlLayout>
-            </EuiToolTip>
+              </EuiToolTip>
+            )}
           </HeaderPage>
 
           <DataQualityPanel
             addSuccessToast={addSuccessToast}
+            baseTheme={baseTheme}
             canUserCreateAndReadCases={canUserCreateAndReadCases}
             defaultBytesFormat={defaultBytesFormat}
             defaultNumberFormat={defaultNumberFormat}
+            endDate={endDate}
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+            reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
+            reportDataQualityIndexChecked={reportDataQualityIndexChecked}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
             isAssistantEnabled={hasAssistantPrivilege}
+            isILMAvailable={isILMAvailable}
             lastChecked={lastChecked}
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}
             setLastChecked={setLastChecked}
-            baseTheme={baseTheme}
+            startDate={startDate}
             theme={theme}
           />
         </SecuritySolutionPageWrapper>

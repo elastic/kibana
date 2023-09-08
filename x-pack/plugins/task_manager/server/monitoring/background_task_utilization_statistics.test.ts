@@ -19,7 +19,7 @@ import {
 import { asOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
-import { AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import {
   BackgroundTaskUtilizationStat,

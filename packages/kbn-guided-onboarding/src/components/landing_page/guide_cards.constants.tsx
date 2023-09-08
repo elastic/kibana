@@ -104,8 +104,7 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Collect and analyze my logs',
     }),
     navigateTo: {
-      appId: 'integrations',
-      path: '/browse?q=log',
+      appId: 'observabilityOnboarding',
     },
     telemetryId: 'onboarding--observability--logs',
     order: 2,

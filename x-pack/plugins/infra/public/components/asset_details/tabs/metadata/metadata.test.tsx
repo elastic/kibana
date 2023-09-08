@@ -12,7 +12,7 @@ import { useSourceContext } from '../../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { AssetDetailsStateProvider } from '../../hooks/use_asset_details_state';
+import { ContextProviders } from '../../context_providers';
 
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../hooks/use_metadata');
@@ -20,12 +20,8 @@ jest.mock('../../hooks/use_metadata');
 const renderHostMetadata = () =>
   render(
     <I18nProvider>
-      <AssetDetailsStateProvider
-        state={{
-          dateRange: {
-            from: '2023-04-09T11:07:49Z',
-            to: '2023-04-09T11:23:49Z',
-          },
+      <ContextProviders
+        props={{
           assetType: 'host',
           asset: {
             id: 'host-1',
@@ -36,10 +32,17 @@ const renderHostMetadata = () =>
               showActionsColumn: true,
             },
           },
+          dateRange: {
+            from: '2023-04-09T11:07:49Z',
+            to: '2023-04-09T11:23:49Z',
+          },
+          renderMode: {
+            mode: 'page',
+          },
         }}
       >
         <Metadata />
-      </AssetDetailsStateProvider>
+      </ContextProviders>
     </I18nProvider>,
     { wrapper: EuiThemeProvider }
   );

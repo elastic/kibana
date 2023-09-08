@@ -32,6 +32,9 @@
     "@kbn/std",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
+    "@kbn/use-tracked-promise",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",

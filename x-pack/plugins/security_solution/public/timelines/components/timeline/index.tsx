@@ -77,6 +77,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     timelineType,
     description,
     sessionViewConfig,
+    initialized,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -87,6 +88,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'timelineType',
         'description',
         'sessionViewConfig',
+        'initialized',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -95,7 +97,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const { timelineFullScreen } = useTimelineFullScreen();
 
   useEffect(() => {
-    if (!savedObjectId) {
+    if (!savedObjectId && !initialized) {
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,

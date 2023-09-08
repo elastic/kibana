@@ -22,6 +22,7 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { GetUserProfileResponse, UserProfileData } from '@kbn/security-plugin/common';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -65,6 +66,7 @@ export interface PluginsStart {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
+  userProfile: GetUserProfileResponse<UserProfileData>;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -100,7 +102,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloudSetup && (pluginsStart as PluginsStart).cloud
         ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
         : undefined;
-    const plugins = { ...pluginsStart, cloud } as PluginsStart;
+    const userProfile = await (pluginsStart as PluginsStart).security.userProfiles.getCurrent();
+    const plugins = { ...pluginsStart, cloud, userProfile } as PluginsStart;
 
     coreStart.chrome
       .getChromeStyle$()
@@ -118,8 +121,11 @@ export class EnterpriseSearchPlugin implements Plugin {
   private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { cloud } = plugins;
     const { config } = this;
+    if (!config.ui?.enabled) {
+      return;
+    }
+    const { cloud } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -413,6 +419,9 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
+    if (!this.config.ui?.enabled) {
+      return;
+    }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);

@@ -101,6 +101,7 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    serverless,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -147,6 +148,7 @@ export async function getLensServices(
     unifiedSearch,
     docLinks: coreStart.docLinks,
     locator,
+    serverless,
   };
 }
 

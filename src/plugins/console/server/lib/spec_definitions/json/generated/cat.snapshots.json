@@ -1,22 +1,24 @@
 {
   "cat.snapshots": {
     "url_params": {
-      "format": "",
-      "ignore_unavailable": "__flag__",
-      "master_timeout": "",
+      "format": [
+        "text"
+      ],
       "h": [],
       "help": "__flag__",
-      "s": [],
-      "time": [
-        "d",
-        "h",
-        "m",
-        "s",
-        "ms",
-        "micros",
-        "nanos"
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
       ],
-      "v": "__flag__"
+      "s": [],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "ignore_unavailable": "__flag__"
     },
     "methods": [
       "GET"
@@ -25,6 +27,10 @@
       "_cat/snapshots",
       "_cat/snapshots/{repository}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-snapshots.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-snapshots.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

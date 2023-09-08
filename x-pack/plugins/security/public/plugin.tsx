@@ -22,8 +22,6 @@ import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/pu
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import type { SecurityLicense } from '../common/licensing';
-import { SecurityLicenseService } from '../common/licensing';
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
@@ -38,6 +36,8 @@ import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
 import type { UiApi } from './ui_api';
 import { getUiApi } from './ui_api';
+import { SecurityLicenseService } from '../common/licensing';
+import type { SecurityLicense } from '../common/licensing';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -68,7 +68,7 @@ export class SecurityPlugin
   private readonly config: ConfigType;
   private sessionTimeout?: SessionTimeout;
   private readonly authenticationService = new AuthenticationService();
-  private readonly navControlService = new SecurityNavControlService();
+  private readonly navControlService;
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
   private readonly securityCheckupService: SecurityCheckupService;
@@ -80,6 +80,9 @@ export class SecurityPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
+    this.navControlService = new SecurityNavControlService(
+      initializerContext.env.packageInfo.buildFlavor
+    );
   }
 
   public setup(

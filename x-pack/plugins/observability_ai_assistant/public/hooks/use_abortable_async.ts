@@ -19,8 +19,11 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
 
 export function useAbortableAsync<T>(
   fn: ({}: { signal: AbortSignal }) => T,
-  deps: any[]
+  deps: any[],
+  options?: { clearValueOnNext?: boolean }
 ): AbortableAsyncState<T> {
+  const clearValueOnNext = options?.clearValueOnNext;
+
   const controllerRef = useRef(new AbortController());
 
   const [refreshId, setRefreshId] = useState(0);
@@ -34,6 +37,10 @@ export function useAbortableAsync<T>(
 
     const controller = new AbortController();
     controllerRef.current = controller;
+
+    if (clearValueOnNext) {
+      setValue(undefined);
+    }
 
     try {
       const response = fn({ signal: controller.signal });
@@ -49,11 +56,11 @@ export function useAbortableAsync<T>(
       } else {
         setError(undefined);
         setValue(response);
+        setLoading(false);
       }
     } catch (err) {
       setValue(undefined);
       setError(err);
-    } finally {
       setLoading(false);
     }
 
@@ -61,7 +68,7 @@ export function useAbortableAsync<T>(
       controller.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps.concat(refreshId));
+  }, deps.concat(refreshId, clearValueOnNext));
 
   return useMemo<AbortableAsyncState<T>>(() => {
     return {

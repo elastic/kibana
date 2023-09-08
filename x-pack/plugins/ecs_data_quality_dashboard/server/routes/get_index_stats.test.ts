@@ -6,7 +6,7 @@
  */
 import { GET_INDEX_STATS } from '../../common/constants';
 
-import { fetchStats } from '../lib';
+import { fetchAvailableIndices, fetchStats } from '../lib';
 
 import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
@@ -15,6 +15,7 @@ import { getIndexStatsRoute } from './get_index_stats';
 
 jest.mock('../lib', () => ({
   fetchStats: jest.fn(),
+  fetchAvailableIndices: jest.fn(),
 }));
 
 describe('getIndexStatsRoute route', () => {
@@ -25,6 +26,11 @@ describe('getIndexStatsRoute route', () => {
     path: GET_INDEX_STATS,
     params: {
       pattern: 'auditbeat-*',
+    },
+    query: {
+      isILMAvailable: true,
+      startDate: `now-7d`,
+      endDate: `now`,
     },
   });
 
@@ -55,6 +61,67 @@ describe('getIndexStatsRoute route', () => {
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);
     expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
+  });
+
+  test('requires date range when isILMAvailable is false', async () => {
+    const request = requestMock.create({
+      method: 'get',
+      path: GET_INDEX_STATS,
+      params: {
+        pattern: `auditbeat-*`,
+      },
+      query: {
+        isILMAvailable: false,
+      },
+    });
+
+    const mockIndices = { 'auditbeat-7.15.1-2022.12.06-000001': {} };
+    (fetchStats as jest.Mock).mockResolvedValue({
+      indices: mockIndices,
+    });
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(400);
+    expect(response.body.status_code).toEqual(400);
+    expect(response.body.message).toEqual(`startDate and endDate are required`);
+  });
+
+  test('returns available indices within the given date range when isILMAvailable is false', async () => {
+    const request = requestMock.create({
+      method: 'get',
+      path: GET_INDEX_STATS,
+      params: {
+        pattern: `auditbeat-*`,
+      },
+      query: {
+        isILMAvailable: false,
+        startDate: `now-7d`,
+        endDate: `now`,
+      },
+    });
+
+    const mockIndices = {
+      'auditbeat-7.15.1-2022.12.06-000001': {},
+      'auditbeat-7.15.1-2022.11.06-000001': {},
+    };
+    (fetchStats as jest.Mock).mockResolvedValue({
+      indices: mockIndices,
+    });
+    (fetchAvailableIndices as jest.Mock).mockResolvedValue({
+      aggregations: {
+        index: {
+          buckets: [
+            {
+              key: 'auditbeat-7.15.1-2022.12.06-000001',
+            },
+          ],
+        },
+      },
+    });
+
+    const response = await server.inject(request, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ 'auditbeat-7.15.1-2022.12.06-000001': {} });
   });
 });
 

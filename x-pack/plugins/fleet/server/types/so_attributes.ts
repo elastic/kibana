@@ -202,6 +202,7 @@ export interface SettingsSOAttributes {
   prerelease_integrations_enabled: boolean;
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
+  secret_storage_requirements_met?: boolean;
 }
 
 export interface DownloadSourceSOAttributes {
@@ -209,6 +210,7 @@ export interface DownloadSourceSOAttributes {
   host: string;
   is_default: boolean;
   source_id?: string;
+  proxy_id?: string | null;
 }
 export interface SimpleSOAssetAttributes {
   title?: string;

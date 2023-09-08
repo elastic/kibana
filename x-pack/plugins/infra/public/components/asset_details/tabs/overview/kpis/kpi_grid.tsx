@@ -12,10 +12,11 @@ import type { TimeRange } from '@kbn/es-query';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import {
-  KPI_CHARTS,
+  assetDetailsDashboards,
   KPI_CHART_HEIGHT,
   AVERAGE_SUBTITLE,
-} from '../../../../../common/visualizations/lens/dashboards/host/kpi_grid_config';
+} from '../../../../../common/visualizations';
+import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 
 interface Props {
   dataView?: DataView;
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export const KPIGrid = React.memo(({ nodeName, dataView, timeRange }: Props) => {
+  const { refreshTs } = useDateRangeProviderContext();
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -36,13 +38,14 @@ export const KPIGrid = React.memo(({ nodeName, dataView, timeRange }: Props) => 
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      {KPI_CHARTS.map(({ id, layers, title, toolTip }, index) => (
+      {assetDetailsDashboards.host.hostKPICharts.map(({ id, layers, title, toolTip }, index) => (
         <EuiFlexItem key={index}>
           <LensChart
             id={`infraAssetDetailsKPI${id}`}
             dataView={dataView}
             dateRange={timeRange}
             layers={{ ...layers, options: { ...layers.options, subtitle: AVERAGE_SUBTITLE } }}
+            lastReloadRequestTime={refreshTs}
             height={KPI_CHART_HEIGHT}
             filters={filters}
             title={title}

@@ -14,6 +14,7 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
+import { getCloudShellUrlFromAgentPolicy } from '../../services';
 
 import {
   getCloudFormationTemplateUrlFromPackageInfo,
@@ -127,6 +128,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
         AWS_ACCOUNT_TYPE
       ]?.value;
 
+    const cloudShellUrl = getCloudShellUrlFromAgentPolicy(agentPolicy);
     return {
       isLoading,
       integrationType,
@@ -135,6 +137,7 @@ export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
         awsAccountType: cloudFormationAwsAccountType,
         templateUrl: cloudFormationTemplateUrl,
       },
+      cloudShellUrl,
     };
   }, [agentPolicy, packageInfoData?.item, isLoading, cloudSecurityPackagePolicy]);
 

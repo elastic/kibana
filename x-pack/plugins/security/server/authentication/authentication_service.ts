@@ -18,6 +18,13 @@ import type {
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { APIKeys } from './api_keys';
+import type { AuthenticationResult } from './authentication_result';
+import type { ProviderLoginAttempt } from './authenticator';
+import { Authenticator } from './authenticator';
+import { canRedirectRequest } from './can_redirect_request';
+import type { DeauthenticationResult } from './deauthentication_result';
+import { renderUnauthenticatedPage } from './unauthenticated_page';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
@@ -28,13 +35,6 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
-import { APIKeys } from './api_keys';
-import type { AuthenticationResult } from './authentication_result';
-import type { ProviderLoginAttempt } from './authenticator';
-import { Authenticator } from './authenticator';
-import { canRedirectRequest } from './can_redirect_request';
-import type { DeauthenticationResult } from './deauthentication_result';
-import { renderUnauthenticatedPage } from './unauthenticated_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
@@ -57,6 +57,7 @@ interface AuthenticationServiceStartParams {
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
   isElasticCloudDeployment: () => boolean;
+  customLogoutURL?: string;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -328,6 +329,7 @@ export class AuthenticationService {
     applicationName,
     kibanaFeatures,
     isElasticCloudDeployment,
+    customLogoutURL,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -368,6 +370,7 @@ export class AuthenticationService {
       license: this.license,
       session,
       isElasticCloudDeployment,
+      customLogoutURL,
     });
 
     return {

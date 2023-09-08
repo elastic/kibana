@@ -15,12 +15,11 @@ import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { SloRulesBadge } from './slo_rules_badge';
-import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloGroupByBadge } from '../../../../components/slo/slo_status_badge/slo_group_by_badge';
 
 export interface Props {
-  activeAlerts?: ActiveAlerts;
+  activeAlerts?: number;
   isLoading: boolean;
   rules: Array<Rule<SloRule>> | undefined;
   slo: SLOWithSummaryResponse;

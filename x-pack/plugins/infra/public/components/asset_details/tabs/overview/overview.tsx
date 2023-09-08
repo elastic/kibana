@@ -7,41 +7,59 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { MetadataSummaryList } from './metadata_summary/metadata_summary_list';
+import {
+  MetadataSummaryList,
+  MetadataSummaryListCompact,
+} from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
-import { MetricsGrid } from './metrics/metrics_grid';
-import { toTimestampRange } from '../../utils';
-import { useAssetDetailsStateContext } from '../../hooks/use_asset_details_state';
+import { MetricsGrid, MetricsGridCompact } from './metrics/metrics_grid';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { SectionSeparator } from './section_separator';
 
 export const Overview = () => {
-  const { asset, assetType, overrides, dateRange } = useAssetDetailsStateContext();
-  const { logsDataView, metricsDataView } = overrides?.overview ?? {};
-
-  const inventoryModel = findInventoryModel(assetType);
-  const { sourceId } = useSourceContext();
+  const { getParsedDateRange } = useDateRangeProviderContext();
+  const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
   const {
+    metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    metadata,
-  } = useMetadata(
-    asset.name,
-    assetType,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    toTimestampRange(dateRange)
+  } = useMetadataStateProviderContext();
+  const { logs, metrics } = useDataViewsProviderContext();
+
+  const parsedDateRange = getParsedDateRange();
+  const isFullPageView = renderMode.mode !== 'flyout';
+
+  const metricsSection = isFullPageView ? (
+    <MetricsGrid
+      dateRange={parsedDateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  ) : (
+    <MetricsGridCompact
+      dateRange={parsedDateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  );
+  const metadataSummarySection = isFullPageView ? (
+    <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+  ) : (
+    <MetadataSummaryListCompact metadata={metadata} metadataLoading={metadataLoading} />
   );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={asset.name} timeRange={dateRange} dataView={metricsDataView} />
+        <KPIGrid nodeName={asset.name} timeRange={parsedDateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -71,31 +89,19 @@ export const Overview = () => {
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+          metadataSummarySection
         )}
         <SectionSeparator />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AlertsSummaryContent assetName={asset.name} assetType={assetType} dateRange={dateRange} />
+        <AlertsSummaryContent
+          assetName={asset.name}
+          assetType={assetType}
+          dateRange={parsedDateRange}
+        />
         <SectionSeparator />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MetricsGrid
-          timeRange={dateRange}
-          logsDataView={logsDataView}
-          metricsDataView={metricsDataView}
-          nodeName={asset.name}
-        />
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
-
-const SectionSeparator = () => (
-  <EuiHorizontalRule
-    margin="m"
-    css={css`
-      margin-bottom: 0;
-    `}
-  />
-);

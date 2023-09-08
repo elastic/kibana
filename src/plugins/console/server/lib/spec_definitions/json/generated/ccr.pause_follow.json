@@ -1,11 +1,21 @@
 {
   "ccr.pause_follow": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "{index}/_ccr/pause_follow"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-pause-follow.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-post-pause-follow.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

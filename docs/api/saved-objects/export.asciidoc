@@ -6,6 +6,12 @@
 
 experimental[] Retrieve sets of saved objects that you want to import into {kib}.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-export-request]]
 ==== Request
 

@@ -6,3 +6,4 @@
  */
 
 export * from './use_stats_api';
+export * from './use_fetch_detection_rules_by_tags';

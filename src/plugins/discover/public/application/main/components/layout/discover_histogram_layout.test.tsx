@@ -20,12 +20,11 @@ import {
 } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { CoreTheme } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
@@ -127,16 +126,14 @@ const mountComponent = async ({
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
-  const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
-
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <KibanaThemeProvider theme$={coreTheme$}>
+    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+      <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={stateContainer}>
           <DiscoverHistogramLayout {...props} />
         </DiscoverMainProvider>
-      </KibanaThemeProvider>
-    </KibanaContextProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 
   // wait for lazy modules

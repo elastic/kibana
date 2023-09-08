@@ -23,6 +23,7 @@ export type { ObservabilityMetricsAlert } from './generated/observability_metric
 export type { ObservabilitySloAlert } from './generated/observability_slo_schema';
 export type { ObservabilityUptimeAlert } from './generated/observability_uptime_schema';
 export type { SecurityAlert } from './generated/security_schema';
+export type { StackAlert } from './generated/stack_schema';
 
 export type AADAlert =
   | Alert

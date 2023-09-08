@@ -15,8 +15,12 @@ import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plu
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { paths } from '../../../../common/locators/paths';
-import { AlertsLocatorParams, observabilityFeatureId } from '../../../../common';
+import { searchConfigurationSchema } from './types';
+import {
+  AlertsLocatorParams,
+  observabilityFeatureId,
+  observabilityPaths,
+} from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
@@ -72,7 +76,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     metric: schema.string(),
     aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
-    customMetrics: schema.never(),
+    metrics: schema.never(),
     equation: schema.never(),
     label: schema.never(),
   });
@@ -81,7 +85,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     aggType: schema.literal('count'),
     metric: schema.never(),
-    customMetrics: schema.never(),
+    metrics: schema.never(),
     equation: schema.never(),
     label: schema.never(),
   });
@@ -90,7 +94,7 @@ export function thresholdRuleType(
     ...baseCriterion,
     aggType: schema.literal('custom'),
     metric: schema.never(),
-    customMetrics: schema.arrayOf(
+    metrics: schema.arrayOf(
       schema.oneOf([
         schema.object({
           name: schema.string(),
@@ -126,13 +130,9 @@ export function thresholdRuleType(
             schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
           ),
           groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          filterQuery: schema.maybe(
-            schema.string({
-              validate: validateKQLStringFilter,
-            })
-          ),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
+          searchConfiguration: searchConfigurationSchema,
         },
         { unknowns: 'allow' }
       ),
@@ -181,8 +181,7 @@ export function thresholdRuleType(
     },
     producer: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
-    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) => {
-      return paths.observability.ruleDetails(rule.id);
-    },
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   };
 }

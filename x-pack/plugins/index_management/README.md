@@ -53,7 +53,7 @@ POST %25%7B%5B%40metadata%5D%5Bbeat%5D%7D-%25%7B%5B%40metadata%5D%5Bversion%5D%7
 
 ### Quick steps for testing
 
-By default, **legacy index templates** are not shown in the UI. Make them appear by creating one in Console:
+**Legacy index templates** are only shown in the UI on stateful *and* if a user has existing legacy index templates. You can test this functionality by creating one in Console:
 
 ```
 PUT _template/template_1
@@ -61,6 +61,8 @@ PUT _template/template_1
   "index_patterns": ["foo*"]
 }
 ```
+
+On serverless, Elasticsearch does not support legacy index templates and therefore this functionality is disabled in Kibana via the config `xpack.index_management.enableLegacyTemplates`. For more details, see [#163518](https://github.com/elastic/kibana/pull/163518).
 
 To test **Cloud-managed templates**:
 

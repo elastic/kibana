@@ -23,6 +23,7 @@ export const getPrebuiltRulesAndTimelinesStatus = async (
   const response = await supertest
     .get(PREBUILT_RULES_STATUS_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send()
     .expect(200);
 

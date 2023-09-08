@@ -216,6 +216,7 @@ export function AlertActions({
             })}
           >
             <EuiButtonIcon
+              data-test-subj="o11yAlertActionsButton"
               aria-label={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
                 defaultMessage: 'View in app',
               })}
@@ -248,7 +249,11 @@ export function AlertActions({
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel size="s" items={actionsMenuItems} />
+          <EuiContextMenuPanel
+            size="s"
+            items={actionsMenuItems}
+            data-test-subj="alertsTableActionsMenu"
+          />
         </EuiPopover>
       </EuiFlexItem>
     </>

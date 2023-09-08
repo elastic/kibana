@@ -24,7 +24,11 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
 } from '../../../../../hooks';
-import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
+import {
+  getCloudShellUrlFromPackagePolicy,
+  isVerificationError,
+  packageToPackagePolicy,
+} from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -304,8 +308,15 @@ export function useOnSubmit({
         ? getCloudFormationPropsFromPackagePolicy(data.item).templateUrl
         : false;
 
+      const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
+
       if (hasCloudFormation) {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+      } else {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
+      if (hasGoogleCloudShell) {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
       } else {
         setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
       }
@@ -315,6 +326,10 @@ export function useOnSubmit({
         const hasAgentsAssigned = agentCount && agentPolicy;
         if (!hasAgentsAssigned && hasCloudFormation) {
           setFormState('SUBMITTED_CLOUD_FORMATION');
+          return;
+        }
+        if (!hasAgentsAssigned && hasGoogleCloudShell) {
+          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
           return;
         }
         if (!hasAgentsAssigned) {

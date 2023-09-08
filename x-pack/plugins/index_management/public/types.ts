@@ -8,9 +8,10 @@
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ExtensionsSetup } from './services';
+import { ExtensionsSetup, PublicApiServiceSetup } from './services';
 
 export interface IndexManagementPluginSetup {
+  apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
 }
 
@@ -29,4 +30,9 @@ export interface ClientConfigType {
     enabled: boolean;
   };
   enableIndexActions?: boolean;
+  enableLegacyTemplates?: boolean;
+  enableIndexStats?: boolean;
+  dev: {
+    enableIndexDetailsPage?: boolean;
+  };
 }

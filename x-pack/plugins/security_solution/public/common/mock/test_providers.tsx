@@ -9,8 +9,8 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import React from 'react';
-import type { DropResult, ResponderProvided } from 'react-beautiful-dnd';
-import { DragDropContext } from 'react-beautiful-dnd';
+import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
@@ -35,7 +35,7 @@ import {
 import type { FieldHook } from '../../shared_imports';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock, localStorageMock } from './mock_local_storage';
-import { CASES_FEATURE_ID } from '../../../common/constants';
+import { ASSISTANT_FEATURE_ID, CASES_FEATURE_ID } from '../../../common/constants';
 import { UserPrivilegesProvider } from '../components/user_privileges/user_privileges_context';
 
 const state: State = mockGlobalState;
@@ -125,6 +125,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   {
                     siem: { show: true, crud: true },
                     [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+                    [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
                   } as unknown as Capabilities
                 }
               >

@@ -77,6 +77,7 @@ describe('Saved query management list component', () => {
               },
               filters: [],
             },
+            namespaces: ['default'],
           },
         ]),
         deleteSavedQuery: jest.fn(),
@@ -157,6 +158,38 @@ describe('Saved query management list component', () => {
     await flushEffect(component);
     findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
     expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
+    expect(component.text()).not.toContain('you remove it from every space');
+  });
+
+  it('should render the modal with warning for multiple namespaces on delete', async () => {
+    const newProps = {
+      ...props,
+      savedQueryService: {
+        ...props.savedQueryService,
+        getAllSavedQueries: jest.fn().mockResolvedValue([
+          {
+            id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+            attributes: {
+              title: 'Test',
+              description: '',
+              query: {
+                query: 'category.keyword : "Men\'s Shoes" ',
+                language: 'kuery',
+              },
+              filters: [],
+            },
+            namespaces: ['one', 'two'],
+          },
+        ]),
+        deleteSavedQuery: jest.fn(),
+      },
+    };
+    const component = mount(wrapSavedQueriesListComponentInContext(newProps));
+    await flushEffect(component);
+    findTestSubject(component, 'delete-saved-query-Test-button').simulate('click');
+
+    expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
+    expect(component.text()).toContain('you remove it from every space');
   });
 
   it('should render the onClearSavedQuery on delete of the current selected query', async () => {
@@ -174,6 +207,7 @@ describe('Saved query management list component', () => {
           },
           filters: [],
         },
+        namespaces: ['default'],
       },
       onClearSavedQuery: onClearSavedQuerySpy,
     };

@@ -71,7 +71,11 @@ export const RecentlyAccessed: FC<Props> = ({
       initialIsOpen={!defaultIsCollapsed}
       data-test-subj={`nav-bucket-recentlyAccessed`}
     >
-      <EuiSideNav items={navItems} css={styles.euiSideNavItems} />
+      <EuiSideNav
+        items={navItems}
+        css={styles.euiSideNavItems}
+        mobileBreakpoints={/* turn off responsive behavior */ []}
+      />
     </EuiCollapsibleNavGroup>
   );
 };

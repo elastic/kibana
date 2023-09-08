@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -15,8 +15,6 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-
-const Context = ({ children }: { children: ReactNode }) => <>{children}</>;
 
 const mount = (dataView = dataViewMock) => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
@@ -29,7 +27,6 @@ const mount = (dataView = dataViewMock) => {
         adHocDataViews={[]}
         services={discoverServiceMock}
         onClose={jest.fn()}
-        I18nContext={Context}
       />
     </KibanaContextProvider>
   );

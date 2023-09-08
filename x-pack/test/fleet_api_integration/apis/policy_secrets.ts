@@ -12,6 +12,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../helpers';
@@ -50,6 +51,135 @@ export default function (providerContext: FtrProviderContext) {
     const supertest = getService('supertest');
     const kibanaServer = getService('kibanaServer');
 
+    const createFleetServerAgentPolicy = async () => {
+      const agentPolicyResponse = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          name: `Fleet server policy ${uuidv4()}`,
+          namespace: 'default',
+        })
+        .expect(200);
+
+      const agentPolicyId = agentPolicyResponse.body.item.id;
+
+      // create fleet_server package policy
+      await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          force: true,
+          package: {
+            name: 'fleet_server',
+            version: '1.3.1',
+          },
+          name: `Fleet Server ${uuidv4()}`,
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          vars: {},
+          inputs: {
+            'fleet_server-fleet-server': {
+              enabled: true,
+              vars: {
+                custom: '',
+              },
+              streams: {},
+            },
+          },
+        })
+        .expect(200);
+
+      return agentPolicyId;
+    };
+
+    const createPolicyWithSecrets = async () => {
+      return supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: `secrets-${Date.now()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          inputs: {
+            'secrets-test_input': {
+              enabled: true,
+              vars: {
+                input_var_secret: 'input_secret_val',
+                input_var_non_secret: 'input_non_secret_val',
+              },
+              streams: {
+                'secrets.log': {
+                  enabled: true,
+                  vars: {
+                    stream_var_secret: 'stream_secret_val',
+                    stream_var_non_secret: 'stream_non_secret_val',
+                  },
+                },
+              },
+            },
+          },
+          vars: {
+            package_var_secret: 'package_secret_val',
+            package_var_non_secret: 'package_non_secret_val',
+          },
+          package: {
+            name: 'secrets',
+            version: '1.0.0',
+          },
+        })
+        .expect(200);
+    };
+
+    async function createPolicyWSecretVar() {
+      const { body: createResBody } = await createPolicyWithSecrets();
+      const createdPolicy = createResBody.item;
+      return createdPolicy;
+    }
+
+    const createFleetServerAgent = async (
+      agentPolicyId: string,
+      hostname: string,
+      agentVersion: string
+    ) => {
+      const agentResponse = await es.index({
+        index: '.fleet-agents',
+        refresh: true,
+        body: {
+          access_api_key_id: 'api-key-3',
+          active: true,
+          policy_id: agentPolicyId,
+          type: 'PERMANENT',
+          local_metadata: {
+            host: { hostname },
+            elastic: { agent: { version: agentVersion } },
+          },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:14:25Z',
+          last_checkin: '2022-06-27T12:28:29Z',
+          tags: ['tag1'],
+        },
+      });
+
+      return agentResponse._id;
+    };
+
+    const clearAgents = async () => {
+      try {
+        await es.deleteByQuery({
+          index: '.fleet-agents',
+          refresh: true,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        });
+      } catch (err) {
+        // index doesn't exist
+      }
+    };
+
     const getSecrets = async (ids?: string[]) => {
       const query = ids ? { terms: { _id: ids } } : { match_all: {} };
       return es.search({
@@ -71,13 +201,43 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       } catch (err) {
-        // index doesnt exis
+        // index doesn't exist
       }
     };
 
     const getPackagePolicyById = async (id: string) => {
       const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
       return body.item;
+    };
+
+    const enableSecrets = async () => {
+      try {
+        await kibanaServer.savedObjects.update({
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          id: 'fleet-default-settings',
+          attributes: {
+            secret_storage_requirements_met: true,
+          },
+          overwrite: false,
+        });
+      } catch (e) {
+        throw e;
+      }
+    };
+
+    const disableSecrets = async () => {
+      try {
+        await kibanaServer.savedObjects.update({
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          id: 'fleet-default-settings',
+          attributes: {
+            secret_storage_requirements_met: false,
+          },
+          overwrite: false,
+        });
+      } catch (e) {
+        throw e;
+      }
     };
 
     const getFullAgentPolicyById = async (id: string) => {
@@ -141,10 +301,13 @@ export default function (providerContext: FtrProviderContext) {
 
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
+    let fleetServerAgentPolicyId: string;
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
 
       await deleteAllSecrets();
+      await clearAgents();
+      await enableSecrets();
     });
 
     setupFleetAndAgents(providerContext);
@@ -160,6 +323,8 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       agentPolicyId = agentPolicyResponse.item.id;
+
+      fleetServerAgentPolicyId = await createFleetServerAgentPolicy();
     });
 
     after(async () => {
@@ -182,12 +347,14 @@ export default function (providerContext: FtrProviderContext) {
               enabled: true,
               vars: {
                 input_var_secret: 'input_secret_val',
+                input_var_non_secret: 'input_non_secret_val',
               },
               streams: {
                 'secrets.log': {
                   enabled: true,
                   vars: {
                     stream_var_secret: 'stream_secret_val',
+                    stream_var_non_secret: 'stream_non_secret_val',
                   },
                 },
               },
@@ -195,6 +362,7 @@ export default function (providerContext: FtrProviderContext) {
           },
           vars: {
             package_var_secret: 'package_secret_val',
+            package_var_non_secret: 'package_non_secret_val',
           },
           package: {
             name: 'secrets',
@@ -220,10 +388,13 @@ export default function (providerContext: FtrProviderContext) {
         ])
       ).to.eql(true);
       expectedCompiledStream = {
-        'config.version': 2,
+        'config.version': '2',
         package_var_secret: secretVar(packageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
         stream_var_secret: secretVar(streamVarId),
+        stream_var_non_secret: 'stream_non_secret_val',
       };
       expect(createdPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql(
         expectedCompiledStream
@@ -231,7 +402,9 @@ export default function (providerContext: FtrProviderContext) {
 
       expectedCompiledInput = {
         package_var_secret: secretVar(packageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
       };
 
       expect(createdPackagePolicy.inputs[0].compiled_input).to.eql(expectedCompiledInput);
@@ -312,12 +485,17 @@ export default function (providerContext: FtrProviderContext) {
       expect(updatedPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql({
         'config.version': 2,
         package_var_secret: secretVar(updatedPackageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
         stream_var_secret: secretVar(streamVarId),
+        stream_var_non_secret: 'stream_non_secret_val',
       });
       expect(updatedPackagePolicy.inputs[0].compiled_input).to.eql({
         package_var_secret: secretVar(updatedPackageVarId),
+        package_var_non_secret: 'package_non_secret_val',
         input_var_secret: secretVar(inputVarId),
+        input_var_non_secret: 'input_non_secret_val',
       });
       expect(updatedPackagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
       expect(updatedPackagePolicy.vars.package_var_secret.value.id).eql(updatedPackageVarId);
@@ -420,12 +598,141 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      // sleep to allow for secrets to be deleted
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      for (let i = 0; i < 3; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const searchRes = await getSecrets();
+        const searchRes = await getSecrets();
+        if (searchRes.hits.hits.length === 0) {
+          return;
+        }
+      }
 
-      expect(searchRes.hits.hits.length).to.eql(0);
+      throw new Error('Secrets not deleted');
+    });
+
+    it('should not store secrets if fleet server does not meet minimum version', async () => {
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_1', '7.0.0');
+      await disableSecrets();
+
+      const createdPolicy = await createPolicyWSecretVar();
+
+      // secret should be in plain text i.e not a secret refrerence
+      expect(createdPolicy.vars.package_var_secret.value).eql('package_secret_val');
+    });
+
+    it('should not store secrets if there are no fleet servers', async () => {
+      await clearAgents();
+
+      const createdPolicy = await createPolicyWSecretVar();
+
+      // secret should be in plain text i.e not a secret refrerence
+      expect(createdPolicy.vars.package_var_secret.value).eql('package_secret_val');
+    });
+
+    it('should convert plain text values to secrets once fleet server requirements are met', async () => {
+      await clearAgents();
+
+      const createdPolicy = await createPolicyWSecretVar();
+
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_2', '9.0.0');
+
+      const updatedPolicy = createdPolicyToUpdatePolicy(createdPolicy);
+      delete updatedPolicy.name;
+
+      updatedPolicy.vars.package_var_secret.value = 'package_secret_val_2';
+
+      const updateRes = await supertest
+        .put(`/api/fleet/package_policies/${createdPolicy.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send(updatedPolicy)
+        .expect(200);
+
+      const updatedPolicyRes = updateRes.body.item;
+
+      expect(updatedPolicyRes.vars.package_var_secret.value.isSecretRef).eql(true);
+      expect(updatedPolicyRes.inputs[0].vars.input_var_secret.value.isSecretRef).eql(true);
+      expect(updatedPolicyRes.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef).eql(
+        true
+      );
+    });
+
+    it('should not revert to plaintext values if the user adds an out of date fleet server', async () => {
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_3', '7.0.0');
+
+      const createdPolicy = await createPolicyWSecretVar();
+
+      expect(createdPolicy.vars.package_var_secret.value.isSecretRef).eql(true);
+    });
+
+    it('should store new secrets after package upgrade', async () => {
+      const createdPolicy = await createPolicyWSecretVar();
+
+      // Install newer version of secrets package
+      await supertest
+        .post('/api/fleet/epm/packages/secrets/1.1.0')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      // Upgrade package policy
+      await supertest
+        .post(`/api/fleet/package_policies/upgrade`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          packagePolicyIds: [createdPolicy.id],
+        })
+        .expect(200);
+
+      // Fetch policy again
+      const res = await supertest.get(`/api/fleet/package_policies/${createdPolicy.id}`);
+      const upgradedPolicy = res.body.item;
+
+      const packageSecretVarId = upgradedPolicy.vars.package_var_secret.value.id;
+      const packageNonSecretVarId = upgradedPolicy.vars.package_var_non_secret.value.id;
+      const inputSecretVarId = upgradedPolicy.inputs[0].vars.input_var_secret.value.id;
+      const inputNonSecretVarId = upgradedPolicy.inputs[0].vars.input_var_non_secret.value.id;
+      const streamSecretVarId = upgradedPolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
+      const streamNonSecretVarId =
+        upgradedPolicy.inputs[0].streams[0].vars.stream_var_non_secret.value.id;
+
+      expect(
+        arrayIdsEqual(upgradedPolicy.secret_references, [
+          { id: packageSecretVarId },
+          { id: packageNonSecretVarId },
+          { id: inputSecretVarId },
+          { id: inputNonSecretVarId },
+          { id: streamSecretVarId },
+          { id: streamNonSecretVarId },
+        ])
+      ).to.eql(true);
+
+      expect(upgradedPolicy.inputs[0].compiled_input).to.eql({
+        package_var_secret: secretVar(packageSecretVarId),
+        package_var_non_secret: secretVar(packageNonSecretVarId),
+        input_var_secret: secretVar(inputSecretVarId),
+        input_var_non_secret: secretVar(inputNonSecretVarId),
+      });
+
+      expect(upgradedPolicy.inputs[0].streams[0].compiled_stream).to.eql({
+        'config.version': '2',
+        package_var_secret: secretVar(packageSecretVarId),
+        package_var_non_secret: secretVar(packageNonSecretVarId),
+        input_var_secret: secretVar(inputSecretVarId),
+        input_var_non_secret: secretVar(inputNonSecretVarId),
+        stream_var_secret: secretVar(streamSecretVarId),
+        stream_var_non_secret: secretVar(streamNonSecretVarId),
+      });
+
+      expect(upgradedPolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.vars.package_var_non_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.inputs[0].vars.input_var_non_secret.value.isSecretRef).to.eql(true);
+      expect(upgradedPolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef).to.eql(
+        true
+      );
+      expect(
+        upgradedPolicy.inputs[0].streams[0].vars.stream_var_non_secret.value.isSecretRef
+      ).to.eql(true);
     });
   });
 }

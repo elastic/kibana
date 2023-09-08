@@ -9,34 +9,29 @@ import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'rea
 import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
 import { useGetAppUrl, useNavigateTo } from './navigation';
 
-export interface WrappedLinkProps {
+export interface BaseLinkProps {
   id: string;
   path?: string;
   urlState?: string;
 }
 
+export type GetLinkUrlProps = BaseLinkProps & { absolute?: boolean };
+export type GetLinkUrl = (params: GetLinkUrlProps) => string;
+
+export type WrappedLinkProps = BaseLinkProps & {
+  /**
+   * Optional `onClick` callback prop.
+   * It is composed within the returned `onClick` function to perform extra actions when the link is clicked.
+   * It does not override the navigation action.
+   **/
+  onClick?: MouseEventHandler;
+};
+export type GetLinkProps = (params: WrappedLinkProps) => LinkProps;
+
 export interface LinkProps {
   onClick: MouseEventHandler;
   href: string;
 }
-
-export type GetLinkUrl = (
-  params: WrappedLinkProps & {
-    absolute?: boolean;
-    urlState?: string;
-  }
-) => string;
-
-export type GetLinkProps = (
-  params: WrappedLinkProps & {
-    /**
-     * Optional `onClick` callback prop.
-     * It is composed within the returned `onClick` function to perform extra actions when the link is clicked.
-     * It does not override the navigation operation.
-     **/
-    onClick?: MouseEventHandler;
-  }
-) => LinkProps;
 
 /**
  * It returns the `url` to use in link `href`.
@@ -45,9 +40,10 @@ export const useGetLinkUrl = () => {
   const { getAppUrl } = useGetAppUrl();
 
   const getLinkUrl = useCallback<GetLinkUrl>(
-    ({ id, path = '', absolute = false, urlState }) => {
+    ({ id, path: subPath = '', absolute = false, urlState }) => {
+      const { appId, deepLinkId, path: mainPath = '' } = getAppIdsFromId(id);
+      const path = concatPaths(mainPath, subPath);
       const formattedPath = urlState ? formatPath(path, urlState) : path;
-      const { appId, deepLinkId } = getAppIdsFromId(id);
       return getAppUrl({ deepLinkId, appId, path: formattedPath, absolute });
     },
     [getAppUrl]
@@ -91,9 +87,8 @@ export const useGetLinkProps = (): GetLinkProps => {
  */
 export const withLink = <T extends Partial<LinkProps>>(
   Component: React.ComponentType<T>
-): React.FC<Omit<T & WrappedLinkProps, 'href'>> =>
-  // eslint-disable-next-line react/display-name
-  React.memo(function ({ id, path, urlState, onClick: _onClick, ...rest }) {
+): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
+  React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
     const { onClick, href } = getLink({ id, path, urlState, onClick: _onClick });
     return <Component onClick={onClick} href={href} {...(rest as unknown as T)} />;
@@ -115,14 +110,29 @@ export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
 
 // Utils
 
-export const isExternalId = (id: string): boolean => id.includes(':');
+// External IDs are in the format `appId:deepLinkId` to match the Chrome NavLinks format.
+// Internal Security Solution ids are the deepLinkId, the appId is omitted for convenience.
+export const isSecurityId = (id: string): boolean => !id.includes(':');
 
-export const getAppIdsFromId = (id: string): { appId?: string; deepLinkId?: string } => {
-  if (isExternalId(id)) {
-    const [appId, deepLinkId] = id.split(':');
-    return { appId, deepLinkId };
+// External links may contain an optional `path` in addition to the `appId` and `deepLinkId`.
+// Format: `<appId>:<deepLinkId>/<path>`
+export const getAppIdsFromId = (
+  id: string
+): { appId?: string; deepLinkId?: string; path?: string } => {
+  const [linkId, strippedPath] = id.split(/\/(.*)/); // split by the first `/` character
+  const path = strippedPath ? `/${strippedPath}` : '';
+  if (!isSecurityId(linkId)) {
+    const [appId, deepLinkId] = linkId.split(':');
+    return { appId, deepLinkId, path };
   }
-  return { deepLinkId: id }; // undefined `appId` for internal Security Solution links
+  return { deepLinkId: linkId, path }; // undefined `appId` for internal Security Solution links
+};
+
+export const concatPaths = (path: string | undefined, subPath: string | undefined) => {
+  if (path && subPath) {
+    return `${path.replace(/\/$/, '')}/${subPath.replace(/^\//, '')}`;
+  }
+  return path || subPath || '';
 };
 
 export const formatPath = (path: string, urlState: string) => {
