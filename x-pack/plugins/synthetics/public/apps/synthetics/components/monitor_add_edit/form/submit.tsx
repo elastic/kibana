@@ -23,7 +23,7 @@ import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
 export const ActionBar = ({
   readOnly = false,
-  canUsePublicLocations,
+  canUsePublicLocations = true,
 }: {
   readOnly: boolean;
   canUsePublicLocations: boolean;
@@ -82,10 +82,13 @@ export const ActionBar = ({
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RunTestButton />
+          <RunTestButton canUsePublicLocations={canUsePublicLocations} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          <NoPermissionsTooltip
+            canEditSynthetics={canEditSynthetics}
+            canUsePublicLocations={canUsePublicLocations}
+          >
             <EuiButton
               fill
               isLoading={loading}

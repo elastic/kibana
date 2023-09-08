@@ -34,7 +34,9 @@ export const MonitorSteps = ({
 
   return (
     <>
-      <ReadOnlyCallout projectId={projectId} canUsePublicLocations={canUsePublicLocations} />
+      {isEditFlow && (
+        <ReadOnlyCallout projectId={projectId} canUsePublicLocations={canUsePublicLocations} />
+      )}
       {isEditFlow ? (
         steps.map((step) => (
           <div key={step.title}>

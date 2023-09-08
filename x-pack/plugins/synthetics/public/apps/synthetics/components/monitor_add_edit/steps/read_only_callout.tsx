@@ -44,10 +44,11 @@ export const ReadOnlyCallout = ({
     return (
       <>
         <EuiCallOut
+          color="warning"
           title={
             <FormattedMessage
               id="xpack.synthetics.publicLocations.readOnly.callout.title"
-              defaultMessage="You don't have permission to use public locations"
+              defaultMessage="You do not have permission to use Elastic managed locations"
             />
           }
           iconType="alert"
@@ -55,7 +56,7 @@ export const ReadOnlyCallout = ({
           <p>
             <FormattedMessage
               id="xpack.synthetics.publicLocations.readOnly.callout.content"
-              defaultMessage="This monitor contains a public location. To edit this monitor, you need to have permission to use public locations."
+              defaultMessage="This monitor contains a Elastic managed location. To edit this monitor, you need to have permission to use Elastic managed locations."
             />
           </p>
         </EuiCallOut>
