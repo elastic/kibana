@@ -6,7 +6,7 @@
  */
 
 import {
-  goToTheRuleDetailsOf,
+  goToRuleDetailsOf,
   expectManagementTableRules,
   selectAllRules,
   disableAutoRefresh,
@@ -117,7 +117,7 @@ describe(
         selectAllRules();
         duplicateSelectedRulesWithExceptions();
         expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
-        goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
+        goToRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
         goToExceptionsTab();
         assertExceptionItemsExists(EXCEPTION_CARD_ITEM_NAME, [NON_EXPIRED_EXCEPTION_ITEM_NAME]);
         viewExpiredExceptionItems();
@@ -128,7 +128,7 @@ describe(
         selectAllRules();
         duplicateSelectedRulesWithNonExpiredExceptions();
         expectManagementTableRules([`${RULE_NAME} [Duplicate]`]);
-        goToTheRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
+        goToRuleDetailsOf(`${RULE_NAME} [Duplicate]`);
         goToExceptionsTab();
         assertExceptionItemsExists(EXCEPTION_CARD_ITEM_NAME, [NON_EXPIRED_EXCEPTION_ITEM_NAME]);
         viewExpiredExceptionItems();
