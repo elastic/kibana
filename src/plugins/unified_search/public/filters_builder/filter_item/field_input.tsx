@@ -43,7 +43,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   const { disabled, suggestionsAbstraction } = useContext(FiltersBuilderContextType);
   const fields = dataView ? getFilterableFields(dataView) : [];
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
-  const comboBoxRef = useRef<HTMLInputElement>(null);
+  const comboBoxWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const onFieldChange = useCallback(
     ([selectedField]: DataViewField[]) => {
@@ -80,7 +80,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   };
 
   return (
-    <div ref={comboBoxRef}>
+    <div ref={comboBoxWrapperRef}>
       <EuiComboBox
         id={id}
         options={euiOptions}
@@ -105,7 +105,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
                 defaultComboboxWidth={DEFAULT_COMBOBOX_WIDTH}
                 defaultFont={DEFAULT_FONT}
                 comboboxPaddings={COMBOBOX_PADDINGS}
-                comboBoxRef={comboBoxRef}
+                comboBoxWrapperRef={comboBoxWrapperRef}
                 label={option.label}
                 search={searchValue}
               />
