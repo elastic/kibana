@@ -29,10 +29,6 @@ export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   &:focus-within {
     flex-grow: 4;
   }
-
-  ${euiCanAnimate} {
-    transition: flex ${euiTheme.animation.extraFast};
-  }
 `;
 
 export const operationCss = (euiTheme: EuiThemeComputed) => css`
