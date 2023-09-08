@@ -72,7 +72,7 @@ export function ClustersTable({ clusters }: Props) {
         defaultMessage: 'Status',
       }),
       render: (status: estypes.ClusterSearchStatus) => {
-        return <ClusterHealth status={status}/>;
+        return <ClusterHealth status={status} />;
       },
     },
     {
