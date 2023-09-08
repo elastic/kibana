@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
 import {
   CreateDispatchableEvents,
   useCreateDispatchableEvents,
@@ -15,15 +14,9 @@ import { useCustomIntegrations } from './use_custom_integrations';
 
 export const useConsumerCustomIntegrations = () => {
   const { customIntegrationsState } = useCustomIntegrations();
-  const createDispatchableEvents = useCreateDispatchableEvents({
+  const dispatchableEvents = useCreateDispatchableEvents({
     machineRef: customIntegrationsState.children.createCustomIntegration,
   });
-
-  const dispatchableEvents = useMemo(() => {
-    return {
-      ...createDispatchableEvents,
-    };
-  }, [createDispatchableEvents]);
 
   return {
     mode: customIntegrationsState.context.mode,
