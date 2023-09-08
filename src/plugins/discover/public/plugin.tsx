@@ -20,6 +20,7 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
@@ -79,6 +80,7 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
+import { getSearchProvider } from './globar_search/search_provider';
 
 /**
  * @public
@@ -164,6 +166,7 @@ export interface DiscoverSetupPlugins {
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 /**
@@ -230,6 +233,25 @@ export class DiscoverPlugin
       );
       this.singleDocLocator = plugins.share.url.locators.create(
         new DiscoverSingleDocLocatorDefinition()
+      );
+    }
+
+    if (plugins.globalSearch) {
+      plugins.globalSearch.registerResultProvider(
+        getSearchProvider(
+          core.getStartServices().then(
+            ([
+              {
+                application: { capabilities },
+              },
+            ]) => capabilities
+          ),
+          core.getStartServices().then((deps) => {
+            const { data } = deps[1];
+            return data;
+          }),
+          this.locator
+        )
       );
     }
 
