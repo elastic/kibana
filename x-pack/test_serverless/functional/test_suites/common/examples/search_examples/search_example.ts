@@ -15,7 +15,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
 
-  describe('Search example', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/165730
+  // FLAKY: https://github.com/elastic/kibana/issues/165735
+  describe.skip('Search example', () => {
     describe('with bfetch', () => {
       testSearchExample();
     });

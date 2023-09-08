@@ -45,10 +45,10 @@ export interface AlertContextMeta {
 
 export type MetricExpression = Omit<
   MetricExpressionParams,
-  'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation' | 'customMetrics'
+  'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation'
 > & {
   metric?: NonCountMetricExpressionParams['metric'];
-  customMetrics?: CustomMetricExpressionParams['customMetrics'];
+  metrics?: CustomMetricExpressionParams['metrics'];
   label?: CustomMetricExpressionParams['label'];
   equation?: CustomMetricExpressionParams['equation'];
   timeSize?: MetricExpressionParams['timeSize'];
@@ -175,4 +175,6 @@ export interface InventoryMetricConditions {
 
 export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
+  searchConfiguration: SerializedSearchSourceFields;
+  groupBy?: string | string[];
 }

@@ -89,6 +89,7 @@ function Lens({
           <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="observabilityAiAssistantLensOpenInLensButton"
                 iconType="lensApp"
                 onClick={() => {
                   lens.navigateToPrefilledEditor(lensEmbeddableInput);
@@ -101,6 +102,7 @@ function Lens({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="observabilityAiAssistantLensSaveButton"
                 iconType="save"
                 onClick={() => {
                   setIsSaveModalOpen(() => true);
