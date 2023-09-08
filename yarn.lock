@@ -4499,6 +4499,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/field-utils@link:packages/kbn-field-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/file-upload-plugin@link:x-pack/plugins/file_upload":
   version "0.0.0"
   uid ""
@@ -5939,6 +5943,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-doc-viewer-examples@link:examples/unified_doc_viewer":
   version "0.0.0"
   uid ""
@@ -5948,10 +5956,6 @@
   uid ""
 
 "@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
   version "0.0.0"
   uid ""
 

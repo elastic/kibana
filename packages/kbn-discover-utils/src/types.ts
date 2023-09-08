@@ -7,8 +7,9 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
-export type { FieldTypeKnown, IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
+export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 
 export interface EsHitRecord extends Omit<SearchHit, '_source'> {
   _source?: Record<string, unknown>;
@@ -35,3 +36,14 @@ export interface DataTableRecord {
    */
   isAnchor?: boolean;
 }
+
+type FormattedHitPair = readonly [
+  fieldName: string,
+  formattedValue: string,
+  field: DataViewField | undefined
+];
+
+/**
+ * Pairs array for each field in the hit
+ */
+export type FormattedHit = FormattedHitPair[];

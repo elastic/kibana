@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getFieldTypeDescription } from './get_field_type_description';
-export { getFieldType } from './get_field_type';
-export { getFieldIconType } from './get_field_icon_type';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-field-utils'],
+};
