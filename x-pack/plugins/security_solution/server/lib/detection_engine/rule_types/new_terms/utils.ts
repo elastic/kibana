@@ -61,7 +61,7 @@ export const transformBucketsToValues = (
   newTermsFields: string[],
   buckets: estypes.AggregationsCompositeBucket[]
 ): Array<string | number> => {
-  // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
+  // if new terms include only one field we don't use runtime mappings and don't stitch fields buckets together
   if (newTermsFields.length === 1) {
     return buckets
       .map((bucket) => Object.values(bucket.key)[0])

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isObject } from 'lodash';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
@@ -20,6 +21,7 @@ import type {
   RecentTermsAggResult,
   DocFetchAggResult,
   NewTermsAggResult,
+  CreateAlertsHook,
 } from './build_new_terms_aggregation';
 import {
   buildRecentTermsAgg,
@@ -31,9 +33,7 @@ import {
   parseDateString,
   validateHistoryWindowStart,
   transformBucketsToValues,
-  getNewTermsRuntimeMappings,
   getAggregationField,
-  decodeMatchedValues,
 } from './utils';
 import {
   addToSearchAfterReturn,
@@ -196,6 +196,43 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
+
+        const createAlertsHook: CreateAlertsHook = async (aggResult) => {
+          const eventsAndTerms: EventsAndTerms[] = (
+            aggResult?.aggregations?.new_terms.buckets ?? []
+          ).map((bucket) => {
+            const newTerms = isObject(bucket.key) ? Object.values(bucket.key) : [bucket.key];
+            return {
+              event: bucket.docs.hits.hits[0],
+              newTerms,
+            };
+          });
+
+          const wrappedAlerts = wrapNewTermsAlerts({
+            eventsAndTerms,
+            spaceId,
+            completeRule,
+            mergeStrategy,
+            indicesToQuery: inputIndex,
+            alertTimestampOverride,
+            ruleExecutionLogger,
+            publicBaseUrl,
+          });
+
+          const bulkCreateResult = await bulkCreate(
+            wrappedAlerts,
+            params.maxSignals - result.createdSignalsCount,
+            createEnrichEventsFunction({
+              services,
+              logger: ruleExecutionLogger,
+            })
+          );
+
+          addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+
+          return bulkCreateResult;
+        };
+
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
@@ -215,13 +252,10 @@ export const createNewTermsAlertType = (
             spaceId,
             runOpts: execOptions.runOpts,
             afterKey,
+            createAlertsHook,
           });
         } else {
           const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
-          const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
-            params.newTermsFields,
-            bucketsForField
-          );
           const {
             searchResult: pageSearchResult,
             searchDuration: pageSearchDuration,
@@ -233,10 +267,7 @@ export const createNewTermsAlertType = (
               field: getAggregationField(params.newTermsFields),
               include: includeValues,
             }),
-            runtimeMappings: {
-              ...runtimeMappings,
-              ...newTermsRuntimeMappings,
-            },
+            runtimeMappings,
             searchAfterSortIds: undefined,
             index: inputIndex,
             // For Phase 2, we expand the time range to aggregate over the history window
@@ -279,10 +310,7 @@ export const createNewTermsAlertType = (
                 field: getAggregationField(params.newTermsFields),
                 include: actualNewTerms,
               }),
-              runtimeMappings: {
-                ...runtimeMappings,
-                ...newTermsRuntimeMappings,
-              },
+              runtimeMappings,
               searchAfterSortIds: undefined,
               index: inputIndex,
               // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
@@ -304,36 +332,7 @@ export const createNewTermsAlertType = (
               throw new Error('Aggregations were missing on document fetch search result');
             }
 
-            const eventsAndTerms: EventsAndTerms[] =
-              docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
-                const newTerms = decodeMatchedValues(params.newTermsFields, bucket.key);
-                return {
-                  event: bucket.docs.hits.hits[0],
-                  newTerms,
-                };
-              });
-
-            const wrappedAlerts = wrapNewTermsAlerts({
-              eventsAndTerms,
-              spaceId,
-              completeRule,
-              mergeStrategy,
-              indicesToQuery: inputIndex,
-              alertTimestampOverride,
-              ruleExecutionLogger,
-              publicBaseUrl,
-            });
-
-            const bulkCreateResult = await bulkCreate(
-              wrappedAlerts,
-              params.maxSignals - result.createdSignalsCount,
-              createEnrichEventsFunction({
-                services,
-                logger: ruleExecutionLogger,
-              })
-            );
-
-            addToSearchAfterReturn({ current: result, next: bulkCreateResult });
+            const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
 
             if (bulkCreateResult.alertsWereTruncated) {
               result.warningMessages.push(getMaxSignalsWarning());

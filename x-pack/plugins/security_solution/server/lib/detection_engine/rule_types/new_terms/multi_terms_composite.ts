@@ -8,8 +8,6 @@
 import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 import type { NewTermsRuleParams } from '../../rule_schema';
-import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
-import type { EventsAndTerms } from './wrap_new_terms_alerts';
 import type { GetFilterArgs } from '../utils/get_filter';
 import { getFilter } from '../utils/get_filter';
 import { singleSearchAfter } from '../utils/single_search_after';
@@ -21,10 +19,10 @@ import {
 import type {
   CompositeDocFetchAggResult,
   CompositeNewTermsAggResult,
+  CreateAlertsHook,
 } from './build_new_terms_aggregation';
 
-import { addToSearchAfterReturn, getMaxSignalsWarning } from '../utils/utils';
-import { createEnrichEventsFunction } from '../utils/enrichments';
+import { getMaxSignalsWarning } from '../utils/utils';
 
 import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
 const BATCH_SIZE = 1000;
@@ -44,6 +42,7 @@ interface MultiTermsCompositeArgs {
   spaceId: string;
   runOpts: RunOpts<NewTermsRuleParams>;
   afterKey: Record<string, string | number | null> | undefined;
+  createAlertsHook: CreateAlertsHook;
 }
 
 export const multiTermsComposite = async ({
@@ -58,6 +57,7 @@ export const multiTermsComposite = async ({
   spaceId,
   runOpts,
   afterKey,
+  createAlertsHook,
 }: MultiTermsCompositeArgs) => {
   const {
     ruleExecutionLogger,
@@ -168,36 +168,8 @@ export const multiTermsComposite = async ({
         throw new Error('Aggregations were missing on document fetch search result');
       }
 
-      const eventsAndTerms: EventsAndTerms[] =
-        docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => {
-          const newTerms = Object.values(bucket.key);
-          return {
-            event: bucket.docs.hits.hits[0],
-            newTerms,
-          };
-        });
+      const bulkCreateResult = await createAlertsHook(docFetchResultWithAggs);
 
-      const wrappedAlerts = wrapNewTermsAlerts({
-        eventsAndTerms,
-        spaceId,
-        completeRule,
-        mergeStrategy,
-        indicesToQuery: inputIndex,
-        alertTimestampOverride,
-        ruleExecutionLogger,
-        publicBaseUrl,
-      });
-
-      const bulkCreateResult = await bulkCreate(
-        wrappedAlerts,
-        params.maxSignals - result.createdSignalsCount,
-        createEnrichEventsFunction({
-          services,
-          logger: ruleExecutionLogger,
-        })
-      );
-
-      addToSearchAfterReturn({ current: result, next: bulkCreateResult });
       if (bulkCreateResult.alertsWereTruncated) {
         result.warningMessages.push(getMaxSignalsWarning());
         return result;
