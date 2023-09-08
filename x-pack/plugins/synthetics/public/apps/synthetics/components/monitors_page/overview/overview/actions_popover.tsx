@@ -101,8 +101,7 @@ export function ActionsPopover({
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const location = useLocationName({ locationId });
-  const locationName = location?.label || monitor.location.id;
+  const locationName = useLocationName(monitor);
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,

@@ -47,16 +47,11 @@ describe('useLocationName', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_central',
-        }),
+          location: { id: 'us_central' },
+        } as any),
       { wrapper: WrapperWithState }
     );
-    expect(result.current).toEqual({
-      id: 'us_central',
-      isServiceManaged: true,
-      label: 'US Central',
-      url: 'mockUrl',
-    });
+    expect(result.current).toEqual('US Central');
   });
 
   it('returns the location id if matching location cannot be found', () => {
@@ -92,10 +87,10 @@ describe('useLocationName', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_west',
-        }),
+          location: { id: 'us_west' },
+        } as any),
       { wrapper: WrapperWithState }
     );
-    expect(result.current).toEqual(undefined);
+    expect(result.current).toEqual('us_west');
   });
 });

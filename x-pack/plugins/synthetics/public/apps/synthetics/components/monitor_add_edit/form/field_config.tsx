@@ -209,7 +209,7 @@ export const MONITOR_TYPE_CONFIG = {
   },
 };
 
-export const FIELD = (readOnly?: boolean): FieldMap => ({
+export const FIELD = (readOnly?: boolean, isProjectMonitor?: boolean): FieldMap => ({
   [ConfigKey.FORM_MONITOR_TYPE]: {
     fieldKey: ConfigKey.FORM_MONITOR_TYPE,
     required: true,
@@ -404,8 +404,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     props: ({ field, setValue, locations, trigger }) => {
       return {
         options: Object.values(locations).map((location) => ({
-          label: locations?.find((loc) => location.id === loc.id)?.label || '',
-          id: location.id || '',
+          label: location.label,
+          id: location.id,
           isServiceManaged: location.isServiceManaged || false,
           isInvalid: location.isInvalid,
           disabled: location.isInvalid,
@@ -417,7 +417,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
               : location.isServiceManaged
               ? 'default'
               : 'primary',
-          label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
+          label:
+            (location.label || locations?.find((loc) => location.id === loc.id)?.label) ??
+            location.id,
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
         })),
@@ -495,7 +497,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
       'data-test-subj': 'syntheticsEnableSwitch',
       // enabled is an allowed field for read only
-      // isDisabled: readOnly,
+      disabled: !isProjectMonitor && readOnly,
     }),
   },
   [AlertConfigKey.STATUS_ENABLED]: {
@@ -518,7 +520,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
       'data-test-subj': 'syntheticsAlertStatusSwitch',
       // alert config is an allowed field for read only
-      // isDisabled: readOnly,
+      disabled: !isProjectMonitor && readOnly,
     }),
   },
   [AlertConfigKey.TLS_ENABLED]: {
@@ -541,7 +543,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
       'data-test-subj': 'syntheticsAlertStatusSwitch',
       // alert config is an allowed field for read only
-      // isDisabled: readOnly,
+      disabled: !isProjectMonitor && readOnly,
     }),
   },
   [ConfigKey.TAGS]: {
