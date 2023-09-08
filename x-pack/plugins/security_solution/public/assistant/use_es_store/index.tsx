@@ -5,101 +5,80 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { Conversation } from '@kbn/elastic-assistant';
-import { useKibana } from '../../common/lib/kibana';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { getConversationStore, INTERNAL_ASSISTANT_STORE, postConversationStore } from './api';
+import type { ConversationStore } from '../use_conversation_store';
 
 interface Props {
-  defaultValue: Conversation[];
+  didLocalStorageCheck: boolean;
+  defaultValue: ConversationStore;
+  stateManager?: boolean;
 }
 
 /** Reads and writes settings from local storage */
 export const useEsStorage = ({
   defaultValue,
-}: Props): [
-  Conversation[],
-  (conversations: Conversation[]) => void,
-  (conversation: Conversation) => void
-] => {
-  const { http } = useKibana().services;
-  const [initialized, setInitialized] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [_value, _setValue] = useState(defaultValue);
+  // hacky property to ensure we are only doing api stuff once
+  stateManager = false,
+  didLocalStorageCheck,
+}: Props): [ConversationStore, (v: ConversationStore) => void] => {
+  const [_value, _setValue] = useState<ConversationStore | null>(null);
 
-  const getMessages = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      return await http.fetch<{ conversations: Conversation[] }>(
-        `/internal/elastic_assistant/store`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          version: '2023-10-31',
-        }
-      );
-    } finally {
-      setIsLoading(false);
+  const { data: currentStore } = useQuery(
+    ['GET', INTERNAL_ASSISTANT_STORE],
+    ({ signal }) => getConversationStore(signal),
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      retry: false,
+      staleTime: Infinity,
+      enabled: stateManager,
     }
-  }, [http]);
-
-  const postMessages = useCallback(
-    async (messages?: Conversation[] = defaultValue) => {
-      setIsLoading(true);
-      try {
-        return await http.fetch<{ conversations: Conversation[] }>(
-          `/internal/elastic_assistant/store`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            version: '2023-10-31',
-            body: JSON.stringify(messages),
-          }
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [defaultValue, http]
   );
+  useEffect(() => {
+    if (currentStore) _setValue(currentStore);
+  }, [currentStore]);
 
-  const getValueFromEs = useCallback(async () => {
-    let value = await getMessages();
-    if (value.conversations.length === 0) {
-      value = await postMessages();
-    }
-    console.log('value', value);
+  const { data: updatedStore, mutate: updateConversationStore } = useMutation(
+    ['POST', INTERNAL_ASSISTANT_STORE],
+    postConversationStore
+  );
+  const doConversationsExist = useMemo(() => {
+    return (
+      (currentStore && Object.keys(currentStore).length > 0) ||
+      (updatedStore && Object.keys(updatedStore).length > 0)
+    );
+  }, [currentStore, updatedStore]);
 
-    _setValue(value.conversations);
-  }, [getMessages, postMessages]);
-
-  // const setValue = useCallback(
-  //   (value: T | ((prev: T) => T)) => {
-  //     if (typeof value === 'function') {
-  //       const updater = value as (prev: T) => T;
-  //       _setValue((prevValue) => {
-  //         const newValue = updater(prevValue);
-  //         storage.set(`${plugin}.${key}`, newValue);
-  //         return newValue;
-  //       });
-  //     } else {
-  //       storage.set(`${plugin}.${key}`, value);
-  //       _setValue(value);
-  //     }
-  //   },
-  //   [key, plugin, storage]
-  // );
+  const didInit = useRef(false);
 
   useEffect(() => {
-    if (!initialized) {
-      getValueFromEs();
-      setInitialized(true);
+    if (!doConversationsExist && stateManager && didLocalStorageCheck && !didInit.current) {
+      didInit.current = true;
+      updateConversationStore(defaultValue);
     }
-  }, [initialized, getValueFromEs]);
+  }, [
+    didLocalStorageCheck,
+    doConversationsExist,
+    updateConversationStore,
+    stateManager,
+    defaultValue,
+  ]);
 
-  return [_value, () => {}, setInitialized];
+  useEffect(() => {
+    if (updatedStore) {
+      _setValue(updatedStore);
+    }
+  }, [updatedStore]);
+  const setConversations = useCallback(
+    (convos) => {
+      updateConversationStore({ ...convos, lobby: true });
+    },
+    [updateConversationStore]
+  );
+
+  return [_value ?? defaultValue, setConversations];
 };

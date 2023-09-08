@@ -12,29 +12,29 @@ import { useLocalStorage } from '../../common/components/local_storage';
 import { LOCAL_STORAGE_KEY } from '../helpers';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 
+export type ConversationStore = Record<string, Conversation>;
+
 export interface UseConversationStore {
-  conversations: Record<string, Conversation>;
-  setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  conversations: ConversationStore;
+  setConversations: React.Dispatch<React.SetStateAction<ConversationStore>>;
 }
 
-export const useConversationStore = (): UseConversationStore => {
-  const [conversations, setConversations] = useLocalStorage<Record<string, Conversation>>({
+export const useConversationStore = (stateManager = false): UseConversationStore => {
+  const [conversations, _, didLocalStorageCheck] = useLocalStorage<ConversationStore>({
     defaultValue: BASE_SECURITY_CONVERSATIONS,
     key: LOCAL_STORAGE_KEY,
     isInvalidDefault: (valueFromStorage) => {
       return !valueFromStorage;
     },
   });
-  const [a, b, c] = useEsStorage({
-    defaultValue: BASE_SECURITY_CONVERSATIONS,
-    isInvalidDefault: (valueFromStorage) => {
-      return !valueFromStorage;
-    },
+  const [fromStorageConvos, setConversations] = useEsStorage({
+    defaultValue: conversations,
+    stateManager,
+    didLocalStorageCheck,
   });
-  console.log({ a });
 
   return {
-    conversations,
+    conversations: fromStorageConvos,
     setConversations,
   };
 };

@@ -20,6 +20,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { useAssistantTelemetry } from '../assistant/use_assistant_telemetry';
 import { getComments } from '../assistant/get_comments';
@@ -72,7 +73,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
   } = services;
 
   const assistantAvailability = useAssistantAvailability();
-  const { conversations, setConversations } = useConversationStore();
+  const { conversations, setConversations } = useConversationStore(true);
   const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
     useAnonymizationStore();
 
@@ -122,21 +123,19 @@ const StartAppComponent: FC<StartAppComponent> = ({
                     <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                       <ManageUserInfo>
                         <NavigationProvider core={services}>
-                          <ReactQueryClientProvider>
-                            <CellActionsProvider
-                              getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                            >
-                              <UpsellingProvider upsellingService={upselling}>
-                                <PageRouter
-                                  history={history}
-                                  onAppLeave={onAppLeave}
-                                  setHeaderActionMenu={setHeaderActionMenu}
-                                >
-                                  {children}
-                                </PageRouter>
-                              </UpsellingProvider>
-                            </CellActionsProvider>
-                          </ReactQueryClientProvider>
+                          <CellActionsProvider
+                            getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                          >
+                            <UpsellingProvider upsellingService={upselling}>
+                              <PageRouter
+                                history={history}
+                                onAppLeave={onAppLeave}
+                                setHeaderActionMenu={setHeaderActionMenu}
+                              >
+                                {children}
+                              </PageRouter>
+                            </UpsellingProvider>
+                          </CellActionsProvider>
                         </NavigationProvider>
                       </ManageUserInfo>
                     </UserPrivilegesProvider>
@@ -183,17 +182,20 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
         ...services,
       }}
     >
-      <CloudProvider>
-        <StartApp
-          history={history}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          store={store}
-          theme$={theme$}
-        >
-          {children}
-        </StartApp>
-      </CloudProvider>
+      <ReactQueryClientProvider>
+        <CloudProvider>
+          <StartApp
+            history={history}
+            onAppLeave={onAppLeave}
+            setHeaderActionMenu={setHeaderActionMenu}
+            store={store}
+            theme$={theme$}
+          >
+            {children}
+          </StartApp>
+        </CloudProvider>
+        <ReactQueryDevtools />
+      </ReactQueryClientProvider>
     </KibanaContextProvider>
   );
 };

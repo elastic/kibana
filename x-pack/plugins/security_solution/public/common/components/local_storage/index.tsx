@@ -24,7 +24,7 @@ export const useLocalStorage = <T,>({
   key,
   plugin = APP_ID,
   isInvalidDefault,
-}: Props<T>): [T, Dispatch<SetStateAction<T>>, Dispatch<SetStateAction<boolean>>] => {
+}: Props<T>): [T, Dispatch<SetStateAction<T>>, boolean] => {
   const { storage } = useKibana().services;
   const [initialized, setInitialized] = useState<boolean>(false);
   const [_value, _setValue] = useState<T>(defaultValue);
@@ -61,5 +61,5 @@ export const useLocalStorage = <T,>({
     }
   }, [initialized, readValueFromLocalStorage]);
 
-  return [_value, setValue, setInitialized];
+  return [_value, setValue, initialized];
 };

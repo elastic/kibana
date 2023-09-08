@@ -6,12 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import { notFound } from '@hapi/boom';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '@kbn/logging';
-import { getAccessQuery } from './get_access_query';
+import { Conversationn, Conversationss } from '../../schemas/conversations';
 import { AIAssistantResourceNames } from './types';
+import { getAccessQuery } from './get_access_query';
 
 export class AIAssistantStoreClient {
   constructor(
@@ -26,20 +26,19 @@ export class AIAssistantStoreClient {
       };
     }
   ) {}
-  private getConversationWithMetaFields = async (
+  private getConversationById = async (
     conversationId: string
-  ): Promise<SearchHit<Conversation> | undefined> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+  ): Promise<SearchHit<Conversationn> | undefined> => {
+    const response = await this.dependencies.esClient.search<Conversationn>({
       index: this.dependencies.resources.aliases,
       query: {
         bool: {
           filter: [
             ...getAccessQuery({
               user: this.dependencies.user,
-              namespace: this.dependencies.namespace,
             }),
-            { term: { 'conversation.id': conversationId } },
           ],
+          must: { match: { id: conversationId } },
         },
       },
       size: 1,
@@ -49,17 +48,17 @@ export class AIAssistantStoreClient {
     return response.hits.hits[0];
   };
 
-  get = async (conversationId: string): Promise<Conversation> => {
-    const conversation = await this.getConversationWithMetaFields(conversationId);
+  get = async (conversationId: string): Promise<Conversationn> => {
+    const conversation = await this.getConversationById(conversationId);
 
-    if (!conversation) {
+    if (!conversation || !conversation._source) {
       throw notFound();
     }
-    return conversation._source!;
+    return conversation._source;
   };
 
-  find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+  find = async (options?: { query?: string }): Promise<Conversationss> => {
+    const response = await this.dependencies.esClient.search<Conversationn>({
       index: this.dependencies.resources.aliases,
       allow_no_indices: true,
       query: {
@@ -67,7 +66,6 @@ export class AIAssistantStoreClient {
           filter: [
             ...getAccessQuery({
               user: this.dependencies.user,
-              namespace: this.dependencies.namespace,
             }),
           ],
         },
@@ -75,8 +73,69 @@ export class AIAssistantStoreClient {
       size: 100,
     });
 
-    return {
-      conversations: response.hits.hits.map((hit) => hit._source!),
-    };
+    return response.hits.hits.reduce((acc, hit) => {
+      if (!hit._source) {
+        return acc;
+      }
+      return {
+        ...acc,
+        [hit._source.id]: hit._source,
+      };
+    }, {});
+  };
+
+  create = async (conversation: Conversationn): Promise<Conversationn> => {
+    await this.dependencies.esClient.index({
+      index: this.dependencies.resources.aliases,
+      document: conversation,
+      refresh: 'wait_for',
+    });
+
+    return conversation;
+  };
+
+  uniqueCreate = async (conversation: Conversationn): Promise<Conversationn> => {
+    const existingConvo = await this.getConversationById(conversation.id);
+
+    if (!existingConvo) {
+      console.log('do a create:', conversation.id);
+      await this.create(conversation);
+    }
+
+    return conversation;
+  };
+
+  initializeFromConversationStore = async (
+    conversations: Conversationss
+  ): Promise<Conversationss> => {
+    // TODO fix api
+    return conversations;
+    const [keys, values] = [Object.keys(conversations), Object.values(conversations)];
+    const validatedConversations = await Promise.all(
+      values.map((c: Conversationn) =>
+        this.uniqueCreate({
+          ...c,
+          theme: {
+            ...(c.theme ?? {}),
+            user: {
+              ...(c.theme && c.theme.user ? c.theme.user : {}),
+              ...this.dependencies.user,
+            },
+          },
+        })
+      )
+    );
+    const conversationStore = keys.reduce(
+      (acc, key, i) => ({
+        ...acc,
+        [key]: validatedConversations[i],
+      }),
+      {}
+    );
+    console.log('yes do it bitch', {
+      conversationStore,
+      conversations,
+    });
+    return conversationStore;
   };
 }

@@ -14,6 +14,7 @@ import {
   IContextProvider,
 } from '@kbn/core/server';
 
+import { postMessagesRoute } from './routes/post_messages';
 import { AIAssistantStoreService } from './lib/store/service';
 import { getStoreRoute } from './routes/get_store';
 import {
@@ -74,6 +75,7 @@ export class ElasticAssistantPlugin
 
     postActionsConnectorExecuteRoute(router);
     getStoreRoute(router, service);
+    postMessagesRoute(router, service);
     return {
       actions: plugins.actions,
     };

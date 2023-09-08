@@ -20,7 +20,7 @@ export function getAccessQuery({
               should: [
                 {
                   term: {
-                    'user.name': user.name,
+                    'theme.user.name': user.name,
                   },
                 },
                 {
@@ -30,26 +30,6 @@ export function getAccessQuery({
                 },
               ],
               minimum_should_match: 1,
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  term: {
-                    namespace,
-                  },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: 'namespace',
-                      },
-                    },
-                  },
-                },
-              ],
             },
           },
         ],

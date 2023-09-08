@@ -46,7 +46,6 @@ export class AIAssistantStoreService {
 
   init = once(async () => {
     try {
-      console.log('hello 1');
       const [coreStart] = await this.core.getStartServices();
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -56,7 +55,6 @@ export class AIAssistantStoreService {
         name: this.resourceNames.componentTemplate,
         template: conversationComponentTemplate,
       });
-      console.log('hello 2');
 
       await esClient.ilm.putLifecycle({
         name: this.resourceNames.ilmPolicy,
@@ -74,7 +72,6 @@ export class AIAssistantStoreService {
           },
         },
       });
-      console.log('hello 3');
 
       await esClient.indices.putIndexTemplate({
         name: this.resourceNames.indexTemplate,
@@ -89,7 +86,6 @@ export class AIAssistantStoreService {
           },
         },
       });
-      console.log('hello 4');
 
       const conversationAliasName = this.resourceNames.aliases;
 
@@ -106,7 +102,6 @@ export class AIAssistantStoreService {
         },
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
-      console.log('hello 5');
 
       this.logger.info('Successfully set up index assets');
     } catch (error) {
@@ -118,29 +113,23 @@ export class AIAssistantStoreService {
   });
 
   async getClient({ request }: { request: KibanaRequest }): Promise<AIAssistantStoreClient> {
-    console.log('hello 0');
     const [_, [coreStart, plugins]] = await Promise.all([
       this.init(),
       this.core.getStartServices() as Promise<
         [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
       >,
     ]);
-    console.log('hello 99', Object.keys(plugins));
 
     const user = plugins.security.authc.getCurrentUser(request);
 
-    console.log('hello 100');
     if (!user) {
       throw Boom.forbidden(`User not found for current request`);
     }
-    console.log('hello 101');
 
     const basePath = coreStart.http.basePath.get(request);
 
-    console.log('hello 102');
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
 
-    console.log('hello 103');
     return new AIAssistantStoreClient({
       namespace: spaceId,
       esClient: coreStart.elasticsearch.client.asInternalUser,
