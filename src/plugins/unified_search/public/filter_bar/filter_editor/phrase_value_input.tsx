@@ -68,7 +68,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
       <div ref={this.comboBoxWrapperRef}>
         <StringComboBox
           inputRef={(ref) => {
-            this.inputRef = ref
+            this.inputRef = ref;
           }}
           isDisabled={this.props.disabled}
           fullWidth={fullWidth}
@@ -85,11 +85,11 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
           getLabel={(option) => option}
           selectedOptions={value ? [valueAsStr] : []}
           onChange={([newValue = '']) => {
-            onChange(newValue)
+            onChange(newValue);
             setTimeout(() => {
               // Note: requires a tick skip to correctly blur element focus
               this.inputRef?.blur();
-            })
+            });
           }}
           onSearchChange={this.onSearchChange}
           singleSelection={{ asPlainText: true }}
