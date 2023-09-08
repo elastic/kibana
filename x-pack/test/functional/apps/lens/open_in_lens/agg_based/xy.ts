@@ -362,7 +362,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickBucket('Y-axis', 'metrics');
       await visEditor.selectAggregation('Percentiles', 'metrics');
       await visEditor.selectField('memory', 'metrics');
-      await visEditor.setPercentileValue('99', 6);
+      await visEditor.setPercentileValue('99.99', 6);
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();

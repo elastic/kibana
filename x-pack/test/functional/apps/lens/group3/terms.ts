@@ -121,6 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const percentileInput = await PageObjects.lens.getNumericFieldReady(
               'lns-indexPattern-percentile-input'
             );
+            await percentileInput.clearValueWithKeyboard();
             await percentileInput.type(value);
 
             const percentileValue = await percentileInput.getAttribute('value');
@@ -146,6 +147,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const percentileRankInput = await testSubjects.find(
               'lns-indexPattern-percentile_ranks-input'
             );
+            await percentileRankInput.clearValueWithKeyboard();
             await percentileRankInput.type(value);
 
             const percentileRankValue = await percentileRankInput.getAttribute('value');
