@@ -45,7 +45,7 @@ describe('FieldOptions', () => {
     expect(within(checkboxGroup).getAllByRole('checkbox')[0]).toHaveAttribute('disabled');
   });
 
-  it.each(['Text', 'List'])('renders options for %s correctly', async (customFieldType) => {
+  it.each(['Text', 'List', 'Toggle'])('renders options for %s correctly', async (customFieldType) => {
     appMockRender.render(
       <FieldOptions {...{ ...props, selectedType: customFieldType as CustomFieldTypesUI }} />
     );

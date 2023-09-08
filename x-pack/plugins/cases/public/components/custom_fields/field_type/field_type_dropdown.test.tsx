@@ -29,6 +29,7 @@ describe('FieldTypeDropdown', () => {
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
   });
 
   it('renders correctly', () => {

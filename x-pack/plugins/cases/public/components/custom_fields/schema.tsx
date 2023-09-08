@@ -13,7 +13,7 @@ import type { ListOptions, BasicOptions } from './field_options/config';
 
 const { emptyField } = fieldValidators;
 
-export const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'List', 'Boolean'];
+export const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'List', 'Toggle'];
 
 export interface FormProps {
   fieldLabel: string;
@@ -26,7 +26,6 @@ export const schema = {
   fieldLabel: {
     label: i18n.FIELD_LABEL,
     type: FIELD_TYPES.TEXT,
-    helpText: i18n.FIELD_LABEL_HELP_TEXT,
     validations: [
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL)),

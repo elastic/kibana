@@ -14,7 +14,11 @@ import { FieldTypeSelector } from './field_type/field_type_selector';
 import { customFieldTypes } from './schema';
 import { builderMap } from './builder';
 
-const FormFieldsComponent: React.FC = () => {
+interface FormFieldsProps {
+  isSubmitting?: boolean;
+}
+
+const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
   const [selectedType, setSelectedType] = useState<CustomFieldTypesUI>(customFieldTypes[0]);
   const handleTypeChange = useCallback(
     (val: CustomFieldTypesUI) => {
@@ -40,6 +44,9 @@ const FormFieldsComponent: React.FC = () => {
       if (customFieldType === selectedType) {
         customFieldBuilder = builder({
           customFieldType,
+          componentProps: {
+            isLoading: isSubmitting,
+          }
         });
       }
 
@@ -61,7 +68,12 @@ const FormFieldsComponent: React.FC = () => {
         path="fieldLabel"
         component={Field}
         componentProps={{
-          euiFieldProps: { 'data-test-subj': 'custom-field-label-input', fullWidth: true },
+          euiFieldProps: { 
+            'data-test-subj': 'custom-field-label-input', 
+            fullWidth: true ,
+            autoFocus: true,
+            isLoading: isSubmitting,
+          },
         }}
       />
       <UseField
@@ -71,6 +83,7 @@ const FormFieldsComponent: React.FC = () => {
           customFieldTypes,
           dataTestSubj: 'custom-field-type-selector',
           selectedType,
+          isLoading: isSubmitting,
           handleChange: handleTypeChange,
         }}
       />

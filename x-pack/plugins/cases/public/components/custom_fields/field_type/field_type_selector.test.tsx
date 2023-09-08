@@ -18,7 +18,7 @@ import { FieldTypeSelector } from './field_type_selector';
 
 describe('FieldTypeSelector', () => {
   let appMockRender: AppMockRenderer;
-  const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'List'];
+  const customFieldTypes: CustomFieldTypesUI[] = ['Text', 'List', 'Toggle'];
 
   const field = {
     label: 'Field Type',

@@ -14,8 +14,6 @@ import { FormFields } from './form_fields';
 
 export interface CustomFieldFormState {
   isValid: boolean | undefined;
-  isSubmitted: boolean;
-  isSubmitting: boolean;
   submit: FormHook['submit'];
 }
 
@@ -30,17 +28,17 @@ const FormComponent: React.FC<Props> = ({ onChange }) => {
     schema,
   });
 
-  const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = form;
+  const { submit, isValid, isSubmitting } = form;
 
   useEffect(() => {
     if (onChange) {
-      onChange({ isValid: isFormValid, isSubmitted, isSubmitting, submit });
+      onChange({ isValid, submit });
     }
-  }, [onChange, isFormValid, isSubmitted, isSubmitting, submit]);
+  }, [onChange, isValid, submit]);
 
   return (
     <Form form={form}>
-      <FormFields />
+      <FormFields isSubmitting={isSubmitting} />
     </Form>
   );
 };

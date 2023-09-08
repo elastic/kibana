@@ -8,7 +8,7 @@
 import type { CustomFieldBuilder } from './types';
 import { createCommonCustomFieldBuilder } from './common';
 
-export const createBooleanCustomFieldBuilder: CustomFieldBuilder = ({ customFieldType }) => ({
+export const createToggleCustomFieldBuilder: CustomFieldBuilder = ({ customFieldType }) => ({
   build: () => {
     const commonBuilder = createCommonCustomFieldBuilder({
       customFieldType,

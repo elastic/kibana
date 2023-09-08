@@ -7,7 +7,7 @@
 
 import type React from 'react';
 
-export type CustomFieldTypesUI = 'Text' | 'List' | 'Boolean';
+export type CustomFieldTypesUI = 'Text' | 'List' | 'Toggle';
 
 export interface CustomFieldBuilderArgs {
   appId?: string;

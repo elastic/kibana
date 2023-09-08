@@ -39,19 +39,19 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
   const dataTestSubj = 'add-custom-field-flyout';
 
   const [formState, setFormState] = useState<CustomFieldFormState>({
-    isSubmitted: false,
-    isSubmitting: false,
     isValid: undefined,
     submit: async () => ({ isValid: false, data: {} as CustomFieldFormState }),
   });
 
-  const { submit, isValid: isFormValid, isSubmitting } = formState;
+  const { submit } = formState;
 
   const handleSaveField = useCallback(async () => {
     const { isValid, data } = await submit();
 
     console.log('handleSaveField', { isValid, data });
-    onSaveField(data);
+    if(isValid) {
+      onSaveField(data);
+    }
   }, [onSaveField, submit]);
 
   return (
@@ -74,15 +74,7 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
 
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={onSaveAndAddAnotherField}
-                data-test-subj={`${dataTestSubj}-save-add-another`}
-              >
-                {i18n.SAVE_AND_ADD_ANOTHER}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={handleSaveField} data-test-subj={`${dataTestSubj}-save`}>
+              <EuiButton fill onClick={handleSaveField} data-test-subj={`${dataTestSubj}-save`} disabled={isLoading}>
                 {i18n.SAVE_FIELD}
               </EuiButton>
             </EuiFlexItem>
