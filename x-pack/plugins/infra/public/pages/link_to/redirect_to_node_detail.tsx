@@ -11,13 +11,12 @@ import rison from '@kbn/rison';
 import { replaceStateKeyInQueryString } from '../../../common/url_state_storage_service';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
 import { InventoryItemType } from '../../../common/inventory_models/types';
-import { AssetDetailsUrlState, RouteState } from '../../components/asset_details/types';
+import { AssetDetailsUrlState } from '../../components/asset_details/types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
 
 export const REDIRECT_NODE_DETAILS_FROM_KEY = 'from';
 export const REDIRECT_NODE_DETAILS_TO_KEY = 'to';
 export const REDIRECT_ASSET_DETAILS_KEY = 'assetDetails';
-export const REDIRECT_NODE_DETAILS_STATE_KEY = 'state';
 
 const getHostDetailSearch = (queryParams: URLSearchParams) => {
   const from = queryParams.get(REDIRECT_NODE_DETAILS_FROM_KEY);
@@ -54,22 +53,12 @@ export const RedirectToNodeDetail = () => {
   const search =
     nodeType === 'host' ? getHostDetailSearch(queryParams) : getNodeDetailSearch(queryParams);
 
-  let state: RouteState | undefined;
-  try {
-    const stateFromLocation = queryParams.get(REDIRECT_NODE_DETAILS_STATE_KEY);
-    state = stateFromLocation
-      ? (rison.decode(stateFromLocation) as unknown as RouteState)
-      : undefined;
-  } catch (err) {
-    state = undefined;
-  }
-
   return (
     <Redirect
       to={{
         pathname: `/detail/${nodeType}/${nodeId}`,
         search,
-        state,
+        state: location.state,
       }}
     />
   );

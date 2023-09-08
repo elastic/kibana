@@ -17,7 +17,6 @@ import {
   REDIRECT_NODE_DETAILS_FROM_KEY,
   REDIRECT_NODE_DETAILS_TO_KEY,
   REDIRECT_ASSET_DETAILS_KEY,
-  REDIRECT_NODE_DETAILS_STATE_KEY,
 } from './redirect_to_node_detail';
 
 export interface MetricDetailsQueryParams {
@@ -59,21 +58,21 @@ export const useNodeDetailsRedirect = () => {
         app: 'metrics',
         pathname: `link-to/${assetType}-detail/${assetId}`,
         search: {
-          ...(assetType === 'host'
+          ...(Object.keys(additionalParams).length > 0
             ? { [REDIRECT_ASSET_DETAILS_KEY]: rison.encodeUnknown(additionalParams) }
-            : undefined),
-          ...(location.pathname
-            ? {
-                [REDIRECT_NODE_DETAILS_STATE_KEY]: rison.encodeUnknown({
-                  originAppId: appId,
-                  originSearch: location.search,
-                  originPathname: location.pathname,
-                } as RouteState),
-              }
             : undefined),
           // retrocompatibility
           ...(from ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: `${from}` } : undefined),
           ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: `${to}` } : undefined),
+        },
+        state: {
+          ...(location.pathname
+            ? ({
+                originAppId: appId,
+                originSearch: location.search,
+                originPathname: location.pathname,
+              } as RouteState)
+            : undefined),
         },
       };
     },
