@@ -605,6 +605,7 @@ export const installFleetPackage = ({
     epmRouteService.getInstallPath(packageName, packageVersion),
     {
       query: { prerelease },
+      version: '2023-10-31',
       body: JSON.stringify({ force }),
     }
   );
@@ -631,6 +632,7 @@ export const bulkInstallFleetPackages = ({
     epmRouteService.getBulkInstallPath(),
     {
       query: { prerelease },
+      version: '2023-10-31',
       body: JSON.stringify({ packages }),
     }
   );
