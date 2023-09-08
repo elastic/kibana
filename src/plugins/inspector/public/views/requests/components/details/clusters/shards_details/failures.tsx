@@ -25,26 +25,29 @@ export function Failures({ failures }: Props) {
   const button = (
     <EuiButtonEmpty
       flush="left"
-      onClick={() => { setIsOpen(!isOpen); }}
+      onClick={() => {
+        setIsOpen(!isOpen);
+      }}
       size="xs"
     >
-      { isOpen
+      {isOpen
         ? i18n.translate('inspector.requests.shardsDetails.hideFailuresLabel', {
-            defaultMessage: 'Hide failures'
+            defaultMessage: 'Hide failures',
           })
         : i18n.translate('inspector.requests.shardsDetails.showFailuresLabel', {
-            defaultMessage: 'Show failures'
-          })
-      }
+            defaultMessage: 'Show failures',
+          })}
     </EuiButtonEmpty>
   );
 
-  return isOpen
-    ? <>
-        {button}
-        {failures.map(failure => {
-          return <Failure key={failure.shard} failure={failure} />
-        })}
-      </>
-    : button;
+  return isOpen ? (
+    <>
+      {button}
+      {failures.map((failure) => {
+        return <Failure key={failure.shard} failure={failure} />;
+      })}
+    </>
+  ) : (
+    button
+  );
 }
