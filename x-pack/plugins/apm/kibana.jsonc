@@ -15,7 +15,6 @@
       "controls",
       "embeddable",
       "features",
-      "infra",
       "logsShared",
       "inspector",
       "licensing",
@@ -41,6 +40,7 @@
       "discover",
       "fleet",
       "fieldFormats",
+      "infra",
       "home",
       "ml",
       "security",
@@ -49,7 +49,7 @@
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
       "licenseManagement",
-      "profiling",
+      "profiling"
     ],
     "requiredBundles": [
       "advancedSettings",
