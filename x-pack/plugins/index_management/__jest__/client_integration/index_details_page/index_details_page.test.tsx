@@ -199,6 +199,12 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Overview tab', () => {
+    it('updates the breadcrumbs to index details overview', async () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.indexDetailsOverview
+      );
+    });
+
     it('renders index details', () => {
       expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
       expect(testBed.actions.overview.indexStatsContentExists()).toBe(true);
@@ -287,7 +293,7 @@ describe('<IndexDetailsPage />', () => {
 
   describe('Settings tab', () => {
     it('updates the breadcrumbs to index details settings', async () => {
-      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Stats);
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
         IndexManagementBreadcrumb.indexDetailsSettings
       );
