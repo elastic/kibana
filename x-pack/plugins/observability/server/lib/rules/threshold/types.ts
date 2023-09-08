@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { validateKQLStringFilter } from './utils';
 import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
 import { TimeUnitChar } from '../../../../common';
 
@@ -71,3 +73,13 @@ export interface AlertExecutionDetails {
   alertId: string;
   executionId: string;
 }
+
+export const searchConfigurationSchema = schema.object({
+  index: schema.string(),
+  query: schema.object({
+    language: schema.string({
+      validate: validateKQLStringFilter,
+    }),
+    query: schema.string(),
+  }),
+});
