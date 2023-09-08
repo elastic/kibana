@@ -10,8 +10,7 @@ import { TelemetryService } from './telemetry_service';
 import { SearchQueryActions, TelemetryEventTypes } from './types';
 
 describe('TelemetryService', () => {
-  let service: TelemetryService;
-  service = new TelemetryService();
+  const service = new TelemetryService();
 
   const mockCoreStart = coreMock.createSetup();
   service.setup({ analytics: mockCoreStart.analytics });
