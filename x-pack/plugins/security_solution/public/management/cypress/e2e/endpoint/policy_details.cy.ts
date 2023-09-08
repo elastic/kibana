@@ -170,7 +170,8 @@ describe('Policy Details', { tags: '@ess' }, () => {
       it('should update note on save', () => {
         loadProtectionUpdatesUrl(policy.id);
         cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
-        cy.getByTestSubj('protection-updates-manifest-note').clear().type(updatedTestNote);
+        cy.getByTestSubj('protection-updates-manifest-note').clear();
+        cy.getByTestSubj('protection-updates-manifest-note').type(updatedTestNote);
 
         cy.intercept('POST', `/api/endpoint/protection_updates_note/*`).as('note_updated');
         cy.getByTestSubj('policyDetailsSaveButton').click();

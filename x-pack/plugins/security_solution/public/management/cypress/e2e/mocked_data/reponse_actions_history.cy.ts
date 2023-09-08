@@ -54,21 +54,23 @@ describe('Response actions history page', { tags: '@ess' }, () => {
   it('collapses expanded tray with a single click', () => {
     loadPage(`/app/security/administration/response_actions_history`);
     // 2nd row on 1st page
-    const row = cy.getByTestSubj('response-actions-list-expand-button').eq(1);
+    cy.getByTestSubj('response-actions-list-expand-button')
+      .eq(1)
+      .then((row) => {
+        // expand the row
+        row.trigger('click');
+        cy.getByTestSubj('response-actions-list-details-tray').should('exist');
+        cy.url().should('include', 'withOutputs');
 
-    // expand the row
-    row.click();
-    cy.getByTestSubj('response-actions-list-details-tray').should('exist');
-    cy.url().should('include', 'withOutputs');
-
-    // collapse the row
-    cy.intercept('GET', '/api/endpoint/action*').as('getResponses');
-    row.click();
-    // wait for the API response to come back
-    // and then see if the tray is actually closed
-    cy.wait('@getResponses', { timeout: 500 }).then(() => {
-      cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
-      cy.url().should('not.include', 'withOutputs');
-    });
+        // collapse the row
+        cy.intercept('GET', '/api/endpoint/action*').as('getResponses');
+        row.trigger('click');
+        // wait for the API response to come back
+        // and then see if the tray is actually closed
+        cy.wait('@getResponses', { timeout: 500 }).then(() => {
+          cy.getByTestSubj('response-actions-list-details-tray').should('not.exist');
+          cy.url().should('not.include', 'withOutputs');
+        });
+      });
   });
 });
