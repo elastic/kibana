@@ -20,11 +20,11 @@ export function ClustersHealth({ clusters }: Props) {
   let partialCount = 0;
   let skippedCount = 0;
   let failedCount = 0;
-  Object.values(clusters).forEach(clusterDetails => {
+  Object.values(clusters).forEach((clusterDetails) => {
     if (clusterDetails.status === 'successful') {
       successfulCount++;
     } else if (clusterDetails.status === 'partial') {
-      partialCount++
+      partialCount++;
     } else if (clusterDetails.status === 'skipped') {
       skippedCount++;
     } else if (clusterDetails.status === 'failed') {
@@ -32,9 +32,7 @@ export function ClustersHealth({ clusters }: Props) {
     }
   });
 
-  function renderStatus(count: number, color: string) {
-
-  }
+  function renderStatus(count: number, color: string) {}
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
@@ -46,14 +44,29 @@ export function ClustersHealth({ clusters }: Props) {
         </EuiText>
       </EuiFlexItem>
 
-      {successfulCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={successfulCount} status="successful" /></EuiFlexItem> : null}
+      {successfulCount > 0 ? (
+        <EuiFlexItem grow={false}>
+          <ClusterHealth count={successfulCount} status="successful" />
+        </EuiFlexItem>
+      ) : null}
 
-      {partialCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={partialCount} status="partial" /></EuiFlexItem> : null}
+      {partialCount > 0 ? (
+        <EuiFlexItem grow={false}>
+          <ClusterHealth count={partialCount} status="partial" />
+        </EuiFlexItem>
+      ) : null}
 
-      {skippedCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={skippedCount} status="skipped" /></EuiFlexItem> : null}
+      {skippedCount > 0 ? (
+        <EuiFlexItem grow={false}>
+          <ClusterHealth count={skippedCount} status="skipped" />
+        </EuiFlexItem>
+      ) : null}
 
-      {failedCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={failedCount} status="failed" /></EuiFlexItem> : null}
-      
+      {failedCount > 0 ? (
+        <EuiFlexItem grow={false}>
+          <ClusterHealth count={failedCount} status="failed" />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
-  )
+  );
 }
