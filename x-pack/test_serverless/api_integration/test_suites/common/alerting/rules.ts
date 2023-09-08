@@ -35,8 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  // Failing: See https://github.com/elastic/kibana/issues/164017
-  describe.skip('Alerting rules', () => {
+  describe('Alerting rules', () => {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;
@@ -120,22 +119,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(resp.hits.hits.length).to.be(1);
 
-      await waitForAllTasksIdle({
-        esClient,
-        filter: testStart,
-      });
-
-      await disableRule({
-        supertest,
-        ruleId,
-      });
-
-      await waitForDisabled({
-        esClient,
-        ruleId,
-        filter: testStart,
-      });
-
       const document = resp.hits.hits[0];
       expect(document._source).to.eql({
         alertActionGroup: 'query matched',
@@ -158,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(eventLogResp.hits.hits.length).to.be(1);
 
       const eventLogDocument = eventLogResp.hits.hits[0]._source;
-      await validateEventLog(eventLogDocument, {
+      validateEventLog(eventLogDocument, {
         ruleId,
         ruleTypeId: RULE_TYPE_ID,
         outcome: 'success',
