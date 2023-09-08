@@ -20,10 +20,11 @@ import { ITaskEventEmitter, TaskLifecycleEvent } from '../../polling_lifecycle';
 import { asTaskManagerMetricEvent } from '../../task_events';
 import { asOk } from '../../lib/result_type';
 
-const POLL_INTERVAL = 5000; // query every 5 seconds
+const DEFAULT_POLL_INTERVAL = 5000; // query every 5 seconds
 interface ConstructorOpts {
   logger: Logger;
   store: TaskStore;
+  pollInterval?: number;
 }
 
 export interface TaskManagerMetrics {
@@ -35,15 +36,17 @@ export interface TaskManagerMetrics {
 export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecycleEvent> {
   private store: TaskStore;
   private logger: Logger;
+  private readonly pollInterval: number;
 
   private running: boolean = false;
 
   // emit collected metrics
   private metrics$ = new Subject<TaskLifecycleEvent>();
 
-  constructor({ logger, store }: ConstructorOpts) {
+  constructor({ logger, store, pollInterval }: ConstructorOpts) {
     this.store = store;
     this.logger = logger;
+    this.pollInterval = pollInterval ?? DEFAULT_POLL_INTERVAL;
 
     this.start();
   }
@@ -111,7 +114,7 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
       // Set the next runCycle call
       setTimeout(
         this.runCollectionCycle.bind(this),
-        Math.max(POLL_INTERVAL - (Date.now() - start), 0)
+        Math.max(this.pollInterval - (Date.now() - start), 0)
       );
     }
   }

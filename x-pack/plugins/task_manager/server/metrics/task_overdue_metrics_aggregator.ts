@@ -6,7 +6,10 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
+import { isOk, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
+import { TaskManagerMetric } from '../task_events';
+import { TaskManagerMetrics } from './collector/task_metrics_collector';
 import { ITaskMetricsAggregator } from './types';
 
 const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
@@ -23,7 +26,9 @@ export interface TaskOverdueMetric extends JsonObject {
   };
 }
 
-export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<TaskOverdueMetric> {
+export class TaskOverdueMetricsAggregator
+  implements ITaskMetricsAggregator<TaskOverdueMetric, TaskLifecycleEvent>
+{
   private overdue: TaskOverdueMetric = {
     [TaskOverdueMetricKeys.OVERALL]: 0,
     [TaskOverdueMetricKeys.BY_TYPE]: {},
@@ -45,8 +50,34 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
   }
 
   public processEvent(taskEvent: TaskLifecycleEvent) {
-    // const { overdue }: RanTask | ErroredTask = unwrap(taskEvent.event);
-    // this.overdue = overdue;
+    let metric: TaskManagerMetrics;
+    if (isOk((taskEvent as TaskManagerMetric).event)) {
+      metric = unwrap((taskEvent as TaskManagerMetric).event) as TaskManagerMetrics;
+
+      this.overdue = Object.keys(metric.numOverdueTasks).reduce(
+        (acc: TaskOverdueMetric, key: string) => {
+          if (key === 'total') {
+            acc[TaskOverdueMetricKeys.OVERALL] = metric.numOverdueTasks[key];
+          } else {
+            const taskType = key.replaceAll('.', '__');
+            const taskTypeGroup = this.getTaskTypeGroup(taskType);
+
+            acc[TaskOverdueMetricKeys.BY_TYPE][taskType] = metric.numOverdueTasks[key];
+            if (taskTypeGroup) {
+              const currCount = acc[TaskOverdueMetricKeys.BY_TYPE][taskTypeGroup] ?? 0;
+              acc[TaskOverdueMetricKeys.BY_TYPE][taskTypeGroup] =
+                currCount + metric.numOverdueTasks[key];
+            }
+          }
+
+          return acc;
+        },
+        {
+          [TaskOverdueMetricKeys.OVERALL]: 0,
+          [TaskOverdueMetricKeys.BY_TYPE]: {},
+        }
+      );
+    }
   }
 
   private getTaskTypeGroup(taskType: string): string | undefined {
