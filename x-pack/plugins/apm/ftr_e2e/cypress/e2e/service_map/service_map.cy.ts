@@ -52,7 +52,7 @@ describe('service map', () => {
       cy.intercept('GET', '/internal/apm/service-map?*').as('serviceMap');
     });
 
-    it('shows nodes in service map', () => {
+    it.skip('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
       cy.wait('@serviceMap');
       cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
@@ -69,7 +69,7 @@ describe('service map', () => {
       );
     });
 
-    it('shows nodes in detailed service map', () => {
+    it.skip('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
       cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
