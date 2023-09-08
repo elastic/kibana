@@ -49,7 +49,7 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
     const { isValid, data } = await submit();
 
     console.log('handleSaveField', { isValid, data });
-    if(isValid) {
+    if (isValid) {
       onSaveField(data);
     }
   }, [onSaveField, submit]);
@@ -74,7 +74,12 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
 
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={handleSaveField} data-test-subj={`${dataTestSubj}-save`} disabled={isLoading}>
+              <EuiButton
+                fill
+                onClick={handleSaveField}
+                data-test-subj={`${dataTestSubj}-save`}
+                disabled={isLoading}
+              >
                 {i18n.SAVE_FIELD}
               </EuiButton>
             </EuiFlexItem>

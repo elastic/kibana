@@ -5,22 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiDragDropContext,
-  EuiDroppable,
-  euiDragDropReorder,
-  EuiDraggable,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiInlineEditText,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 
 import * as i18n from '../translations';
 import { Draggable } from './draggable';
@@ -54,7 +41,13 @@ const ListOptionsComponent: React.FC<Props> = (props) => {
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={true}>
           <EuiEmptyPrompt
-            body={<Draggable {...props} isEditingEnabled={isEditingEnabled} handleEditingEnabled={setIsEditingEnabled} />}
+            body={
+              <Draggable
+                {...props}
+                isEditingEnabled={isEditingEnabled}
+                handleEditingEnabled={setIsEditingEnabled}
+              />
+            }
             color="subdued"
             className="eui-fullWidth"
             css={css`

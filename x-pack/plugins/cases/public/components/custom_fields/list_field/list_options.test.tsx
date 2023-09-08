@@ -55,6 +55,6 @@ describe('FieldTypeDropdown', () => {
 
     userEvent.click(screen.getByTestId('custom-field-add-list-option-btn'));
 
-    expect(props.onChange).toBeCalledWith([{id: '1', content: ''}]);
+    expect(props.onChange).toBeCalledWith([{ id: '1', content: '' }]);
   });
 });

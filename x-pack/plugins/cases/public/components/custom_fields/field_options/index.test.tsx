@@ -45,21 +45,24 @@ describe('FieldOptions', () => {
     expect(within(checkboxGroup).getAllByRole('checkbox')[0]).toHaveAttribute('disabled');
   });
 
-  it.each(['Text', 'List', 'Toggle'])('renders options for %s correctly', async (customFieldType) => {
-    appMockRender.render(
-      <FieldOptions {...{ ...props, selectedType: customFieldType as CustomFieldTypesUI }} />
-    );
+  it.each(['Text', 'List', 'Toggle'])(
+    'renders options for %s correctly',
+    async (customFieldType) => {
+      appMockRender.render(
+        <FieldOptions {...{ ...props, selectedType: customFieldType as CustomFieldTypesUI }} />
+      );
 
-    const config = getConfig(customFieldType as CustomFieldTypesUI);
+      const config = getConfig(customFieldType as CustomFieldTypesUI);
 
-    const checkboxOptions = [...Object.values(config)];
+      const checkboxOptions = [...Object.values(config)];
 
-    expect(screen.getByTestId('custom-field-options-checkbox-group')).toBeInTheDocument();
+      expect(screen.getByTestId('custom-field-options-checkbox-group')).toBeInTheDocument();
 
-    for (const option of checkboxOptions) {
-      expect(screen.getByText(option.label)).toBeInTheDocument();
+      for (const option of checkboxOptions) {
+        expect(screen.getByText(option.label)).toBeInTheDocument();
+      }
     }
-  });
+  );
 
   it('toggles group of checkbox options correctly', async () => {
     appMockRender.render(

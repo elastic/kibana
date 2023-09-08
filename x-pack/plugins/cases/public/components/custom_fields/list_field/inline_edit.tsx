@@ -5,25 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiDragDropContext,
-  EuiDroppable,
-  euiDragDropReorder,
-  EuiDraggable,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiInlineEditText,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiInlineEditText, EuiButtonEmpty } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { Draggable } from './draggable';
 
 export interface ListOption {
   content: string;
@@ -40,7 +26,15 @@ export interface Props {
   handleEditingEnabled: (value: boolean) => void;
 }
 
-const InlineEditComponent: React.FC<Props> = ({ disabled, isLoading, listValues, onChange, listOption, isEditingEnabled, handleEditingEnabled }) => {
+const InlineEditComponent: React.FC<Props> = ({
+  disabled,
+  isLoading,
+  listValues,
+  onChange,
+  listOption,
+  isEditingEnabled,
+  handleEditingEnabled,
+}) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleOptionSave = useCallback(
@@ -72,7 +66,7 @@ const InlineEditComponent: React.FC<Props> = ({ disabled, isLoading, listValues,
     }
   }, [isEditingEnabled, inputRef]);
 
-  return  (
+  return (
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
       <EuiFlexItem grow={true}>
         <EuiInlineEditText
@@ -82,8 +76,8 @@ const InlineEditComponent: React.FC<Props> = ({ disabled, isLoading, listValues,
           defaultValue={listOption.content ?? ''}
           isLoading={isLoading}
           css={css`
-          text-align: left;
-        `}
+            text-align: left;
+          `}
           placeholder={!listOption.content ? i18n.LIST_OPTION_PLACEHOLDER : undefined}
           readModeProps={{
             iconType: undefined,
@@ -92,7 +86,7 @@ const InlineEditComponent: React.FC<Props> = ({ disabled, isLoading, listValues,
           editModeProps={{
             inputProps: {
               inputRef,
-              disabled: disabled,
+              disabled,
             },
             cancelButtonProps: {
               onClick: () => handleEditingEnabled(false),
@@ -123,8 +117,8 @@ const InlineEditComponent: React.FC<Props> = ({ disabled, isLoading, listValues,
           onClick={() => onDeleteOption(listOption.id)}
           iconType="minusInCircle"
           css={css`
-          margin-top: 4px;
-        `}
+            margin-top: 4px;
+          `}
           data-test-subj="custom-field-remove-list-option"
         />
       </EuiFlexItem>

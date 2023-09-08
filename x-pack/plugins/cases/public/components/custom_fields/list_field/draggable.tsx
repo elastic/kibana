@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback } from 'react';
 import {
   EuiDragDropContext,
   EuiDroppable,
@@ -16,10 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiInlineEditText,
   EuiSpacer,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import * as i18n from '../translations';
@@ -87,7 +83,7 @@ const DraggableComponent: React.FC<Props> = (props) => {
                             </EuiPanel>
                           </EuiFlexItem>
                           <EuiFlexItem grow={true}>
-                            <InlineEdit {...props} listOption={{id, content}}  />
+                            <InlineEdit {...props} listOption={{ id, content }} />
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiPanel>

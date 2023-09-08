@@ -46,7 +46,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
           customFieldType,
           componentProps: {
             isLoading: isSubmitting,
-          }
+          },
         });
       }
 
@@ -68,9 +68,9 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
         path="fieldLabel"
         component={Field}
         componentProps={{
-          euiFieldProps: { 
-            'data-test-subj': 'custom-field-label-input', 
-            fullWidth: true ,
+          euiFieldProps: {
+            'data-test-subj': 'custom-field-label-input',
+            fullWidth: true,
             autoFocus: true,
             isLoading: isSubmitting,
           },
