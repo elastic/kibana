@@ -26,7 +26,6 @@ import type {
   VersionedRouter,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
-import { cloneDeepWith } from 'lodash';
 import { RouteValidator } from './validator';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
@@ -202,7 +201,6 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (error) {
       this.log.error(`400 Bad Request - ${request.path}`, {
-        error: redactSensitiveHeaders(error),
         http: { response: { status_code: 400 } },
       });
 
@@ -219,7 +217,6 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(error)) {
         this.log.error(`401 Unauthorized - ${request.path}`, {
-          error: redactSensitiveHeaders(error),
           http: { response: { status_code: 401 } },
         });
         return hapiResponseAdapter.handle(
@@ -229,7 +226,6 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
 
       // return a generic 500 to avoid error info / stack trace surfacing
       this.log.error(`500 Server Error - ${request.path}`, {
-        error: redactSensitiveHeaders(error),
         http: { response: { status_code: 500 } },
       });
       return hapiResponseAdapter.toInternalError();
@@ -272,25 +268,3 @@ type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => i
 type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadArgument<
   RequestHandler<P, Q, B, RequestHandlerContextBase, Method>
 >;
-
-const FORBIDDEN_HEADERS = [
-  'authorization',
-  'cookie',
-  'set-cookie',
-  'x-elastic-app-auth',
-  'es-client-authentication',
-];
-
-const REDACTED_HEADER_TEXT = '[REDACTED]';
-
-const redactSensitiveHeaders = (data: any) => {
-  // keep the original Error object, but deep clone all its properties
-  // this allows redacting some fields without modifying the original objects,
-  // and at the same time preserving the original Error object
-  Object.entries(data).forEach(([key, value]) => {
-    data[key] = cloneDeepWith(value, (v, k) =>
-      typeof k === 'string' && FORBIDDEN_HEADERS.includes(k) ? REDACTED_HEADER_TEXT : undefined
-    );
-  });
-  return data;
-};
