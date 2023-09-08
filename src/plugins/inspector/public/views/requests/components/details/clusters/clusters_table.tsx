@@ -15,7 +15,7 @@ import { ClusterDescriptionList } from './cluster_description_list';
 function getInitialExpandedRow(clusters) {
   const clusterNames = Object.keys(clusters);
   return clusterNames.length === 1
-    ? { [clusterNames[0]]: <ClusterDescriptionList clusterDetails={clusters[clusterNames[0]]}/> }
+    ? { [clusterNames[0]]: <ClusterDescriptionList clusterDetails={clusters[clusterNames[0]]} /> }
     : {};
 }
 
@@ -24,22 +24,19 @@ interface Props {
 }
 
 export function ClustersTable({ clusters }: Props) {
-
-  const [expandedRows, setExpandedRows] = useState<
-    Record<string, ReactNode>
-  >(getInitialExpandedRow(clusters));
+  const [expandedRows, setExpandedRows] = useState<Record<string, ReactNode>>(
+    getInitialExpandedRow(clusters)
+  );
 
   const toggleDetails = (name: string) => {
     const nextExpandedRows = { ...expandedRows };
     if (name in nextExpandedRows) {
       delete nextExpandedRows[name];
     } else {
-      nextExpandedRows[name] = (
-        <ClusterDescriptionList clusterDetails={clusters[name]}/>
-      );
+      nextExpandedRows[name] = <ClusterDescriptionList clusterDetails={clusters[name]} />;
     }
     setExpandedRows(nextExpandedRows);
-  }
+  };
 
   const columns = [
     {
@@ -61,9 +58,7 @@ export function ClustersTable({ clusters }: Props) {
                       defaultMessage: 'Expand table row to view cluster details',
                     })
               }
-              iconType={
-                name in expandedRows ? 'arrowDown' : 'arrowRight'
-              }
+              iconType={name in expandedRows ? 'arrowDown' : 'arrowRight'}
             />
             {name}
           </>
@@ -95,9 +90,7 @@ export function ClustersTable({ clusters }: Props) {
           });
         }
 
-        return (
-          <EuiHealth color={color}>{label}</EuiHealth>
-        );
+        return <EuiHealth color={color}>{label}</EuiHealth>;
       },
     },
     {
@@ -105,20 +98,19 @@ export function ClustersTable({ clusters }: Props) {
       name: i18n.translate('inspector.requests.clustersTable.responseTimeLabel', {
         defaultMessage: 'Response time',
       }),
-      render: (responseTime: number | undefined) => (
-        responseTime 
+      render: (responseTime: number | undefined) =>
+        responseTime
           ? i18n.translate('inspector.requests.clustersTable.responseTimeInMilliseconds', {
-            defaultMessage: '{responseTime}ms',
-            values: { responseTime }
-          })
-          : null
-      ),
-    }
+              defaultMessage: '{responseTime}ms',
+              values: { responseTime },
+            })
+          : null,
+    },
   ];
 
   return (
     <EuiBasicTable
-      items={Object.keys(clusters).map(key => {
+      items={Object.keys(clusters).map((key) => {
         return {
           name: key,
           status: clusters[key].status,

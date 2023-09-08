@@ -17,30 +17,27 @@ interface Props {
 export function ShardsDetails({ clusterDetails }: Props) {
   return (
     <>
-      {clusterDetails._shards ?
+      {clusterDetails._shards ? (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            {
-              i18n.translate('inspector.requests.shardsDetails.totalShardsLabel', {
-                defaultMessage: '{total} total shards',
-                values: { total: clusterDetails._shards.total }
-              })
-            }
+            {i18n.translate('inspector.requests.shardsDetails.totalShardsLabel', {
+              defaultMessage: '{total} total shards',
+              values: { total: clusterDetails._shards.total },
+            })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {
-              i18n.translate('inspector.requests.shardsDetails.successfulShardsLabel', {
-                defaultMessage: '{successful} of {total} successful',
-                values: {
-                  // _shards.skipped is count of shards excluded via search optimization.
-                  // Add skipped to successful count to avoid missing shards in message
-                  successful: clusterDetails._shards.successful + clusterDetails._shards.skipped,
-                  total: clusterDetails._shards.total,
-                }
-              })
-            }
+            {i18n.translate('inspector.requests.shardsDetails.successfulShardsLabel', {
+              defaultMessage: '{successful} of {total} successful',
+              values: {
+                // _shards.skipped is count of shards excluded via search optimization.
+                // Add skipped to successful count to avoid missing shards in message
+                successful: clusterDetails._shards.successful + clusterDetails._shards.skipped,
+                total: clusterDetails._shards.total,
+              },
+            })}
           </EuiFlexItem>
-        </EuiFlexGroup> : null}
+        </EuiFlexGroup>
+      ) : null}
     </>
   );
 }
