@@ -73,13 +73,13 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
         label: i18n.translate(
           'xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeLabel',
           {
-            defaultMessage: 'ESQL',
+            defaultMessage: 'ES|QL',
           }
         ),
         description: i18n.translate(
           'xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeDescription',
           {
-            defaultMessage: 'Use ESQL to define a text-based query.',
+            defaultMessage: 'Use ES|QL to define a text-based query.',
           }
         ),
       });

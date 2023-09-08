@@ -82,7 +82,7 @@ import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
-
+import { ITelemetryClient, TelemetryService } from './services/telemetry';
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
 export type ApmPluginStart = void;
@@ -104,6 +104,10 @@ export interface ApmPluginSetupDeps {
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
+}
+
+export interface ApmServices {
+  telemetry: ITelemetryClient;
 }
 
 export interface ApmPluginStartDeps {
@@ -181,16 +185,17 @@ const apmTutorialTitle = i18n.translate(
 );
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
+  private telemetry: TelemetryService;
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
+    this.telemetry = new TelemetryService();
   }
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
-
     const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
@@ -273,6 +278,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       };
     };
 
+    this.telemetry.setup({ analytics: core.analytics });
+
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
       'apm_fleet_server_status_check',
@@ -332,6 +339,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const { observabilityRuleTypeRegistry } = plugins.observability;
 
+    // Register APM telemetry based events
+    const telemetry = this.telemetry.start();
+
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -388,7 +398,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
-
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps,
@@ -396,6 +405,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           config,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
+          apmServices: {
+            telemetry,
+          },
         });
       },
     });
