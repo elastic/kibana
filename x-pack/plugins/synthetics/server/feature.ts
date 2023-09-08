@@ -38,7 +38,7 @@ const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = 
     {
       id: 'elastic_managed_locations_enabled',
       name: i18n.translate('xpack.synthetics.features.elasticManagedLocations', {
-        defaultMessage: 'Elastic manages locations enabled',
+        defaultMessage: 'Elastic managed locations enabled',
       }),
       includeIn: 'all',
       savedObject: {
