@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -19,7 +20,7 @@ import {
   submitNewExceptionItem,
   deleteFirstExceptionItemInListDetailPage,
 } from '../../../tasks/exceptions';
-import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../../urls/navigation';
+import { EXCEPTIONS_URL, ruleDetailsUrl } from '../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
@@ -29,8 +30,6 @@ import {
   EXECPTION_ITEM_CARD_HEADER_TITLE,
   EMPTY_EXCEPTIONS_VIEWER,
 } from '../../../screens/exceptions';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { goToExceptionsTab } from '../../../tasks/rule_details';
 import {
   addExceptionListFromSharedExceptionListHeaderMenu,
   createSharedExceptionList,
@@ -43,19 +42,17 @@ describe(
   'Add, edit and delete exception',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
+      createRule(getNewRule()).as('createdRule');
 
-      createRule(getNewRule());
-    });
-
-    beforeEach(() => {
       login();
       visitWithoutDateRange(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
     });
-    after(() => {
+
+    afterEach(() => {
       cy.task('esArchiverUnload', 'exceptions');
     });
 
