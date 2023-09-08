@@ -229,7 +229,7 @@ export default function AlertDetailsAppSection({
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" data-test-subj="thresholdAlertRelatedEventsSection">
         {ruleParams.criteria.map((criterion, criterionIndex) =>
-          criterion.customMetrics?.map(
+          criterion.metrics?.map(
             (metric, metricIndex) =>
               dataView &&
               dataView.id && (
