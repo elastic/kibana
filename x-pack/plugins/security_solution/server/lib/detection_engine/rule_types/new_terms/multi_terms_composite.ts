@@ -25,7 +25,7 @@ import type {
 import { getMaxSignalsWarning } from '../utils/utils';
 
 import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
-const BATCH_SIZE = 1000;
+const BATCH_SIZE = 500;
 
 interface MultiTermsCompositeArgsBase {
   filterArgs: GetFilterArgs;
@@ -190,9 +190,9 @@ const multiTermsCompositeNonRetryable = async ({
 };
 
 /**
- * If request fails with batch size of 1,000
- * We will try to reduce it in twice per each request, up until 250
- * Per ES documentation, max_clause_count min value is 1,000 - so with 250 we should be able execute query below max_clause_count value
+ * If request fails with batch size of BATCH_SIZE
+ * We will try to reduce it in twice per each request, three times, up until 125
+ * Per ES documentation, max_clause_count min value is 1,000 - so with 125 we should be able execute query below max_clause_count value
  */
 export const multiTermsComposite = async (args: MultiTermsCompositeArgs): Promise<void> => {
   let retryBatchSize = BATCH_SIZE;
