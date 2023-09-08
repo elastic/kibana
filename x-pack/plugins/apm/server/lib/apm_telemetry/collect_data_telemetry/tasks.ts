@@ -983,57 +983,65 @@ export const tasks: TelemetryTask[] = [
                   size,
                 },
               },
-              ["span.db.subtypes"]: {
+              ['span.db.subtypes']: {
                 filter: {
                   bool: {
                     must: [
-                      { term: { [SPAN_TYPE]: "db" } },
-                      { exists: { field: SPAN_SUBTYPE } }
-                    ]
-                  }
+                      { term: { [SPAN_TYPE]: 'db' } },
+                      { exists: { field: SPAN_SUBTYPE } },
+                    ],
+                  },
                 },
                 aggs: {
                   subtypes: {
                     terms: {
                       field: SPAN_SUBTYPE,
-                      size: size
-                    }
-                  }
-                }
+                      size,
+                    },
+                  },
+                },
               },
-              ["span.messaging.subtypes"]: {
+              ['span.messaging.subtypes']: {
                 filter: {
                   bool: {
                     must: [
-                      { term: { [SPAN_TYPE]: "messaging" } },
-                      { exists: { field: SPAN_SUBTYPE } }
-                    ]
-                  }
+                      { term: { [SPAN_TYPE]: 'messaging' } },
+                      { exists: { field: SPAN_SUBTYPE } },
+                    ],
+                  },
                 },
                 aggs: {
                   subtypes: {
                     terms: {
                       field: SPAN_SUBTYPE,
-                      size: size
-                    }
-                  }
-                }
+                      size,
+                    },
+                  },
+                },
               },
-              ["span.composite.count"]: {
+              ['span.composite.count']: {
                 terms: {
                   field: 'span.composite.count',
-                  size: size
+                  size,
                 },
               },
             },
           },
         });
 
-        const inferredSubtypeBuckets = response.aggregations[SPAN_SUBTYPE]?.buckets || [];
-        const hasInferredSpanType = inferredSubtypeBuckets.some(bucket => bucket.key === "inferred");
-        const databaseSpanSubtypes = response.aggregations["span.db.subtypes"]?.subtypes?.buckets.map(bucket => bucket.key);
-        const messagingSpanSubtypes = response.aggregations["span.messaging.subtypes"]?.subtypes?.buckets.map(bucket => bucket.key);
-        const hasSpanCompression = !!response.aggregations["span.composite.count"]?.buckets.length;
+        const inferredSubtypeBuckets =
+          response.aggregations[SPAN_SUBTYPE]?.buckets || [];
+        const hasInferredSpanType = inferredSubtypeBuckets.some(
+          (bucket) => bucket.key === 'inferred'
+        );
+        const databaseSpanSubtypes = response.aggregations[
+          'span.db.subtypes'
+        ]?.subtypes?.buckets.map((bucket) => bucket.key);
+        const messagingSpanSubtypes = response.aggregations[
+          'span.messaging.subtypes'
+        ]?.subtypes?.buckets.map((bucket) => bucket.key);
+        const hasSpanCompression =
+          !!response.aggregations['span.composite.count']?.buckets.length;
 
         const { aggregations } = response;
 
