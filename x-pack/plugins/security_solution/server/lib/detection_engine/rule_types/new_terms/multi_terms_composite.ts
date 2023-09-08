@@ -39,12 +39,17 @@ interface MultiTermsCompositeArgs {
   services: RuleServices;
   result: SearchAfterAndBulkCreateReturnType;
   logger: Logger;
-  spaceId: string;
   runOpts: RunOpts<NewTermsRuleParams>;
   afterKey: Record<string, string | number | null> | undefined;
   createAlertsHook: CreateAlertsHook;
 }
 
+/**
+ * This helper does phase2/phase3(look README) got multiple new terms
+ * It takes full page of results from phase 1 (10,000)
+ * Splits it in chunks (starts from 1000) and applies it as a filter in new composite aggregation request
+ * It pages through though all 10,000 results from phase1 until maxSize alerts found
+ */
 export const multiTermsComposite = async ({
   filterArgs,
   buckets,
@@ -54,23 +59,17 @@ export const multiTermsComposite = async ({
   services,
   result,
   logger,
-  spaceId,
   runOpts,
   afterKey,
   createAlertsHook,
 }: MultiTermsCompositeArgs) => {
   const {
     ruleExecutionLogger,
-    bulkCreate,
-    completeRule,
     tuple,
-    mergeStrategy,
     inputIndex,
     runtimeMappings,
     primaryTimestamp,
     secondaryTimestamp,
-    alertTimestampOverride,
-    publicBaseUrl,
   } = runOpts;
 
   let internalAfterKey = afterKey ?? undefined;
@@ -94,6 +93,9 @@ export const multiTermsComposite = async ({
       ],
     });
 
+    // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
+    // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
+    // response correspond to each new term.
     const {
       searchResult: pageSearchResult,
       searchDuration: pageSearchDuration,
