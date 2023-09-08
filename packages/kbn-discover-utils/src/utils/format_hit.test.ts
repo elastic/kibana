@@ -41,10 +41,10 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['extension', 'formatted:png'],
-      ['message', 'formatted:foobar'],
-      ['object.value', 'formatted:42,13'],
-      ['_index', 'formatted:logs'],
+      ['extension', 'formatted:png', dataViewMock.fields.getByName('extension')],
+      ['message', 'formatted:foobar', dataViewMock.fields.getByName('message')],
+      ['object.value', 'formatted:42,13', dataViewMock.fields.getByName('object.value')],
+      ['_index', 'formatted:logs', dataViewMock.fields.getByName('_index')],
       ['_score', undefined],
     ]);
   });
@@ -83,9 +83,9 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['extension', 'formatted:png'],
-      ['message', 'formatted:foobar'],
-      ['and 3 more fields', ''],
+      ['extension', 'formatted:png', dataViewMock.fields.getByName('extension')],
+      ['message', 'formatted:foobar', dataViewMock.fields.getByName('message')],
+      ['and 3 more fields', '', undefined],
     ]);
   });
 
@@ -98,10 +98,10 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['message', 'formatted:foobar'],
-      ['object.value', 'formatted:42,13'],
-      ['_index', 'formatted:logs'],
-      ['_score', undefined],
+      ['message', 'formatted:foobar', dataViewMock.fields.getByName('message')],
+      ['object.value', 'formatted:42,13', dataViewMock.fields.getByName('object.value')],
+      ['_index', 'formatted:logs', dataViewMock.fields.getByName('_index')],
+      ['_score', undefined, undefined],
     ]);
   });
 
@@ -114,9 +114,9 @@ describe('formatHit', () => {
       fieldFormatsMock
     );
     expect(formatted).toEqual([
-      ['bytesDisplayName', 'formatted:123'],
-      ['_index', 'formatted:logs'],
-      ['_score', undefined],
+      ['bytesDisplayName', 'formatted:123', dataViewMock.fields.getByName('bytes')],
+      ['_index', 'formatted:logs', dataViewMock.fields.getByName('_index')],
+      ['_score', undefined, undefined],
     ]);
   });
 });

@@ -10,10 +10,9 @@ import { useMemo, useState } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { FieldTypeKnown } from '@kbn/discover-utils/types';
+import { type FieldTypeKnown, getFieldIconType } from '@kbn/field-utils';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
 import { type FieldListItem, GetCustomFieldType } from '../types';
-import { getFieldIconType } from '../utils/field_types';
 import { fieldNameWildcardMatcher } from '../utils/field_name_wildcard_matcher';
 
 const htmlId = htmlIdGenerator('fieldList');

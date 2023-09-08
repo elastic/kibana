@@ -25,6 +25,7 @@ import type {
   DataTableRecord,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
+  FormattedHit,
 } from '@kbn/discover-utils/types';
 import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
@@ -122,7 +123,7 @@ export const getRenderCellValueFn =
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
-      const pairs = useTopLevelObjectColumns
+      const pairs: FormattedHit = useTopLevelObjectColumns
         ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
             0,
             maxEntries
@@ -272,8 +273,8 @@ function getTopLevelObjectPairs(
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
   const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
-  const highlightPairs: Array<[string, string]> = [];
-  const sourcePairs: Array<[string, string]> = [];
+  const highlightPairs: FormattedHit = [];
+  const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
     const subField = dataView.getFieldByName(key);
     const displayKey = dataView.fields.getByName
@@ -293,10 +294,10 @@ function getTopLevelObjectPairs(
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
       if (shouldShowFieldHandler(displayKey)) {
-        pairs.push([displayKey, formatted]);
+        pairs.push([displayKey, formatted, subField]);
       }
     } else {
-      pairs.push([key, formatted]);
+      pairs.push([key, formatted, subField]);
     }
   });
   return [...highlightPairs, ...sourcePairs];
