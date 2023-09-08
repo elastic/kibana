@@ -13,6 +13,8 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
+import { validateEndpointPackagePolicy } from '../utils/validate_endpoint_package_policy';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
@@ -376,6 +378,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
+
+    validateEndpointPackagePolicy(newData.inputs[0]);
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,

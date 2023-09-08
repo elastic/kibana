@@ -89,7 +89,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment(deployedVersion, internalDateFormat).format(displayDateFormat);
-    const cutoffDate = moment().subtract(18, 'months'); // Earliest selectable date
+    const cutoffDate = moment().subtract(18, 'months').add(1, 'day'); // Earliest selectable date
 
     const viewModeSwitchLabel = automaticUpdatesEnabled
       ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
