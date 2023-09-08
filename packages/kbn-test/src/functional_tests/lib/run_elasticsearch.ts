@@ -32,7 +32,7 @@ type EsConfig = ReturnType<typeof getEsConfig>;
 function getEsConfig({
   config,
   esFrom = config.get('esTestCluster.from'),
-  essImage = esTestConfig.getESSImage() || config.get('esTestCluster.essImage'),
+  essImage,
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
   const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
@@ -51,18 +51,7 @@ function getEsConfig({
   const serverless: boolean = config.get('serverless');
   const files: string[] | undefined = config.get('esTestCluster.files');
 
-  let essOptions: { image?: string; tag?: string } | undefined;
-  if (essImage) {
-    if (essImage.includes(':')) {
-      essOptions = {
-        image: essImage,
-      };
-    } else {
-      essOptions = {
-        tag: essImage,
-      };
-    }
-  }
+  const essOptions = extractESSOptions(essImage, config);
 
   return {
     ssl,
@@ -168,4 +157,23 @@ async function startEsNode({
   await cluster.start();
 
   return cluster;
+}
+
+function extractESSOptions(essImageFromArg: string | undefined, config: Config) {
+  const essImageUrlOrTag =
+    essImageFromArg ||
+    esTestConfig.getESSImage() ||
+    (config.has('esTestCluster.essImage') && config.get('esTestCluster.essImage'));
+
+  if (essImageUrlOrTag) {
+    if (essImageUrlOrTag.includes(':')) {
+      return {
+        image: essImageUrlOrTag,
+      };
+    } else {
+      return {
+        tag: essImageUrlOrTag,
+      };
+    }
+  }
 }
