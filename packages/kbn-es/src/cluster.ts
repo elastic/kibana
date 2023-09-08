@@ -17,6 +17,7 @@ import { Client } from '@elastic/elasticsearch';
 import { promisify } from 'util';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
+import treeKill from 'tree-kill';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
 import {
@@ -32,8 +33,7 @@ import {
   teardownServerlessClusterSync,
 } from './utils';
 import { createCliError } from './errors';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const treeKillAsync = promisify(require('tree-kill'));
+const treeKillAsync = promisify<number, string>(treeKill);
 import { parseSettings, SettingsFilter } from './settings';
 import { InstallSourceOptions } from './install/install_source';
 import { DownloadSnapshotOptions, InstallSnapshotOptions } from './install/install_snapshot';
@@ -297,10 +297,12 @@ export class Cluster {
       throw new Error('ES has not been started');
     }
 
-    if (options.gracefully) {
-      await treeKillAsync(this.process.pid);
+    const pid = this.process.pid;
+
+    if (pid) {
+      await treeKillAsync(pid, options.gracefully ? 'SIGTERM' : 'SIGKILL');
     } else {
-      await treeKillAsync(this.process.pid, 'SIGKILL');
+      throw Error(`ES process pid is not defined, can't stop it`);
     }
 
     await this.outcome;
