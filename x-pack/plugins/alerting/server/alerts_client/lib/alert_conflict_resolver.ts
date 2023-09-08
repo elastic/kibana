@@ -38,15 +38,12 @@ export async function resolveAlertConflicts(
 
   const bulkRequest = {
     operations: conflictRequest.map((req) => [req.op, req.doc]).flat(),
-  }
+  };
   return { bulkRequest };
 }
 
-
 // change this to do the mget separately from applying the OCC,
 // so we can also use the mget to get the current ad-hoc fields of the alert
-
-
 
 /** Update the OCC info in the request via mget. */
 async function updateOCC(esClient: ElasticsearchClient, conflictRequests: NormalizedBulkRequest[]) {
