@@ -1002,6 +1002,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#Update_connector_request_body_properties"><code>Update_connector_request_body_properties</code> - Update connector request body properties</a></li>
     <li><a href="#action_response_properties"><code>action_response_properties</code> - Action response properties</a></li>
     <li><a href="#config_properties_cases_webhook"><code>config_properties_cases_webhook</code> - Connector request properties for Webhook - Case Management connector</a></li>
+    <li><a href="#config_properties_d3security"><code>config_properties_d3security</code> - Connector request properties for a D3 Security connector</a></li>
     <li><a href="#config_properties_genai"><code>config_properties_genai</code> - Connector request properties for a generative AI connector</a></li>
     <li><a href="#config_properties_index"><code>config_properties_index</code> - Connector request properties for an index connector</a></li>
     <li><a href="#config_properties_jira"><code>config_properties_jira</code> - Connector request properties for a Jira connector</a></li>
@@ -1034,6 +1035,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_response_properties_xmatters"><code>connector_response_properties_xmatters</code> - Connector response properties for an xMatters connector</a></li>
     <li><a href="#connector_types"><code>connector_types</code> - Connector types</a></li>
     <li><a href="#create_connector_request_cases_webhook"><code>create_connector_request_cases_webhook</code> - Create Webhook - Case Managment connector request</a></li>
+    <li><a href="#create_connector_request_d3security"><code>create_connector_request_d3security</code> - Create D3 Security connector request</a></li>
     <li><a href="#create_connector_request_email"><code>create_connector_request_email</code> - Create email connector request</a></li>
     <li><a href="#create_connector_request_genai"><code>create_connector_request_genai</code> - Create generative AI connector request</a></li>
     <li><a href="#create_connector_request_index"><code>create_connector_request_index</code> - Create index connector request</a></li>
@@ -1088,6 +1090,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#run_connector_subaction_pushtoservice_subActionParams_incident_malware_url"><code>run_connector_subaction_pushtoservice_subActionParams_incident_malware_url</code> - </a></li>
     <li><a href="#run_connector_subaction_pushtoservice_subActionParams_incident_source_ip"><code>run_connector_subaction_pushtoservice_subActionParams_incident_source_ip</code> - </a></li>
     <li><a href="#secrets_properties_cases_webhook"><code>secrets_properties_cases_webhook</code> - Connector secrets properties for Webhook - Case Management connector</a></li>
+    <li><a href="#secrets_properties_d3security"><code>secrets_properties_d3security</code> - Connector secrets properties for a D3 Security connector</a></li>
     <li><a href="#secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for a generative AI connector</a></li>
     <li><a href="#secrets_properties_jira"><code>secrets_properties_jira</code> - Connector secrets properties for a Jira connector</a></li>
     <li><a href="#secrets_properties_opsgenie"><code>secrets_properties_opsgenie</code> - Connector secrets properties for an Opsgenie connector</a></li>
@@ -1102,6 +1105,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_xmatters"><code>secrets_properties_xmatters</code> - Connector secrets properties for an xMatters connector</a></li>
     <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
     <li><a href="#update_connector_request_cases_webhook"><code>update_connector_request_cases_webhook</code> - Update Webhook - Case Managment connector request</a></li>
+    <li><a href="#update_connector_request_d3security"><code>update_connector_request_d3security</code> - Update D3 Security connector request</a></li>
     <li><a href="#update_connector_request_index"><code>update_connector_request_index</code> - Update index connector request</a></li>
     <li><a href="#update_connector_request_jira"><code>update_connector_request_jira</code> - Update Jira connector request</a></li>
     <li><a href="#update_connector_request_opsgenie"><code>update_connector_request_opsgenie</code> - Update Opsgenie connector request</a></li>
@@ -1383,6 +1387,13 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">patch</div><div class="param-enum">post</div><div class="param-enum">put</div>
 <div class="param">updateIncidentUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The REST API URL to update the case by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the <code>xpack.actions.allowedHosts</code> setting, add the hostname to the allowed hosts. </div>
 <div class="param">viewIncidentUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The URL to view the case in the external system. You can use variables to add the external system ID or external system title to the URL. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="config_properties_d3security"><code>config_properties_d3security</code> - Connector request properties for a D3 Security connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for connectors when type is <code>.d3security</code>.</div>
+    <div class="field-items">
+      <div class="param">url (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The D3 Security API request URL. If you are using the <code>xpack.actions.allowedHosts</code> setting, add the hostname to the allowed hosts. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1815,6 +1826,18 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">.cases-webhook</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_cases_webhook">secrets_properties_cases_webhook</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="create_connector_request_d3security"><code>create_connector_request_d3security</code> - Create D3 Security connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The Slack connector uses axios to send a POST request to a D3 Security endpoint.</div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_d3security">config_properties_d3security</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">.d3security</div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_d3security">secrets_properties_d3security</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2379,6 +2402,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_d3security"><code>secrets_properties_d3security</code> - Connector secrets properties for a D3 Security connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.d3security</code>.</div>
+    <div class="field-items">
+      <div class="param">token </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The D3 Security token. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_genai"><code>secrets_properties_genai</code> - Connector secrets properties for a generative AI connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.gen-ai</code>.</div>
     <div class="field-items">
@@ -2490,6 +2520,15 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_cases_webhook">config_properties_cases_webhook</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets (optional)</div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_cases_webhook">secrets_properties_cases_webhook</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_d3security"><code>update_connector_request_d3security</code> - Update D3 Security connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_d3security">config_properties_d3security</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_d3security">secrets_properties_d3security</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
