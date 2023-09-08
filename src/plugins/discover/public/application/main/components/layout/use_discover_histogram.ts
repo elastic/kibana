@@ -59,7 +59,7 @@ export const useDiscoverHistogram = ({
    */
 
   const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
-  unifiedHistogram?.setIsSuggestionLoading(isPlainRecord);
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
 
   const getCreationOptions = useCallback(() => {
     const {
@@ -102,7 +102,6 @@ export const useDiscoverHistogram = ({
 
         if ('lensRequestAdapter' in changes) {
           inspectorAdapters.lensRequests = lensRequestAdapter;
-          unifiedHistogram?.setIsSuggestionLoading(false);
         }
 
         if (!isEqual(oldState, newState)) {
@@ -114,7 +113,7 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription?.unsubscribe();
     };
-  }, [inspectorAdapters, stateContainer.appState, unifiedHistogram, unifiedHistogram?.state$]);
+  }, [inspectorAdapters, stateContainer.appState, unifiedHistogram?.state$]);
 
   /**
    * Override Unified Histgoram total hits with Discover partial results
@@ -245,6 +244,24 @@ export const useDiscoverHistogram = ({
     columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
 
+  useEffect(() => {
+    if (!isPlainRecord) {
+      return;
+    }
+
+    const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
+      setIsSuggestionLoading(true);
+    });
+    const fetchComplete = textBasedFetchComplete$.subscribe(() => {
+      setIsSuggestionLoading(false);
+    });
+
+    return () => {
+      fetchStart.unsubscribe();
+      fetchComplete.unsubscribe();
+    };
+  }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$]);
+
   /**
    * Data fetching
    */
@@ -321,6 +338,7 @@ export const useDiscoverHistogram = ({
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
+    isChartLoading: isSuggestionLoading,
   };
 };
 

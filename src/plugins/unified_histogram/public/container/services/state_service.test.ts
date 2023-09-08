@@ -53,7 +53,6 @@ describe('UnifiedHistogramStateService', () => {
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
     currentSuggestion: undefined,
-    isSuggestionLoading: true,
   };
 
   it('should initialize state with default values', () => {
@@ -70,7 +69,6 @@ describe('UnifiedHistogramStateService', () => {
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
       currentSuggestion: undefined,
       allSuggestions: undefined,
-      isSuggestionLoading: true,
     });
   });
 
@@ -151,8 +149,6 @@ describe('UnifiedHistogramStateService', () => {
       totalHitsResult: 100,
     };
     expect(state).toEqual(newState);
-    stateService.setIsSuggestionLoading(false);
-    newState = { ...newState, isSuggestionLoading: false };
   });
 
   it('should update state and save it to storage if localStorageKeyPrefix is provided', () => {

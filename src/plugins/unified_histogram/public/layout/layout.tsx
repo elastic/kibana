@@ -121,9 +121,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   input$?: UnifiedHistogramInput$;
   /**
-   * Flag indicating that the suggestion is currently loading
+   * Flag indicating that the chart is currently loading
    */
-  isSuggestionLoading: boolean;
+  isChartLoading: boolean;
   /**
    * The Lens suggestions API
    */
@@ -178,7 +178,7 @@ export const UnifiedHistogramLayout = ({
   query,
   filters,
   currentSuggestion: originalSuggestion,
-  isSuggestionLoading,
+  isChartLoading,
   isPlainRecord,
   timeRange,
   relativeTimeRange,
@@ -274,7 +274,7 @@ export const UnifiedHistogramLayout = ({
           request={request}
           hits={hits}
           currentSuggestion={currentSuggestion}
-          isSuggestionLoading={isSuggestionLoading}
+          isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
           chart={chart}

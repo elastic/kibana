@@ -35,7 +35,6 @@ describe('useStateProps', () => {
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
     currentSuggestion: undefined,
-    isSuggestionLoading: true,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -50,7 +49,6 @@ describe('useStateProps', () => {
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
     jest.spyOn(stateService, 'setCurrentSuggestion');
-    jest.spyOn(stateService, 'setIsSuggestionLoading');
     return stateService;
   };
 
@@ -86,7 +84,6 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
-        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [
@@ -162,7 +159,6 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": true,
-        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [
@@ -259,7 +255,6 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
-        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [
@@ -332,7 +327,6 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
-        "isSuggestionLoading": true,
         "lensTablesAdapter": Object {
           "default": Object {
             "columns": Array [

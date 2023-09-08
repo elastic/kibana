@@ -20,11 +20,7 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import {
-  topPanelHeightSelector,
-  currentSuggestionSelector,
-  isSuggestionLoadingSelector,
-} from './utils/state_selectors';
+import { topPanelHeightSelector, currentSuggestionSelector } from './utils/state_selectors';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -46,6 +42,7 @@ export type UnifiedHistogramContainerProps = {
     | Promise<UnifiedHistogramCreationOptions>;
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+  isChartLoading?: boolean;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -81,7 +78,6 @@ export type UnifiedHistogramApi = {
   | 'setBreakdownField'
   | 'setTimeInterval'
   | 'setTotalHits'
-  | 'setIsSuggestionLoading'
 >;
 
 export const UnifiedHistogramContainer = forwardRef<
@@ -125,15 +121,13 @@ export const UnifiedHistogramContainer = forwardRef<
         'setTopPanelHeight',
         'setBreakdownField',
         'setTimeInterval',
-        'setTotalHits',
-        'setIsSuggestionLoading'
+        'setTotalHits'
       ),
     });
   }, [input$, stateService]);
-  const { dataView, query, searchSessionId, requestAdapter } = containerProps;
+  const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
-  const isSuggestionLoading = useStateSelector(stateService?.state$, isSuggestionLoadingSelector);
   const stateProps = useStateProps({
     stateService,
     dataView,
@@ -153,7 +147,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...layoutProps}
       {...stateProps}
       currentSuggestion={currentSuggestion}
-      isSuggestionLoading={Boolean(isSuggestionLoading)}
+      isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}
       lensSuggestionsApi={lensSuggestionsApi}

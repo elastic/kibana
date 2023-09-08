@@ -173,6 +173,12 @@ describe('useDiscoverHistogram', () => {
         'totalHitsResult',
       ]);
     });
+
+    it('should return the isChartLoading params for text based languages', async () => {
+      const { hook } = await renderUseDiscoverHistogram({ isPlainRecord: true });
+      const isChartLoading = hook.result.current.isChartLoading;
+      expect(isChartLoading).toBe(false);
+    });
   });
 
   describe('state', () => {
@@ -208,7 +214,6 @@ describe('useDiscoverHistogram', () => {
         hook.result.current.ref(api);
       });
       expect(inspectorAdapters.lensRequests).toBe(lensRequestAdapter);
-      expect(api.setIsSuggestionLoading).toHaveBeenCalledWith(false);
       expect(stateContainer.appState.update).toHaveBeenCalledWith({
         interval: state.timeInterval,
         hideChart: state.chartHidden,
@@ -252,10 +257,6 @@ describe('useDiscoverHistogram', () => {
       api.setBreakdownField = jest.fn((breakdownField) => {
         params = { ...params, breakdownField };
       });
-
-      api.setIsSuggestionLoading = jest.fn((isSuggestionLoading) => {
-        params = { ...params, isSuggestionLoading };
-      });
       act(() => {
         hook.result.current.ref(api);
       });
@@ -264,9 +265,7 @@ describe('useDiscoverHistogram', () => {
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
       expect(api.setBreakdownField).toHaveBeenCalled();
-      expect(api.setIsSuggestionLoading).toHaveBeenCalled();
       expect(Object.keys(params ?? {})).toEqual([
-        'isSuggestionLoading',
         'totalHitsStatus',
         'totalHitsResult',
         'breakdownField',
@@ -396,6 +395,26 @@ describe('useDiscoverHistogram', () => {
         recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       expect(mockCheckHitCount).not.toHaveBeenCalled();
+    });
+
+    it('should set isChartLoading to true for fetch start', async () => {
+      const fetch$ = new Subject<{
+        options: {
+          reset: boolean;
+          fetchMore: boolean;
+        };
+        searchSessionId: string;
+      }>();
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = fetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer, isPlainRecord: true });
+      act(() => {
+        fetch$.next({
+          options: { reset: false, fetchMore: false },
+          searchSessionId: '1234',
+        });
+      });
+      expect(hook.result.current.isChartLoading).toBe(true);
     });
   });
 
