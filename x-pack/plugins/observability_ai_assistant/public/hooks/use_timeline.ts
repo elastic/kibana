@@ -182,11 +182,12 @@ export function useTimeline({
         const name = lastMessage.message.function_call.name;
 
         try {
-          const message = await chatService!.executeFunction(
+          const message = await chatService!.executeFunction({
             name,
-            lastMessage.message.function_call.arguments,
-            controller.signal
-          );
+            args: lastMessage.message.function_call.arguments,
+            messages: messagesAfterChat.slice(0, -1),
+            signal: controller.signal,
+          });
 
           return await chat(
             messagesAfterChat.concat({

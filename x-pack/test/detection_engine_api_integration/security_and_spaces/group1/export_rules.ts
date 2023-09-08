@@ -7,7 +7,10 @@
 
 import expect from 'expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  UPDATE_OR_CREATE_LEGACY_ACTIONS,
+} from '@kbn/security-solution-plugin/common/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -427,8 +430,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',
@@ -496,8 +500,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification with actions
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',
@@ -585,8 +590,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification with actions to the first rule
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule1.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule1.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',
@@ -615,8 +621,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // attach the legacy notification with actions to the 2nd rule
           await supertest
-            .post(`/internal/api/detection/legacy/notifications?alert_id=${rule2.id}`)
+            .post(`${UPDATE_OR_CREATE_LEGACY_ACTIONS}?alert_id=${rule2.id}`)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '1')
             .send({
               name: 'Legacy notification with one action',
               interval: '1h',

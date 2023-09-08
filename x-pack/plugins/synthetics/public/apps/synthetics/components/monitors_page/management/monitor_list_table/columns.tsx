@@ -240,6 +240,7 @@ export function useMonitorListColumns({
       render: () => (
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           <EuiButtonIcon
+            data-test-subj="syntheticsUseMonitorListColumnsButton"
             iconType="boxesHorizontal"
             isDisabled={true}
             aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
