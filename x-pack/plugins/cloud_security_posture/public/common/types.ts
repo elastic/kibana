@@ -74,7 +74,9 @@ export interface RuleCreateProps {
   description: string;
   tags: string[];
   max_signals: number;
-  investigation_fields?: string[];
+  investigation_fields?: {
+    field_names: string[];
+  };
   note?: string;
 }
 
