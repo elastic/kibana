@@ -12,8 +12,7 @@ import {
 } from '../../../../tasks/alerts';
 import { deleteAlertsAndRules, postDataView } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
-import { goToRuleDetails } from '../../../../tasks/alerts_detection_rules';
+import { ruleDetailsUrl } from '../../../../urls/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
@@ -29,7 +28,6 @@ import {
 
 // See https://github.com/elastic/kibana/issues/163967
 describe('Close matching Alerts ', () => {
-  const newRule = getNewRule();
   const ITEM_NAME = 'Sample Exception Item';
 
   beforeEach(() => {
@@ -40,15 +38,15 @@ describe('Close matching Alerts ', () => {
 
     login();
     postDataView('exceptions-*');
-    createRule({
-      ...newRule,
-      query: 'agent.name:*',
-      data_view_id: 'exceptions-*',
-      interval: '10s',
-      rule_id: 'rule_testing',
-    });
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
+    createRule(
+      getNewRule({
+        query: 'agent.name:*',
+        data_view_id: 'exceptions-*',
+        interval: '10s',
+        rule_id: 'rule_testing',
+      })
+    ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+
     waitForAlertsToPopulate();
   });
   after(() => {
