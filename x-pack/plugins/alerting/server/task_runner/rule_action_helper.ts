@@ -12,6 +12,7 @@ import {
   RuleAction,
   RuleNotifyWhenTypeValues,
   ThrottledActions,
+  RuleActionTypes,
 } from '../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {
@@ -156,9 +157,12 @@ export const getSummaryActionTimeBounds = (
 
 /**
  * TODO: Substitute with a function which takes into
- * account system actions. The function returns false
- * because system actions cannot be created from APIs
- * and the type of the RuleAction is set to DEFAULT
+ * account system actions.
+ *
+ * Because RuleAction has the type set as RuleActionTypes.DEFAULT
+ * TS produce an error as the check below will always return false.
+ * We need the check to be able to test.
  */
 
-const isSystemAction = (action: RuleAction) => false;
+// @ts-expect-error
+const isSystemAction = (action: RuleAction) => action.type === RuleActionTypes.SYSTEM;
