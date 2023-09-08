@@ -88,12 +88,12 @@ export const getSavedObjects = (): SavedObject[] => [
       },
       {
         type: 'index-pattern',
-        id: 'security-solution-default',
+        id: 'c89b196d-d0cd-4cfb-8d95-787e4ce51551',
         name: '60fa5218-4ab5-4cae-8655-f0cb4bd213e0:indexpattern-datasource-layer-a578b0a4-d2d8-4e74-9ff2-c371933b26e8',
       },
       {
         type: 'tag',
-        id: 'security-solution-default',
+        id: 'c89b196d-d0cd-4cfb-8d95-787e4ce51551',
         name: 'tag-ref-security-solution-default',
       },
     ],

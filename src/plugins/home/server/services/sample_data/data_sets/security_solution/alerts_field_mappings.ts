@@ -16,6 +16,13 @@ export const alertsFieldMappings = {
           workflow_status: {
             type: 'keyword',
           },
+          rule: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+            },
+          },
         },
       },
     },
