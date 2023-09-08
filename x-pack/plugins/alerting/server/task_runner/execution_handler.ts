@@ -19,7 +19,10 @@ import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { GetSummarizedAlertsParams, IAlertsClient } from '../alerts_client/types';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
+import {
+  AlertingEventLogger,
+  ActionOpts as EventLogAction,
+} from '../lib/alerting_event_logger/alerting_event_logger';
 import { parseDuration, CombinedSummarizedAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
@@ -46,6 +49,7 @@ import {
   isSummaryActionOnInterval,
   isSummaryActionThrottled,
 } from './rule_action_helper';
+import { ConnectorAdapter } from '../connector_adapters/types';
 
 enum Reasons {
   MUTED = 'muted',
@@ -53,20 +57,39 @@ enum Reasons {
   ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
 }
 
-interface LogAction {
-  id: string;
-  typeId: string;
-  alertId?: string;
-  alertGroup?: string;
-  alertSummary?: {
-    new: number;
-    ongoing: number;
-    recovered: number;
-  };
-}
-
 export interface RunResult {
   throttledSummaryActions: ThrottledActions;
+}
+
+interface RunSummarizedActionArgs {
+  action: RuleAction;
+  summarizedAlerts: CombinedSummarizedAlerts;
+  spaceId: string;
+}
+
+interface RunActionArgs<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  action: RuleAction;
+  alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;
+  ruleId: string;
+  spaceId: string;
+}
+
+interface RunSystemActionArgs<Params extends RuleTypeParams> {
+  action: RuleAction;
+  connectorAdapter: ConnectorAdapter;
+  summarizedAlerts: CombinedSummarizedAlerts;
+  rule: SanitizedRule<Params>;
+  spaceId: string;
+}
+
+interface RunActionReturnValue {
+  actionsToEnqueueForExecution: EnqueueExecutionOptions[];
+  actionsToLog: Record<string, EventLogAction>;
 }
 
 export interface RuleUrl {
@@ -178,215 +201,365 @@ export class ExecutionHandler<
       actions: this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
+
     const executables = await this.generateExecutables(alerts, throttledSummaryActions);
 
-    if (!!executables.length) {
-      const {
-        CHUNK_SIZE,
-        logger,
-        alertingEventLogger,
-        ruleRunMetricsStore,
-        taskRunnerContext: { actionsConfigMap, actionsPlugin },
-        taskInstance: {
-          params: { spaceId, alertId: ruleId },
-        },
-      } = this;
+    if (executables.length === 0) {
+      return { throttledSummaryActions };
+    }
 
-      const logActions: Record<string, LogAction> = {};
-      const bulkActions: EnqueueExecutionOptions[] = [];
-      let bulkActionsResponse: ExecutionResponseItem[] = [];
+    const {
+      logger,
+      ruleRunMetricsStore,
+      taskRunnerContext: { actionsConfigMap },
+      taskInstance: {
+        params: { spaceId, alertId: ruleId },
+      },
+    } = this;
 
-      this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
+    const logActions: Record<string, EventLogAction> = {};
+    const enqueueActions: EnqueueExecutionOptions[] = [];
 
-      for (const { action, alert, summarizedAlerts } of executables) {
-        const { actionTypeId } = action;
-        const actionGroup = action.group as ActionGroupIds;
+    this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-        ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+    for (const { action, alert, summarizedAlerts } of executables) {
+      const { actionTypeId } = action;
 
-        if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
+      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+
+      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+
+        logger.debug(
+          `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+        );
+
+        break;
+      }
+
+      if (
+        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+          actionTypeId,
+          actionsConfigMap,
+        })
+      ) {
+        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
           logger.debug(
-            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+            `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
           );
-          break;
         }
 
-        if (
-          ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
-            actionTypeId,
-            actionsConfigMap,
-          })
-        ) {
-          if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
-            logger.debug(
-              `Rule "${this.rule.id}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
-            );
-          }
-          ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-            actionTypeId,
-            status: ActionsCompletion.PARTIAL,
-          });
-          continue;
-        }
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
 
-        if (!this.isExecutableAction(action)) {
+        continue;
+      }
+
+      if (!this.isExecutableAction(action)) {
+        this.logger.warn(
+          `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
+        );
+
+        continue;
+      }
+
+      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+
+      if (summarizedAlerts && !isSystemAction(action)) {
+        const { actionsToEnqueueForExecution, actionsToLog } = await this.runSummarizedAction({
+          action,
+          summarizedAlerts,
+          spaceId,
+        });
+
+        enqueueActions.push(...actionsToEnqueueForExecution);
+        Object.assign(logActions, actionsToLog);
+
+        if (isActionOnInterval(action)) {
+          throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
+        }
+      } else if (isSystemAction(action) && summarizedAlerts) {
+        const hasConnectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.has(
+          action.actionTypeId
+        );
+
+        /**
+         * System actions without an adapter
+         * cannot be executed
+         *
+         */
+        if (!hasConnectorAdapter) {
           this.logger.warn(
-            `Rule "${this.taskInstance.params.alertId}" skipped scheduling action "${action.id}" because it is disabled`
+            `Rule "${this.taskInstance.params.alertId}" skipped scheduling system action "${action.id}" because no connector adapter is configured`
           );
+
           continue;
         }
 
-        ruleRunMetricsStore.incrementNumberOfTriggeredActions();
-        ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
+        const connectorAdapter = this.taskRunnerContext.connectorAdapterRegistry.get(
+          action.actionTypeId
+        );
 
-        if (summarizedAlerts) {
-          const { start, end } = getSummaryActionTimeBounds(
-            action,
-            this.rule.schedule,
-            this.previousStartedAt
-          );
-          const ruleUrl = this.buildRuleUrl(spaceId, start, end);
-          const actionToRun = {
-            ...action,
-            params: injectActionParams({
-              actionTypeId,
-              ruleUrl,
-              actionParams: transformSummaryActionParams({
-                alerts: summarizedAlerts,
-                rule: this.rule,
-                ruleTypeId: this.ruleType.id,
-                actionId: action.id,
-                actionParams: action.params,
-                spaceId,
-                actionsPlugin,
-                actionTypeId,
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: ruleUrl?.absoluteUrl,
-              }),
-            }),
-          };
+        const { actionsToEnqueueForExecution, actionsToLog } = await this.runSystemAction({
+          action,
+          connectorAdapter,
+          summarizedAlerts,
+          rule: this.rule,
+          spaceId,
+        });
 
-          await this.actionRunOrAddToBulk({
-            enqueueOptions: this.getEnqueueOptions(actionToRun),
-            bulkActions,
-          });
+        enqueueActions.push(...actionsToEnqueueForExecution);
+        Object.assign(logActions, actionsToLog);
+      } else if (!isSystemAction(action) && alert) {
+        const { actionsToEnqueueForExecution, actionsToLog } = await this.runAction({
+          action,
+          spaceId,
+          alert,
+          ruleId,
+        });
 
+        enqueueActions.push(...actionsToEnqueueForExecution);
+        Object.assign(logActions, actionsToLog);
+
+        if (!this.isRecoveredAlert(action.group)) {
           if (isActionOnInterval(action)) {
-            throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
-          }
-
-          logActions[action.id] = {
-            id: action.id,
-            typeId: action.actionTypeId,
-            alertSummary: {
-              new: summarizedAlerts.new.count,
-              ongoing: summarizedAlerts.ongoing.count,
-              recovered: summarizedAlerts.recovered.count,
-            },
-          };
-        } else {
-          const ruleUrl = this.buildRuleUrl(spaceId);
-          const actionToRun = {
-            ...action,
-            params: injectActionParams({
-              actionTypeId,
-              ruleUrl,
-              actionParams: transformActionParams({
-                actionsPlugin,
-                alertId: ruleId,
-                alertType: this.ruleType.id,
-                actionTypeId,
-                alertName: this.rule.name,
-                spaceId,
-                tags: this.rule.tags,
-                alertInstanceId: alert.getId(),
-                alertUuid: alert.getUuid(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: alert.getContext(),
-                actionId: action.id,
-                state: alert.getState(),
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                alertParams: this.rule.params,
-                actionParams: action.params,
-                flapping: alert.getFlapping(),
-                ruleUrl: ruleUrl?.absoluteUrl,
-              }),
-            }),
-          };
-
-          await this.actionRunOrAddToBulk({
-            enqueueOptions: this.getEnqueueOptions(actionToRun),
-            bulkActions,
-          });
-
-          logActions[action.id] = {
-            id: action.id,
-            typeId: action.actionTypeId,
-            alertId: alert.getId(),
-            alertGroup: action.group,
-          };
-
-          if (!this.isRecoveredAlert(actionGroup)) {
-            if (isActionOnInterval(action)) {
-              alert.updateLastScheduledActions(
-                action.group as ActionGroupIds,
-                generateActionHash(action),
-                action.uuid
-              );
-            } else {
-              alert.updateLastScheduledActions(action.group as ActionGroupIds);
-            }
-            alert.unscheduleActions();
-          }
-        }
-      }
-
-      if (!!bulkActions.length) {
-        for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          const response = await this.actionsClient!.bulkEnqueueExecution(c);
-          if (response.errors) {
-            bulkActionsResponse = bulkActionsResponse.concat(
-              response.items.filter(
-                (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
-              )
+            alert.updateLastScheduledActions(
+              action.group as ActionGroupIds,
+              generateActionHash(action),
+              action.uuid
             );
+          } else {
+            alert.updateLastScheduledActions(action.group as ActionGroupIds);
           }
-        }
-      }
-
-      if (!!bulkActionsResponse.length) {
-        for (const r of bulkActionsResponse) {
-          if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
-            ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
-            ruleRunMetricsStore.decrementNumberOfTriggeredActions();
-            ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(r.actionTypeId);
-            ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
-              actionTypeId: r.actionTypeId,
-              status: ActionsCompletion.PARTIAL,
-            });
-
-            logger.debug(
-              `Rule "${this.rule.id}" skipped scheduling action "${r.id}" because the maximum number of queued actions has been reached.`
-            );
-
-            delete logActions[r.id];
-          }
-        }
-      }
-
-      const logActionsValues = Object.values(logActions);
-      if (!!logActionsValues.length) {
-        for (const action of logActionsValues) {
-          alertingEventLogger.logAction(action);
+          alert.unscheduleActions();
         }
       }
     }
+
+    const errorActionIds = await this.bulkEnqueueForExecution(enqueueActions);
+    this.bulkLogActions(logActions, errorActionIds);
+
     return { throttledSummaryActions };
+  }
+
+  private async runSummarizedAction({
+    action,
+    summarizedAlerts,
+    spaceId,
+  }: RunSummarizedActionArgs): Promise<RunActionReturnValue> {
+    const { start, end } = getSummaryActionTimeBounds(
+      action,
+      this.rule.schedule,
+      this.previousStartedAt
+    );
+    const ruleUrl = this.buildRuleUrl(spaceId, start, end);
+    const actionToRun = {
+      ...action,
+      params: injectActionParams({
+        actionTypeId: action.actionTypeId,
+        ruleUrl,
+        actionParams: transformSummaryActionParams({
+          alerts: summarizedAlerts,
+          rule: this.rule,
+          ruleTypeId: this.ruleType.id,
+          actionId: action.id,
+          actionParams: action.params,
+          spaceId,
+          actionsPlugin: this.taskRunnerContext.actionsPlugin,
+          actionTypeId: action.actionTypeId,
+          kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+          ruleUrl: ruleUrl?.absoluteUrl,
+        }),
+      }),
+    };
+
+    const actionsToEnqueueForExecution = await this.actionRunOrAddToBulk({
+      enqueueOptions: this.getEnqueueOptions(actionToRun),
+    });
+
+    return {
+      actionsToEnqueueForExecution,
+      actionsToLog: {
+        [action.id]: {
+          id: action.id,
+          typeId: action.actionTypeId,
+          alertSummary: {
+            new: summarizedAlerts.new.count,
+            ongoing: summarizedAlerts.ongoing.count,
+            recovered: summarizedAlerts.recovered.count,
+          },
+        },
+      },
+    };
+  }
+
+  private async runAction({
+    action,
+    spaceId,
+    alert,
+    ruleId,
+  }: RunActionArgs<
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >): Promise<RunActionReturnValue> {
+    const ruleUrl = this.buildRuleUrl(spaceId);
+    const actionToRun = {
+      ...action,
+      params: injectActionParams({
+        actionTypeId: action.actionTypeId,
+        ruleUrl,
+        actionParams: transformActionParams({
+          actionsPlugin: this.taskRunnerContext.actionsPlugin,
+          alertId: ruleId,
+          alertType: this.ruleType.id,
+          actionTypeId: action.actionTypeId,
+          alertName: this.rule.name,
+          spaceId,
+          tags: this.rule.tags,
+          alertInstanceId: alert.getId(),
+          alertUuid: alert.getUuid(),
+          alertActionGroup: action.group,
+          alertActionGroupName: this.ruleTypeActionGroups!.get(action.group as ActionGroupIds)!,
+          context: alert.getContext(),
+          actionId: action.id,
+          state: alert.getState(),
+          kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+          alertParams: this.rule.params,
+          actionParams: action.params,
+          flapping: alert.getFlapping(),
+          ruleUrl: ruleUrl?.absoluteUrl,
+        }),
+      }),
+    };
+
+    const actionsToEnqueueForExecution = await this.actionRunOrAddToBulk({
+      enqueueOptions: this.getEnqueueOptions(actionToRun),
+    });
+
+    return {
+      actionsToEnqueueForExecution,
+      actionsToLog: {
+        [action.id]: {
+          id: action.id,
+          typeId: action.actionTypeId,
+          alertId: alert.getId(),
+          alertGroup: action.group,
+        },
+      },
+    };
+  }
+
+  private async runSystemAction({
+    action,
+    spaceId,
+    connectorAdapter,
+    summarizedAlerts,
+    rule,
+  }: RunSystemActionArgs<Params>): Promise<RunActionReturnValue> {
+    const { start, end } = getSummaryActionTimeBounds(
+      action,
+      this.rule.schedule,
+      this.previousStartedAt
+    );
+
+    const ruleUrl = this.buildRuleUrl(spaceId, start, end);
+
+    const connectorAdapterActionParams = connectorAdapter.buildActionParams({
+      alerts: summarizedAlerts,
+      rule: { id: rule.id, tags: rule.tags, name: rule.name },
+      ruleUrl: ruleUrl?.absoluteUrl,
+      spaceId,
+      params: action.params,
+    });
+
+    const actionToRun = Object.assign(action, { params: connectorAdapterActionParams });
+
+    const actionsToEnqueueForExecution = await this.actionRunOrAddToBulk({
+      enqueueOptions: this.getEnqueueOptions(actionToRun),
+    });
+
+    return {
+      actionsToEnqueueForExecution,
+      actionsToLog: {
+        [action.id]: {
+          id: action.id,
+          typeId: action.actionTypeId,
+          alertSummary: {
+            new: summarizedAlerts.new.count,
+            ongoing: summarizedAlerts.ongoing.count,
+            recovered: summarizedAlerts.recovered.count,
+          },
+        },
+      },
+    };
+  }
+
+  private async bulkEnqueueForExecution(actions: EnqueueExecutionOptions[]): Promise<Set<string>> {
+    const errorResponses: ExecutionResponseItem[] = [];
+    const errorResponseActionIds = new Set<string>();
+
+    if (!!actions.length) {
+      for (const c of chunk(actions, this.CHUNK_SIZE)) {
+        const res = await this.actionsClient!.bulkEnqueueExecution(c);
+
+        if (res.errors) {
+          const queuedActionsLimitErrors = res.items.filter(
+            (resItem) => resItem.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
+          );
+
+          errorResponses.push(...queuedActionsLimitErrors);
+        }
+      }
+    }
+
+    if (!!errorResponses.length) {
+      for (const errorResponse of errorResponses) {
+        if (errorResponse.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+          this.ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
+          this.ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+
+          this.ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(
+            errorResponse.actionTypeId
+          );
+
+          this.ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+            actionTypeId: errorResponse.actionTypeId,
+            status: ActionsCompletion.PARTIAL,
+          });
+
+          this.logger.debug(
+            `Rule "${this.rule.id}" skipped scheduling action "${errorResponse.id}" because the maximum number of queued actions has been reached.`
+          );
+
+          errorResponseActionIds.add(errorResponse.id);
+        }
+      }
+    }
+
+    return errorResponseActionIds;
+  }
+
+  private async bulkLogActions(
+    logActions: Record<string, EventLogAction>,
+    errorActionIds: Set<string>
+  ) {
+    const logActionsEntries = Object.entries(logActions);
+
+    if (!!logActionsEntries.length) {
+      for (const [id, actionToBeLogged] of logActionsEntries) {
+        if (!errorActionIds.has(id)) {
+          this.alertingEventLogger.logAction(actionToBeLogged);
+        }
+      }
+    }
   }
 
   private logNumberOfFilteredAlerts({
@@ -574,7 +747,11 @@ export class ExecutionHandler<
           spaceId: this.taskInstance.params.spaceId,
           ruleId: this.taskInstance.params.alertId,
         });
-        if (!isSummaryActionOnInterval(action)) {
+
+        /**
+         * System actions cannot be throttled
+         */
+        if (!isSummaryActionOnInterval(action) || isSystemAction(action)) {
           this.logNumberOfFilteredAlerts({
             numberOfAlerts: alertsArray.length,
             numberOfSummarizedAlerts: summarizedAlerts.all.count,
@@ -591,11 +768,13 @@ export class ExecutionHandler<
             this.taskInstance.params.alertId
           }": has active maintenance windows ${this.maintenanceWindowIds.join()}.`
         );
+
         continue;
-      } else if (isSummaryAction(action)) {
+      } else if (isSummaryAction(action) || isSystemAction(action)) {
         if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
+
         continue;
       }
 
@@ -647,12 +826,22 @@ export class ExecutionHandler<
     throttledSummaryActions: ThrottledActions;
   }) {
     if (!this.canGetSummarizedAlerts()) {
-      if (action.frequency?.summary) {
+      if (isSystemAction(action) || action.frequency?.summary) {
         this.logger.error(
           `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
         );
       }
+
       return false;
+    }
+
+    /**
+     * System action should always get summarized alerts.
+     * The above check ensures that the rule supports
+     * alerts-as-data which are needed by system actions.
+     */
+    if (isSystemAction(action)) {
+      return true;
     }
 
     // we fetch summarizedAlerts to filter alerts in memory as well
@@ -687,12 +876,12 @@ export class ExecutionHandler<
       ruleId,
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
-      alertsFilter: action.alertsFilter,
+      alertsFilter: isSystemAction(action) ? undefined : action.alertsFilter,
     };
 
     let options: GetSummarizedAlertsParams;
 
-    if (isActionOnInterval(action)) {
+    if (isActionOnInterval(action) && !isSystemAction(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 
@@ -721,11 +910,11 @@ export class ExecutionHandler<
 
   private async actionRunOrAddToBulk({
     enqueueOptions,
-    bulkActions,
   }: {
     enqueueOptions: EnqueueExecutionOptions;
-    bulkActions: EnqueueExecutionOptions[];
-  }) {
+  }): Promise<EnqueueExecutionOptions[]> {
+    const bulkActions: EnqueueExecutionOptions[] = [];
+
     if (this.taskRunnerContext.supportsEphemeralTasks && this.ephemeralActionsToSchedule > 0) {
       this.ephemeralActionsToSchedule--;
       try {
@@ -738,5 +927,16 @@ export class ExecutionHandler<
     } else {
       bulkActions.push(enqueueOptions);
     }
+
+    return bulkActions;
   }
 }
+
+/**
+ * TODO: Substitute with a function which takes into
+ * account system actions. The function returns false
+ * because system actions cannot be created from APIs
+ * and the type of the RuleAction is set to DEFAULT
+ */
+
+const isSystemAction = (action: RuleAction) => false;

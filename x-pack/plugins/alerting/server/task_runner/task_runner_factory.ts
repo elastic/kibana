@@ -40,6 +40,7 @@ import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { AlertsService } from '../alerts_service/alerts_service';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -68,6 +69,7 @@ export interface TaskRunnerContext {
   usageCounter?: UsageCounter;
   getRulesSettingsClientWithRequest(request: KibanaRequest): RulesSettingsClientApi;
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
 
 export class TaskRunnerFactory {

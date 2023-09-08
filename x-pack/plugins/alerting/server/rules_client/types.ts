@@ -32,6 +32,7 @@ import {
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 export type {
   BulkEditOperation,
@@ -74,6 +75,7 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
+  readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;

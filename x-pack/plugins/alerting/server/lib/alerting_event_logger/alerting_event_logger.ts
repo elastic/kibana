@@ -54,7 +54,7 @@ interface AlertOpts {
   maintenanceWindowIds?: string[];
 }
 
-interface ActionOpts {
+export interface ActionOpts {
   id: string;
   typeId: string;
   alertId?: string;

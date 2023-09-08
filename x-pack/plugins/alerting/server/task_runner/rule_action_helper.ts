@@ -15,10 +15,18 @@ import {
 } from '../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {
+  if (action != null && isSystemAction(action)) {
+    return false;
+  }
+
   return action?.frequency?.summary || false;
 };
 
 export const isActionOnInterval = (action?: RuleAction) => {
+  if (action != null && isSystemAction(action)) {
+    return false;
+  }
+
   if (!action?.frequency) {
     return false;
   }
@@ -29,6 +37,10 @@ export const isActionOnInterval = (action?: RuleAction) => {
 };
 
 export const isSummaryActionOnInterval = (action: RuleAction) => {
+  if (action != null && isSystemAction(action)) {
+    return false;
+  }
+
   return isActionOnInterval(action) && action.frequency?.summary;
 };
 
@@ -41,17 +53,26 @@ export const isSummaryActionThrottled = ({
   throttledSummaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
+  if (action != null && isSystemAction(action)) {
+    return false;
+  }
+
   if (!isActionOnInterval(action)) {
     return false;
   }
+
   if (!throttledSummaryActions) {
     return false;
   }
+
   const throttledAction = throttledSummaryActions[action?.uuid!];
+
   if (!throttledAction) {
     return false;
   }
+
   let throttleMills = 0;
+
   try {
     throttleMills = parseDuration(action?.frequency!.throttle!);
   } catch (e) {
@@ -69,6 +90,10 @@ export const isSummaryActionThrottled = ({
 };
 
 export const generateActionHash = (action?: RuleAction) => {
+  if (action != null && isSystemAction(action)) {
+    return `system-action:${action?.actionTypeId || 'no-action-type-id'}:summary`;
+  }
+
   return `${action?.actionTypeId || 'no-action-type-id'}:${
     action?.frequency?.summary ? 'summary' : action?.group || 'no-action-group'
   }:${action?.frequency?.throttle || 'no-throttling'}`;
@@ -81,11 +106,16 @@ export const getSummaryActionsFromTaskState = ({
   actions: RuleAction[];
   summaryActions?: ThrottledActions;
 }) => {
+  const actionsWithoutSystemActions = actions.filter(
+    (action): action is RuleAction => !isSystemAction(action)
+  );
+
   return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
-    const actionExists = actions.find(
+    const actionExists = actionsWithoutSystemActions.find(
       (action) =>
         action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
+
     if (actionExists) {
       // replace hash with uuid
       newObj[actionExists.uuid!] = val;
@@ -102,10 +132,11 @@ export const getSummaryActionTimeBounds = (
   if (!isSummaryAction(action)) {
     return { start: undefined, end: undefined };
   }
+
   let startDate: Date;
   const now = Date.now();
 
-  if (isActionOnInterval(action)) {
+  if (isActionOnInterval(action) && !isSystemAction(action)) {
     // If action is throttled, set time bounds using throttle interval
     const throttleMills = parseDuration(action.frequency!.throttle!);
     startDate = new Date(now - throttleMills);
@@ -122,3 +153,12 @@ export const getSummaryActionTimeBounds = (
 
   return { start: startDate.valueOf(), end: now.valueOf() };
 };
+
+/**
+ * TODO: Substitute with a function which takes into
+ * account system actions. The function returns false
+ * because system actions cannot be created from APIs
+ * and the type of the RuleAction is set to DEFAULT
+ */
+
+const isSystemAction = (action: RuleAction) => false;
