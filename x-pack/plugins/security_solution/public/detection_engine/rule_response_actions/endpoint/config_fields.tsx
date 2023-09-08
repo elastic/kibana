@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
+import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash';
 import { OverwriteField } from './overwrite_process_field';
 import { FieldNameField } from './field_name';
@@ -32,16 +32,19 @@ export const ConfigFieldsComponent = ({
   if (currentCommand === 'kill-process' || currentCommand === 'suspend-process') {
     return (
       <>
+        <EuiSpacer />
         <OverwriteField
           path={`${basePath}.config.overwrite`}
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
         />
+        <EuiSpacer />
         <FieldNameField
           path={`${basePath}.config.field`}
           disabled={!currentOverwrite || disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
         />
+        <EuiSpacer />
       </>
     );
   }

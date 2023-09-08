@@ -10,7 +10,7 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import ECSSchema from './v.8.10.0_process.json';
 
 interface FieldNameFieldProps {
@@ -24,17 +24,6 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
   value: ecs,
 }));
 
-const CONFIG = {
-  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
-    defaultMessage: 'Custom field name',
-  }),
-  helpText: (
-    <FormattedMessage
-      id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
-      defaultMessage="Specify field name that should be used instead of `process.pid`."
-    />
-  ),
-};
 const SINGLE_SELECTION = { asPlainText: true };
 
 const FieldNameFieldComponent = ({
@@ -49,14 +38,20 @@ const FieldNameFieldComponent = ({
     const contains = fieldValue?.includes('entity_id');
     if (contains) {
       return (
-        <span>
-          Entity_id is an endpoint specific field, if the alert does not come from endpoint we will
-          not be able to send the action.
-        </span>
+        <FormattedMessage
+          id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
+          defaultMessage="Entity_id is an endpoint specific field, if the alert does not come from endpoint we will not be able to send the action."
+        />
       );
     }
     return null;
   }, [fieldValue]);
+  const CONFIG = {
+    label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
+      defaultMessage: 'Custom field name',
+    }),
+    helpText: renderEntityIdNote,
+  };
 
   const optionsAsComboBoxOptions = ECSSchemaOptions.map(({ label }) => ({
     label,
@@ -67,16 +62,16 @@ const FieldNameFieldComponent = ({
     <>
       <UseField<string> path={path} readDefaultValueOnForm={readDefaultValueOnForm} config={CONFIG}>
         {(field) => {
-          const { label, value, setValue } = field;
+          const { value, setValue } = field;
           const valueInList = !!optionsAsComboBoxOptions.find((option) => option.label === value);
           return (
-            <EuiFormRow label={label} fullWidth>
+            <EuiFormRow label={field.label} helpText={field.helpText} fullWidth>
               <EuiComboBox
                 isDisabled={disabled}
                 placeholder={i18n.translate(
                   'xpack.securitySolution.responseActions.endpoint.validations.customField',
                   {
-                    defaultMessage: 'Select custom field',
+                    defaultMessage: 'Defaults to process.pid',
                   }
                 )}
                 singleSelection={SINGLE_SELECTION}
@@ -96,8 +91,9 @@ const FieldNameFieldComponent = ({
           );
         }}
       </UseField>
+      <EuiSpacer size="s" />
       {/* TODO: Still waiting for mock ups regarding this*/}
-      {renderEntityIdNote}
+      {/* {renderEntityIdNote}*/}
     </>
   );
 };

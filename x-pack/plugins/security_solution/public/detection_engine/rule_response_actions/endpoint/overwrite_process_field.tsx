@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { i18n } from '@kbn/i18n';
 
 interface OverwriteFieldProps {
   path: string;
@@ -18,12 +18,12 @@ interface OverwriteFieldProps {
 
 const CONFIG = {
   label: i18n.translate('xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel', {
-    defaultMessage: `Ovewrite default field`,
+    defaultMessage: 'Use different field',
   }),
   helpText: (
     <FormattedMessage
       id="xpack.securitySolution.responseActions.endpoint.overwriteFieldDescription"
-      defaultMessage="Enable overwritting default field (process.pid)"
+      defaultMessage="If turned off, this defaults to process.pid"
     />
   ),
 };
