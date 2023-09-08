@@ -21,7 +21,6 @@ import {
   filterByCustomRules,
   filterBySearchTerm,
   filterByTags,
-  goToRuleDetails,
   expectFilterSearchTerm,
   expectFilterByTags,
   expectFilterByCustomRules,
@@ -35,6 +34,7 @@ import {
   expectFilterByPrebuiltRules,
   expectFilterByEnabledRules,
   expectManagementTableRules,
+  goToRuleDetailsOf,
 } from '../../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import {
@@ -228,7 +228,7 @@ describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () 
           changeRulesTableState();
           goToTablePage(2);
 
-          goToRuleDetails();
+          goToRuleDetailsOf('rule 6');
           cy.go('back');
 
           expectRulesManagementTab();

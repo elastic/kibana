@@ -175,4 +175,6 @@ export interface InventoryMetricConditions {
 
 export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
+  searchConfiguration: SerializedSearchSourceFields;
+  groupBy?: string | string[];
 }
