@@ -180,7 +180,6 @@ export class SampleDataInstaller {
           name: index,
           body: {
             template: {
-              settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
               mappings: { properties: dataIndex.fields },
             },
             index_patterns: [index],
@@ -205,8 +204,6 @@ export class SampleDataInstaller {
           settings: {
             index: {
               ...dataIndex.indexSettings,
-              number_of_shards: 1,
-              auto_expand_replicas: '0-1',
             },
           },
           mappings: { properties: dataIndex.fields },
