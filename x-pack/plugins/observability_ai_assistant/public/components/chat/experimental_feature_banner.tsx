@@ -31,7 +31,7 @@ export function ExperimentalFeatureBanner() {
               <FormattedMessage
                 id="xpack.observabilityAiAssistant.experimentalFunctionBanner.title"
                 defaultMessage="This feature is currently in {techPreview} and may contain issues."
-                values={{ techPreview: <strong>Tech Preview</strong> }}
+                values={{ techPreview: <strong>Technical preview</strong> }}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
