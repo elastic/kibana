@@ -10,7 +10,6 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import ECSSchema from './v.8.10.0-pid.json';
 
@@ -59,16 +58,17 @@ const FieldNameFieldComponent = ({
     return null;
   }, [fieldValue]);
 
+  const optionsAsComboBoxOptions = ECSSchemaOptions.map(({ label }) => ({
+    label,
+    value: label,
+  }));
+
   return (
     <>
-      <UseField<EuiComboBoxOptionOption<string>>
-        path={path}
-        readDefaultValueOnForm={readDefaultValueOnForm}
-        config={CONFIG}
-      >
+      <UseField<string> path={path} readDefaultValueOnForm={readDefaultValueOnForm} config={CONFIG}>
         {(field) => {
           const { label, value, setValue } = field;
-          const valueInList = !!ECSSchemaOptions.find((option) => option.label === value);
+          const valueInList = !!optionsAsComboBoxOptions.find((option) => option.label === value);
           return (
             <EuiFormRow label={label} fullWidth>
               <EuiComboBox
@@ -81,7 +81,7 @@ const FieldNameFieldComponent = ({
                 )}
                 singleSelection={SINGLE_SELECTION}
                 noSuggestions={false}
-                options={ECSSchemaOptions}
+                options={optionsAsComboBoxOptions}
                 fullWidth
                 selectedOptions={value && valueInList ? [{ value, label: value }] : undefined}
                 onChange={(newValue) => {
