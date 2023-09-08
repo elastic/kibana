@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { mathOperatorsCommandsDefinitions } from './autocomplete_definitions';
 import { dateExpressionDefinitions } from './autocomplete_definitions/date_math_expressions';
 
 export function endsWithOpenBracket(text: string) {
@@ -13,7 +14,12 @@ export function endsWithOpenBracket(text: string) {
 }
 
 export function isDateFunction(fnName: string) {
-  return /date/.test(fnName);
+  // TODO: improve this and rely in signature in the future
+  return ['to_datetime', 'date_trunc', 'date_parse'].includes(fnName);
+}
+
+export function getDateMathOperation() {
+  return mathOperatorsCommandsDefinitions.filter(({ label }) => ['+', '-'].includes(String(label)));
 }
 
 export function getDurationItemsWithQuantifier(quantifier: number = 1) {

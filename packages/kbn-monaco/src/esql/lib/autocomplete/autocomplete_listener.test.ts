@@ -205,17 +205,7 @@ describe('autocomplete_listener', () => {
       'case',
       'length',
     ];
-    const dateSuggestions = [
-      'year',
-      'month',
-      'day',
-      'second',
-      'minute',
-      'hour',
-      'week',
-      'millisecond',
-    ].flatMap((v) => [v, `${v}s`]);
-    const mathSymbols = ['+', '-', '/', '*'];
+
     testSuggestions('from a | eval ', ['var0']);
     testSuggestions('from a | eval a ', ['=']);
     testSuggestions('from a | eval a=', functionSuggestions);
@@ -224,11 +214,7 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | eval a=round(', ['FieldIdentifier']);
     testSuggestions('from a | eval a=round(b) ', ['|', '+', '-', '/', '*']);
     testSuggestions('from a | eval a=round(b),', ['var0']);
-    testSuggestions('from a | eval a=round(b) + ', [
-      'FieldIdentifier',
-      ...functionSuggestions,
-      ...getDurationItemsWithQuantifier().map(({ label }) => label),
-    ]);
+    testSuggestions('from a | eval a=round(b) + ', ['FieldIdentifier', ...functionSuggestions]);
     // NOTE: this is handled also partially in the suggestion wrapper with auto-injection of closing brackets
     testSuggestions('from a | eval a=round(b', [')', 'FieldIdentifier']);
     testSuggestions('from a | eval a=round(b), b=round(', ['FieldIdentifier']);
@@ -236,9 +222,23 @@ describe('autocomplete_listener', () => {
     testSuggestions('from a | eval var0=round(b), var1=round(c) | stats ', ['var2']);
 
     describe('date math', () => {
-      testSuggestions('from a | eval a = 1 ', mathSymbols.concat(dateSuggestions));
-      testSuggestions('from a | eval a = 1 ye', mathSymbols.concat(dateSuggestions)); // list will be filtered by the editor
-      testSuggestions('from a | eval a = 1 + 2 ', mathSymbols.concat(dateSuggestions));
+      const dateSuggestions = [
+        'year',
+        'month',
+        'week',
+        'day',
+        'hour',
+        'minute',
+        'second',
+        'millisecond',
+      ].flatMap((v) => [v, `${v}s`]);
+      const dateMathSymbols = ['+', '-'];
+      testSuggestions('from a | eval a = 1 ', dateMathSymbols.concat(dateSuggestions, ['|']));
+      testSuggestions('from a | eval a = 1 year ', dateMathSymbols.concat(dateSuggestions, ['|']));
+      testSuggestions(
+        'from a | eval a = 1 day + 2 ',
+        dateMathSymbols.concat(dateSuggestions, ['|'])
+      );
       testSuggestions(
         'from a | eval var0=date_trunc(',
         ['FieldIdentifier'].concat(...getDurationItemsWithQuantifier().map(({ label }) => label))
