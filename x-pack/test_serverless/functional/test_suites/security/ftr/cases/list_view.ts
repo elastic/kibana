@@ -53,7 +53,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('status', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/166027
+      describe.skip('status', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the status of cases to in-progress correctly', async () => {
