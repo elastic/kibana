@@ -11,7 +11,12 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 
-import { Clusters, RequestDetailsRequest, RequestDetailsResponse, RequestDetailsStats } from './details';
+import {
+  Clusters,
+  RequestDetailsRequest,
+  RequestDetailsResponse,
+  RequestDetailsStats,
+} from './details';
 import { RequestDetailsProps } from './types';
 
 interface RequestDetailsState {

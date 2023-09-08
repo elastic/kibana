@@ -12,8 +12,7 @@ import { getLocalClusterDetails } from './utils';
 import { ClustersTable } from './clusters_table';
 
 export class Clusters extends Component<RequestDetailsProps> {
-  static shouldShow = (request: Request) =>
-    Boolean(request.response?.json);
+  static shouldShow = (request: Request) => Boolean(request.response?.json);
 
   render() {
     console.log(this.props);
@@ -23,20 +22,20 @@ export class Clusters extends Component<RequestDetailsProps> {
     }
 
     const clusters = rawResponse._clusters
-        ? (
-            rawResponse._clusters as estypes.ClusterStatistics & {
-              details: Record<string, ClusterDetails>;
-            }
-          ).details
-        : {
-            local: getLocalClusterDetails(rawResponse)
-          };
+      ? (
+          rawResponse._clusters as estypes.ClusterStatistics & {
+            details: Record<string, ClusterDetails>;
+          }
+        ).details
+      : {
+          local: getLocalClusterDetails(rawResponse),
+        };
     console.log(clusters);
 
-    return this.props.request.response?.json
-      ? <>
-        <ClustersTable clusters={clusters}/>
-        </>
-      : null;
+    return this.props.request.response?.json ? (
+      <>
+        <ClustersTable clusters={clusters} />
+      </>
+    ) : null;
   }
 }
