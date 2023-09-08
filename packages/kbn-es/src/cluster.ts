@@ -178,14 +178,14 @@ export class Cluster {
    * @param plugins comma separated list of plugins to install
    * @param esJavaOpts
    */
-  async installPlugins(installPath: string, plugins: string, esJavaOpts: string | undefined) {
-    const _esJavaOpts = this.javaOptions(esJavaOpts);
+  async installPlugins(installPath: string, plugins: string, esJavaOpts?: string) {
+    const javaOpts = this.getJavaOptions(esJavaOpts);
     for (const plugin of plugins.split(',')) {
       await execa(ES_PLUGIN_BIN, ['install', plugin.trim()], {
         cwd: installPath,
         env: {
           JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-          ES_JAVA_OPTS: _esJavaOpts.trim(),
+          ES_JAVA_OPTS: javaOpts,
         },
       });
     }
@@ -406,7 +406,7 @@ export class Cluster {
     );
 
     this.log.info('%s %s', ES_BIN, args.join(' '));
-    const esJavaOpts = this.javaOptions(options.esJavaOpts);
+    const esJavaOpts = this.getJavaOptions(options.esJavaOpts);
 
     this.log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
@@ -571,18 +571,17 @@ export class Cluster {
     }
   }
 
-  javaOptions(esJavaOpts: string | undefined) {
-    let _esJavaOpts = `${esJavaOpts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
-
+  private getJavaOptions(opts: string | undefined) {
+    let esJavaOpts = `${opts || ''} ${process.env.ES_JAVA_OPTS || ''}`;
     // ES now automatically sets heap size to 50% of the machine's available memory
     // so we need to set it to a smaller size for local dev and CI
     // especially because we currently run many instances of ES on the same machine during CI
     // inital and max must be the same, so we only need to check the max
-    if (!_esJavaOpts.includes('Xmx')) {
+    if (!esJavaOpts.includes('Xmx')) {
       // 1536m === 1.5g
-      _esJavaOpts += ' -Xms1536m -Xmx1536m';
+      esJavaOpts += ' -Xms1536m -Xmx1536m';
     }
-    return _esJavaOpts.trim();
+    return esJavaOpts.trim();
   }
 
   /**

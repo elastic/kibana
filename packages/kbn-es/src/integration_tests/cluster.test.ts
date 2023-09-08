@@ -13,6 +13,7 @@ import * as installUtils from '../install';
 import { Cluster } from '../cluster';
 import { ES_NOPASSWORD_P12_PATH } from '@kbn/dev-utils/src/certs';
 import {
+  DownloadSnapshotOptions,
   InstallArchiveOptions,
   InstallSnapshotOptions,
   InstallSourceOptions,
@@ -54,7 +55,7 @@ async function ensureNoResolve(promise: Promise<unknown>) {
 jest.mock('execa');
 const execaMock = jest.requireMock('execa');
 
-function mockEsBin(
+const mockEsBin = (
   {
     exitCode,
     start,
@@ -64,7 +65,7 @@ function mockEsBin(
     start?: boolean;
     ssl?: boolean;
   } = { start: false, ssl: false }
-) {
+) => {
   execaMock.mockImplementationOnce((args: string[], options: {}) =>
     jest.requireActual('execa')(
       process.execPath,
@@ -80,13 +81,14 @@ function mockEsBin(
       options
     )
   );
-}
+};
 
 jest.mock('../utils/extract_config_files', () => ({
   extractConfigFiles: jest.fn(),
 }));
 
 jest.mock('../install', () => ({
+  downloadSnapshot: jest.fn(),
   installSource: jest.fn(),
   installSnapshot: jest.fn(),
   installArchive: jest.fn(),
@@ -97,6 +99,7 @@ jest.mock('../utils/extract_config_files', () => ({
 }));
 
 const extractConfigMock = jest.spyOn(extractConfig, 'extractConfigFiles');
+const downloadSnapshotMock = jest.spyOn(installUtils, 'downloadSnapshot');
 const installSourceMock = jest.spyOn(installUtils, 'installSource');
 const installSnapshotMock = jest.spyOn(installUtils, 'installSnapshot');
 const installArchiveMock = jest.spyOn(installUtils, 'installArchive');
@@ -111,6 +114,54 @@ beforeEach(() => {
 
 afterEach(() => {
   process.env = { ...initialEnv };
+});
+
+describe('#downloadSnapshot()', () => {
+  test('awaits downloadSnapshot() promise and returns { downloadPath }', async () => {
+    let resolveDownloadSnapshot: Function;
+    downloadSnapshotMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveDownloadSnapshot = () => {
+            resolve({ downloadPath: 'foo' });
+          };
+        })
+    );
+
+    const cluster = new Cluster({ log });
+    const promise = cluster.downloadSnapshot({ version: '8.10.0' });
+    await ensureNoResolve(promise);
+    resolveDownloadSnapshot!();
+    await expect(ensureResolve(promise)).resolves.toEqual({
+      downloadPath: 'foo',
+    });
+  });
+
+  test('passes through all options+log to downloadSnapshot()', async () => {
+    downloadSnapshotMock.mockResolvedValue({ downloadPath: 'foo' });
+    const options: DownloadSnapshotOptions = {
+      version: '8.10.0',
+      license: 'trial',
+      basePath: 'someBasePath',
+      installPath: 'someInstallPath',
+      log,
+      useCached: true,
+    };
+    const cluster = new Cluster({ log });
+    await cluster.downloadSnapshot(options);
+    expect(downloadSnapshotMock.mock.calls[0][0]).toMatchObject(options);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[@kbn/es Cluster] Downloading snapshot",
+      ]
+    `);
+  });
+
+  test('rejects if downloadSnapshot() rejects', async () => {
+    downloadSnapshotMock.mockRejectedValue(new Error('foo'));
+    const cluster = new Cluster({ log });
+    await expect(cluster.downloadSnapshot({ version: '8.10.0' })).rejects.toThrowError('foo');
+  });
 });
 
 describe('#installSource()', () => {
@@ -149,11 +200,10 @@ describe('#installSource()', () => {
     await cluster.installSource(options);
     expect(installSourceMock.mock.calls[0][0]).toMatchObject(options);
     expect(logWriter.messages).toMatchInlineSnapshot(`
-    Array [
-      " info source[@kbn/es Cluster] Installing from source",
-    ]
-  `);
-    // expect(logWriter.messages).toMatchSnapshot();
+          Array [
+            " info source[@kbn/es Cluster] Installing from source",
+          ]
+      `);
   });
 
   test('rejects if installSource() rejects', async () => {
@@ -200,10 +250,10 @@ describe('#installSnapshot()', () => {
     await cluster.installSnapshot(options);
     expect(installSnapshotMock.mock.calls[0][0]).toMatchObject(options);
     expect(logWriter.messages).toMatchInlineSnapshot(`
-    Array [
-      " info source[@kbn/es Cluster] Installing from snapshot",
-    ]
-  `);
+          Array [
+            " info source[@kbn/es Cluster] Installing from snapshot",
+          ]
+      `);
   });
 
   test('rejects if installSnapshot() rejects', async () => {
@@ -248,10 +298,10 @@ describe('#installArchive()', () => {
     await cluster.installArchive('bar', options);
     expect(installArchiveMock.mock.calls[0]).toMatchObject(['bar', options]);
     expect(logWriter.messages).toMatchInlineSnapshot(`
-    Array [
-      " info source[@kbn/es Cluster] Installing from an archive",
-    ]
-  `);
+          Array [
+            " info source[@kbn/es Cluster] Installing from an archive",
+          ]
+      `);
   });
 
   test('rejects if installArchive() rejects', async () => {
@@ -464,6 +514,100 @@ describe('#run()', () => {
   });
 });
 
+describe('#installPlugins()', () => {
+  test('passes through installPath and runs execa for each plugin', async () => {
+    const cluster = new Cluster({ log });
+    await cluster.installPlugins('foo', 'esPlugin1,esPlugin2', '');
+    expect(execaMock.mock.calls.length).toBe(2);
+    expect(execaMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "bin/elasticsearch-plugin",
+        Array [
+          "install",
+          "esPlugin1",
+        ],
+        Object {
+          "cwd": "foo",
+          "env": Object {
+            "ES_JAVA_OPTS": "-Xms1536m -Xmx1536m",
+            "JAVA_HOME": "",
+          },
+        },
+      ]
+    `);
+
+    expect(execaMock.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            "bin/elasticsearch-plugin",
+            Array [
+              "install",
+              "esPlugin2",
+            ],
+            Object {
+              "cwd": "foo",
+              "env": Object {
+                "ES_JAVA_OPTS": "-Xms1536m -Xmx1536m",
+                "JAVA_HOME": "",
+              },
+            },
+          ]
+      `);
+  });
+
+  test(`allows 'esJavaOpts' to be overwritten`, async () => {
+    mockEsBin({ start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.installPlugins('foo', 'esPlugin1', '-Xms2g -Xmx2g');
+
+    expect(execaMock.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms2g -Xmx2g"`);
+  });
+});
+
+describe('#configureKeystoreWithSecureSettingsFiles()', () => {
+  test('passes through installPath and runs execa for each pair of settings', async () => {
+    const cluster = new Cluster({ log });
+    await cluster.configureKeystoreWithSecureSettingsFiles('foo', [
+      ['name1', 'file1'],
+      ['name2', 'file2'],
+    ]);
+    expect(execaMock.mock.calls.length).toBe(2);
+    expect(execaMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "./bin/elasticsearch-keystore",
+        Array [
+          "add-file",
+          "name1",
+          "file1",
+        ],
+        Object {
+          "cwd": "foo",
+          "env": Object {
+            "JAVA_HOME": "",
+          },
+        },
+      ]
+    `);
+
+    expect(execaMock.mock.calls[1]).toMatchInlineSnapshot(`
+      Array [
+        "./bin/elasticsearch-keystore",
+        Array [
+          "add-file",
+          "name2",
+          "file2",
+        ],
+        Object {
+          "cwd": "foo",
+          "env": Object {
+            "JAVA_HOME": "",
+          },
+        },
+      ]
+    `);
+  });
+});
+
 describe('#stop()', () => {
   test('rejects if #run() or #start() was not called', async () => {
     const cluster = new Cluster({ log });
@@ -502,5 +646,20 @@ describe('#stop()', () => {
       'ES exited with code 1'
     );
     await expect(cluster.stop()).rejects.toThrowError('ES exited with code 1');
+  });
+});
+
+describe('#kill()', () => {
+  test('rejects if #run() or #start() was not called', async () => {
+    const cluster = new Cluster({ log });
+    await expect(cluster.kill()).rejects.toThrowError('ES has not been started');
+  });
+
+  test('resolves when ES exits with 0', async () => {
+    mockEsBin({ exitCode: 0, start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.start(installPath, esClusterExecOptions);
+    await cluster.kill();
   });
 });
