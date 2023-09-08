@@ -201,7 +201,7 @@ export const buildCompositeNewTermsAgg = ({
 };
 
 /**
- * Creates an aggregation that fetches the oldest document for each value in the `include` array.
+ * Creates an aggregation that fetches the oldest document for each term.
  */
 export const buildCompositeDocFetchAgg = ({
   fields,
