@@ -267,7 +267,7 @@ Specify the annotation appearance.
 
 Save the annotation group to the library. 
 
-. In the layer pane, on your annotation layer, click image:dashboard/images/lens_saveAnnotationLayerButton_8.9.0.png[Save button on annotations layer].
+. In the layer pane, on your annotation layer, click image:images/lens_saveAnnotationLayerButton_8.9.0.png[Save button on annotations layer].
 
 . Enter the *Title*, *Description*, and add any applicable <<managing-tags,*Tags*>>.
 
