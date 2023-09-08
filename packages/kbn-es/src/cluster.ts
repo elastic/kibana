@@ -35,10 +35,13 @@ import {
 import { createCliError } from './errors';
 const treeKillAsync = promisify<number, string>(treeKill);
 import { parseSettings, SettingsFilter } from './settings';
-import { InstallSourceOptions } from './install/install_source';
-import { DownloadSnapshotOptions, InstallSnapshotOptions } from './install/install_snapshot';
 import { EsClusterExecOptions } from './cluster_exec_options';
-import { InstallArchiveOptions } from './install/install_archive';
+import {
+  DownloadSnapshotOptions,
+  InstallArchiveOptions,
+  InstallSnapshotOptions,
+  InstallSourceOptions,
+} from './install/types';
 
 const DEFAULT_READY_TIMEOUT = 60 * 1000;
 
@@ -58,7 +61,6 @@ const first = (stream: Readable, map: (data: Buffer) => string | true | undefine
 interface StopOptions {
   gracefully: boolean;
 }
-
 export class Cluster {
   private log: ToolingLog;
   private ssl: boolean;

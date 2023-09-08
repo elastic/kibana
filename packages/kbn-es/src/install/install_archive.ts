@@ -16,18 +16,10 @@ import { extract } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
-import { Artifact, ArtifactLicense } from '../artifact';
+import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
 import { log as defaultLog } from '../utils/log';
-
-export interface InstallArchiveOptions {
-  license?: ArtifactLicense;
-  password?: string;
-  basePath?: string;
-  installPath?: string;
-  log?: ToolingLog;
-  esArgs?: string[];
-}
+import { InstallArchiveOptions } from './types';
 
 const isHttpUrl = (str: string) => {
   try {

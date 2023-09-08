@@ -11,10 +11,12 @@ import * as extractConfig from '../utils/extract_config_files';
 import { createAnyInstanceSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
 import * as installUtils from '../install';
 import { Cluster } from '../cluster';
-import { InstallSourceOptions } from '../install/install_source';
-import { InstallSnapshotOptions } from '../install/install_snapshot';
-import { InstallArchiveOptions } from '../install/install_archive';
 import { ES_NOPASSWORD_P12_PATH } from '@kbn/dev-utils/src/certs';
+import {
+  InstallArchiveOptions,
+  InstallSnapshotOptions,
+  InstallSourceOptions,
+} from '../install/types';
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
