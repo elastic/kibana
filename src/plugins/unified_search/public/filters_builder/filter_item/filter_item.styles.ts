@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import { EuiThemeComputed, euiCanAnimate } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 import add from '../assets/add.svg';
@@ -28,6 +28,10 @@ export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   }
   &:focus-within {
     flex-grow: 4;
+  }
+
+  ${euiCanAnimate} {
+    transition: flex ${euiTheme.animation.extraFast};
   }
 `;
 
