@@ -52,7 +52,6 @@ export default async () => {
       files: [idpPath, jwksPath],
       serverArgs: [
         'xpack.security.authc.realms.file.file1.order=-100',
-        'xpack.security.authc.token.enabled=true',
         `xpack.security.authc.realms.native.native1.enabled=false`,
         `xpack.security.authc.realms.native.native1.order=-97`,
 
