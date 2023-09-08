@@ -11,8 +11,13 @@ import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
+import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { ALERT_NAMESPACE, ALERT_URL } from '@kbn/rule-data-utils';
+import { StackAlert } from '@kbn/alerts-as-data-utils';
+import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils/src/schemas/generated/ml_anomaly_detection_schema';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -42,9 +47,32 @@ export type AnomalyDetectionAlertContext = AnomalyDetectionAlertBaseContext & {
   topInfluencers?: InfluencerAnomalyAlertDoc[];
 };
 
+export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
+  P,
+  RuleTypeState,
+  {},
+  AnomalyDetectionAlertContext,
+  typeof ANOMALY_SCORE_MATCH_GROUP_ID,
+  MlAnomalyDetectionAlert
+>;
+
 export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
 
 export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
+
+export const ANOMALY_DETECTION_AAD_INDEX_NAME = 'ml.anomaly-detection';
+
+export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ALERT_NAMESPACE}.jobId` as const;
+
+export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlert> = {
+  context: ANOMALY_DETECTION_AAD_INDEX_NAME,
+  mappings: {
+    fieldMap: {
+      [ALERT_ANOMALY_DETECTION_JOB_ID]: { type: 'keyword', array: false, required: false },
+    },
+  },
+  shouldWrite: true,
+};
 
 export const THRESHOLD_MET_GROUP: ActionGroup<AnomalyScoreMatchGroupId> = {
   id: ANOMALY_SCORE_MATCH_GROUP_ID,
@@ -137,18 +165,30 @@ export function registerAnomalyDetectionAlertType({
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     doesSetRecoveryContext: true,
-    async executor({ services, params, spaceId }) {
+    executor: async ({
+      services,
+      params,
+      spaceId,
+    }: ExecutorOptions<MlAnomalyDetectionAlertParams>) => {
       const fakeRequest = {} as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest
       );
+
+      const { alertsClient } = services;
+
       const executionResult = await execute(params, spaceId);
 
       if (executionResult && !executionResult.isHealthy) {
-        const alertInstanceName = executionResult.name;
-        const alertInstance = services.alertFactory.create(alertInstanceName);
-        alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult.context);
+        alertsClient?.report({
+          id: executionResult.name,
+          actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
+          context: executionResult.context,
+          payload: {
+            [ALERT_URL]: executionResult.context.anomalyExplorerUrl,
+          },
+        });
       }
 
       // Set context for recovered alerts
@@ -161,5 +201,6 @@ export function registerAnomalyDetectionAlertType({
 
       return { state: {} };
     },
+    alerts: STACK_ALERTS_AAD_CONFIG,
   });
 }
