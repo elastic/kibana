@@ -190,7 +190,10 @@ export function ConfigureLogsContent() {
           >
             <>
               {logFilePaths.map((filepath, index) => (
-                <div key={index}>
+                <div
+                  key={index}
+                  data-test-subj={`obltOnboardingLogFilePath-${index}`}
+                >
                   {index > 0 && <EuiSpacer size="s" />}
                   <EuiFlexGroup alignItems="center" gutterSize="xs">
                     <EuiFlexItem>
@@ -209,10 +212,10 @@ export function ConfigureLogsContent() {
                     {index > 0 && (
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
-                          data-test-subj="observabilityOnboardingConfigureLogsButton"
                           iconType="trash"
                           aria-label="Delete"
                           onClick={() => removeLogFilePath(index)}
+                          data-test-subj={`obltOnboardingLogFilePathDelete-${index}`}
                         />
                       </EuiFlexItem>
                     )}
@@ -229,9 +232,9 @@ export function ConfigureLogsContent() {
           >
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="observabilityOnboardingConfigureLogsAddRowButton"
                 iconType="plusInCircle"
                 onClick={addLogFilePath}
+                data-test-subj="obltOnboardingCustomLogsAddFilePath"
               >
                 {i18n.translate(
                   'xpack.observability_onboarding.configureLogs.logFile.addRow',
@@ -280,7 +283,6 @@ export function ConfigureLogsContent() {
             }
           >
             <EuiFieldText
-              data-test-subj="observabilityOnboardingConfigureLogsFieldText"
               placeholder={i18n.translate(
                 'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
                 {
@@ -289,6 +291,7 @@ export function ConfigureLogsContent() {
               )}
               value={serviceName}
               onChange={(event) => setServiceName(event.target.value)}
+              data-test-subj="obltOnboardingCustomLogsServiceName"
             />
           </OptionalFormRow>
           <EuiHorizontalRule margin="m" />
@@ -317,6 +320,7 @@ export function ConfigureLogsContent() {
                     defaultMessage: 'Advanced settings',
                   }
                 )}
+                data-test-subj="obltOnboardingCustomLogsAdvancedSettings"
               >
                 <EuiSpacer size="l" />
                 <EuiFormRow
@@ -375,7 +379,6 @@ export function ConfigureLogsContent() {
                   }
                 >
                   <EuiFieldText
-                    data-test-subj="observabilityOnboardingConfigureLogsFieldText"
                     placeholder={i18n.translate(
                       'xpack.observability_onboarding.configureLogs.namespace.placeholder',
                       {
@@ -384,6 +387,7 @@ export function ConfigureLogsContent() {
                     )}
                     value={namespace}
                     onChange={(event) => setNamespace(event.target.value)}
+                    data-test-subj="obltOnboardingCustomLogsNamespace"
                   />
                 </EuiFormRow>
                 <EuiSpacer size="l" />
@@ -421,11 +425,11 @@ export function ConfigureLogsContent() {
                   }
                 >
                   <EuiTextArea
-                    data-test-subj="observabilityOnboardingConfigureLogsTextArea"
                     value={customConfigurations}
                     onChange={(event) =>
                       setCustomConfigurations(event.target.value)
                     }
+                    data-test-subj="obltOnboardingCustomLogsCustomConfig"
                   />
                 </OptionalFormRow>
               </EuiAccordion>
