@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
+  // TODO: Skip before merging the PR
   describe('Search advanced settings', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('advancedSettings');

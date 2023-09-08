@@ -64,8 +64,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
    *
    * The intent is to trigger a code review from the Core and Security teams to discuss potential issues.
    */
-  // Skipped as blocking https://github.com/elastic/kibana/pull/164471
-  test.skip('detecting all the settings that have opted-in for dynamic in-memory updates', () => {
+  test('detecting all the settings that have opted-in for dynamic in-memory updates', () => {
     expect(getListOfDynamicConfigPaths()).toStrictEqual([
       // We need this for enriching our Perf tests with more valuable data regarding the steps of the test
       // Also helpful in Cloud & Serverless testing because we can't control the labels in those offerings
