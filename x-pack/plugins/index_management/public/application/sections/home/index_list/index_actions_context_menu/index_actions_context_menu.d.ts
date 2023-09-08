@@ -16,6 +16,8 @@ export interface IndexActionsContextMenuProps {
   // indices data
   indices: Index[];
 
+  // indicates if the context menu is on the list view (to show additional actions)
+  isOnListView?: boolean;
   // a callback used to reset selected indices on the list view
   resetSelection?: () => void;
 
