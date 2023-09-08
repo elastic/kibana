@@ -27,7 +27,7 @@ import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../../screens/com
 
 import {
   selectAllRules,
-  goToTheRuleDetailsOf,
+  goToRuleDetailsOf,
   testAllTagsBadges,
   testTagsBadge,
   testMultipleSelectedRulesLabel,
@@ -401,7 +401,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         // check if rule has been updated
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
     });
@@ -440,7 +440,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
         });
 
         // check if rule has been updated
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         hasIndexPatterns(resultingIndexPatterns.join(''));
       });
     });
@@ -496,7 +496,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
       waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
 
       // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
+      goToRuleDetailsOf(RULE_NAME);
       hasIndexPatterns(indexPattersToWrite.join(''));
     });
 
@@ -521,7 +521,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
       waitForBulkEditActionToFinish({ updatedCount: rulesToSelect.length });
 
       // check if rule has been updated
-      goToTheRuleDetailsOf(RULE_NAME);
+      goToRuleDetailsOf(RULE_NAME);
       hasIndexPatterns(resultingIndexPatterns.join(''));
     });
 
@@ -572,7 +572,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if timeline template has been updated to selected one
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', timelineTemplateName);
       });
     });
@@ -590,7 +590,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
         // check if timeline template has been updated to selected one, by opening rule that have had timeline prior to editing
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', noneTimelineTemplate);
       });
     });
@@ -627,7 +627,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
         submitBulkEditForm();
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
 
         assertRuleScheduleValues({
           interval: '20h',
@@ -651,7 +651,7 @@ describe('Detection rules, bulk edit', { tags: ['@ess', '@brokenInServerless'] }
         submitBulkEditForm();
         waitForBulkEditActionToFinish({ updatedCount: rows.length });
 
-        goToTheRuleDetailsOf(RULE_NAME);
+        goToRuleDetailsOf(RULE_NAME);
 
         assertRuleScheduleValues({
           interval: '1h',
