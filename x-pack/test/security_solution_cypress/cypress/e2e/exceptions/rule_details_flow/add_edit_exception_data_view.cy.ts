@@ -8,7 +8,6 @@
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
@@ -28,7 +27,7 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../urls/navigation';
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -60,6 +59,7 @@ describe(
     });
 
     beforeEach(() => {
+      login();
       deleteAlertsAndRules();
       createRule(
         getNewRule({
@@ -68,10 +68,7 @@ describe(
           interval: '10s',
           rule_id: 'rule_testing',
         })
-      );
-      login();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
+      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
       waitForAlertsToPopulate();
     });
 
