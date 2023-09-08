@@ -15,6 +15,8 @@ import type {
   EventAnnotationGroupSearchOut,
   EventAnnotationGroupGetIn,
   EventAnnotationGroupGetOut,
+  EventAnnotationGroupDeleteIn,
+  EventAnnotationGroupDeleteOut,
 } from '@kbn/event-annotation-plugin/common';
 import { CONTENT_ID } from '@kbn/event-annotation-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -255,9 +257,43 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('delete', () => {
-      it(`should delete a group`, async () => {});
+      it(`should delete a group`, async () => {
+        const payload: EventAnnotationGroupDeleteIn = {
+          contentTypeId: CONTENT_ID,
+          id: EXISTING_ID_1,
+          version: API_VERSION,
+        };
 
-      it(`should reject deleting a group that does not exist`, async () => {});
+        const resp = await supertest
+          .post(`${CONTENT_ENDPOINT}/delete`)
+          .set('kbn-xsrf', 'kibana')
+          .send(payload)
+          .expect(200);
+
+        const result = resp.body.result.result as EventAnnotationGroupDeleteOut;
+
+        expect(result.success).to.be(true);
+      });
+
+      it(`should reject deleting a group that does not exist`, async () => {
+        const payload: EventAnnotationGroupDeleteIn = {
+          contentTypeId: CONTENT_ID,
+          id: 'does-not-exist',
+          version: API_VERSION,
+        };
+
+        const resp = await supertest
+          .post(`${CONTENT_ENDPOINT}/delete`)
+          .set('kbn-xsrf', 'kibana')
+          .send(payload)
+          .expect(404);
+
+        expect(resp.body).to.eql({
+          error: 'Not Found',
+          message: 'Saved object [event-annotation-group/does-not-exist] not found',
+          statusCode: 404,
+        });
+      });
     });
 
     describe('create', () => {
