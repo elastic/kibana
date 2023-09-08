@@ -5,19 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// import { TestScheduler } from 'rxjs/testing';
 import { NEVER, lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import { getSearchProvider } from './search_provider';
 import { createDiscoverDataViewsMock } from '../__mocks__/data_views';
 import type { DiscoverAppLocator } from '../../common';
-
-// const getTestScheduler = () => {
-//   return new TestScheduler((actual, expected) => {
-//     return expect(actual).toEqual(expected);
-//   });
-// };
 
 describe('ES|QL search provider', () => {
   const uiCapabilitiesMock = new Promise<ApplicationStart['capabilities']>((resolve) => {
