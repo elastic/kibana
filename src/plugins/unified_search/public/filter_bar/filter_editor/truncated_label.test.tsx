@@ -15,7 +15,7 @@ describe('truncated_label', () => {
     defaultFont: '14px Inter',
     defaultComboboxWidth: 130,
     comboboxPaddings: 100,
-    comboBoxWrapperRef: React.createRef<HTMLInputElement>(),
+    comboBoxWrapperRef: React.createRef<HTMLDivElement>(),
     search: '',
     label: 'example_field',
   };
