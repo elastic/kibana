@@ -6,13 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegrationOptions } from '../../types';
-import { CreateCustomIntegrationContext } from './types';
+import { CustomIntegrationOptions, IntegrationError } from '../../types';
+import { CreateCustomIntegrationContext, CreateCustomIntegrationEvent } from './types';
 
 export type CreateCustomIntegrationNotificationEvent =
   | {
       type: 'INTEGRATION_CREATED';
       fields: CustomIntegrationOptions;
+    }
+  | {
+      type: 'INTEGRATION_CLEANUP';
+      integrationName: CustomIntegrationOptions['integrationName'];
+    }
+  | {
+      type: 'INTEGRATION_CLEANUP_FAILED';
+      error: IntegrationError;
     }
   | {
       type: 'CREATE_INITIALIZED';
@@ -24,6 +32,28 @@ export const CreateIntegrationNotificationEventSelectors = {
       type: 'INTEGRATION_CREATED',
       fields: context.fields,
     } as CreateCustomIntegrationNotificationEvent),
+  integrationCleanup: (
+    context: CreateCustomIntegrationContext,
+    event: CreateCustomIntegrationEvent
+  ) => {
+    return 'data' in event && 'integrationName' in event.data
+      ? ({
+          type: 'INTEGRATION_CLEANUP',
+          integrationName: event.data.integrationName,
+        } as CreateCustomIntegrationNotificationEvent)
+      : null;
+  },
+  integrationCleanupFailed: (
+    context: CreateCustomIntegrationContext,
+    event: CreateCustomIntegrationEvent
+  ) => {
+    return 'data' in event && event.data instanceof IntegrationError
+      ? ({
+          type: 'INTEGRATION_CLEANUP_FAILED',
+          error: event.data,
+        } as CreateCustomIntegrationNotificationEvent)
+      : null;
+  },
   initialized: () =>
     ({
       type: 'CREATE_INITIALIZED',

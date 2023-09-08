@@ -8,6 +8,8 @@
 /* eslint-disable max-classes-per-file */
 import * as rt from 'io-ts';
 
+export const integrationNameRT = rt.string;
+
 const datasetTypes = rt.keyof({
   logs: null,
   metrics: null,
@@ -24,7 +26,7 @@ export type Dataset = rt.TypeOf<typeof dataset>;
 
 export const customIntegrationOptionsRT = rt.exact(
   rt.type({
-    integrationName: rt.string,
+    integrationName: integrationNameRT,
     datasets: rt.array(dataset),
   })
 );
@@ -60,6 +62,13 @@ export class UnknownError extends IntegrationError {
 }
 
 export class DecodeError extends IntegrationError {
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export class IntegrationNotInstalledError extends IntegrationError {
   constructor(message?: string) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);

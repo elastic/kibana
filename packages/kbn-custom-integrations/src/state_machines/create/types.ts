@@ -7,7 +7,10 @@
  */
 
 import { CustomIntegrationOptions, IntegrationError } from '../../types';
-import { CreateCustomIntegrationValue } from '../services/integrations_client';
+import {
+  CreateCustomIntegrationValue,
+  DeleteCustomIntegrationResponse,
+} from '../services/integrations_client';
 import { IndexedValidationErrors, ValidationErrors } from '../services/validation';
 
 export type CreateCustomIntegrationOptions = CustomIntegrationOptions;
@@ -22,6 +25,7 @@ export interface WithOptions {
   options: {
     deletePrevious?: boolean;
     resetOnCreation?: boolean;
+    errorOnFailedCleanup?: boolean;
   };
 }
 
@@ -113,6 +117,10 @@ export type CreateCustomIntegrationEvent =
   | {
       type: 'done.invoke.submitting:invocation[0]';
       data: CreateCustomIntegrationValue;
+    }
+  | {
+      type: 'done.invoke.CreateCustomIntegration.deletingPrevious:invocation[0]';
+      data: DeleteCustomIntegrationResponse;
     }
   | {
       type: 'error.platform.CreateCustomIntegration.deletingPrevious:invocation[0]';

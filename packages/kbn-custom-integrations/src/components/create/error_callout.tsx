@@ -9,7 +9,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { AuthorizationError, IntegrationError, UnknownError } from '../../types';
+import {
+  AuthorizationError,
+  IntegrationError,
+  IntegrationNotInstalledError,
+  UnknownError,
+} from '../../types';
 
 const TITLE = i18n.translate('customIntegrationsPackage.create.errorCallout.title', {
   defaultMessage: 'Sorry, there was an error',
@@ -34,7 +39,7 @@ export const ErrorCallout = ({
       }
     );
     return <BaseErrorCallout message={authorizationDescription} onRetry={onRetry} />;
-  } else if (error instanceof UnknownError) {
+  } else if (error instanceof UnknownError || error instanceof IntegrationNotInstalledError) {
     return <BaseErrorCallout message={error.message} onRetry={onRetry} />;
   } else {
     return null;

@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import { isDevMode } from '@kbn/xstate-utils';
 import { createCustomIntegrationsStateMachine } from './state_machine';
 import { IntegrationsClient } from '../services/integrations_client';
-import { CustomIntegrationOptions } from '../../types';
+import { CustomIntegrationOptions, IntegrationError } from '../../types';
 import { InitialState } from './types';
 import { createCustomIntegrationsNotificationChannel } from './notifications';
 
@@ -21,19 +21,24 @@ interface Services {
   http: HttpSetup | undefined;
 }
 
-export type OnIntegrationCreationCallback = (integrationOptions: CustomIntegrationOptions) => void;
+export interface Callbacks {
+  onIntegrationCreation?: (integrationOptions: CustomIntegrationOptions) => void;
+  onIntegrationCleanup?: (integrationName: CustomIntegrationOptions['integrationName']) => void;
+  onIntegrationCleanupFailed?: (error: IntegrationError) => void;
+}
 
-interface ProviderProps {
+type ProviderProps = {
   services: Services;
   useDevTools?: boolean;
-  onIntegrationCreation?: OnIntegrationCreationCallback;
   initialState: InitialState;
-}
+} & Callbacks;
 
 export const useCustomIntegrationsState = ({
   services,
   useDevTools = isDevMode(),
   onIntegrationCreation,
+  onIntegrationCleanup,
+  onIntegrationCleanupFailed,
   initialState,
 }: ProviderProps) => {
   const { http } = services;
@@ -56,10 +61,19 @@ export const useCustomIntegrationsState = ({
     const sub = notificationsService.subscribe((event) => {
       if (event.type === 'INTEGRATION_CREATED' && onIntegrationCreation) {
         onIntegrationCreation(event.fields);
+      } else if (event.type === 'INTEGRATION_CLEANUP' && onIntegrationCleanup) {
+        onIntegrationCleanup(event.integrationName);
+      } else if (event.type === 'INTEGRATION_CLEANUP_FAILED' && onIntegrationCleanupFailed) {
+        onIntegrationCleanupFailed(event.error);
       }
     });
     return () => sub.unsubscribe();
-  }, [notificationsService, onIntegrationCreation]);
+  }, [
+    notificationsService,
+    onIntegrationCleanup,
+    onIntegrationCleanupFailed,
+    onIntegrationCreation,
+  ]);
 
   const customIntegrationsStateService = useInterpret(
     () =>

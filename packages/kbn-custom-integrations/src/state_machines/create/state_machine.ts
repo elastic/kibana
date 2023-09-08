@@ -108,11 +108,18 @@ export const createPureCreateCustomIntegrationStateMachine = (
             src: 'cleanup',
             onDone: {
               target: '#submitting',
+              actions: ['notifyIntegrationCleanup'],
             },
-            onError: {
-              target: '#failure',
-              actions: ['storeServerErrors'],
-            },
+            onError: [
+              {
+                target: '#failure',
+                cond: 'shouldErrorOnFailedCleanup',
+                actions: ['storeServerErrors', 'notifyIntegrationCleanupFailed'],
+              },
+              {
+                target: '#submitting',
+              },
+            ],
           },
         },
         submitting: {
@@ -240,6 +247,7 @@ export const createPureCreateCustomIntegrationStateMachine = (
         shouldCleanup: (context) =>
           context.options.deletePrevious === true &&
           context.previouslyCreatedIntegration !== undefined,
+        shouldErrorOnFailedCleanup: (context) => context.options.errorOnFailedCleanup === true,
         shouldReset: (context) => context.options.resetOnCreation === true,
       },
     }
@@ -312,6 +320,12 @@ export const createCreateCustomIntegrationStateMachine = ({
     actions: {
       notifyIntegrationCreated: sendIfDefined(SpecialTargets.Parent)(
         CreateIntegrationNotificationEventSelectors.integrationCreated
+      ),
+      notifyIntegrationCleanup: sendIfDefined(SpecialTargets.Parent)(
+        CreateIntegrationNotificationEventSelectors.integrationCleanup
+      ),
+      notifyIntegrationCleanupFailed: sendIfDefined(SpecialTargets.Parent)(
+        CreateIntegrationNotificationEventSelectors.integrationCleanupFailed
       ),
       notifyInitialized: sendIfDefined(SpecialTargets.Parent)(
         CreateIntegrationNotificationEventSelectors.initialized

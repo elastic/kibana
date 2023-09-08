@@ -31,7 +31,7 @@ import {
   ConnectedCustomIntegrationsForm,
   useConsumerCustomIntegrations,
   CustomIntegrationsProvider,
-  OnIntegrationCreationCallback,
+  Callbacks,
 } from '@kbn/custom-integrations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWizard } from '.';
@@ -53,7 +53,7 @@ export function ConfigureLogs() {
   const { integrationName, datasetName, lastCreatedIntegrationOptions } =
     getState();
 
-  const onIntegrationCreation: OnIntegrationCreationCallback = (
+  const onIntegrationCreation: Callbacks['onIntegrationCreation'] = (
     integrationOptions
   ) => {
     const {
@@ -79,6 +79,7 @@ export function ConfigureLogs() {
           options: {
             deletePrevious: true,
             resetOnCreation: false,
+            errorOnFailedCleanup: false,
           },
           fields: {
             integrationName,

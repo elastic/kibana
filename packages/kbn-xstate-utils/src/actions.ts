@@ -19,11 +19,13 @@ import {
 export const sendIfDefined =
   <TSentEvent extends EventObject = AnyEventObject>(target: string | ActorRef<TSentEvent>) =>
   <TContext, TEvent extends EventObject>(
-    eventExpr: Expr<TContext, TEvent, TSentEvent | undefined>,
+    eventExpr: Expr<TContext, TEvent, TSentEvent | undefined | null>,
     options?: SendActionOptions<TContext, TEvent>
   ): PureAction<TContext, TEvent> => {
     return actions.pure((context, event) => {
       const targetEvent = eventExpr(context, event);
-      return targetEvent != null ? [actions.sendTo(target, targetEvent, options)] : undefined;
+      return targetEvent != null && targetEvent !== undefined
+        ? [actions.sendTo(target, targetEvent, options)]
+        : undefined;
     });
   };

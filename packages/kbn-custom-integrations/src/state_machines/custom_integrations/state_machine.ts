@@ -58,6 +58,12 @@ export const createPureCustomIntegrationsStateMachine = (
                 INTEGRATION_CREATED: {
                   actions: ['notifyIntegrationCreated'],
                 },
+                INTEGRATION_CLEANUP: {
+                  actions: ['notifyIntegrationCleanup'],
+                },
+                INTEGRATION_CLEANUP_FAILED: {
+                  actions: ['notifyIntegrationCleanupFailed'],
+                },
               },
             },
           },
@@ -113,6 +119,14 @@ export const createCustomIntegrationsStateMachine = ({
       notifyIntegrationCreated: customIntegrationsNotificationsChannel.notify((context, event) => {
         return event;
       }),
+      notifyIntegrationCleanup: customIntegrationsNotificationsChannel.notify((context, event) => {
+        return event;
+      }),
+      notifyIntegrationCleanupFailed: customIntegrationsNotificationsChannel.notify(
+        (context, event) => {
+          return event;
+        }
+      ),
     },
   });
 };

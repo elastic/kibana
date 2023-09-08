@@ -15,5 +15,5 @@ export { CustomIntegrationsProvider } from './src/state_machines';
 
 // Types
 export type { DispatchableEvents } from './src/hooks';
-export type { OnIntegrationCreationCallback, InitialState } from './src/state_machines';
+export type { Callbacks, InitialState } from './src/state_machines';
 export type { CustomIntegrationOptions } from './src/types';

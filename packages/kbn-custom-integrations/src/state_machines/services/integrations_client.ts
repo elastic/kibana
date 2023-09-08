@@ -15,6 +15,8 @@ import {
   AuthorizationError,
   customIntegrationOptionsRT,
   DecodeError,
+  integrationNameRT,
+  IntegrationNotInstalledError,
   NamingCollisionError,
   UnknownError,
 } from '../../types';
@@ -43,7 +45,9 @@ export interface IIntegrationsClient {
   createCustomIntegration(
     params?: CreateCustomIntegrationRequestQuery
   ): Promise<CreateCustomIntegrationValue>;
-  deleteCustomIntegration(params?: DeleteCustomIntegrationRequestQuery): Promise<void>;
+  deleteCustomIntegration(
+    params?: DeleteCustomIntegrationRequestQuery
+  ): Promise<DeleteCustomIntegrationResponse>;
 }
 
 export class IntegrationsClient implements IIntegrationsClient {
@@ -81,15 +85,24 @@ export class IntegrationsClient implements IIntegrationsClient {
     }
   }
 
-  public async deleteCustomIntegration(params: DeleteCustomIntegrationRequestQuery): Promise<void> {
+  public async deleteCustomIntegration(
+    params: DeleteCustomIntegrationRequestQuery
+  ): Promise<DeleteCustomIntegrationResponse> {
     const { integrationName, version } = params;
     try {
       await this.http.delete(
         DELETE_PACKAGE_URL.replace('{pkgName}', integrationName).replace('{pkgVersion}', version),
         { version: '2023-10-31' }
       );
+      return Promise.resolve({
+        integrationName: params.integrationName,
+      });
     } catch (error) {
-      throw new UnknownError(error?.body?.message ?? GENERIC_DELETE_ERROR_MESSAGE);
+      if (error?.body?.message && error.body.message.includes('is not installed')) {
+        throw new IntegrationNotInstalledError(error.body.message);
+      } else {
+        throw new UnknownError(error?.body?.message ?? GENERIC_DELETE_ERROR_MESSAGE);
+      }
     }
   }
 }
@@ -127,3 +140,11 @@ export const deleteCustomIntegrationRequestQueryRT = rt.type({
 export type DeleteCustomIntegrationRequestQuery = rt.TypeOf<
   typeof deleteCustomIntegrationRequestQueryRT
 >;
+
+export const deleteCustomIntegrationResponseRT = rt.exact(
+  rt.type({
+    integrationName: integrationNameRT,
+  })
+);
+
+export type DeleteCustomIntegrationResponse = rt.TypeOf<typeof deleteCustomIntegrationResponseRT>;

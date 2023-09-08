@@ -10,6 +10,7 @@ export const DEFAULT_CONTEXT = {
   options: {
     deletePrevious: false,
     resetOnCreation: true,
+    errorOnFailedCleanup: false,
   },
   fields: {
     integrationName: '',

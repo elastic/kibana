@@ -7,5 +7,5 @@
  */
 
 export { CustomIntegrationsProvider } from './custom_integrations/provider';
-export type { OnIntegrationCreationCallback } from './custom_integrations/provider';
+export type { Callbacks } from './custom_integrations/provider';
 export type { InitialState } from './custom_integrations/types';
