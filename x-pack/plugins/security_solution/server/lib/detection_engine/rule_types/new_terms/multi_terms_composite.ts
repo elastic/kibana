@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import pRetry, { AbortError } from 'p-retry';
 import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 import type { NewTermsRuleParams } from '../../rule_schema';
@@ -27,7 +27,7 @@ import { getMaxSignalsWarning } from '../utils/utils';
 import type { RuleServices, SearchAfterAndBulkCreateReturnType, RunOpts } from '../types';
 const BATCH_SIZE = 1000;
 
-interface MultiTermsCompositeArgs {
+interface MultiTermsCompositeArgsBase {
   filterArgs: GetFilterArgs;
   buckets: Array<{
     doc_count: number;
@@ -44,13 +44,17 @@ interface MultiTermsCompositeArgs {
   createAlertsHook: CreateAlertsHook;
 }
 
+interface MultiTermsCompositeArgs extends MultiTermsCompositeArgsBase {
+  batchSize: number;
+}
+
 /**
  * This helper does phase2/phase3(look README) got multiple new terms
  * It takes full page of results from phase 1 (10,000)
  * Splits it in chunks (starts from 1000) and applies it as a filter in new composite aggregation request
  * It pages through though all 10,000 results from phase1 until maxSize alerts found
  */
-export const multiTermsComposite = async ({
+const multiTermsCompositeNonRetryable = async ({
   filterArgs,
   buckets,
   params,
@@ -62,6 +66,7 @@ export const multiTermsComposite = async ({
   runOpts,
   afterKey,
   createAlertsHook,
+  batchSize,
 }: MultiTermsCompositeArgs) => {
   const {
     ruleExecutionLogger,
@@ -77,8 +82,8 @@ export const multiTermsComposite = async ({
   let i = 0;
 
   while (i < buckets.length) {
-    const batch = buckets.slice(i, i + BATCH_SIZE);
-    i += BATCH_SIZE;
+    const batch = buckets.slice(i, i + batchSize);
+    i += batchSize;
     const batchFilters = batch.map((b) => {
       const must = Object.keys(b.key).map((key) => ({ match: { [key]: b.key[key] } }));
 
@@ -182,4 +187,43 @@ export const multiTermsComposite = async ({
   }
 
   return result;
+};
+
+/**
+ * If request fails with batch size of 1,000
+ * We will try to reduce it in twice per each request, up until 250
+ * Per ES documentation, max_clause_count min value is 1,000 - so with 250 we should be able execute query below max_clause_count value
+ */
+export const multiTermsComposite = async (args: MultiTermsCompositeArgs): Promise<void> => {
+  let retryBatchSize = BATCH_SIZE;
+  const ruleExecutionLogger = args.runOpts.ruleExecutionLogger;
+  await pRetry(
+    async (retryCount) => {
+      try {
+        const res = await multiTermsCompositeNonRetryable({ ...args, batchSize: retryBatchSize });
+        return res;
+      } catch (e) {
+        // do not retry if error not related to too many clauses
+        // if user's configured rule somehow has filter itself greater than max_clause_count, we won't get to this place anyway,
+        // as rule would fail on phase 1
+        if (
+          ![
+            'query_shard_exception: failed to create query',
+            'Query contains too many nested clauses;',
+          ].some((errMessage) => e.message.includes(errMessage))
+        ) {
+          throw new AbortError(e.message);
+        }
+
+        retryBatchSize = retryBatchSize / 2;
+        ruleExecutionLogger.warn(
+          `New terms query for multiple fields failed due to too many clauses in query: ${e.message}. Retrying #{retryCount} with ${retryBatchSize} for composite aggregation`
+        );
+        throw e;
+      }
+    },
+    {
+      retries: 2,
+    }
+  );
 };
