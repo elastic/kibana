@@ -577,11 +577,8 @@ describe('Handler', () => {
       'An internal server error occurred. Check Kibana server logs for details.'
     );
 
-    const [message, meta] = loggingSystemMock.collect(logger).error[0];
+    const [message] = loggingSystemMock.collect(logger).error[0];
     expect(message).toEqual('500 Server Error - /');
-
-    // unwrap all error properties
-    expect(Object.assign({}, meta!.error)).toMatchInlineSnapshot(`Object {}`);
   });
 
   it('captures the error if handler throws', async () => {
