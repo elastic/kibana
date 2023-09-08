@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
-  describe('Header menu', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/165839
+  describe.skip('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
