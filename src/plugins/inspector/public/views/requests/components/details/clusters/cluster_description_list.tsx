@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescriptionList, EuiText } from '@elastic/eui';
+import { EuiDescriptionList, EuiDescriptionListProps, EuiText } from '@elastic/eui';
 import { ShardsDetails } from './shards_details';
 
 interface Props {
@@ -16,18 +16,19 @@ interface Props {
 }
 
 export function ClusterDescriptionList({ clusterDetails }: Props) {
-  const items = [
-    {
+  const items: EuiDescriptionListProps['listItems'] = [];
+  if (clusterDetails._shards) {
+    items.push({
       title: i18n.translate('inspector.requests.clusterDetails.shardsLabel', {
         defaultMessage: 'Shards',
       }),
       description: (
         <EuiText size="xs" color="subdued">
-          <ShardsDetails clusterDetails={clusterDetails} />
+          <ShardsDetails failures={clusterDetails.failures ?? []} shardsDetails={clusterDetails._shards} />
         </EuiText>
       ),
-    },
-  ];
+    });
+  }
 
   return (
     <EuiText style={{ width: '100%' }} size="xs">
