@@ -339,6 +339,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       enrichApis: `${ELASTICSEARCH_DOCS}enrich-apis.html`,
       createEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
       matchAllQuery: `${ELASTICSEARCH_DOCS}query-dsl-match-all-query.html`,
+      enrichPolicies: `${ELASTICSEARCH_DOCS}ingest-enriching-data.html#enrich-policy`,
       createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
       frozenIndices: `${ELASTICSEARCH_DOCS}frozen-indices.html`,
       gettingStarted: `${ELASTICSEARCH_DOCS}getting-started.html`,

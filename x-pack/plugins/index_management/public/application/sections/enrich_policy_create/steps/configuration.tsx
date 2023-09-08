@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { omit, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiPopover, EuiIcon, EuiCode, EuiButton, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import {
   useForm,
   Form,
@@ -121,6 +121,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
       application: { getUrlForApp },
     },
   } = useAppContext();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   const { form } = useForm({
@@ -159,6 +160,49 @@ export const ConfigurationStep = ({ onNext }: Props) => {
       <UseField
         path="type"
         component={SelectField}
+        labelAppend={
+          <EuiPopover
+            button={
+              <EuiLink onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}>
+                <EuiIcon type="questionInCircle" />
+              </EuiLink>
+            }
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+          >
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver"
+                  defaultMessage="Determines how to match the data to incoming documents."
+                />
+              </p>
+              <ul>
+                <li>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver"
+                    defaultMessage="{type} matches an exact value."
+                    values={{ type: <EuiCode transparentBackground>Match</EuiCode> }}
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver"
+                    defaultMessage="{type} matches a geographic location."
+                    values={{ type: <EuiCode transparentBackground>Geo match</EuiCode> }}
+                  />
+                </li>
+                <li>
+                  <FormattedMessage
+                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver"
+                    defaultMessage="{type} matches a number, date, or IP address range."
+                    values={{ type: <EuiCode transparentBackground>Range</EuiCode> }}
+                  />
+                </li>
+              </ul>
+            </EuiText>
+          </EuiPopover>
+        }
         componentProps={{
           fullWidth: false,
           euiFieldProps: {

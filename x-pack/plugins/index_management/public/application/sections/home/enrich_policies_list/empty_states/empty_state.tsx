@@ -32,7 +32,7 @@ export const EmptyState = () => {
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription"
-            defaultMessage="A set of configuration options used to add the right enrich data to the right incoming documents."
+            defaultMessage="Use an enrich policy to add data from existing indices into incoming documents during ingest."
           />
         </p>
       }

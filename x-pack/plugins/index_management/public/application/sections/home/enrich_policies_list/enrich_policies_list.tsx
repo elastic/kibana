@@ -82,7 +82,7 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
       <EuiText color="subdued">
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.list.descriptionTitle"
-          defaultMessage="Enrich policies allow you to enrich your data by adding context via additional data. {learnMoreLink}"
+          defaultMessage="Use an enrich policy to automatically enhance your incoming documents with data from your existing indices. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink
