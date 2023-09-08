@@ -85,6 +85,11 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
     });
   };
 
+  const handleFocus: React.FocusEventHandler<HTMLDivElement> = () => {
+    // Force focus on input due to https://github.com/elastic/eui/issues/7170
+    inputRef?.current?.focus();
+  }
+
   return (
     <div ref={comboBoxWrapperRef}>
       <EuiComboBox
@@ -103,6 +108,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
         isClearable={false}
         compressed
         fullWidth
+        onFocus={handleFocus}
         data-test-subj="filterFieldSuggestionList"
         renderOption={(option, searchValue) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
