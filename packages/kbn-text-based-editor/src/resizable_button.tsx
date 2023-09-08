@@ -20,20 +20,17 @@ export function ResizableButton({
   onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
 }) {
   return (
-    <div
+    <EuiResizableButton
+      data-test-subj="TextBasedLangEditor-resize"
+      onMouseDown={onMouseDownResizeHandler}
+      onKeyDown={onKeyDownResizeHandler}
+      onTouchStart={onMouseDownResizeHandler}
       css={css`
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
       `}
-    >
-      <EuiResizableButton
-        data-test-subj="TextBasedLangEditor-resize"
-        onMouseDown={onMouseDownResizeHandler}
-        onKeyDown={onKeyDownResizeHandler}
-        onTouchStart={onMouseDownResizeHandler}
-      />
-    </div>
+    />
   );
 }
