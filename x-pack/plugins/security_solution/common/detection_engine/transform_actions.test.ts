@@ -18,8 +18,12 @@ import type {
   RuleResponseAction,
 } from '../api/detection_engine/model/rule_response_actions';
 import { RESPONSE_ACTION_TYPES } from '../api/detection_engine/model/rule_response_actions';
-import type { NormalizedRuleAction } from '../api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
-import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type {
+  NormalizedRuleAction,
+  NormalizedSystemRuleAction,
+} from '../api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import type { RuleDefaultAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 describe('transform_actions', () => {
   test('it should transform RuleAlertAction[] to RuleAction[]', () => {
@@ -29,12 +33,34 @@ describe('transform_actions', () => {
       action_type_id: 'action_type_id',
       params: {},
     };
+
     const alertAction = transformRuleToAlertAction(ruleAction);
+
     expect(alertAction).toEqual({
       id: ruleAction.id,
       group: ruleAction.group,
       actionTypeId: ruleAction.action_type_id,
       params: ruleAction.params,
+    });
+  });
+
+  test('it should transform RuleAlertSystemAction[] to RuleSystemAction[]', () => {
+    const systemAction = {
+      id: 'id',
+      action_type_id: 'action_type_id',
+      params: {},
+      uuid: 'uuid',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    const alertAction = transformRuleToAlertAction(systemAction);
+
+    expect(alertAction).toEqual({
+      id: systemAction.id,
+      actionTypeId: systemAction.action_type_id,
+      params: systemAction.params,
+      uuid: systemAction.uuid,
+      type: systemAction.type,
     });
   });
 
@@ -46,7 +72,9 @@ describe('transform_actions', () => {
       params: {},
       uuid: '111',
     };
+
     const ruleAction = transformAlertToRuleAction(alertAction);
+
     expect(ruleAction).toEqual({
       id: alertAction.id,
       group: alertAction.group,
@@ -55,6 +83,27 @@ describe('transform_actions', () => {
       uuid: '111',
     });
   });
+
+  test('it should transform RuleSystemAction[] to RuleAlertSystemAction[]', () => {
+    const systemAction = {
+      id: 'id',
+      actionTypeId: 'action_type_id',
+      params: {},
+      uuid: 'uuid',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    const ruleAction = transformAlertToRuleAction(systemAction);
+
+    expect(ruleAction).toEqual({
+      id: systemAction.id,
+      action_type_id: systemAction.actionTypeId,
+      params: systemAction.params,
+      uuid: systemAction.uuid,
+      type: systemAction.type,
+    });
+  });
+
   test('it should transform NormalizedRuleAction[] to NormalizedAlertAction[]', () => {
     const ruleAction: NormalizedRuleAction = {
       id: 'id',
@@ -63,7 +112,9 @@ describe('transform_actions', () => {
       frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
       alerts_filter: { query: { kql: '*', filters: [] } },
     };
+
     const alertAction = transformNormalizedRuleToAlertAction(ruleAction);
+
     expect(alertAction).toEqual({
       id: ruleAction.id,
       group: ruleAction.group,
@@ -72,8 +123,27 @@ describe('transform_actions', () => {
       alertsFilter: ruleAction.alerts_filter,
     });
   });
+
+  test('it should transform NormalizedSystemRuleAction[] to NormalizedSystemAlertAction[]', () => {
+    const systemAction: NormalizedSystemRuleAction = {
+      id: 'id',
+      params: {},
+      uuid: 'uuid',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    const alertAction = transformNormalizedRuleToAlertAction(systemAction);
+
+    expect(alertAction).toEqual({
+      id: systemAction.id,
+      params: systemAction.params,
+      uuid: systemAction.uuid,
+      type: systemAction.type,
+    });
+  });
+
   test('it should transform RuleAction[] to NormalizedRuleAction[]', () => {
-    const alertAction: RuleAction = {
+    const alertAction: RuleDefaultAction = {
       id: 'id',
       group: 'group',
       actionTypeId: 'actionTypeId',
@@ -82,15 +152,38 @@ describe('transform_actions', () => {
       frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
       alertsFilter: { query: { kql: '*', filters: [] } },
     };
+
     const ruleAction = transformAlertToNormalizedRuleAction(alertAction);
+
     expect(ruleAction).toEqual({
       id: alertAction.id,
       group: alertAction.group,
       params: alertAction.params,
       frequency: alertAction.frequency,
       alerts_filter: alertAction.alertsFilter,
+      uuid: '111',
     });
   });
+
+  test('it should transform RuleSystemAction[] to NormalizedSystemAlertAction[]', () => {
+    const systemAction: RuleSystemAction = {
+      id: 'id',
+      actionTypeId: 'action_type_id',
+      params: {},
+      uuid: 'uuid',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    const ruleAction = transformAlertToNormalizedRuleAction(systemAction);
+
+    expect(ruleAction).toEqual({
+      id: systemAction.id,
+      params: systemAction.params,
+      uuid: systemAction.uuid,
+      type: systemAction.type,
+    });
+  });
+
   test('it should transform ResponseAction[] to RuleResponseAction[]', () => {
     const ruleAction: ResponseAction = {
       action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
@@ -102,7 +195,9 @@ describe('transform_actions', () => {
         queries: undefined,
       },
     };
+
     const alertAction = transformRuleToAlertResponseAction(ruleAction);
+
     expect(alertAction).toEqual({
       actionTypeId: ruleAction.action_type_id,
       params: {
@@ -126,7 +221,9 @@ describe('transform_actions', () => {
         queries: undefined,
       },
     };
+
     const ruleAction = transformAlertToRuleResponseAction(alertAction);
+
     expect(ruleAction).toEqual({
       action_type_id: alertAction.actionTypeId,
       params: {

@@ -26,6 +26,7 @@ import {
   getInvalidConnectors,
   swapActionIds,
   migrateLegacyActionsIds,
+  partitionActions,
 } from './utils';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import type { PartialFilter } from '../../types';
@@ -38,6 +39,8 @@ import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../
 import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../logic/import/import_rules_utils';
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import type { RuleDefaultAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 type PromiseFromStreams = RuleToImport | Error;
 
@@ -1256,6 +1259,33 @@ describe('utils', () => {
           },
           rule_id: 'rule-1',
         },
+      ]);
+    });
+  });
+
+  describe('partitionActions', () => {
+    test('it partition rule actions correctly', async () => {
+      const defaultAction: RuleDefaultAction = {
+        id: 'id',
+        group: 'group',
+        actionTypeId: 'actionTypeId',
+        params: {},
+        uuid: '111',
+        frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },
+        alertsFilter: { query: { kql: '*', filters: [] } },
+      };
+
+      const systemAction: RuleSystemAction = {
+        id: 'id',
+        actionTypeId: 'action_type_id',
+        params: {},
+        uuid: 'uuid',
+        type: RuleActionTypes.SYSTEM,
+      };
+
+      expect(partitionActions([defaultAction, systemAction, defaultAction, systemAction])).toEqual([
+        [systemAction, systemAction],
+        [defaultAction, defaultAction],
       ]);
     });
   });

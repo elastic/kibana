@@ -6,6 +6,7 @@
  */
 
 import type { SanitizedDefaultRuleAction } from '@kbn/alerting-plugin/common';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 import {
   NOTIFICATION_DEFAULT_FREQUENCY,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -204,6 +205,22 @@ describe('Rule actions normalization', () => {
           ],
         } as RuleAlertType)
       ).toBe('1d');
+    });
+
+    test('returns "NOTIFICATION_THROTTLE_RULE" if it is a system action', () => {
+      expect(
+        transformFromAlertThrottle({
+          actions: [
+            {
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              uuid: 'uuid',
+              type: RuleActionTypes.SYSTEM,
+            },
+          ],
+        } as RuleAlertType)
+      ).toBe(NOTIFICATION_THROTTLE_RULE);
     });
   });
 

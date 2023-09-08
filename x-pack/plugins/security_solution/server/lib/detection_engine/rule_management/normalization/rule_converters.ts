@@ -17,8 +17,6 @@ import type {
   SanitizedRule,
 } from '@kbn/alerting-plugin/common';
 
-import { partition } from 'lodash';
-import { isSystemAction } from '../../../../../common/utils/is_system_action';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,
@@ -484,10 +482,9 @@ export const convertCreateAPIToInternalSchema = (
 
   const alertActions = input.actions?.map(transformRuleToAlertAction) ?? [];
 
-  const [systemActions, defaultActions] = partition(alertActions, isSystemAction) as [
-    RuleSystemAction[],
-    RuleDefaultAction[]
-  ];
+  const [systemActions, defaultActions] = partitionActions<RuleSystemAction, RuleDefaultAction>(
+    alertActions
+  );
 
   const actions = [...transformToActionFrequency(defaultActions, input.throttle), ...systemActions];
 
@@ -683,10 +680,10 @@ export const internalRuleToAPIResponse = (
   const alertActions = rule.actions.map(transformAlertToRuleAction);
   const throttle = transformFromAlertThrottle(rule);
 
-  const [systemActions, defaultActions] = partition(alertActions, isSystemAction) as [
-    RuleAlertSystemAction[],
-    RuleAlertDefaultAction[]
-  ];
+  const [systemActions, defaultActions] = partitionActions<
+    RuleAlertSystemAction,
+    RuleAlertDefaultAction
+  >(alertActions);
 
   const actions = [...transformToActionFrequency(defaultActions, throttle), ...systemActions];
 
