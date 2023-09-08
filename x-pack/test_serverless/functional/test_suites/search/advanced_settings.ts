@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -30,13 +30,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(url).to.contain(`/settings`);
     });
 
-    describe('renders common settings',  () => {
+    describe('renders common settings', () => {
       for (const settingId of SEARCH_PROJECT_SETTINGS) {
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'advancedSetting-editField-' + settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
         });
-      };
+      }
     });
   });
 };

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -30,15 +30,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(url).to.contain(`/settings`);
     });
 
-    describe('renders common settings',  () => {
+    describe('renders common settings', () => {
       for (const settingId of ALL_COMMON_SETTINGS) {
         it('renders ' + settingId + ' edit field', async () => {
-
-          const isColorPickerField = (settingId === 'banners:textColor') || (settingId === 'banners:backgroundColor');
-          const fieldTestSubj = (isColorPickerField ? 'euiColorPickerAnchor ' : '') + 'advancedSetting-editField-' + settingId;
+          const isColorPickerField =
+            settingId === 'banners:textColor' || settingId === 'banners:backgroundColor';
+          const fieldTestSubj =
+            (isColorPickerField ? 'euiColorPickerAnchor ' : '') +
+            'advancedSetting-editField-' +
+            settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
         });
-      };
+      }
     });
   });
 };
