@@ -46,13 +46,13 @@ export function ClustersHealth({ clusters }: Props) {
         </EuiText>
       </EuiFlexItem>
 
-      {successfulCount > 0 ? <ClusterHealth count={successfulCount} status="successful" /> : null}
+      {successfulCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={successfulCount} status="successful" /></EuiFlexItem> : null}
 
-      {partialCount > 0 ? <ClusterHealth count={partialCount} status="partial" /> : null}
+      {partialCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={partialCount} status="partial" /></EuiFlexItem> : null}
 
-      {skippedCount > 0 ? <ClusterHealth count={skippedCount} status="skipped" /> : null}
+      {skippedCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={skippedCount} status="skipped" /></EuiFlexItem> : null}
 
-      {failedCount > 0 ? <ClusterHealth count={failedCount} status="failed" /> : null}
+      {failedCount > 0 ? <EuiFlexItem grow={false}><ClusterHealth count={failedCount} status="failed" /></EuiFlexItem> : null}
       
     </EuiFlexGroup>
   )
