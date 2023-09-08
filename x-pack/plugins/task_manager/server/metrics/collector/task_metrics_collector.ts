@@ -6,14 +6,19 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Subject } from 'rxjs';
-import { Result, asOk, asErr } from '../../lib/result_type';
+import {
+  AggregationsStringTermsBucketKeys,
+  AggregationsTermsAggregateBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Observable, Subject } from 'rxjs';
 import { TaskStore } from '../../task_store';
 import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
 } from '../../queries/mark_available_tasks_as_claimed';
+import { ITaskEventEmitter, TaskLifecycleEvent } from '../../polling_lifecycle';
+import { asTaskManagerMetricEvent } from '../../task_events';
+import { asOk } from '../../lib/result_type';
 
 const POLL_INTERVAL = 5000; // query every 5 seconds
 interface ConstructorOpts {
@@ -21,14 +26,20 @@ interface ConstructorOpts {
   store: TaskStore;
 }
 
-export class TaskManagerMetricsCollector {
+export interface TaskManagerMetrics {
+  numOverdueTasks: {
+    total: number;
+    [key: string]: number;
+  };
+}
+export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecycleEvent> {
   private store: TaskStore;
   private logger: Logger;
 
   private running: boolean = false;
-  private timeoutId: NodeJS.Timeout | null = null;
 
-  private subject = new Subject<any>();
+  // emit collected metrics
+  private metrics$ = new Subject<TaskLifecycleEvent>();
 
   constructor({ logger, store }: ConstructorOpts) {
     this.store = store;
@@ -37,8 +48,8 @@ export class TaskManagerMetricsCollector {
     this.start();
   }
 
-  public get metrics() {
-    return this.subject;
+  public get events(): Observable<TaskLifecycleEvent> {
+    return this.metrics$;
   }
 
   private start() {
@@ -49,7 +60,6 @@ export class TaskManagerMetricsCollector {
   }
 
   private async runCollectionCycle() {
-    this.timeoutId = null;
     const start = Date.now();
     try {
       const results = await this.store.aggregate({
@@ -77,16 +87,29 @@ export class TaskManagerMetricsCollector {
       const totalOverdueTasks =
         typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
       const aggregations = results.aggregations as {
-        byTaskType: AggregationsTermsAggregateBase;
+        byTaskType: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       };
-      console.log(`createTaskMetricsCollector ${JSON.stringify(results)}`);
-      // subject.next(asOk(results));
+      const byTaskType = (
+        (aggregations.byTaskType.buckets as AggregationsStringTermsBucketKeys[]) ?? []
+      ).reduce((acc: Record<string, number>, bucket: AggregationsStringTermsBucketKeys) => {
+        acc[bucket.key] = bucket.doc_count;
+        return acc;
+      }, {});
+      const metrics = {
+        numOverdueTasks: {
+          total: totalOverdueTasks ?? 0,
+          ...byTaskType,
+        },
+      };
+      this.metrics$.next(asTaskManagerMetricEvent(asOk(metrics)));
     } catch (e) {
-      // subject.next(asPollingError<T>(e, PollingErrorType.WorkError));
+      this.logger.debug(`Error querying for task manager metrics - ${e.message}`);
+      // emit empty metrics so we don't have stale metrics
+      this.metrics$.next(asTaskManagerMetricEvent(asOk({ numOverdueTasks: { total: 0 } })));
     }
     if (this.running) {
       // Set the next runCycle call
-      this.timeoutId = setTimeout(
+      setTimeout(
         this.runCollectionCycle.bind(this),
         Math.max(POLL_INTERVAL - (Date.now() - start), 0)
       );

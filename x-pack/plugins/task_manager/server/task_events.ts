@@ -15,6 +15,7 @@ import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
 import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 import type { EventLoopDelayConfig } from './config';
+import { TaskManagerMetrics } from './metrics/collector/task_metrics_collector';
 
 export enum TaskPersistence {
   Recurring = 'recurring',
@@ -28,7 +29,7 @@ export enum TaskEventType {
   TASK_RUN = 'TASK_RUN',
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
-  TASK_OVERDUE = 'TASK_OVERDUE',
+  TASK_MANAGER_METRIC = 'TASK_MANAGER_METRIC',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
   EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY = 'EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY',
 }
@@ -83,6 +84,7 @@ export type TaskClaim = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type EphemeralTaskRejectedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
+export type TaskManagerMetric = TaskEvent<TaskManagerMetrics, Error>;
 
 export type TaskManagerStats =
   | 'load'
@@ -176,7 +178,14 @@ export function asTaskManagerStatEvent(
   };
 }
 
-export function asTaskOverdueEvent() {}
+export function asTaskManagerMetricEvent(
+  event: Result<TaskManagerMetrics, never>
+): TaskManagerMetric {
+  return {
+    type: TaskEventType.TASK_MANAGER_METRIC,
+    event,
+  };
+}
 
 export function asEphemeralTaskRejectedDueToCapacityEvent(
   id: string,
@@ -222,10 +231,10 @@ export function isTaskManagerWorkerUtilizationStatEvent(
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT && taskEvent.id === 'workerUtilization';
 }
-export function isTaskOverdueEvent(
+export function isTaskManagerMetricEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
-  return taskEvent.type === TaskEventType.TASK_OVERDUE;
+  return taskEvent.type === TaskEventType.TASK_MANAGER_METRIC;
 }
 export function isEphemeralTaskRejectedDueToCapacityEvent(
   taskEvent: TaskEvent<unknown, unknown>

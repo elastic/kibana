@@ -11,7 +11,7 @@ export const createIMetricsAggregatorMock = () => {
       initialMetric: jest.fn().mockReturnValue({ count: 0 }),
       reset: jest.fn(),
       collect: jest.fn(),
-      processTaskLifecycleEvent: jest.fn(),
+      processEvent: jest.fn(),
     };
   });
 };

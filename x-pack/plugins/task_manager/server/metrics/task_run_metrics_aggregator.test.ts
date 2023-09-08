@@ -98,8 +98,8 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly process task run success event', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: { success: 2, on_time: 2, total: 2, delay: { counts: [], values: [] } },
       by_type: {
@@ -109,24 +109,22 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly process task manager runDelay stat', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.343));
+    taskRunMetricsAggregator.processEvent(getTaskManagerStatEvent(3.343));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: { success: 0, on_time: 0, total: 0, delay: { counts: [1], values: [10] } },
     });
   });
 
   test('should ignore task manager stats that are not runDelays', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskManagerStatEvent(3.343, 'pollingDelay')
-    );
+    taskRunMetricsAggregator.processEvent(getTaskManagerStatEvent(3.343, 'pollingDelay'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: { success: 0, on_time: 0, total: 0, delay: { counts: [], values: [] } },
     });
   });
 
   test('should correctly process task run success event where task run has timed out', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry', true));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('telemetry', true));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('telemetry', true));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: { success: 2, on_time: 0, total: 2, delay: { counts: [], values: [] } },
       by_type: {
@@ -136,8 +134,8 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly process task run failure event', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: { success: 0, on_time: 2, total: 2, delay: { counts: [], values: [] } },
       by_type: {
@@ -147,8 +145,8 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly process task run failure event where task run has timed out', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry', true));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('telemetry', true));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('telemetry', true));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: { success: 0, on_time: 0, total: 2, delay: { counts: [], values: [] } },
       by_type: {
@@ -158,10 +156,10 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly process different task types', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report', true));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('report'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('report', true));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('telemetry'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: { success: 3, on_time: 3, total: 4, delay: { counts: [], values: [] } },
       by_type: {
@@ -172,24 +170,20 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly group alerting and action task types', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true)
-    );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
-    );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:.email'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('report'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('report'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:example', true));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:.index-threshold'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('actions:webhook'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('actions:webhook'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('actions:.email'));
+    taskRunMetricsAggregator.processEvent(
       getTaskRunSuccessEvent('alerting:.index-threshold', true)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
@@ -208,31 +202,27 @@ describe('TaskRunMetricsAggregator', () => {
   });
 
   test('should correctly reset counter', () => {
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(3.343));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(25.45));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(6.4478));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskManagerStatEvent(9.241));
+    taskRunMetricsAggregator.processEvent(getTaskManagerStatEvent(3.343));
+    taskRunMetricsAggregator.processEvent(getTaskManagerStatEvent(25.45));
+    taskRunMetricsAggregator.processEvent(getTaskManagerStatEvent(6.4478));
+    taskRunMetricsAggregator.processEvent(getTaskManagerStatEvent(9.241));
 
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true)
-    );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('report'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('report'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('telemetry'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:example', true));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(
       getTaskRunSuccessEvent('alerting:.index-threshold', true)
     );
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:webhook'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('alerting:example'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('actions:.email'));
-    taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold')
-    );
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('actions:webhook'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('actions:webhook'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(getTaskRunFailedEvent('alerting:example'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('actions:.email'));
+    taskRunMetricsAggregator.processEvent(getTaskRunSuccessEvent('alerting:.index-threshold'));
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: {
         success: 11,

@@ -7,41 +7,43 @@
 
 import { combineLatest, filter, interval, map, merge, Observable, startWith } from 'rxjs';
 import { JsonValue } from '@kbn/utility-types';
-import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import { TaskManagerConfig } from '../config';
 import { ITaskMetricsAggregator } from './types';
+import { TaskEvent } from '../task_events';
 
-export interface CreateMetricsAggregatorOpts<T> {
+export interface CreateMetricsAggregatorOpts<T, E> {
   key: string;
   config: TaskManagerConfig;
-  resetMetrics$: Observable<boolean>;
-  taskPollingLifecycle: TaskPollingLifecycle;
-  taskEventFilter: (taskEvent: TaskLifecycleEvent) => boolean;
-  metricsAggregator: ITaskMetricsAggregator<T>;
+  reset$?: Observable<boolean>;
+  events$: Observable<E>;
+  eventFilter: (event: E) => boolean;
+  metricsAggregator: ITaskMetricsAggregator<T, E>;
 }
 
-export function createAggregator<T extends JsonValue>({
+export function createAggregator<T extends JsonValue, E extends TaskEvent<unknown, unknown>>({
   key,
-  taskPollingLifecycle,
   config,
-  resetMetrics$,
-  taskEventFilter,
+  events$,
+  reset$,
+  eventFilter,
   metricsAggregator,
-}: CreateMetricsAggregatorOpts<T>): AggregatedStatProvider<T> {
-  // Resets the aggregators either when the reset interval has passed or
-  // a resetMetrics$ event is received
-  merge(
-    interval(config.metrics_reset_interval).pipe(map(() => true)),
-    resetMetrics$.pipe(map(() => true))
-  ).subscribe(() => {
-    metricsAggregator.reset();
-  });
+}: CreateMetricsAggregatorOpts<T, E>): AggregatedStatProvider<T> {
+  if (reset$) {
+    // Resets the aggregators either when the reset interval has passed or
+    // a resetMetrics$ event is received
+    merge(
+      interval(config.metrics_reset_interval).pipe(map(() => true)),
+      reset$.pipe(map(() => true))
+    ).subscribe(() => {
+      metricsAggregator.reset();
+    });
+  }
 
-  const taskEvents$: Observable<T> = taskPollingLifecycle.events.pipe(
-    filter((taskEvent: TaskLifecycleEvent) => taskEventFilter(taskEvent)),
-    map((taskEvent: TaskLifecycleEvent) => {
-      metricsAggregator.processTaskLifecycleEvent(taskEvent);
+  const taskEvents$: Observable<T> = events$.pipe(
+    filter((event: E) => eventFilter(event)),
+    map((event: E) => {
+      metricsAggregator.processEvent(event);
       return metricsAggregator.collect();
     })
   );

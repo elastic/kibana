@@ -6,12 +6,11 @@
  */
 
 import sinon from 'sinon';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs/operators';
 import { isTaskManagerStatEvent, isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { TaskManagerConfig } from '../config';
 import { createAggregator } from './create_aggregator';
 import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
@@ -90,16 +89,13 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
 
-      const taskClaimAggregator = createAggregator({
+      const taskClaimAggregator = createAggregator<TaskClaimMetric, TaskLifecycleEvent>({
         key: 'task_claim',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        reset$: new Subject<boolean>(),
+        eventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
         metricsAggregator: new TaskClaimMetricsAggregator(),
       });
 
@@ -166,8 +162,8 @@ describe('createAggregator', () => {
       });
     });
 
-    test('resets count when resetMetric$ event is received', async () => {
-      const resetMetrics$ = new Subject<boolean>();
+    test('resets count when reset$ event is received', async () => {
+      const reset$ = new Subject<boolean>();
       const pollingCycleEvents1 = [
         taskClaimSuccessEvent,
         taskClaimSuccessEvent,
@@ -185,16 +181,12 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
-
-      const taskClaimAggregator = createAggregator({
+      const taskClaimAggregator = createAggregator<TaskClaimMetric, TaskLifecycleEvent>({
         key: 'task_claim',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        reset$,
+        eventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
         metricsAggregator: new TaskClaimMetricsAggregator(),
       });
 
@@ -259,7 +251,7 @@ describe('createAggregator', () => {
         for (const event of pollingCycleEvents1) {
           events$.next(event);
         }
-        resetMetrics$.next(true);
+        reset$.next(true);
         for (const event of pollingCycleEvents2) {
           events$.next(event);
         }
@@ -286,19 +278,15 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
-
-      const taskClaimAggregator = createAggregator({
+      const taskClaimAggregator = createAggregator<TaskClaimMetric, TaskLifecycleEvent>({
         key: 'task_claim',
-        taskPollingLifecycle,
+        events$,
         config: {
           ...config,
           metrics_reset_interval: 10,
         },
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        reset$: new Subject<boolean>(),
+        eventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
         metricsAggregator: new TaskClaimMetricsAggregator(),
       });
 
@@ -398,16 +386,12 @@ describe('createAggregator', () => {
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
-
-      const taskRunAggregator = createAggregator({
+      const taskRunAggregator = createAggregator<TaskRunMetric, TaskLifecycleEvent>({
         key: 'task_run',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
+        reset$: new Subject<boolean>(),
+        eventFilter: (taskEvent: TaskLifecycleEvent) =>
           isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
@@ -758,8 +742,8 @@ describe('createAggregator', () => {
       });
     });
 
-    test('resets count when resetMetric$ event is received', async () => {
-      const resetMetrics$ = new Subject<boolean>();
+    test('resets count when reset$ event is received', async () => {
+      const reset$ = new Subject<boolean>();
       const taskRunEvents1 = [
         getTaskManagerStatEvent(3.234),
         getTaskRunSuccessEvent('alerting:example'),
@@ -786,16 +770,12 @@ describe('createAggregator', () => {
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
-
-      const taskRunAggregator = createAggregator({
+      const taskRunAggregator = createAggregator<TaskRunMetric, TaskLifecycleEvent>({
         key: 'task_run',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
+        reset$,
+        eventFilter: (taskEvent: TaskLifecycleEvent) =>
           isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
@@ -1125,7 +1105,7 @@ describe('createAggregator', () => {
         for (const event of taskRunEvents1) {
           events$.next(event);
         }
-        resetMetrics$.next(true);
+        reset$.next(true);
         for (const event of taskRunEvents2) {
           events$.next(event);
         }
@@ -1161,19 +1141,15 @@ describe('createAggregator', () => {
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
-
-      const taskRunAggregator = createAggregator({
+      const taskRunAggregator = createAggregator<TaskRunMetric, TaskLifecycleEvent>({
         key: 'task_run',
-        taskPollingLifecycle,
+        events$,
         config: {
           ...config,
           metrics_reset_interval: 10,
         },
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
+        reset$: new Subject<boolean>(),
+        eventFilter: (taskEvent: TaskLifecycleEvent) =>
           isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
@@ -1527,17 +1503,14 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = jest.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
-    const taskPollingLifecycle = taskPollingLifecycleMock.create({
-      events$: events$ as Observable<TaskLifecycleEvent>,
-    });
-    const aggregator = createAggregator({
+    const aggregator = createAggregator<TaskClaimMetric, TaskLifecycleEvent>({
       key: 'test',
-      taskPollingLifecycle,
+      events$,
       config,
-      resetMetrics$: new Subject<boolean>(),
-      taskEventFilter,
+      reset$: new Subject<boolean>(),
+      eventFilter,
       metricsAggregator: new TaskClaimMetricsAggregator(),
     });
 
@@ -1558,7 +1531,7 @@ describe('createAggregator', () => {
         events$.next(event);
       }
 
-      expect(taskEventFilter).toHaveBeenCalledTimes(pollingCycleEvents.length);
+      expect(eventFilter).toHaveBeenCalledTimes(pollingCycleEvents.length);
     });
   });
 
@@ -1580,18 +1553,15 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = jest.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
-    const taskPollingLifecycle = taskPollingLifecycleMock.create({
-      events$: events$ as Observable<TaskLifecycleEvent>,
-    });
-    const aggregator = createAggregator({
+    const aggregator = createAggregator<TaskClaimMetric, TaskLifecycleEvent>({
       key: 'test',
-      taskPollingLifecycle,
+      events$,
       config,
-      resetMetrics$: new Subject<boolean>(),
-      taskEventFilter,
-      metricsAggregator: mockMetricsAggregator,
+      reset$: new Subject<boolean>(),
+      eventFilter,
+      metricsAggregator: new TaskClaimMetricsAggregator(),
     });
 
     return new Promise<void>((resolve) => {
@@ -1612,9 +1582,7 @@ describe('createAggregator', () => {
       }
 
       expect(mockMetricsAggregator.initialMetric).toHaveBeenCalledTimes(1);
-      expect(mockMetricsAggregator.processTaskLifecycleEvent).toHaveBeenCalledTimes(
-        pollingCycleEvents.length
-      );
+      expect(mockMetricsAggregator.processEvent).toHaveBeenCalledTimes(pollingCycleEvents.length);
       expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(pollingCycleEvents.length);
       expect(mockMetricsAggregator.reset).not.toHaveBeenCalled();
       spy.mockRestore();
@@ -1626,7 +1594,7 @@ describe('createAggregator', () => {
       .spyOn(TaskClaimMetricsAggregatorModule, 'TaskClaimMetricsAggregator')
       .mockImplementation(() => mockMetricsAggregator);
 
-    const resetMetrics$ = new Subject<boolean>();
+    const reset$ = new Subject<boolean>();
     const pollingCycleEvents = [
       taskClaimSuccessEvent,
       taskClaimSuccessEvent,
@@ -1640,17 +1608,14 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = jest.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
-    const taskPollingLifecycle = taskPollingLifecycleMock.create({
-      events$: events$ as Observable<TaskLifecycleEvent>,
-    });
-    const aggregator = createAggregator({
+    const aggregator = createAggregator<TaskClaimMetric, TaskLifecycleEvent>({
       key: 'test',
-      taskPollingLifecycle,
+      events$,
       config,
-      resetMetrics$,
-      taskEventFilter,
+      reset$,
+      eventFilter,
       metricsAggregator: mockMetricsAggregator,
     });
 
@@ -1674,15 +1639,13 @@ describe('createAggregator', () => {
       for (let i = 0; i < 5; i++) {
         events$.next(pollingCycleEvents[i]);
       }
-      resetMetrics$.next(true);
+      reset$.next(true);
       for (let i = 0; i < pollingCycleEvents.length; i++) {
         events$.next(pollingCycleEvents[i]);
       }
 
       expect(mockMetricsAggregator.initialMetric).toHaveBeenCalledTimes(1);
-      expect(mockMetricsAggregator.processTaskLifecycleEvent).toHaveBeenCalledTimes(
-        pollingCycleEvents.length
-      );
+      expect(mockMetricsAggregator.processEvent).toHaveBeenCalledTimes(pollingCycleEvents.length);
       expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(pollingCycleEvents.length);
       expect(mockMetricsAggregator.reset).toHaveBeenCalledTimes(1);
       spy.mockRestore();

@@ -32,7 +32,9 @@ export type TaskClaimMetric = TaskClaimCounts & {
   };
 };
 
-export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskClaimMetric> {
+export class TaskClaimMetricsAggregator
+  implements ITaskMetricsAggregator<TaskClaimMetric, TaskLifecycleEvent>
+{
   private counter: MetricCounterService<TaskClaimCounts> = new MetricCounterService(
     Object.values(TaskClaimKeys)
   );
@@ -56,7 +58,7 @@ export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskCl
     this.durationHistogram.reset();
   }
 
-  public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
+  public processEvent(taskEvent: TaskLifecycleEvent) {
     const success = isOk((taskEvent as TaskRun).event);
     if (success) {
       this.counter.increment(TaskClaimKeys.SUCCESS);

@@ -36,7 +36,7 @@ import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import { metricsStream, Metrics } from './metrics';
-import { TaskOverdueMetricsCollector } from './metrics/collector/task_metrics_collector';
+import { TaskManagerMetricsCollector } from './metrics/collector/task_metrics_collector';
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -89,7 +89,7 @@ export class TaskManagerPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private adHocTaskCounter: AdHocTaskCounter;
   private nodeRoles: PluginInitializerContext['node']['roles'];
-  private taskOverdueMetricsCollector?: TaskOverdueMetricsCollector;
+  private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -250,7 +250,7 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
-      this.taskOverdueMetricsCollector = new TaskOverdueMetricsCollector({
+      this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
       });
@@ -294,6 +294,7 @@ export class TaskManagerPlugin
       config: this.config!,
       resetMetrics$: this.resetMetrics$,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      taskManagerMetricsCollector: this.taskManagerMetricsCollector,
     }).subscribe((metric) => this.metrics$.next(metric));
 
     const taskScheduling = new TaskScheduling({

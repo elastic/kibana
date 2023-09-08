@@ -60,7 +60,9 @@ export interface TaskRunMetric extends JsonObject {
   by_type: TaskRunMetrics['by_type'];
 }
 
-export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunMetric> {
+export class TaskRunMetricsAggregator
+  implements ITaskMetricsAggregator<TaskRunMetric, TaskLifecycleEvent>
+{
   private counter: MetricCounterService<TaskRunMetrics> = new MetricCounterService(
     Object.values(TaskRunKeys),
     TaskRunMetricKeys.OVERALL
@@ -83,7 +85,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     this.delayHistogram.reset();
   }
 
-  public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
+  public processEvent(taskEvent: TaskLifecycleEvent) {
     if (isTaskRunEvent(taskEvent)) {
       this.processTaskRunEvent(taskEvent);
     } else if (isTaskManagerStatEvent(taskEvent)) {

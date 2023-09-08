@@ -46,7 +46,7 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
     // no-op because this metric is not a counter
   }
 
-  public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
+  public processEvent(taskEvent: TaskLifecycleEvent) {
     // const { overdue }: RanTask | ErroredTask = unwrap(taskEvent.event);
     // this.overdue = overdue;
   }

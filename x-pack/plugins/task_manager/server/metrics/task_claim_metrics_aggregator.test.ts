@@ -59,8 +59,8 @@ describe('TaskClaimMetricsAggregator', () => {
   });
 
   test('should correctly process task lifecycle success event', () => {
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimSuccessEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimSuccessEvent);
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 2,
       total: 2,
@@ -69,8 +69,8 @@ describe('TaskClaimMetricsAggregator', () => {
   });
 
   test('should correctly process task lifecycle failure event', () => {
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimFailureEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimFailureEvent);
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 0,
       total: 2,
@@ -79,13 +79,13 @@ describe('TaskClaimMetricsAggregator', () => {
   });
 
   test('should correctly reset counter', () => {
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimSuccessEvent);
-    taskClaimMetricsAggregator.processTaskLifecycleEvent(taskClaimFailureEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimSuccessEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimSuccessEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimFailureEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimFailureEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimSuccessEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimSuccessEvent);
+    taskClaimMetricsAggregator.processEvent(taskClaimFailureEvent);
     expect(taskClaimMetricsAggregator.collect()).toEqual({
       success: 4,
       total: 7,

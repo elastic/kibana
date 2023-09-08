@@ -13,7 +13,7 @@ import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import {
   isTaskManagerStatEvent,
-  isTaskOverdueEvent,
+  isTaskManagerMetricEvent,
   isTaskPollingCycleEvent,
   isTaskRunEvent,
 } from '../task_events';
@@ -21,6 +21,7 @@ import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metric
 import { createAggregator } from './create_aggregator';
 import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
+import { TaskManagerMetricsCollector } from './collector/task_metrics_collector';
 export interface Metrics {
   last_update: string;
   metrics: {
@@ -39,38 +40,44 @@ interface CreateMetricsAggregatorsOpts {
   config: TaskManagerConfig;
   resetMetrics$: Observable<boolean>;
   taskPollingLifecycle?: TaskPollingLifecycle;
+  taskManagerMetricsCollector?: TaskManagerMetricsCollector;
 }
 export function createMetricsAggregators({
   config,
   resetMetrics$,
   taskPollingLifecycle,
+  taskManagerMetricsCollector,
 }: CreateMetricsAggregatorsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [];
   if (taskPollingLifecycle) {
     aggregators.push(
-      createAggregator({
+      createAggregator<TaskClaimMetric, TaskLifecycleEvent>({
         key: 'task_claim',
-        taskPollingLifecycle,
+        events$: taskPollingLifecycle.events,
         config,
-        resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        reset$: resetMetrics$,
+        eventFilter: (event: TaskLifecycleEvent) => isTaskPollingCycleEvent(event),
         metricsAggregator: new TaskClaimMetricsAggregator(),
       }),
-      createAggregator({
+      createAggregator<TaskRunMetric, TaskLifecycleEvent>({
         key: 'task_run',
-        taskPollingLifecycle,
+        events$: taskPollingLifecycle.events,
         config,
-        resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
-          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
+        reset$: resetMetrics$,
+        eventFilter: (event: TaskLifecycleEvent) =>
+          isTaskRunEvent(event) || isTaskManagerStatEvent(event),
         metricsAggregator: new TaskRunMetricsAggregator(),
-      }),
-      createAggregator({
+      })
+    );
+  }
+
+  if (taskManagerMetricsCollector) {
+    aggregators.push(
+      createAggregator<TaskOverdueMetric, TaskLifecycleEvent>({
         key: 'task_overdue',
-        taskPollingLifecycle,
+        events$: taskManagerMetricsCollector.events,
         config,
-        resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskOverdueEvent(taskEvent),
+        eventFilter: (event: TaskLifecycleEvent) => isTaskManagerMetricEvent(event),
         metricsAggregator: new TaskOverdueMetricsAggregator(),
       })
     );
