@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export const EQL_MODE_NAME = 'ace/mode/eql';
-export const EQL_THEME_NAME = 'ace/theme/eql';
-
-export enum EQLCodeEditorSuggestionType {
-  EventType = 'eventType',
-  Field = 'field',
-  Value = 'value',
-}
+export const FLYOUT_HEADER_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHeaderTitle';
