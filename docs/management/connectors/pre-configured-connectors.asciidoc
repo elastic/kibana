@@ -107,6 +107,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 === Examples
 
 * <<preconfigured-index-configuration>>
+* <<preconfigured-jira-configuration>>
 * <<preconfigured-opsgenie-configuration>>
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
@@ -132,6 +133,30 @@ xpack.actions.preconfigured:
 --
 <1> The {es} index to be written to.
 <2> A field that indicates when the document was indexed.
+
+[float]
+[[preconfigured-jira-configuration]]
+==== Jira connectors
+
+The following example creates a <<jira-action-type,Jira connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-jira:
+    name: preconfigured-jira-connector-type
+    actionTypeId: .jira
+    config:
+      apiUrl: https://elastic.atlassian.net <1>
+      projectKey: ES <2>
+    secrets:
+      email: testuser <3>
+      apiToken: tokenkeystorevalue <4>
+--
+<1> The Jira instance URL.
+<2> The Jira project key.
+<3> The account email for HTTP basic authentication.
+<4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 [float]
 [[preconfigured-opsgenie-configuration]]
