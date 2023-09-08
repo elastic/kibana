@@ -77,7 +77,7 @@ export function parseFlags(flags: FlagsReader) {
       ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
       : undefined,
     esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
-    essImage: flags.string('essImage') || 'latest', // TODO: change this to the latest stable ESS image
+    essImage: flags.string('essImage'),
     installDir: flags.path('kibana-install-dir'),
     grep: flags.string('grep'),
     suiteTags: {

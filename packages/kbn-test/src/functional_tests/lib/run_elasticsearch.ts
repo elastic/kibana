@@ -11,7 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Config } from '../../functional_test_runner';
-import { createTestEsCluster } from '../../es';
+import { createTestEsCluster, esTestConfig } from '../../es';
 
 interface RunElasticsearchOptions {
   log: ToolingLog;
@@ -32,7 +32,7 @@ type EsConfig = ReturnType<typeof getEsConfig>;
 function getEsConfig({
   config,
   esFrom = config.get('esTestCluster.from'),
-  essImage = config.get('esTestCluster.essImage'),
+  essImage = esTestConfig.getESSImage() || config.get('esTestCluster.essImage'),
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
   const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
@@ -144,8 +144,8 @@ async function startEsNode({
     clusterName: `cluster-${name}`,
     esArgs: config.esArgs,
     esFrom: config.esFrom,
-    esJavaOpts: config.esJavaOpts,
     essOptions: config.essOptions,
+    esJavaOpts: config.esJavaOpts,
     license: config.license,
     password: config.password,
     port: config.port,

@@ -13,7 +13,7 @@ steps:
     trigger: "kibana-serverless"
     build:
       env:
-        TEST_ESS_IMAGE_TAG: ${ESS_IMAGE_URL_OR_TAG}
+        TEST_ESS_IMAGE: ${ESS_IMAGE_URL_OR_TAG}
 
   - wait: ~
 

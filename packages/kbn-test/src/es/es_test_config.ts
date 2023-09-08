@@ -27,6 +27,10 @@ class EsTestConfig {
     return process.env.TEST_ES_FROM || 'snapshot';
   }
 
+  getESSImage() {
+    return process.env.TEST_ESS_IMAGE;
+  }
+
   getTransportPort() {
     return process.env.TEST_ES_TRANSPORT_PORT || '9300-9400';
   }

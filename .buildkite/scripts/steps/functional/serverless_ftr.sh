@@ -42,21 +42,14 @@ fi
 EXIT_CODE=0
 OFFENDING_CONFIG=
 
-if [[ -z "$TEST_ESS_IMAGE_TAG" ]]; then
-  export ESS_IMAGE_FLAG=
-else
-  export ESS_IMAGE_FLAG="--essImage=$ESS_IMAGE_FLAG"
-fi
-
 for CONFIG in "${SERVERLESS_CONFIGS[@]}"
 do
-  echo "--- $ node scripts/functional_tests --bail --kibana-install-dir $KIBANA_BUILD_LOCATION --config $CONFIG $ESS_IMAGE_FLAG"
+  echo "--- $ node scripts/functional_tests --bail --kibana-install-dir $KIBANA_BUILD_LOCATION --config $CONFIG"
   set +e;
   node ./scripts/functional_tests \
     --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config="$CONFIG" \
-    $ESS_IMAGE_FLAG
+    --config="$CONFIG"
   LAST_CODE=$?
   set -e;
 
