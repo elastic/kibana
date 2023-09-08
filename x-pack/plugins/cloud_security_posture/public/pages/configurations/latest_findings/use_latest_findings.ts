@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { Pagination } from '@elastic/eui';
@@ -103,7 +102,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
 
       let totalPassed = 0;
       let totalFailed = 0;
-      let findingsBucketsLength = aggregations.unique_event_code.buckets.length;
+      const findingsBucketsLength = aggregations.unique_event_code.buckets.length;
 
       for (let i = 0; i < findingsBucketsLength; i++) {
         const evaluationBucket = aggregations.unique_event_code.buckets[i];

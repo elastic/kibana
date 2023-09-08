@@ -94,7 +94,7 @@ export const getFailedFindingsFromAggs = (
   queryResult.map((bucket) => {
     let totalPassed = 0;
     let totalFailed = 0;
-    let findingsBucketsLength = bucket.unique_event_code.buckets.length;
+    const findingsBucketsLength = bucket.unique_event_code.buckets.length;
 
     for (let i = 0; i < findingsBucketsLength; i++) {
       const evaluationBucket = bucket.unique_event_code.buckets[i];

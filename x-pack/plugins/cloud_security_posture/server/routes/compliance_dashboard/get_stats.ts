@@ -91,7 +91,7 @@ export const getStatsFromFindingsEvaluationsAggs = (
 
   let passedFindings = 0;
   let failedFindings = 0;
-  let findingsBucketsLength = findingsEvaluationsAggs.unique_event_code.buckets.length;
+  const findingsBucketsLength = findingsEvaluationsAggs.unique_event_code.buckets.length;
 
   for (let i = 0; i < findingsBucketsLength; i++) {
     const bucket = findingsEvaluationsAggs.unique_event_code.buckets[i];

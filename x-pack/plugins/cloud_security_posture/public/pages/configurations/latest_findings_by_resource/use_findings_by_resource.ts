@@ -20,7 +20,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { getBelongsToRuntimeMapping } from '../../../../common/runtime_mappings/get_belongs_to_runtime_mapping';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import type { FindingsBaseEsQuery, Sort } from '../../../common/types';
@@ -142,7 +141,7 @@ const getKeysList = (
 const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResourcePage => {
   let totalPassed = 0;
   let totalFailed = 0;
-  let findingsBucketsLength = resource.unique_event_code.buckets.length;
+  const findingsBucketsLength = resource.unique_event_code.buckets.length;
 
   for (let i = 0; i < findingsBucketsLength; i++) {
     const evaluationBucket = resource.unique_event_code.buckets[i];
@@ -199,7 +198,7 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
 
       let totalPassed = 0;
       let totalFailed = 0;
-      let findingsBucketsLength = aggregations.unique_event_code.buckets.length;
+      const findingsBucketsLength = aggregations.unique_event_code.buckets.length;
 
       for (let i = 0; i < findingsBucketsLength; i++) {
         const evaluationBucket = aggregations.unique_event_code.buckets[i];

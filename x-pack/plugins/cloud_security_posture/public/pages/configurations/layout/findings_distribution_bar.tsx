@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import numeral from '@elastic/numeral';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { statusColors } from '../../../common/constants';
 import type { Evaluation } from '../../../../common/types';
