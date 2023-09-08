@@ -106,7 +106,7 @@ export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
 export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const SERVERLESS_TAG = 'latest';
+export const SERVERLESS_TAG = 'latest'; // TODO: change this to the latest stable ESS image
 export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
 
 // See for default cluster settings
@@ -260,7 +260,12 @@ export function resolveDockerImage({
   image,
   repo,
   defaultImg,
-}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) {
+}: {
+  tag?: string;
+  image?: string;
+  repo: string;
+  defaultImg: string;
+}) {
   if (image) {
     if (!image.includes(DOCKER_REGISTRY)) {
       throw createCliError(
@@ -517,7 +522,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 /**
  * Resolve the Serverless ES image based on defaults and CLI options
  */
-function getServerlessImage(options: ServerlessOptions) {
+function getServerlessImage(options: { image?: string; tag?: string }) {
   return resolveDockerImage({
     ...options,
     repo: SERVERLESS_REPO,
@@ -680,7 +685,7 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
 /**
  * Resolve the Elasticsearch image based on defaults and CLI options
  */
-function getDockerImage(options: DockerOptions) {
+function getDockerImage(options: { tag?: string; image?: string }) {
   return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
 }
 
