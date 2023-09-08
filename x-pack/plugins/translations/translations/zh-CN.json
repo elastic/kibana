@@ -16578,8 +16578,6 @@
     "xpack.fleet.policyDetailsPackagePolicies.createFirstTitle": "添加您的首个集成",
     "xpack.fleet.policyForm.deletePolicyActionText": "删除策略",
     "xpack.fleet.policyForm.deletePolicyActionText.disabled": "无法删除包含托管软件包策略的代理策略。",
-    "xpack.fleet.policyForm.deletePolicyGroupDescription": "现有数据将不会删除。",
-    "xpack.fleet.policyForm.deletePolicyGroupTitle": "删除策略",
     "xpack.fleet.policyForm.generalSettingsGroupDescription": "为您的代理策略选择名称和描述。",
     "xpack.fleet.policyForm.generalSettingsGroupTitle": "常规设置",
     "xpack.fleet.renameAgentTags.errorNotificationTitle": "标签重命名失败",

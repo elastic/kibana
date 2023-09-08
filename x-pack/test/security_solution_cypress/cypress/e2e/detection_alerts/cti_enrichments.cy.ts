@@ -20,12 +20,11 @@ import {
   THREAT_DETAILS_ACCORDION,
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { ruleDetailsUrl } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
 describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -35,7 +34,7 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'
     cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
     login();
-    createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true });
+
     disableExpandableFlyout();
   });
 
@@ -46,8 +45,9 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
+    createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
+      (rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+    );
   });
 
   // Skipped: https://github.com/elastic/kibana/issues/162818
@@ -157,12 +157,6 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'
   describe('with additional indicators', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
-    });
-
-    beforeEach(() => {
-      login();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
     });
 
     after(() => {
