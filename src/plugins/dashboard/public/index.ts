@@ -31,6 +31,7 @@ export {
   type DashboardAppLocatorParams,
   cleanEmptyKeys,
 } from './dashboard_app/locator/locator';
+export { getEmbeddableParams } from './dashboard_app/locator/get_dashboard_locator_params';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

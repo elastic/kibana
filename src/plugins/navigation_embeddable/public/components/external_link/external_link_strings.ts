@@ -25,4 +25,16 @@ export const ExternalLinkStrings = {
     i18n.translate('navigationEmbeddable.externalLink.editor.placeholder', {
       defaultMessage: 'Enter external URL',
     }),
+  getUrlFormatError: () =>
+    i18n.translate('navigationEmbeddable.externalLink.editor.urlFormatError', {
+      defaultMessage: 'Invalid format. Example: {exampleUrl}',
+      values: {
+        exampleUrl: 'https://elastic.co/',
+      },
+    }),
+  getDisallowedUrlError: () =>
+    i18n.translate('navigationEmbeddable.externalLink.editor.disallowedUrlError', {
+      defaultMessage:
+        'This URL is not allowed by your administrator. Refer to "externalUrl.policy" configuration.',
+    }),
 };
