@@ -54,10 +54,12 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const focusPanelId = container.select((state) => state.componentState.focusPanelId);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
+    const focusPanel = focusPanelId !== undefined && focusPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
     const classes = classNames({
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
+      'dshDashboardGrid__item--focused': focusPanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
@@ -77,7 +79,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       <div
         style={{
           ...style,
-          zIndex: focusedPanelId === id ? 2 : 'auto',
           pointerEvents: focusPanelId && focusPanelId !== id ? 'none' : 'auto',
           opacity: focusPanelId && focusPanelId !== id ? '.25' : '1',
         }}
@@ -85,6 +86,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
         ref={ref}
+        tabIndex={focusPanelId && focusPanelId !== id ? -1 : 0}
         {...rest}
       >
         {isRenderable ? (

@@ -23,7 +23,8 @@
 
 // Remove border color unless in editing mode
 .dshLayout-withoutMargins:not(.dshLayout--editing),
-.dshDashboardGrid__item--expanded {
+.dshDashboardGrid__item--expanded,
+.dshDashboardGrid__item--focused {
   .embPanel {
     border-color: transparent;
   }
