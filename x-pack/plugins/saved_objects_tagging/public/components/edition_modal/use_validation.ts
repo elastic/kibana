@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+
 import { type TagValidation, validateTagName } from '../../../common';
 import type { ITagsClient, TagAttributes } from '../../../common/types';
 import { duplicateTagNameErrorMessage, validateTag } from './utils';
@@ -27,8 +30,30 @@ export const useValidation = ({
 }) => {
   const isMounted = useRef(false);
   const [validation, setValidation] = useState<TagValidation>(initialValidation);
-  const [isValidating, setIsValidating] = useState(false);
-  const hasDuplicateNameError = validation.errors.name === duplicateTagNameErrorMessage;
+  const {
+    errors: { name: nameError },
+  } = validation;
+
+  const validation$ = useMemo(
+    () =>
+      new BehaviorSubject({
+        isValidating: false,
+        hasDuplicateNameError: false,
+      }),
+    []
+  );
+
+  const { isValidating = false } = useObservable(validation$) ?? {};
+
+  const setIsValidating = useCallback(
+    (value: boolean) => {
+      validation$.next({
+        ...validation$.value,
+        isValidating: value,
+      });
+    },
+    [validation$]
+  );
 
   const validateDuplicateTagName = useCallback(
     async (name: string) => {
@@ -54,7 +79,7 @@ export const useValidation = ({
 
       setIsValidating(false);
     },
-    [tagAttributes, tagClient]
+    [tagClient, setIsValidating, tagAttributes]
   );
 
   const onNameChange = useCallback(
@@ -74,7 +99,7 @@ export const useValidation = ({
         setIsValidating(false);
       }
     },
-    [validateDuplicateTagName]
+    [setIsValidating, validateDuplicateTagName]
   );
 
   useEffect(() => {
@@ -87,13 +112,26 @@ export const useValidation = ({
       validateDuplicateTagName(tagAttributes.name);
     }
     isMounted.current = true;
-  }, [validateDuplicateNameOnMount, tagAttributes.name, validateDuplicateTagName]);
+  }, [
+    validateDuplicateNameOnMount,
+    tagAttributes.name,
+    validateDuplicateTagName,
+    validation$,
+    setIsValidating,
+  ]);
+
+  useEffect(() => {
+    validation$.next({
+      ...validation$.value,
+      hasDuplicateNameError: nameError === duplicateTagNameErrorMessage,
+    });
+  }, [nameError, validation$]);
 
   return {
     validation,
     setValidation,
     isValidating,
+    validation$,
     onNameChange,
-    hasDuplicateNameError,
   };
 };

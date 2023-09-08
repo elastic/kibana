@@ -150,6 +150,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   maxLength={tagNameMaxLength}
                   value={tag.name}
                   onChange={(e) => setName(e.target.value)}
+                  isLoading={isValidating}
                   data-test-subj="createModalField-name"
                 />
               </EuiFormRow>
@@ -258,7 +259,8 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                   fill
                   data-test-subj="createModalConfirmButton"
                   onClick={onFormSubmit}
-                  isDisabled={submitting || isValidating || (isEdit && !tagHasBeenModified)}
+                  isLoading={submitting}
+                  isDisabled={submitting || (isEdit && !tagHasBeenModified)}
                 >
                   {isEdit ? (
                     <FormattedMessage

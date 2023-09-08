@@ -8,6 +8,7 @@
 import React, { FC, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
+import { first, lastValueFrom } from 'rxjs';
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { isServerValidationError } from '../../services/tags';
 import { CreateOrEditModal } from './create_or_edit_modal';
@@ -35,11 +36,10 @@ export const EditTagModal: FC<EditTagModalProps> = ({
   notifications,
 }) => {
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
-  const { validation, setValidation, onNameChange, isValidating, hasDuplicateNameError } =
-    useValidation({
-      tagAttributes,
-      tagClient,
-    });
+  const { validation, setValidation, onNameChange, isValidating, validation$ } = useValidation({
+    tagAttributes,
+    tagClient,
+  });
 
   const setField = useCallback(
     <T extends keyof TagAttributes>(field: T) =>
@@ -53,6 +53,10 @@ export const EditTagModal: FC<EditTagModalProps> = ({
   );
 
   const onSubmit = useCallback(async () => {
+    const { hasDuplicateNameError } = await lastValueFrom(
+      validation$.pipe(first((v) => v.isValidating === false))
+    );
+
     if (hasDuplicateNameError) {
       return;
     }
@@ -80,15 +84,7 @@ export const EditTagModal: FC<EditTagModalProps> = ({
         });
       }
     }
-  }, [
-    hasDuplicateNameError,
-    tagAttributes,
-    setValidation,
-    tagClient,
-    tag.id,
-    onSave,
-    notifications.toasts,
-  ]);
+  }, [validation$, tagAttributes, setValidation, tagClient, tag.id, onSave, notifications.toasts]);
 
   return (
     <CreateOrEditModal
