@@ -569,6 +569,10 @@ describe('Handler', () => {
       // simulate the enriched error that we get for an actual request
       throw Object.assign(new Error('unexpected error'), {
         meta: {
+          headers: {
+            authorization: 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
+            randomHeader: 'randomValue',
+          },
           request: {
             options: {
               headers: {
@@ -577,10 +581,21 @@ describe('Handler', () => {
                 cookie: '5eaGBBijbDxx someCookie RfK7IcNAkAAAA=',
               },
             },
+            params: {
+              headers: {
+                queryParam: 'aValue',
+                authorization: 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
+                cookie: '5eaGBBijbDxx someCookie RfK7IcNAkAAAA=',
+                'set-cookie': '5eaGBBijbDxx someCookie RfK7IcNAkAAAA=',
+                'x-elastic-app-auth': 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
+                'es-client-authentication': '5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
+              },
+            },
           },
         },
       });
     });
+
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -596,12 +611,26 @@ describe('Handler', () => {
     expect(Object.assign({}, meta!.error)).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
+          "headers": Object {
+            "authorization": "[REDACTED]",
+            "randomHeader": "randomValue",
+          },
           "request": Object {
             "options": Object {
               "headers": Object {
                 "authorization": "[REDACTED]",
                 "cookie": "[REDACTED]",
                 "user-agent": "Kibana/8.11.0",
+              },
+            },
+            "params": Object {
+              "headers": Object {
+                "authorization": "[REDACTED]",
+                "cookie": "[REDACTED]",
+                "es-client-authentication": "[REDACTED]",
+                "queryParam": "aValue",
+                "set-cookie": "[REDACTED]",
+                "x-elastic-app-auth": "[REDACTED]",
               },
             },
           },
