@@ -561,12 +561,25 @@ describe('Cache-Control', () => {
 });
 
 describe('Handler', () => {
-  it("Doesn't expose error details if handler throws", async () => {
+  it("Doesn't expose sensitive nor uninteresting error details if handler throws", async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
-      throw new Error('unexpected error');
+      // simulate the enriched error that we get for an actual request
+      throw Object.assign(new Error('unexpected error'), {
+        meta: {
+          request: {
+            options: {
+              headers: {
+                'user-agent': 'Kibana/8.11.0',
+                authorization: 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
+                cookie: '5eaGBBijbDxx someCookie RfK7IcNAkAAAA=',
+              },
+            },
+          },
+        },
+      });
     });
     await server.start();
 
@@ -575,20 +588,25 @@ describe('Handler', () => {
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
     );
-    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "500 Server Error - /",
-          Object {
-            "error": [Error: unexpected error],
-            "http": Object {
-              "response": Object {
-                "status_code": 500,
+
+    const [message, meta] = loggingSystemMock.collect(logger).error[0];
+    expect(message).toEqual('500 Server Error - /');
+
+    // unwrap all Error's properties (assert PII has been redacted)
+    expect(Object.assign({}, meta!.error)).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "request": Object {
+            "options": Object {
+              "headers": Object {
+                "authorization": "[REDACTED]",
+                "cookie": "[REDACTED]",
+                "user-agent": "Kibana/8.11.0",
               },
             },
           },
-        ],
-      ]
+        },
+      }
     `);
   });
 
