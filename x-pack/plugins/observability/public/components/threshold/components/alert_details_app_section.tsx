@@ -210,8 +210,8 @@ export default function AlertDetailsAppSection({
                     chartType={MetricsExplorerChartType.line}
                     derivedIndexPattern={derivedIndexPattern}
                     expression={criterion}
-                    filterQuery={(rule.params.searchConfiguration?.query as Query)?.query as string}
-                    groupBy={rule.params.groupBy}
+                    filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
+                    groupBy={ruleParams.groupBy}
                     hideTitle
                     timeRange={timeRange}
                   />
