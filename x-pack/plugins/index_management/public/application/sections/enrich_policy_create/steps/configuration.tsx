@@ -180,21 +180,21 @@ export const ConfigurationStep = ({ onNext }: Props) => {
               <ul>
                 <li>
                   <FormattedMessage
-                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver"
+                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.matchTypePopOver"
                     defaultMessage="{type} matches an exact value."
                     values={{ type: <EuiCode transparentBackground>Match</EuiCode> }}
                   />
                 </li>
                 <li>
                   <FormattedMessage
-                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver"
+                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.geoMatchTypePopOver"
                     defaultMessage="{type} matches a geographic location."
                     values={{ type: <EuiCode transparentBackground>Geo match</EuiCode> }}
                   />
                 </li>
                 <li>
                   <FormattedMessage
-                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver"
+                    id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeTypePopOver"
                     defaultMessage="{type} matches a number, date, or IP address range."
                     values={{ type: <EuiCode transparentBackground>Range</EuiCode> }}
                   />
