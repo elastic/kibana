@@ -42,7 +42,7 @@ export const createPureCreateCustomIntegrationStateMachine = (
     CreateCustomIntegrationTypestate
   >(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QGEBOYCGAXMyCusWA9gLYCSAdjlKtgJZEUDEAqgAoAiAggCoCiAfQBiZPgBkOAZQDaABgC6iUAAcisOlgYUlIAB6IALACYANCACeiAOwBGKwDpZAVgCcADjc33AZidO3AGwAvkFmaJg4+ISklNS0moz2eBR0KZoYADZ0AF6QTHKKSCCq6gnaRfoIRgZu9t5GnkY2RlZORkYu3gFmlggBRt72Tl0GVgFWVsbeNk4hYejYuATE5FRgNPSJyakadJk5edI2hSpqu4w6ldW19Y3Nre2d3RaILkZDsp-GLhMBAbIBAxzEDhRZRFaxdbxLT2ABu+wg9AoUCYEEYYHsqVhRAA1hjQZFljE1hsynCEUioAgsUQAMabCgFAo6ErncqgSpWab2FwBNyTAxOLkTdw9RD9QYBLxuT6BAwGGx2YEEpbRVZxBnkrKIzTIphgVCoIioezKDLYABmxpI9hV4OJGrJ8O1lOpFGx9LKTIULLOZUu1m5vP58qF3hFbjFfTc7zcnSMTlGRlkBlkLlmoRBC0JashpJhzroECYki4ADU+Myiqz-RVEIqvPYmvyYzZZE1flHWk46jGrG4ut2fkZldnVRCSdDEoXi6WK0cTsU-VoAwgGy4mzYW0123YxlHwwYm7Jpv83k0XO3RxFxw6oZqZyXy5WjIuayu62vFRvm-2dx39xePp2nsb8ZQMKV5XDKxrzBIl1XvMkIDADIwF1KA2HQWEGAIVF0Uxd1cXxMd7QQ-NEmQ1D0MwsBsKIAg3Q9BlvTfZcLk-GwAi6OoGmTW5hkCJwoycFM6gCdwahcQUJicGxYJzCdHRhSi0NSDCsJw2B9UNY1TXNLArVQG07XgvMpwoewVOojT6NgRi6WYhQq1OUoPw5esuICHiYxPBoBICISgKaGxHE+E9ZGafxZAHGDMxM3NJ01WA8AAIxIDR0LwigMRpPFbRI0zErJZK0oytT7M9LQWN9Vz2PctcJOPeoz2GcTAmEt5QKsH4vH8VtOPk28yPM+wSvSrBMoNI0TTNS1rXym9SLMpLUvG9CKsc+RnKXWr2T0etGr4owWq6dxnl6AwXB-Y6wxcGxjAGQalqKmFktpWk4C07b3zq-aqj8Dc3i8Hwxmi9Moy42R7C5dM7sCcT+zkuKCoSpTEgtDA6AyPB0CYAAlPgeDxgBNb62L2q5ZR5Nx5V5WwnH+QED0mJqt2mfw2naJ7CrRiyMaxnGwHxwmSYXGq2VXPivM6B4Gn7Vo7CjYwjysE9OJphVZFsYJkcWnnEJhdBYDQzKyd2yW7sGbrbHbP5hj3CGOmp3kU0CCKhRHYEKCIZD4CKeLFIN36fopxAAFpzvDnX5j11Gg4s7Y0j2LJcggcXa3q4wo08D5PmlAxvGixMMxjuC4-IiyZ0pdO3L+2Sexlmo3BE2xRkjICpUGU7+wRjo41i0uFLvCukioejaQAC0gGvfsqQvovsONoog2Tm4i7wo3cULPl8NX+jaaOs1jwOR5nGfQ4QN4G75VpOmb6DTCA1wN2-RGB043jufLkaq7KIRMdQmnas5NVxXx5DfVw3h74TEfr0VWR4pTuGaOMH4Pwv4nxGlZNSNE6IEHPque6sk6gF26p4GYzgBgHiIXxTiJ5Wi2ATAPI+ZcMErVKhNNS+COKeBfgmGw7NeLayVlJHk9t6FXW6uJEuzCh7DRWu9T6XD6rtBjPYCCHgGaAgBN4XwENnBqLjBzPs4ZfDoOHiNfm2N0BKL+io946jm5-FTFxXRQUC7QzGP8VwAIOgtEPgHcxmojYm04cA82n4WgzHsPvZM9w0w3T0T2SSsk7pswmN4EIIQgA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QGEBOYCGAXMyCusWA9gLYCSAdjlKtgJZEUDEAqgAoAiAggCoCiAfQBiZPgBkOAZQDaABgC6iUAAcisOlgYUlIAB6IALACYANCACeh2UYB0ATgBsD6w4DsAVgCMngMyvPAL4BZmiYOPiEpJTUtJqMNngUdEmaGAA2dABekExyikggqupx2gX6CEYGABw2PkZVnk6yjVXVBg5mlgju7TYGxu4eBo1O1UEh6Ni4BMTkVGA09PGJyRp06Vk50p75KmprjDrllTV1DU0tbR0WiK5GPjauHnaydz4G763jIKFTEbPRBaxLQ2ABuGwg9AoUCYEEYYBsyVBRAA1gjfuEZlF5osSmCIVCoAgkUQAMZLCh5PI6IoHUqgcquHyeewOKquOyeKp2Iyedx2HydRA9Aw2Kr8oyybk+HyDdxGb4Y6aROYxCn4jKQzTQphgVCoIioGzKNLYABmhpINiV-2xarx4M1hOJFGR5JKVIUNP2JSOt2ZrPZnO5vP5gpuCH6shsviMDiMdgMnM8zXcismmJVgNxIMddAgTEkXAAanxqQVab6yohvJ47DZeeyOVK+T5ZNcumGxfy65Lk1UHOmwsqATjgfE8wWi6XtrtCj6tH6ELX642ni8Gu42x3EG3o347O4jwLPEZ5YPgj8MyO7UD1ZPCyWy0Y55XF9Xl95V1z1y2t+2hW6D5aglA8j1kAwtyHP4sVVO88QgMA0jAbUoDYdBQQYAhYXhRFXVRdFr1tOCc3iRDkNQ9CwEwogCBdN0KU9V8F0OD9Gl6M46zDDlBgMQD6lFVxrDsET+QcFMmQvCZh2I7NxwoGxyJQ5I0IwrDYF1fVDWNU0sAtVArRtWC5PVJTKLU2jYHoslGIUcs9mKd8GRrBwOPqLiBR41w+IjBo+hExwHHceM+XaVxoMzUd7RBMyVKomjsL1A0jRNc1LWtIjjLHUykOU6F4vU6z3S0Kkdm9RzWOc5dXIcWp3MPTzD28-i-AbYT2WGIS4w8CKbxI+SbFgPAACMSA0VCcIoBESTRDKZKy6L4iG0bxpUorbPkez5wq+k9EQRt6waM8DCZZlIP6QCfCqaM+XE1420cbw00vIys2yvFlrGrAJqS7TUr09LXqi+CQU+1boXWj07K9CsWN244uUO08elOzxzp8rp6lcNq2xOs8grscVnukmC3sWhShtJUk4A0ra30qvaKiedwbC3U8uQTQnxUA9w-OsXnzyMfxgvCl7MrJkH4jNDA6DSPB0CYAAlPgeEVgBNOm4aXIxeVFMMGlkHxXLqDxAJOh4Ux5eM2SN9sB162T3pBaXZflsAlZV9XZ3KultcqWwejZZtxXaOwWtqoSHuZSVIKqB2FslhT0FgFCJs1nal2j+sDHbIWeU5V4eeuhsPAHfw-G5TxRcvCgiEQ+ACiB29SN2+n4cQABaHcEC7mxZH7gfB4H+p44lluEiSFJ1gybIIB9qsquMQC2VFIXecTbzeQk0fgfHydCXnpzGa8FnPK3PxvE+bv3HbGNZB5Pwt0gqU7B35uBsSYg8FJAALSBD4ZuUOolRWb9w5j4Dc1RXCAX8IJZ41hrpOHuKLEmkV373ghAA9uCAeSnyDomKocYBTvB5pKECwZjDtEaImN+-UMFOhKEIGWyE56wwzh+XBgYOTVCITKDGhhxLdgfs0FMCDX5i3mmPAasV8oWQIFgpcaMvC1A+NwpMDhEzuH4k8WoPE7BDBlPyV4tCTIfRGl9VCCiPyShAUyfoR5eZxmaN3eoth86BxvuJdeJinZLW-tTWADcHK+2sUmGorxCGyBvoTdo18jyPFLpQm+1ReY+PJjYF2ct0BWKqpUQmfdXCROia0JwZtnB9wlGA8U+iqhxwkaTXeA1k6pxUjkxmCYAz3A+I9L8HwebxOZq0SoyTxR1KCEAA */
       context: initialContext,
       preserveActionOrder: true,
       predictableActionArguments: true,
@@ -108,7 +108,7 @@ export const createPureCreateCustomIntegrationStateMachine = (
             src: 'cleanup',
             onDone: {
               target: '#submitting',
-              actions: ['notifyIntegrationCleanup'],
+              actions: ['clearPreviouslyCreatedIntegration', 'notifyIntegrationCleanup'],
             },
             onError: [
               {
@@ -200,6 +200,13 @@ export const createPureCreateCustomIntegrationStateMachine = (
           return 'data' in event && !(event.data instanceof IntegrationError)
             ? ({
                 previouslyCreatedIntegration: context.fields,
+              } as WithPreviouslyCreatedIntegration)
+            : {};
+        }),
+        clearPreviouslyCreatedIntegration: actions.assign((context, event) => {
+          return 'data' in event && 'previouslyCreatedIntegration' in context
+            ? ({
+                previouslyCreatedIntegration: undefined,
               } as WithPreviouslyCreatedIntegration)
             : {};
         }),
