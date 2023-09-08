@@ -12,6 +12,7 @@ import classNames from 'classnames';
 
 import { EmbeddablePhaseEvent, EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { css } from '@emotion/react';
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
@@ -54,12 +55,14 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const focusPanelId = container.select((state) => state.componentState.focusPanelId);
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
-    const focusPanel = focusPanelId !== undefined && focusPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
+    const focusPanel = focusPanelId !== undefined && focusPanelId === id;
+    const blurPanel = focusPanelId !== undefined && focusPanelId !== id;
     const classes = classNames({
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
+      'dshDashboardGrid__item--blurred': focusPanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
@@ -75,13 +78,20 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, container, scrollToPanelId, highlightPanelId, ref]);
 
+    const focusStyles =
+      focusPanelId && focusPanelId !== id
+        ? css`
+            // pointer-events: none;
+            opacity: 0.25;
+          `
+        : css``;
+
     return (
       <div
         style={{
           ...style,
-          pointerEvents: focusPanelId && focusPanelId !== id ? 'none' : 'auto',
-          opacity: focusPanelId && focusPanelId !== id ? '.25' : '1',
         }}
+        css={focusStyles}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
         id={`panel-${id}`}
