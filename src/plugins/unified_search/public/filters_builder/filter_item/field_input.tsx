@@ -44,6 +44,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   const fields = dataView ? getFilterableFields(dataView) : [];
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
   const comboBoxWrapperRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const onFieldChange = useCallback(
     ([selectedField]: DataViewField[]) => {
@@ -77,12 +78,20 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       ({ label }) => fields[optionFields.findIndex((optionField) => optionField.label === label)]
     );
     onFieldChange(newValues);
+
+    setTimeout(() => {
+      // Note: requires a tick skip to correctly blur element focus
+      inputRef?.current?.blur();
+    })
   };
 
   return (
     <div ref={comboBoxWrapperRef}>
       <EuiComboBox
         id={id}
+        inputRef={(ref) => {
+          inputRef.current = ref
+        }}
         options={euiOptions}
         selectedOptions={selectedEuiOptions}
         onChange={onComboBoxChange}
