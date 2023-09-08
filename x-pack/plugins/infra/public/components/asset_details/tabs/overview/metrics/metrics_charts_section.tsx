@@ -6,20 +6,26 @@
  */
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import type { XYConfig } from '../../../../../common/visualizations/lens/dashboards/asset_details/metric_charts/types';
 import { XY_MISSING_VALUE_DOTTED_LINE_CONFIG } from '../../../../../common/visualizations';
+import type { XYConfig } from '../../../../../common/visualizations/lens/dashboards/asset_details/metric_charts/types';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensChart } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
-import type { DataViewOrigin } from '../../../types';
 import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
+import type { DataViewOrigin } from '../../../types';
+import {
+  calculateChartRowsTimeInterval,
+  extractTableEntryFromChartClickContextData,
+  isChartClickContextData,
+} from './chart_utils';
 
 type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
+type FilterArgs = Parameters<NonNullable<LensEmbeddableInput['onFilter']>>[0];
 
 interface ChartGridProps {
   assetName: string;
@@ -66,6 +72,29 @@ export const ChartGrid = React.memo(
       [setDateRange]
     );
 
+    const handleFilter = useCallback(
+      ({ data, preventDefault }: FilterArgs) => {
+        if (!isChartClickContextData(data)) {
+          return;
+        }
+
+        const { column, row } = extractTableEntryFromChartClickContextData(data);
+
+        if (!column || !row || column.meta.type !== 'date') {
+          return;
+        }
+
+        const timestamp = row[column.id];
+        const rowInterval = calculateChartRowsTimeInterval(data[0].table.rows, column.id);
+        const from = new Date(timestamp).toISOString();
+        const to = new Date(timestamp + rowInterval).toISOString();
+
+        setDateRange({ from, to });
+        preventDefault();
+      },
+      [setDateRange]
+    );
+
     const chartsToRender = useMemo(
       () =>
         charts.filter(
@@ -93,6 +122,7 @@ export const ChartGrid = React.memo(
               overrides={overrides}
               visualizationType="lnsXY"
               onBrushEnd={handleBrushEnd}
+              onFilter={handleFilter}
             />
           </EuiFlexItem>
         ))}
