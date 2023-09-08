@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { HOST_NAME } from '../../../../common/es_fields/apm';
+import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_format';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
+import { HostnamesFilterWarning } from './host_names_filter_warning';
 
 interface Props {
   serviceName: string;
@@ -22,6 +28,7 @@ export function ProfilingFlamegraph({
   serviceName,
   environment,
 }: Props) {
+  const { profilingLocators } = useProfilingPlugin();
   const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
@@ -37,11 +44,38 @@ export function ProfilingFlamegraph({
     [serviceName, start, end, environment]
   );
 
+  const hostNamesKueryFormat = toKueryFilterFormat(
+    HOST_NAME,
+    data?.hostNames || []
+  );
+
   return (
-    <EmbeddableFlamegraph
-      data={data}
-      isLoading={isPending(status)}
-      height="60vh"
-    />
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <HostnamesFilterWarning hostNames={data?.hostNames} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <EuiLink
+              data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
+              href={profilingLocators?.flamegraphLocator.getRedirectUrl({
+                kuery: hostNamesKueryFormat,
+              })}
+            >
+              {i18n.translate('xpack.apm.profiling.flamegraph.link', {
+                defaultMessage: 'Go to Universal Profiling Flamegraph',
+              })}
+            </EuiLink>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EmbeddableFlamegraph
+        data={data?.flamegraph}
+        isLoading={isPending(status)}
+        height="60vh"
+      />
+    </>
   );
 }

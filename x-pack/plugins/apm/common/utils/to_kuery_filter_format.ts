@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { isEmpty } from 'lodash';
-import { HOST_NAME } from '../../../common/es_fields/apm';
 
-export function hostNamesToKuery(hostNames: string[]) {
-  return hostNames.reduce<string>((acc, hostName) => {
+export function toKueryFilterFormat(
+  key: string,
+  values: string[],
+  separator: 'OR' | 'AND' = 'OR'
+) {
+  return values.reduce<string>((acc, value) => {
     if (isEmpty(acc)) {
-      return `${HOST_NAME} : "${hostName}"`;
+      return `${key} : "${value}"`;
     }
 
-    return `${acc} OR ${HOST_NAME} : "${hostName}"`;
+    return `${acc} ${separator} ${key} : "${value}"`;
   }, '');
 }

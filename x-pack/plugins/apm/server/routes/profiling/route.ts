@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
+import * as t from 'io-ts';
+import { HOST_NAME } from '../../../common/es_fields/apm';
+import { toKueryFilterFormat } from '../../../common/utils/to_kuery_filter_format';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getServiceHostNames } from './get_service_host_names';
-import { hostNamesToKuery } from './utils';
 
 const profilingFlamegraphRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
@@ -21,7 +22,11 @@ const profilingFlamegraphRoute = createApmServerRoute({
     query: t.intersection([rangeRt, kueryRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<BaseFlameGraph | undefined> => {
+  handler: async (
+    resources
+  ): Promise<
+    { flamegraph: BaseFlameGraph; hostNames: string[] } | undefined
+  > => {
     const { context, plugins, params } = resources;
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
@@ -42,12 +47,15 @@ const profilingFlamegraphRoute = createApmServerRoute({
         serviceName,
       });
 
-      return profilingDataAccessStart?.services.fetchFlamechartData({
-        esClient: esClient.asCurrentUser,
-        rangeFromMs: start,
-        rangeToMs: end,
-        kuery: hostNamesToKuery(serviceHostNames),
-      });
+      const flamegraph =
+        await profilingDataAccessStart?.services.fetchFlamechartData({
+          esClient: esClient.asCurrentUser,
+          rangeFromMs: start,
+          rangeToMs: end,
+          kuery: toKueryFilterFormat(HOST_NAME, serviceHostNames),
+        });
+
+      return { flamegraph, hostNames: serviceHostNames };
     }
 
     return undefined;
@@ -66,7 +74,9 @@ const profilingFunctionsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<TopNFunctions | undefined> => {
+  handler: async (
+    resources
+  ): Promise<{ functions: TopNFunctions; hostNames: string[] } | undefined> => {
     const { context, plugins, params } = resources;
     const [esClient, apmEventClient, profilingDataAccessStart] =
       await Promise.all([
@@ -88,14 +98,15 @@ const profilingFunctionsRoute = createApmServerRoute({
         serviceName,
       });
 
-      return profilingDataAccessStart?.services.fetchFunction({
+      const functions = await profilingDataAccessStart?.services.fetchFunction({
         esClient: esClient.asCurrentUser,
         rangeFromMs: start,
         rangeToMs: end,
-        kuery: hostNamesToKuery(serviceHostNames),
+        kuery: toKueryFilterFormat(HOST_NAME, serviceHostNames),
         startIndex,
         endIndex,
       });
+      return { functions, hostNames: serviceHostNames };
     }
 
     return undefined;
