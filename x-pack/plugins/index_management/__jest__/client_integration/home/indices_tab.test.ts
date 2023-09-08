@@ -12,31 +12,6 @@ import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
 
-// Since the editor component being used for editing index settings is not a React
-// component but an editor being instantiated on a div reference, we cannot mock
-// the component and replace it with something else. In this particular case we're
-// mocking the returned instance of the editor to always have the same values.
-const mockGetAceEditorValue = jest.fn().mockReturnValue(`{}`);
-
-jest.mock('../../../public/application/lib/ace', () => {
-  const createAceEditor = () => {
-    return {
-      getValue: mockGetAceEditorValue,
-      getSession: () => {
-        return {
-          on: () => null,
-          getValue: () => null,
-        };
-      },
-      destroy: () => null,
-    };
-  };
-
-  return {
-    createAceEditor,
-  };
-});
-
 /**
  * The below import is required to avoid a console error warn from the "brace" package
  * console.warn ../node_modules/brace/index.js:3999
@@ -163,6 +138,21 @@ describe('<IndexManagementHome />', () => {
 
       expect(dataStreamLinkExistsAt(1)).toBeFalsy();
     });
+  });
+
+  it('navigates to the index details page when the index name is clicked', async () => {
+    const indexName = 'testIndex';
+    httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+
+    testBed = await setup(httpSetup, {
+      history: createMemoryHistory(),
+    });
+    const { component, actions } = testBed;
+
+    component.update();
+
+    await actions.clickIndexNameAt(0);
+    expect(testBed.actions.findIndexDetailsPageTitle()).toContain('testIndex');
   });
 
   // TODO fix the % in the new index details page

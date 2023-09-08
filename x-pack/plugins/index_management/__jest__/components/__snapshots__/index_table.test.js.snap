@@ -112,6 +112,9 @@ Array [
 
 exports[`index table should show the right context menu options when one index is selected and closed 1`] = `
 Array [
+  "Show index overview",
+  "Show index settings",
+  "Show index mapping",
   "Open index",
   "Delete index",
 ]
@@ -119,6 +122,10 @@ Array [
 
 exports[`index table should show the right context menu options when one index is selected and open 1`] = `
 Array [
+  "Show index overview",
+  "Show index settings",
+  "Show index mapping",
+  "Show index stats",
   "Close index",
   "Force merge index",
   "Refresh index",

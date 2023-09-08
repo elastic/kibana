@@ -320,18 +320,6 @@ describe('index table', () => {
     snapshot(namesText(rendered));
   });
 
-  test('navigates to the index details page when the index name is clicked', async () => {
-    const rendered = mountWithIntl(component);
-    await runAllPromises();
-    rendered.update();
-
-    const indexNameLink = names(rendered).at(0);
-    indexNameLink.simulate('click');
-    rendered.update();
-
-    // TODO check that the navigation worked
-  });
-
   test('should show the right context menu options when one index is selected and open', async () => {
     const rendered = mountWithIntl(component);
     await runAllPromises();
