@@ -41,6 +41,7 @@ export {
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
+  profilingNewFlamegraphApiPoC,
 } from './ui_settings_keys';
 
 export {

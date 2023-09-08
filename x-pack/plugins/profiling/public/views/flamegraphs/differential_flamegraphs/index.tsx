@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { profilingNewFlamegraphApiPoC } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
 import { NormalizationMode, NormalizationOptions } from '../../../components/normalization_menu';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
-import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 import { DifferentialFlameGraphSearchPanel } from './differential_flame_graph_search_panel';
@@ -46,8 +47,14 @@ export function DifferentialFlameGraphsView() {
   });
 
   const {
+    start: { core },
     services: { fetchElasticFlamechart },
   } = useProfilingDependencies();
+
+  const isProfilingIntegrationEnabled = core.uiSettings.get<boolean>(
+    profilingNewFlamegraphApiPoC,
+    false
+  );
 
   const state = useTimeRangeAsync(
     ({ http }) => {
@@ -57,6 +64,7 @@ export function DifferentialFlameGraphsView() {
           timeFrom: new Date(timeRange.start).getTime(),
           timeTo: new Date(timeRange.end).getTime(),
           kuery,
+          useNewFlamegraphApi: isProfilingIntegrationEnabled,
         }),
         comparisonTimeRange.start && comparisonTimeRange.end
           ? fetchElasticFlamechart({
@@ -64,6 +72,7 @@ export function DifferentialFlameGraphsView() {
               timeFrom: new Date(comparisonTimeRange.start).getTime(),
               timeTo: new Date(comparisonTimeRange.end).getTime(),
               kuery: comparisonKuery,
+              useNewFlamegraphApi: isProfilingIntegrationEnabled,
             })
           : Promise.resolve(undefined),
       ]).then(([primaryFlamegraph, comparisonFlamegraph]) => {
@@ -80,6 +89,7 @@ export function DifferentialFlameGraphsView() {
       kuery,
       comparisonTimeRange.start,
       comparisonTimeRange.end,
+      isProfilingIntegrationEnabled,
       comparisonKuery,
     ]
   );

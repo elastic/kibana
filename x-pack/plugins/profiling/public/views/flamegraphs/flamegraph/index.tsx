@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
+import { profilingNewFlamegraphApiPoC } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
@@ -24,8 +25,14 @@ export function FlameGraphView() {
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
   const {
+    start: { core },
     services: { fetchElasticFlamechart },
   } = useProfilingDependencies();
+
+  const isProfilingIntegrationEnabled = core.uiSettings.get<boolean>(
+    profilingNewFlamegraphApiPoC,
+    false
+  );
 
   const state = useTimeRangeAsync(
     ({ http }) => {
@@ -34,9 +41,10 @@ export function FlameGraphView() {
         timeFrom: new Date(timeRange.start).getTime(),
         timeTo: new Date(timeRange.end).getTime(),
         kuery,
+        useNewFlamegraphApi: isProfilingIntegrationEnabled,
       });
     },
-    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery]
+    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, isProfilingIntegrationEnabled]
   );
 
   const { data } = state;

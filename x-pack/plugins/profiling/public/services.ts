@@ -50,6 +50,7 @@ export interface Services {
     timeFrom: number;
     timeTo: number;
     kuery: string;
+    useNewFlamegraphApi: boolean;
   }) => Promise<ElasticFlameGraph>;
   fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingSetupStatus>;
   postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
@@ -100,14 +101,14 @@ export function getServices(): Services {
       return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
     },
 
-    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery }) => {
+    fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery, useNewFlamegraphApi }) => {
       const query: HttpFetchQuery = {
         timeFrom,
         timeTo,
         kuery,
       };
-
-      const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
+      const path = useNewFlamegraphApi ? paths.FlamechartPoC : paths.Flamechart;
+      const baseFlamegraph = (await http.get(path, { query })) as BaseFlameGraph;
       return createFlameGraph(baseFlamegraph);
     },
     fetchHasSetup: async ({ http }) => {

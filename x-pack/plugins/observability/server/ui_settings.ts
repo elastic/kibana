@@ -30,6 +30,7 @@ import {
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
+  profilingNewFlamegraphApiPoC,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -373,6 +374,15 @@ export const uiSettings: Record<string, UiSettings> = {
     value: false,
     schema: schema.boolean(),
     requiresPageReload: false,
+  },
+  [profilingNewFlamegraphApiPoC]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingNewFlamegraphApiPoC', {
+      defaultMessage: 'Enable new Flamegraph API',
+    }),
+    value: false,
+    schema: schema.boolean(),
+    requiresPageReload: true,
   },
 };
 
