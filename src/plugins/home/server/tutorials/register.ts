@@ -11,7 +11,7 @@ import { activemqMetricsSpecProvider } from './activemq_metrics';
 import { aerospikeMetricsSpecProvider } from './aerospike_metrics';
 import { apacheLogsSpecProvider } from './apache_logs';
 import { apacheMetricsSpecProvider } from './apache_metrics';
-import { securitySolutionSpecProvider } from './auditbeat';
+import { auditbeatSpecProvider } from './auditbeat';
 import { auditdLogsSpecProvider } from './auditd_logs';
 import { awsLogsSpecProvider } from './aws_logs';
 import { awsMetricsSpecProvider } from './aws_metrics';
@@ -170,7 +170,7 @@ export const builtInTutorials = [
   zeekLogsSpecProvider,
   corednsMetricsSpecProvider,
   corednsLogsSpecProvider,
-  securitySolutionSpecProvider,
+  auditbeatSpecProvider,
   iptablesLogsSpecProvider,
   ciscoLogsSpecProvider,
   envoyproxyLogsSpecProvider,

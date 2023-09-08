@@ -18,7 +18,7 @@ import {
   TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
 
-export function securitySolutionSpecProvider(context: TutorialContext): TutorialSchema {
+export function auditbeatSpecProvider(context: TutorialContext): TutorialSchema {
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   const moduleName = 'auditbeat';
   return {
