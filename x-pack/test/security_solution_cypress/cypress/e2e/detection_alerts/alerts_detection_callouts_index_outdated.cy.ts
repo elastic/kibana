@@ -7,12 +7,11 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,
@@ -80,10 +79,9 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' }));
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
-            waitForPageTitleToBeShown();
-            goToRuleDetails();
+            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+              loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
+            );
           });
 
           afterEach(() => {
@@ -130,10 +128,9 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' }));
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
-            waitForPageTitleToBeShown();
-            goToRuleDetails();
+            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+              loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
+            );
           });
 
           afterEach(() => {
@@ -180,10 +177,9 @@ describe(
 
         context('On Rule Details page', () => {
           beforeEach(() => {
-            createRule(getNewRule({ rule_id: 'rule_testing' }));
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
-            waitForPageTitleToBeShown();
-            goToRuleDetails();
+            createRule(getNewRule({ rule_id: 'rule_testing' })).then((rule) =>
+              loadPageAsPlatformEngineerUser(ruleDetailsUrl(rule.body.id))
+            );
           });
 
           afterEach(() => {
