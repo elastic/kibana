@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
@@ -11,13 +12,13 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 import {
-  selectNumberOfRules,
-  unselectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
+  selectRulesByName,
+  unselectRulesByName,
 } from '../../tasks/alerts_detection_rules';
 import {
-  getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
+  getAvailablePrebuiltRulesCount,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -32,7 +33,7 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
-describe('Rules selection', () => {
+describe('Rules table: selection', () => {
   before(() => {
     cleanKibana();
   });
@@ -48,11 +49,11 @@ describe('Rules selection', () => {
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
     waitForPrebuiltDetectionRulesToBeLoaded();
 
-    selectNumberOfRules(2);
+    selectRulesByName(['Test rule 1', 'Test rule 2']);
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '2');
 
-    unselectNumberOfRules(2);
+    unselectRulesByName(['Test rule 1', 'Test rule 2']);
 
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
   });

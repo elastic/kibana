@@ -7,7 +7,6 @@
 
 import { APP_PATH, RULES_ADD_PATH, RULES_UPDATES } from '../../../common/constants';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { createAndInstallMockedPrebuiltRules } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
@@ -58,7 +57,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Authorizatio
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
-    waitForRulesTableToBeLoaded();
     createAndInstallMockedPrebuiltRules({ rules: [OUTDATED_RULE_1, OUTDATED_RULE_2] });
   });
 
@@ -75,7 +73,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Authorizatio
       // Now login with read-only user in preparation for test
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
       loadPageAsReadOnlyUser(SECURITY_DETECTIONS_RULES_URL);
-      waitForRulesTableToBeLoaded();
     });
 
     it('should not be able to install prebuilt rules', () => {
@@ -103,7 +100,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update - Authorizatio
       });
       // Now login with read-only user in preparation for test
       loadPageAsReadOnlyUser(SECURITY_DETECTIONS_RULES_URL);
-      waitForRulesTableToBeLoaded();
     });
 
     it('should not be able to upgrade prebuilt rules', () => {

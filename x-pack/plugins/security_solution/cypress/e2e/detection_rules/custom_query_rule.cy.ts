@@ -5,118 +5,113 @@
  * 2.0.
  */
 
+import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { ruleFields } from '../../data/detection_engine';
-import { getNewRule, getExistingRule, getEditedRule, getNewOverrideRule } from '../../objects/rule';
+import { getNewRule, getNewOverrideRule, getExistingRule, getEditedRule } from '../../objects/rule';
 import { getTimeline } from '../../objects/timeline';
-import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../screens/alerts';
-
 import {
-  CUSTOM_RULES_BTN,
-  RISK_SCORE,
   RULE_NAME,
-  RULES_ROW,
-  RULES_MANAGEMENT_TABLE,
-  RULE_SWITCH,
+  RISK_SCORE,
   SEVERITY,
-} from '../../screens/alerts_detection_rules';
+  ALERTS_COUNT,
+  ALERT_GRID_CELL,
+} from '../../screens/alerts';
+import { CUSTOM_RULES_BTN, RULES_MANAGEMENT_TABLE } from '../../screens/alerts_detection_rules';
 import {
-  ACTIONS_NOTIFY_WHEN_BUTTON,
   ACTIONS_SUMMARY_BUTTON,
+  ACTIONS_NOTIFY_WHEN_BUTTON,
 } from '../../screens/common/rule_actions';
 import {
-  ABOUT_CONTINUE_BTN,
-  ABOUT_EDIT_BUTTON,
-  CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
+  ABOUT_CONTINUE_BTN,
   DEFINE_EDIT_BUTTON,
-  DEFINE_INDEX_INPUT,
-  DEFAULT_RISK_SCORE_INPUT,
-  RULE_DESCRIPTION_INPUT,
+  CUSTOM_QUERY_INPUT,
+  ABOUT_EDIT_BUTTON,
   RULE_NAME_INPUT,
+  SCHEDULE_CONTINUE_BUTTON,
+  DEFINE_INDEX_INPUT,
+  RULE_DESCRIPTION_INPUT,
+  TAGS_FIELD,
+  SEVERITY_DROPDOWN,
+  DEFAULT_RISK_SCORE_INPUT,
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
   SCHEDULE_INTERVAL_UNITS_INPUT,
-  SCHEDULE_CONTINUE_BUTTON,
-  SEVERITY_DROPDOWN,
   TAGS_CLEAR_BUTTON,
-  TAGS_FIELD,
 } from '../../screens/create_new_rule';
 import {
-  ADDITIONAL_LOOK_BACK_DETAILS,
-  ABOUT_DETAILS,
-  ABOUT_INVESTIGATION_NOTES,
-  ABOUT_RULE_DESCRIPTION,
-  CUSTOM_QUERY_DETAILS,
-  DEFINITION_DETAILS,
-  FALSE_POSITIVES_DETAILS,
-  removeExternalLinkText,
-  INDEX_PATTERNS_DETAILS,
-  INVESTIGATION_NOTES_MARKDOWN,
-  INVESTIGATION_NOTES_TOGGLE,
-  REFERENCE_URLS_DETAILS,
-  RISK_SCORE_DETAILS,
+  RULE_SWITCH,
   RULE_NAME_HEADER,
-  RULE_TYPE_DETAILS,
-  RUNS_EVERY_DETAILS,
-  SCHEDULE_DETAILS,
+  ABOUT_RULE_DESCRIPTION,
+  ABOUT_DETAILS,
   SEVERITY_DETAILS,
+  RISK_SCORE_DETAILS,
+  REFERENCE_URLS_DETAILS,
+  FALSE_POSITIVES_DETAILS,
   TAGS_DETAILS,
-  TIMELINE_TEMPLATE_DETAILS,
   THREAT_TACTIC,
   THREAT_TECHNIQUE,
   THREAT_SUBTECHNIQUE,
+  INVESTIGATION_NOTES_TOGGLE,
+  ABOUT_INVESTIGATION_NOTES,
+  INVESTIGATION_NOTES_MARKDOWN,
+  DEFINITION_DETAILS,
+  INDEX_PATTERNS_DETAILS,
+  CUSTOM_QUERY_DETAILS,
+  RULE_TYPE_DETAILS,
+  TIMELINE_TEMPLATE_DETAILS,
+  SCHEDULE_DETAILS,
+  RUNS_EVERY_DETAILS,
+  ADDITIONAL_LOOK_BACK_DETAILS,
 } from '../../screens/rule_details';
-
 import {
-  deleteFirstRule,
-  deleteRuleFromDetailsPage,
-  deleteSelectedRules,
-  editFirstRule,
+  expectManagementTableRules,
   goToRuleDetails,
-  selectNumberOfRules,
+  getRulesManagementTableRows,
+  deleteFirstRule,
+  selectRulesByName,
+  goToTheRuleDetailsOf,
+  deleteRuleFromDetailsPage,
+  editFirstRule,
 } from '../../tasks/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../tasks/common/rule_actions';
 import {
-  createAndEnableRule,
-  expandAdvancedSettings,
-  fillAboutRule,
-  fillDescription,
-  fillFalsePositiveExamples,
-  fillFrom,
-  fillNote,
-  fillReferenceUrls,
-  fillRiskScore,
-  fillRuleName,
-  fillRuleTags,
-  fillSeverity,
-  fillThreat,
-  fillThreatSubtechnique,
-  fillThreatTechnique,
-  goToAboutStepTab,
-  goToActionsStepTab,
-  goToScheduleStepTab,
   importSavedQuery,
+  fillRuleName,
+  fillDescription,
+  fillSeverity,
+  fillRiskScore,
+  fillRuleTags,
+  expandAdvancedSettings,
+  fillReferenceUrls,
+  fillFalsePositiveExamples,
+  fillThreat,
+  fillThreatTechnique,
+  fillThreatSubtechnique,
+  fillNote,
+  fillFrom,
+  createAndEnableRule,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
+  goToAboutStepTab,
+  goToScheduleStepTab,
+  goToActionsStepTab,
+  fillAboutRule,
 } from '../../tasks/create_new_rule';
 import { saveEditedRule } from '../../tasks/edit_rule';
-import { login, visit } from '../../tasks/login';
-import { enablesRule, getDetails } from '../../tasks/rule_details';
-
-import { RULE_CREATION, DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+import { login, visit, visitSecurityDetectionRulesPage } from '../../tasks/login';
+import { deleteSelectedRules } from '../../tasks/rules_bulk_edit';
+import { getDetails, waitForTheRuleToBeExecuted, enablesRule } from '../../tasks/rule_details';
+import { RULE_CREATION } from '../../urls/navigation';
 
 describe('Custom query rules', () => {
-  before(() => {
-    cleanKibana();
+  beforeEach(() => {
+    deleteAlertsAndRules();
   });
 
   describe('Custom detection rules creation', () => {
-    const expectedNumberOfRules = 1;
-
     beforeEach(() => {
-      deleteAlertsAndRules();
       createTimeline(getTimeline())
         .then((response) => {
           return response.body.data.persistTimeline.timeline.savedObjectId;
@@ -133,7 +128,7 @@ describe('Custom query rules', () => {
       cy.get(DEFINE_CONTINUE_BUTTON).click();
 
       cy.log('Filling about section');
-      fillRuleName();
+      fillRuleName('Test Rule');
       fillDescription();
       fillSeverity();
       fillRiskScore();
@@ -167,7 +162,7 @@ describe('Custom query rules', () => {
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
       cy.log('Asserting rule view in rules list');
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
+      expectManagementTableRules(['Test Rule']);
       cy.get(RULE_NAME).should('have.text', ruleFields.ruleName);
       cy.get(RISK_SCORE).should('have.text', ruleFields.riskScore);
       cy.get(SEVERITY)
@@ -234,109 +229,104 @@ describe('Custom query rules', () => {
   describe('Custom detection rules deletion and edition', () => {
     context('Deletion', () => {
       beforeEach(() => {
-        deleteAlertsAndRules();
-        createRule(getNewRule({ rule_id: 'rule1', enabled: true, max_signals: 500 }));
-        createRule(getNewOverrideRule({ rule_id: 'rule2', enabled: true, max_signals: 500 }));
-        createRule(getExistingRule({ rule_id: 'rule3', enabled: true }));
+        createRule(
+          getNewRule({ rule_id: 'rule1', name: 'New Rule Test', enabled: false, max_signals: 500 })
+        );
+        createRule(
+          getNewOverrideRule({
+            rule_id: 'rule2',
+            name: 'Override Rule',
+            enabled: false,
+            max_signals: 500,
+          })
+        );
+        createRule(getExistingRule({ rule_id: 'rule3', name: 'Rule 1', enabled: false }));
         login();
-        visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        visitSecurityDetectionRulesPage();
       });
 
       it('Deletes one rule', () => {
-        cy.get(RULES_MANAGEMENT_TABLE)
-          .find(RULES_ROW)
-          .then((rules) => {
-            const initialNumberOfRules = rules.length;
-            const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+        getRulesManagementTableRows().then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
-              const numberOfRules = body.data.length;
-              expect(numberOfRules).to.eql(initialNumberOfRules);
-            });
-
-            deleteFirstRule();
-
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .find(RULES_ROW)
-              .should('have.length', expectedNumberOfRulesAfterDeletion);
-            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
-              const numberOfRules = body.data.length;
-              expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
-            });
-            cy.get(CUSTOM_RULES_BTN).should(
-              'have.text',
-              `Custom rules (${expectedNumberOfRulesAfterDeletion})`
-            );
+          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+            const numberOfRules = body.data.length;
+            expect(numberOfRules).to.eql(initialNumberOfRules);
           });
+
+          deleteFirstRule();
+
+          getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
+          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+            const numberOfRules = body.data.length;
+            expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+          });
+          cy.get(CUSTOM_RULES_BTN).should(
+            'have.text',
+            `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+          );
+        });
       });
 
       it('Deletes more than one rule', () => {
-        cy.get(RULES_MANAGEMENT_TABLE)
-          .find(RULES_ROW)
-          .then((rules) => {
-            const initialNumberOfRules = rules.length;
-            const numberOfRulesToBeDeleted = 2;
-            const expectedNumberOfRulesAfterDeletion =
-              initialNumberOfRules - numberOfRulesToBeDeleted;
+        getRulesManagementTableRows().then((rules) => {
+          const rulesToDelete = ['New Rule Test', 'Override Rule'] as const;
+          const initialNumberOfRules = rules.length;
+          const numberOfRulesToBeDeleted = 2;
+          const expectedNumberOfRulesAfterDeletion =
+            initialNumberOfRules - numberOfRulesToBeDeleted;
 
-            selectNumberOfRules(numberOfRulesToBeDeleted);
-            deleteSelectedRules();
+          selectRulesByName(rulesToDelete);
+          deleteSelectedRules();
 
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .get(RULES_ROW)
-              .first()
-              .within(() => {
-                cy.get(RULE_SWITCH).should('not.exist');
-              });
+          getRulesManagementTableRows()
+            .first()
+            .within(() => {
+              cy.get(RULE_SWITCH).should('not.exist');
+            });
 
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .find(RULES_ROW)
-              .should('have.length', expectedNumberOfRulesAfterDeletion);
+          getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
+          cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+            const numberOfRules = body.data.length;
+            expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+          });
+          getRulesManagementTableRows()
+            .first()
+            .within(() => {
+              cy.get(RULE_SWITCH).should('exist');
+            });
+          cy.get(CUSTOM_RULES_BTN).should(
+            'have.text',
+            `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+          );
+        });
+      });
+
+      it('Deletes one rule from detail page', () => {
+        getRulesManagementTableRows().then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
+
+          goToTheRuleDetailsOf('New Rule Test');
+          cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
+
+          deleteRuleFromDetailsPage();
+
+          // @ts-expect-error update types
+          cy.waitFor('@deleteRule').then(() => {
+            cy.get(RULES_MANAGEMENT_TABLE).should('exist');
+            getRulesManagementTableRows().should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
               const numberOfRules = body.data.length;
               expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
             });
-            cy.get(RULES_MANAGEMENT_TABLE)
-              .get(RULES_ROW)
-              .first()
-              .within(() => {
-                cy.get(RULE_SWITCH).should('exist');
-              });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`
             );
           });
-      });
-
-      it('Deletes one rule from detail page', () => {
-        cy.get(RULES_MANAGEMENT_TABLE)
-          .find(RULES_ROW)
-          .then((rules) => {
-            const initialNumberOfRules = rules.length;
-            const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
-
-            goToRuleDetails();
-            cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
-
-            deleteRuleFromDetailsPage();
-
-            // @ts-expect-error update types
-            cy.waitFor('@deleteRule').then(() => {
-              cy.get(RULES_MANAGEMENT_TABLE).should('exist');
-              cy.get(RULES_MANAGEMENT_TABLE)
-                .find(RULES_ROW)
-                .should('have.length', expectedNumberOfRulesAfterDeletion);
-              cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
-                const numberOfRules = body.data.length;
-                expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
-              });
-              cy.get(CUSTOM_RULES_BTN).should(
-                'have.text',
-                `Custom rules (${expectedNumberOfRulesAfterDeletion})`
-              );
-            });
-          });
+        });
       });
     });
 
@@ -345,15 +335,11 @@ describe('Custom query rules', () => {
       const expectedEditedtags = rule.tags?.join('');
       const expectedEditedIndexPatterns = rule.index;
 
-      before(() => {
-        deleteAlertsAndRules();
+      beforeEach(() => {
         deleteConnectors();
         createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
-      });
-
-      beforeEach(() => {
         login();
-        visit(DETECTIONS_RULE_MANAGEMENT_URL);
+        visitSecurityDetectionRulesPage();
       });
 
       it('Only modifies rule active status on enable/disable', () => {

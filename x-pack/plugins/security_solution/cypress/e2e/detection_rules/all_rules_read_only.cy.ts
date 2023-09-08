@@ -13,7 +13,6 @@ import {
   RULE_NAME,
 } from '../../screens/alerts_detection_rules';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../screens/lists';
-import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
@@ -22,19 +21,17 @@ import {
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../tasks/common/callouts';
-import { login, visitWithoutDateRange } from '../../tasks/login';
-import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
+import { login, visitSecurityDetectionRulesPage } from '../../tasks/login';
 
 describe('All rules - read only', () => {
   before(() => {
     cleanKibana();
-    createRule(getNewRule({ rule_id: '1' }));
+    createRule(getNewRule({ rule_id: '1', enabled: false }));
   });
 
   beforeEach(() => {
     login(ROLES.reader);
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, ROLES.reader);
-    waitForRulesTableToBeLoaded();
+    visitSecurityDetectionRulesPage(ROLES.reader);
     cy.get(RULE_NAME).should('have.text', getNewRule().name);
   });
 

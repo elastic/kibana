@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const ALL_ACTIONS = '[data-test-subj="rules-details-popover-button-icon"]';
+export const POPOVER_ACTIONS_TRIGGER_BUTTON =
+  '[data-test-subj="rules-details-popover-button-icon"]';
 
 export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';
 
@@ -13,6 +14,8 @@ export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggl
 
 export const ABOUT_DETAILS =
   '[data-test-subj="aboutRule"] [data-test-subj="listItemColumnStepRuleDescription"]';
+
+export const ACTIONS = '[data-test-subj="actions"]';
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
