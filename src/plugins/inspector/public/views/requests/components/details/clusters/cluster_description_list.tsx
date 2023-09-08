@@ -17,9 +17,24 @@ interface Props {
 
 export function ClusterDescriptionList({ clusterDetails }: Props) {
   const items: EuiDescriptionListProps['listItems'] = [];
+  if (clusterDetails.timed_out) {
+    items.push({
+      title: i18n.translate('inspector.requests.clusterDetails.timedOutTitle', {
+        defaultMessage: 'Timed out',
+      }),
+      description: (
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('inspector.requests.clusterDetails.timedOutDescription', {
+            defaultMessage: 'Request timed out before completion. Results may be incomplete or empty.',
+          })}
+        </EuiText>
+      ),
+    });
+  }
+
   if (clusterDetails._shards) {
     items.push({
-      title: i18n.translate('inspector.requests.clusterDetails.shardsLabel', {
+      title: i18n.translate('inspector.requests.clusterDetails.shardsTitle', {
         defaultMessage: 'Shards',
       }),
       description: (
