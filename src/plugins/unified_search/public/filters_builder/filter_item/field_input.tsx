@@ -82,7 +82,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
     setTimeout(() => {
       // Note: requires a tick skip to correctly blur element focus
       inputRef?.current?.blur();
-    })
+    });
   };
 
   return (
@@ -90,7 +90,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       <EuiComboBox
         id={id}
         inputRef={(ref) => {
-          inputRef.current = ref
+          inputRef.current = ref;
         }}
         options={euiOptions}
         selectedOptions={selectedEuiOptions}
