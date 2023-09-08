@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { Failures } from './failures';
 
 interface Props {
   clusterDetails: ClusterDetails;
@@ -38,6 +39,10 @@ export function ShardsDetails({ clusterDetails }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
+
+      <EuiSpacer size="xs" />
+
+      <Failures failures={clusterDetails.failures ?? []} />
     </>
   );
 }
