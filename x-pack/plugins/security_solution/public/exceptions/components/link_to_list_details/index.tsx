@@ -40,7 +40,7 @@ const LinkToListDetailsComponent: FC<LinkToListDetailsProps> = ({
       target="_blank"
       href="#"
       external={external}
-      data-test-subj={`linkEuiLink${dataTestSubj}`}
+      data-test-subj={`linToListkEuiLink${dataTestSubj ?? ''}`}
       onClick={(e) => {
         e.preventDefault();
         navigateToApp(APP_UI_ID, {
@@ -54,7 +54,7 @@ const LinkToListDetailsComponent: FC<LinkToListDetailsProps> = ({
     </EuiLink>
   ) : (
     <SecuritySolutionLinkAnchor
-      data-test-subj={`linkSecuritySolutionLinkAnchor${dataTestSubj}`}
+      data-test-subj={`linkToListSecuritySolutionLinkAnchor${dataTestSubj ?? ''}`}
       deepLinkId={SecurityPageName.exceptions}
       path={`/details/${listId}`}
       external={external}

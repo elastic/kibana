@@ -19,6 +19,7 @@ interface LinkToRuleDetailsProps {
   referenceName: string;
   referenceId: string;
   external?: boolean;
+  dataTestSubj?: string;
 }
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
@@ -27,6 +28,7 @@ const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
   referenceName,
   referenceId,
   external,
+  dataTestSubj,
 }) => {
   const {
     application: { navigateToApp },
@@ -40,7 +42,7 @@ const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
       target="_blank"
       href="#"
       external={external}
-      data-test-subj="linkToRuleDetailsUsingEuiLink"
+      data-test-subj={`linkToRuleEuiLink${dataTestSubj ?? ''}`}
       onClick={(e) => {
         e.preventDefault();
         navigateToApp(APP_UI_ID, {
@@ -54,7 +56,7 @@ const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
     </EuiLink>
   ) : (
     <SecuritySolutionLinkAnchor
-      data-test-subj="linkToRuleDetailsUsingSecuritySolutionLinkAnchor"
+      data-test-subj={`linkToRuleSecuritySolutionLinkAnchor${dataTestSubj ?? ''}`}
       deepLinkId={SecurityPageName.rules}
       path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
       external={external}
