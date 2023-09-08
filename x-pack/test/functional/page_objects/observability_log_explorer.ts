@@ -208,8 +208,8 @@ export function ObservabilityLogExplorerPageObject({
       return testSubjects.find('datasetSelectorUncategorizedTab');
     },
 
-    getDatasetSelectorContextMenuPanelTitle() {
-      return testSubjects.find('contextMenuPanelTitleButton');
+    getPanelTitle(contextMenu: WebElementWrapper) {
+      return contextMenu.findByClassName('euiContextMenuPanelTitle');
     },
 
     async getDatasetSelectorButtonText() {
@@ -230,9 +230,9 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     async getIntegrations() {
-      const content = await this.getDatasetSelectorContent();
+      const menu = await this.getIntegrationsContextMenu();
 
-      const nodes = await content.findAllByCssSelector('[data-test-subj*="integration-"]', 2000);
+      const nodes = await menu.findAllByCssSelector('[data-test-subj*="integration-"]', 2000);
       const integrations = await Promise.all(nodes.map((node) => node.getVisibleText()));
 
       return {
