@@ -1,10 +1,10 @@
 {
   "type": "plugin",
-  "id": "@kbn/event-annotation-application-plugin",
+  "id": "@kbn/event-annotation-listing-plugin",
   "owner": "@elastic/kibana-visualizations",
   "description": "The listing page for event annotations.",
   "plugin": {
-    "id": "eventAnnotationApplication",
+    "id": "eventAnnotationListing",
     "server": false,
     "browser": true,
     "requiredPlugins": [

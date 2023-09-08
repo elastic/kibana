@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EventAnnotationPlugin } from './plugin';
-export const plugin = () => new EventAnnotationPlugin();
+import { EventAnnotationListingPlugin } from './plugin';
+export const plugin = () => new EventAnnotationListingPlugin();
 export type {
-  EventAnnotationApplicationPluginSetup,
-  EventAnnotationApplicationPluginStart,
+  EventAnnotationListingPluginSetup as eventAnnotationListingPluginSetup,
+  EventAnnotationListingPluginStart as eventAnnotationListingPluginStart,
 } from './plugin';
 export {
   defaultAnnotationColor,

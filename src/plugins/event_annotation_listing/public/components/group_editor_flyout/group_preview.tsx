@@ -98,7 +98,7 @@ export const GroupPreview = ({
             <EuiTitle size="s">
               <h4>
                 <FormattedMessage
-                  id="eventAnnotationApplication.groupPreview.preview"
+                  id="eventAnnotationListing.groupPreview.preview"
                   defaultMessage="Preview"
                 />
               </h4>
@@ -126,12 +126,12 @@ export const GroupPreview = ({
               customQuickSelectRender={customQuickSelectRender}
               customQuickSelectPanels={[
                 {
-                  title: i18n.translate('eventAnnotationApplication.timeField', {
+                  title: i18n.translate('eventAnnotationListing.timeField', {
                     defaultMessage: 'Time field',
                   }),
                   content: (
                     <EuiSelect
-                      aria-label={i18n.translate('eventAnnotationApplication.timeField', {
+                      aria-label={i18n.translate('eventAnnotationListing.timeField', {
                         defaultMessage: 'Time field',
                       })}
                       options={timeFieldNames.map((name) => ({
@@ -192,7 +192,7 @@ export const GroupPreview = ({
                 title={
                   <h2>
                     <FormattedMessage
-                      id="eventAnnotationApplication.groupPreview.missingDataViewTitle"
+                      id="eventAnnotationListing.groupPreview.missingDataViewTitle"
                       defaultMessage="Select a valid data view"
                     />
                   </h2>
@@ -200,7 +200,7 @@ export const GroupPreview = ({
                 body={
                   <p>
                     <FormattedMessage
-                      id="eventAnnotationApplication.groupPreview.missingDataViewDescription"
+                      id="eventAnnotationListing.groupPreview.missingDataViewDescription"
                       defaultMessage="The currently selected data view no longer exists. Please select a valid data view in order to preview and use this annotation group."
                     />
                   </p>

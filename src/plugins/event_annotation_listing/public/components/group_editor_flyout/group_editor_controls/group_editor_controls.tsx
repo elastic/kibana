@@ -90,18 +90,18 @@ export const GroupEditorControls = ({
       >
         <h4>
           <FormattedMessage
-            id="eventAnnotationApplication.groupEditor.details"
+            id="eventAnnotationListing.groupEditor.details"
             defaultMessage="Details"
           />
         </h4>
       </EuiTitle>
       <EuiForm>
         <EuiFormRow
-          label={i18n.translate('eventAnnotationApplication.groupEditor.title', {
+          label={i18n.translate('eventAnnotationListing.groupEditor.title', {
             defaultMessage: 'Title',
           })}
           isInvalid={showValidation && !isTitleValid(group.title)}
-          error={i18n.translate('eventAnnotationApplication.groupEditor.titleRequired', {
+          error={i18n.translate('eventAnnotationListing.groupEditor.titleRequired', {
             defaultMessage: 'A title is required.',
           })}
         >
@@ -118,13 +118,13 @@ export const GroupEditorControls = ({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('eventAnnotationApplication.groupEditor.description', {
+          label={i18n.translate('eventAnnotationListing.groupEditor.description', {
             defaultMessage: 'Description',
           })}
           labelAppend={
             <EuiText color="subdued" size="xs">
               <FormattedMessage
-                id="eventAnnotationApplication.groupEditor.optional"
+                id="eventAnnotationListing.groupEditor.optional"
                 defaultMessage="Optional"
               />
             </EuiText>
@@ -154,7 +154,7 @@ export const GroupEditorControls = ({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('eventAnnotationApplication.groupEditor.dataView', {
+          label={i18n.translate('eventAnnotationListing.groupEditor.dataView', {
             defaultMessage: 'Data view',
           })}
           isInvalid={!isDataViewValid(currentDataView)}
@@ -186,7 +186,7 @@ export const GroupEditorControls = ({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('eventAnnotationApplication.groupEditor.addAnnotation', {
+          label={i18n.translate('eventAnnotationListing.groupEditor.addAnnotation', {
             defaultMessage: 'Annotations',
           })}
         >

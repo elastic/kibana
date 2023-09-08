@@ -21,7 +21,7 @@ import { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public'
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { EventAnnotationListingPageServices } from './get_table_list';
 
-export interface EventAnnotationApplicationStartDependencies {
+export interface EventAnnotationListingStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   eventAnnotation: EventAnnotationPluginStart;
   data: DataPublicPluginStart;
@@ -38,25 +38,25 @@ interface SetupDependencies {
 }
 
 /** @public */
-export type EventAnnotationApplicationPluginStart = void;
-export type EventAnnotationApplicationPluginSetup = void;
+export type EventAnnotationListingPluginStart = void;
+export type EventAnnotationListingPluginSetup = void;
 
 /** @public */
-export class EventAnnotationPlugin
+export class EventAnnotationListingPlugin
   implements
     Plugin<
-      EventAnnotationApplicationPluginSetup,
-      EventAnnotationApplicationPluginStart,
+      EventAnnotationListingPluginSetup,
+      EventAnnotationListingPluginStart,
       SetupDependencies,
-      EventAnnotationApplicationStartDependencies
+      EventAnnotationListingStartDependencies
     >
 {
   public setup(
-    core: CoreSetup<EventAnnotationApplicationStartDependencies>,
+    core: CoreSetup<EventAnnotationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
     dependencies.visualizations.listingViewRegistry.add({
-      title: i18n.translate('eventAnnotationApplication.listingViewTitle', {
+      title: i18n.translate('eventAnnotationListing.listingViewTitle', {
         defaultMessage: 'Annotation groups',
       }),
       id: 'annotations',

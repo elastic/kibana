@@ -9,12 +9,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/event_annotation_application'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/plugins/event_annotation_application',
+  roots: ['<rootDir>/src/plugins/event_annotation_listing'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/event_annotation_listing',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/plugins/event_annotation_application/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/plugins/event_annotation_listing/{common,public,server}/**/*.{ts,tsx}',
   ],
   setupFiles: ['jest-canvas-mock'],
 };

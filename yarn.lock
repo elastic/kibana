@@ -4375,15 +4375,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-annotation-application-plugin@link:src/plugins/event_annotation_application":
-  version "0.0.0"
-  uid ""
-
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
 
 "@kbn/event-annotation-components@link:packages/kbn-event-annotation-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/event-annotation-listing-plugin@link:src/plugins/event_annotation_listing":
   version "0.0.0"
   uid ""
 
@@ -5943,6 +5943,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-doc-viewer-examples@link:examples/unified_doc_viewer":
   version "0.0.0"
   uid ""
@@ -5952,10 +5956,6 @@
   uid ""
 
 "@kbn/unified-doc-viewer@link:packages/kbn-unified-doc-viewer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/unified-data-table@link:packages/kbn-unified-data-table":
   version "0.0.0"
   uid ""
 
