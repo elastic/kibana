@@ -15,7 +15,7 @@ export function endsWithOpenBracket(text: string) {
 
 export function isDateFunction(fnName: string) {
   // TODO: improve this and rely in signature in the future
-  return ['to_datetime', 'date_trunc', 'date_parse'].includes(fnName);
+  return ['to_datetime', 'date_trunc', 'date_parse'].includes(fnName.toLowerCase());
 }
 
 export function getDateMathOperation() {
