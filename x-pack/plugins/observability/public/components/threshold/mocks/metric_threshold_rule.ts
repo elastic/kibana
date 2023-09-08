@@ -84,7 +84,13 @@ export const buildMetricThresholdRule = (
           metric: 'system.memory.used.pct',
         },
       ],
-      filterQuery: 'host.hostname: Users-System.local and service.type: system',
+      searchConfiguration: {
+        query: {
+          query: 'host.hostname: Users-System.local and service.type: system',
+          language: 'kuery',
+        },
+        index: 'mockedIndex',
+      },
       groupBy: ['host.hostname'],
     },
     monitoring: {
