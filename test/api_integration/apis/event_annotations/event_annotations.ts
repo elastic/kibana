@@ -257,46 +257,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('delete', () => {
-      it(`should delete a group`, async () => {
-        const payload: EventAnnotationGroupDeleteIn = {
-          contentTypeId: CONTENT_ID,
-          id: EXISTING_ID_1,
-          version: API_VERSION,
-        };
-
-        const resp = await supertest
-          .post(`${CONTENT_ENDPOINT}/delete`)
-          .set('kbn-xsrf', 'kibana')
-          .send(payload)
-          .expect(200);
-
-        const result = resp.body.result.result as EventAnnotationGroupDeleteOut;
-
-        expect(result.success).to.be(true);
-      });
-
-      it(`should reject deleting a group that does not exist`, async () => {
-        const payload: EventAnnotationGroupDeleteIn = {
-          contentTypeId: CONTENT_ID,
-          id: 'does-not-exist',
-          version: API_VERSION,
-        };
-
-        const resp = await supertest
-          .post(`${CONTENT_ENDPOINT}/delete`)
-          .set('kbn-xsrf', 'kibana')
-          .send(payload)
-          .expect(404);
-
-        expect(resp.body).to.eql({
-          error: 'Not Found',
-          message: 'Saved object [event-annotation-group/does-not-exist] not found',
-          statusCode: 404,
-        });
-      });
-    });
-
     describe('create', () => {
       it(`should create a new group`, async () => {
         const payload: EventAnnotationGroupCreateIn = {
@@ -397,9 +357,80 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('update', () => {
-      it(`should update a group`, async () => {});
+      it(`should update a group`, async () => {
+        const payload: EventAnnotationGroupUpdateIn = {
+          contentTypeId: CONTENT_ID,
+          data: {
+            ...DEFAULT_EVENT_ANNOTATION_GROUP,
+            description: 'updated description',
+          },
+          id: EXISTING_ID_1,
+          options: {
+            references: DEFAULT_REFERENCES,
+          },
+          version: API_VERSION,
+        };
 
-      it(`should reject malformed groups`, async () => {});
+        const resp = await supertest
+          .post(`${CONTENT_ENDPOINT}/update`)
+          .set('kbn-xsrf', 'kibana')
+          .send(payload)
+          .expect(200);
+
+        const result = resp.body.result.result as EventAnnotationGroupCreateOut;
+
+        expect(result.item.attributes).to.eql({
+          ...DEFAULT_EVENT_ANNOTATION_GROUP,
+          description: 'updated description',
+        });
+        expect(result.item.id).to.be(EXISTING_ID_1);
+      });
+
+      it(`should reject malformed groups`, async () => {
+        const badGroups = [
+          // extra property
+          {
+            ...DEFAULT_EVENT_ANNOTATION_GROUP,
+            extraProp: 'some-value',
+          },
+          // missing title
+          {
+            ...DEFAULT_EVENT_ANNOTATION_GROUP,
+            title: undefined,
+          },
+          // wrong type for property
+          {
+            ...DEFAULT_EVENT_ANNOTATION_GROUP,
+            ignoreGlobalFilters: 'not-a-boolean',
+          },
+        ] as unknown as EventAnnotationGroupSavedObjectAttributes[]; // (coerce the types because these are intentionally malformed)
+
+        const expectedMessages = [
+          'Invalid data. [extraProp]: definition for this key is missing',
+          'Invalid data. [title]: expected value of type [string] but got [undefined]',
+          'Invalid data. [ignoreGlobalFilters]: expected value of type [boolean] but got [string]',
+        ];
+
+        for (let i = 0; i < badGroups.length; i++) {
+          const payload: EventAnnotationGroupUpdateIn = {
+            contentTypeId: CONTENT_ID,
+            data: badGroups[i],
+            id: EXISTING_ID_1,
+            options: {
+              references: DEFAULT_REFERENCES,
+            },
+            version: API_VERSION,
+          };
+
+          const resp = await supertest
+            .post(`${CONTENT_ENDPOINT}/update`)
+            .set('kbn-xsrf', 'kibana')
+            .send(payload)
+            .expect(400);
+
+          expect(resp.body.message).to.be(expectedMessages[i]);
+        }
+      });
 
       it(`should require dataViewSpec to be specified`, async () => {
         const updateWithDataViewSpec = (dataViewSpec: any) => {
@@ -429,6 +460,36 @@ export default function ({ getService }: FtrProviderContext) {
         await updateWithDataViewSpec({
           someDataViewProp: 'some-value',
         }).expect(200);
+      });
+    });
+
+    describe('delete', () => {
+      const deleteGroupByID = (id: string) => {
+        const payload: EventAnnotationGroupDeleteIn = {
+          contentTypeId: CONTENT_ID,
+          id,
+          version: API_VERSION,
+        };
+
+        return supertest.post(`${CONTENT_ENDPOINT}/delete`).set('kbn-xsrf', 'kibana').send(payload);
+      };
+
+      it(`should delete a group`, async () => {
+        const resp = await deleteGroupByID(EXISTING_ID_1).expect(200);
+
+        const result = resp.body.result.result as EventAnnotationGroupDeleteOut;
+
+        expect(result.success).to.be(true);
+      });
+
+      it(`should reject deleting a group that does not exist`, async () => {
+        const resp = await deleteGroupByID('does-not-exist').expect(404);
+
+        expect(resp.body).to.eql({
+          error: 'Not Found',
+          message: 'Saved object [event-annotation-group/does-not-exist] not found',
+          statusCode: 404,
+        });
       });
     });
   });
