@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, mapValues } from 'lodash';
+import  {         cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
