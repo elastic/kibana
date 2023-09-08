@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { I18nProvider } from '@kbn/i18n-react';
-
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-const startMock = coreMock.createStart();
+import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -28,11 +28,24 @@ import { SearchItems } from '../../../../hooks/use_search_items';
 import { getAggNameConflictToastMessages } from './common';
 import { StepDefineForm } from './step_define_form';
 
+import { MlSharedContext } from '../../../../__mocks__/shared_context';
+import { getMlSharedImports } from '../../../../../shared_imports';
+
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../__mocks__/shared_context';
-import { getMlSharedImports } from '../../../../../shared_imports';
+const startMock = coreMock.createStart();
+
+const getMockedDatePickerDependencies = () => {
+  return {
+    data: {
+      query: {
+        timefilter: timefilterServiceMock.createStartContract(),
+      },
+    },
+    notifications: {},
+  } as unknown as DatePickerDependencies;
+};
 
 const createMockWebStorage = () => ({
   clear: jest.fn(),
@@ -54,11 +67,12 @@ const createMockStorage = () => ({
 describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', async () => {
     // Arrange
+    const queryClient = new QueryClient();
     const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
       dataView: {
-        title: 'the-data-view-title',
+        getIndexPattern: () => 'the-data-view-index-pattern',
         fields: [] as any[],
       } as SearchItems['dataView'],
     };
@@ -71,21 +85,32 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
+    const mockOnChange = jest.fn();
+
     const { getByText } = render(
       <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <MlSharedContext.Provider value={mlSharedImports}>
-            <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
-          </MlSharedContext.Provider>
-        </KibanaContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={services}>
+            <MlSharedContext.Provider value={mlSharedImports}>
+              <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
+                <StepDefineForm onChange={mockOnChange} searchItems={searchItems as SearchItems} />
+              </DatePickerContextProvider>
+            </MlSharedContext.Provider>
+          </KibanaContextProvider>
+        </QueryClientProvider>
       </I18nProvider>
     );
 
     // Act
+
     // Assert
-    expect(getByText('Data view')).toBeInTheDocument();
-    expect(getByText(searchItems.dataView.title)).toBeInTheDocument();
-  });
+
+    await waitFor(() => {
+      expect(getByText('Data view')).toBeInTheDocument();
+      expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
+      expect(mockOnChange).toBeCalled();
+    });
+  }, 10000);
 });
 
 describe('Transform: isAggNameConflict()', () => {

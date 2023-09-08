@@ -27,9 +27,8 @@ export const useStyles = () => {
       maxWidth: '248px',
       fontSize: size.m,
       fontWeight: font.weight.regular,
-      '.euiButtonEmpty__content': {
-        paddingLeft: size.xs,
-        paddingRight: size.xs,
+      '.euiButtonEmpty': {
+        paddingInline: size.xs,
       },
     };
 
@@ -42,11 +41,19 @@ export const useStyles = () => {
       marginRight: size.xs,
     };
 
+    const breadcrumbsWrapper: CSSObject = { flexDirection: 'row', alignItems: 'center' };
+
+    const breadcrumbIconColor = (color: string): CSSObject => ({
+      color,
+    });
+
     return {
       breadcrumb,
       breadcrumbButton,
       breadcrumbButtonBold,
       breadcrumbRightIcon,
+      breadcrumbsWrapper,
+      breadcrumbIconColor,
     };
   }, [euiTheme]);
 

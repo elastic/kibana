@@ -16,7 +16,7 @@ describe('parseTelemetryRC', () => {
   });
 
   it('returns parsed rc file', async () => {
-    const configRoot = path.join(process.cwd(), 'src', 'fixtures', 'telemetry_collectors');
+    const configRoot = path.resolve(__dirname, '__fixture__', 'telemetry_collectors');
     const config = await parseTelemetryRC(configRoot);
     expect(config).toStrictEqual([
       {

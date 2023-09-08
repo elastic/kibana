@@ -6,32 +6,21 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { API_USAGE_COUNTER_TYPE } from '../../common/constants';
 import { ReportingCore } from '..';
-import { registerDeprecationsRoutes } from './deprecations/deprecations';
-import { registerDiagnosticRoutes } from './diagnostic';
-import {
-  registerGenerateCsvFromSavedObjectImmediate,
-  registerJobGenerationRoutes,
-} from './generate';
-import { registerJobInfoRoutes } from './management';
-
-export function incrementApiUsageCounter(
-  method: string,
-  path: string,
-  usageCounter: UsageCounter | undefined
-) {
-  usageCounter?.incrementCounter({
-    counterName: `${method} ${path}`,
-    counterType: API_USAGE_COUNTER_TYPE,
-  });
-}
+import { registerDeprecationsRoutes } from './internal/deprecations/deprecations';
+import { registerDiagnosticRoutes } from './internal/diagnostic';
+import { registerGenerateCsvFromSavedObjectImmediate } from './internal/generate/csv_searchsource_immediate';
+import { registerGenerationRoutesInternal } from './internal/generate/generate_from_jobparams';
+import { registerJobInfoRoutesInternal } from './internal/management/jobs';
+import { registerGenerationRoutesPublic } from './public/generate_from_jobparams';
+import { registerJobInfoRoutesPublic } from './public/jobs';
 
 export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerDeprecationsRoutes(reporting, logger);
   registerDiagnosticRoutes(reporting, logger);
   registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
-  registerJobGenerationRoutes(reporting, logger);
-  registerJobInfoRoutes(reporting);
+  registerGenerationRoutesInternal(reporting, logger);
+  registerJobInfoRoutesInternal(reporting);
+  registerGenerationRoutesPublic(reporting, logger);
+  registerJobInfoRoutesPublic(reporting);
 }

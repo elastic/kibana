@@ -6,10 +6,10 @@
  */
 
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { getPageRowIndex } from '@kbn/securitysolution-data-table';
 import React, { useMemo } from 'react';
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { EmptyComponent, useKibanaServices } from './helpers';
 

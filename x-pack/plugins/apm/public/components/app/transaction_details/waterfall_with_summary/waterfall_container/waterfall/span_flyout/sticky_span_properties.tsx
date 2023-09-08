@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
+import {
+  METRIC_TYPE,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -19,9 +22,9 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../../../../hooks/use_apm_params';
-import { DependencyLink } from '../../../../../../shared/dependency_link';
+import { DependencyLink } from '../../../../../../shared/links/dependency_link';
 import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
-import { ServiceLink } from '../../../../../../shared/service_link';
+import { ServiceLink } from '../../../../../../shared/links/apm/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
 import { LatencyAggregationType } from '../../../../../../../../common/latency_aggregation_types';
 
@@ -33,6 +36,7 @@ interface Props {
 export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
     '/dependencies/operation'
   );

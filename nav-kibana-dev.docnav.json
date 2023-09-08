@@ -79,6 +79,9 @@
           "id": "kibBuildingBlocks"
         },
         {
+          "id": "kibDevDocsSecurityIntro"
+        },
+        {
           "id": "kibDevDocsSavedObjectsIntro",
           "label": "Saved objects"
         },
@@ -117,7 +120,7 @@
       "label": "Tutorials",
       "items": [
         {
-          "id": "kibDevTutorialAddingPerformanceMetrics"
+          "id": "kibDevTutorialAddingCustomPerformanceMetrics"
         },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
@@ -127,6 +130,14 @@
         },
         {
           "id": "kibDevTutorialSavedObject"
+        },
+        {
+          "id": "kibDevTutorialVersioningHTTPAPIs",
+          "label": "Versioning HTTP APIs"
+        },
+        {
+          "id": "kibDevTutorialVersioningInterfaces",
+          "label": "Versioning interfaces"
         },
         {
           "id": "kibDevTutorialSubmitPullRequest"
@@ -169,12 +180,33 @@
         },
         {
           "id": "kibDevTutorialScreenshotting"
+        },
+        {
+          "id": "kibDevTutorialsContentManagementOnboarding"
+        },
+        {
+          "id": "kibDevTutorialsServerlessProjectNavigation"
         }
       ]
     },
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibJuly2023ContributorNewsletter"
+        },
+        {
+          "id": "kibMay2023ContributorNewsletter"
+        },
+        {
+          "id": "kibMarch2023ContributorNewsletter"
+        },
+        {
+          "id": "kibJanuary2023ContributorNewsletter"
+        },
+        {
+          "id": "kibNovember2022ContributorNewsletter"
+        },
         {
           "id": "kibOctober2022ContributorNewsletter"
         },
@@ -254,9 +286,6 @@
         },
         {
           "id": "kibDevDocsDeprecationsByApi"
-        },
-        {
-          "id": "kibCorePluginApi"
         },
         {
           "id": "kibFieldFormatsPluginApi"

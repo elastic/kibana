@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
+import { DESCRIPTION } from './translations';
 
 /**
  * Inline definition for a runtime field "threat.indicator.name" we are adding for indicators grid
@@ -20,9 +20,7 @@ const indicatorNameField = {
   searchable: true,
   type: 'string',
   category: 'threat',
-  description: i18n.translate('xpack.threatIntelligence.indicatorNameFieldDescription', {
-    defaultMessage: 'Indicator display name generated in the runtime ',
-  }),
+  description: DESCRIPTION,
   esTypes: ['keyword'],
 } as const;
 

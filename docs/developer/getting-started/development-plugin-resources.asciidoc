@@ -49,13 +49,6 @@ but not in the distributable version of {kib}. If you use the
 {kib-repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build your plugin, then your `.ts` and `.tsx` files will be permanently transpiled before your plugin is archived. If you have your own build process, make sure to run the TypeScript compiler on your source files and ship the compilation output so that your plugin will work with the distributable version of {kib}.
 
 [discrete]
-=== {kib} platform migration guide
-
-<<migrating-legacy-plugins, This guide>>
-provides an action plan for moving a legacy plugin to the new platform.
-<<migrating-legacy-plugins-examples, Provides>> migration examples for the legacy core services.
-
-[discrete]
 === Externally developed plugins
 
 If you are building a plugin outside of the {kib} repo, read <<external-plugin-development>>.

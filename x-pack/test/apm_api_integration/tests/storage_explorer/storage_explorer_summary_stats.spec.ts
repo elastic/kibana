@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when(
-    'Storage explorer summary stats when data is not loaded',
+    'Storage Explorer summary stats when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
@@ -61,7 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when('Storage explorer summary stats', { config: 'basic', archives: [] }, () => {
+  registry.when('Storage Explorer summary stats', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       before(async () => {
         const serviceGo = apm

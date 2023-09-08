@@ -7,93 +7,16 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  EuiPanel,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPanel, EuiText, EuiPageTemplate } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import {
-  HELLO_WORLD_EMBEDDABLE,
-  TODO_EMBEDDABLE,
-  BOOK_EMBEDDABLE,
-  MULTI_TASK_TODO_EMBEDDABLE,
-  SearchableListContainerFactory,
-} from '@kbn/embeddable-examples-plugin/public';
+import { IEmbeddable, EmbeddablePanel } from '@kbn/embeddable-plugin/public';
+import { HelloWorldEmbeddableFactory } from '@kbn/embeddable-examples-plugin/public';
 
 interface Props {
-  embeddableServices: EmbeddableStart;
-  searchListContainerFactory: SearchableListContainerFactory;
+  helloWorldFactory: HelloWorldEmbeddableFactory;
 }
 
-export function EmbeddablePanelExample({ embeddableServices, searchListContainerFactory }: Props) {
-  const searchableInput = {
-    id: '1',
-    title: 'My searchable todo list',
-    panels: {
-      '1': {
-        type: HELLO_WORLD_EMBEDDABLE,
-        explicitInput: {
-          id: '1',
-          title: 'Hello',
-        },
-      },
-      '2': {
-        type: TODO_EMBEDDABLE,
-        explicitInput: {
-          id: '2',
-          task: 'Goes out on Wednesdays!',
-          icon: 'broom',
-          title: 'Take out the trash',
-        },
-      },
-      '3': {
-        type: MULTI_TASK_TODO_EMBEDDABLE,
-        explicitInput: {
-          id: '3',
-          icon: 'searchProfilerApp',
-          title: 'Learn more',
-          tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
-        },
-      },
-      '4': {
-        type: BOOK_EMBEDDABLE,
-        explicitInput: {
-          id: '4',
-          savedObjectId: 'sample-book-saved-object',
-        },
-      },
-      '5': {
-        type: BOOK_EMBEDDABLE,
-        explicitInput: {
-          id: '5',
-          attributes: {
-            title: 'The Sympathizer',
-            author: 'Viet Thanh Nguyen',
-            readIt: true,
-          },
-        },
-      },
-      '6': {
-        type: BOOK_EMBEDDABLE,
-        explicitInput: {
-          id: '6',
-          attributes: {
-            title: 'The Hobbit',
-            author: 'J.R.R. Tolkien',
-            readIt: false,
-          },
-        },
-      },
-    },
-  };
-
+export function EmbeddablePanelExample({ helloWorldFactory }: Props) {
   const [embeddable, setEmbeddable] = useState<IEmbeddable | undefined>(undefined);
 
   const ref = useRef(false);
@@ -101,7 +24,7 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
   useEffect(() => {
     ref.current = true;
     if (!embeddable) {
-      const promise = searchListContainerFactory.create(searchableInput);
+      const promise = helloWorldFactory.create({ id: '1', title: 'Hello World!' });
       if (promise) {
         promise.then((e) => {
           if (ref.current) {
@@ -116,16 +39,10 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
   });
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>The embeddable panel component</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
+    <>
+      <EuiPageTemplate.Header pageTitle="Context menu" />
+      <EuiPageTemplate.Section grow={false}>
+        <>
           <EuiText>
             You can render your embeddable inside the EmbeddablePanel component. This adds some
             extra rendering and offers a context menu with pluggable actions. Using EmbeddablePanel
@@ -135,15 +52,15 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
           </EuiText>
           <EuiPanel data-test-subj="embeddedPanelExample" paddingSize="none" role="figure">
             {embeddable ? (
-              <embeddableServices.EmbeddablePanel embeddable={embeddable} />
+              <EmbeddablePanel embeddable={embeddable} />
             ) : (
               <EuiText>Loading...</EuiText>
             )}
           </EuiPanel>
 
           <EuiSpacer />
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+        </>
+      </EuiPageTemplate.Section>
+    </>
   );
 }

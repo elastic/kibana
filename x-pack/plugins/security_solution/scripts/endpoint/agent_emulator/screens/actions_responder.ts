@@ -40,6 +40,15 @@ export class ActionResponderScreen extends ScreenBaseClass {
   RESPOND.FLEET.STATE=SUCCESS   Respond to Fleet Action with success
   RESPOND.FLEET.STATE=FAILURE   Respond to Fleet Action with failure
 
+  Action specific:
+  In addition, the following can also be used when 'RESPOND.STATE' is 'SUCCESS'
+
+  Token                         Description
+  ---------------------------   ------------------------------------
+  EXECUTE:SUCCESS               Successful execute response output
+  EXECUTE:FAILURE               Failure execute output
+
+
 ${blue(HORIZONTAL_LINE.substring(0, HORIZONTAL_LINE.length - 2))}
   ${actionsAndStatus.output}`;
   }

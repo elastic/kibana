@@ -7,8 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
+import { BooleanRelation } from '@kbn/es-query';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
@@ -29,6 +30,31 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   };
 }
 
+export interface MultiValueClickContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
+  data: {
+    data: Array<{
+      table: Pick<Datatable, 'rows' | 'columns'>;
+      cells: Array<{
+        column: number;
+        row: number;
+      }>;
+      relation?: BooleanRelation;
+    }>;
+    timeFieldName?: string;
+    negate?: boolean;
+  };
+}
+
+export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
+  data: Array<{
+    value?: any;
+    eventId?: string;
+    columnMeta?: DatatableColumnMeta;
+  }>;
+}
+
 export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
@@ -41,6 +67,7 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickContext<T>
+  | MultiValueClickContext<T>
   | RangeSelectContext<T>
   | RowClickContext;
 
@@ -51,7 +78,18 @@ export const contextMenuTrigger: Trigger = {
     defaultMessage: 'Context menu',
   }),
   description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
-    defaultMessage: 'A panel top-right corner context menu click.',
+    defaultMessage: "A new action will be added to the panel's context menu",
+  }),
+};
+
+export const PANEL_HOVER_TRIGGER = 'PANEL_HOVER_TRIGGER';
+export const panelHoverTrigger: Trigger = {
+  id: PANEL_HOVER_TRIGGER,
+  title: i18n.translate('embeddableApi.panelHoverTrigger.title', {
+    defaultMessage: 'Panel hover',
+  }),
+  description: i18n.translate('embeddableApi.panelHoverTrigger.description', {
+    defaultMessage: "A new action will be added to the panel's hover menu",
   }),
 };
 
@@ -99,9 +137,51 @@ export const valueClickTrigger: Trigger = {
   }),
 };
 
+export const MULTI_VALUE_CLICK_TRIGGER = 'MULTI_VALUE_CLICK_TRIGGER';
+export const multiValueClickTrigger: Trigger = {
+  id: MULTI_VALUE_CLICK_TRIGGER,
+  title: i18n.translate('embeddableApi.multiValueClickTrigger.title', {
+    defaultMessage: 'Multi click',
+  }),
+  description: i18n.translate('embeddableApi.multiValueClickTrigger.description', {
+    defaultMessage: 'Selecting multiple values of a single dimension on the visualization',
+  }),
+};
+
+export const CELL_VALUE_TRIGGER = 'CELL_VALUE_TRIGGER';
+export const cellValueTrigger: Trigger = {
+  id: CELL_VALUE_TRIGGER,
+  title: i18n.translate('embeddableApi.cellValueTrigger.title', {
+    defaultMessage: 'Cell value',
+  }),
+  description: i18n.translate('embeddableApi.cellValueTrigger.description', {
+    defaultMessage: 'Actions appear in the cell value options on the visualization',
+  }),
+};
+
 export const isValueClickTriggerContext = (
   context: ChartActionContext
-): context is ValueClickContext => context.data && 'data' in context.data;
+): context is ValueClickContext => {
+  return (
+    context.data &&
+    'data' in context.data &&
+    Array.isArray(context.data.data) &&
+    context.data.data.length > 0 &&
+    'column' in context.data.data[0]
+  );
+};
+
+export const isMultiValueClickTriggerContext = (
+  context: ChartActionContext
+): context is MultiValueClickContext => {
+  return (
+    context.data &&
+    'data' in context.data &&
+    Array.isArray(context.data.data) &&
+    context.data.data.length > 0 &&
+    'cells' in context.data.data[0]
+  );
+};
 
 export const isRangeSelectTriggerContext = (
   context: ChartActionContext

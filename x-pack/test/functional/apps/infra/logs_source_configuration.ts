@@ -6,6 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { DATES } from './constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -33,11 +37,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Allows indices configuration', () => {
-      const logPosition = {
-        start: DATES.metricsAndLogs.stream.startWithData,
-        end: DATES.metricsAndLogs.stream.endWithData,
+      const logFilter = {
+        timeRange: {
+          from: DATES.metricsAndLogs.stream.startWithData,
+          to: DATES.metricsAndLogs.stream.endWithData,
+        },
       };
-      const formattedLocalStart = new Date(logPosition.start).toLocaleDateString('en-US', {
+      const formattedLocalStart = new Date(logFilter.timeRange.from).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -106,7 +112,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
@@ -126,13 +132,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('records telemetry for logs', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await logsUi.logStreamPage.getStreamEntries();
 
         const [{ stats }] = await supertest
-          .post(`/api/telemetry/v2/clusters/_stats`)
+          .post(`/internal/telemetry/clusters/_stats`)
           .set(COMMON_REQUEST_HEADERS)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .set('Accept', 'application/json')
           .send({
             unencrypted: true,
@@ -161,7 +169,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();

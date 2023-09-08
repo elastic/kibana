@@ -9,22 +9,15 @@ import React, { useMemo, useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useFleetStatus, useGetAgents } from '../../hooks';
-
+import { useFleetStatus, useGetAgents, useFleetServerStandalone } from '../../hooks';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
-
 import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../constants';
-
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
-
 import { Loading } from '..';
-
 import { policyHasFleetServer } from '../../services';
-
 import { AdvancedTab } from '../../applications/fleet/components/fleet_server_instructions/advanced_tab';
 
 import type { InstructionProps } from './types';
-
 import { ManagedSteps, StandaloneSteps } from './steps';
 import { DefaultMissingRequirements } from './default_missing_requirements';
 
@@ -42,7 +35,10 @@ export const Instructions = (props: InstructionProps) => {
     refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
-  const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+  const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
+    useFleetServerUnhealthy();
+
+  const { isFleetServerStandalone } = useFleetServerStandalone();
 
   useEffect(() => {
     refreshAgentPolicies();
@@ -66,26 +62,39 @@ export const Instructions = (props: InstructionProps) => {
 
   const fleetServers = agents?.items || [];
 
-  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
-
   const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
-    fleetStatus.isReady &&
-    !isFleetServerUnhealthy &&
-    fleetServers.length > 0 &&
-    (fleetServerHosts?.length ?? 0) > 0;
+    isFleetServerPolicySelected ||
+    isFleetServerStandalone ||
+    (fleetStatus.isReady &&
+      !isFleetServerUnhealthy &&
+      fleetServers.length > 0 &&
+      (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
-    fleetServers.length === 0 ||
-    isFleetServerUnhealthy ||
-    (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
+    !isFleetServerStandalone &&
+    !isFleetServerPolicySelected &&
+    (fleetServers.length === 0 ||
+      isFleetServerUnhealthy ||
+      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
-  if (!isIntegrationFlow && showAgentEnrollment) {
-    setSelectionType('radio');
-  } else {
-    setSelectionType('tabs');
-  }
+  useEffect(() => {
+    // If we detect a CloudFormation integration, we want to hide the selection type
+    if (
+      props.cloudSecurityIntegration?.isCloudFormation ||
+      props.cloudSecurityIntegration?.cloudShellUrl
+    ) {
+      setSelectionType(undefined);
+    } else if (!isIntegrationFlow && showAgentEnrollment) {
+      setSelectionType('radio');
+    } else {
+      setSelectionType('tabs');
+    }
+  }, [isIntegrationFlow, showAgentEnrollment, setSelectionType, props.cloudSecurityIntegration]);
+
+  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
+    return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;
@@ -97,7 +106,7 @@ export const Instructions = (props: InstructionProps) => {
     } else if (showAgentEnrollment) {
       return (
         <>
-          {selectionType === 'tabs' && (
+          {selectionType === 'tabs' && !props.cloudSecurityIntegration?.cloudShellUrl && (
             <>
               <EuiText>
                 <FormattedMessage
@@ -109,7 +118,7 @@ export const Instructions = (props: InstructionProps) => {
             </>
           )}
           {isFleetServerPolicySelected ? (
-            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} />
+            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
             <ManagedSteps {...props} />
           )}

@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/user-profile-examples-plugin",
+  "owner": "@elastic/kibana-security",
+  "description": "Demo of how to implement a suggest user functionality",
+  "plugin": {
+    "id": "userProfileExamples",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples",
+      "security",
+      "spaces"
+    ]
+  }
+}

@@ -32,3 +32,31 @@ export const MULTIPLE_ALERTS = (totalAlerts: number): string =>
 export const ATTACHMENT = i18n.translate('xpack.cases.userActions.attachment', {
   defaultMessage: 'Attachment',
 });
+
+export const UNSAVED_DRAFT_COMMENT = i18n.translate(
+  'xpack.cases.userActions.comment.unsavedDraftComment',
+  {
+    defaultMessage: 'You have unsaved edits for this comment',
+  }
+);
+
+export const DELETE_ALERTS_SUCCESS_TITLE = (totalAlerts: number) =>
+  i18n.translate('xpack.cases.userActions.attachments.alerts.successToasterTitle', {
+    defaultMessage:
+      'Deleted {totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',
+    values: { totalAlerts },
+  });
+
+export const DELETE_COMMENT_SUCCESS_TITLE = i18n.translate(
+  'xpack.cases.userActions.attachments.comment.successToasterTitle',
+  {
+    defaultMessage: 'Deleted comment',
+  }
+);
+
+export const DELETE_REGISTERED_ATTACHMENT = i18n.translate(
+  'xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle',
+  {
+    defaultMessage: 'Deleted attachment',
+  }
+);

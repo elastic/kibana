@@ -32,24 +32,17 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
       <input
         data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
         data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
         }}
       />
     ),
   };
 });
 
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
-  return {
-    ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
-    ),
-  };
-});
+jest.mock('react-virtualized/dist/commonjs/AutoSizer', () => ({ children }: { children: any }) => (
+  <div>{children({ height: 500, width: 500 })}</div>
+));
 
 const testBedSetup = registerTestBed<TestSubject>(
   (props: Props) => <ProcessorsEditorWithDeps {...props} />,
@@ -98,6 +91,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickProcessorOutputTab() {
       await act(async () => {
         find('outputTab').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -112,6 +106,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickRunPipelineButton() {
       await act(async () => {
         find('runPipelineButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -119,14 +114,14 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async toggleVerboseSwitch() {
       await act(async () => {
         form.toggleEuiSwitch('verboseOutputToggle');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
 
     addDocumentsJson(jsonString: string) {
-      find('documentsEditor').simulate('change', {
-        jsonString,
-      });
+      find('documentsEditor').getDOMNode().setAttribute('data-currentvalue', jsonString);
+      find('documentsEditor').simulate('change');
     },
 
     clickDocumentsDropdown() {
@@ -181,6 +176,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickAddDocumentButton() {
       await act(async () => {
         find('addDocumentButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },

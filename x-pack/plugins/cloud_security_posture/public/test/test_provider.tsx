@@ -8,7 +8,10 @@
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Router, Switch, Route } from 'react-router-dom';
+// eslint-disable-next-line no-restricted-imports
+import { Router } from 'react-router-dom';
+import { Route, Routes } from '@kbn/shared-ux-router';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -45,9 +48,9 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <I18nProvider>
-            <Switch>
+            <Routes>
               <Route path="*" render={() => <>{children}</>} />
-            </Switch>
+            </Routes>
           </I18nProvider>
         </Router>
       </QueryClientProvider>

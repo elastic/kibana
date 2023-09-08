@@ -119,7 +119,7 @@ export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.fleet.requestDiagnostics.description"
-          defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs. Fleet will automatically remove old diagnostics files after 30 days."
+          defaultMessage="Diagnostics files are stored in Elasticsearch, and as such can incur storage costs."
         />
       </p>
     </EuiConfirmModal>

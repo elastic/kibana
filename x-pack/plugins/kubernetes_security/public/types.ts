@@ -56,6 +56,14 @@ export type KubernetesCollection =
   | 'pod'
   | 'containerImage';
 
+export enum KubernetesTreeViewLevels {
+  clusterId = 'clusterId',
+  clusterName = 'clusterName',
+  namespace = 'namespace',
+  node = 'node',
+  pod = 'pod',
+  containerImage = 'containerImage',
+}
 export type KubernetesCollectionMap<T = string> = Record<KubernetesCollection, T>;
 
 export type TreeViewIconProps = {

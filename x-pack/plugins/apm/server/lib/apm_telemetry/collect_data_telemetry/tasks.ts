@@ -10,8 +10,10 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
+  AGENT_ACTIVATION_METHOD,
   AGENT_NAME,
   AGENT_VERSION,
   CLIENT_GEO_COUNTRY_ISO_CODE,
@@ -41,6 +43,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../common/es_fields/apm';
 import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
@@ -54,7 +57,7 @@ import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry, APMPerService, APMDataTelemetry } from '../types';
-import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import { TelemetryClient } from '../telemetry_client';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
@@ -71,7 +74,7 @@ interface TelemetryTask {
 
 export interface TelemetryTaskExecutorParams {
   telemetryClient: TelemetryClient;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   savedObjectsClient: ISavedObjectsClient;
 }
 
@@ -464,7 +467,6 @@ export const tasks: TelemetryTask[] = [
         span: indices.span,
         transaction: indices.transaction,
         onboarding: indices.onboarding,
-        sourcemap: indices.sourcemap,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -558,7 +560,7 @@ export const tasks: TelemetryTask[] = [
     name: 'agent_configuration',
     executor: async ({ indices, telemetryClient }) => {
       const agentConfigurationCount = await telemetryClient.search({
-        index: indices.apmAgentConfigurationIndex,
+        index: APM_AGENT_CONFIGURATION_INDEX,
         body: {
           size: 0,
           timeout,
@@ -773,28 +775,57 @@ export const tasks: TelemetryTask[] = [
         })
       ).hits.total.value;
 
-      const servicesCount = (
+      const servicesAndEnvironmentsCount = await telemetryClient.search({
+        index: [indices.transaction, indices.error, indices.metric],
+        body: {
+          track_total_hits: false,
+          size: 0,
+          timeout,
+          query: {
+            bool: {
+              filter: [range1d],
+            },
+          },
+          aggs: {
+            service_name: {
+              cardinality: {
+                field: SERVICE_NAME,
+              },
+            },
+            service_environments: {
+              cardinality: {
+                field: SERVICE_ENVIRONMENT,
+              },
+            },
+          },
+        },
+      });
+
+      const spanDestinationServiceResourceCount = (
         await telemetryClient.search({
-          index: [indices.transaction, indices.error, indices.metric],
+          index: indices.transaction,
           body: {
             track_total_hits: false,
             size: 0,
             timeout,
             query: {
               bool: {
-                filter: [range1d],
+                filter: [
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.span } },
+                  range1d,
+                ],
               },
             },
-            aggs: {
-              service_name: {
-                cardinality: {
-                  field: SERVICE_NAME,
-                },
+          },
+          aggs: {
+            span_destination_service_resource: {
+              cardinality: {
+                field: SPAN_DESTINATION_SERVICE_RESOURCE,
               },
             },
           },
         })
-      ).aggregations?.service_name.value;
+      ).aggregations?.span_destination_service_resource.value;
 
       return {
         counts: {
@@ -808,7 +839,17 @@ export const tasks: TelemetryTask[] = [
             '1d': tracesPerDayCount || 0,
           },
           services: {
-            '1d': servicesCount || 0,
+            '1d':
+              servicesAndEnvironmentsCount.aggregations?.service_name.value ||
+              0,
+          },
+          environments: {
+            '1d':
+              servicesAndEnvironmentsCount.aggregations?.service_environments
+                .value || 0,
+          },
+          span_destination_service_resource: {
+            '1d': spanDestinationServiceResourceCount || 0,
           },
         },
       };
@@ -856,6 +897,12 @@ export const tasks: TelemetryTask[] = [
               '@timestamp': 'desc',
             },
             aggs: {
+              [AGENT_ACTIVATION_METHOD]: {
+                terms: {
+                  field: AGENT_ACTIVATION_METHOD,
+                  size,
+                },
+              },
               [AGENT_VERSION]: {
                 terms: {
                   field: AGENT_VERSION,
@@ -941,6 +988,9 @@ export const tasks: TelemetryTask[] = [
           ...data,
           [agentName]: {
             agent: {
+              activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
+                .map((bucket) => bucket.key as string)
+                .slice(0, size),
               version: aggregations[AGENT_VERSION].buckets.map(
                 (bucket) => bucket.key as string
               ),
@@ -1033,11 +1083,10 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ indices, telemetryClient }) => {
       const response = await telemetryClient.indicesStats({
         index: [
-          indices.apmAgentConfigurationIndex,
+          APM_AGENT_CONFIGURATION_INDEX,
           indices.error,
           indices.metric,
           indices.onboarding,
-          indices.sourcemap,
           indices.span,
           indices.transaction,
         ],
@@ -1278,6 +1327,9 @@ export const tasks: TelemetryTask[] = [
                         sort: '_score',
                         metrics: [
                           {
+                            field: AGENT_ACTIVATION_METHOD,
+                          },
+                          {
                             field: AGENT_NAME,
                           },
                           {
@@ -1381,6 +1433,9 @@ export const tasks: TelemetryTask[] = [
             },
             agent: {
               name: envBucket.top_metrics?.top[0].metrics[AGENT_NAME] as string,
+              activation_method: envBucket.top_metrics?.top[0].metrics[
+                AGENT_ACTIVATION_METHOD
+              ] as string,
               version: envBucket.top_metrics?.top[0].metrics[
                 AGENT_VERSION
               ] as string,

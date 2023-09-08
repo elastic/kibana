@@ -20,7 +20,6 @@ import {
 describe('NewSearchIndexTemplate', () => {
   const mockProps: NewSearchIndexTemplateProps = {
     onSubmit: jest.fn(),
-    title: 'Index using the API',
     type: 'api',
   };
 
@@ -35,13 +34,9 @@ describe('NewSearchIndexTemplate', () => {
     setMockActions({ makeRequest: jest.fn(), setLanguageSelectValue: jest.fn() });
   });
 
-  it('renders children', () => {
-    const wrapper = shallow(
-      <NewSearchIndexTemplate {...mockProps}>
-        <div data-test-subj="ChildComponent" />
-      </NewSearchIndexTemplate>
-    );
+  it('renders', () => {
+    const wrapper = shallow(<NewSearchIndexTemplate {...mockProps} />);
 
-    expect(wrapper.find('[data-test-subj="ChildComponent"]')).toHaveLength(1);
+    expect(wrapper.find('EuiForm')).toHaveLength(1);
   });
 });

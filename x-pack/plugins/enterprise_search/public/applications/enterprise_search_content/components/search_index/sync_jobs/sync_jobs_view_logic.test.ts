@@ -9,15 +9,11 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea
 
 import moment from 'moment';
 
+import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../../common/types/api';
 
-import {
-  ConnectorSyncJob,
-  SyncStatus,
-  TriggerMethod,
-} from '../../../../../../common/types/connectors';
 import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -32,11 +28,9 @@ const DEFAULT_VALUES = {
   syncJobsData: undefined,
   syncJobsLoading: true,
   syncJobsPagination: {
-    data: [],
+    from: 0,
     has_more_hits_than_total: false,
-    pageIndex: 0,
-    pageSize: 10,
-    size: 0,
+    size: 10,
     total: 0,
   },
   syncJobsStatus: Status.IDLE,
@@ -78,10 +72,12 @@ describe('SyncJobsViewLogic', () => {
         id: 'id',
         indexed_document_count: 50,
         indexed_document_volume: 40,
+        job_type: SyncJobType.FULL,
         last_seen: '2022-09-05T15:59:39.816+00:00',
         metadata: {},
         started_at: '2022-09-05T14:59:39.816+00:00',
         status: SyncStatus.COMPLETED,
+        total_document_count: null,
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: 'hostname_fake',
       };
@@ -93,30 +89,35 @@ describe('SyncJobsViewLogic', () => {
       };
       it('should update values', async () => {
         FetchSyncJobsApiLogic.actions.apiSuccess({
+          _meta: {
+            page: {
+              from: 40,
+              has_more_hits_than_total: false,
+              size: 20,
+              total: 50,
+            },
+          },
           data: [syncJob],
-          has_more_hits_than_total: false,
-          pageIndex: 3,
-          pageSize: 20,
-          size: 20,
-          total: 50,
         });
         await nextTick();
         expect(SyncJobsViewLogic.values).toEqual({
           ...DEFAULT_VALUES,
           syncJobs: [syncJobView],
           syncJobsData: {
+            _meta: {
+              page: {
+                from: 40,
+                has_more_hits_than_total: false,
+                size: 20,
+                total: 50,
+              },
+            },
             data: [syncJob],
-            has_more_hits_than_total: false,
-            pageIndex: 3,
-            pageSize: 20,
-            size: 20,
-            total: 50,
           },
           syncJobsLoading: false,
           syncJobsPagination: {
+            from: 40,
             has_more_hits_than_total: false,
-            pageIndex: 3,
-            pageSize: 20,
             size: 20,
             total: 50,
           },
@@ -125,6 +126,14 @@ describe('SyncJobsViewLogic', () => {
       });
       it('should update values for incomplete job', async () => {
         FetchSyncJobsApiLogic.actions.apiSuccess({
+          _meta: {
+            page: {
+              from: 40,
+              has_more_hits_than_total: false,
+              size: 20,
+              total: 50,
+            },
+          },
           data: [
             {
               ...syncJob,
@@ -133,11 +142,6 @@ describe('SyncJobsViewLogic', () => {
               status: SyncStatus.IN_PROGRESS,
             },
           ],
-          has_more_hits_than_total: false,
-          pageIndex: 3,
-          pageSize: 20,
-          size: 20,
-          total: 50,
         });
         await nextTick();
         expect(SyncJobsViewLogic.values).toEqual({
@@ -153,6 +157,14 @@ describe('SyncJobsViewLogic', () => {
             },
           ],
           syncJobsData: {
+            _meta: {
+              page: {
+                from: 40,
+                has_more_hits_than_total: false,
+                size: 20,
+                total: 50,
+              },
+            },
             data: [
               {
                 ...syncJob,
@@ -161,17 +173,11 @@ describe('SyncJobsViewLogic', () => {
                 status: SyncStatus.IN_PROGRESS,
               },
             ],
-            has_more_hits_than_total: false,
-            pageIndex: 3,
-            pageSize: 20,
-            size: 20,
-            total: 50,
           },
           syncJobsLoading: false,
           syncJobsPagination: {
+            from: 40,
             has_more_hits_than_total: false,
-            pageIndex: 3,
-            pageSize: 20,
             size: 20,
             total: 50,
           },
@@ -188,11 +194,9 @@ describe('SyncJobsViewLogic', () => {
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
 
-    it('calls flashAPIErrors on apiError', async () => {
+    it('updates state on apiError', async () => {
       SyncJobsViewLogic.actions.fetchSyncJobsError({} as HttpError);
       await nextTick();
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
       expect(SyncJobsViewLogic.values).toEqual({
         ...DEFAULT_VALUES,
         syncJobsLoading: false,

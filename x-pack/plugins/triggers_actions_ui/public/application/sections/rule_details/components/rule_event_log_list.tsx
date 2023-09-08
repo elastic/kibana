@@ -11,7 +11,8 @@ import { RuleExecutionSummaryAndChartWithApi } from './rule_execution_summary_an
 
 import { RuleSummary, RuleType } from '../../../../types';
 import { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
-import { RuleEventLogListTableWithApi } from './rule_event_log_list_table';
+import { RuleEventLogListTable } from './rule_event_log_list_table';
+import { RefreshToken } from './types';
 
 const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
 
@@ -23,7 +24,7 @@ export interface RuleEventLogListCommonProps {
   ruleId: string;
   ruleType: RuleType;
   localStorageKey?: string;
-  refreshToken?: number;
+  refreshToken?: RefreshToken;
   requestRefresh?: () => Promise<void>;
   loadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   fetchRuleSummary?: boolean;
@@ -54,7 +55,6 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
     refreshToken,
     requestRefresh,
     fetchRuleSummary = true,
-    loadExecutionLogAggregations,
   } = props;
 
   const {
@@ -78,11 +78,10 @@ export const RuleEventLogList = <T extends RuleEventLogListOptions>(
         fetchRuleSummary={fetchRuleSummary}
       />
       <EuiSpacer />
-      <RuleEventLogListTableWithApi
+      <RuleEventLogListTable
         localStorageKey={localStorageKey}
         ruleId={ruleId}
         refreshToken={refreshToken}
-        overrideLoadExecutionLogAggregations={loadExecutionLogAggregations}
       />
     </div>
   );

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { Page } from './page';
+export { AccessDeniedCallout } from './access_denied';

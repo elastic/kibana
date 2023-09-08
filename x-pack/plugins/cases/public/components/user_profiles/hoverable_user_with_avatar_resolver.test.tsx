@@ -7,13 +7,13 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import type { ElasticUser } from '../../containers/types';
+import type { CaseUser } from '../../containers/types';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { HoverableUserWithAvatarResolver } from './hoverable_user_with_avatar_resolver';
 
 describe('HoverableUserWithAvatarResolver', () => {
   it('renders the avatar and display name using the full name', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: 'user',
       email: 'some.user@google.com',
       fullName: 'Some Super User',
@@ -26,7 +26,7 @@ describe('HoverableUserWithAvatarResolver', () => {
   });
 
   it('renders the avatar and display name using the username when the profile uid is not found', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: 'some_user',
       profileUid: '123',
       fullName: null,
@@ -40,7 +40,7 @@ describe('HoverableUserWithAvatarResolver', () => {
   });
 
   it('renders the avatar and display name using the profile', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: userProfiles[0].user.username,
       profileUid: userProfiles[0].uid,
       fullName: null,
@@ -54,7 +54,7 @@ describe('HoverableUserWithAvatarResolver', () => {
   });
 
   it('renders display name bolded by default', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: userProfiles[0].user.username,
       profileUid: userProfiles[0].uid,
       fullName: null,

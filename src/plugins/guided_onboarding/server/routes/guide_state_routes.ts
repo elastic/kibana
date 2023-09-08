@@ -9,6 +9,7 @@
 import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { API_BASE_PATH } from '../../common';
 import { findAllGuides } from '../helpers';
+import { guideStateSavedObjectsType } from '../saved_objects';
 
 export const registerGetGuideStateRoute = (router: IRouter) => {
   // Fetch all guides state
@@ -19,7 +20,9 @@ export const registerGetGuideStateRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const coreContext = await context.core;
-      const soClient = coreContext.savedObjects.client as SavedObjectsClient;
+      const soClient = coreContext.savedObjects.getClient({
+        includedHiddenTypes: [guideStateSavedObjectsType],
+      }) as SavedObjectsClient;
 
       const existingGuides = await findAllGuides(soClient);
 

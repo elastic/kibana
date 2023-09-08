@@ -6,12 +6,17 @@
  */
 
 export { isReservedSpace } from './is_reserved_space';
-export { MAX_SPACE_INITIALS, SPACE_SEARCH_COUNT_THRESHOLD, ENTER_SPACE_PATH } from './constants';
+export {
+  MAX_SPACE_INITIALS,
+  SPACE_SEARCH_COUNT_THRESHOLD,
+  ENTER_SPACE_PATH,
+  DEFAULT_SPACE_ID,
+} from './constants';
 export { addSpaceIdToPath, getSpaceIdFromPath } from './lib/spaces_url_parser';
 export type {
   Space,
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
-  LegacyUrlAliasTarget,
-} from './types';
+} from './types/latest';
+export { spaceV1 } from './types';

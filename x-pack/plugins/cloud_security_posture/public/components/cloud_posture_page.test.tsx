@@ -23,25 +23,27 @@ import React, { ComponentProps } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 const chance = new Chance();
+
 jest.mock('../common/api/use_setup_status_api');
-jest.mock('../common/navigation/use_navigate_to_cis_integration');
+jest.mock('../common/api/use_license_management_locator_api');
 jest.mock('../common/hooks/use_subscription_status');
+jest.mock('../common/navigation/use_csp_integration_link');
 
 describe('<CloudPosturePage />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed' },
+        data: true,
       })
     );
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
@@ -50,7 +52,9 @@ describe('<CloudPosturePage />', () => {
   });
 
   const renderCloudPosturePage = (
-    props: ComponentProps<typeof CloudPosturePage> = { children: null }
+    props: ComponentProps<typeof CloudPosturePage> = {
+      children: null,
+    }
   ) => {
     const mockCore = coreMock.createStart();
 
@@ -72,6 +76,37 @@ describe('<CloudPosturePage />', () => {
       </TestProvider>
     );
   };
+
+  it('renders with license url locator', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    renderCloudPosturePage();
+    expect(screen.getByTestId('has_locator')).toBeInTheDocument();
+  });
+
+  it('renders no license url locator', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: undefined,
+      })
+    );
+
+    renderCloudPosturePage();
+    expect(screen.getByTestId('no_locator')).toBeInTheDocument();
+  });
 
   it('renders children if setup status is indexed', () => {
     const children = chance.sentence();
@@ -137,62 +172,6 @@ describe('<CloudPosturePage />', () => {
     expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
     expect(screen.getByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).toBeInTheDocument();
     expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
-  });
-
-  it('renders integrations installation prompt if integration is not installed', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: { status: 'not-installed' },
-      })
-    );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    const children = chance.sentence();
-    renderCloudPosturePage({ children });
-
-    expect(screen.getByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).toBeInTheDocument();
-    expect(screen.queryByText(children)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
-  });
-
-  it('renders default loading state when the integration query is loading', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(
-      () =>
-        createReactQueryResponse({
-          status: 'loading',
-        }) as unknown as UseQueryResult
-    );
-
-    const children = chance.sentence();
-    renderCloudPosturePage({ children });
-
-    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
-    expect(screen.queryByText(children)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
-  });
-
-  it('renders default error state when the integration query has an error', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(
-      () =>
-        createReactQueryResponse({
-          status: 'error',
-          error: new Error('error'),
-        }) as unknown as UseQueryResult
-    );
-
-    const children = chance.sentence();
-    renderCloudPosturePage({ children });
-
-    expect(screen.getByTestId(ERROR_STATE_TEST_SUBJECT)).toBeInTheDocument();
-    expect(screen.queryByTestId(LOADING_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT)).not.toBeInTheDocument();
-    expect(screen.queryByText(children)).not.toBeInTheDocument();
-    expect(screen.queryByTestId(PACKAGE_NOT_INSTALLED_TEST_SUBJECT)).not.toBeInTheDocument();
   });
 
   it('renders default loading text when query isLoading', () => {

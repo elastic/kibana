@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
+import { APMConfig } from '../../..';
+import { ApmTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getMemoryChartData } from '../by_agent/shared/memory';
 import { getColdStartCountChart } from './get_cold_start_count_chart';
 import { getColdStartDurationChart } from './get_cold_start_duration_chart';
 import { getComputeUsageChart } from './get_compute_usage_chart';
 import { getServerlessFunctionLatencyChart } from './get_serverless_function_latency_chart';
-import { APMConfig } from '../../..';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export function getServerlessAgentMetricsCharts({
   environment,
@@ -24,6 +25,9 @@ export function getServerlessAgentMetricsCharts({
   start,
   end,
   serverlessId,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
@@ -33,16 +37,11 @@ export function getServerlessAgentMetricsCharts({
   start: number;
   end: number;
   serverlessId?: string;
+  documentType: ApmTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }) {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config,
-      apmEventClient,
-      kuery,
-      start,
-      end,
-    });
-
     const options = {
       environment,
       kuery,
@@ -56,7 +55,9 @@ export function getServerlessAgentMetricsCharts({
     return await Promise.all([
       getServerlessFunctionLatencyChart({
         ...options,
-        searchAggregatedTransactions,
+        documentType,
+        rollupInterval,
+        bucketSizeInSeconds,
       }),
       getMemoryChartData(options),
       getColdStartDurationChart(options),

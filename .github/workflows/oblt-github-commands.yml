@@ -1,0 +1,64 @@
+---
+##
+## This the automation to let Observability team members to know what are the
+## supported GitHub commands to interact with the Observability test environments.
+##
+## Owner: @elastic/observablt-robots
+##
+name: oblt-github-commands
+
+on:
+  pull_request_target:
+    types:
+      - opened
+
+permissions:
+  contents: read
+
+jobs:
+  comment-if-oblt-member:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+        with:
+          url: ${{ secrets.OBLT_VAULT_ADDR }}
+          roleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+
+      - id: is_team_member
+        name: Check if user is member of the Elastic org and Observability team
+        run: |
+          if gh api -H "Accept: application/vnd.github+json" \
+            /orgs/elastic/teams/observability/memberships/${{ github.actor }} ; then
+            echo "result=true" >> $GITHUB_OUTPUT
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+      - if: ${{ steps.is_team_member.outputs.result == 'true' }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ env.GITHUB_TOKEN }}
+          script: |
+            const body = `
+              ### :robot: GitHub comments
+
+              <details><summary>Expand to view the GitHub comments</summary>
+              <p>
+
+              Just comment with:
+              - \`/oblt-deploy\` : Deploy a Kibana instance using the Observability test environments.
+              - \`/oblt-deploy-serverless\` : Deploy a serverless Kibana instance using the Observability test environments.
+              - \`run\` \`elasticsearch-ci/docs\` : Re-trigger the docs validation. (use unformatted text in the comment!)
+
+              </p>
+              </details>
+            `.replace(/  +/g, '')
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })

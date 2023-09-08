@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { ComponentStory } from '@storybook/react';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
-import { ChartTypes, RenderValue } from '../../common/types';
+import { ChartTypes, PartitionChartProps } from '../../common/types';
 import { getStartDeps } from '../__mocks__';
 import { mosaicArgTypes, treemapMosaicConfig, data } from './shared';
 
@@ -22,9 +22,9 @@ const containerSize = {
 const PartitionVisRenderer = () => getPartitionVisRenderer({ getStartDeps });
 
 type Props = {
-  visType: RenderValue['visType'];
-  syncColors: RenderValue['syncColors'];
-} & RenderValue['visConfig'];
+  visType: PartitionChartProps['visType'];
+  syncColors: PartitionChartProps['syncColors'];
+} & PartitionChartProps['visConfig'];
 
 const PartitionVis: ComponentStory<FC<Props>> = ({
   visType,

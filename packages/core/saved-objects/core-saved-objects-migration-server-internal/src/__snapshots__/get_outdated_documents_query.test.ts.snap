@@ -1,0 +1,175 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getOutdatedDocumentsQuery should not select documents if there are no migrations 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [],
+  },
+}
+`;
+
+exports[`getOutdatedDocumentsQuery should select documents with outdated both core and type migration versions 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "term": Object {
+                "type": "dashboard",
+              },
+            },
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "range": Object {
+                      "coreMigrationVersion": Object {
+                        "lt": "8.8.0",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "typeMigrationVersion",
+                          },
+                        },
+                        Object {
+                          "exists": Object {
+                            "field": "migrationVersion.dashboard",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must": Object {
+                        "exists": Object {
+                          "field": "migrationVersion",
+                        },
+                      },
+                      "must_not": Object {
+                        "term": Object {
+                          "migrationVersion.dashboard": "7.7.0",
+                        },
+                      },
+                    },
+                  },
+                  Object {
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "7.7.0",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`getOutdatedDocumentsQuery should select documents with outdated core migration version 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "term": Object {
+                "type": "dashboard",
+              },
+            },
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "range": Object {
+                      "coreMigrationVersion": Object {
+                        "lt": "8.8.0",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`getOutdatedDocumentsQuery should select documents with outdated type migration version 1`] = `
+Object {
+  "bool": Object {
+    "should": Array [
+      Object {
+        "bool": Object {
+          "must": Array [
+            Object {
+              "term": Object {
+                "type": "dashboard",
+              },
+            },
+            Object {
+              "bool": Object {
+                "should": Array [
+                  Object {
+                    "bool": Object {
+                      "must_not": Array [
+                        Object {
+                          "exists": Object {
+                            "field": "typeMigrationVersion",
+                          },
+                        },
+                        Object {
+                          "exists": Object {
+                            "field": "migrationVersion.dashboard",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must": Object {
+                        "exists": Object {
+                          "field": "migrationVersion",
+                        },
+                      },
+                      "must_not": Object {
+                        "term": Object {
+                          "migrationVersion.dashboard": "7.7.0",
+                        },
+                      },
+                    },
+                  },
+                  Object {
+                    "range": Object {
+                      "typeMigrationVersion": Object {
+                        "lt": "7.7.0",
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+}
+`;

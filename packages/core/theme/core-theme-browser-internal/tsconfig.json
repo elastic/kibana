@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -13,5 +11,15 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/core-injected-metadata-browser-internal",
+    "@kbn/core-theme-browser",
+    "@kbn/core-injected-metadata-browser-mocks",
+    "@kbn/test-jest-helpers",
+    "@kbn/react-kibana-context-theme",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

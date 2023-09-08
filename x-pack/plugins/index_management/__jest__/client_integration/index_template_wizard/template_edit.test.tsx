@@ -28,6 +28,23 @@ const MAPPING = {
   },
 };
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
+
 jest.mock('@elastic/eui', () => {
   const origial = jest.requireActual('@elastic/eui');
 
@@ -195,6 +212,7 @@ describe('<TemplateEdit />', () => {
         // Make some changes to the mappings
         await act(async () => {
           actions.clickEditButtonAtField(0); // Select the first field to edit
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
         component.update();
 
@@ -204,6 +222,7 @@ describe('<TemplateEdit />', () => {
         // Change the field name
         await act(async () => {
           form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
 
         // Save changes on the field

@@ -7,7 +7,6 @@
 import { render } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import React from 'react';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -79,13 +78,7 @@ describe('LensEmbeddable', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
@@ -95,6 +88,11 @@ describe('LensEmbeddable', () => {
       services: {
         lens: {
           EmbeddableComponent: mockEmbeddableComponent,
+        },
+        data: {
+          actions: {
+            createFiltersFromValueClickAction: jest.fn(),
+          },
         },
       },
     });
@@ -124,5 +122,10 @@ describe('LensEmbeddable', () => {
 
   it('should render with searchSessionId', () => {
     expect(mockEmbeddableComponent.mock.calls[0][0].searchSessionId).toEqual(mockSearchSessionId);
+  });
+
+  it('should not sync highlight state between visualizations', () => {
+    expect(mockEmbeddableComponent.mock.calls[0][0].syncTooltips).toEqual(false);
+    expect(mockEmbeddableComponent.mock.calls[0][0].syncCursor).toEqual(false);
   });
 });

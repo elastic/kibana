@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { PartitionProps } from '@elastic/charts';
+import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
   ExpressionFunctionDefinition,
   Datatable,
@@ -21,13 +23,13 @@ import {
   PARTITION_LABELS_FUNCTION,
 } from '../constants';
 import {
-  RenderValue,
-  PieVisConfig,
+  type PartitionChartProps,
+  type PieVisConfig,
   LabelPositions,
   ValueFormats,
-  TreemapVisConfig,
-  MosaicVisConfig,
-  WaffleVisConfig,
+  type TreemapVisConfig,
+  type MosaicVisConfig,
+  type WaffleVisConfig,
 } from './expression_renderers';
 
 export interface PartitionLabelsArguments {
@@ -63,28 +65,28 @@ export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof PIE_VIS_EXPRESSION_NAME,
   Datatable,
   PieVisConfig,
-  ExpressionValueRender<RenderValue>
+  ExpressionValueRender<PartitionChartProps>
 >;
 
 export type TreemapVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof TREEMAP_VIS_EXPRESSION_NAME,
   Datatable,
   TreemapVisConfig,
-  ExpressionValueRender<RenderValue>
+  ExpressionValueRender<PartitionChartProps>
 >;
 
 export type MosaicVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof MOSAIC_VIS_EXPRESSION_NAME,
   Datatable,
   MosaicVisConfig,
-  ExpressionValueRender<RenderValue>
+  ExpressionValueRender<PartitionChartProps>
 >;
 
 export type WaffleVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof WAFFLE_VIS_EXPRESSION_NAME,
   Datatable,
   WaffleVisConfig,
-  ExpressionValueRender<RenderValue>
+  ExpressionValueRender<PartitionChartProps>
 >;
 
 export enum ChartTypes {
@@ -100,4 +102,16 @@ export type PartitionLabelsExpressionFunctionDefinition = ExpressionFunctionDefi
   Datatable | null,
   PartitionLabelsArguments,
   ExpressionValuePartitionLabels
+>;
+
+export type AllowedPartitionOverrides = Partial<
+  Record<
+    'partition',
+    Simplify<
+      Omit<
+        MakeOverridesSerializable<PartitionProps>,
+        'id' | 'data' | 'valueAccessor' | 'valueFormatter' | 'layers' | 'layout'
+      >
+    >
+  >
 >;

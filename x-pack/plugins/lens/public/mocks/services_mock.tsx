@@ -29,6 +29,8 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type {
   LensByValueInput,
@@ -36,10 +38,11 @@ import type {
   LensSavedObjectAttributes,
   LensUnwrapMetaInfo,
 } from '../embeddable/embeddable';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 import { LensAppServices } from '../app_plugin/types';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
+import { SavedObjectIndexStore } from '../persistence';
 
 const startMock = coreMock.createStart();
 
@@ -138,6 +141,7 @@ export function makeDefaultServices(
     chrome: core.chrome,
     overlays: core.overlays,
     uiSettings: core.uiSettings,
+    settings: settingsServiceMock.createStartContract(),
     executionContext: core.executionContext,
     navigation: navigationStartMock,
     notifications: core.notifications,
@@ -149,15 +153,19 @@ export function makeDefaultServices(
     },
     dashboard: dashboardPluginMock.createStartContract(),
     presentationUtil: presentationUtilPluginMock.createStartContract(core),
-    savedObjectsClient: core.savedObjects.client,
     dashboardFeatureFlag: { allowByValueEmbeddables: false },
+    savedObjectStore: {
+      load: jest.fn(),
+      search: jest.fn(),
+      save: jest.fn(),
+    } as unknown as SavedObjectIndexStore,
     stateTransfer: createEmbeddableStateTransferMock() as EmbeddableStateTransfer,
     getOriginatingAppName: jest.fn(() => 'defaultOriginatingApp'),
     application: {
       ...core.application,
       capabilities: {
         ...core.application.capabilities,
-        visualize: { save: true, saveQuery: true, show: true },
+        visualize: { save: true, saveQuery: true, show: true, createShortUrl: true },
       },
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },
@@ -177,5 +185,6 @@ export function makeDefaultServices(
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     docLinks: startMock.docLinks,
+    eventAnnotationService: {} as EventAnnotationServiceType,
   };
 }

@@ -8,28 +8,29 @@
 import expect from '@kbn/expect';
 
 import {
-  CaseResponse,
+  Case,
   CaseSeverity,
   CaseStatuses,
-  CommentType,
+  UserCommentAttachmentPayload,
+  AttachmentType,
+  CreateCaseUserAction,
   ConnectorTypes,
-  getCaseUserActionUrl,
-} from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+} from '@kbn/cases-plugin/common/types/domain';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
   updateCase,
-  getCaseUserActions,
   superUserSpace1Auth,
   deleteCases,
   createComment,
   updateComment,
   deleteComment,
   extractWarningValueFromWarningHeader,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -51,10 +52,27 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
+    it('populates the action_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].action_id).not.to.be(undefined);
+      expect(userActions[0]).not.to.have.property('id');
+    });
+
+    it('populates the case_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].case_id).not.to.be(undefined);
+    });
+
     it('creates a create case user action when a case is created', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+      const createCaseUserAction = userActions[0] as unknown as CreateCaseUserAction;
 
       expect(userActions.length).to.eql(1);
       expect(createCaseUserAction.action).to.eql('create');
@@ -68,19 +86,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
     });
 
-    it('creates a delete case user action when a case is deleted', async () => {
+    it('deletes all user actions when a case is deleted', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       await deleteCases({ supertest, caseIDs: [theCase.id] });
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
 
-      const userAction = userActions[1];
-
-      // One for creation and one for deletion
-      expect(userActions.length).to.eql(2);
-
-      expect(userAction.action).to.eql('delete');
-      expect(userAction.type).to.eql('delete_case');
-      expect(userAction.payload).to.eql({});
+      expect(userActions.length).to.be(0);
     });
 
     it('creates a status update user action when changing the status', async () => {
@@ -283,7 +294,7 @@ export default ({ getService }: FtrProviderContext): void => {
           id: caseWithComments.comments![0].id,
           version: caseWithComments.comments![0].version,
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -298,7 +309,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(commentUserAction.payload).to.eql({
         comment: {
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -322,17 +333,26 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
       const { id, version: _, ...restComment } = caseWithComments.comments![0];
 
+      const castedUserComment = restComment as UserCommentAttachmentPayload;
+
       expect(userActions.length).to.eql(3);
       expect(commentUserAction.type).to.eql('comment');
       expect(commentUserAction.action).to.eql('delete');
       expect(commentUserAction.comment_id).to.eql(id);
-      expect(commentUserAction.payload).to.eql({ comment: restComment });
+
+      expect(commentUserAction.payload).to.eql({
+        comment: {
+          comment: castedUserComment.comment,
+          type: castedUserComment.type,
+          owner: castedUserComment.owner,
+        },
+      });
     });
 
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-      let caseInfo: CaseResponse;
+      let caseInfo: Case;
       beforeEach(async () => {
         caseInfo = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, {
           user: superUser,

@@ -214,3 +214,75 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:d0487a50-c7f1-11ed-aefe-691acd8d4e25",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "8.5.0"
+      },
+      "task": {
+          "retryAt": null,
+          "runAt": "2023-03-21T14:08:29.777Z",
+          "startedAt": null,
+          "params": "{\"alertId\":\"d0487a50-c7f1-11ed-aefe-691acd8d4e25\",\"spaceId\":\"default\",\"consumer\":\"alerts\"}",
+          "ownerId": null,
+          "enabled": true,
+          "schedule": {
+              "interval": "3s"
+          },
+          "taskType": "alerting:.index-threshold",
+          "scope": [
+              "alerting"
+          ],
+          "traceparent": "",
+          "state": "{\"alertTypeState\":{},\"alertInstances\":{\"host-C\":{\"state\":{\"start\":\"2023-03-21T14:08:20.886Z\",\"duration\":\"6010000000\"},\"meta\":{\"flappingHistory\":[true,false],\"flapping\":false,\"pendingRecoveredCount\":0,\"lastScheduledActions\":{\"group\":\"threshold met\",\"date\":\"2023-03-21T14:08:26.903Z\"}}}},\"alertRecoveredInstances\":{\"host-A\":{\"meta\":{\"flappingHistory\":[true,false,true],\"flapping\":false}},\"host-B\":{\"meta\":{\"flappingHistory\":[true,false,true],\"flapping\":false}}},\"summaryActions\":{},\"previousStartedAt\":\"2023-03-21T14:08:26.777Z\"}",
+          "scheduledAt": "2023-03-21T14:08:23.770Z",
+          "attempts": 0,
+          "status": "idle"
+      },
+      "references": [],
+      "updated_at": "2023-03-21T14:08:27.022Z",
+      "type": "task"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:cf0ced10-c7f1-11ed-aefe-691acd8d4e25",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "8.5.0"
+      },
+      "task": {
+          "retryAt": null,
+          "runAt": "2023-03-21T14:08:29.777Z",
+          "startedAt": null,
+          "params": "{\"alertId\":\"cf0ced10-c7f1-11ed-aefe-691acd8d4e25\",\"spaceId\":\"default\",\"consumer\":\"infrastructure\"}",
+          "ownerId": null,
+          "enabled": true,
+          "schedule": {
+              "interval": "3s"
+          },
+          "taskType": "alerting:metrics.alert.threshold",
+          "scope": [
+              "alerting"
+          ],
+          "traceparent": "",
+          "state": "{\"alertTypeState\":{\"wrapped\":{\"lastRunTimestamp\":1679407706777,\"missingGroups\":[],\"groupBy\":[\"network.name\"]},\"trackedAlerts\":{\"host-C\":{\"alertId\":\"host-C\",\"alertUuid\":\"34f86489-cf44-4760-a9df-d1a2166230d9\",\"started\":\"2023-03-21T14:08:20.770Z\",\"flappingHistory\":[true,false],\"flapping\":false,\"pendingRecoveredCount\":0}},\"trackedAlertsRecovered\":{\"host-A\":{\"alertId\":\"host-A\",\"alertUuid\":\"d3a6a7d0-71d3-475d-a8db-5ea7a03462d5\",\"started\":\"2023-03-21T14:08:11.767Z\",\"flappingHistory\":[true,false,false,true],\"flapping\":false,\"pendingRecoveredCount\":0},\"host-B\":{\"alertId\":\"host-B\",\"alertUuid\":\"41d17c71-12b6-4bbc-8fd7-1eee8498c17f\",\"started\":\"2023-03-21T14:08:11.767Z\",\"flappingHistory\":[true,false,false,true],\"flapping\":false,\"pendingRecoveredCount\":0}}},\"alertInstances\":{\"host-C\":{\"state\":{\"start\":\"2023-03-21T14:08:21.701Z\",\"duration\":\"6049000000\"},\"meta\":{\"flappingHistory\":[true,false],\"flapping\":false,\"pendingRecoveredCount\":0,\"lastScheduledActions\":{\"group\":\"metrics.threshold.fired\",\"date\":\"2023-03-21T14:08:27.755Z\"}}}},\"alertRecoveredInstances\":{\"host-A\":{\"meta\":{\"flappingHistory\":[true,false,false,true],\"flapping\":false}},\"host-B\":{\"meta\":{\"flappingHistory\":[true,false,false,true],\"flapping\":false}}},\"summaryActions\":{},\"previousStartedAt\":\"2023-03-21T14:08:26.777Z\"}",
+          "scheduledAt": "2023-03-21T14:08:23.770Z",
+          "attempts": 0,
+          "status": "idle"
+      },
+      "references": [],
+      "updated_at": "2023-03-21T14:08:27.877Z",
+      "type": "task"
+    }
+  }
+}

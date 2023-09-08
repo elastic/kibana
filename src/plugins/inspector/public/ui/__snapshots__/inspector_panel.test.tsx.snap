@@ -28,23 +28,22 @@ Array [
             class="euiPopover__anchor css-16vtueo-render"
           >
             <button
-              class="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
               data-test-subj="inspectorViewChooser"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
-                <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   View: View 1
                 </span>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
               </span>
             </button>
           </div>

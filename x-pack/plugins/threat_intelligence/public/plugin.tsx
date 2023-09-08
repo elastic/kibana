@@ -11,7 +11,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { generateAttachmentType } from './modules/cases/utils';
+import { generateAttachmentType } from './modules/cases/utils/attachments';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
   SecuritySolutionPluginContext,
@@ -32,7 +32,7 @@ const LazyIndicatorsPageWrapper = React.lazy(() => import('./containers/indicato
 
 /**
  * This is used here:
- * x-pack/plugins/security_solution/public/threat_intelligence/pages/threat_intelligence.tsx
+ * x-pack/plugins/security_solution/public/threat_intelligence/routes.tsx
  */
 export const createApp =
   (services: Services) =>
@@ -40,7 +40,7 @@ export const createApp =
   ({ securitySolutionContext }: AppProps) =>
     (
       <IntlProvider>
-        <ReduxStoreProvider store={securitySolutionContext.getSecuritySolutionStore}>
+        <ReduxStoreProvider store={securitySolutionContext.securitySolutionStore}>
           <SecuritySolutionContext.Provider value={securitySolutionContext}>
             <KibanaContextProvider services={services}>
               <EnterpriseGuard>

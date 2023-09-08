@@ -18,14 +18,14 @@ export interface ReportedUsage {
 
 export function registerUsageCollector(
   usageCollection: UsageCollectionSetup,
-  kibanaIndex: string,
+  getIndexForType: (type: string) => Promise<string>,
   logger: Logger
 ) {
   try {
     const collector = usageCollection.makeUsageCollector<ReportedUsage>({
       type: 'search-session',
       isReady: () => true,
-      fetch: fetchProvider(kibanaIndex, logger),
+      fetch: fetchProvider(getIndexForType, logger),
       schema: {
         transientCount: { type: 'long' },
         persistedCount: { type: 'long' },

@@ -22,8 +22,6 @@ export { scheduleThrottledNotificationActions } from './logic/notifications/sche
 export { getNotificationResultsLink } from './logic/notifications/utils';
 
 // eslint-disable-next-line no-restricted-imports
-export { legacyGetBulkRuleActionsSavedObject } from './logic/rule_actions/legacy_get_bulk_rule_actions_saved_object';
-// eslint-disable-next-line no-restricted-imports
 export type { LegacyRulesActionsSavedObject } from './logic/rule_actions/legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 export { legacyGetRuleActionsSavedObject } from './logic/rule_actions/legacy_get_rule_actions_saved_object';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
@@ -48,7 +48,7 @@ export function useClientMetricsQuery() {
     const backendValue = backEnd.values[pkey] ?? 0;
 
     return {
-      pageViews: { value: (esQueryResponse.hits.total as any as number) ?? 0 },
+      pageViews: { value: esQueryResponse.hits.total.value ?? 0 },
       totalPageLoadDuration: { value: totalPageLoadDurationValueMs },
       backEnd: { value: backendValue },
       frontEnd: { value: totalPageLoadDurationValueMs - backendValue },

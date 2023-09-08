@@ -41,15 +41,22 @@ export const LINK_ELASTIC_ENDPOINT_SECURITY = i18n.translate(
   }
 );
 
-export const EMPTY_STATUS = i18n.translate(
-  'xpack.securitySolution.hostIsolation.agentStatuses.empty',
+export const SHOW_ALL_INDICATOR_MATCHES = (count: number) =>
+  i18n.translate('xpack.securitySolution.event.summary.threat_indicator.showMatches', {
+    values: { count },
+    defaultMessage: 'Show all {count} indicator match alerts',
+  });
+
+export const ALL_INDICATOR_MATCHES_MODAL_HEADER = i18n.translate(
+  'xpack.securitySolution.event.summary.threat_indicator.modal.allMatches',
   {
-    defaultMessage: '-',
+    defaultMessage: 'All Indicator Matches',
   }
 );
 
-export const REASON_RENDERER_TITLE = (eventRendererName: string) =>
-  i18n.translate('xpack.securitySolution.event.reason.reasonRendererTitle', {
-    values: { eventRendererName },
-    defaultMessage: 'Event renderer: {eventRendererName} ',
-  });
+export const ALL_INDICATOR_MATCHES_MODAL_CLOSE = i18n.translate(
+  'xpack.securitySolution.event.summary.threat_indicator.modal.close',
+  {
+    defaultMessage: 'Close',
+  }
+);

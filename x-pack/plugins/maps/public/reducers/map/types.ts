@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
@@ -52,6 +53,7 @@ export type MapContext = Partial<MapViewContext> & {
 };
 
 export type MapState = {
+  executionContext: KibanaExecutionContext;
   ready: boolean;
   mapInitError?: string | null;
   goto?: Goto | null;

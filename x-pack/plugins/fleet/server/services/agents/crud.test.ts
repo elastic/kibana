@@ -6,21 +6,36 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { AGENTS_INDEX } from '../../constants';
 import type { Agent } from '../../types';
 
-import { getAgentsByKuery, getAgentTags } from './crud';
+import { auditLoggingService } from '../audit_logging';
 
+import {
+  closePointInTime,
+  getAgentsByKuery,
+  getAgentTags,
+  openPointInTime,
+  updateAgent,
+} from './crud';
+
+jest.mock('../audit_logging');
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
   isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
 
+const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+
 describe('Agents CRUD test', () => {
+  const soClientMock = savedObjectsClientMock.create();
   let esClientMock: ElasticsearchClient;
   let searchMock: jest.Mock;
 
   beforeEach(() => {
     searchMock = jest.fn();
+    soClientMock.find = jest.fn().mockResolvedValue({ saved_objects: [] });
     esClientMock = {
       search: searchMock,
       openPointInTime: jest.fn().mockResolvedValue({ id: '1' }),
@@ -35,6 +50,9 @@ describe('Agents CRUD test', () => {
         hits: ids.map((id: string) => ({
           _id: id,
           _source: {},
+          fields: {
+            status: ['inactive'],
+          },
         })),
       },
     };
@@ -48,17 +66,23 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock, { showInactive: false });
+      const result = await getAgentTags(soClientMock, esClientMock, { showInactive: false });
 
       expect(result).toEqual(['tag1', 'tag2']);
-      expect(searchMock).toHaveBeenCalledWith({
-        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
-        body: {
-          query: { bool: { minimum_should_match: 1, should: [{ match: { active: true } }] } },
-        },
-        index: '.fleet-agents',
-        size: 0,
-      });
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+          body: {
+            query: expect.any(Object),
+          },
+          index: '.fleet-agents',
+          size: 0,
+          fields: ['status'],
+          runtime_mappings: {
+            status: expect.anything(),
+          },
+        })
+      );
     });
 
     it('should return empty list if no agent tags', async () => {
@@ -68,7 +92,7 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      const result = await getAgentTags(esClientMock, { showInactive: false });
+      const result = await getAgentTags(soClientMock, esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
     });
@@ -76,7 +100,7 @@ describe('Agents CRUD test', () => {
     it('should return empty list if no agent index', async () => {
       searchMock.mockRejectedValueOnce(new errors.ResponseError({ statusCode: 404 } as any));
 
-      const result = await getAgentTags(esClientMock, { showInactive: false });
+      const result = await getAgentTags(soClientMock, esClientMock, { showInactive: false });
 
       expect(result).toEqual([]);
     });
@@ -88,30 +112,36 @@ describe('Agents CRUD test', () => {
         },
       });
 
-      await getAgentTags(esClientMock, {
+      await getAgentTags(soClientMock, esClientMock, {
         showInactive: true,
         kuery: 'fleet-agents.policy_id: 123',
       });
 
-      expect(searchMock).toHaveBeenCalledWith({
-        aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
-        body: {
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  match: {
-                    policy_id: '123',
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
+          body: {
+            query: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      policy_id: '123',
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
-        },
-        index: '.fleet-agents',
-        size: 0,
-      });
+          index: '.fleet-agents',
+          size: 0,
+          fields: ['status'],
+          runtime_mappings: {
+            status: expect.anything(),
+          },
+        })
+      );
     });
   });
 
@@ -122,7 +152,7 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -151,7 +181,7 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -187,7 +217,7 @@ describe('Agents CRUD test', () => {
         .mockImplementationOnce(() =>
           Promise.resolve(getEsResponse(['up1', 'up2', 'up3', 'up4', 'up5', 'up6', '7'], 7))
         );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 2,
@@ -214,7 +244,7 @@ describe('Agents CRUD test', () => {
       searchMock.mockImplementationOnce(() =>
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001))
       );
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -239,7 +269,7 @@ describe('Agents CRUD test', () => {
 
     it('should return second page', async () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['6', '7'], 7)));
-      const result = await getAgentsByKuery(esClientMock, {
+      const result = await getAgentsByKuery(esClientMock, soClientMock, {
         showUpgradeable: false,
         showInactive: false,
         page: 2,
@@ -271,11 +301,11 @@ describe('Agents CRUD test', () => {
 
     it('should pass secondary sort for default sort', async () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
-      await getAgentsByKuery(esClientMock, {
+      await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
       });
 
-      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
+      expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([
         { enrolled_at: { order: 'desc' } },
         { 'local_metadata.host.hostname.keyword': { order: 'asc' } },
       ]);
@@ -283,13 +313,51 @@ describe('Agents CRUD test', () => {
 
     it('should not pass secondary sort for non-default sort', async () => {
       searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse(['1', '2'], 2)));
-      await getAgentsByKuery(esClientMock, {
+      await getAgentsByKuery(esClientMock, soClientMock, {
         showInactive: false,
         sortField: 'policy_id',
       });
-      expect(searchMock.mock.calls[searchMock.mock.calls.length - 1][0].body.sort).toEqual([
-        { policy_id: { order: 'desc' } },
-      ]);
+      expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
+    });
+  });
+
+  describe('update', () => {
+    it('should write to audit log', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.update.mockResolvedValueOnce({} as any);
+
+      await updateAgent(esClient, 'test-agent-id', { tags: ['new-tag'] });
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: 'User updated agent [id=test-agent-id]',
+      });
+    });
+  });
+
+  describe('openPointInTime', () => {
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.openPointInTime.mockResolvedValueOnce({ id: 'test-pit' } as any);
+
+      await openPointInTime(esClient, AGENTS_INDEX);
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `User opened point in time query [index=${AGENTS_INDEX}] [pitId=test-pit]`,
+      });
+    });
+  });
+
+  describe('closePointInTime', () => {
+    it('should call audit logger', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.closePointInTime.mockResolvedValueOnce({} as any);
+
+      await closePointInTime(esClient, 'test-pit');
+
+      expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: `User closing point in time query [pitId=test-pit]`,
+      });
     });
   });
 });

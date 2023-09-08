@@ -6,10 +6,11 @@
  */
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMConfig } from '..';
 import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
 import { APMInternalESClient } from '../lib/helpers/create_es_client/create_internal_es_client';
-import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
+import { ApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
 
 interface Options {
   mockResponse?: (
@@ -24,11 +25,13 @@ export async function inspectSearchParams(
     mockConfig,
     mockInternalESClient,
     mockIndices,
+    mockApmAlertsClient,
   }: {
     mockApmEventClient: APMEventClient;
     mockConfig: APMConfig;
     mockInternalESClient: APMInternalESClient;
-    mockIndices: ApmIndicesConfig;
+    mockIndices: APMIndices;
+    mockApmAlertsClient: ApmAlertsClient;
   }) => Promise<any>,
   options: Options = {}
 ) {
@@ -50,15 +53,15 @@ export async function inspectSearchParams(
   let error;
   const mockApmEventClient = { search: spy } as any;
   const indices: {
-    [Property in keyof APMConfig['indices']]: string;
+    [Property in keyof APMIndices]: string;
   } = {
-    sourcemap: 'myIndex',
     error: 'myIndex',
     onboarding: 'myIndex',
     span: 'myIndex',
     transaction: 'myIndex',
     metric: 'myIndex',
   };
+
   const mockConfig = new Proxy(
     {},
     {
@@ -71,13 +74,10 @@ export async function inspectSearchParams(
         switch (key) {
           default:
             return 'myIndex';
-          case 'indices':
-            return indices;
           case 'ui':
             return {
               enabled: true,
-              transactionGroupBucketSize: 1000,
-              maxTraceItems: 1000,
+              maxTraceItems: 5000,
             };
           case 'metricsInterval':
             return 30;
@@ -86,17 +86,15 @@ export async function inspectSearchParams(
     }
   ) as APMConfig;
   const mockInternalESClient = { search: spy } as any;
-  const mockIndices = {
-    ...indices,
-    apmAgentConfigurationIndex: 'myIndex',
-    apmCustomLinkIndex: 'myIndex',
-  };
+  const mockApmAlertsClient = { search: spy } as any;
+
   try {
     response = await fn({
-      mockIndices,
+      mockIndices: indices,
       mockApmEventClient,
       mockConfig,
       mockInternalESClient,
+      mockApmAlertsClient,
     });
   } catch (err) {
     error = err;

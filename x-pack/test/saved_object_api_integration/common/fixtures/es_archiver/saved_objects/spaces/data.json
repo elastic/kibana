@@ -1,24 +1,6 @@
 {
   "type": "doc",
   "value": {
-    "id": "space:default",
-    "index": ".kibana",
-    "source": {
-      "space": {
-        "_reserved": true,
-        "description": "This is the default space",
-        "name": "Default Space"
-      },
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
     "id": "space:space_1",
     "index": ".kibana",
     "source": {
@@ -27,9 +9,10 @@
         "name": "Space 1"
       },
       "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0"
+    }
   }
 }
 
@@ -44,9 +27,10 @@
         "name": "Space 2"
       },
       "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0"
+    }
   }
 }
 
@@ -54,18 +38,20 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:defaultspace-index-pattern-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "timeFieldName": "@timestamp",
         "title": "logstash-*"
       },
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "type": "index-pattern",
-      "migrationVersion": { "index-pattern": "8.0.0" },
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -80,9 +66,13 @@
         "defaultIndex": "defaultspace-index-pattern-id"
       },
       "type": "config",
-      "updated_at": "2017-09-21T18:49:16.302Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.302Z",
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0"
+    }
   }
 }
 
@@ -113,7 +103,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:defaultspace-dashboard-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "dashboard": {
         "description": "",
@@ -132,14 +122,16 @@
         "timeRestore": true,
         "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
         "title": "Requests",
-        "uiStateJSON": "{}",
         "version": 1
       },
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "type": "dashboard",
-      "updated_at": "2017-09-21T18:57:40.826Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:57:40.826Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -147,18 +139,20 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space1-index-pattern-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "timeFieldName": "@timestamp",
         "title": "logstash-*"
       },
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "type": "index-pattern",
-      "migrationVersion": { "index-pattern": "8.0.0" },
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -174,9 +168,13 @@
       },
       "namespace": "space_1",
       "type": "config",
-      "updated_at": "2017-09-21T18:49:16.302Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.302Z",
+      "namespaces": [
+        "space_1"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0"
+    }
   }
 }
 
@@ -208,7 +206,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:space1-dashboard-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "dashboard": {
         "description": "",
@@ -227,14 +225,16 @@
         "timeRestore": true,
         "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
         "title": "Requests",
-        "uiStateJSON": "{}",
         "version": 1
       },
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "type": "dashboard",
-      "updated_at": "2017-09-21T18:57:40.826Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:57:40.826Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -242,18 +242,20 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:space2-index-pattern-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "timeFieldName": "@timestamp",
         "title": "logstash-*"
       },
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "type": "index-pattern",
-      "migrationVersion": { "index-pattern": "8.0.0" },
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -269,9 +271,13 @@
       },
       "namespace": "space_2",
       "type": "config",
-      "updated_at": "2017-09-21T18:49:16.302Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.302Z",
+      "namespaces": [
+        "space_2"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0"
+    }
   }
 }
 
@@ -303,7 +309,7 @@
   "type": "doc",
   "value": {
     "id": "dashboard:space2-dashboard-id",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "dashboard": {
         "description": "",
@@ -322,14 +328,16 @@
         "timeRestore": true,
         "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
         "title": "Requests",
-        "uiStateJSON": "{}",
         "version": 1
       },
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "type": "dashboard",
-      "updated_at": "2017-09-21T18:57:40.826Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:57:40.826Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -359,7 +367,9 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -376,7 +386,10 @@
         "title": "A shared saved-object in the default and space_1 spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1"],
+      "namespaces": [
+        "default",
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -393,7 +406,9 @@
         "title": "A shared saved-object only in space_1"
       },
       "type": "sharedtype",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -410,7 +425,9 @@
         "title": "A shared saved-object only in space_2"
       },
       "type": "sharedtype",
-      "namespaces": ["space_2"],
+      "namespaces": [
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -427,7 +444,11 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -445,7 +466,11 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -463,7 +488,11 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -480,7 +509,11 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -498,7 +531,11 @@
         "title": "A shared saved-object in all spaces"
       },
       "type": "sharedtype",
-      "namespaces": ["default", "space_1", "space_2"],
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -516,7 +553,11 @@
       "resolvetype": {
         "title": "Resolve outcome exactMatch"
       },
-      "namespaces": ["default", "space_1", "space_2"]
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
     }
   }
 }
@@ -532,7 +573,11 @@
       "resolvetype": {
         "title": "Resolve outcome aliasMatch"
       },
-      "namespaces": ["default", "space_1", "space_2"]
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
     }
   }
 }
@@ -550,7 +595,9 @@
         "targetNamespace": "default",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -568,7 +615,9 @@
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -584,7 +633,9 @@
       "resolvetype": {
         "title": "This is used to test that 1. the 'disabled' alias does not resolve to this target (because the alias is disabled), and 2. when this object that exists in all spaces is deleted, the alias that targets it is deleted too (even though the alias is disabled)"
       },
-      "namespaces": ["*"]
+      "namespaces": [
+        "*"
+      ]
     }
   }
 }
@@ -603,7 +654,9 @@
         "targetType": "resolvetype",
         "targetId": "disabled-newid",
         "disabled": true
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -622,7 +675,9 @@
         "targetType": "resolvetype",
         "targetId": "disabled-newid",
         "disabled": true
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -640,7 +695,9 @@
         "targetNamespace": "space_x",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -659,7 +716,9 @@
         "targetType": "resolvetype",
         "targetId": "alias-match-newid",
         "disabled": true
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -675,7 +734,11 @@
       "resolvetype": {
         "title": "Resolve outcome conflict (1 of 2)"
       },
-      "namespaces": ["default", "space_1", "space_2"]
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
     }
   }
 }
@@ -691,7 +754,11 @@
       "resolvetype": {
         "title": "Resolve outcome conflict (2 of 2)"
       },
-      "namespaces": ["default", "space_1", "space_2"]
+      "namespaces": [
+        "default",
+        "space_1",
+        "space_2"
+      ]
     }
   }
 }
@@ -709,7 +776,9 @@
         "targetNamespace": "default",
         "targetType": "resolvetype",
         "targetId": "conflict-newid"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -727,7 +796,9 @@
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "conflict-newid"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -742,7 +813,9 @@
         "title": "A share-capable (isolated) saved-object only in the default space"
       },
       "type": "sharecapabletype",
-      "namespaces": ["default"],
+      "namespaces": [
+        "default"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -759,7 +832,9 @@
         "title": "A share-capable (isolated) saved-object only in space_1"
       },
       "type": "sharecapabletype",
-      "namespaces": ["space_1"],
+      "namespaces": [
+        "space_1"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -770,18 +845,20 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:inbound-reference-origin-match-1-newId",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "inbound-reference-origin-match-1",
       "index-pattern": {
         "title": "This is used to test if an imported object with a reference to this originId will be remapped properly"
       },
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "type": "index-pattern",
-      "migrationVersion": { "index-pattern": "8.0.0" },
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -789,18 +866,20 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:inbound-reference-origin-match-2a",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "inbound-reference-origin-match-2",
       "index-pattern": {
         "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
       },
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "type": "index-pattern",
-      "migrationVersion": { "index-pattern": "8.0.0" },
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -808,18 +887,20 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:inbound-reference-origin-match-2b",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "inbound-reference-origin-match-2",
       "index-pattern": {
         "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
       },
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "type": "index-pattern",
-      "migrationVersion": { "index-pattern": "8.0.0" },
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "doc"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
+    }
   }
 }
 
@@ -833,7 +914,9 @@
         "title": "This is used to test if an imported object with a missing reference will have an exact match conflict when the missing reference is replaced"
       },
       "type": "sharedtype",
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"
@@ -851,7 +934,9 @@
         "title": "This is used to test if an imported object with a missing reference will have an inexact match conflict when the missing reference is replaced"
       },
       "type": "sharedtype",
-      "namespaces": ["*"],
+      "namespaces": [
+        "*"
+      ],
       "updated_at": "2017-09-21T18:59:16.270Z"
     },
     "type": "doc"

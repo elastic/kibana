@@ -12,8 +12,8 @@ import {
   buildUserNamesFilter,
   RiskScoreEntity,
 } from '../../../../common/search_strategy';
-import type { HostRisk, UserRisk } from '../../../risk_score/containers';
-import { useRiskScore } from '../../../risk_score/containers';
+import type { HostRisk, UserRisk } from '../../../explore/containers/risk_score';
+import { useRiskScore } from '../../../explore/containers/risk_score';
 
 export const ONLY_FIRST_ITEM_PAGINATION = {
   cursorStart: 0,
@@ -31,7 +31,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
   const {
     data: hostRiskData,
     loading: hostRiskLoading,
-    isLicenseValid: isHostLicenseValid,
+    isAuthorized: isHostRiskScoreAuthorized,
     isModuleEnabled: isHostRiskModuleEnabled,
   } = useRiskScore({
     filterQuery: hostNameFilterQuery,
@@ -57,7 +57,7 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
   const {
     data: userRiskData,
     loading: userRiskLoading,
-    isLicenseValid: isUserLicenseValid,
+    isAuthorized: isUserRiskScoreAuthorized,
     isModuleEnabled: isUserRiskModuleEnabled,
   } = useRiskScore({
     filterQuery: userNameFilterQuery,
@@ -75,5 +75,9 @@ export const useRiskScoreData = (data: TimelineEventsDetailsItem[]) => {
     [userRiskLoading, isUserRiskModuleEnabled, userRiskData]
   );
 
-  return { userRisk, hostRisk, isLicenseValid: isHostLicenseValid && isUserLicenseValid };
+  return {
+    userRisk,
+    hostRisk,
+    isAuthorized: isHostRiskScoreAuthorized && isUserRiskScoreAuthorized,
+  };
 };

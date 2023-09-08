@@ -8,14 +8,17 @@
 import type { AnyAction, Reducer } from 'redux';
 import { combineReducers } from 'redux';
 
+import type { DataTableState } from '@kbn/securitysolution-data-table';
+import { dataTableReducer } from '@kbn/securitysolution-data-table';
+import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
 import { sourcererReducer, sourcererModel } from './sourcerer';
 
-import type { HostsPluginReducer } from '../../hosts/store';
-import type { NetworkPluginReducer } from '../../network/store';
-import type { UsersPluginReducer } from '../../users/store';
+import type { HostsPluginReducer } from '../../explore/hosts/store';
+import type { NetworkPluginReducer } from '../../explore/network/store';
+import type { UsersPluginReducer } from '../../explore/users/store';
 import type { TimelinePluginReducer } from '../../timelines/store/timeline';
 
 import type { SecuritySubPlugins } from '../../app/types';
@@ -27,8 +30,13 @@ import { initDataView, SourcererScopeName } from './sourcerer/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from './sourcerer/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
-import type { DataTableReducer } from './data_table';
-import type { DataTableState } from './data_table/types';
+import { groupsReducer } from './grouping/reducer';
+import type { GroupState } from './grouping/types';
+import { analyzerReducer } from '../../resolver/store/reducer';
+import { securitySolutionDiscoverReducer } from './discover/reducer';
+import type { AnalyzerState } from '../../resolver/types';
+
+enableMapSet();
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   UsersPluginReducer &
@@ -54,7 +62,9 @@ export const createInitialState = (
     signalIndexName: SourcererModel['signalIndexName'];
     enableExperimental: ExperimentalFeatures;
   },
-  dataTableState: DataTableState
+  dataTableState: DataTableState,
+  groupsState: GroupState,
+  analyzerState: AnalyzerState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -108,6 +118,13 @@ export const createInitialState = (
     },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,
+    groups: groupsState.groups,
+    analyzer: analyzerState.analyzer,
+    discover: {
+      app: undefined,
+      internal: undefined,
+      savedSearch: undefined,
+    },
   };
 
   return preloadedState;
@@ -117,18 +134,17 @@ export const createInitialState = (
  * Factory for the Security app's redux reducer.
  */
 export const createReducer: (
-  pluginsReducer: SubPluginsInitReducer,
-  tgridReducer: DataTableReducer // TODO: remove this param when the table reducer will be moved to security_solution
-) => Reducer<State, AppAction | AnyAction> = (
-  pluginsReducer: SubPluginsInitReducer,
-  tgridReducer: DataTableReducer
-) =>
+  pluginsReducer: SubPluginsInitReducer
+) => Reducer<State, AppAction | AnyAction> = (pluginsReducer: SubPluginsInitReducer) =>
   combineReducers({
     app: appReducer,
     dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
+    dataTable: dataTableReducer,
+    groups: groupsReducer,
+    analyzer: analyzerReducer,
+    discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
-    ...tgridReducer,
   });

@@ -109,6 +109,28 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
       );
     });
 
+    it('uses default value "count" if aggType is undefined', async () => {
+      params.aggType = undefined;
+      expect(onValidate()).not.toThrow();
+    });
+
+    it('fails for invalid groupBy', async () => {
+      params.groupBy = 42;
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+        `"[groupBy]: expected value of type [string] but got [number]"`
+      );
+
+      params.groupBy = '-not-a-valid-groupBy-';
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+        `"[groupBy]: invalid groupBy: \\"-not-a-valid-groupBy-\\""`
+      );
+    });
+
+    it('uses default value "all" if groupBy is undefined', async () => {
+      params.groupBy = undefined;
+      expect(onValidate()).not.toThrow();
+    });
+
     it('fails for invalid aggField', async () => {
       params.aggField = 42;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(

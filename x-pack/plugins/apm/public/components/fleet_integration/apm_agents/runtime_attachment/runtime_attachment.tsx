@@ -147,6 +147,7 @@ export function RuntimeAttachment({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="apmRuntimeAttachmentAddRuleButton"
                 iconType="plusInCircle"
                 disabled={editDiscoveryRuleId !== null}
                 onClick={onAddRule}

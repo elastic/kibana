@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Route, type RouteProps } from 'react-router-dom';
+import { type RouteProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { cloudPosturePages } from '../common/navigation/constants';
 import { useSecuritySolutionContext } from './security_solution_context';

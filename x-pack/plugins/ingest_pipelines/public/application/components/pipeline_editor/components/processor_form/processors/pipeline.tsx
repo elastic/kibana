@@ -8,9 +8,15 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  UseField,
+  Field,
+  ToggleField,
+} from '../../../../../../shared_imports';
 
-import { FieldsConfig } from './shared';
+import { FieldsConfig, from, to } from './shared';
 
 const { emptyField } = fieldValidators;
 
@@ -44,8 +50,43 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
+  /* Optional field configs */
+  ignore_missing_pipeline: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+    deserializer: to.booleanOrUndef,
+    serializer: from.undefinedIfValue(false),
+    label: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.pipelineForm.ignoreMissingPipelineFieldLabel',
+      {
+        defaultMessage: 'Ignore missing pipeline',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.pipelineForm.ignoreMissingPipelineFieldHelpText',
+      {
+        defaultMessage: 'Ignore missing pipelines instead of failing.',
+      }
+    ),
+  },
 };
 
 export const Pipeline: FunctionComponent = () => {
-  return <UseField config={fieldsConfig.name} component={Field} path="fields.name" />;
+  return (
+    <>
+      <UseField
+        data-test-subj="pipelineNameField"
+        config={fieldsConfig.name}
+        component={Field}
+        path="fields.name"
+      />
+
+      <UseField
+        data-test-subj="ignoreMissingPipelineSwitch"
+        config={fieldsConfig.ignore_missing_pipeline}
+        component={ToggleField}
+        path="fields.ignore_missing_pipeline"
+      />
+    </>
+  );
 };

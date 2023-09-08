@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import { resolve } from 'path';
-import globby from 'globby';
 
 import Url from 'url';
 
@@ -21,17 +19,8 @@ import { tiAbusechMalware } from './pipelines/ti_abusech_malware';
 import { tiAbusechMalwareBazaar } from './pipelines/ti_abusech_malware_bazaar';
 import { tiAbusechUrl } from './pipelines/ti_abusech_url';
 
-const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
-  const pattern = resolve(__dirname, '../../plugins/threat_intelligence/cypress/e2e/**/*.cy.ts');
-  const integrationsPaths = globby.sync(pattern);
-  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
-
-  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1] || [];
-};
-
 export async function ThreatIntelligenceConfigurableCypressTestRunner(
   { getService }: FtrProviderContext,
-  command: string,
   envVars?: Record<string, string>
 ) {
   const log = getService('log');
@@ -55,56 +44,19 @@ export async function ThreatIntelligenceConfigurableCypressTestRunner(
     log.info(`PUT pipeline ${pipeline.name}: ${res.statusCode}`);
   }
 
-  await withProcRunner(log, async (procs) => {
-    await procs.run('cypress', {
-      cmd: 'yarn',
-      args: [command],
-      cwd: resolve(__dirname, '../../plugins/threat_intelligence'),
-      env: {
-        FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
-        CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-        CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-        CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-        ...process.env,
-        ...envVars,
-      },
-      wait: true,
-    });
-  });
-}
-
-export async function ThreatIntelligenceCypressCliTestRunnerCI(
-  context: FtrProviderContext,
-  totalCiJobs: number,
-  ciJobNumber: number
-) {
-  const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
-  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:spec', {
-    SPEC_LIST: integrations.join(','),
-  });
-}
-
-export async function ThreatIntelligenceCypressCliResponseOpsTestRunner(
-  context: FtrProviderContext
-) {
-  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:respops');
-}
-
-export async function ThreatIntelligenceCypressCliCasesTestRunner(context: FtrProviderContext) {
-  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:cases');
-}
-
-export async function ThreatIntelligenceCypressCliTestRunner(context: FtrProviderContext) {
-  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run');
-}
-
-export async function ThreatIntelligenceCypressCliFirefoxTestRunner(context: FtrProviderContext) {
-  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:run:firefox');
-}
-
-export async function ThreatIntelligenceCypressVisualTestRunner(context: FtrProviderContext) {
-  return ThreatIntelligenceConfigurableCypressTestRunner(context, 'cypress:open');
+  return {
+    FORCE_COLOR: '1',
+    CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
+    CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+    CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+    CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+    ...envVars,
+    baseUrl: Url.format(config.get('servers.kibana')),
+    BASE_URL: Url.format(config.get('servers.kibana')),
+    ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
+    ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
+    ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+  };
 }
 
 export async function ThreatIntelligenceCypressCcsTestRunner({ getService }: FtrProviderContext) {

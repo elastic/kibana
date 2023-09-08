@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { schema } from '@kbn/config-schema';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { KibanaRequest } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  getAlertUrl,
+  observabilityPaths,
+  ProcessorEvent,
+} from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -20,6 +24,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
@@ -36,7 +41,6 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
   ApmRuleType,
@@ -47,32 +51,22 @@ import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-
-const paramsSchema = schema.object({
-  serviceName: schema.maybe(schema.string()),
-  transactionType: schema.maybe(schema.string()),
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  environment: schema.string(),
-  anomalySeverityType: schema.oneOf([
-    schema.literal(ANOMALY_SEVERITY.CRITICAL),
-    schema.literal(ANOMALY_SEVERITY.MAJOR),
-    schema.literal(ANOMALY_SEVERITY.MINOR),
-    schema.literal(ANOMALY_SEVERITY.WARNING),
-  ]),
-});
+import { anomalyParamsSchema } from '../../../../../common/rules/schema';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
 export function registerAnomalyRuleType({
   alerting,
+  alertsLocator,
+  getApmIndices,
   basePath,
-  config$,
   logger,
   ml,
-  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -86,14 +80,10 @@ export function registerAnomalyRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: anomalyParamsSchema },
       actionVariables: {
         context: [
-          ...(observability.getAlertDetailsConfig()?.apm.enabled
-            ? [apmActionVariables.alertDetailsUrl]
-            : []),
+          apmActionVariables.alertDetailsUrl,
           apmActionVariables.environment,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
@@ -106,13 +96,19 @@ export function registerAnomalyRuleType({
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ params, services, spaceId }) => {
+      executor: async ({ params, services, spaceId, startedAt }) => {
         if (!ml) {
-          return {};
+          return { state: {} };
         }
 
-        const { savedObjectsClient, scopedClusterClient, getAlertUuid } =
-          services;
+        const {
+          getAlertUuid,
+          getAlertStartedDate,
+          savedObjectsClient,
+          scopedClusterClient,
+        } = services;
+
+        const apmIndices = await getApmIndices(savedObjectsClient);
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
@@ -143,7 +139,7 @@ export function registerAnomalyRuleType({
         const threshold = selectedOption.threshold;
 
         if (mlJobs.length === 0) {
-          return {};
+          return { state: {} };
         }
 
         // start time must be at least 30, does like this to support rules created before this change where default was 15
@@ -251,7 +247,7 @@ export function registerAnomalyRuleType({
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
-        for (const anomaly of compact(anomalies)) {
+        await asyncForEach(compact(anomalies), async (anomaly) => {
           const {
             serviceName,
             environment,
@@ -262,7 +258,7 @@ export function registerAnomalyRuleType({
           } = anomaly;
 
           const eventSourceFields = await getServiceGroupFieldsForAnomaly({
-            config$,
+            apmIndices,
             scopedClusterClient,
             savedObjectsClient,
             serviceName,
@@ -281,7 +277,7 @@ export function registerAnomalyRuleType({
             windowUnit: params.windowUnit,
           });
 
-          const id = [
+          const alertId = [
             ApmRuleType.Anomaly,
             serviceName,
             environment,
@@ -290,55 +286,59 @@ export function registerAnomalyRuleType({
             .filter((name) => name)
             .join('_');
 
+          const alert = services.alertWithLifecycle({
+            id: alertId,
+            fields: {
+              [SERVICE_NAME]: serviceName,
+              ...getEnvironmentEsField(environment),
+              [TRANSACTION_TYPE]: transactionType,
+              [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+              [ALERT_SEVERITY]: severityLevel,
+              [ALERT_EVALUATION_VALUE]: score,
+              [ALERT_EVALUATION_THRESHOLD]: threshold,
+              [ALERT_REASON]: reasonMessage,
+              ...eventSourceFields,
+            },
+          });
+
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
             transactionType
           );
-
           const viewInAppUrl = addSpaceIdToPath(
             basePath.publicBaseUrl,
             spaceId,
             relativeViewInAppUrl
           );
-
-          const alertUuid = getAlertUuid(id);
-
-          const alertDetailsUrl = getAlertDetailsUrl(
-            basePath,
+          const indexedStartedAt =
+            getAlertStartedDate(alertId) ?? startedAt.toISOString();
+          const alertUuid = getAlertUuid(alertId);
+          const alertDetailsUrl = await getAlertUrl(
+            alertUuid,
             spaceId,
-            alertUuid
+            indexedStartedAt,
+            alertsLocator,
+            basePath.publicBaseUrl
           );
 
-          services
-            .alertWithLifecycle({
-              id,
-              fields: {
-                [SERVICE_NAME]: serviceName,
-                ...getEnvironmentEsField(environment),
-                [TRANSACTION_TYPE]: transactionType,
-                [PROCESSOR_EVENT]: ProcessorEvent.transaction,
-                [ALERT_SEVERITY]: severityLevel,
-                [ALERT_EVALUATION_VALUE]: score,
-                [ALERT_EVALUATION_THRESHOLD]: threshold,
-                [ALERT_REASON]: reasonMessage,
-                ...eventSourceFields,
-              },
-            })
-            .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              alertDetailsUrl,
-              environment: getEnvironmentLabel(environment),
-              reason: reasonMessage,
-              serviceName,
-              threshold: selectedOption?.label,
-              transactionType,
-              triggerValue: severityLevel,
-              viewInAppUrl,
-            });
-        }
+          alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
+            alertDetailsUrl,
+            environment: getEnvironmentLabel(environment),
+            reason: reasonMessage,
+            serviceName,
+            threshold: selectedOption?.label,
+            transactionType,
+            triggerValue: severityLevel,
+            viewInAppUrl,
+          });
+        });
 
-        return {};
+        return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
+      getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+        observabilityPaths.ruleDetails(rule.id),
     })
   );
 }

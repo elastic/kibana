@@ -148,6 +148,30 @@
                     "trackAdoption": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "@kbn/axe-config",
+                "id": "def-common.AXE_OPTIONS.rules.nestedinteractive",
+                "type": "Object",
+                "tags": [],
+                "label": "'nested-interactive'",
+                "description": [],
+                "path": "packages/kbn-axe-config/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/axe-config",
+                    "id": "def-common.AXE_OPTIONS.rules.nestedinteractive.enabled",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "enabled",
+                    "description": [],
+                    "path": "packages/kbn-axe-config/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ]
           }

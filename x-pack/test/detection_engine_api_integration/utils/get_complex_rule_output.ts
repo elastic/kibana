@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
 // without using Partial
@@ -51,6 +51,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> =
   tags: ['tag 1', 'tag 2', 'any tag you want'],
   to: 'now',
   from: 'now-6m',
+  revision: 0,
   severity: 'high',
   severity_mapping: [],
   language: 'kuery',
@@ -91,7 +92,6 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> =
     'http://www.example.com/some-article-about-attack',
     'Some plain text string here explaining why this is a valid thing to look out for',
   ],
-  throttle: 'no_actions',
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   updated_by: 'elastic',

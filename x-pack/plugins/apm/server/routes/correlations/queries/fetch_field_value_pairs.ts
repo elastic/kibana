@@ -16,6 +16,11 @@ import { splitAllSettledPromises } from '../utils';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export interface FieldValuePairsResponse {
+  fieldValuePairs: FieldValuePair[];
+  errors: any[];
+}
+
 export const fetchFieldValuePairs = async ({
   apmEventClient,
   fieldCandidates,

@@ -6,20 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
+import { APMConfig } from '../../..';
+import { ApmTransactionDocumentType } from '../../../../common/document_type';
 import {
   FAAS_BILLED_DURATION,
   FAAS_ID,
   METRICSET_NAME,
 } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { RollupInterval } from '../../../../common/rollup';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
-import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
-import { APMConfig } from '../../..';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
 import {
   fetchAndTransformMetrics,
   GenericMetricsChart,
@@ -49,7 +51,7 @@ const chartBase: ChartBase = {
   ),
 };
 
-async function getServerlessLantecySeries({
+async function getServerlessLatencySeries({
   environment,
   kuery,
   apmEventClient,
@@ -57,7 +59,9 @@ async function getServerlessLantecySeries({
   start,
   end,
   serverlessId,
-  searchAggregatedTransactions,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
@@ -66,18 +70,22 @@ async function getServerlessLantecySeries({
   start: number;
   end: number;
   serverlessId?: string;
-  searchAggregatedTransactions: boolean;
+  documentType: ApmTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }): Promise<GenericMetricsChart['series']> {
   const transactionLatency = await getLatencyTimeseries({
     environment,
     kuery,
     serviceName,
     apmEventClient,
-    searchAggregatedTransactions,
     latencyAggregationType: LatencyAggregationType.avg,
     start,
     end,
     serverlessId,
+    documentType,
+    rollupInterval,
+    bucketSizeInSeconds,
   });
 
   return [
@@ -104,7 +112,9 @@ export async function getServerlessFunctionLatencyChart({
   start,
   end,
   serverlessId,
-  searchAggregatedTransactions,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
@@ -114,7 +124,9 @@ export async function getServerlessFunctionLatencyChart({
   start: number;
   end: number;
   serverlessId?: string;
-  searchAggregatedTransactions: boolean;
+  documentType: ApmTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
 }): Promise<GenericMetricsChart> {
   const options = {
     environment,
@@ -140,10 +152,12 @@ export async function getServerlessFunctionLatencyChart({
       ],
       operationName: 'get_billed_duration',
     }),
-    getServerlessLantecySeries({
+    getServerlessLatencySeries({
       ...options,
       serverlessId,
-      searchAggregatedTransactions,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
     }),
   ]);
 

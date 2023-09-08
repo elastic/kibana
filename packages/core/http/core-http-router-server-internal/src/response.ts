@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Stream } from 'stream';
 import type {
   IKibanaResponse,
@@ -14,6 +13,7 @@ import type {
   HttpResponseOptions,
   RedirectResponseOptions,
   CustomHttpResponseOptions,
+  FileHttpResponseOptions,
   ErrorHttpResponseOptions,
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
@@ -21,6 +21,7 @@ import type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from '@kbn/core-http-server';
+import mime from 'mime';
 
 export function isKibanaResponse(response: Record<string, any>): response is IKibanaResponse {
   return typeof response.status === 'number' && typeof response.options === 'object';
@@ -76,10 +77,51 @@ const errorResponseFactory: KibanaErrorResponseFactory = {
   },
 };
 
+export const fileResponseFactory = {
+  file: <T extends HttpResponsePayload | ResponseError>(options: FileHttpResponseOptions<T>) => {
+    const {
+      body,
+      bypassErrorFormat,
+      fileContentSize,
+      headers,
+      filename,
+      fileContentType,
+      bypassFileNameEncoding,
+    } = options;
+    const reponseFilename = bypassFileNameEncoding ? filename : encodeURIComponent(filename);
+    const responseBody = typeof body === 'string' ? Buffer.from(body) : body;
+    if (!responseBody) {
+      throw new Error(`options.body is expected to be set.`);
+    }
+
+    const responseContentType =
+      fileContentType ?? mime.getType(filename) ?? 'application/octet-stream';
+    const responseContentLength =
+      typeof fileContentSize === 'number'
+        ? fileContentSize
+        : Buffer.isBuffer(responseBody)
+        ? responseBody.length
+        : '';
+
+    return new KibanaResponse(200, responseBody, {
+      bypassErrorFormat,
+      headers: {
+        ...headers,
+        'content-type': `${responseContentType}`,
+        'content-length': `${responseContentLength}`,
+        'content-disposition': `attachment; filename=${reponseFilename}`,
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+        'x-content-type-options': 'nosniff',
+      },
+    });
+  },
+};
+
 export const kibanaResponseFactory: KibanaResponseFactory = {
   ...successResponseFactory,
   ...redirectionResponseFactory,
   ...errorResponseFactory,
+  ...fileResponseFactory,
   custom: <T extends HttpResponsePayload | ResponseError>(
     options: CustomHttpResponseOptions<T>
   ) => {

@@ -9,8 +9,9 @@ import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionEditType } from '../../../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 import { caseInsensitiveSort } from '../../helpers';
 
@@ -25,7 +26,6 @@ import {
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
-import { useTags } from '../../../../../rule_management/logic/use_tags';
 
 type TagsEditActions =
   | BulkActionEditType.add_tags
@@ -78,13 +78,16 @@ interface TagsFormProps {
 }
 
 const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsFormProps) => {
-  const { data: tags = [] } = useTags();
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,
   });
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
-  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
+  const sortedTags = useMemo(
+    () => caseInsensitiveSort(ruleManagementFilters?.aggregated_fields.tags ?? []),
+    [ruleManagementFilters]
+  );
 
   const { tagsLabel, tagsHelpText, formTitle } = getFormConfig(editAction);
 

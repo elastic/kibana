@@ -6,6 +6,7 @@ exports[`it renders without crashing 1`] = `
     key="clusterPrivs"
   >
     <EuiComboBox
+      aria-label="Cluster privileges"
       async={false}
       compressed={false}
       data-test-subj="cluster-privileges-combobox"
@@ -27,6 +28,7 @@ exports[`it renders without crashing 1`] = `
           },
         ]
       }
+      placeholder="Add an action…"
       selectedOptions={Array []}
       singleSelection={false}
       sortMatchesBy="none"

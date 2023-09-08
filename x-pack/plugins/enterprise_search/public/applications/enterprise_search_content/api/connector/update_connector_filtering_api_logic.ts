@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { FilteringRule, FilteringRules } from '../../../../../common/types/connectors';
+import { i18n } from '@kbn/i18n';
+
+import { FilteringRule, FilteringRules } from '@kbn/search-connectors';
+
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -34,5 +37,12 @@ export const putConnectorFiltering = async ({
 
 export const ConnectorFilteringApiLogic = createApiLogic(
   ['content', 'connector_filtering_api_logic'],
-  putConnectorFiltering
+  putConnectorFiltering,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.index.connector.filtering.successToastRules.title',
+        { defaultMessage: 'Sync rules updated' }
+      ),
+  }
 );

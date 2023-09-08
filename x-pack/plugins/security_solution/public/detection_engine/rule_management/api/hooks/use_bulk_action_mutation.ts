@@ -7,14 +7,17 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type { BulkActionErrorResponse, BulkActionResponse, PerformBulkActionProps } from '../api';
 import { performBulkAction } from '../api';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
-import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
-import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
-import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
+import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
+import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
+import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_upgrade_review_query';
+import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
+import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
@@ -27,8 +30,13 @@ export const useBulkActionMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
-  const invalidateFetchTagsQuery = useInvalidateFetchTagsQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchPrebuiltRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidateFetchPrebuiltRulesInstallReviewQuery =
+    useInvalidateFetchPrebuiltRulesInstallReviewQuery();
+  const invalidateFetchPrebuiltRulesUpgradeReviewQuery =
+    useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const updateRulesCache = useUpdateRulesCache();
 
   return useMutation<
@@ -54,6 +62,7 @@ export const useBulkActionMutation = (
         case BulkActionType.enable:
         case BulkActionType.disable: {
           invalidateFetchRuleByIdQuery();
+          invalidateFetchCoverageOverviewQuery();
           if (updatedRules) {
             // We have a list of updated rules, no need to invalidate all
             updateRulesCache(updatedRules);
@@ -66,12 +75,16 @@ export const useBulkActionMutation = (
         case BulkActionType.delete:
           invalidateFindRulesQuery();
           invalidateFetchRuleByIdQuery();
-          invalidateFetchTagsQuery();
+          invalidateFetchRuleManagementFilters();
           invalidateFetchPrebuiltRulesStatusQuery();
+          invalidateFetchPrebuiltRulesInstallReviewQuery();
+          invalidateFetchPrebuiltRulesUpgradeReviewQuery();
+          invalidateFetchCoverageOverviewQuery();
           break;
         case BulkActionType.duplicate:
           invalidateFindRulesQuery();
-          invalidateFetchPrebuiltRulesStatusQuery();
+          invalidateFetchRuleManagementFilters();
+          invalidateFetchCoverageOverviewQuery();
           break;
         case BulkActionType.edit:
           if (updatedRules) {
@@ -82,7 +95,8 @@ export const useBulkActionMutation = (
             invalidateFindRulesQuery();
           }
           invalidateFetchRuleByIdQuery();
-          invalidateFetchTagsQuery();
+          invalidateFetchRuleManagementFilters();
+          invalidateFetchCoverageOverviewQuery();
           break;
       }
 

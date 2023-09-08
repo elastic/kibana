@@ -8,7 +8,7 @@
 import { JsonObject } from '@kbn/utility-types';
 import d3 from 'd3';
 import { TargetOptions } from '../components/control_panel';
-import { FontawesomeIcon } from '../helpers/style_choices';
+import { GenericIcon } from '../helpers/style_choices';
 import { WorkspaceField, AdvancedSettings } from './app_state';
 
 export interface WorkspaceNode {
@@ -16,7 +16,7 @@ export interface WorkspaceNode {
   x: number;
   y: number;
   label: string;
-  icon: FontawesomeIcon;
+  icon: GenericIcon;
   data: {
     field: string;
     term: string;
@@ -49,7 +49,7 @@ export interface ServerResultNode {
   id: string;
   label: string;
   color: string;
-  icon: FontawesomeIcon;
+  icon: GenericIcon;
   data: {
     field: string;
     term: string;

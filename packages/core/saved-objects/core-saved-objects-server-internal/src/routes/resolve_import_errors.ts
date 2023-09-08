@@ -44,9 +44,19 @@ export const registerResolveImportErrorsRoute = (
         },
       },
       validate: {
-        query: schema.object({
-          createNewCopies: schema.boolean({ defaultValue: false }),
-        }),
+        query: schema.object(
+          {
+            createNewCopies: schema.boolean({ defaultValue: false }),
+            compatibilityMode: schema.boolean({ defaultValue: false }),
+          },
+          {
+            validate: (object) => {
+              if (object.createNewCopies && object.compatibilityMode) {
+                return 'cannot use [createNewCopies] with [compatibilityMode]';
+              }
+            },
+          }
+        ),
         body: schema.object({
           file: schema.stream(),
           retries: schema.arrayOf(
@@ -71,11 +81,15 @@ export const registerResolveImportErrorsRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      const { createNewCopies } = req.query;
+      const { createNewCopies, compatibilityMode } = req.query;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
-        .incrementSavedObjectsResolveImportErrors({ request: req, createNewCopies })
+        .incrementSavedObjectsResolveImportErrors({
+          request: req,
+          createNewCopies,
+          compatibilityMode,
+        })
         .catch(() => {});
 
       const file = req.body.file as FileStream;
@@ -111,6 +125,7 @@ export const registerResolveImportErrorsRoute = (
           readStream,
           retries: req.body.retries,
           createNewCopies,
+          compatibilityMode,
         });
 
         return res.ok({ body: result });

@@ -29,7 +29,7 @@ module.exports = (_, argv) => {
     externals: {
       module: 'module',
     },
-    mode: 'production',
+    mode: process.env.NODE_ENV || 'development',
     entry: {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
@@ -81,12 +81,15 @@ module.exports = (_, argv) => {
         '@elastic/eui/dist/eui_theme_light.json',
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',
+        '@emotion/cache',
         '@emotion/react',
+        '@hello-pangea/dnd/dist/dnd.js',
         '@tanstack/react-query',
         '@tanstack/react-query-devtools',
         'classnames',
         'fflate',
         'history',
+        'io-ts',
         'jquery',
         'lodash',
         'lodash/fp',
@@ -94,16 +97,17 @@ module.exports = (_, argv) => {
         'moment-timezone/data/packed/latest.json',
         'moment',
         'react-ace',
-        'react-beautiful-dnd',
         'react-dom',
         'react-dom/server',
         'react-router-dom',
+        'react-router-dom-v5-compat',
         'react-router',
         'react',
         'rxjs',
         'rxjs/operators',
         'styled-components',
         'tslib',
+        'uuid',
       ],
       'kbn-ui-shared-deps-npm.v8.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
       'kbn-ui-shared-deps-npm.v8.light': ['@elastic/eui/dist/eui_theme_light.css'],
@@ -134,6 +138,19 @@ module.exports = (_, argv) => {
             },
           ],
         },
+        // @hello-pangea/dnd emits optional chaining that confuses webpack.
+        // We need to transform it using babel before going further
+        {
+          test: /@hello-pangea\/dnd\/dist\/dnd\.js$/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                plugins: [require.resolve('@babel/plugin-proposal-optional-chaining')],
+              },
+            },
+          ],
+        },
         {
           test: /\.css$/,
           use: [MiniCssExtractPlugin.loader, 'css-loader'],
@@ -151,7 +168,6 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
       },
       extensions: ['.js', '.ts'],
-      symlinks: false,
     },
 
     optimization: {

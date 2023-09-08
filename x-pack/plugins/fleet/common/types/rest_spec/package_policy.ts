@@ -54,7 +54,9 @@ export interface DeletePackagePoliciesRequest {
   };
 }
 
-export type DeletePackagePoliciesResponse = Array<{
+export type DeletePackagePoliciesResponse = PackagePolicy[];
+
+export type PostDeletePackagePoliciesResponse = Array<{
   id: string;
   name?: string;
   success: boolean;

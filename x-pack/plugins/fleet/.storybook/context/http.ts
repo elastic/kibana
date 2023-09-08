@@ -101,6 +101,31 @@ export const getHttp = (basepath = BASE_PATH) => {
         };
       }
 
+      if (path.match('/api/fleet/uninstall_tokens/token-id-13')) {
+        return {
+          item: { token: '123-456-789' },
+          page: 1,
+          perPage: 20,
+          total: 1,
+        };
+      } else if (path.match('/api/fleet/uninstall_tokens')) {
+        if (options.query?.policyId === 'missing-policy') {
+          return {
+            items: [],
+            page: 1,
+            perPage: 20,
+            total: 0,
+          };
+        } else {
+          return {
+            items: [{ id: 'token-id-13' }],
+            page: 1,
+            perPage: 20,
+            total: 1,
+          };
+        }
+      }
+
       action(path)(`UNSUPPORTED ROUTE: GET ${path}`);
       return {};
     }) as HttpHandler,

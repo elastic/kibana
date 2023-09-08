@@ -22,7 +22,7 @@ import type {
 import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
 import type { ISavedObjectsExporter } from './export';
-import type { ISavedObjectsImporter } from './import';
+import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
 import type { SavedObjectsExtensions } from './extensions/extensions';
 
 /**
@@ -136,7 +136,7 @@ export interface SavedObjectsServiceSetup {
   /**
    * Returns the default index used for saved objects.
    */
-  getKibanaIndex: () => string;
+  getDefaultIndex: () => string;
 }
 
 /**
@@ -200,10 +200,36 @@ export interface SavedObjectsServiceStart {
   /**
    * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
    */
-  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+  createImporter: (
+    client: SavedObjectsClientContract,
+    options?: SavedObjectsImporterOptions
+  ) => ISavedObjectsImporter;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}
    */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
+  /**
+   * Returns the (alias to the) index that the specified saved object type is stored in.
+   *
+   * @param type The SO type to retrieve the index/alias for.
+   */
+  getIndexForType: (type: string) => string;
+  /**
+   * Returns the (alias to the) index that the specified saved object type is stored in.
+   *
+   * @remark if multiple types are living in the same index, duplicates will be removed.
+   * @param types The SO types to retrieve the index/alias for.
+   */
+  getIndicesForTypes: (types: string[]) => string[];
+  /**
+   * Returns the default index used for saved objects.
+   */
+  getDefaultIndex: () => string;
+  /**
+   * Returns all (aliases to) kibana system indices used for saved object storage.
+   *
+   * @remarks Only the indices effectively present in the current running environment will be returned.
+   */
+  getAllIndices: () => string[];
 }

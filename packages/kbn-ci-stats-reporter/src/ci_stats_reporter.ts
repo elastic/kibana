@@ -14,12 +14,9 @@ import crypto from 'crypto';
 
 import execa from 'execa';
 import Axios, { AxiosRequestConfig } from 'axios';
-import { REPO_ROOT, kibanaPackageJson } from '@kbn/utils';
+import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-
-// @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
-import httpAdapter from 'axios/lib/adapters/http';
 
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
 
@@ -375,7 +372,7 @@ export class CiStatsReporter {
           headers,
           data: body,
           params: query,
-          adapter: httpAdapter,
+          adapter: 'http',
 
           // if it can be serialized into a string, send it
           maxBodyLength: Infinity,

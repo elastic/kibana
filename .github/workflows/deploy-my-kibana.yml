@@ -1,0 +1,31 @@
+---
+##
+## This the automation to let Observability team members to deploy a Kibana instance
+## using the Observability test environments.
+## It will deploy a new instance for those who add a comment /oblt-deploy
+## only supported for Elasticians.
+##
+## Owner: @elastic/observablt-robots
+## Further details: https://ela.st/oblt-deploy-my-kibana
+##
+name: deploy-my-kibana
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-my-kibana:
+    if: ${{ github.event.issue.pull_request && (github.event.comment.body == '/oblt-deploy' || github.event.comment.body == '/oblt-deploy-serverless') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/deploy-my-kibana@current
+        with:
+          vaultUrl: ${{ secrets.OBLT_VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
+          serverless: ${{ github.event.comment.body == '/oblt-deploy-serverless' }}

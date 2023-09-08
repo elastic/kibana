@@ -5,23 +5,10 @@
  * 2.0.
  */
 
-import type { Datum } from '@elastic/charts';
+import type { Datum, Key, ArrayNode } from '@elastic/charts';
 
 import { getFillColor } from '../chart_palette';
 import { getLabel } from '../labels';
-
-export interface DataName {
-  dataName: string;
-}
-
-export interface Path {
-  index: number;
-  value: string;
-}
-
-export interface FillColorDatum {
-  path?: Path[];
-}
 
 // common functions used by getLayersOneDimension and getLayersMultiDimensional:
 const valueFormatter = (d: number) => `${d}`;
@@ -30,13 +17,10 @@ const groupByRollup = (d: Datum) => d.key;
 /**
  * Extracts the first group name from the data representing the second group
  */
-export const getGroupFromPath = (datum: FillColorDatum): string | undefined => {
+export const getGroupFromPath = (path: ArrayNode['path']): string | undefined => {
   const OFFSET_FROM_END = 2; // The offset from the end of the path array containing the group
-
-  const pathLength = datum.path?.length ?? 0;
-  const groupIndex = pathLength - OFFSET_FROM_END;
-
-  return Array.isArray(datum.path) && groupIndex > 0 ? datum.path[groupIndex].value : undefined;
+  const groupIndex = path.length - OFFSET_FROM_END;
+  return groupIndex > 0 ? path[groupIndex].value : undefined;
 };
 
 export const getLayersOneDimension = ({
@@ -53,9 +37,9 @@ export const getLayersOneDimension = ({
     groupByRollup,
     nodeLabel: (d: Datum) => getLabel({ baseLabel: d, riskScore: maxRiskSubAggregations[d] }),
     shape: {
-      fillColor: (d: DataName) =>
+      fillColor: (dataName: Key) =>
         getFillColor({
-          riskScore: maxRiskSubAggregations[d.dataName] ?? 0,
+          riskScore: maxRiskSubAggregations[dataName] ?? 0,
           colorPalette,
         }),
     },
@@ -88,8 +72,8 @@ export const getLayersMultiDimensional = ({
     groupByRollup: (d: Datum) => d.stackByField1Key, // different implementation than layer 0
     nodeLabel: (d: Datum) => `${d}`,
     shape: {
-      fillColor: (d: FillColorDatum) => {
-        const groupFromPath = getGroupFromPath(d) ?? '';
+      fillColor: (dataName: Key, sortIndex: number, node: Pick<ArrayNode, 'path'>) => {
+        const groupFromPath = getGroupFromPath(node.path) ?? '';
 
         return getFillColor({
           riskScore: maxRiskSubAggregations[groupFromPath] ?? 0,

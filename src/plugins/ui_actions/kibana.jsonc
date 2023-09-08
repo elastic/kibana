@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ui-actions-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Adds UI Actions service to Kibana",
+  "plugin": {
+    "id": "uiActions",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "dataViews"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact"
+    ]
+  }
+}

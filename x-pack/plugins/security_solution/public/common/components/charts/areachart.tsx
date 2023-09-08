@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
+import type { AreaSeriesStyle, RecursivePartial, SettingsProps } from '@elastic/charts';
 import { Axis, AreaSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
@@ -21,14 +21,15 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  useThemes,
   Wrapper,
   ChartWrapper,
 } from './common';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions/actions';
 import type { VisualizationActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 // custom series styles: https://ela.st/areachart-styling
 const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
@@ -80,15 +81,15 @@ export const AreaChartBaseComponent = ({
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }) => {
-  const theme = useTheme();
+  const themes = useThemes();
   const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = `group-${data[0].key}-x`;
   const yAxisId = `group-${data[0].key}-y`;
-  const settings = {
+  const settings: SettingsProps = {
     ...chartDefaultSettings,
-    theme,
+    ...themes,
     ...get('configs.settings', chartConfigs),
   };
   return chartConfigs.width && chartConfigs.height ? (
@@ -155,7 +156,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
 
   return (
     <Wrapper>
-      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+      <HoverVisibilityContainer targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && areaChart && (
           <ChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>

@@ -10,11 +10,14 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
@@ -27,7 +30,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
-import { useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
+import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -57,10 +60,14 @@ import { AgentsApp } from './sections/agents';
 import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
+import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
+import { ExperimentalFeaturesService } from './services';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
+
+const queryClient = new QueryClient();
 
 const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
   isAddIntegrationsPath,
@@ -146,6 +153,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [initializationError, setInitializationError] = useState<Error | null>(null);
 
   const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const isDebugPath = !!useRouteMatch(FLEET_ROUTING_PATHS.debug);
 
   useEffect(() => {
     (async () => {
@@ -193,6 +201,10 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
       </ErrorLayout>
     );
   }
+  // Debug page moved outside of initialization to allow debugging when setup failed
+  if (isDebugPath) {
+    return <DebugPage setupError={initializationError} isInitialized={isInitialized} />;
+  }
 
   if (!isInitialized || initializationError) {
     return (
@@ -230,6 +242,7 @@ export const FleetAppContext: React.FC<{
   theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
+  fleetStatus?: FleetStatusProviderProps;
 }> = memo(
   ({
     children,
@@ -240,30 +253,35 @@ export const FleetAppContext: React.FC<{
     extensions,
     routerHistory,
     theme$,
+    fleetStatus,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const darkModeObservable = useObservable(theme$);
+    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices }}>
+          <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
                   <KibanaThemeProvider theme$={theme$}>
                     <EuiThemeProvider darkMode={isDarkMode}>
-                      <UIExtensionsContext.Provider value={extensions}>
-                        <FleetStatusProvider>
-                          <Router history={history}>
-                            <PackageInstallProvider
-                              notifications={startServices.notifications}
-                              theme$={theme$}
-                            >
-                              <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                            </PackageInstallProvider>
-                          </Router>
-                        </FleetStatusProvider>
-                      </UIExtensionsContext.Provider>
+                      <QueryClientProvider client={queryClient}>
+                        <ReactQueryDevtools initialIsOpen={false} />
+                        <UIExtensionsContext.Provider value={extensions}>
+                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
+                            <Router history={history}>
+                              <PackageInstallProvider
+                                notifications={startServices.notifications}
+                                theme$={theme$}
+                              >
+                                <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                              </PackageInstallProvider>
+                            </Router>
+                          </FleetStatusProvider>
+                        </UIExtensionsContext.Provider>
+                      </QueryClientProvider>
                     </EuiThemeProvider>
                   </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
@@ -305,12 +323,13 @@ export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const flyoutContext = useFlyoutContext();
     const fleetStatus = useFleetStatus();
+    const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
 
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        <Switch>
+        <Routes>
           <Route path={FLEET_ROUTING_PATHS.agents}>
             <AgentsApp />
           </Route>
@@ -320,16 +339,17 @@ export const AppRoutes = memo(
           <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
             <EnrollmentTokenListPage />
           </Route>
+          {agentTamperProtectionEnabled && (
+            <Route path={FLEET_ROUTING_PATHS.uninstall_tokens}>
+              <UninstallTokenListPage />
+            </Route>
+          )}
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <DataStreamApp />
           </Route>
 
           <Route path={FLEET_ROUTING_PATHS.settings}>
             <SettingsApp />
-          </Route>
-
-          <Route path={FLEET_ROUTING_PATHS.debug}>
-            <DebugPage />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}
@@ -357,7 +377,7 @@ export const AppRoutes = memo(
               );
             }}
           />
-        </Switch>
+        </Routes>
 
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>

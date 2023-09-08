@@ -30,21 +30,8 @@ import * as i18n from './translations';
 import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
-const DescriptionListStyled = styled(EuiDescriptionList)`
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.s}) {
-    .euiDescriptionList__title {
-      width: 30% !important;
-    }
-
-    .euiDescriptionList__description {
-      width: 70% !important;
-    }
-  }
-`;
-
-DescriptionListStyled.displayName = 'DescriptionListStyled';
-
 export interface ModalInspectProps {
+  adHocDataViews?: string[] | null;
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   closeModal: () => void;
@@ -108,6 +95,7 @@ export const formatIndexPatternRequested = (indices: string[] = []) => {
 };
 
 export const ModalInspectQuery = ({
+  adHocDataViews,
   additionalRequests,
   additionalResponses,
   closeModal,
@@ -120,6 +108,7 @@ export const ModalInspectQuery = ({
   const { selectedPatterns } = useSourcererDataView(
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
   );
+
   const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
   const responses: string[] = [
     response,
@@ -150,7 +139,13 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          <p>{formatIndexPatternRequested(inspectRequests[0]?.index ?? [])}</p>
+          <p>
+            {formatIndexPatternRequested(
+              adHocDataViews != null && adHocDataViews.length > 0
+                ? adHocDataViews
+                : inspectRequests[0]?.index ?? []
+            )}
+          </p>
 
           {!isSourcererPattern && (
             <p>
@@ -200,7 +195,11 @@ export const ModalInspectQuery = ({
       content: (
         <>
           <EuiSpacer />
-          <DescriptionListStyled listItems={statistics} type="column" />
+          <EuiDescriptionList
+            listItems={statistics}
+            type="responsiveColumn"
+            columnWidths={[3, 7]}
+          />
         </>
       ),
     },

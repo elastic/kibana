@@ -19,9 +19,9 @@ import {
   EuiSwitch,
   EuiTextAlign,
 } from '@elastic/eui';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
+import { useDataSource } from '../../../../contexts/ml/data_source_context';
 import { ModuleJobUI, SAVE_STATE } from '../page';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { useMlContext } from '../../../../contexts/ml';
 import {
   composeValidators,
   maxLengthValidator,
@@ -51,8 +51,9 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
   saveState,
   jobs,
 }) => {
-  const { from, to } = getTimeFilterRange();
-  const { currentDataView: dataView } = useMlContext();
+  const timefilter = useTimefilter();
+  const { from, to } = getTimeFilterRange(timefilter);
+  const { selectedDataView: dataView } = useDataSource();
 
   const jobPrefixValidator = useMemo(
     () =>
@@ -153,6 +154,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
               value={jobPrefix}
               onChange={({ target: { value } }) => setJobPrefix(value)}
               isInvalid={!!validationResult.jobPrefix}
+              data-test-subj="mlJobRecognizerWizardInputJobIdPrefix"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -180,8 +182,8 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.useFullDataLabel"
-                defaultMessage="Use full {indexPatternTitle} data"
-                values={{ indexPatternTitle: dataView.title }}
+                defaultMessage="Use full {dataViewIndexPattern} data"
+                values={{ dataViewIndexPattern: dataView.getIndexPattern() }}
               />
             }
             checked={useFullIndexData}
@@ -193,12 +195,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
         {!useFullIndexData && (
           <>
             <EuiSpacer size="m" />
-            <TimeRangePicker
-              setTimeRange={(value) => {
-                setTimeRange(value);
-              }}
-              timeRange={timeRange}
-            />
+            <TimeRangePicker setTimeRange={setTimeRange} timeRange={timeRange} />
           </>
         )}
         <EuiSpacer size="l" />
@@ -214,6 +211,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             />
           }
           paddingSize="l"
+          data-test-subj="mlJobWizardToggleAdvancedSection"
         >
           <EuiDescribedFormGroup
             title={
@@ -231,7 +229,10 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
               />
             }
           >
-            <EuiFormRow describedByIds={['ml_aria_label_new_job_dedicated_index']}>
+            <EuiFormRow
+              describedByIds={['ml_aria_label_new_job_dedicated_index']}
+              data-test-subj="mlJobWizardAdvancedSection"
+            >
               <EuiSwitch
                 id="useDedicatedIndex"
                 name="useDedicatedIndex"

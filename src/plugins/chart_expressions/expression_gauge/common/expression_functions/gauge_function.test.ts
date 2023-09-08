@@ -11,6 +11,7 @@ import { GaugeArguments, GaugeShapes } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import {
+  EXPRESSION_GAUGE_NAME,
   GaugeCentralMajorModes,
   GaugeColorModes,
   GaugeLabelMajorModes,
@@ -109,5 +110,24 @@ describe('interpreter/functions#gauge', () => {
     await fn(context, args, handlers);
 
     expect(loggedTable!).toMatchSnapshot();
+  });
+
+  it('should pass over overrides from variables', async () => {
+    const overrides = {
+      settings: {
+        onBrushEnd: 'ignore',
+      },
+    };
+    const handlers = {
+      variables: { overrides },
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext;
+    const result = await fn(context, args, handlers);
+
+    expect(result).toEqual({
+      type: 'render',
+      as: EXPRESSION_GAUGE_NAME,
+      value: expect.objectContaining({ overrides }),
+    });
   });
 });

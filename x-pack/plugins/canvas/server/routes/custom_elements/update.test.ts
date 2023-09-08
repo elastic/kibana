@@ -31,7 +31,9 @@ const mockRouteContext = {
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123abc'),
+}));
 
 type CustomElementPayload = CustomElement & {
   '@timestamp': string;
@@ -57,7 +59,8 @@ describe('PUT custom element', () => {
     const routerDeps = getMockedRouterDeps();
     initializeUpdateCustomElementRoute(routerDeps);
 
-    routeHandler = routerDeps.router.put.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.put.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterEach(() => {

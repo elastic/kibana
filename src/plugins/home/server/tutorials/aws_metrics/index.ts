@@ -60,6 +60,6 @@ export function awsMetricsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['aws', 'cloud', 'datastore', 'security', 'network'],
+    integrationBrowserCategories: ['aws', 'observability'],
   };
 }

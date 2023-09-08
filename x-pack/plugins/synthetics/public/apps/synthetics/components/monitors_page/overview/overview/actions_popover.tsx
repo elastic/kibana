@@ -6,16 +6,31 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow, EuiPanel } from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { useDispatch } from 'react-redux';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenu,
+  useEuiShadow,
+  EuiPanel,
+  EuiLoadingSpinner,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
-import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
+import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import {
+  manualTestMonitorAction,
+  manualTestRunInProgressSelector,
+} from '../../../../state/manual_test_runs';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import { useMonitorEnableHandler, useLocationName } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
-import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
-import { useLocationName } from '../../../../hooks';
+import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { NoPermissionsTooltip } from '../../../common/components/permissions';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -50,6 +65,7 @@ interface Props {
   position: PopoverPosition;
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
+  locationId: string;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -81,16 +97,20 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
+  locationId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const locationName = useLocationName({ locationId: monitor.location.id });
+  const location = useLocationName({ locationId });
+  const locationName = location?.label || monitor.location.id;
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: monitor.location.id,
+    locationId: locationId ?? monitor.location.id,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
+
+  const canEditSynthetics = useCanEditSynthetics();
 
   const labels = useMemo(
     () => ({
@@ -106,9 +126,13 @@ export function ActionsPopover({
     labels,
   });
 
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
+
   const [enableLabel, setEnableLabel] = useState(
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
   );
+
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -126,37 +150,88 @@ export function ActionsPopover({
     onClick: () => {
       if (locationName) {
         dispatch(
-          setFlyoutConfig({ configId: monitor.configId, location: locationName, id: monitor.id })
+          setFlyoutConfig({
+            configId: monitor.configId,
+            location: locationName,
+            id: monitor.id,
+            locationId: monitor.location.id,
+          })
         );
         setIsPopoverOpen(false);
       }
     },
   };
 
-  let popoverItems = [
+  const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
+
+  let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
       href: detailUrl,
     },
     quickInspectPopoverItem,
-    // not rendering this for now because the manual test flyout is
-    // still in the design phase
-    // {
-    //   name: 'Run test manually',
-    //   icon: 'beaker',
-    // },
     {
-      name: actionsMenuEditMonitorName,
+      name: runTestManually,
+      icon: 'beaker',
+      disabled: testInProgress,
+      onClick: () => {
+        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
+        dispatch(setFlyoutConfig(null));
+        setIsPopoverOpen(false);
+      },
+    },
+    {
+      name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {actionsMenuEditMonitorName}
+        </NoPermissionsTooltip>
+      ),
       icon: 'pencil',
+      disabled: !canEditSynthetics,
       href: editUrl,
     },
     {
-      name: enableLabel,
+      name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {enableLabel}
+        </NoPermissionsTooltip>
+      ),
       icon: 'invert',
+      disabled: !canEditSynthetics,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
+        }
+      },
+    },
+    {
+      name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
+        </NoPermissionsTooltip>
+      ),
+      disabled: !canEditSynthetics,
+      icon: alertLoading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : monitor.isStatusAlertEnabled ? (
+        'bellSlash'
+      ) : (
+        'bell'
+      ),
+      onClick: () => {
+        if (!alertLoading) {
+          updateAlertEnabledState({
+            monitor: {
+              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
+                status: {
+                  enabled: monitor.isStatusAlertEnabled,
+                },
+              }),
+            },
+            configId: monitor.configId,
+            name: monitor.name,
+          });
         }
       },
     },
@@ -169,12 +244,14 @@ export function ActionsPopover({
         button={
           <IconPanel hasPanel={iconHasPanel}>
             <EuiButtonIcon
+              data-test-subj="syntheticsActionsPopoverButton"
               aria-label={openActionsMenuAria}
               iconType="boxesHorizontal"
               color="primary"
               size={iconSize}
               display="empty"
               onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+              title={openActionsMenuAria}
             />
           </IconPanel>
         }
@@ -201,6 +278,10 @@ export function ActionsPopover({
 
 const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.quickInspect.title', {
   defaultMessage: 'Quick inspect',
+});
+
+const runTestManually = i18n.translate('xpack.synthetics.overview.actions.runTestManually.title', {
+  defaultMessage: 'Run test manually',
 });
 
 const openActionsMenuAria = i18n.translate(
@@ -245,14 +326,28 @@ const loadingLabel = (isEnabled: boolean) =>
 const enableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelEnableMonitor',
   {
-    defaultMessage: 'Enable monitor',
+    defaultMessage: 'Enable monitor (all locations)',
   }
 );
 
 const disableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
   {
-    defaultMessage: 'Disable monitor',
+    defaultMessage: 'Disable monitor (all locations)',
+  }
+);
+
+const disableAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.disableLabelDisableAlert',
+  {
+    defaultMessage: 'Disable status alerts (all locations)',
+  }
+);
+
+const enableMonitorAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.enableLabelDisableAlert',
+  {
+    defaultMessage: 'Enable status alerts (all locations)',
   }
 );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConfigKey } from '../components/monitors_page/overview/types';
@@ -42,7 +42,7 @@ export function useMonitorEnableHandler({
     (enabled: boolean) => {
       dispatch(
         fetchUpsertMonitorAction({
-          id: configId,
+          configId,
           monitor: { [ConfigKey.ENABLED]: enabled },
           success: {
             message: enabled ? labels.enabledSuccessLabel : labels.disabledSuccessLabel,

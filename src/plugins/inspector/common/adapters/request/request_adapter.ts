@@ -7,7 +7,7 @@
  */
 
 import { EventEmitter } from 'events';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { RequestResponder } from './request_responder';
 import { Request, RequestParams, RequestStatus } from './types';
 
@@ -47,7 +47,7 @@ export class RequestAdapter extends EventEmitter {
       name,
       startTime,
       status: RequestStatus.PENDING,
-      id: params.id ?? uuid(),
+      id: params.id ?? uuidv4(),
     };
     this.requests.set(req.id, req);
     this._onChange();

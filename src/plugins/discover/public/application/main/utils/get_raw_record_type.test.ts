@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RecordRawType } from '../hooks/use_saved_search';
+import { RecordRawType } from '../services/discover_data_state_container';
 import { getRawRecordType } from './get_raw_record_type';
 
 describe('getRawRecordType', () => {
@@ -15,8 +15,8 @@ describe('getRawRecordType', () => {
     expect(mode).toEqual(RecordRawType.DOCUMENT);
   });
 
-  it('returns sql for Query type query', () => {
-    const mode = getRawRecordType({ sql: 'SELECT * from foo' });
+  it('returns esql for Query type query', () => {
+    const mode = getRawRecordType({ esql: 'from foo' });
 
     expect(mode).toEqual(RecordRawType.PLAIN);
   });

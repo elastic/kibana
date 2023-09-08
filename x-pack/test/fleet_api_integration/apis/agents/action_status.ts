@@ -5,7 +5,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
+  AGENTS_INDEX,
+  AGENT_POLICY_INDEX,
+} from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -35,6 +40,10 @@ export default function (providerContext: FtrProviderContext) {
           index: AGENT_ACTIONS_INDEX,
           q: '*',
         });
+        await es.deleteByQuery({
+          index: AGENT_POLICY_INDEX,
+          q: '*',
+        });
         try {
           await es.deleteByQuery(
             {
@@ -57,7 +66,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent1', 'agent2', 'agent3'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
             start_time: '2022-09-15T10:00:00.000Z',
-            expiration: '2099-09-16T10:00:00.000Z',
             data: {
               version: '8.5.0',
             },
@@ -73,7 +81,6 @@ export default function (providerContext: FtrProviderContext) {
             agents: ['agent4', 'agent5'],
             '@timestamp': '2022-09-15T10:00:00.000Z',
             start_time: '2022-09-15T10:00:00.000Z',
-            expiration: '2099-09-16T10:00:00.000Z',
           },
         });
         // Action 3 complete
@@ -84,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action3',
             agents: ['agent1', 'agent2'],
-            '@timestamp': '2022-09-15T10:00:00.000Z',
+            '@timestamp': '2022-09-15T10:05:00.000Z',
             expiration: '2099-09-16T10:00:00.000Z',
           },
         });
@@ -121,7 +128,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UNENROLL',
             action_id: 'action4',
             agents: ['agent1', 'agent2', 'agent3'],
-            '@timestamp': '2022-09-15T10:00:00.000Z',
+            '@timestamp': '2022-09-15T10:10:00.000Z',
             expiration: '2022-09-14T10:00:00.000Z',
           },
         });
@@ -134,8 +141,8 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action5',
             agents: ['agent1', 'agent2', 'agent3'],
-            '@timestamp': '2022-09-15T10:00:00.000Z',
-            start_time: '2022-09-15T10:00:00.000Z',
+            '@timestamp': '2022-09-15T10:20:00.000Z',
+            start_time: '2022-09-15T10:20:00.000Z',
             expiration: '2099-09-16T10:00:00.000Z',
           },
         });
@@ -162,7 +169,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'POLICY_REASSIGN',
             action_id: 'action7',
             agents: ['agent1'],
-            '@timestamp': '2022-09-15T10:00:00.000Z',
+            '@timestamp': '2022-09-15T10:30:00.000Z',
             expiration: '2099-09-16T10:00:00.000Z',
             data: {
               policy_id: 'policy1',
@@ -182,58 +189,101 @@ export default function (providerContext: FtrProviderContext) {
           },
           ES_INDEX_OPTIONS
         );
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENT_POLICY_INDEX,
+          document: {
+            revision_idx: 2,
+            policy_id: 'policy3',
+            '@timestamp': '2023-03-15T13:00:00.000Z',
+          },
+        });
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENT_POLICY_INDEX,
+          document: {
+            revision_idx: 2,
+            policy_id: 'policy2',
+            '@timestamp': '2023-03-15T14:00:00.000Z',
+          },
+        });
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENT_POLICY_INDEX,
+          document: {
+            revision_idx: 3,
+            policy_id: 'policy2',
+            '@timestamp': '2023-03-15T15:00:00.000Z',
+          },
+        });
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          document: {
+            policy_revision_idx: 2,
+            policy_id: 'policy2',
+          },
+        });
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          document: {
+            policy_revision_idx: 3,
+            policy_id: 'policy2',
+          },
+        });
+        // unenrolled agent should be ignored
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          document: {
+            policy_revision_idx: 1,
+            policy_id: 'policy2',
+            unenrolled_at: '2023-03-15T10:00:00.000Z',
+          },
+        });
       });
       it('should respond 200 and the action statuses', async () => {
         const res = await supertest.get(`/api/fleet/agents/action_status`).expect(200);
         expect(res.body.items).to.eql([
           {
-            actionId: 'action2',
-            nbAgentsActionCreated: 5,
-            nbAgentsAck: 0,
-            version: '8.5.0',
-            startTime: '2022-09-15T10:00:00.000Z',
-            type: 'UPGRADE',
-            nbAgentsActioned: 5,
-            status: 'IN_PROGRESS',
-            expiration: '2099-09-16T10:00:00.000Z',
-            creationTime: '2022-09-15T10:00:00.000Z',
-            nbAgentsFailed: 0,
-          },
-          {
-            actionId: 'action3',
-            nbAgentsActionCreated: 2,
-            nbAgentsAck: 2,
-            type: 'UPGRADE',
+            actionId: 'policy2:3',
+            creationTime: '2023-03-15T15:00:00.000Z',
+            completionTime: '2023-03-15T15:00:00.000Z',
+            type: 'POLICY_CHANGE',
             nbAgentsActioned: 2,
+            nbAgentsAck: 1,
+            nbAgentsActionCreated: 2,
+            nbAgentsFailed: 0,
+            status: 'IN_PROGRESS',
+            policyId: 'policy2',
+            revision: 3,
+          },
+          {
+            actionId: 'policy2:2',
+            creationTime: '2023-03-15T14:00:00.000Z',
+            completionTime: '2023-03-15T14:00:00.000Z',
+            type: 'POLICY_CHANGE',
+            nbAgentsActioned: 2,
+            nbAgentsAck: 2,
+            nbAgentsActionCreated: 2,
+            nbAgentsFailed: 0,
             status: 'COMPLETE',
-            expiration: '2099-09-16T10:00:00.000Z',
-            creationTime: '2022-09-15T10:00:00.000Z',
-            nbAgentsFailed: 0,
-            completionTime: '2022-09-15T12:00:00.000Z',
+            policyId: 'policy2',
+            revision: 2,
           },
           {
-            actionId: 'action4',
-            nbAgentsActionCreated: 3,
+            actionId: 'policy3:2',
+            creationTime: '2023-03-15T13:00:00.000Z',
+            completionTime: '2023-03-15T13:00:00.000Z',
+            type: 'POLICY_CHANGE',
+            nbAgentsActioned: 0,
             nbAgentsAck: 0,
-            type: 'UNENROLL',
-            nbAgentsActioned: 3,
-            status: 'EXPIRED',
-            expiration: '2022-09-14T10:00:00.000Z',
-            creationTime: '2022-09-15T10:00:00.000Z',
+            nbAgentsActionCreated: 0,
             nbAgentsFailed: 0,
-          },
-          {
-            actionId: 'action5',
-            nbAgentsActionCreated: 3,
-            nbAgentsAck: 0,
-            startTime: '2022-09-15T10:00:00.000Z',
-            type: 'UPGRADE',
-            nbAgentsActioned: 3,
-            status: 'CANCELLED',
-            expiration: '2099-09-16T10:00:00.000Z',
-            creationTime: '2022-09-15T10:00:00.000Z',
-            nbAgentsFailed: 0,
-            cancellationTime: '2022-09-15T11:00:00.000Z',
+            status: 'COMPLETE',
+            policyId: 'policy3',
+            revision: 2,
           },
           {
             actionId: 'action7',
@@ -244,9 +294,74 @@ export default function (providerContext: FtrProviderContext) {
             status: 'FAILED',
             expiration: '2099-09-16T10:00:00.000Z',
             newPolicyId: 'policy1',
-            creationTime: '2022-09-15T10:00:00.000Z',
+            creationTime: '2022-09-15T10:30:00.000Z',
             nbAgentsFailed: 1,
+            hasRolloutPeriod: false,
             completionTime: '2022-09-15T11:00:00.000Z',
+            latestErrors: [
+              {
+                agentId: 'agent1',
+                error: 'agent already assigned',
+                timestamp: '2022-09-15T11:00:00.000Z',
+                hostname: 'agent1',
+              },
+            ],
+          },
+          {
+            actionId: 'action5',
+            nbAgentsActionCreated: 3,
+            nbAgentsAck: 0,
+            startTime: '2022-09-15T10:20:00.000Z',
+            type: 'UPGRADE',
+            nbAgentsActioned: 3,
+            status: 'CANCELLED',
+            expiration: '2099-09-16T10:00:00.000Z',
+            creationTime: '2022-09-15T10:20:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            cancellationTime: '2022-09-15T11:00:00.000Z',
+            latestErrors: [],
+          },
+          {
+            actionId: 'action4',
+            nbAgentsActionCreated: 3,
+            nbAgentsAck: 0,
+            type: 'UNENROLL',
+            nbAgentsActioned: 3,
+            status: 'EXPIRED',
+            expiration: '2022-09-14T10:00:00.000Z',
+            creationTime: '2022-09-15T10:10:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
+          },
+          {
+            actionId: 'action3',
+            nbAgentsActionCreated: 2,
+            nbAgentsAck: 2,
+            type: 'UPGRADE',
+            nbAgentsActioned: 2,
+            status: 'COMPLETE',
+            expiration: '2099-09-16T10:00:00.000Z',
+            creationTime: '2022-09-15T10:05:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            completionTime: '2022-09-15T12:00:00.000Z',
+            latestErrors: [],
+          },
+          {
+            actionId: 'action2',
+            nbAgentsActionCreated: 5,
+            nbAgentsAck: 0,
+            version: '8.5.0',
+            startTime: '2022-09-15T10:00:00.000Z',
+            type: 'UPGRADE',
+            nbAgentsActioned: 5,
+            status: 'IN_PROGRESS',
+            creationTime: '2022-09-15T10:00:00.000Z',
+            nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
           },
         ]);
       });

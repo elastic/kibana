@@ -7,7 +7,6 @@
 
 import { HeatmapStyle, RecursivePartial } from '@elastic/charts';
 import { EuiThemeComputed } from '@elastic/eui';
-import { CHART_CELL_WIDTH } from './monitor_status_data';
 
 export function getMonitorStatusChartTheme(
   euiTheme: EuiThemeComputed,
@@ -15,16 +14,11 @@ export function getMonitorStatusChartTheme(
 ): RecursivePartial<HeatmapStyle> {
   return {
     grid: {
-      cellHeight: {
-        min: 20,
-      },
       stroke: {
         width: 0,
         color: 'transparent',
       },
     },
-    maxRowHeight: 30,
-    maxColumnWidth: CHART_CELL_WIDTH,
     cell: {
       maxWidth: 'fill',
       maxHeight: 3,

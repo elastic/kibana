@@ -28,6 +28,7 @@ export async function mountManagementSection(
   const [core] = await coreSetup.getStartServices();
   const {
     chrome: { docTitle },
+    settings,
   } = core;
 
   docTitleService.setup(docTitle.change);
@@ -37,6 +38,8 @@ export async function mountManagementSection(
     core,
     config,
     services: {
+      uiSettings: coreSetup.uiSettings,
+      settings,
       httpService,
       uiMetricService: services.uiMetricService,
       i18n,

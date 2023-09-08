@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+require('@kbn/babel-register').install();
+
 const fs = require('fs');
 const path = require('path');
 const { pipeline } = require('stream');
@@ -53,7 +55,7 @@ run(
       execa.sync(
         process.execPath,
         [
-          '--preserve-symlinks',
+          '--openssl-legacy-provider',
           require.resolve('webpack-dev-server/bin/webpack-dev-server'),
           '--config',
           webpackConfig,
@@ -87,7 +89,7 @@ run(
     execa.sync(
       process.execPath,
       [
-        '--preserve-symlinks',
+        '--openssl-legacy-provider',
         require.resolve('webpack/bin/webpack'),
         '--config',
         webpackConfig,

@@ -425,6 +425,95 @@ Object {
         "type": "long",
       },
     },
+    "csv_v2": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "error_codes": Object {
+        "authentication_expired_error": Object {
+          "type": "long",
+        },
+        "kibana_shutting_down_error": Object {
+          "type": "long",
+        },
+        "queue_timeout_error": Object {
+          "type": "long",
+        },
+        "unknown_error": Object {
+          "type": "long",
+        },
+      },
+      "execution_times": Object {
+        "avg": Object {
+          "type": "float",
+        },
+        "max": Object {
+          "type": "long",
+        },
+        "min": Object {
+          "type": "long",
+        },
+      },
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+      },
+      "output_size": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
     "enabled": Object {
       "type": "boolean",
     },
@@ -758,6 +847,95 @@ Object {
         },
       },
       "csv_searchsource_immediate": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "error_codes": Object {
+          "authentication_expired_error": Object {
+            "type": "long",
+          },
+          "kibana_shutting_down_error": Object {
+            "type": "long",
+          },
+          "queue_timeout_error": Object {
+            "type": "long",
+          },
+          "unknown_error": Object {
+            "type": "long",
+          },
+        },
+        "execution_times": Object {
+          "avg": Object {
+            "type": "float",
+          },
+          "max": Object {
+            "type": "long",
+          },
+          "min": Object {
+            "type": "long",
+          },
+        },
+        "metrics": Object {
+          "csv_rows": Object {
+            "50.0": Object {
+              "type": "long",
+            },
+            "75.0": Object {
+              "type": "long",
+            },
+            "95.0": Object {
+              "type": "long",
+            },
+            "99.0": Object {
+              "type": "long",
+            },
+          },
+        },
+        "output_size": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "csv_v2": Object {
         "app": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -1247,6 +1425,20 @@ Object {
               "type": "long",
             },
           },
+          "csv_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "printable_pdf": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -1320,6 +1512,20 @@ Object {
             },
           },
           "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_v2": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -1419,6 +1625,20 @@ Object {
               "type": "long",
             },
           },
+          "csv_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "printable_pdf": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -1505,6 +1725,20 @@ Object {
               "type": "long",
             },
           },
+          "csv_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
           "printable_pdf": Object {
             "canvas workpad": Object {
               "type": "long",
@@ -1578,6 +1812,20 @@ Object {
             },
           },
           "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_v2": Object {
             "canvas workpad": Object {
               "type": "long",
             },
@@ -2023,6 +2271,20 @@ Object {
             "type": "long",
           },
         },
+        "csv_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "printable_pdf": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -2096,6 +2358,20 @@ Object {
           },
         },
         "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_v2": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -2195,6 +2471,20 @@ Object {
             "type": "long",
           },
         },
+        "csv_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "printable_pdf": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -2268,6 +2558,20 @@ Object {
           },
         },
         "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_v2": Object {
           "canvas workpad": Object {
             "type": "long",
           },
@@ -2367,6 +2671,20 @@ Object {
             "type": "long",
           },
         },
+        "csv_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
         "printable_pdf": Object {
           "canvas workpad": Object {
             "type": "long",
@@ -2404,43 +2722,6 @@ Object {
 
 exports[`data modeling usage data with meta.isDeprecated jobTypes 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": undefined,
-    "execution_times": undefined,
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 0,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -2511,7 +2792,7 @@ Object {
     },
     "total": 4,
   },
-  "csv_searchsource_immediate": Object {
+  "csv_v2": Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
@@ -2544,43 +2825,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -2650,7 +2894,7 @@ Object {
       },
       "total": 4,
     },
-    "csv_searchsource_immediate": Object {
+    "csv_v2": Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
@@ -2901,43 +3145,6 @@ Object {
 
 exports[`data modeling with empty data 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": undefined,
-    "execution_times": undefined,
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 0,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -3008,7 +3215,7 @@ Object {
     },
     "total": 0,
   },
-  "csv_searchsource_immediate": Object {
+  "csv_v2": Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
@@ -3041,43 +3248,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -3147,7 +3317,7 @@ Object {
       },
       "total": 0,
     },
-    "csv_searchsource_immediate": Object {
+    "csv_v2": Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
@@ -3386,43 +3556,6 @@ Object {
 
 exports[`data modeling with metrics and execution times in the data 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": undefined,
-    "execution_times": undefined,
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 0,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -3493,7 +3626,7 @@ Object {
     },
     "total": 0,
   },
-  "csv_searchsource_immediate": Object {
+  "csv_v2": Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
@@ -3526,43 +3659,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -3632,7 +3728,7 @@ Object {
       },
       "total": 0,
     },
-    "csv_searchsource_immediate": Object {
+    "csv_v2": Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
@@ -3905,43 +4001,6 @@ Object {
 
 exports[`data modeling with sparse data 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": Object {},
-    "execution_times": Object {},
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 1,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -4012,7 +4071,7 @@ Object {
     },
     "total": 1,
   },
-  "csv_searchsource_immediate": Object {
+  "csv_v2": Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
@@ -4045,43 +4104,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": Object {},
-      "execution_times": Object {},
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 1,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -4151,7 +4173,7 @@ Object {
       },
       "total": 1,
     },
-    "csv_searchsource_immediate": Object {
+    "csv_v2": Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,
@@ -4412,43 +4434,6 @@ Object {
 
 exports[`data modeling with usage data from the reporting/archived_reports es archive 1`] = `
 Object {
-  "PNG": Object {
-    "app": Object {
-      "canvas workpad": 0,
-      "dashboard": 0,
-      "search": 0,
-      "visualization": 0,
-    },
-    "available": true,
-    "deprecated": 0,
-    "error_codes": Object {},
-    "execution_times": Object {},
-    "layout": undefined,
-    "metrics": Object {
-      "png_cpu": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "png_memory": Object {
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-    },
-    "output_size": Object {
-      "1.0": null,
-      "25.0": null,
-      "5.0": null,
-      "50.0": null,
-      "75.0": null,
-      "95.0": null,
-      "99.0": null,
-    },
-    "total": 1,
-  },
   "PNGV2": Object {
     "app": Object {
       "canvas workpad": 0,
@@ -4519,7 +4504,7 @@ Object {
     },
     "total": 1,
   },
-  "csv_searchsource_immediate": Object {
+  "csv_v2": Object {
     "app": Object {
       "canvas workpad": 0,
       "dashboard": 0,
@@ -4552,43 +4537,6 @@ Object {
   },
   "enabled": true,
   "last7Days": Object {
-    "PNG": Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "error_codes": undefined,
-      "execution_times": undefined,
-      "layout": undefined,
-      "metrics": Object {
-        "png_cpu": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-        "png_memory": Object {
-          "50.0": null,
-          "75.0": null,
-          "95.0": null,
-          "99.0": null,
-        },
-      },
-      "output_size": Object {
-        "1.0": null,
-        "25.0": null,
-        "5.0": null,
-        "50.0": null,
-        "75.0": null,
-        "95.0": null,
-        "99.0": null,
-      },
-      "total": 0,
-    },
     "PNGV2": Object {
       "app": Object {
         "canvas workpad": 0,
@@ -4658,7 +4606,7 @@ Object {
       },
       "total": 0,
     },
-    "csv_searchsource_immediate": Object {
+    "csv_v2": Object {
       "app": Object {
         "canvas workpad": 0,
         "dashboard": 0,

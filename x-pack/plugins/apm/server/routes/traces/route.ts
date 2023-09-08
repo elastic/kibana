@@ -18,15 +18,24 @@ import {
 } from '../default_api_types';
 import { getTransaction } from '../transactions/get_transaction';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
-import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
-import { getTraceItems } from './get_trace_items';
-import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
+import {
+  getTopTracesPrimaryStats,
+  TopTracesPrimaryStatsResponse,
+} from './get_top_traces_primary_stats';
+import { getTraceItems, TraceItems } from './get_trace_items';
+import {
+  getTraceSamplesByQuery,
+  TraceSamplesResponse,
+} from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import {
   CriticalPathResponse,
   getAggregatedCriticalPath,
 } from './get_aggregated_critical_path';
+import { getSpan } from '../transactions/get_span';
+import { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { Span } from '../../../typings/es_schemas/ui/span';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -34,20 +43,7 @@ const tracesRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    items: Array<{
-      key: import('./get_top_traces_primary_stats').BucketKey;
-      serviceName: string;
-      transactionName: string;
-      averageResponseTime: number | null;
-      transactionsPerMinute: number;
-      transactionType: string;
-      impact: number;
-      agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
-    }>;
-  }> => {
+  handler: async (resources): Promise<TopTracesPrimaryStatsResponse> => {
     const {
       config,
       params,
@@ -88,27 +84,33 @@ const tracesByIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, t.type({ entryTransactionId: t.string })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    exceedsMax: boolean;
-    traceDocs: Array<
-      | import('./../../../typings/es_schemas/ui/transaction').Transaction
-      | import('./../../../typings/es_schemas/ui/span').Span
-    >;
-    errorDocs: Array<
-      import('./../../../typings/es_schemas/ui/apm_error').APMError
-    >;
-    linkedChildrenOfSpanCountBySpanId: Record<string, number>;
+    traceItems: TraceItems;
+    entryTransaction?: Transaction;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end } = params.query;
-    return getTraceItems(traceId, config, apmEventClient, start, end);
+    const { start, end, entryTransactionId } = params.query;
+    const [traceItems, entryTransaction] = await Promise.all([
+      getTraceItems(traceId, config, apmEventClient, start, end),
+      getTransaction({
+        transactionId: entryTransactionId,
+        traceId,
+        apmEventClient,
+        start,
+        end,
+      }),
+    ]);
+    return {
+      traceItems,
+      entryTransaction,
+    };
   },
 });
 
@@ -118,17 +120,24 @@ const rootTransactionByTraceIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    transaction: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+    transaction: Transaction;
   }> => {
-    const { params } = resources;
-    const { traceId } = params.path;
+    const {
+      params: {
+        path: { traceId },
+        query: { start, end },
+      },
+    } = resources;
+
     const apmEventClient = await getApmEventClient(resources);
-    return getRootTransactionByTraceId(traceId, apmEventClient);
+
+    return getRootTransactionByTraceId({ traceId, apmEventClient, start, end });
   },
 });
 
@@ -138,18 +147,29 @@ const transactionByIdRoute = createApmServerRoute({
     path: t.type({
       transactionId: t.string,
     }),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    transaction: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+    transaction: Transaction;
   }> => {
-    const { params } = resources;
-    const { transactionId } = params.path;
+    const {
+      params: {
+        path: { transactionId },
+        query: { start, end },
+      },
+    } = resources;
+
     const apmEventClient = await getApmEventClient(resources);
     return {
-      transaction: await getTransaction({ transactionId, apmEventClient }),
+      transaction: await getTransaction({
+        transactionId,
+        apmEventClient,
+        start,
+        end,
+      }),
     };
   },
 });
@@ -175,7 +195,7 @@ const findTracesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    traceSamples: Array<{ traceId: string; transactionId: string }>;
+    traceSamples: TraceSamplesResponse;
   }> => {
     const { start, end, environment, query, type } = resources.params.query;
 
@@ -232,6 +252,71 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
   },
 });
 
+const transactionFromTraceByIdRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+      transactionId: t.string,
+    }),
+    query: rangeRt,
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<Transaction> => {
+    const { params } = resources;
+    const {
+      path: { transactionId, traceId },
+      query: { start, end },
+    } = params;
+
+    const apmEventClient = await getApmEventClient(resources);
+    return await getTransaction({
+      transactionId,
+      traceId,
+      apmEventClient,
+      start,
+      end,
+    });
+  },
+});
+
+const spanFromTraceByIdRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/spans/{spanId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+      spanId: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.union([t.partial({ parentTransactionId: t.string }), t.undefined]),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    span?: Span;
+    parentTransaction?: Transaction;
+  }> => {
+    const { params } = resources;
+    const {
+      path: { spanId, traceId },
+      query: { start, end, parentTransactionId },
+    } = params;
+
+    const apmEventClient = await getApmEventClient(resources);
+    return await getSpan({
+      spanId,
+      parentTransactionId,
+      traceId,
+      apmEventClient,
+      start,
+      end,
+    });
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...tracesRoute,
@@ -239,4 +324,6 @@ export const traceRouteRepository = {
   ...transactionByIdRoute,
   ...findTracesRoute,
   ...aggregatedCriticalPathRoute,
+  ...transactionFromTraceByIdRoute,
+  ...spanFromTraceByIdRoute,
 };

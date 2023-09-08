@@ -9,7 +9,7 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
@@ -88,7 +88,8 @@ export const RuleSwitchComponent = ({
         ) : (
           <StaticSwitch
             data-test-subj="ruleSwitch"
-            label={undefined}
+            showLabel={false}
+            label=""
             disabled={isDisabled}
             checked={enabled}
             onChange={onRuleStateChange}

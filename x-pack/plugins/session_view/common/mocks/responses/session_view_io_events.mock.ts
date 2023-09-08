@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessEventResults } from '../../types/process_tree';
+import type { ProcessEventResults } from '../..';
 
 export const sessionViewIOEventsMock: ProcessEventResults = {
   events: [

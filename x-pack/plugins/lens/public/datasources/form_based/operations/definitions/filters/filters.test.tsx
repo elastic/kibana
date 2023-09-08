@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -25,7 +25,6 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
@@ -234,7 +233,7 @@ describe('filters', () => {
           filters: [
             {
               input: {
-                query: 'bytes : *',
+                query: '"bytes" : *',
                 language: 'kuery',
               },
               label: '',
@@ -273,14 +272,14 @@ describe('filters', () => {
           filters: [
             {
               input: {
-                query: 'bytes : *',
+                query: '"bytes" : *',
                 language: 'kuery',
               },
               label: '',
             },
             {
               input: {
-                query: 'dest : *',
+                query: '"dest" : *',
                 language: 'kuery',
               },
               label: '',
@@ -293,7 +292,7 @@ describe('filters', () => {
 
   describe('popover param editor', () => {
     // @ts-expect-error
-    window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
     jest.mock('@kbn/unified-search-plugin/public', () => ({
       QueryStringInput: () => {
         return 'QueryStringInput';

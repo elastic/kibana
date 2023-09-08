@@ -45,7 +45,7 @@ export const useListExceptionItems = ({
 
   const [exceptions, setExceptions] = useState<ExceptionListItemSchema[]>([]);
   const [exceptionListReferences, setExceptionListReferences] = useState<RuleReferences>({});
-  const [pagination, setPagination] = useState<Pagination>({
+  const [pagination, setPagination] = useState<Pagination & { pageSize: number }>({
     pageIndex: 0,
     pageSize: 0,
     totalItemCount: 0,
@@ -66,7 +66,7 @@ export const useListExceptionItems = ({
 
   const getReferences = useCallback(async () => {
     try {
-      const result: RuleReferences = await getExceptionItemsReferences(list);
+      const result: RuleReferences = await getExceptionItemsReferences([list]);
       setExceptionListReferences(result);
     } catch (error) {
       handleErrorStatus(error);

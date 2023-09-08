@@ -26,6 +26,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_misc_console_behavior'));
       loadTestFile(require.resolve('./_context_menu'));
       loadTestFile(require.resolve('./_text_input'));
+      loadTestFile(require.resolve('./_settings'));
     }
   });
 }

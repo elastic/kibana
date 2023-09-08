@@ -17,7 +17,7 @@ import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../../common/types';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/lib/kibana');
 

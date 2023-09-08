@@ -6,7 +6,7 @@
  */
 
 import {
-  fetchConnectors,
+  getSupportedActionConnectors,
   getCaseConfigure,
   postCaseConfigure,
   patchCaseConfigure,
@@ -17,7 +17,7 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';
@@ -37,7 +37,7 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await fetchConnectors({ signal: abortCtrl.signal });
+      await getSupportedActionConnectors({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure/connectors/_find', {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -45,7 +45,7 @@ describe('Case Configuration API', () => {
     });
 
     test('happy path', async () => {
-      const resp = await fetchConnectors({ signal: abortCtrl.signal });
+      const resp = await getSupportedActionConnectors({ signal: abortCtrl.signal });
       expect(resp).toEqual(connectorsMock);
     });
   });

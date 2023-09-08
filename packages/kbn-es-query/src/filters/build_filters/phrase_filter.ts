@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 import type { DataViewFieldBase, DataViewBase } from '../../es_query';
@@ -14,10 +15,12 @@ import { hasRangeKeys } from './range_filter';
 
 export type PhraseFilterValue = string | number | boolean;
 
+export interface PhraseFilterMetaParams extends SerializableRecord {
+  query: PhraseFilterValue; // The unformatted value
+}
+
 export type PhraseFilterMeta = FilterMeta & {
-  params?: {
-    query: PhraseFilterValue; // The unformatted value
-  };
+  params?: PhraseFilterMetaParams;
   field?: string;
   index?: string;
 };
@@ -148,7 +151,7 @@ export const buildInlineScriptForPhraseFilter = (scriptedField: DataViewFieldBas
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
     return (
-      `boolean compare(Supplier s, def v) {return s.get() == v;}` +
+      `boolean compare(Supplier s, def v) {if(s.get() instanceof List){List list = s.get(); for(def k : list){if(k==v){return true;}}return false;}else{return s.get() == v;}}` +
       `compare(() -> { ${scriptedField.script} }, params.value);`
     );
   } else {

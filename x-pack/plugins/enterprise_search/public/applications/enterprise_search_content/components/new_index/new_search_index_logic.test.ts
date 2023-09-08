@@ -16,6 +16,9 @@ import { flashIndexCreatedToast } from './new_index_created_toast';
 import { NewSearchIndexLogic, NewSearchIndexValues } from './new_search_index_logic';
 
 jest.mock('./new_index_created_toast', () => ({ flashIndexCreatedToast: jest.fn() }));
+jest.mock('../../../shared/kibana/kibana_logic', () => ({
+  KibanaLogic: { values: { productAccess: { hasAppSearchAccess: true } } },
+}));
 
 const DEFAULT_VALUES: NewSearchIndexValues = {
   data: undefined as any,
@@ -35,14 +38,12 @@ describe('NewSearchIndexLogic', () => {
   });
 
   it('has expected default values', () => {
-    mount();
     expect(NewSearchIndexLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
     describe('setLanguageSelectValue', () => {
       it('sets language to the provided value', () => {
-        mount();
         NewSearchIndexLogic.actions.setLanguageSelectValue('en');
         expect(NewSearchIndexLogic.values).toEqual({
           ...DEFAULT_VALUES,

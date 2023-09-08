@@ -7,14 +7,15 @@
 
 import { mount } from 'enzyme';
 import { AlertContextMenu } from './alert_context_menu';
-import { TableId, TimelineId } from '../../../../../common/types';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelines } from '../../../../common/mock/mock_timelines_plugin';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -56,30 +57,36 @@ const props = {
   timelineId: 'alerts-page',
 };
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-  }),
-  useKibana: () => ({
-    services: {
-      timelines: { ...mockTimelines },
-      application: {
-        capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+    useKibana: () => ({
+      services: {
+        timelines: { ...mockTimelines },
+        application: {
+          capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+        },
+        cases: mockCasesContract(),
       },
-      cases: mockCasesContract(),
-    },
-  }),
-  useGetUserCasesPermissions: jest.fn().mockReturnValue({
-    all: true,
-    create: true,
-    read: true,
-    update: true,
-    delete: true,
-    push: true,
-  }),
-}));
+    }),
+    useGetUserCasesPermissions: jest.fn().mockReturnValue({
+      all: true,
+      create: true,
+      read: true,
+      update: true,
+      delete: true,
+      push: true,
+    }),
+  };
+});
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
@@ -93,6 +100,7 @@ const markAsAcknowledgedButton = '[data-test-subj="acknowledged-alert-status"]';
 const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
 const openAlertDetailsPageButton = '[data-test-subj="open-alert-details-page-menu-item"]';
+const applyAlertTagsButton = '[data-test-subj="alert-tags-context-menu-item"]';
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
@@ -281,7 +289,7 @@ describe('Alert table context menu', () => {
     });
   });
 
-  describe('Open  alert details action', () => {
+  describe('Open alert details action', () => {
     test('it does not render the open alert details page action if kibana.alert.rule.uuid is not set', () => {
       const nonAlertProps = {
         ...props,
@@ -316,6 +324,18 @@ describe('Alert table context menu', () => {
       wrapper.find(actionMenuButton).simulate('click');
 
       expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(true);
+    });
+  });
+
+  describe('Apply alert tags action', () => {
+    test('it renders the apply alert tags action button', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
+      });
+
+      wrapper.find(actionMenuButton).simulate('click');
+
+      expect(wrapper.find(applyAlertTagsButton).first().exists()).toEqual(true);
     });
   });
 });

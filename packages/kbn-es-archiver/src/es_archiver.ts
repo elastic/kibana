@@ -11,7 +11,7 @@ import Path from 'path';
 
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
 
 import {
@@ -154,14 +154,12 @@ export class EsArchiver {
   }
 
   /**
-   * Delete any Kibana indices, and initialize the Kibana index as Kibana would do
-   * on startup.
+   * Cleanup saved object indices, preserving the space:default saved object.
    */
   async emptyKibanaIndex() {
     return await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
-      kbnClient: this.kbnClient,
     });
   }
 

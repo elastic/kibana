@@ -1,0 +1,73 @@
+{
+  "id": "@kbn/deeplinks-ml",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-ml",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"ml\""
+        ],
+        "path": "packages/deeplinks/ml/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-ml",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"ml\" | \"ml:nodes\" | \"ml:notifications\" | \"ml:overview\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:singleMetricViewer\" | \"ml:dataComparison\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysis\" | \"ml:logPatternAnalysis\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:memoryUsage\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\""
+        ],
+        "path": "packages/deeplinks/ml/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-ml",
+        "id": "def-common.LinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "LinkId",
+        "description": [],
+        "signature": [
+          "\"nodes\" | \"notifications\" | \"overview\" | \"settings\" | \"dataVisualizer\" | \"anomalyDetection\" | \"anomalyExplorer\" | \"singleMetricViewer\" | \"dataComparison\" | \"dataFrameAnalytics\" | \"resultExplorer\" | \"analyticsMap\" | \"aiOps\" | \"logRateAnalysis\" | \"logPatternAnalysis\" | \"changePointDetections\" | \"modelManagement\" | \"nodesOverview\" | \"memoryUsage\" | \"fileUpload\" | \"indexDataVisualizer\" | \"calendarSettings\" | \"filterListsSettings\""
+        ],
+        "path": "packages/deeplinks/ml/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

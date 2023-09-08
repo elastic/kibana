@@ -41,7 +41,7 @@ export function _downloadSingle(settings, logger, sourceUrl) {
     _checkFilePathDeprecation(sourceUrl, logger);
     downloadPromise = downloadLocalFile(
       logger,
-      _getFilePath(urlInfo.path, sourceUrl),
+      _getFilePath(urlInfo.path),
       settings.tempArchiveFile
     );
   } else if (/^https?/.test(urlInfo.protocol)) {

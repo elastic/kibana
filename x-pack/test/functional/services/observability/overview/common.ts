@@ -13,6 +13,11 @@ const DATE_WITH_DATA = {
   rangeTo: '2021-10-20T13:36:22.109Z',
 };
 
+const DATE_WITHOUT_DATA = {
+  rangeFrom: '2021-09-18T13:36:22.109Z',
+  rangeTo: '2021-09-20T13:36:22.109Z',
+};
+
 const ALERTS_TITLE = 'Alerts';
 const ALERTS_ACCORDION_SELECTOR = `accordion-${ALERTS_TITLE}`;
 const ALERTS_SECTION_BUTTON_CSS_SELECTOR = `[data-test-subj=${ALERTS_ACCORDION_SELECTOR}] button.euiAccordion__button`;
@@ -34,6 +39,15 @@ export function ObservabilityOverviewCommonProvider({
       'observability',
       '/overview',
       `?rangeFrom=${DATE_WITH_DATA.rangeFrom}&rangeTo=${DATE_WITH_DATA.rangeTo}`,
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToOverviewPageWithoutAlerts = async () => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      '/overview',
+      `?rangeFrom=${DATE_WITHOUT_DATA.rangeFrom}&rangeTo=${DATE_WITHOUT_DATA.rangeTo}`,
       { ensureCurrentUrl: false }
     );
   };
@@ -81,6 +95,7 @@ export function ObservabilityOverviewCommonProvider({
   return {
     getAlertsTableNoDataOrFail,
     navigateToOverviewPageWithAlerts,
+    navigateToOverviewPageWithoutAlerts,
     navigateToOverviewPage,
     openAlertsSectionAndWaitToAppear,
   };

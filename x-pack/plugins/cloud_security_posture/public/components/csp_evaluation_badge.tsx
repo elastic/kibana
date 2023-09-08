@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiBadge, type EuiBadgeProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { statusColors } from '../common/constants';
 
 interface Props {
   type: 'passed' | 'failed';
@@ -15,18 +17,22 @@ interface Props {
 
 // 'fail' / 'pass' are same chars length, but not same width size.
 // 46px is used to make sure the badge is always the same width.
-const BADGE_WIDTH = 46;
+const BADGE_WIDTH = '46px';
 
 const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
-  if (type === 'passed') return 'success';
-  if (type === 'failed') return 'danger';
+  if (type === 'passed') return statusColors.passed;
+  if (type === 'failed') return statusColors.failed;
   return 'default';
 };
 
 export const CspEvaluationBadge = ({ type }: Props) => (
   <EuiBadge
     color={getColor(type)}
-    style={{ width: BADGE_WIDTH, textAlign: 'center' }}
+    css={css`
+      width: ${BADGE_WIDTH};
+      display: flex;
+      justify-content: center;
+    `}
     data-test-subj={`${type}_finding`}
   >
     {type === 'failed' ? (

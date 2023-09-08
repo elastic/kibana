@@ -1,0 +1,158 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "task:e9c069d0-eea4-11ea-a285-352ee3aecffa",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{\"alertId\":\"6ee9630a-a20e-44af-9465-217a3717d2ab\",\"spaceId\":\"space1\"}",
+        "retryAt": null,
+        "runAt": "2020-09-04T11:51:05.197Z",
+        "scheduledAt": "2020-09-04T11:51:05.197Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": null,
+        "state": "{\"previousStartedAt\":null,\"alertTypeState\":{},\"alertInstances\":{}}",
+        "status": "idle",
+        "taskType": "alerting:test.always-firing"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:05.197Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:e39a02f0-eea4-11ea-a285-352ee3aecffa",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "ownerId": null,
+        "params": "{\"alertId\":\"b384be60-ec53-4b26-857e-0253ee55b277\",\"spaceId\":\"space1\"}",
+        "retryAt": null,
+        "runAt": "2020-09-04T11:51:04.804Z",
+        "scheduledAt": "2020-09-04T11:50:54.879Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": null,
+        "state": "{\"previousStartedAt\":null,\"alertTypeState\":{},\"alertInstances\":{}}",
+        "status": "idle",
+        "taskType": "alerting:test.always-firing"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:04.273Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:e8885f00-eea4-11ea-a285-352ee3aecffa",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 1,
+        "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
+        "params": "{\"alertId\":\"5cc59319-74ee-4edc-8646-a79ea91067cd\",\"spaceId\":\"space1\"}",
+        "retryAt": "2020-09-04T12:01:05.793Z",
+        "runAt": "2020-09-04T11:51:03.152Z",
+        "scheduledAt": "2020-09-04T11:51:03.152Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": "2020-09-04T11:51:05.793Z",
+        "state": "{\"previousStartedAt\":null,\"alertTypeState\":{},\"alertInstances\":{}}",
+        "status": "running",
+        "taskType": "alerting:test.always-firing"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:05.794Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:e616c2c0-eea4-11ea-a285-352ee3aecffa",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 1,
+        "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
+        "params": "{\"alertId\":\"d41a6abb-b93b-46df-a80a-926221ea847c\",\"spaceId\":\"space1\"}",
+        "retryAt": "2020-09-04T12:01:05.793Z",
+        "runAt": "2020-09-04T11:51:04.804Z",
+        "scheduledAt": "2020-09-04T11:50:59.052Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": "2020-09-04T11:51:05.793Z",
+        "state": "{\"previousStartedAt\":null,\"alertTypeState\":{},\"alertInstances\":{}}",
+        "status": "idle",
+        "taskType": "alerting:test.always-firing"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:05.794Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:e4df5430-eea4-11ea-a285-352ee3aecffa",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "7.6.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 1,
+        "ownerId": "kibana:5b2de169-2785-441b-ae8c-186a1936b17d",
+        "params": "{\"alertId\":\"362e362b-a137-4aa2-9434-43e3d0d84a34\",\"spaceId\":\"space1\"}",
+        "retryAt": "2020-09-04T12:01:05.793Z",
+        "runAt": "2020-09-04T11:51:04.804Z",
+        "scheduledAt": "2020-09-04T11:50:57.011Z",
+        "scope": [
+          "alerting"
+        ],
+        "startedAt": "2020-09-04T11:51:05.793Z",
+        "state": "{\"previousStartedAt\":null,\"alertTypeState\":{},\"alertInstances\":{}}",
+        "status": "running",
+        "taskType": "alerting:test.always-firing"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:05.794Z"
+    }
+  }
+}

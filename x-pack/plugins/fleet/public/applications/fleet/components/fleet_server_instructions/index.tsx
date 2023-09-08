@@ -38,20 +38,20 @@ interface Props {
   onClose: () => void;
 }
 
-const useFleetServerTabs = () => {
+const useFleetServerTabs = (onClose: () => void) => {
   const [currentTab, setCurrentTab] = useState('quickStart');
 
   const quickStartTab = {
     id: 'quickStart',
     label: 'Quick Start',
-    content: <QuickStartTab />,
+    content: <QuickStartTab onClose={onClose} />,
     'data-test-subj': 'fleetServerFlyoutTab-quickStart',
   };
 
   const advancedTab = {
     id: 'advanced',
     label: 'Advanced',
-    content: <AdvancedTab />,
+    content: <AdvancedTab onClose={onClose} />,
     'data-test-subj': 'fleetServerFlyoutTab-advanced',
   };
 
@@ -119,7 +119,7 @@ const Header: React.FunctionComponent<{
 
 // Renders instructions inside of a flyout
 export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
-  const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs();
+  const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(onClose);
 
   return (
     <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} size="m">

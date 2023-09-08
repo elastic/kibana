@@ -10,11 +10,11 @@ import https from 'https';
 import getPort from 'get-port';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   getWebhookServer,
   getHttpsWebhookServer,
-} from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '@kbn/actions-simulators-plugin/server/plugin';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createTlsWebhookServer } from '../../../../../common/lib/get_tls_webhook_servers';
 
 // eslint-disable-next-line import/no-default-export

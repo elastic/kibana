@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
-import { CoreSetup } from '@kbn/core/public';
+import { CoreSetup, CoreTheme } from '@kbn/core/public';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
@@ -18,7 +18,7 @@ export class ThemeService {
   public readonly chartsDefaultTheme = EUI_CHARTS_THEME_LIGHT.theme;
   public readonly chartsDefaultBaseTheme = LIGHT_THEME;
 
-  private _uiSettingsDarkMode$?: Observable<boolean>;
+  private theme$?: Observable<CoreTheme>;
   private _chartsTheme$ = new BehaviorSubject(this.chartsDefaultTheme);
   private _chartsBaseTheme$ = new BehaviorSubject(this.chartsDefaultBaseTheme);
 
@@ -29,12 +29,12 @@ export class ThemeService {
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
 
   /** An observable boolean for dark mode of kibana */
-  public get darkModeEnabled$(): Observable<boolean> {
-    if (!this._uiSettingsDarkMode$) {
+  public get darkModeEnabled$(): Observable<CoreTheme> {
+    if (!this.theme$) {
       throw new Error('ThemeService not initialized');
     }
 
-    return this._uiSettingsDarkMode$;
+    return this.theme$;
   }
 
   /** A React hook for consuming the dark mode value */
@@ -42,7 +42,9 @@ export class ThemeService {
     const [value, update] = useState(false);
 
     useEffect(() => {
-      const s = this.darkModeEnabled$.subscribe(update);
+      const s = this.darkModeEnabled$.subscribe((val) => {
+        update(val.darkMode);
+      });
       return () => s.unsubscribe();
     }, []);
 
@@ -86,11 +88,11 @@ export class ThemeService {
   };
 
   /** initialize service with uiSettings */
-  public init(uiSettings: CoreSetup['uiSettings']) {
-    this._uiSettingsDarkMode$ = uiSettings.get$<boolean>('theme:darkMode');
-    this._uiSettingsDarkMode$.subscribe((darkMode) => {
-      const theme = darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
-      this._chartsTheme$.next(theme);
+  public init(theme: CoreSetup['theme']) {
+    this.theme$ = theme.theme$;
+    this.theme$.subscribe(({ darkMode }) => {
+      const selectedTheme = darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+      this._chartsTheme$.next(selectedTheme);
       this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
     });
   }

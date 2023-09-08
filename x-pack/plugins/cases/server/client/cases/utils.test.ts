@@ -10,7 +10,6 @@ import {
   userActions,
   commentAlert,
   commentAlertMultipleIds,
-  mappings,
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
@@ -29,12 +28,12 @@ import {
   formatComments,
   addKibanaInformationToDescription,
 } from './utils';
-import { Actions, CaseStatuses } from '../../../common/api';
+import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
-import { mockCases } from '../../mocks';
+import { mappings, mockCases } from '../../mocks';
 
 const allComments = [
   commentObj,
@@ -86,9 +85,10 @@ describe('utils', () => {
       },
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
 
-    it('creates an external incident', async () => {
+    it('creates an external incident correctly for Jira', async () => {
       const res = await createIncident({
         theCase,
         userActions: [],
@@ -108,6 +108,155 @@ describe('utils', () => {
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
           externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for SN', async () => {
+      const snConnector = {
+        ...connector,
+        actionTypeId: '.servicenow',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: snConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          category: null,
+          subcategory: null,
+          correlation_display: 'Elastic Case',
+          correlation_id: 'mock-id-1',
+          impact: null,
+          severity: null,
+          urgency: null,
+          short_description: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for SIR', async () => {
+      const snConnector = {
+        ...connector,
+        actionTypeId: '.servicenow-sir',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: snConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          category: null,
+          subcategory: null,
+          correlation_display: 'Elastic Case',
+          correlation_id: 'mock-id-1',
+          dest_ip: [],
+          source_ip: [],
+          malware_hash: [],
+          malware_url: [],
+          priority: null,
+          short_description: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for IBM Resilient', async () => {
+      const resilientConnector = {
+        ...connector,
+        actionTypeId: '.resilient',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: resilientConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          incidentTypes: null,
+          severityCode: null,
+          name: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for Swimlane', async () => {
+      const swimlaneConnector = {
+        ...connector,
+        actionTypeId: '.swimlane',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: swimlaneConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          caseId: 'mock-id-1',
+          caseName: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for Cases webhook', async () => {
+      const webhookConnector = {
+        ...connector,
+        actionTypeId: '.cases-webhook',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: webhookConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          externalId: null,
+          description: 'This is a brand new case of a bad meanie defacing data',
+          tags: ['defacement'],
+          title: 'Super Bad Security Issue',
         },
         comments: [],
       });
@@ -830,7 +979,7 @@ describe('utils', () => {
         ...userActions.slice(0, 3),
         {
           type: 'pushed',
-          action: Actions.push_to_service,
+          action: UserActionActions.push_to_service,
           created_at: '2021-02-03T17:45:29.400Z',
           created_by: {
             email: 'elastic@elastic.co',

@@ -61,7 +61,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiIconTip
                   content={i18n.translate('xpack.fleet.settings.outputsTable.managedTooltip', {
-                    defaultMessage: 'This outputs is managed outside of Fleet.',
+                    defaultMessage: 'This output is managed outside of Fleet.',
                   })}
                   type="lock"
                   size="m"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UrlFilter } from '@kbn/observability-plugin/public';
+import { UrlFilter } from '@kbn/exploratory-view-plugin/public';
 import { TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
 import { UrlParams } from '../../context/url_params_context/types';
 import {

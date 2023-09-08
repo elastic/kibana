@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
+import { useCallback, useMemo } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
+import type { AlertTableContextMenuItem } from '../types';
 
 interface UseExceptionActionProps {
   isEndpointAlert: boolean;
@@ -34,28 +36,25 @@ export const useExceptionActions = ({
   const disabledAddEndpointException = !canUserCRUD || !hasIndexWrite || !isEndpointAlert;
   const disabledAddException = !canUserCRUD || !hasIndexWrite;
 
-  const exceptionActionItems = useMemo(
+  const exceptionActionItems: AlertTableContextMenuItem[] = useMemo(
     () =>
       disabledAddException
         ? []
         : [
-            <EuiContextMenuItem
-              key="add-endpoint-exception-menu-item"
-              data-test-subj="add-endpoint-exception-menu-item"
-              disabled={disabledAddEndpointException}
-              onClick={handleEndpointExceptionModal}
-            >
-              {ACTION_ADD_ENDPOINT_EXCEPTION}
-            </EuiContextMenuItem>,
-
-            <EuiContextMenuItem
-              key="add-exception-menu-item"
-              data-test-subj="add-exception-menu-item"
-              disabled={disabledAddException}
-              onClick={handleDetectionExceptionModal}
-            >
-              {ACTION_ADD_EXCEPTION}
-            </EuiContextMenuItem>,
+            {
+              key: 'add-endpoint-exception-menu-item',
+              'data-test-subj': 'add-endpoint-exception-menu-item',
+              disabled: disabledAddEndpointException,
+              onClick: handleEndpointExceptionModal,
+              name: ACTION_ADD_ENDPOINT_EXCEPTION,
+            },
+            {
+              key: 'add-exception-menu-item',
+              'data-test-subj': 'add-exception-menu-item',
+              disabled: disabledAddException,
+              onClick: handleDetectionExceptionModal,
+              name: ACTION_ADD_EXCEPTION,
+            },
           ],
     [
       disabledAddEndpointException,
@@ -65,5 +64,35 @@ export const useExceptionActions = ({
     ]
   );
 
+  return { exceptionActionItems };
+};
+
+export const useAlertExceptionActions = ({
+  isEndpointAlert,
+  onAddExceptionTypeClick,
+}: UseExceptionActionProps) => {
+  const { exceptionActionItems } = useExceptionActions({
+    isEndpointAlert,
+    onAddExceptionTypeClick,
+  });
+
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
+  const canReadEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
+
+  const canWriteEndpointExceptions = useMemo(
+    () => !listsConfigLoading && !needsListsConfiguration && canReadEndpointExceptions,
+    [canReadEndpointExceptions, listsConfigLoading, needsListsConfiguration]
+  );
+  // Endpoint exceptions are available for:
+  // Serverless Endpoint Essentials/Complete PLI and
+  // on ESS Security Kibana sub-feature Endpoint Exceptions (enabled when Security feature is enabled)
+  if (!canWriteEndpointExceptions) {
+    return {
+      exceptionActionItems: exceptionActionItems.map((item) => {
+        return { ...item, disabled: item.name === ACTION_ADD_ENDPOINT_EXCEPTION };
+      }),
+    };
+  }
   return { exceptionActionItems };
 };

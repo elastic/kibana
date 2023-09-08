@@ -13,6 +13,7 @@ import {
   Position,
   ScaleType,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import {
@@ -28,6 +29,10 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 type ErrorDistributionAPIResponse =
@@ -35,7 +40,7 @@ type ErrorDistributionAPIResponse =
 
 interface Props {
   fetchStatus: FETCH_STATUS;
-  distribution: ErrorDistributionAPIResponse;
+  distribution?: ErrorDistributionAPIResponse;
   title: React.ReactNode;
 }
 
@@ -47,19 +52,22 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { comparisonEnabled } = urlParams;
 
   const previousPeriodLabel = usePreviousPeriodLabel();
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.ERROR_OCCURRENCES
+  );
   const timeseries = [
     {
-      data: distribution.currentPeriod,
-      color: theme.eui.euiColorVis1,
+      data: distribution?.currentPeriod ?? [],
+      color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
-        defaultMessage: 'Occurrences',
+        defaultMessage: 'Error occurrences',
       }),
     },
     ...(comparisonEnabled
       ? [
           {
-            data: distribution.previousPeriod,
-            color: theme.eui.euiColorMediumShade,
+            data: distribution?.previousPeriod ?? [],
+            color: previousPeriodColor,
             title: previousPeriodLabel,
           },
         ]
@@ -87,9 +95,9 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
         id="errorDistribution"
       >
         <Chart>
+          <Tooltip stickTo="top" />
           <Settings
             xDomain={{ min, max }}
-            tooltip={{ stickTo: 'top' }}
             showLegend
             showLegendExtra
             legendPosition={Position.Bottom}

@@ -10,7 +10,7 @@ import type { Duration } from 'moment';
 import path from 'path';
 
 import type { Type, TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { AppenderConfigType, Logger } from '@kbn/core/server';
 import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -204,6 +204,7 @@ export const ConfigSchema = schema.object({
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
   showInsecureClusterWarning: schema.boolean({ defaultValue: true }),
   loginHelp: schema.maybe(schema.string()),
+  showNavLinks: schema.boolean({ defaultValue: true }),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
@@ -213,7 +214,7 @@ export const ConfigSchema = schema.object({
   ),
   session: schema.object({
     idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], {
-      defaultValue: schema.duration().validate('8h'),
+      defaultValue: schema.duration().validate('3d'),
     }),
     lifespan: schema.oneOf([schema.duration(), schema.literal(null)], {
       defaultValue: schema.duration().validate('30d'),
@@ -226,6 +227,11 @@ export const ConfigSchema = schema.object({
         }
       },
     }),
+    concurrentSessions: schema.maybe(
+      schema.object({
+        maxSessions: schema.number({ min: 1, max: 1000 }),
+      })
+    ),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(
@@ -273,6 +279,11 @@ export const ConfigSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       autoSchemesEnabled: schema.boolean({ defaultValue: true }),
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey', 'bearer'] }),
+      jwt: offeringBasedSchema({
+        serverless: schema.object({
+          taggedRoutesOnly: schema.boolean({ defaultValue: true }),
+        }),
+      }),
     }),
   }),
   audit: schema.object({
@@ -289,6 +300,16 @@ export const ConfigSchema = schema.object({
         })
       )
     ),
+  }),
+  enabled: schema.boolean({ defaultValue: true }),
+
+  // Setting only allowed in the Serverless offering
+  ui: offeringBasedSchema({
+    serverless: schema.object({
+      userManagementEnabled: schema.boolean({ defaultValue: true }),
+      roleManagementEnabled: schema.boolean({ defaultValue: true }),
+      roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
+    }),
   }),
 });
 
@@ -400,6 +421,13 @@ export function createConfig(
       },
     } as AppenderConfigType);
 
+  const session = getSessionConfig(config.session, providers);
+  if (session.concurrentSessions?.maxSessions != null && config.authc.http.enabled) {
+    logger.warn(
+      'Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.'
+    );
+  }
+
   return {
     ...config,
     audit: {
@@ -412,7 +440,7 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
-    session: getSessionConfig(config.session, providers),
+    session,
     encryptionKey,
     secureCookies,
   };
@@ -420,6 +448,7 @@ export function createConfig(
 
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
   return {
+    concurrentSessions: session.concurrentSessions,
     cleanupInterval: session.cleanupInterval,
     getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three

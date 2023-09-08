@@ -24,6 +24,7 @@ import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -39,7 +40,6 @@ import { calculateTotalPages } from '../helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
 import type {
-  ControlColumnProps,
   KueryFilterQueryKind,
   RowRenderer,
   ToggleDetailPanel,
@@ -60,11 +60,11 @@ import { useTimelineFullScreen } from '../../../../common/containers/use_full_sc
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -117,14 +117,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   ${({ theme }) => `margin: 0 ${theme.eui.euiSizeM};`}
   overflow: hidden;
 `;
-
-const DatePicker = styled(EuiFlexItem)`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-    width: auto;
-  }
-`;
-DatePicker.displayName = 'DatePicker';
 
 const SourcererFlex = styled(EuiFlexItem)`
   align-items: flex-end;
@@ -286,7 +278,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         id: timelineId,
       })
     );
-  }, [activeFilterManager, currentTimeline, dispatch, filterManager, timelineId, uiSettings]);
+  }, [dispatch, filterManager, timelineId]);
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
@@ -369,13 +361,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={10}>
+              <EuiFlexItem grow={10}>
                 <SuperDatePicker
+                  width="auto"
                   id={InputsModelId.timeline}
                   timelineId={timelineId}
                   disabled={isDatePickerDisabled}
                 />
-              </DatePicker>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>

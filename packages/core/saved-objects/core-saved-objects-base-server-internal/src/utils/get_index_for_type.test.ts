@@ -6,16 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import {
+  type ISavedObjectTypeRegistry,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
 import { getIndexForType } from './get_index_for_type';
+
+const createTypeRegistry = () => {
+  return {
+    getIndex: jest.fn(),
+  } as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
+};
 
 describe('getIndexForType', () => {
   const kibanaVersion = '8.0.0';
-  const defaultIndex = '.kibana';
-  let typeRegistry: ReturnType<typeof typeRegistryMock.create>;
+  const defaultIndex = MAIN_SAVED_OBJECT_INDEX;
+  let typeRegistry: ReturnType<typeof createTypeRegistry>;
 
   beforeEach(() => {
-    typeRegistry = typeRegistryMock.create();
+    typeRegistry = createTypeRegistry();
   });
 
   it('returns the correct index for a type specifying a custom index', () => {

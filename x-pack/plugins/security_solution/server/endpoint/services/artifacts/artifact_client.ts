@@ -18,7 +18,13 @@ export interface EndpointArtifactClientInterface {
 
   createArtifact(artifact: InternalArtifactCompleteSchema): Promise<InternalArtifactCompleteSchema>;
 
+  bulkCreateArtifacts(
+    artifacts: InternalArtifactCompleteSchema[]
+  ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }>;
+
   deleteArtifact(id: string): Promise<void>;
+
+  bulkDeleteArtifacts(ids: string[]): Promise<Error[]>;
 
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 }
@@ -73,10 +79,27 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     return createdArtifact;
   }
 
+  async bulkCreateArtifacts(
+    artifacts: InternalArtifactCompleteSchema[]
+  ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }> {
+    const optionsList = artifacts.map((artifact) => ({
+      content: Buffer.from(artifact.body, 'base64').toString(),
+      identifier: artifact.identifier,
+      type: this.parseArtifactId(artifact.identifier).type,
+    }));
+
+    const createdArtifacts = await this.fleetArtifacts.bulkCreateArtifacts(optionsList);
+    return createdArtifacts;
+  }
+
   async deleteArtifact(id: string) {
     // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
+  }
+
+  async bulkDeleteArtifacts(ids: string[]): Promise<Error[]> {
+    return this.fleetArtifacts.bulkDeleteArtifacts(ids);
   }
 }

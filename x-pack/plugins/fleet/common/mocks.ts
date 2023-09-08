@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { DeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
+import type {
+  PostDeletePackagePoliciesResponse,
+  NewPackagePolicy,
+  PackagePolicy,
+  AgentPolicy,
+} from './types';
 import type { FleetAuthz } from './authz';
-import { ENDPOINT_PRIVILEGES } from './constants';
+import { dataTypes, ENDPOINT_PRIVILEGES } from './constants';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
@@ -47,7 +52,7 @@ export const createPackagePolicyMock = (): PackagePolicy => {
   };
 };
 
-export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
+export const deletePackagePolicyMock = (): PostDeletePackagePoliciesResponse => {
   const newPackagePolicy = createNewPackagePolicyMock();
   return [
     {
@@ -62,7 +67,7 @@ export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
  * Creates mock `authz` object
  */
 export const createFleetAuthzMock = (): FleetAuthz => {
-  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
+  const endpointActions = Object.keys(ENDPOINT_PRIVILEGES).reduce((acc, privilege) => {
     return {
       ...acc,
       [privilege]: {
@@ -94,6 +99,32 @@ export const createFleetAuthzMock = (): FleetAuthz => {
       endpoint: {
         actions: endpointActions,
       },
+      transform: {
+        actions: {
+          canCreateTransform: { executePackageAction: true },
+          canDeleteTransform: { executePackageAction: true },
+          canGetTransform: { executePackageAction: true },
+          canStartStopTransform: { executePackageAction: true },
+        },
+      },
     },
+  };
+};
+
+export const createAgentPolicyMock = (overrideProps?: Partial<AgentPolicy>): AgentPolicy => {
+  return {
+    id: 'agent-policy-1',
+    name: 'agent-policy-1',
+    description: 'an agent policy',
+    status: 'active',
+    namespace: 'default',
+    monitoring_enabled: Object.values(dataTypes),
+    inactivity_timeout: 1209600,
+    updated_at: '2023-06-30T16:03:38.159292',
+    updated_by: 'user-1',
+    revision: 1,
+    is_managed: false,
+    is_protected: false,
+    ...overrideProps,
   };
 };

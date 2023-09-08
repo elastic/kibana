@@ -204,4 +204,60 @@ describe('convertToLens', () => {
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsMetric');
   });
+
+  test('should carry the ignoreGlobalFilters flag if set on the panel', async () => {
+    mockGetMetricsColumns.mockReturnValue([metricColumn]);
+    mockGetSeriesAgg.mockReturnValue({ metrics: [metric] });
+    mockGetConfigurationForGauge.mockReturnValue({});
+
+    const result = await convertToLens(
+      {
+        params: createPanel({
+          series: [
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+            }),
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+            }),
+          ],
+          ignore_global_filter: 1,
+        }),
+      } as Vis<Panel>,
+      undefined,
+      true
+    );
+    expect(result?.layers.every((l) => l.ignoreGlobalFilters)).toBe(true);
+  });
+
+  test('should carry the ignoreGlobalFilters flag if set on the series', async () => {
+    mockGetMetricsColumns.mockReturnValue([metricColumn]);
+    mockGetSeriesAgg.mockReturnValue({ metrics: [metric] });
+    mockGetConfigurationForGauge.mockReturnValue({});
+
+    const result = await convertToLens(
+      {
+        params: createPanel({
+          series: [
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+              ignore_global_filter: 1,
+            }),
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+            }),
+          ],
+          ignore_global_filter: 0,
+        }),
+      } as Vis<Panel>,
+      undefined,
+      true
+    );
+
+    expect(result?.layers[0].ignoreGlobalFilters).toBe(true);
+  });
 });

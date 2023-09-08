@@ -24,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { DiscoverLink } from '../../../../lib/discover_link';
 import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
 import { SectionError, Error, DataHealth } from '../../../../components';
 import { useLoadDataStream } from '../../../../services/api';
@@ -265,6 +266,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           <EuiTitle size="m">
             <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
               {dataStreamName}
+              <DiscoverLink indexName={dataStreamName} />
               {dataStream && <DataStreamsBadges dataStream={dataStream} />}
             </h2>
           </EuiTitle>

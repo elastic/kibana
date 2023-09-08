@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   async function getSavedObjectCounters() {
     // wait until ES indexes the counter SavedObject;
-    await new Promise((res) => setTimeout(res, 7 * 1000));
+    await new Promise((res) => setTimeout(res, 10 * 1000));
 
     return await supertest
       .get('/api/saved_objects/_find?type=usage-counters')

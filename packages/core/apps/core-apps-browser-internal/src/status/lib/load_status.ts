@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
@@ -58,15 +59,9 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
 
   return [
     {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.heapTotalHeader', {
-        defaultMessage: 'Heap total',
-      }),
-      value: metrics.process.memory.heap.size_limit,
-      type: 'byte',
-    },
-    {
       name: i18n.translate('core.statusPage.metricsTiles.columns.heapUsedHeader', {
-        defaultMessage: 'Heap used',
+        defaultMessage: 'Heap used out of {heapTotal}',
+        values: { heapTotal: numeral(metrics.process.memory.heap.size_limit).format('0.00 b') },
       }),
       value: metrics.process.memory.heap.used_in_bytes,
       type: 'byte',
@@ -76,6 +71,17 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
         defaultMessage: 'Requests per second',
       }),
       value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
+      type: 'float',
+    },
+    {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.utilizationHeader', {
+        defaultMessage: 'Utilization (active: {active} / idle: {idle})',
+        values: {
+          active: numeral(metrics.process.event_loop_utilization.active).format('0.00'),
+          idle: numeral(metrics.process.event_loop_utilization.idle).format('0.00'),
+        },
+      }),
+      value: metrics.process.event_loop_utilization.utilization,
       type: 'float',
     },
     {

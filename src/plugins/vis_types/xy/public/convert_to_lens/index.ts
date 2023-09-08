@@ -7,15 +7,17 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { CollapseFunction, Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import { CollapseFunction, Column } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
+import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
 import { getSeriesParams } from '../utils/get_series_params';
 import { ConvertXYToLensVisualization } from './types';
+import { getConfiguration } from './configurations';
 
 export interface Layer {
   indexPatternId: string;
@@ -26,6 +28,7 @@ export interface Layer {
   seriesIdsMap: Record<string, string>;
   isReferenceLineLayer: boolean;
   collapseFn?: CollapseFunction;
+  ignoreGlobalFilters: boolean;
 }
 
 const SIBBLING_PIPELINE_AGGS: string[] = [
@@ -34,21 +37,6 @@ const SIBBLING_PIPELINE_AGGS: string[] = [
   METRIC_TYPES.MAX_BUCKET,
   METRIC_TYPES.MIN_BUCKET,
 ];
-
-export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
-  if ((column as ColumnWithMeta).meta) {
-    return true;
-  }
-  return false;
-};
-
-export const excludeMetaFromColumn = (column: Column) => {
-  if (isColumnWithMeta(column)) {
-    const { meta, ...rest } = column;
-    return rest;
-  }
-  return column;
-};
 
 export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -85,10 +73,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     (param) => param.show && visSchemas.metric.some((m) => m.aggId?.split('.')[0] === param.data.id)
   );
 
-  const [{ getColumnsFromVis, createStaticValueColumn }, { getConfiguration }] = await Promise.all([
-    convertToLensModule,
-    import('./configurations'),
-  ]);
+  const { getColumnsFromVis, createStaticValueColumn } = await convertToLensModule;
   const dataLayers = getColumnsFromVis(
     vis,
     timefilter,
@@ -161,10 +146,10 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
 
   const indexPatternId = dataView.id!;
 
-  const uuid = await import('uuid/v4');
+  const { v4: uuidv4 } = await import('uuid');
 
   const layers = dataLayers.map<Layer>((l) => {
-    const layerId = uuid.default();
+    const layerId = uuidv4();
     const seriesIdsMap: Record<string, string> = {};
     visibleSeries.forEach((s) => {
       const column = l.columns.find(
@@ -190,6 +175,7 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       seriesIdsMap,
       collapseFn,
       isReferenceLineLayer: false,
+      ignoreGlobalFilters: false,
     };
   });
 
@@ -197,11 +183,12 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
     const staticValueColumn = createStaticValueColumn(vis.params.thresholdLine.value || 0);
     layers.push({
       indexPatternId,
-      layerId: uuid.default(),
+      layerId: uuidv4(),
       columns: [staticValueColumn],
       columnOrder: [],
       metrics: [staticValueColumn.columnId],
       isReferenceLineLayer: true,
+      ignoreGlobalFilters: false,
       collapseFn: undefined,
       seriesIdsMap: {},
     });

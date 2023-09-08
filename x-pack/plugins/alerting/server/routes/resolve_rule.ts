@@ -9,7 +9,12 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase, rewriteRuleLastRun } from './lib';
+import {
+  verifyAccessAndContext,
+  RewriteResponseCase,
+  rewriteRuleLastRun,
+  rewriteActionsRes,
+} from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
@@ -28,6 +33,7 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
   createdAt,
   updatedAt,
   apiKeyOwner,
+  apiKeyCreatedByUser,
   notifyWhen,
   muteAll,
   mutedInstanceIds,
@@ -54,14 +60,10 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-  })),
+  actions: rewriteActionsRes(actions),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
 });
 
 export const resolveRuleRoute = (

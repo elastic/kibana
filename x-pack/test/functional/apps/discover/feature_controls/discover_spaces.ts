@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'security',
     'spaceSelector',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -84,8 +85,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
     });
 
@@ -154,8 +155,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
     });
 

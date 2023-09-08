@@ -8,10 +8,13 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as Actions from './actions';
-import type { State } from './state';
 
-export async function cleanup(client: ElasticsearchClient, state?: State) {
-  if (!state) return;
+type CleanableState = { sourceIndexPitId: string } | {};
+
+export async function cleanup(client: ElasticsearchClient, state?: CleanableState) {
+  if (!state) {
+    return;
+  }
   if ('sourceIndexPitId' in state) {
     await Actions.closePit({ client, pitId: state.sourceIndexPitId })();
   }

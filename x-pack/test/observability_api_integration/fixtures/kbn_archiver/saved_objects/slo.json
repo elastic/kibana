@@ -1,0 +1,85 @@
+{
+  "attributes": {
+    "budgetingMethod": "occurrences",
+    "createdAt": "2023-05-23T15:17:46.761Z",
+    "description": "",
+    "enabled": true,
+    "id": "f9072790-f97c-11ed-895c-170d13e61076",
+    "indicator": {
+      "params": {
+        "filter": "host : \"5c89fd95-ed02-43f4-945f-a6793bfc8ae9\"",
+        "good": "latency <= 100",
+        "index": "service-logs-latency",
+        "timestampField": "@timestamp",
+        "total": ""
+      },
+      "type": "sli.kql.custom"
+    },
+    "name": "slo two used in composite one",
+    "objective": {
+      "target": 0.94
+    },
+    "revision": 2,
+    "settings": {
+      "frequency": "1m",
+      "syncDelay": "1m"
+    },
+    "tags": [],
+    "timeWindow": {
+      "duration": "7d",
+      "type": "rolling"
+    },
+    "updatedAt": "2023-05-23T15:18:31.650Z"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-05-23T15:18:31.653Z",
+  "id": "f907c3d0-f97c-11ed-895c-170d13e61076",
+  "managed": false,
+  "references": [],
+  "type": "slo",
+  "updated_at": "2023-05-23T15:18:31.653Z",
+  "version": "WzIwNDkwLDFd"
+}
+
+{
+  "attributes": {
+    "budgetingMethod": "occurrences",
+    "createdAt": "2023-05-23T15:17:42.371Z",
+    "description": "",
+    "enabled": true,
+    "id": "f6694b30-f97c-11ed-895c-170d13e61076",
+    "indicator": {
+      "params": {
+        "filter": "host : \"5c89fd95-ed02-43f4-945f-a6793bfc8ae9\"",
+        "good": "latency <= 150",
+        "index": "service-logs-latency",
+        "timestampField": "@timestamp",
+        "total": ""
+      },
+      "type": "sli.kql.custom"
+    },
+    "name": "slo one used in composite one",
+    "objective": {
+      "target": 0.94
+    },
+    "revision": 1,
+    "settings": {
+      "frequency": "1m",
+      "syncDelay": "1m"
+    },
+    "tags": [],
+    "timeWindow": {
+      "duration": "7d",
+      "type": "rolling"
+    },
+    "updatedAt": "2023-05-23T15:18:39.734Z"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-05-23T15:18:39.737Z",
+  "id": "f66a0e80-f97c-11ed-895c-170d13e61076",
+  "managed": false,
+  "references": [],
+  "type": "slo",
+  "updated_at": "2023-05-23T15:18:39.737Z",
+  "version": "WzIwNDg5LDFd"
+}

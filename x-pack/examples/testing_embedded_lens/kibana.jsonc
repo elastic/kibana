@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/testing-embedded-lens-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "testingEmbeddedLens",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "testing_embedded_lens"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "data",
+      "embeddable",
+      "developerExamples",
+      "kibanaReact"
+    ]
+  }
+}

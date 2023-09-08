@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
-import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import { TableContext } from '@kbn/timelines-plugin/public';
+import type { DraggableProvided, DraggableStateSnapshot } from '@hello-pangea/dnd';
 import { TimelineContext } from '../../../timelines/components/timeline';
 import { HoverActions } from '.';
 
 import type { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
+import { TableContext } from '../events_viewer/shared';
 import { useTopNPopOver } from './utils';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
@@ -83,7 +83,7 @@ export const useHoverActions = ({
   const values = useMemo(() => {
     const val = dataProvider.queryMatch.value;
 
-    if (typeof val === 'number') {
+    if (typeof val === 'number' || typeof val === 'boolean') {
       return val.toString();
     }
 
@@ -102,7 +102,16 @@ export const useHoverActions = ({
         <ProviderContentWrapper
           data-test-subj={`draggable-link-content-${dataProvider.queryMatch.field}`}
         >
-          {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+          {render(dataProvider, null, {
+            isDragging: false,
+            isDropAnimating: false,
+            isClone: false,
+            dropAnimation: null,
+            draggingOver: null,
+            combineWith: null,
+            combineTargetFor: null,
+            mode: null,
+          })}
         </ProviderContentWrapper>
       ) : null;
 

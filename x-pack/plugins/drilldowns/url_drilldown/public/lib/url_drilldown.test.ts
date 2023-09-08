@@ -6,7 +6,6 @@
  */
 
 import { IExternalUrl } from '@kbn/core/public';
-import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import {
   IEmbeddable,
@@ -18,6 +17,8 @@ import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { of } from '@kbn/kibana-utils-plugin/common';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 const mockDataPoints = [
   {
@@ -84,7 +85,10 @@ const createDrilldown = (isExternalUrlValid: boolean = true) => {
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
-    uiSettings: uiSettingsServiceMock.createSetupContract(),
+    settings: settingsServiceMock.createSetupContract(),
+    theme: () => {
+      return themeServiceMock.createStartContract();
+    },
   });
   return drilldown;
 };

@@ -11,19 +11,21 @@ import type {
   Entry,
   EntryNested,
   ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import { hasSimpleExecutableName } from '@kbn/securitysolution-utils';
+import { EntryFieldType, hasSimpleExecutableName } from '@kbn/securitysolution-utils';
 
-import type {
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
+import {
+  ENDPOINT_ARTIFACT_LISTS,
+  type ENDPOINT_BLOCKLISTS_LIST_ID,
+  type ENDPOINT_EVENT_FILTERS_LIST_ID,
+  type ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+  type ENDPOINT_LIST_ID,
+  type ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -74,18 +76,32 @@ export type ArtifactListId =
   | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
   | typeof ENDPOINT_BLOCKLISTS_LIST_ID;
 
-export async function getFilteredEndpointExceptionList({
+export function convertExceptionsToEndpointFormat(
+  exceptions: ExceptionListItemSchema[],
+  schemaVersion: string
+) {
+  const translatedExceptions = {
+    entries: translateToEndpointExceptions(exceptions, schemaVersion),
+  };
+  const [validated, errors] = validate(translatedExceptions, wrappedTranslatedExceptionList);
+  if (errors != null) {
+    throw new Error(errors);
+  }
+
+  return validated as WrappedTranslatedExceptionList;
+}
+
+export async function getFilteredEndpointExceptionListRaw({
   elClient,
   filter,
   listId,
-  schemaVersion,
 }: {
   elClient: ExceptionListClient;
   filter: string;
   listId: ArtifactListId;
-  schemaVersion: string;
-}): Promise<WrappedTranslatedExceptionList> {
-  const exceptions: WrappedTranslatedExceptionList = { entries: [] };
+}): Promise<ExceptionListItemSchema[]> {
+  const perPage = 1000;
+  let exceptions: ExceptionListItemSchema[] = [];
   let page = 1;
   let paging = true;
 
@@ -94,63 +110,39 @@ export async function getFilteredEndpointExceptionList({
       listId,
       namespaceType: 'agnostic',
       filter,
-      perPage: 100,
+      perPage,
       page,
       sortField: 'created_at',
       sortOrder: 'desc',
     });
 
     if (response?.data !== undefined) {
-      exceptions.entries = exceptions.entries.concat(
-        translateToEndpointExceptions(response.data, schemaVersion)
-      );
+      exceptions = exceptions.concat(response.data);
 
-      paging = (page - 1) * 100 + response.data.length < response.total;
+      paging = (page - 1) * perPage + response.data.length < response.total;
       page++;
     } else {
       break;
     }
   }
 
-  const [validated, errors] = validate(exceptions, wrappedTranslatedExceptionList);
-  if (errors != null) {
-    throw new Error(errors);
-  }
-  return validated as WrappedTranslatedExceptionList;
+  return exceptions;
 }
 
-export async function getEndpointExceptionList({
+export async function getAllItemsFromEndpointExceptionList({
   elClient,
   listId,
   os,
-  policyId,
-  schemaVersion,
 }: {
   elClient: ExceptionListClient;
-  listId?: ArtifactListId;
+  listId: ArtifactListId;
   os: string;
-  policyId?: string;
-  schemaVersion: string;
-}): Promise<WrappedTranslatedExceptionList> {
+}): Promise<FoundExceptionListItemSchema['data']> {
   const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
-  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
-    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
-  })`;
 
-  // for endpoint list
-  if (!listId || listId === ENDPOINT_LIST_ID) {
-    return getFilteredEndpointExceptionList({
-      elClient,
-      schemaVersion,
-      filter: `${osFilter}`,
-      listId: ENDPOINT_LIST_ID,
-    });
-  }
-  // for TAs, EFs, Host IEs and Blocklists
-  return getFilteredEndpointExceptionList({
+  return getFilteredEndpointExceptionListRaw({
     elClient,
-    schemaVersion,
-    filter: `${osFilter} and ${policyFilter}`,
+    filter: osFilter,
     listId,
   });
 }
@@ -168,13 +160,36 @@ export function translateToEndpointExceptions(
   const entriesFiltered: TranslatedExceptionListItem[] = [];
   if (schemaVersion === 'v1') {
     exceptions.forEach((entry) => {
-      const translatedItem = translateItem(schemaVersion, entry);
-      const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
-      if (!entrySet.has(entryHash)) {
-        entriesFiltered.push(translatedItem);
-        entrySet.add(entryHash);
+      // For Blocklist, we create a single entry for each blocklist entry item
+      // if there is an entry with more than one hash type.
+      if (
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.blocklists.id &&
+        entry.entries.length > 1 &&
+        !!entry.entries[0].field.match(EntryFieldType.HASH)
+      ) {
+        entry.entries.forEach((blocklistSingleEntry) => {
+          const translatedItem = translateItem(schemaVersion, {
+            ...entry,
+            entries: [blocklistSingleEntry],
+          });
+          const entryHash = createHash('sha256')
+            .update(JSON.stringify(translatedItem))
+            .digest('hex');
+          if (!entrySet.has(entryHash)) {
+            entriesFiltered.push(translatedItem);
+            entrySet.add(entryHash);
+          }
+        });
+      } else {
+        const translatedItem = translateItem(schemaVersion, entry);
+        const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+        if (!entrySet.has(entryHash)) {
+          entriesFiltered.push(translatedItem);
+          entrySet.add(entryHash);
+        }
       }
     });
+
     return entriesFiltered;
   } else {
     throw new Error('unsupported schemaVersion');

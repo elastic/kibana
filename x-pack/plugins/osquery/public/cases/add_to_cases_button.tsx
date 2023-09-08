@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { CommentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
@@ -50,7 +50,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
                 ecs: ecsData,
                 data: [],
               }),
-              type: CommentType.alert as const,
+              type: AttachmentType.alert as const,
             },
           ]
         : [],
@@ -60,13 +60,13 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   const casePermissions = cases.helpers.canUseCases();
   const hasCasesPermissions =
     casePermissions.read && casePermissions.update && casePermissions.push;
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({});
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   const handleClick = useCallback(() => {
     const attachments: CaseAttachmentsWithoutOwner = [
       ...alertAttachments,
       {
-        type: CommentType.externalReference,
+        type: AttachmentType.externalReference,
         externalReferenceId: actionId,
         externalReferenceStorage: {
           type: ExternalReferenceStorageType.elasticSearchDoc,
@@ -76,7 +76,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
       },
     ];
     if (hasCasesPermissions) {
-      selectCaseModal.open({ attachments });
+      selectCaseModal.open({ getAttachments: () => attachments });
     }
   }, [actionId, agentIds, alertAttachments, hasCasesPermissions, queryId, selectCaseModal]);
 

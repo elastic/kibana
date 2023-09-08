@@ -14,15 +14,22 @@ import {
 } from '../../../detection_engine/routes/__mocks__';
 import { deletePrebuiltSavedObjectsRoute } from './delete_prebuilt_saved_objects';
 
-jest.mock('../helpers/find_or_create_tag', () => {
-  const actual = jest.requireActual('../helpers/find_or_create_tag');
+jest.mock('../../../tags/saved_objects', () => {
+  return {
+    findTagsByName: jest.fn().mockResolvedValue([
+      {
+        id: 'tagID',
+        name: 'my tag',
+        type: 'tag',
+      },
+    ]),
+  };
+});
+
+jest.mock('../helpers/create_risk_score_tag', () => {
+  const actual = jest.requireActual('../helpers/create_risk_score_tag');
   return {
     ...actual,
-    findRiskScoreTag: jest.fn().mockResolvedValue({
-      id: 'tagID',
-      name: 'my tag',
-      type: 'tag',
-    }),
     findSavedObjectsWithTagReference: jest
       .fn()
       .mockResolvedValue([{ id: 'test-1', type: 'test-type' }]),

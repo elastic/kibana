@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
+import { ApmDocumentType } from '../../common/document_type';
+import { RollupInterval } from '../../common/rollup';
 
 export { environmentRt } from '../../common/environment_rt';
 
@@ -19,3 +21,30 @@ export const probabilityRt = t.type({
   probability: toNumberRt,
 });
 export const kueryRt = t.type({ kuery: t.string });
+
+export const serviceTransactionDataSourceRt = t.type({
+  documentType: t.union([
+    t.literal(ApmDocumentType.ServiceTransactionMetric),
+    t.literal(ApmDocumentType.TransactionMetric),
+    t.literal(ApmDocumentType.TransactionEvent),
+  ]),
+  rollupInterval: t.union([
+    t.literal(RollupInterval.OneMinute),
+    t.literal(RollupInterval.TenMinutes),
+    t.literal(RollupInterval.SixtyMinutes),
+    t.literal(RollupInterval.None),
+  ]),
+});
+
+export const transactionDataSourceRt = t.type({
+  documentType: t.union([
+    t.literal(ApmDocumentType.TransactionMetric),
+    t.literal(ApmDocumentType.TransactionEvent),
+  ]),
+  rollupInterval: t.union([
+    t.literal(RollupInterval.OneMinute),
+    t.literal(RollupInterval.TenMinutes),
+    t.literal(RollupInterval.SixtyMinutes),
+    t.literal(RollupInterval.None),
+  ]),
+});

@@ -14,12 +14,12 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
-import type { AuditLogger } from '../audit';
-import type { ConfigType } from '../config';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
 import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
+import type { AuditServiceSetup } from '../audit';
+import type { ConfigType } from '../config';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 
 export interface SessionManagementServiceSetupParams {
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;
@@ -32,7 +32,7 @@ export interface SessionManagementServiceStartParams {
   readonly kibanaIndexName: string;
   readonly online$: Observable<OnlineStatusRetryScheduler>;
   readonly taskManager: TaskManagerStartContract;
-  readonly auditLogger: AuditLogger;
+  readonly audit: AuditServiceSetup;
 }
 
 export interface SessionManagementServiceStart {
@@ -80,14 +80,14 @@ export class SessionManagementService {
     kibanaIndexName,
     online$,
     taskManager,
-    auditLogger,
+    audit,
   }: SessionManagementServiceStartParams): SessionManagementServiceStart {
     this.sessionIndex = new SessionIndex({
       config: this.config,
       elasticsearchClient,
       kibanaIndexName,
       logger: this.logger.get('index'),
-      auditLogger,
+      auditLogger: audit.withoutRequest,
     });
 
     this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {
@@ -104,6 +104,7 @@ export class SessionManagementService {
         sessionCookie: this.sessionCookie,
         sessionIndex: this.sessionIndex,
         config: this.config,
+        audit,
       }),
     };
   }

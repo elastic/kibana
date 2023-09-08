@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 import { createBulkErrorObject } from '../../../../detection_engine/routes/utils';
 import type { PromiseFromStreams } from './types';
@@ -17,13 +17,13 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
   const { errors, timelinesAcc } = timelines.reduce(
     (acc, parsedTimeline) => {
       if (parsedTimeline instanceof Error) {
-        acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+        acc.timelinesAcc.set(uuidv4(), parsedTimeline);
       } else {
         const { savedObjectId } = parsedTimeline;
         if (savedObjectId != null) {
           if (acc.timelinesAcc.has(savedObjectId) && !isOverwrite) {
             acc.errors.set(
-              uuid.v4(),
+              uuidv4(),
               createBulkErrorObject({
                 id: savedObjectId,
                 statusCode: 400,
@@ -33,7 +33,7 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
           }
           acc.timelinesAcc.set(savedObjectId, parsedTimeline);
         } else {
-          acc.timelinesAcc.set(uuid.v4(), parsedTimeline);
+          acc.timelinesAcc.set(uuidv4(), parsedTimeline);
         }
       }
 

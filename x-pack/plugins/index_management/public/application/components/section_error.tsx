@@ -33,7 +33,7 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
   const cause = causeAttributes ?? causeRoot;
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
+    <EuiCallOut title={title} color="danger" iconType="warning" {...rest}>
       <div>{message || statusText}</div>
       {cause && (
         <Fragment>

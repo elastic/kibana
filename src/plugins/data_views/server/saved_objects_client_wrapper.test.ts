@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
+import { SavedObjectsClientWrapper } from './saved_objects_client_wrapper';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { DataViewSavedObjectConflictError } from '../common';
@@ -21,8 +21,8 @@ describe('SavedObjectsClientPublicToCommon', () => {
     soClient.resolve = jest
       .fn()
       .mockResolvedValue({ outcome: 'exactMatch', saved_object: mockedSavedObject });
-    const service = new SavedObjectsClientServerToCommon(soClient);
-    const result = await service.get('index-pattern', '1');
+    const service = new SavedObjectsClientWrapper(soClient);
+    const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
 
@@ -33,8 +33,8 @@ describe('SavedObjectsClientPublicToCommon', () => {
     soClient.resolve = jest
       .fn()
       .mockResolvedValue({ outcome: 'aliasMatch', saved_object: mockedSavedObject });
-    const service = new SavedObjectsClientServerToCommon(soClient);
-    const result = await service.get('index-pattern', '1');
+    const service = new SavedObjectsClientWrapper(soClient);
+    const result = await service.get('1');
     expect(result).toStrictEqual(mockedSavedObject);
   });
 
@@ -46,10 +46,8 @@ describe('SavedObjectsClientPublicToCommon', () => {
     soClient.resolve = jest
       .fn()
       .mockResolvedValue({ outcome: 'conflict', saved_object: mockedSavedObject });
-    const service = new SavedObjectsClientServerToCommon(soClient);
+    const service = new SavedObjectsClientWrapper(soClient);
 
-    await expect(service.get('index-pattern', '1')).rejects.toThrow(
-      DataViewSavedObjectConflictError
-    );
+    await expect(service.get('1')).rejects.toThrow(DataViewSavedObjectConflictError);
   });
 });

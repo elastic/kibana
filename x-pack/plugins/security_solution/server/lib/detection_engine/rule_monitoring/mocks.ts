@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './logic/detection_engine_health/__mocks__';
 export * from './logic/rule_execution_log/__mocks__';

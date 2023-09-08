@@ -46,10 +46,13 @@ describe('DiscoverLinks', () => {
       },
     } as Span;
 
-    const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
-      search:
-        '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
-    } as Location);
+    const href = await getRenderedHref(
+      () => <DiscoverSpanLink spanId={span.span.id} />,
+      {
+        search:
+          '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
+      } as Location
+    );
 
     expect(href).toMatchInlineSnapshot(
       `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'span.id:\\"test-span-id\\"'))"`

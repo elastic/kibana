@@ -8,6 +8,7 @@
 
 import { defaults, isEqual, omit, map } from 'lodash';
 import type { FilterMeta, Filter } from '../build_filters';
+import { isCombinedFilter } from '../build_filters';
 
 /** @public */
 export interface FilterCompareOptions {
@@ -30,13 +31,21 @@ export const COMPARE_ALL_OPTIONS: FilterCompareOptions = {
   alias: true,
 };
 
+// Combined filters include sub-filters in the `meta` property and the relation type in the `relation` property, so
+// they should never be excluded in the comparison
+const removeRequiredAttributes = (excludedAttributes: string[]) =>
+  excludedAttributes.filter((attribute) => !['meta', 'relation'].includes(attribute));
+
 const mapFilter = (
   filter: Filter,
   comparators: FilterCompareOptions,
   excludedAttributes: string[]
 ) => {
-  const cleaned: FilterMeta = omit(filter, excludedAttributes) as FilterMeta;
+  const attrsToExclude = isCombinedFilter(filter)
+    ? removeRequiredAttributes(excludedAttributes)
+    : excludedAttributes;
 
+  const cleaned: FilterMeta = omit(filter, attrsToExclude) as FilterMeta;
   if (comparators.index) cleaned.index = filter.meta?.index;
   if (comparators.negate) cleaned.negate = filter.meta && Boolean(filter.meta.negate);
   if (comparators.disabled) cleaned.disabled = filter.meta && Boolean(filter.meta.disabled);

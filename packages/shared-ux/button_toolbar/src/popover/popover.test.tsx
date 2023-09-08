@@ -15,7 +15,6 @@ describe('<ToolbarPopover />', () => {
   test('is rendered', () => {
     const isOpen = true;
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
-
     expect(component.render()).toMatchSnapshot();
   });
 
@@ -29,5 +28,46 @@ describe('<ToolbarPopover />', () => {
 
     component.simulate('click');
     expect(mockHandler).toHaveBeenCalled();
+  });
+
+  test('defaults to a bordered empty button', () => {
+    const isOpen = true;
+    const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
+    const button = component.find('EuiButton');
+    expect(button.prop('color')).toBe('text');
+    expect(button.prop('css')).toMatchObject({
+      backgroundColor: '#FFF',
+      border: '1px solid #D3DAE6 !important',
+      color: '#343741',
+    });
+  });
+
+  test('accepts a button type', () => {
+    const isOpen = true;
+    const component = mountWithIntl(
+      <ToolbarPopover type="primary" label="test" children={() => !isOpen} />
+    );
+    const button = component.find('EuiButton');
+    expect(button.prop('color')).toBe('primary');
+  });
+
+  test('if not given an iconType, render arrowDown on the right', () => {
+    const isOpen = false;
+
+    const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
+    const button = component.find('EuiButton');
+    expect(button.prop('iconType')).toBe('arrowDown');
+    expect(button.prop('iconSide')).toBe('right');
+  });
+
+  test('if given an iconType, render it on the left', () => {
+    const isOpen = false;
+
+    const component = mountWithIntl(
+      <ToolbarPopover label="test" iconType="plusInCircle" children={() => !isOpen} />
+    );
+    const button = component.find('EuiButton');
+    expect(button.prop('iconType')).toBe('plusInCircle');
+    expect(button.prop('iconSide')).toBe('left');
   });
 });

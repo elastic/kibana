@@ -94,6 +94,7 @@ describe('SearchSource', () => {
       getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
+      scriptedFieldsEnabled: true,
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -114,7 +115,7 @@ describe('SearchSource', () => {
   });
 
   describe('#getActiveIndexFilter()', () => {
-    test('pase _index from query', () => {
+    test('pass _index from query', () => {
       searchSource.setField('query', {
         language: 'kuery',
         query: `_INDEX : fakebeat and _index : "mybeat-*"`,
@@ -122,7 +123,7 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject(['mybeat-*']);
     });
 
-    test('pase _index from filter', () => {
+    test('pass _index from filter', () => {
       const filter = [
         {
           query: { match_phrase: { _index: 'auditbeat-*' } },
@@ -163,7 +164,33 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
 
-    test('pase _index from query and filter with negate equals to true', () => {
+    test('pass _index from filter - phrases filter', () => {
+      const filter: Filter[] = [
+        {
+          meta: {
+            type: 'phrases',
+            key: '_index',
+            params: ['auditbeat-*', 'packetbeat-*'],
+            alias: null,
+            negate: false,
+            disabled: false,
+          },
+          query: {
+            bool: {
+              should: [
+                { match_phrase: { _index: 'auditbeat-*' } },
+                { match_phrase: { _index: 'packetbeat-*' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*', 'packetbeat-*']);
+    });
+
+    test('pass _index from query and filter with negate equals to true', () => {
       const filter = [
         {
           query: {
@@ -189,7 +216,7 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject([]);
     });
 
-    test('pase _index from query and filter with negate equals to true and disabled equals to true', () => {
+    test('pass _index from query and filter with negate equals to true and disabled equals to true', () => {
       const filter = [
         {
           query: {
@@ -624,6 +651,22 @@ describe('SearchSource', () => {
 
         const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {}, world: {} });
+      });
+
+      test('ignores scripted fields when scripted fields are disabled', async () => {
+        searchSource.setField('index', {
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: { hello: {}, world: {} },
+            docvalueFields: [],
+          }),
+        } as unknown as DataView);
+        searchSourceDependencies.scriptedFieldsEnabled = false;
+        searchSource.setField('fields', ['timestamp', '*']);
+
+        const request = searchSource.getSearchRequestBody();
+        expect(request.script_fields).toEqual({});
       });
     });
 
@@ -1062,32 +1105,6 @@ describe('SearchSource', () => {
         expect(complete2).toBeCalledTimes(1);
         expect(searchSourceDependencies.search).toHaveBeenCalledTimes(1);
       });
-
-      test('should emit error on empty response', async () => {
-        searchSourceDependencies.search = mockSearchMethod = jest
-          .fn()
-          .mockReturnValue(
-            of({ rawResponse: { test: 1 }, isPartial: true, isRunning: true }, undefined)
-          );
-
-        searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
-        const options = {};
-
-        const next = jest.fn();
-        const error = jest.fn();
-        const complete = jest.fn();
-        const res$ = searchSource.fetch$(options);
-        res$.subscribe({ next, error, complete });
-        await firstValueFrom(res$).catch((_) => {});
-
-        expect(next).toBeCalledTimes(1);
-        expect(error).toBeCalledTimes(1);
-        expect(complete).toBeCalledTimes(0);
-        expect(next.mock.calls[0][0].rawResponse).toStrictEqual({
-          test: 1,
-        });
-        expect(error.mock.calls[0][0]).toBe(undefined);
-      });
     });
 
     describe('inspector', () => {
@@ -1210,7 +1227,7 @@ describe('SearchSource', () => {
 
       test('doesnt call any post flight requests if disabled', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn();
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn();
         const ac = getAggConfigs(typesRegistry, false);
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1225,12 +1242,12 @@ describe('SearchSource', () => {
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
         expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
 
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
       });
 
       test('doesnt call any post flight if searchsource has error', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn();
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn();
         const ac = getAggConfigs(typesRegistry, true);
 
         searchSourceDependencies.search = jest.fn().mockImplementation(() =>
@@ -1252,12 +1269,12 @@ describe('SearchSource', () => {
         expect(fetchSub.complete).toHaveBeenCalledTimes(0);
         expect(fetchSub.error).toHaveBeenNthCalledWith(1, 1);
 
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(0);
       });
 
       test('calls post flight requests, fires 1 extra response, returns last response', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn().mockResolvedValue({
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
           other: 5,
         });
 
@@ -1299,12 +1316,12 @@ describe('SearchSource', () => {
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
         expect(resp.rawResponse).toStrictEqual({ other: 5 });
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(3);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(3);
       });
 
       test('calls post flight requests only once, with multiple subs (shareReplay)', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn().mockResolvedValue({
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockResolvedValue({
           other: 5,
         });
 
@@ -1340,12 +1357,12 @@ describe('SearchSource', () => {
 
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(1);
       });
 
       test('calls post flight requests, handles error', async () => {
         const typesRegistry = mockAggTypesRegistry();
-        typesRegistry.get('avg').postFlightRequest = jest.fn().mockRejectedValue(undefined);
+        typesRegistry.get('avg')!.postFlightRequest = jest.fn().mockRejectedValue(undefined);
         const ac = getAggConfigs(typesRegistry, true);
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1359,7 +1376,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(0);
         expect(fetchSub.error).toHaveBeenCalledTimes(1);
-        expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
+        expect(typesRegistry.get('avg')!.postFlightRequest).toHaveBeenCalledTimes(1);
       });
     });
   });

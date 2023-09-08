@@ -22,25 +22,19 @@ export const useUpdateCases = () => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
-  return useMutation(
-    ({ cases }: MutationArgs) => {
-      const abortCtrlRef = new AbortController();
-      return updateCases(cases, abortCtrlRef.signal);
-    },
-    {
-      mutationKey: casesMutationsKeys.updateCases,
-      onSuccess: (_, { successToasterTitle }) => {
-        queryClient.invalidateQueries(casesQueriesKeys.casesList());
-        queryClient.invalidateQueries(casesQueriesKeys.tags());
-        queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
+  return useMutation(({ cases }: MutationArgs) => updateCases({ cases }), {
+    mutationKey: casesMutationsKeys.updateCases,
+    onSuccess: (_, { successToasterTitle }) => {
+      queryClient.invalidateQueries(casesQueriesKeys.casesList());
+      queryClient.invalidateQueries(casesQueriesKeys.tags());
+      queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
-        showSuccessToast(successToasterTitle);
-      },
-      onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.ERROR_UPDATING });
-      },
-    }
-  );
+      showSuccessToast(successToasterTitle);
+    },
+    onError: (error: ServerError) => {
+      showErrorToast(error, { title: i18n.ERROR_UPDATING });
+    },
+  });
 };
 
 export type UseUpdateCases = ReturnType<typeof useUpdateCases>;

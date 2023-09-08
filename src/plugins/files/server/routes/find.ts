@@ -30,8 +30,10 @@ export function toArrayOrUndefined(val?: string | string[]): undefined | string[
 const rt = {
   body: schema.object({
     kind: schema.maybe(stringOrArrayOfStrings),
+    kindToExclude: schema.maybe(stringOrArrayOfStrings),
     status: schema.maybe(stringOrArrayOfStrings),
     extension: schema.maybe(stringOrArrayOfStrings),
+    mimeType: schema.maybe(stringOrArrayOfStrings),
     name: schema.maybe(nameStringOrArrayOfNameStrings),
     meta: fileMeta,
   }),
@@ -50,15 +52,17 @@ export type Endpoint = CreateRouteDefinition<
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
   const {
-    body: { meta, extension, kind, name, status },
+    body: { meta, extension, mimeType, kind, name, status, kindToExclude },
     query,
   } = req;
 
   const { files: results, total } = await fileService.asCurrentUser().find({
     kind: toArrayOrUndefined(kind),
+    kindToExclude: toArrayOrUndefined(kindToExclude),
     name: toArrayOrUndefined(name),
     status: toArrayOrUndefined(status),
     extension: toArrayOrUndefined(extension),
+    mimeType: toArrayOrUndefined(mimeType),
     meta: meta as Record<string, string>,
     ...query,
   });

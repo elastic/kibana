@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { useTheme } from '../charts/common';
+import { useThemes } from '../charts/common';
 import { DraggableLegend } from '../charts/draggable_legend';
 import type { LegendItem } from '../charts/draggable_legend_item';
 import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
@@ -31,7 +31,7 @@ import { NoData } from './no_data';
 import { NO_DATA_REASON_LABEL } from './translations';
 import type { AlertsTreeMapAggregation, FlattenedBucket, RawBucket } from './types';
 
-export const DEFAULT_MIN_CHART_HEIGHT = 370; // px
+export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 const DEFAULT_LEGEND_WIDTH = 300; // px
 
 export interface Props {
@@ -59,22 +59,23 @@ const AlertsTreemapComponent: React.FC<Props> = ({
   stackByField0,
   stackByField1,
 }: Props) => {
-  const theme = useTheme();
-  const fillColor = useMemo(() => theme.background.color, [theme.background.color]);
+  const { theme, baseTheme } = useThemes();
+  const fillColor = useMemo(
+    () => theme?.background?.color ?? baseTheme.background.color,
+    [theme?.background?.color, baseTheme.background.color]
+  );
 
-  const treemapTheme: PartialTheme[] = useMemo(
-    () => [
-      {
-        partition: {
-          fillLabel: { valueFont: { fontWeight: 700 } },
-          idealFontSizeJump: 1.15,
-          maxFontSize: 16,
-          minFontSize: 4,
-          sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
-          sectorLineWidth: 1.5,
-        },
+  const treemapTheme: PartialTheme = useMemo(
+    () => ({
+      partition: {
+        fillLabel: { valueFont: { fontWeight: 700 } },
+        idealFontSizeJump: 1.15,
+        maxFontSize: 16,
+        minFontSize: 4,
+        sectorLineStroke: fillColor, // draws the light or dark "lines" between partitions
+        sectorLineWidth: 1.5,
       },
-    ],
+    }),
     [fillColor]
   );
 
@@ -165,7 +166,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
   }
 
   return (
-    <div data-test-subj="treemap">
+    <div data-test-subj="alerts-treemap">
       <EuiFlexGroup gutterSize="none">
         <ChartFlexItem grow={true} $minChartHeight={minChartHeight}>
           {stackByField1 != null && !isEmpty(stackByField1) && normalizedData.length === 0 ? (
@@ -173,9 +174,9 @@ const AlertsTreemapComponent: React.FC<Props> = ({
           ) : (
             <Chart>
               <Settings
-                baseTheme={theme}
+                baseTheme={baseTheme}
                 showLegend={false}
-                theme={treemapTheme}
+                theme={[treemapTheme, theme]}
                 onElementClick={onElementClick}
               />
               <Partition

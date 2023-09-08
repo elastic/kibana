@@ -6,9 +6,16 @@
  */
 import { Logger } from '@kbn/core/server';
 import stats from 'stats-lite';
-import { RuleMonitoring, RawRuleMonitoring, RuleMonitoringHistory } from '../types';
+import {
+  RuleMonitoring,
+  RawRuleMonitoring,
+  RuleMonitoringHistory,
+  RuleMonitoringLastRunMetrics,
+} from '../types';
+import { RuleDomain } from '../application/rule/types';
 
-export const INITIAL_METRICS = {
+const INITIAL_LAST_RUN_METRICS: RuleMonitoringLastRunMetrics = {
+  duration: 0,
   total_search_duration_ms: null,
   total_indexing_duration_ms: null,
   total_alerts_detected: null,
@@ -25,29 +32,43 @@ export const getDefaultMonitoring = (timestamp: string): RawRuleMonitoring => {
       },
       last_run: {
         timestamp,
-        metrics: INITIAL_METRICS,
+        metrics: INITIAL_LAST_RUN_METRICS,
       },
     },
   };
 };
 
-export const getExecutionDurationPercentiles = (history: RuleMonitoringHistory[]) => {
-  const durationSamples = history.reduce<number[]>((duration, historyItem) => {
-    if (typeof historyItem.duration === 'number') {
-      return [...duration, historyItem.duration];
-    }
-    return duration;
-  }, []);
+export const getDefaultMonitoringRuleDomainProperties = (
+  timestamp: string
+): RuleDomain['monitoring'] => {
+  return {
+    run: {
+      history: [],
+      calculated_metrics: {
+        success_ratio: 0,
+      },
+      last_run: {
+        timestamp,
+        metrics: INITIAL_LAST_RUN_METRICS,
+      },
+    },
+  };
+};
 
-  if (durationSamples.length) {
-    return {
-      p50: stats.percentile(durationSamples as number[], 0.5),
-      p95: stats.percentile(durationSamples as number[], 0.95),
-      p99: stats.percentile(durationSamples as number[], 0.99),
-    };
-  }
+export const resetMonitoringLastRun = (monitoring: RuleMonitoring): RawRuleMonitoring => {
+  const { run, ...restMonitoring } = monitoring;
+  const { last_run: lastRun, ...restRun } = run;
 
-  return {};
+  return {
+    ...restMonitoring,
+    run: {
+      ...restRun,
+      last_run: {
+        timestamp: lastRun.timestamp,
+        metrics: INITIAL_LAST_RUN_METRICS,
+      },
+    },
+  };
 };
 
 // Immutably updates the monitoring object with timestamp and duration.
@@ -60,13 +81,15 @@ export const updateMonitoring = ({
   monitoring: RuleMonitoring;
   timestamp: string;
   duration?: number;
-}) => {
-  const { run } = monitoring;
-  const { last_run: lastRun, ...rest } = run;
-  const { metrics = INITIAL_METRICS } = lastRun;
+}): RawRuleMonitoring => {
+  const { run, ...restMonitoring } = monitoring;
+  const { last_run: lastRun, ...restRun } = run;
+  const { metrics = INITIAL_LAST_RUN_METRICS } = lastRun;
 
   return {
+    ...restMonitoring,
     run: {
+      ...restRun,
       last_run: {
         timestamp,
         metrics: {
@@ -74,7 +97,6 @@ export const updateMonitoring = ({
           duration,
         },
       },
-      ...rest,
     },
   };
 };
@@ -101,4 +123,23 @@ export const convertMonitoringFromRawAndVerify = (
     timestamp: new Date(parsedDateMillis).toISOString(),
     duration: monitoring.run.last_run.metrics.duration,
   });
+};
+
+export const getExecutionDurationPercentiles = (history: RuleMonitoringHistory[]) => {
+  const durationSamples = history.reduce<number[]>((duration, historyItem) => {
+    if (typeof historyItem.duration === 'number') {
+      return [...duration, historyItem.duration];
+    }
+    return duration;
+  }, []);
+
+  if (durationSamples.length) {
+    return {
+      p50: stats.percentile(durationSamples as number[], 0.5),
+      p95: stats.percentile(durationSamples as number[], 0.95),
+      p99: stats.percentile(durationSamples as number[], 0.99),
+    };
+  }
+
+  return {};
 };

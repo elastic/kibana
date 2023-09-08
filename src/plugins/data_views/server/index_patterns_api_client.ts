@@ -16,7 +16,8 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
   esClient: ElasticsearchClient;
   constructor(
     elasticsearchClient: ElasticsearchClient,
-    private readonly savedObjectsClient: SavedObjectsClientContract
+    private readonly savedObjectsClient: SavedObjectsClientContract,
+    private readonly rollupsEnabled: boolean
   ) {
     this.esClient = elasticsearchClient;
   }
@@ -26,16 +27,22 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     type,
     rollupIndex,
     allowNoIndex,
-    filter,
+    indexFilter,
+    fields,
   }: GetFieldsOptions) {
-    const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
+    const indexPatterns = new IndexPatternsFetcher(
+      this.esClient,
+      allowNoIndex,
+      this.rollupsEnabled
+    );
     return await indexPatterns
       .getFieldsForWildcard({
         pattern,
         metaFields,
         type,
         rollupIndex,
-        filter,
+        indexFilter,
+        fields,
       })
       .catch((err) => {
         if (

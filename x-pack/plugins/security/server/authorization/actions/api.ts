@@ -10,8 +10,8 @@ import { isString } from 'lodash';
 export class ApiActions {
   private readonly prefix: string;
 
-  constructor(versionNumber: string) {
-    this.prefix = `api:${versionNumber}:`;
+  constructor() {
+    this.prefix = `api:`;
   }
 
   public get(operation: string) {

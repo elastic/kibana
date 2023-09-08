@@ -16,10 +16,12 @@ import {
 } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { castArray, omit } from 'lodash';
-import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -27,7 +29,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
   const ruleDataClientMock = createRuleDataClientMock();
 
   const factory = createLifecycleRuleTypeFactory({
-    ruleDataClient: ruleDataClientMock as unknown as RuleDataClient,
+    ruleDataClient: ruleDataClientMock,
     logger: loggerMock.create(),
   });
 
@@ -51,6 +53,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         services.alertWithLifecycle(alert);
       });
       nextAlerts = [];
+      return { state: {} };
     },
     id: 'ruleTypeId',
     isExportable: true,
@@ -73,10 +76,14 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
   const scheduleActions = jest.fn();
 
+  let uuidCounter = 1;
+  const getUuid = jest.fn(() => `uuid-${uuidCounter++}`);
+
   const alertFactory = {
     create: () => {
       return {
         scheduleActions,
+        getUuid,
       } as any;
     },
     alertLimit: {
@@ -94,11 +101,11 @@ function createRule(shouldWriteAlerts: boolean = true) {
 
       scheduleActions.mockClear();
 
-      state = ((await type.executor({
+      ({ state } = ((await type.executor({
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
         namespace: 'namespace',
-        params: {},
+        params: { threshold: 1, operator: '>' },
         previousStartedAt,
         rule: {
           id: 'alertId',
@@ -107,20 +114,24 @@ function createRule(shouldWriteAlerts: boolean = true) {
           createdAt,
           createdBy: 'createdBy',
           enabled: true,
+          muteAll: false,
           name: 'name',
           notifyWhen: 'onActionGroupChange',
           producer: 'producer',
+          revision: 0,
           ruleTypeId: 'ruleTypeId',
           ruleTypeName: 'ruleTypeName',
           schedule: {
             interval: '1m',
           },
+          snoozeSchedule: [],
           tags: ['tags'],
           throttle: null,
           updatedAt: createdAt,
           updatedBy: 'updatedBy',
         },
         services: {
+          alertsClient: null,
           alertFactory,
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,
@@ -129,11 +140,14 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldStopExecution: () => false,
           shouldWriteAlerts: () => shouldWriteAlerts,
           uiSettingsClient: {} as any,
+          share: {} as SharePluginStart,
+          dataViews: dataViewPluginMocks.createStartContract(),
         },
         spaceId: 'spaceId',
         startedAt,
         state,
-      })) ?? {}) as Record<string, any>;
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
     },
@@ -212,7 +226,7 @@ describe('createLifecycleRuleTypeFactory', () => {
 
         const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[0][0].body!;
 
-        const documents = body.filter((op: any) => !('index' in op)) as any[];
+        const documents: any[] = body.filter((op: any) => !isOpDoc(op));
 
         const evaluationDocuments = documents.filter((doc) => doc['event.kind'] === 'event');
         const alertDocuments = documents.filter((doc) => doc['event.kind'] === 'signal');
@@ -241,7 +255,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",
@@ -273,7 +292,12 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",
@@ -322,9 +346,10 @@ describe('createLifecycleRuleTypeFactory', () => {
         ).bulk.mock.calls[0][0].body
           ?.concat()
           .reverse()
-          .find(
-            (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
-          ) as Record<string, any>;
+          .find((doc: any) => !isOpDoc(doc) && doc['service.name'] === 'opbeans-node') as Record<
+          string,
+          any
+        >;
 
         // @ts-ignore 4.3.5 upgrade
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
@@ -365,7 +390,7 @@ describe('createLifecycleRuleTypeFactory', () => {
         expect((await helpers.ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledTimes(2);
         const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[1][0].body!;
 
-        const documents = body.filter((op: any) => !('index' in op)) as any[];
+        const documents: any[] = body.filter((op: any) => !isOpDoc(op));
 
         const evaluationDocuments = documents.filter((doc) => doc['event.kind'] === 'event');
         const alertDocuments = documents.filter((doc) => doc['event.kind'] === 'signal');
@@ -404,13 +429,16 @@ describe('createLifecycleRuleTypeFactory', () => {
         ).bulk.mock.calls[0][0].body
           ?.concat()
           .reverse()
-          .find(
-            (doc: any) => !('index' in doc) && doc['service.name'] === 'opbeans-node'
-          ) as Record<string, any>;
+          .find((doc: any) => !isOpDoc(doc) && doc['service.name'] === 'opbeans-node') as Record<
+          string,
+          any
+        >;
 
         helpers.ruleDataClientMock.getReader().search.mockResolvedValueOnce({
           hits: {
-            hits: [{ _source: lastOpbeansNodeDoc } as any],
+            hits: [
+              { _source: lastOpbeansNodeDoc, _index: 'a', _primary_term: 4, _seq_no: 2 } as any,
+            ],
             total: {
               value: 1,
               relation: 'eq',
@@ -440,7 +468,7 @@ describe('createLifecycleRuleTypeFactory', () => {
 
         const body = (await helpers.ruleDataClientMock.getWriter()).bulk.mock.calls[1][0].body!;
 
-        const documents = body.filter((op: any) => !('index' in op)) as any[];
+        const documents: any[] = body.filter((op: any) => !isOpDoc(op));
 
         const opbeansJavaAlertDoc = documents.find(
           (doc) => castArray(doc['service.name'])[0] === 'opbeans-java'
@@ -462,3 +490,9 @@ describe('createLifecycleRuleTypeFactory', () => {
     });
   });
 });
+
+function isOpDoc(doc: any) {
+  if (doc?.index?._id) return true;
+  if (doc?.create?._id) return true;
+  return false;
+}

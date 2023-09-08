@@ -15,6 +15,7 @@ import { errors } from '@elastic/elasticsearch';
 import type {
   AuthenticationHandler,
   AuthToolkit,
+  CustomBrandingSetup,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
@@ -33,9 +34,12 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import { AuthenticationResult } from './authentication_result';
+import { AuthenticationService } from './authentication_service';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -50,8 +54,6 @@ import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
-import { AuthenticationResult } from './authentication_result';
-import { AuthenticationService } from './authentication_service';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -62,6 +64,7 @@ describe('AuthenticationService', () => {
     config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
     buildNumber: number;
+    customBranding: jest.Mocked<CustomBrandingSetup>;
   };
   let mockStartAuthenticationParams: {
     audit: jest.Mocked<AuditServiceSetup>;
@@ -75,6 +78,7 @@ describe('AuthenticationService', () => {
     applicationName: 'kibana-.kibana';
     kibanaFeatures: [];
     isElasticCloudDeployment: jest.Mock;
+    customLogoutURL?: string;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -93,6 +97,7 @@ describe('AuthenticationService', () => {
       }),
       license: licenseMock.create(),
       buildNumber: 100500,
+      customBranding: customBrandingServiceMock.createSetupContract(),
     };
     mockCanRedirectRequest.mockReturnValue(false);
 
@@ -117,6 +122,7 @@ describe('AuthenticationService', () => {
       applicationName: 'kibana-.kibana',
       kibanaFeatures: [],
       isElasticCloudDeployment: jest.fn().mockReturnValue(false),
+      customLogoutURL: 'https://some-logout-origin/logout',
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath

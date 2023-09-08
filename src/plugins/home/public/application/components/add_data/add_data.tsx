@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { FC, MouseEvent } from 'react';
 import {
   EuiButton,
@@ -22,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { MoveData } from '../move_data';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { getServices } from '../../kibana_services';
 
@@ -33,7 +35,7 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric } = getServices();
+  const { trackUiMetric, guidedOnboardingService } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {
     return (
@@ -68,7 +70,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
             <EuiSpacer />
 
             <EuiFlexGroup gutterSize="m">
-              {isCloudEnabled && (
+              {guidedOnboardingService?.isEnabled && (
                 <EuiFlexItem grow={false}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
@@ -91,9 +93,9 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"
-                    // on self managed this button is primary
-                    // on Cloud this button is secondary, because there is a "guided onboarding" button
-                    fill={!isCloudEnabled}
+                    // when guided onboarding is disabled, this button is primary
+                    // otherwise it's secondary, because there is a "guided onboarding" button
+                    fill={!guidedOnboardingService?.isEnabled}
                     href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {
@@ -139,16 +141,22 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiImage
-              alt="Illustration of Elastic data integrations"
-              className="homDataAdd__illustration"
-              src={
-                addBasePath('/plugins/kibanaReact/assets/') +
-                (isDarkMode
-                  ? 'illustration_integrations_darkmode.svg'
-                  : 'illustration_integrations_lightmode.svg')
-              }
-            />
+            {!isCloudEnabled ? (
+              <MoveData addBasePath={addBasePath} />
+            ) : (
+              <EuiImage
+                alt={i18n.translate('home.addData.illustration.alt.text', {
+                  defaultMessage: 'Illustration of Elastic data integrations',
+                })}
+                className="homDataAdd__illustration"
+                src={
+                  addBasePath('/plugins/kibanaReact/assets/') +
+                  (isDarkMode
+                    ? 'illustration_integrations_darkmode.svg'
+                    : 'illustration_integrations_lightmode.svg')
+                }
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>

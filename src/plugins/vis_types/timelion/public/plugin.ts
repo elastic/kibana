@@ -40,7 +40,7 @@ import {
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';
 
-import type { ConfigSchema } from '../config';
+import type { TimelionPublicConfig } from '../config';
 
 /** @internal */
 export interface TimelionVisDependencies extends Partial<CoreStart> {
@@ -82,7 +82,7 @@ export class TimelionVisPlugin
       TimelionVisStartDependencies
     >
 {
-  constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(public initializerContext: PluginInitializerContext<TimelionPublicConfig>) {}
 
   public setup(
     { uiSettings, http, theme }: CoreSetup,
@@ -97,7 +97,12 @@ export class TimelionVisPlugin
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     expressions.registerRenderer(getTimelionVisRenderer(dependencies));
-    visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
+    const { readOnly } = this.initializerContext.config.get<TimelionPublicConfig>();
+    visualizations.createBaseVisualization({
+      ...getTimelionVisDefinition(dependencies),
+      disableCreate: Boolean(readOnly),
+      disableEdit: Boolean(readOnly),
+    });
   }
 
   public start(

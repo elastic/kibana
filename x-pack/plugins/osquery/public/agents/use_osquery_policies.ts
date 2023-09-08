@@ -8,6 +8,7 @@
 import { uniq } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -19,7 +20,8 @@ export const useOsqueryPolicies = () => {
     ['osqueryPolicies'],
     () =>
       http.get<{ items: Array<{ policy_id: string }> }>(
-        '/internal/osquery/fleet_wrapper/package_policies'
+        '/internal/osquery/fleet_wrapper/package_policies',
+        { version: API_VERSIONS.internal.v1 }
       ),
     {
       select: (response) => uniq<string>(response.items.map((p) => p.policy_id)),

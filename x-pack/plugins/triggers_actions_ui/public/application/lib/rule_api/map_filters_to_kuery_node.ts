@@ -6,6 +6,7 @@
  */
 
 import { fromKueryExpression, KueryNode, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { isEmpty } from 'lodash';
 import { RuleStatus } from '../../../types';
 
 export const mapFiltersToKueryNode = ({
@@ -13,19 +14,27 @@ export const mapFiltersToKueryNode = ({
   actionTypesFilter,
   ruleExecutionStatusesFilter,
   ruleLastRunOutcomesFilter,
+  ruleParamsFilter,
   ruleStatusesFilter,
   tagsFilter,
   searchText,
+  kueryNode,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
   ruleLastRunOutcomesFilter?: string[];
+  ruleParamsFilter?: Record<string, string | number | object>;
   ruleStatusesFilter?: RuleStatus[];
   searchText?: string;
+  kueryNode?: KueryNode;
 }): KueryNode | null => {
   const filterKueryNode = [];
+
+  if (kueryNode && !isEmpty(kueryNode)) {
+    filterKueryNode.push(kueryNode);
+  }
 
   if (typesFilter && typesFilter.length) {
     filterKueryNode.push(
@@ -58,6 +67,19 @@ export const mapFiltersToKueryNode = ({
       nodeBuilder.or(
         ruleLastRunOutcomesFilter.map((resf) =>
           nodeBuilder.is('alert.attributes.lastRun.outcome', resf)
+        )
+      )
+    );
+  }
+
+  if (ruleParamsFilter && Object.keys(ruleParamsFilter).length) {
+    filterKueryNode.push(
+      nodeBuilder.and(
+        Object.keys(ruleParamsFilter).map((ruleParam) =>
+          nodeBuilder.is(
+            `alert.attributes.params.${ruleParam}`,
+            String(ruleParamsFilter[ruleParam])
+          )
         )
       )
     );

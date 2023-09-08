@@ -22,7 +22,7 @@ export function getMetricChangeDescription(
     return { iconType: 'empty', message: '' };
   }
 
-  let iconType: string = 'alert';
+  let iconType: string = 'warning';
   let message: string;
 
   // For metric functions, actual and typical will be single value arrays.
@@ -36,7 +36,7 @@ export function getMetricChangeDescription(
       // TODO - do we want to enhance the description depending on detector?
       // e.g. 'Unusual location' if using a lat_long detector.
       return {
-        iconType: 'alert',
+        iconType: 'warning',
         message: i18n.translate(
           'xpack.ml.formatters.metricChangeDescription.unusualValuesDescription',
           {

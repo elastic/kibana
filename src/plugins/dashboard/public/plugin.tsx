@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -19,7 +20,6 @@ import {
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import type {
   ScreenshotModePluginSetup,
@@ -30,11 +30,10 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -45,20 +44,32 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
-  type DashboardContainerFactory,
-  DashboardContainerFactoryDefinition,
-  createDashboardContainerByValueRenderer,
-} from './application/embeddable';
-import type { DashboardMountContextProps } from './types';
-import { dashboardFeatureCatalog } from './dashboard_strings';
-import { type DashboardAppLocator, DashboardAppLocatorDefinition } from './locator';
-import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
-import { DashboardConstants, DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+  type DashboardAppLocator,
+  DashboardAppLocatorDefinition,
+} from './dashboard_app/locator/locator';
+import {
+  DASHBOARD_APP_ID,
+  LANDING_PAGE_PATH,
+  LEGACY_DASHBOARD_APP_ID,
+  SEARCH_SESSION_ID,
+} from './dashboard_constants';
+import { DashboardMountContextProps } from './dashboard_app/types';
+import type { FindDashboardsService } from './services/dashboard_content_management/types';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -68,6 +79,7 @@ export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
+  contentManagement: ContentManagementPublicSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share?: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -84,7 +96,8 @@ export interface DashboardStartDependencies {
   navigation: NavigationPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjects: SavedObjectsStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  contentManagement: ContentManagementPublicStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   screenshotMode: ScreenshotModePluginStart;
   share?: SharePluginStart;
@@ -94,6 +107,9 @@ export interface DashboardStartDependencies {
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
+  customBranding: CustomBrandingStart;
+  serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 export interface DashboardSetup {
@@ -101,12 +117,13 @@ export interface DashboardSetup {
 }
 
 export interface DashboardStart {
-  getDashboardContainerByValueRenderer: () => ReturnType<
-    typeof createDashboardContainerByValueRenderer
-  >;
   locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
+  findDashboardsService: () => Promise<FindDashboardsService>;
 }
+
+export let resolveServicesReady: () => void;
+export const servicesReady = new Promise<void>((resolve) => (resolveServicesReady = resolve));
 
 export class DashboardPlugin
   implements
@@ -127,11 +144,12 @@ export class DashboardPlugin
   ) {
     const { registry, pluginServices } = await import('./services/plugin_services');
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins, initContext }));
+    resolveServicesReady();
   }
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -143,12 +161,9 @@ export class DashboardPlugin
           getDashboardFilterFields: async (dashboardId: string) => {
             const { pluginServices } = await import('./services/plugin_services');
             const {
-              dashboardSavedObject: { loadDashboardStateFromSavedObject },
+              dashboardContentManagement: { loadDashboardState },
             } = pluginServices.getServices();
-            return (
-              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardState
-                ?.filters ?? []
-            );
+            return (await loadDashboardState({ id: dashboardId })).dashboardInput?.filters ?? [];
           },
         })
       );
@@ -161,7 +176,7 @@ export class DashboardPlugin
       restorePreviousUrl,
     } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
-      defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,
+      defaultSubUrl: `#${LANDING_PAGE_PATH}`,
       storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
@@ -187,14 +202,16 @@ export class DashboardPlugin
         // Do not save SEARCH_SESSION_ID into nav link, because of possible edge cases
         // that could lead to session restoration failure.
         // see: https://github.com/elastic/kibana/issues/87149
-        if (newNavLink.includes(DashboardConstants.SEARCH_SESSION_ID)) {
-          newNavLink = replaceUrlHashQuery(newNavLink, (query) => {
-            delete query[DashboardConstants.SEARCH_SESSION_ID];
-            return query;
-          });
-        }
 
-        return newNavLink;
+        // We also don't want to store the table list view state.
+        // The question is: what _do_ we want to save here? :)
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
+        return replaceUrlHashQuery(newNavLink, (query) => {
+          [SEARCH_SESSION_ID, ...tableListUrlState].forEach((param) => {
+            delete query[param];
+          });
+          return query;
+        });
       },
     });
 
@@ -204,9 +221,6 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
-
-      const placeholderFactory = new PlaceholderEmbeddableFactory();
-      embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
     });
 
     this.stopUrlTracking = () => {
@@ -214,17 +228,17 @@ export class DashboardPlugin
     };
 
     const app: App = {
-      id: DashboardConstants.DASHBOARDS_ID,
+      id: DASHBOARD_APP_ID,
       title: 'Dashboard',
       order: 2500,
       euiIconType: 'logoKibana',
-      defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
+      defaultPath: `#${LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        const { mountApp } = await import('./application/dashboard_router');
+        const { mountApp } = await import('./dashboard_app/dashboard_router');
         appMounted();
 
         const mountContext: DashboardMountContextProps = {
@@ -244,47 +258,55 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
-    urlForwarding.forwardApp(
-      DashboardConstants.DASHBOARDS_ID,
-      DashboardConstants.DASHBOARDS_ID,
-      (path) => {
-        const [, tail] = /(\?.*)/.exec(path) || [];
-        // carry over query if it exists
-        return `#/list${tail || ''}`;
+    urlForwarding.forwardApp(DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
+      const [, tail] = /(\?.*)/.exec(path) || [];
+      // carry over query if it exists
+      return `#/list${tail || ''}`;
+    });
+    urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
+      const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
+      if (!id && !tail) {
+        // unrecognized sub url
+        return '#/list';
       }
-    );
-    urlForwarding.forwardApp(
-      DashboardConstants.DASHBOARD_ID,
-      DashboardConstants.DASHBOARDS_ID,
-      (path) => {
-        const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
-        if (!id && !tail) {
-          // unrecognized sub url
-          return '#/list';
-        }
-        if (!id && tail) {
-          // unsaved dashboard, but probably state in URL
-          return `#/create${tail || ''}`;
-        }
-        // persisted dashboard, probably with url state
-        return `#/view/${id}${tail || ''}`;
+      if (!id && tail) {
+        // unsaved dashboard, but probably state in URL
+        return `#/create${tail || ''}`;
       }
-    );
+      // persisted dashboard, probably with url state
+      return `#/view/${id}${tail || ''}`;
+    });
+    const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
+      defaultMessage: 'Dashboard',
+    });
 
     if (home) {
       home.featureCatalogue.register({
-        id: DashboardConstants.DASHBOARD_ID,
-        title: dashboardFeatureCatalog.getTitle(),
-        subtitle: dashboardFeatureCatalog.getSubtitle(),
-        description: dashboardFeatureCatalog.getDescription(),
+        id: LEGACY_DASHBOARD_APP_ID,
+        title: dashboardAppTitle,
+        subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
+          defaultMessage: 'Analyze data in dashboards.',
+        }),
+        description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
+          defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+        }),
         icon: 'dashboardApp',
-        path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
+        path: `/app/dashboards#${LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: 'data',
         solutionId: 'kibana',
         order: 100,
       });
     }
+
+    // register content management
+    contentManagement.registry.register({
+      id: CONTENT_ID,
+      version: {
+        latest: LATEST_VERSION,
+      },
+      name: dashboardAppTitle,
+    });
 
     return {
       locator: this.locator,
@@ -293,7 +315,7 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     this.startDashboardKibanaServices(core, plugins, this.initializerContext).then(async () => {
-      const { buildAllDashboardActions } = await import('./application/actions');
+      const { buildAllDashboardActions } = await import('./dashboard_actions');
       buildAllDashboardActions({
         core,
         plugins,
@@ -302,20 +324,15 @@ export class DashboardPlugin
     });
 
     return {
-      getDashboardContainerByValueRenderer: () => {
-        const dashboardContainerFactory =
-          plugins.embeddable.getEmbeddableFactory(DASHBOARD_CONTAINER_TYPE);
-
-        if (!dashboardContainerFactory) {
-          throw new Error(`${DASHBOARD_CONTAINER_TYPE} Embeddable Factory not found`);
-        }
-
-        return createDashboardContainerByValueRenderer({
-          factory: dashboardContainerFactory as DashboardContainerFactory,
-        });
-      },
       locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
+      findDashboardsService: async () => {
+        const { pluginServices } = await import('./services/plugin_services');
+        const {
+          dashboardContentManagement: { findDashboards },
+        } = pluginServices.getServices();
+        return findDashboards;
+      },
     };
   }
 

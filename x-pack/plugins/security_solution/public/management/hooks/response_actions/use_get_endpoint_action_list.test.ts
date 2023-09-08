@@ -8,7 +8,7 @@
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointActionList } from './use_get_endpoint_action_list';
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { useQuery as _useQuery } from '@tanstack/react-query';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 
@@ -55,7 +55,8 @@ describe('useGetEndpointActionList hook', () => {
     );
 
     expect(apiMocks.responseProvider.actionList).toHaveBeenCalledWith({
-      path: `${ENDPOINTS_ACTION_LIST_ROUTE}`,
+      path: BASE_ENDPOINT_ACTION_ROUTE,
+      version: '2023-10-31',
       query: {
         agentIds: ['123', '456'],
         commands: ['isolate', 'unisolate'],

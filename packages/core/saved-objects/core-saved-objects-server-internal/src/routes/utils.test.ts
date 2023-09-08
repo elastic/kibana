@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
+import {
+  createSavedObjectsStreamFromNdJson,
+  validateTypes,
+  validateObjects,
+  throwOnHttpHiddenTypes,
+  throwOnGloballyHiddenTypes,
+  throwIfTypeNotVisibleByAPI,
+  throwIfAnyTypeNotVisibleByAPI,
+  logWarnOnExternalRequest,
+} from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 import { catchAndReturnBoomErrors } from './utils';
@@ -18,6 +27,10 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+import { typeRegistryInstanceMock } from '../saved_objects_service.test.mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { EXPORT_ALL_TYPES_TOKEN } from '@kbn/core-saved-objects-import-export-server-internal';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -136,6 +149,20 @@ describe('validateTypes', () => {
     expect(validateTypes(allowedTypes, allowedTypes)).toBeUndefined();
     expect(validateTypes(['config'], allowedTypes)).toBeUndefined();
   });
+  it('supports the all types token', () => {
+    expect(validateTypes([EXPORT_ALL_TYPES_TOKEN], allowedTypes)).toBeUndefined();
+    expect(validateTypes([EXPORT_ALL_TYPES_TOKEN, allowedTypes[0]], allowedTypes)).toBeUndefined();
+  });
+  it('returns an error message for non-allowed types even with the all types token', () => {
+    expect(
+      validateTypes(
+        [EXPORT_ALL_TYPES_TOKEN, 'not-allowed-type', 'not-allowed-type-2'],
+        allowedTypes
+      )
+    ).toMatchInlineSnapshot(
+      `"Trying to export non-exportable type(s): not-allowed-type, not-allowed-type-2"`
+    );
+  });
 });
 
 describe('validateObjects', () => {
@@ -234,5 +261,162 @@ describe('catchAndReturnBoomErrors', () => {
     await expect(wrapped(context, request, response)).rejects.toMatchInlineSnapshot(
       `[Error: Internal Server Error]`
     );
+  });
+});
+
+describe('throwOnHttpHiddenTypes', () => {
+  it('should throw on types hidden from the HTTP Apis', () => {
+    expect(() => {
+      throwOnHttpHiddenTypes(['not-allowed-type']);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type(s): not-allowed-type: Bad Request"`
+    );
+    expect(() => {
+      throwOnHttpHiddenTypes(['index-pattern', 'not-allowed-type', 'not-allowed-type-2']);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type(s): index-pattern, not-allowed-type, not-allowed-type-2: Bad Request"`
+    );
+  });
+  it("returns if there aren't any types provided to check", () => {
+    expect(() => {
+      throwOnHttpHiddenTypes([]);
+    }).not.toThrowError();
+  });
+});
+
+describe('throwOnGloballyHiddenTypes', () => {
+  const httpVisibleTypes = ['config', 'index-pattern', 'dashboard'];
+
+  it('throws if some objects are not globally visible', () => {
+    expect(() => {
+      throwOnGloballyHiddenTypes(httpVisibleTypes, ['not-allowed-type']);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type(s): not-allowed-type: Bad Request"`
+    );
+  });
+
+  it("returns if there aren't any types provided to check", () => {
+    expect(() => {
+      throwOnGloballyHiddenTypes(httpVisibleTypes, []);
+    }).not.toThrowError();
+  });
+});
+
+describe('throwIfTypeNotVisibleByAPI', () => {
+  const registry = typeRegistryInstanceMock;
+  registry.getType.mockImplementation((name: string) => {
+    return {
+      name,
+      hidden: name === 'hidden' ? true : false,
+      hiddenFromHttpApis: name === 'hiddenFromHttpApis' ? true : false,
+      namespaceType: 'multiple-isolated',
+      mappings: { properties: {} },
+    };
+  });
+
+  it('throws if a type is not visible by to the HTTP APIs', () => {
+    expect(() =>
+      throwIfTypeNotVisibleByAPI('hiddenFromHttpApis', registry)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type: 'hiddenFromHttpApis': Bad Request"`
+    );
+  });
+
+  it('does not throw when a type is not hidden from the HTTP APIS', () => {
+    expect(() => throwIfTypeNotVisibleByAPI('hidden', registry)).not.toThrowError();
+  });
+
+  it('does not throw on visible types', () => {
+    expect(() => throwIfTypeNotVisibleByAPI('config', registry)).not.toThrowError();
+  });
+});
+
+describe('throwIfAnyTypeNotVisibleByAPI', () => {
+  const registry = typeRegistryInstanceMock;
+  registry.getType.mockImplementation((name: string) => {
+    return {
+      name,
+      hidden: name === 'hidden' ? true : false,
+      hiddenFromHttpApis: name === 'hiddenFromHttpApis' ? true : false,
+      namespaceType: 'multiple-isolated',
+      mappings: { properties: {} },
+    };
+  });
+
+  it('throws if the provided types contains any that are not visible by to the HTTP APIs', () => {
+    expect(() =>
+      throwIfAnyTypeNotVisibleByAPI(['hiddenFromHttpApis'], registry)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Unsupported saved object type(s): hiddenFromHttpApis: Bad Request"`
+    );
+  });
+
+  it('does not throw when a type is not hidden from the HTTP APIS', () => {
+    expect(() => throwIfAnyTypeNotVisibleByAPI(['hidden'], registry)).not.toThrowError();
+  });
+
+  it('does not throw on visible types', () => {
+    expect(() => throwIfAnyTypeNotVisibleByAPI(['config'], registry)).not.toThrowError();
+  });
+});
+
+describe('logWarnOnExternalRequest', () => {
+  let logger: MockedLogger;
+  const firstPartyRequestHeaders = {
+    'kbn-version': 'a',
+    referer: 'b',
+    'x-elastic-internal-origin': 'foo',
+  };
+  const kibRequest = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
+  const extRequest = httpServerMock.createKibanaRequest();
+
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('logs on external requests to non-bulk apis', () => {
+    logWarnOnExternalRequest({
+      method: 'get',
+      path: '/resolve/{type}/{id}',
+      req: extRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The get saved object API /resolve/{type}/{id} is deprecated.'
+    );
+  });
+
+  it('logs on external requests to bulk apis', () => {
+    logWarnOnExternalRequest({
+      method: 'post',
+      path: '/_bulk_resolve',
+      req: extRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The post saved object API /_bulk_resolve is deprecated.'
+    );
+  });
+
+  it('does not log a warning on internal requests', () => {
+    logWarnOnExternalRequest({
+      method: 'get',
+      path: '/resolve/{type}/{id}',
+      req: kibRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    logWarnOnExternalRequest({
+      method: 'post',
+      path: '/_bulk_resolve',
+      req: kibRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 });

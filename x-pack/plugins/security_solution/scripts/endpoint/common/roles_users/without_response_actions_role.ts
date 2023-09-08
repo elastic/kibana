@@ -7,7 +7,7 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 
-export const noResponseActionsRole: Omit<Role, 'name'> = {
+export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
   elasticsearch: {
     cluster: ['manage'],
     indices: [
@@ -18,8 +18,13 @@ export const noResponseActionsRole: Omit<Role, 'name'> = {
           '.siem-signals-*',
           '.items-*',
           '.lists-*',
+          '.logs-*',
         ],
         privileges: ['manage', 'write', 'read', 'view_index_metadata'],
+      },
+      {
+        names: ['logs-*'],
+        privileges: ['read'],
       },
     ],
     run_as: [],
@@ -51,12 +56,10 @@ export const noResponseActionsRole: Omit<Role, 'name'> = {
           'event_filters_read',
           'policy_management_all',
           'policy_management_read',
-          'actions_log_management_all',
-          'actions_log_management_read',
         ],
         stackAlerts: ['all'],
       },
       spaces: ['*'],
     },
   ],
-};
+});

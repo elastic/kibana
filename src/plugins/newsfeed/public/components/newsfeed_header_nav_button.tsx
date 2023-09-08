@@ -9,6 +9,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import type { NewsfeedApi } from '../lib/api';
 import { NewsfeedFlyout } from './flyout_list';
 import { FetchResult } from '../types';
@@ -22,11 +24,13 @@ export const NewsfeedContext = React.createContext({} as INewsfeedContext);
 
 export interface Props {
   newsfeedApi: NewsfeedApi;
+  hasCustomBranding$: Observable<boolean>;
 }
 
-export const NewsfeedNavButton = ({ newsfeedApi }: Props) => {
+export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$ }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
+  const hasCustomBranding = useObservable(hasCustomBranding$, false);
   const hasNew = useMemo(() => {
     return newsFetchResult ? newsFetchResult.hasNew : false;
   }, [newsFetchResult]);
@@ -71,7 +75,12 @@ export const NewsfeedNavButton = ({ newsfeedApi }: Props) => {
         >
           <EuiIcon type="cheer" size="m" />
         </EuiHeaderSectionItemButton>
-        {flyoutVisible ? <NewsfeedFlyout focusTrapProps={{ shards: [buttonRef] }} /> : null}
+        {flyoutVisible ? (
+          <NewsfeedFlyout
+            focusTrapProps={{ shards: [buttonRef] }}
+            showPlainSpinner={hasCustomBranding}
+          />
+        ) : null}
       </>
     </NewsfeedContext.Provider>
   );

@@ -33,7 +33,7 @@ exports[`NoDataCard props button 1`] = `
       class="emotion-euiCard__footer"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         type="button"
       >
         <span
@@ -87,7 +87,7 @@ exports[`NoDataCard props href 1`] = `
       class="emotion-euiCard__footer"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         type="button"
       >
         <span
@@ -138,7 +138,7 @@ exports[`NoDataCard props recommended 1`] = `
       class="emotion-euiCard__betaBadgeAnchor"
     >
       <span
-        class="euiBetaBadge emotion-euiBetaBadge-hollow-m-euiCard__betaBadge"
+        class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline-euiCard__betaBadge"
         id="generated-idBetaBadge"
         title="Recommended"
       >

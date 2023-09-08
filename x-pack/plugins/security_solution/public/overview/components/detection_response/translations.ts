@@ -73,15 +73,24 @@ export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse
 export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
 });
+
 export const CASES = (totalCases: number) =>
   i18n.translate('xpack.securitySolution.detectionResponse.casesByStatus.totalCases', {
     values: { totalCases },
     defaultMessage: 'total {totalCases, plural, =1 {case} other {cases}}',
   });
+
 export const CASES_BY_STATUS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.casesByStatusSectionTitle',
   {
     defaultMessage: 'Cases',
+  }
+);
+
+export const CASES_BY_STATUS_SECTION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.casesByStatusSectionTooltip',
+  {
+    defaultMessage: 'The cases table is not filterable via the SIEM global KQL search.',
   }
 );
 
@@ -114,6 +123,14 @@ export const CASES_TABLE_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.caseSectionTitle',
   {
     defaultMessage: 'Recently created cases',
+  }
+);
+
+export const CASES_TABLE_SECTION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseSectionTooltip',
+  {
+    defaultMessage:
+      'The recently created cases table is not filterable via the SIEM global KQL search.',
   }
 );
 
@@ -255,9 +272,45 @@ export const USER_TOOLTIP = i18n.translate(
     defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
   }
 );
+
 export const INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionResponse.investigateInTimeline',
   {
     defaultMessage: 'Investigate in Timeline',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_SEVERITY = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsSeverity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_STATUS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsStatus',
+  {
+    defaultMessage: 'Status',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_RULENAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsRuleName',
+  {
+    defaultMessage: 'Rule name',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_HOSTNAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsHostName',
+  {
+    defaultMessage: 'Host name',
+  }
+);
+
+export const OPEN_IN_ALERTS_TITLE_USERNAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.openInAlertsUserName',
+  {
+    defaultMessage: 'Username',
   }
 );

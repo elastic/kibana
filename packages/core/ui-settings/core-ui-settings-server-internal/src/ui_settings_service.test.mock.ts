@@ -7,12 +7,17 @@
  */
 
 export const MockUiSettingsClientConstructor = jest.fn();
-jest.doMock('./ui_settings_client', () => ({
+jest.doMock('./clients/ui_settings_client', () => ({
   UiSettingsClient: MockUiSettingsClientConstructor,
 }));
 
+export const MockUiSettingsGlobalClientConstructor = jest.fn();
+jest.doMock('./clients/ui_settings_global_client', () => ({
+  UiSettingsGlobalClient: MockUiSettingsGlobalClientConstructor,
+}));
+
 export const MockUiSettingsDefaultsClientConstructor = jest.fn();
-jest.doMock('./ui_settings_defaults_client', () => ({
+jest.doMock('./clients/ui_settings_defaults_client', () => ({
   UiSettingsDefaultsClient: MockUiSettingsDefaultsClientConstructor,
 }));
 

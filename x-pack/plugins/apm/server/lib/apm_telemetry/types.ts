@@ -42,6 +42,7 @@ export interface APMPerService {
   agent: {
     name: string;
     version: string;
+    activation_method: string;
   };
   service: {
     language: {
@@ -101,13 +102,14 @@ export interface APMUsage {
     span: TimeframeMap;
     error: TimeframeMap;
     metric: TimeframeMap;
-    sourcemap: TimeframeMap;
     onboarding: TimeframeMap;
     agent_configuration: TimeframeMapAll;
-    max_transaction_groups_per_service: TimeframeMap;
-    max_error_groups_per_service: TimeframeMap;
+    max_transaction_groups_per_service: TimeframeMap1d;
+    max_error_groups_per_service: TimeframeMap1d;
     traces: TimeframeMap;
-    services: TimeframeMap;
+    services: TimeframeMap1d;
+    environments: TimeframeMap1d;
+    span_destination_service_resource: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
@@ -125,7 +127,7 @@ export interface APMUsage {
     };
   };
   retainment: Record<
-    'span' | 'transaction' | 'error' | 'metric' | 'sourcemap' | 'onboarding',
+    'span' | 'transaction' | 'error' | 'metric' | 'onboarding',
     { ms: number }
   >;
   integrations: {
@@ -138,6 +140,7 @@ export interface APMUsage {
     {
       agent: {
         version: string[];
+        activation_method: string[];
       };
       service: {
         framework: {

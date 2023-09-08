@@ -15,7 +15,6 @@ import {
 } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import { createStore } from '../../common/store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import React from 'react';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 
@@ -48,7 +47,6 @@ const store = createStore(
     },
   },
   SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
   kibanaObservable,
   storage
 );

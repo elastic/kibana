@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+export { SavedObjectsImporter, SavedObjectsImportError } from './src/import';
 export {
   SavedObjectsExporter,
   SavedObjectsExportError,
-  SavedObjectsImporter,
-  SavedObjectsImportError,
-} from './src';
+  EXPORT_ALL_TYPES_TOKEN,
+} from './src/export';

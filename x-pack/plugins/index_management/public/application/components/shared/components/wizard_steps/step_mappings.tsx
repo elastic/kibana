@@ -25,6 +25,8 @@ import {
   IndexSettings,
 } from '../../../mappings_editor';
 
+import { documentationService } from '../../../mappings_editor/shared_imports';
+
 interface Props {
   onChange: (content: Forms.Content) => void;
   esDocsBase: string;
@@ -90,7 +92,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
                 <EuiButtonEmpty
                   size="s"
                   flush="right"
-                  href={`${esDocsBase}/mapping.html`}
+                  href={documentationService.getMappingDocumentationLink()}
                   target="_blank"
                   iconType="help"
                 >

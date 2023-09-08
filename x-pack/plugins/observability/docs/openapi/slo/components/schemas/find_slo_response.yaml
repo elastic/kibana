@@ -1,0 +1,18 @@
+title: Find SLO response
+description: >
+  A paginated response of SLOs matching the query.
+type: object
+properties:
+  page:
+    type: number
+    example: 1
+  perPage:
+    type: number
+    example: 25
+  total:
+    type: number
+    example: 34
+  results:
+    type: array
+    items:
+      $ref: 'slo_response.yaml'

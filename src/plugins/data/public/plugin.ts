@@ -34,8 +34,10 @@ import {
 import {
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
-  createValueClickAction,
-  createSelectRangeAction,
+  createFiltersFromMultiValueClickAction,
+  createMultiValueClickActionDefinition,
+  createValueClickActionDefinition,
+  createSelectRangeActionDefinition,
 } from './actions';
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
@@ -137,20 +139,28 @@ export class DataPublicPlugin
       fieldFormats,
       indexPatterns: dataViews,
       screenshotMode,
+      scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
     });
     setSearchService(search);
 
     uiActions.addTriggerAction(
       'SELECT_RANGE_TRIGGER',
-      createSelectRangeAction(() => ({
+      createSelectRangeActionDefinition(() => ({
         uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
       'VALUE_CLICK_TRIGGER',
-      createValueClickAction(() => ({
+      createValueClickActionDefinition(() => ({
         uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      'MULTI_VALUE_CLICK_TRIGGER',
+      createMultiValueClickActionDefinition(() => ({
+        query,
       }))
     );
 
@@ -159,6 +169,7 @@ export class DataPublicPlugin
       actions: {
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
+        createFiltersFromMultiValueClickAction,
       },
       datatableUtilities,
       fieldFormats,

@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { useApmParams } from '../../../hooks/use_apm_params';
-
 import { DatePicker } from '.';
 import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 import {
   toBoolean,
   toNumber,
 } from '../../../context/url_params_context/helpers';
+
+export const DEFAULT_REFRESH_INTERVAL = 60000;
 
 export function ApmDatePicker() {
   const { query } = useApmParams('/*');
@@ -26,12 +27,12 @@ export function ApmDatePicker() {
     rangeFrom,
     rangeTo,
     refreshPaused: refreshPausedFromUrl = 'true',
-    refreshInterval: refreshIntervalFromUrl = '0',
+    refreshInterval: refreshIntervalFromUrl,
   } = query;
 
   const refreshPaused = toBoolean(refreshPausedFromUrl);
-
-  const refreshInterval = toNumber(refreshIntervalFromUrl);
+  const refreshInterval =
+    toNumber(refreshIntervalFromUrl) ?? DEFAULT_REFRESH_INTERVAL;
 
   const { incrementTimeRangeId } = useTimeRangeId();
 

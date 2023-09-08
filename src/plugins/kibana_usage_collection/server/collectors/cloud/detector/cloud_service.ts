@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { AbortSignal } from 'abort-controller';
 import { isObject, isPlainObject } from 'lodash';
 import { CloudServiceResponse } from './cloud_response';
 

@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'context',
     'header',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -43,11 +44,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await filterBar.addFilter(columnName, 'is', value);
+        await filterBar.addFilter({ field: columnName, operation: 'is', value });
+        await PageObjects.header.waitUntilLoadingHasFinished();
       }
     });
 
@@ -82,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('next anchor timestamp matches previous anchor timestamp', async () => {
         // get the timestamp of the first row
         const firstContextTimestamp = await getTimestamp(false);
-        await dataGrid.clickRowToggle({ isAnchorRow: true });
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
 
         const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[1].click();

@@ -9,15 +9,14 @@ import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import styled from 'styled-components';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  div.euiTabs {
-    padding-left: 8px;
-  }
-`;
+const euiTabbedContentCss = {
+  'div.euiTabs': {
+    paddingLeft: '8px',
+  },
+};
 
 interface ResultTabsProps {
   actionId: string;
@@ -27,6 +26,7 @@ interface ResultTabsProps {
   failedAgentsCount?: number;
   endDate?: string;
   liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -37,6 +37,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   failedAgentsCount,
   startDate,
   liveQueryActionId,
+  error,
 }) => {
   const tabs = useMemo(
     () => [
@@ -52,6 +53,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             startDate={startDate}
             endDate={endDate}
             liveQueryActionId={liveQueryActionId}
+            error={error}
           />
         ),
       },
@@ -60,7 +62,12 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         name: 'Status',
         'data-test-subj': 'osquery-status-tab',
         content: (
-          <ActionResultsSummary actionId={actionId} agentIds={agentIds} expirationDate={endDate} />
+          <ActionResultsSummary
+            actionId={actionId}
+            agentIds={agentIds}
+            expirationDate={endDate}
+            error={error}
+          />
         ),
         append: failedAgentsCount ? (
           <EuiNotificationBadge className="eui-alignCenter" size="m">
@@ -69,11 +76,21 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ) : null,
       },
     ],
-    [actionId, agentIds, ecsMapping, startDate, endDate, liveQueryActionId, failedAgentsCount]
+    [
+      actionId,
+      agentIds,
+      ecsMapping,
+      startDate,
+      endDate,
+      liveQueryActionId,
+      error,
+      failedAgentsCount,
+    ]
   );
 
   return (
-    <StyledEuiTabbedContent
+    <EuiTabbedContent
+      css={euiTabbedContentCss}
       // TODO: extend the EuiTabbedContent component to support EuiTabs props
       // bottomBorder={false}
       tabs={tabs}

@@ -56,6 +56,6 @@ export function memcachedMetricsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['custom'],
+    integrationBrowserCategories: ['observability'],
   };
 }

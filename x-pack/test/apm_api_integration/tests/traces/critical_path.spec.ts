@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { getAggregatedCriticalPathRootNodes } from '@kbn/apm-plugin/common';
-import { apm, EntityArrayIterable, EntityIterable, timerange } from '@kbn/apm-synthtrace';
+import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { Assign } from '@kbn/utility-types';
-import { invert, sortBy, uniq } from 'lodash';
+import { compact, invert, sortBy, uniq } from 'lodash';
+import { Readable } from 'stream';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -47,17 +48,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   async function fetchAndBuildCriticalPathTree(
-    options: { fn: () => EntityIterable } & ({ serviceName: string; transactionName: string } | {})
+    options: { fn: () => SynthtraceGenerator<ApmFields> } & (
+      | { serviceName: string; transactionName: string }
+      | {}
+    )
   ) {
     const { fn } = options;
 
     const generator = fn();
 
-    const events = generator.toArray();
+    const unserialized = Array.from(generator);
 
-    const traceIds = uniq(events.map((event) => event['trace.id']!));
+    const serialized = unserialized.flatMap((event) => event.serialize());
 
-    await synthtraceEsClient.index(new EntityArrayIterable(events));
+    const traceIds = compact(uniq(serialized.map((event) => event['trace.id'])));
+
+    await synthtraceEsClient.index(Readable.from(unserialized));
 
     return apmApiClient
       .readUser({

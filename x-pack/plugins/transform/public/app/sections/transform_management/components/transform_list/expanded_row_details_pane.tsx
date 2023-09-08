@@ -48,11 +48,15 @@ export const Section: FC<SectionProps> = ({ section }) => {
 
 interface ExpandedRowDetailsPaneProps {
   sections: SectionConfig[];
+  dataTestSubj?: string;
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sections }) => {
+export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
+  sections,
+  dataTestSubj,
+}) => {
   return (
-    <div data-test-subj="transformDetailsTabContent">
+    <div data-test-subj={dataTestSubj ?? 'transformDetailsTabContent'}>
       <EuiFlexGroup>
         <EuiFlexItem style={{ width: '50%' }}>
           {sections

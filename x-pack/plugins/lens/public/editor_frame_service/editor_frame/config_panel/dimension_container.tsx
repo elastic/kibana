@@ -8,7 +8,7 @@
 import './dimension_container.scss';
 
 import React from 'react';
-import { FlyoutContainer } from './flyout_container';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
 
 export function DimensionContainer({
   panel,

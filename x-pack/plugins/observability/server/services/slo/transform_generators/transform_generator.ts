@@ -5,157 +5,160 @@
  * 2.0.
  */
 
-import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import {
-  AggregationsCalendarInterval,
+  MappingRuntimeFields,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
-import {
-  calendarAlignedTimeWindowSchema,
-  rollingTimeWindowSchema,
-  timeslicesBudgetingMethodSchema,
-} from '../../../types/schema';
 import { SLO } from '../../../domain/models';
 
 export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
-  public buildCommonRuntimeMappings(slo: SLO) {
+  public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
+    const mustIncludeAllInstanceId = slo.groupBy === ALL_VALUE || slo.groupBy === '';
+
     return {
       'slo.id': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.id}')`,
         },
       },
       'slo.revision': {
-        type: 'long' as MappingRuntimeFieldType,
+        type: 'long',
         script: {
           source: `emit(${slo.revision})`,
         },
       },
-      'slo._internal.name': {
-        type: 'keyword' as MappingRuntimeFieldType,
+      'slo.groupBy': {
+        type: 'keyword',
+        script: {
+          source: `emit('${!!slo.groupBy ? slo.groupBy : ALL_VALUE}')`,
+        },
+      },
+      ...(mustIncludeAllInstanceId && {
+        'slo.instanceId': {
+          type: 'keyword',
+          script: {
+            source: `emit('${ALL_VALUE}')`,
+          },
+        },
+      }),
+      'slo.name': {
+        type: 'keyword',
         script: {
           source: `emit('${slo.name}')`,
         },
       },
-      'slo._internal.budgeting_method': {
-        type: 'keyword' as MappingRuntimeFieldType,
+      'slo.description': {
+        type: 'keyword',
         script: {
-          source: `emit('${slo.budgeting_method}')`,
+          source: `emit('${slo.description}')`,
         },
       },
-      'slo._internal.objective.target': {
-        type: 'double' as MappingRuntimeFieldType,
+      'slo.tags': {
+        type: 'keyword',
+        script: {
+          source: `emit('${slo.tags}')`,
+        },
+      },
+      'slo.indicator.type': {
+        type: 'keyword',
+        script: {
+          source: `emit('${slo.indicator.type}')`,
+        },
+      },
+      'slo.objective.target': {
+        type: 'double',
         script: {
           source: `emit(${slo.objective.target})`,
         },
       },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgeting_method) && {
-        'slo._internal.objective.timeslice_target': {
-          type: 'double' as MappingRuntimeFieldType,
+      ...(slo.objective.timesliceWindow && {
+        'slo.objective.sliceDurationInSeconds': {
+          type: 'long',
           script: {
-            source: `emit(${slo.objective.timeslice_target})`,
-          },
-        },
-        'slo._internal.objective.timeslice_window': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.objective.timeslice_window?.format()}')`,
+            source: `emit(${slo.objective.timesliceWindow!.asSeconds()})`,
           },
         },
       }),
-      'slo._internal.time_window.duration': {
-        type: 'keyword' as MappingRuntimeFieldType,
+      'slo.budgetingMethod': {
+        type: 'keyword',
         script: {
-          source: `emit('${slo.time_window.duration.format()}')`,
+          source: `emit('${slo.budgetingMethod}')`,
         },
       },
-      ...(calendarAlignedTimeWindowSchema.is(slo.time_window) && {
-        'slo._internal.time_window.is_rolling': {
-          type: 'boolean' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(false)`,
-          },
+      'slo.timeWindow.duration': {
+        type: 'keyword',
+        script: {
+          source: `emit('${slo.timeWindow.duration.format()}')`,
         },
-      }),
-      ...(rollingTimeWindowSchema.is(slo.time_window) && {
-        'slo._internal.time_window.is_rolling': {
-          type: 'boolean' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(true)`,
-          },
+      },
+      'slo.timeWindow.type': {
+        type: 'keyword',
+        script: {
+          source: `emit('${slo.timeWindow.type}')`,
         },
-      }),
+      },
     };
   }
 
-  public buildCommonGroupBy(slo: SLO) {
+  public buildDescription(slo: SLO): string {
+    return `Rolled-up SLI data for SLO: ${slo.name}`;
+  }
+
+  public buildCommonGroupBy(
+    slo: SLO,
+    sourceIndexTimestampField: string | undefined = '@timestamp',
+    extraGroupByFields = {}
+  ) {
+    let fixedInterval = '1m';
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      fixedInterval = slo.objective.timesliceWindow!.format();
+    }
+
+    const instanceIdField =
+      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE ? slo.groupBy : 'slo.instanceId';
+
     return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      'slo._internal.name': {
-        terms: {
-          field: 'slo._internal.name',
-        },
-      },
-      'slo._internal.budgeting_method': {
-        terms: {
-          field: 'slo._internal.budgeting_method',
-        },
-      },
-      'slo._internal.objective.target': {
-        terms: {
-          field: 'slo._internal.objective.target',
-        },
-      },
-      'slo._internal.time_window.duration': {
-        terms: {
-          field: 'slo._internal.time_window.duration',
-        },
-      },
-      'slo._internal.time_window.is_rolling': {
-        terms: {
-          field: 'slo._internal.time_window.is_rolling',
-        },
-      },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgeting_method) && {
-        'slo._internal.objective.timeslice_target': {
-          terms: {
-            field: 'slo._internal.objective.timeslice_target',
-          },
-        },
-        'slo._internal.objective.timeslice_window': {
-          terms: {
-            field: 'slo._internal.objective.timeslice_window',
-          },
+      'slo.id': { terms: { field: 'slo.id' } },
+      'slo.revision': { terms: { field: 'slo.revision' } },
+      'slo.groupBy': { terms: { field: 'slo.groupBy' } },
+      'slo.instanceId': { terms: { field: instanceIdField } },
+      'slo.name': { terms: { field: 'slo.name' } },
+      'slo.description': { terms: { field: 'slo.description' } },
+      'slo.tags': { terms: { field: 'slo.tags' } },
+      'slo.indicator.type': { terms: { field: 'slo.indicator.type' } },
+      'slo.objective.target': { terms: { field: 'slo.objective.target' } },
+      ...(slo.objective.timesliceWindow && {
+        'slo.objective.sliceDurationInSeconds': {
+          terms: { field: 'slo.objective.sliceDurationInSeconds' },
         },
       }),
-      // Field used in the destination index, using @timestamp as per mapping definition
+      'slo.budgetingMethod': { terms: { field: 'slo.budgetingMethod' } },
+      'slo.timeWindow.duration': { terms: { field: 'slo.timeWindow.duration' } },
+      'slo.timeWindow.type': { terms: { field: 'slo.timeWindow.type' } },
+      ...extraGroupByFields,
+      // @timestamp field defined in the destination index
       '@timestamp': {
         date_histogram: {
-          field: slo.settings.timestamp_field,
-          calendar_interval: '1m' as AggregationsCalendarInterval,
+          field: sourceIndexTimestampField, // timestamp field defined in the source index
+          fixed_interval: fixedInterval,
         },
       },
     };
   }
 
-  public buildSettings(slo: SLO): TransformSettings {
+  public buildSettings(
+    slo: SLO,
+    sourceIndexTimestampField: string | undefined = '@timestamp'
+  ): TransformSettings {
     return {
       frequency: slo.settings.frequency.format(),
-      sync_field: slo.settings.timestamp_field,
-      sync_delay: slo.settings.sync_delay.format(),
+      sync_field: sourceIndexTimestampField, // timestamp field defined in the source index
+      sync_delay: slo.settings.syncDelay.format(),
     };
   }
 }

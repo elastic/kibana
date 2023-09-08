@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiButtonGroup, EuiFlexGroup } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,24 +18,31 @@ import {
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import * as i18n from './translations';
 
 const StyledText = styled.span`
   font-weight: bold;
 `;
 
-const MyUtilities = styled(EuiFlexGroup)`
+const MyUtilities = styled.div`
   height: 50px;
 `;
 
-const StyledCondition = styled.span`
-  display: inline-block !important;
-  vertical-align: middle !important;
+const StyledBarGroup = styled(EuiFlexGroup)`
+  align-items: center;
+`;
+
+const PaginationUtilityBarText = styled(UtilityBarText)`
+  align-self: center;
 `;
 
 interface ExceptionsViewerUtilityProps {
   pagination: ExceptionsPagination;
   // Corresponds to last time exception items were fetched
   lastUpdated: string | number;
+  exceptionsToShow: { [id: string]: boolean };
+  onChangeExceptionsToShow: (optionId: string) => void;
+  isEndpoint: boolean;
 }
 
 /**
@@ -44,19 +51,22 @@ interface ExceptionsViewerUtilityProps {
 const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> = ({
   pagination,
   lastUpdated,
-}): JSX.Element => (
-  <MyUtilities alignItems="center" justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
+  exceptionsToShow,
+  onChangeExceptionsToShow,
+  isEndpoint,
+}): JSX.Element => {
+  return (
+    <MyUtilities>
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText dataTestSubj="exceptionsShowing">
+            <PaginationUtilityBarText dataTestSubj="exceptionsShowing">
               <FormattedMessage
                 id="xpack.securitySolution.exceptions.viewer.paginationDetails"
                 defaultMessage="Showing {partOne} of {partTwo}"
                 values={{
                   partOne: (
-                    <StyledText>{`1-${Math.min(
+                    <StyledText>{`${pagination.totalItemCount === 0 ? '0' : '1'}-${Math.min(
                       pagination.pageSize,
                       pagination.totalItemCount
                     )}`}</StyledText>
@@ -64,31 +74,46 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
                   partTwo: <StyledText>{`${pagination.totalItemCount}`}</StyledText>,
                 }}
               />
-            </UtilityBarText>
+            </PaginationUtilityBarText>
           </UtilityBarGroup>
         </UtilityBarSection>
-      </UtilityBar>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" data-test-subj="exceptionsViewerLastUpdated">
-        <FormattedMessage
-          id="xpack.securitySolution.exceptions.viewer.lastUpdated"
-          defaultMessage="Updated {updated}"
-          values={{
-            updated: (
-              <StyledCondition>
-                <FormattedRelativePreferenceDate
-                  value={lastUpdated}
-                  tooltipAnchorClassName="eui-textTruncate"
+        <UtilityBarSection>
+          <StyledBarGroup>
+            <UtilityBarText dataTestSubj="lastUpdated">
+              <EuiText size="s" data-test-subj="exceptionsViewerLastUpdated">
+                <FormattedMessage
+                  id="xpack.securitySolution.exceptions.viewer.lastUpdated"
+                  defaultMessage="Updated {updated}"
+                  values={{
+                    updated: <FormattedRelativePreferenceDate value={lastUpdated} />,
+                  }}
                 />
-              </StyledCondition>
-            ),
-          }}
-        />
-      </EuiText>
-    </EuiFlexItem>
-  </MyUtilities>
-);
+              </EuiText>
+            </UtilityBarText>
+            {!isEndpoint && (
+              <EuiButtonGroup
+                legend="Displayed exceptions button group"
+                options={[
+                  {
+                    id: `active`,
+                    label: i18n.ACTIVE_EXCEPTIONS,
+                  },
+                  {
+                    id: `expired`,
+                    label: i18n.EXPIRED_EXCEPTIONS,
+                  },
+                ]}
+                idToSelectedMap={exceptionsToShow}
+                onChange={onChangeExceptionsToShow}
+                type="multi"
+              />
+            )}
+          </StyledBarGroup>
+        </UtilityBarSection>
+      </UtilityBar>
+    </MyUtilities>
+  );
+};
 
 ExceptionsViewerUtilityComponent.displayName = 'ExceptionsViewerUtilityComponent';
 

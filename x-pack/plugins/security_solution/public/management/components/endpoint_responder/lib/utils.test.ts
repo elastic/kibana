@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parsedPidOrEntityIdParameter } from './utils';
+import { parsedPidOrEntityIdParameter, parsedExecuteTimeout } from './utils';
 
 describe('Endpoint Responder - Utilities', () => {
   describe('when using parsedPidOrEntityIdParameter()', () => {
@@ -19,9 +19,27 @@ describe('Endpoint Responder - Utilities', () => {
       expect(parameters).toEqual({ entity_id: '123qwe' });
     });
 
-    it('should return entity id with emtpy string if no params are defined', () => {
+    it('should return entity id with empty string if no params are defined', () => {
       const parameters = parsedPidOrEntityIdParameter({});
       expect(parameters).toEqual({ entity_id: '' });
+    });
+  });
+
+  describe('#parsedExecuteTimeout', () => {
+    it('should return `undefined` if no timeout is defined', () => {
+      expect(parsedExecuteTimeout()).toEqual(undefined);
+    });
+    it('should return `undefined` if timeout does not match pattern', () => {
+      expect(parsedExecuteTimeout('23d')).toEqual(undefined);
+    });
+    it('should return correct seconds for hours', () => {
+      expect(parsedExecuteTimeout('23h')).toEqual(82800);
+    });
+    it('should return correct seconds for minutes', () => {
+      expect(parsedExecuteTimeout('23m')).toEqual(1380);
+    });
+    it('should return correct seconds for seconds', () => {
+      expect(parsedExecuteTimeout('23s')).toEqual(23);
     });
   });
 });

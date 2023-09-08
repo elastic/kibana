@@ -15,6 +15,7 @@ export interface TemplateContext {
   license: string;
   artifactsDir: string;
   dockerPush: boolean;
+  dockerTag: string | null;
   dockerTagQualifier: string | null;
   dockerCrossCompile: boolean;
   imageTag: string;
@@ -26,6 +27,7 @@ export interface TemplateContext {
   baseImage: 'none' | 'ubi8' | 'ubi9' | 'ubuntu';
   baseImageName: string;
   cloud?: boolean;
+  serverless?: boolean;
   metricbeatTarball?: string;
   filebeatTarball?: string;
   ironbank?: boolean;

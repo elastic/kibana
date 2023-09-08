@@ -9,14 +9,16 @@ import React, { useMemo } from 'react';
 
 import type { EuiFlyoutSize } from '@elastic/eui';
 import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
-import type { Case } from '../../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import type { CaseUI } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
 import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
-
+import { CaseViewTabs } from '../case_view_tabs';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 interface CaseViewAlertsProps {
-  caseData: Case;
+  caseData: CaseUI;
 }
 export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
   const { triggersActionsUi } = useKibana().services;
@@ -35,21 +37,32 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     [caseData.comments]
   );
 
-  const { isLoading: isLoadingAlertFeatureIds, alertFeatureIds } =
+  const { isLoading: isLoadingAlertFeatureIds, data: alertFeatureIds } =
     useGetFeatureIds(alertRegistrationContexts);
+
+  const configId =
+    caseData.owner === SECURITY_SOLUTION_OWNER ? `${caseData.owner}-case` : caseData.owner;
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
-    configurationId: caseData.owner,
+    configurationId: configId,
     id: `case-details-alerts-${caseData.owner}`,
-    flyoutSize: (alertFeatureIds.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
-    featureIds: alertFeatureIds,
+    flyoutSize: (alertFeatureIds?.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
+    featureIds: alertFeatureIds ?? [],
     query: alertIdsQuery,
-    showExpandToDetails: alertFeatureIds.includes('siem'),
+    showExpandToDetails: Boolean(alertFeatureIds?.includes('siem')),
+    showAlertStatusWithFlapping: caseData.owner !== SECURITY_SOLUTION_OWNER,
   };
 
   if (alertIdsQuery.ids.values.length === 0) {
-    return <CaseViewAlertsEmpty />;
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+          <CaseViewAlertsEmpty />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   return isLoadingAlertFeatureIds ? (
@@ -59,7 +72,10 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    triggersActionsUi.getAlertsStateTable(alertStateProps)
+    <EuiFlexItem data-test-subj="case-view-alerts">
+      <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+      {triggersActionsUi.getAlertsStateTable(alertStateProps)}
+    </EuiFlexItem>
   );
 };
 CaseViewAlerts.displayName = 'CaseViewAlerts';

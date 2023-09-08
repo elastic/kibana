@@ -293,7 +293,7 @@
                 "section": "def-common.Params",
                 "text": "Params"
               },
-              ") => { noDataConfig: { solution: any; logo: any; action: { elasticAgent: { title: string; }; }; docsLink: string; }; onDataViewCreated: ",
+              ") => { showPlainSpinner: boolean; noDataConfig: { solution: any; logo: any; action: { elasticAgent: { title: string; }; }; docsLink: string; }; onDataViewCreated: ",
               "HandlerFunction",
               "; }"
             ],

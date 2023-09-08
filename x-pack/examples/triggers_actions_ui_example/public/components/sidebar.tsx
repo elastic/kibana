@@ -50,6 +50,11 @@ export const Sidebar = () => {
                 onClick: () => history.push(`/rule_event_log_list`),
               },
               {
+                id: 'global_rule_event_log_list',
+                name: 'Global Run History List',
+                onClick: () => history.push(`/global_rule_event_log_list`),
+              },
+              {
                 id: 'rule_status_dropdown',
                 name: 'Rule Status Dropdown',
                 onClick: () => history.push(`/rule_status_dropdown`),
@@ -63,6 +68,11 @@ export const Sidebar = () => {
                 id: 'alerts table',
                 name: 'Alert Table',
                 onClick: () => history.push('/alerts_table'),
+              },
+              {
+                id: 'rules settings link',
+                name: 'Rules Settings Link',
+                onClick: () => history.push('/rules_settings_link'),
               },
             ],
           },

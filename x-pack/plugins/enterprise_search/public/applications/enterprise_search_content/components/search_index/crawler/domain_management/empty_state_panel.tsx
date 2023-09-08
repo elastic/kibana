@@ -41,6 +41,18 @@ export const EmptyStatePanel: React.FC = () => {
           })}
         </h2>
       </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>
+          {i18n.translate(
+            'xpack.enterpriseSearch.crawler.domainManagement.emptyState.description',
+            {
+              defaultMessage:
+                'Configure the domains you’d like to crawl, and when ready trigger your first crawl.',
+            }
+          )}
+        </p>
+      </EuiText>
       <EuiSpacer size="l" />
       {events.length > 0 ? (
         <>

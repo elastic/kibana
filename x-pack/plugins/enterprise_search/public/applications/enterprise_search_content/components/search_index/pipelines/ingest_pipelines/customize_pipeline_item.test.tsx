@@ -12,9 +12,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiCallOut, EuiButton } from '@elastic/eui';
 
-import { CustomizeIngestPipelineItem } from './customize_pipeline_item';
+import { LicensingCallout } from '../../../../../shared/licensing_callout/licensing_callout';
+
+import { CopyAndCustomizePipelinePanel } from './customize_pipeline_item';
 
 const DEFAULT_VALUES = {
   // LicensingLogic
@@ -24,45 +26,39 @@ const DEFAULT_VALUES = {
   ingestionMethod: 'crawler',
   // KibanaLogic
   isCloud: false,
+  // PipelineLogic
+  hasIndexIngestionPipeline: false,
 };
 
-describe('CustomizeIngestPipelineItem', () => {
+describe('CopyAndCustomizePipelinePanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({ ...DEFAULT_VALUES });
   });
-  it('renders cta with license', () => {
-    const wrapper = shallow(<CustomizeIngestPipelineItem />);
-    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(1);
-    expect(wrapper.find(EuiText).children().text()).toContain('create an index-specific version');
-    expect(wrapper.find(EuiText).children().text()).not.toContain('With a platinum license');
+  it('renders callout with default pipeline', () => {
+    const wrapper = shallow(<CopyAndCustomizePipelinePanel />);
+
+    expect(wrapper.find(EuiCallOut)).toHaveLength(1);
+    expect(wrapper.find(EuiButton)).toHaveLength(1);
+    expect(wrapper.find(EuiButton).render().text()).toBe('Copy and customize');
   });
-  it('renders cta on cloud', () => {
-    setMockValues({
-      ...DEFAULT_VALUES,
-      hasPlatinumLicense: false,
-      isCloud: true,
-    });
-    const wrapper = shallow(<CustomizeIngestPipelineItem />);
-    expect(wrapper.find(EuiText)).toHaveLength(1);
-    expect(wrapper.find(EuiText).children().text()).toContain('create an index-specific version');
-    expect(wrapper.find(EuiText).children().text()).not.toContain('With a platinum license');
-  });
-  it('gates cta without license', () => {
+  it('returns LicensingCallout if gated', () => {
     setMockValues({
       ...DEFAULT_VALUES,
       hasPlatinumLicense: false,
       isCloud: false,
     });
-    const wrapper = shallow(<CustomizeIngestPipelineItem />);
-    expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
-    expect(wrapper.find(EuiText)).toHaveLength(1);
 
-    const ctaButton = wrapper.find(EuiButtonEmpty);
-    expect(ctaButton.prop('disabled')).toBe(true);
-    expect(ctaButton.prop('iconType')).toBe('lock');
+    const wrapper = shallow(<CopyAndCustomizePipelinePanel />);
+    expect(wrapper.find(LicensingCallout)).toHaveLength(1);
+  });
+  it('returns null if you have a custom pipeline', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      hasIndexIngestionPipeline: true,
+    });
 
-    expect(wrapper.find(EuiText).children().text()).toContain('With a platinum license');
+    const wrapper = shallow(<CopyAndCustomizePipelinePanel />);
+    expect(wrapper.isEmptyRender()).toBe(true);
   });
 });

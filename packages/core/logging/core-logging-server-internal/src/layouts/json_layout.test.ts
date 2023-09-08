@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EcsVersion } from '@kbn/ecs';
 import { LogLevel, LogRecord } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 
@@ -81,7 +82,7 @@ test('`format()` correctly formats record and includes correct ECS version.', ()
 
   for (const record of records) {
     const { ecs, ...restOfRecord } = JSON.parse(layout.format(record));
-    expect(ecs).toStrictEqual({ version: '8.4.0' });
+    expect(ecs).toStrictEqual({ version: EcsVersion });
     expect(restOfRecord).toMatchSnapshot();
   }
 });

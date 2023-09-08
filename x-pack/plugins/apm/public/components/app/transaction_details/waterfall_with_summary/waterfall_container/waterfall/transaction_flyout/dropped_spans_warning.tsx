@@ -33,7 +33,10 @@ export function DroppedSpansWarning({
             values: { dropped },
           }
         )}{' '}
-        <EuiLink href={docLinks.links.apm.droppedTransactionSpans}>
+        <EuiLink
+          data-test-subj="apmDroppedSpansWarningLearnMoreAboutDroppedSpansLink"
+          href={docLinks.links.apm.droppedTransactionSpans}
+        >
           {i18n.translate(
             'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
             {

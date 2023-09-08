@@ -48,7 +48,7 @@ export const DataStreamsGlobalStateCallOut: FunctionComponent<Props> = ({ dataSt
     <EuiCallOut
       data-test-subj="dataStreamWarningCallOut"
       title={i18nTexts.callout.title(dataStreamsCount)}
-      iconType="alert"
+      iconType="warning"
       color="warning"
     >
       {i18nTexts.callout.body(docLinks.links.snapshotRestore.createSnapshot)}

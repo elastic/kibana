@@ -86,6 +86,8 @@ export const InstallationModeSelectionStep = ({
         onChange={onChangeCallback}
         name={`radio group ${radioSuffix}`}
       />
-    ) : null,
+    ) : (
+      <React.Fragment />
+    ),
   };
 };

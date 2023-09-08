@@ -17,5 +17,6 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
     loadTestFile(require.resolve('./import_warnings'));
     loadTestFile(require.resolve('./hidden_types'));
     loadTestFile(require.resolve('./visible_in_management'));
+    loadTestFile(require.resolve('./hidden_from_http_apis'));
   });
 }

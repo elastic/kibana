@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fontStyle, functionWrapper } from '@kbn/presentation-util-plugin/common';
+import { fontStyle, functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { testPlot } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
   grayscalePalette,

@@ -22,6 +22,7 @@ import type { EndpointAppContext } from '../../types';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 const SCOPE = ['securitySolution'];
 const INTERVAL = '2h';
@@ -54,6 +55,7 @@ export class CheckMetadataTransformsTask {
       [TYPE]: {
         title: 'Security Solution Endpoint Metadata Periodic Tasks',
         timeout: TIMEOUT,
+        stateSchemaByVersion,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
@@ -82,9 +84,7 @@ export class CheckMetadataTransformsTask {
         schedule: {
           interval: INTERVAL,
         },
-        state: {
-          attempts: {},
-        },
+        state: emptyState,
         params: { version: VERSION },
       });
     } catch (e) {
@@ -96,7 +96,7 @@ export class CheckMetadataTransformsTask {
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. MetadataTask not started yet');
-      return;
+      return { state: taskInstance.state };
     }
 
     // Check that this task is current
@@ -121,21 +121,21 @@ export class CheckMetadataTransformsTask {
       const errMessage = `failed to get transform stats with error: ${err}`;
       this.logger.error(errMessage);
 
-      return;
+      return { state: taskInstance.state };
     }
 
     const packageClient = this.endpointAppContext.service.getInternalFleetServices().packages;
     const installation = await packageClient.getInstallation(FLEET_ENDPOINT_PACKAGE);
     if (!installation) {
       this.logger.info('no endpoint installation found');
-      return;
+      return { state: taskInstance.state };
     }
     const expectedTransforms = installation.installed_es.filter(
       (asset) => asset.type === ElasticsearchAssetType.transform
     );
 
     const { transforms } = transformStatsResponse.body;
-    let { reinstallAttempts } = taskInstance.state;
+    let { reinstallAttempts } = taskInstance.state as LatestTaskStateSchema;
     let runAt: Date | undefined;
     if (transforms.length !== expectedTransforms.length) {
       const { attempts, didAttemptReinstall } = await this.reinstallTransformsIfNeeded(
@@ -154,7 +154,9 @@ export class CheckMetadataTransformsTask {
 
     let didAttemptRestart: boolean = false;
     let highestAttempt: number = 0;
-    const restartAttempts: Record<string, number> = { ...taskInstance.state.restartAttempts };
+    const restartAttempts: LatestTaskStateSchema['restartAttempts'] = {
+      ...taskInstance.state.restartAttempts,
+    };
 
     for (const transform of transforms) {
       const restartedTransform = await this.restartTransformIfNeeded(

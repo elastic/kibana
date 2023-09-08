@@ -103,7 +103,7 @@ describe('tabifyAggResponse Integration', () => {
 
     describe(`scaleMetricValues performance check${getTitlePostfix()}`, () => {
       beforeAll(() => {
-        typesRegistry.get('count').params.push({
+        typesRegistry.get('count')!.params.push({
           name: 'scaleMetricValues',
           default: false,
           write: () => {},

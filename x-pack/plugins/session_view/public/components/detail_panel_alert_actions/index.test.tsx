@@ -16,7 +16,7 @@ import {
   JUMP_TO_PROCESS_TEST_ID,
 } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common';
 
 describe('DetailPanelAlertActions component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

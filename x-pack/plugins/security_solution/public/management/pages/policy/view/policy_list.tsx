@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
@@ -15,19 +16,25 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  EuiIconTip,
+  EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import moment from 'moment';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import type { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
-  useGetAgentCountForPolicy,
+  useEndpointPackagePoliciesStats,
   useGetEndpointSecurityPackage,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
@@ -40,10 +47,13 @@ import { PolicyEndpointCount } from './components/policy_endpoint_count';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 export const PolicyList = memo(() => {
+  const { canReadEndpointList, loading: authLoading } = useUserPrivileges().endpointPrivileges;
+  const isProtectionUpdatesEnabled = useIsExperimentalFeatureEnabled('protectionUpdatesEnabled');
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
   const { search } = useLocation();
   const { getAppUrl } = useAppUrl();
   const toasts = useToasts();
+  const { euiTheme } = useEuiTheme();
 
   // load the list of policies
   const {
@@ -55,31 +65,13 @@ export const PolicyList = memo(() => {
     perPage: pagination.pageSize,
   });
 
-  // endpoint count per policy
-  const policyIds = useMemo(() => data?.items.map((policies) => policies.id) ?? [], [data]);
-  const agentPolicyIds = useMemo(
-    () => data?.items.map((policies) => policies.policy_id) ?? [],
-    [data]
-  );
-  const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
-    agentPolicyIds,
-    customQueryOptions: {
-      enabled: agentPolicyIds.length > 0,
-      onError: (err) => {
-        toasts.addDanger(
-          i18n.translate('xpack.securitySolution.policyList.endpointCountError', {
-            defaultMessage: 'Error retrieving endpoint counts',
-          })
-        );
-      },
-    },
-  });
+  const { data: outdatedManifestsCountResponse, isLoading: isOutdatedManifestsCountLoading } =
+    useEndpointPackagePoliciesStats(isProtectionUpdatesEnabled);
 
   // grab endpoint version for empty page
   const { data: endpointPackageInfo, isFetching: packageIsFetching } =
     useGetEndpointSecurityPackage({
       customQueryOptions: {
-        enabled: agentPolicyIds.length === 0,
         onError: (err) => {
           toasts.addDanger(
             i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
@@ -89,28 +81,6 @@ export const PolicyList = memo(() => {
         },
       },
     });
-
-  const policyIdToEndpointCount = useMemo(() => {
-    const map = new Map<string, number>();
-
-    for (const agentPolicy of endpointCount?.items) {
-      if (agentPolicy.package_policies) {
-        for (const packagePolicy of agentPolicy.package_policies) {
-          if (policyIds.includes(packagePolicy.id)) {
-            map.set(packagePolicy.id, agentPolicy.agents ?? 0);
-          }
-        }
-      }
-    }
-
-    // error with the endpointCount api call, set default count to 0
-    if (policyIds.length > 0 && map.size === 0) {
-      for (const policy of policyIds) {
-        map.set(policy, 0);
-      }
-    }
-    return map;
-  }, [endpointCount, policyIds]);
 
   const totalItemCount = useMemo(() => data?.total ?? 0, [data]);
 
@@ -154,6 +124,31 @@ export const PolicyList = memo(() => {
       },
     }
   );
+
+  const outdatedManifestsCallOut = useMemo(() => {
+    if (
+      !isProtectionUpdatesEnabled ||
+      isOutdatedManifestsCountLoading ||
+      !outdatedManifestsCountResponse ||
+      outdatedManifestsCountResponse.outdatedManifestsCount === 0
+    ) {
+      return null;
+    }
+
+    return (
+      <EuiCallOut
+        color={'warning'}
+        size="m"
+        data-test-subj="policy-list-outdated-manifests-call-out"
+        title={i18n.translate('xpack.securitySolution.policy.list.outdatedManifestsCallOut', {
+          defaultMessage:
+            'Updates available for {outdatedManifestsCount} {outdatedManifestsCount, plural, one {policy} other {policies}}',
+          values: { outdatedManifestsCount: outdatedManifestsCountResponse.outdatedManifestsCount },
+        })}
+      />
+    );
+  }, [isOutdatedManifestsCountLoading, isProtectionUpdatesEnabled, outdatedManifestsCountResponse]);
+
   const policyColumns = useMemo(() => {
     const updatedAtColumnName = i18n.translate('xpack.securitySolution.policy.list.updatedAt', {
       defaultMessage: 'Last Updated',
@@ -162,6 +157,45 @@ export const PolicyList = memo(() => {
     const createdAtColumnName = i18n.translate('xpack.securitySolution.policy.list.createdAt', {
       defaultMessage: 'Date Created',
     });
+
+    const generateDeployedVersionEntry = (version?: 'latest' | string) => {
+      if (!version) {
+        return [];
+      }
+
+      if (version === 'latest') {
+        return [
+          'success',
+          i18n.translate('xpack.securitySolution.policy.list.manifestLatest', {
+            defaultMessage: 'latest',
+          }),
+        ];
+      }
+
+      const parsedDate = moment(version, 'YYYY-MM-DD');
+
+      if (parsedDate < moment().subtract(18, 'months')) {
+        return [
+          'danger',
+          parsedDate.format('MMMM DD, YYYY'),
+          i18n.translate('xpack.securitySolution.policy.list.manifestOver18MonthsOld', {
+            defaultMessage: 'Manifest is over 18 months old and rollback is not supported',
+          }),
+        ];
+      }
+
+      if (parsedDate > moment().subtract(1, 'month')) {
+        return ['success', parsedDate.format('MMMM DD, YYYY')];
+      }
+
+      return [
+        euiTheme.colors.warning,
+        parsedDate.format('MMMM DD, YYYY'),
+        i18n.translate('xpack.securitySolution.policy.list.manifestOver1MonthOld', {
+          defaultMessage: 'Manifest is over a month old',
+        }),
+      ];
+    };
 
     return [
       {
@@ -183,6 +217,35 @@ export const PolicyList = memo(() => {
           );
         },
       },
+      ...(isProtectionUpdatesEnabled
+        ? [
+            {
+              field: '',
+              name: i18n.translate('xpack.securitySolution.policy.list.deployedVersion', {
+                defaultMessage: 'Deployed Version',
+              }),
+              truncateText: true,
+              render: (policy: PolicyData) => {
+                const [color, displayText, tooltip] = generateDeployedVersionEntry(
+                  policy.inputs[0]?.config?.policy.value.global_manifest_version
+                );
+
+                return (
+                  <EuiFlexGroup responsive={false} gutterSize={'xs'} alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip type={'dot'} color={color} content={tooltip} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" data-test-subj="policyDeployedVersion">
+                        {displayText}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              },
+            },
+          ]
+        : []),
       {
         field: 'created_by',
         name: i18n.translate('xpack.securitySolution.policy.list.createdBy', {
@@ -260,13 +323,14 @@ export const PolicyList = memo(() => {
         }),
         width: '8%',
         render: (policy: PolicyData) => {
-          const count = policyIdToEndpointCount.get(policy.id);
+          const count = policy.agents ?? 0;
+
           return (
             <PolicyEndpointCount
               className="eui-textTruncate"
               data-test-subj="policyEndpointCountLink"
               policyId={policy.id}
-              nonLinkCondition={count === 0}
+              nonLinkCondition={authLoading || !canReadEndpointList || count === 0}
             >
               {count}
             </PolicyEndpointCount>
@@ -274,7 +338,13 @@ export const PolicyList = memo(() => {
         },
       },
     ];
-  }, [policyIdToEndpointCount, backLink]);
+  }, [
+    isProtectionUpdatesEnabled,
+    euiTheme.colors.warning,
+    backLink,
+    authLoading,
+    canReadEndpointList,
+  ]);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PolicyData>) => {
@@ -321,6 +391,7 @@ export const PolicyList = memo(() => {
             />
           </EuiText>
           <EuiHorizontalRule margin="xs" />
+          {outdatedManifestsCallOut}
           <EuiBasicTable
             data-test-subj="policyListTable"
             items={data?.items || []}

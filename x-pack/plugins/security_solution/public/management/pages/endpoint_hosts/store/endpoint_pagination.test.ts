@@ -92,6 +92,7 @@ describe('endpoint list pagination: ', () => {
           pageSize: '10',
           kuery: '',
         },
+        version: '2023-10-31',
       });
     });
   });

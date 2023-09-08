@@ -1,0 +1,12 @@
+title: Historical summary request
+type: object
+required:
+  - list
+properties:
+  list:
+    description: The list of SLO identifiers to get the historical summary for
+    type: array
+    items:
+      type: string
+      example: 8853df00-ae2e-11ed-90af-09bb6422b258
+  

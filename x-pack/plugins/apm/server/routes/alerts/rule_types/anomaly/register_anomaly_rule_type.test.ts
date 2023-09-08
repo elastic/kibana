@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { registerAnomalyRuleType } from './register_anomaly_rule_type';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
 import { createRuleTypeMocks } from '../../test_utils';
@@ -24,7 +24,7 @@ describe('Transaction duration anomaly alert', () => {
         ml: undefined,
       });
 
-      const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
+      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
 
       await executor({ params });
 
@@ -52,7 +52,7 @@ describe('Transaction duration anomaly alert', () => {
         ml,
       });
 
-      const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
+      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
 
       await executor({ params });
       expect(
@@ -103,7 +103,7 @@ describe('Transaction duration anomaly alert', () => {
         ml,
       });
 
-      const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
+      const params = { anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR };
 
       await executor({ params });
 
@@ -180,7 +180,7 @@ describe('Transaction duration anomaly alert', () => {
       });
 
       const params = {
-        anomalySeverityType: ANOMALY_SEVERITY.MINOR,
+        anomalySeverityType: ML_ANOMALY_SEVERITY.MINOR,
         windowSize: 5,
         windowUnit: 'm',
       };
@@ -194,9 +194,6 @@ describe('Transaction duration anomaly alert', () => {
       );
 
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {
-        alertDetailsUrl: expect.stringContaining(
-          'http://localhost:5601/eyr/app/observability/alerts/'
-        ),
         serviceName: 'foo',
         transactionType: 'type-foo',
         environment: 'development',
@@ -206,6 +203,7 @@ describe('Transaction duration anomaly alert', () => {
           'critical anomaly with a score of 80 was detected in the last 5 mins for foo.',
         viewInAppUrl:
           'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=development',
+        alertDetailsUrl: 'mockedAlertsLocator > getLocation',
       });
     });
   });

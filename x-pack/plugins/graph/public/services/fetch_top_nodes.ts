@@ -6,6 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { getIcon } from '../helpers/style_choices';
 import { WorkspaceField, ServerResultNode } from '../types';
 
 const DEFAULT_SHARD_SIZE = 5000;
@@ -76,7 +77,7 @@ export function createServerResultNode(
     term,
     id: '',
     color: field.color,
-    icon: field.icon,
+    icon: getIcon(field.icon),
     data: {
       field: fieldName,
       term,
@@ -97,7 +98,7 @@ export async function fetchTopNodes(
   const body = createSamplerSearchBody(aggs);
 
   const response = (
-    await post<{ resp: TopTermsAggResponse }>('../api/graph/searchProxy', {
+    await post<{ resp: TopTermsAggResponse }>('../internal/graph/searchProxy', {
       body: JSON.stringify({ index, body }),
     })
   ).resp;

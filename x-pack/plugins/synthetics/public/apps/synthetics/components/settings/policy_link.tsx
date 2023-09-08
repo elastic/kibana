@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiLoadingContent } from '@elastic/eui';
+import { EuiIconTip, EuiLink, EuiSkeletonText, EuiToolTip, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { ClientPluginsStart } from '../../../../plugin';
 
 export const PolicyLink = ({ name }: { name: string }) => {
-  const { share } = useKibana<ClientPluginsStart>().services;
+  const { share, application } = useKibana<ClientPluginsStart>().services;
+  const canManageILM = application.capabilities.management?.data?.index_lifecycle_management;
 
   const ilmLocator = share.url.locators.get(ILM_LOCATOR_ID);
 
@@ -22,15 +24,55 @@ export const PolicyLink = ({ name }: { name: string }) => {
 
   const { data } = useFetcher(async () => {
     return ilmLocator?.getLocation({ page: 'policy_edit', policyName: name });
-  }, []);
+  }, [name]);
 
   if (!data) {
-    return <EuiLoadingContent lines={1} />;
+    return <EuiSkeletonText lines={1} />;
+  }
+
+  if (!name) {
+    return <>--</>;
+  }
+
+  if (!canManageILM) {
+    return (
+      <EuiToolTip content={PERMISSIONS_NEEDED}>
+        <EuiText size="m">{name}</EuiText>
+      </EuiToolTip>
+    );
   }
 
   return (
-    <EuiLink href={`${basePath}/app/${data.app}${data.path}`} target="_blank">
+    <EuiLink
+      href={`${basePath}/app/${data.app}${data.path}`}
+      target="_blank"
+      data-test-subj={name + 'PolicyLink'}
+    >
       {name}
     </EuiLink>
   );
 };
+
+export const PolicyNameLabel = () => {
+  const { application } = useKibana<ClientPluginsStart>().services;
+
+  const canManageILM = application.capabilities.management?.data?.index_lifecycle_management;
+
+  if (canManageILM) {
+    return <>{POLICY_LABEL}</>;
+  }
+
+  return (
+    <>
+      {POLICY_LABEL} <EuiIconTip content={PERMISSIONS_NEEDED} position="right" />
+    </>
+  );
+};
+
+const POLICY_LABEL = i18n.translate('xpack.synthetics.settingsRoute.table.policy', {
+  defaultMessage: 'Policy',
+});
+
+const PERMISSIONS_NEEDED = i18n.translate('xpack.synthetics.settingsRoute.policy.manageILM', {
+  defaultMessage: 'You need the "manage_ilm" cluster permission to manage ILM policies.',
+});

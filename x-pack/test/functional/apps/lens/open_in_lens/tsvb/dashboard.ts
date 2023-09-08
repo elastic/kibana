@@ -17,7 +17,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'dashboard',
     'canvas',
   ]);
-
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
+  const dashboardBadgeActions = getService('dashboardBadgeActions');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
@@ -29,9 +31,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by value TSVB viz to a Lens viz', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
       await testSubjects.click('visualizeSaveButton');
 
@@ -42,6 +41,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+      await dashboardCustomizePanel.clickSaveButton();
+      await dashboard.waitForRenderComplete();
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
@@ -52,11 +58,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
-      await lens.saveAndReturn();
+      await lens.replaceInDashboard();
       await retry.try(async () => {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
+      const titles = await dashboard.getPanelTitles();
+      expect(titles[0]).to.be('My TSVB to Lens viz 1 (converted)');
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
 
@@ -70,6 +79,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
+      await dashboardPanelActions.customizePanel();
+      await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
+      await dashboardCustomizePanel.clickToggleQuickMenuButton();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+      await dashboardCustomizePanel.clickSaveButton();
+      await dashboard.waitForRenderComplete();
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
@@ -80,19 +96,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
-      await lens.saveAndReturn();
+      await lens.replaceInDashboard();
       await retry.try(async () => {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
-
-      const panel = await testSubjects.find(`embeddablePanelHeading-`);
+      const panel = await testSubjects.find(`embeddablePanelHeading-MyTSVBtoLensviz2(converted)`);
       const descendants = await testSubjects.findAllDescendant(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
         panel
       );
       expect(descendants.length).to.equal(0);
-
+      const titles = await dashboard.getPanelTitles();
+      expect(titles[0]).to.be('My TSVB to Lens viz 2 (converted)');
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });
   });

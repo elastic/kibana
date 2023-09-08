@@ -23,7 +23,6 @@ import { useHistory } from 'react-router-dom';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
-import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
 
@@ -63,13 +62,7 @@ const ActionsTableComponent = () => {
   const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    direction: Direction.desc,
-    sortField: '@timestamp',
-    filterQuery: {
-      exists: {
-        field: 'user_id',
-      },
-    },
+    kuery: 'user_id: *',
   });
 
   const onTableChange = useCallback(({ page = {} }) => {
@@ -264,6 +257,13 @@ const ActionsTableComponent = () => {
     [actionsData, pageIndex, pageSize]
   );
 
+  const rowProps = useCallback(
+    (data) => ({
+      'data-test-subj': `row-${data._source.action_id}`,
+    }),
+    []
+  );
+
   return (
     <EuiBasicTable
       items={actionsData?.data?.items ?? EMPTY_ARRAY}
@@ -271,6 +271,8 @@ const ActionsTableComponent = () => {
       columns={columns}
       pagination={pagination}
       onChange={onTableChange}
+      rowProps={rowProps}
+      data-test-subj="liveQueryActionsTable"
     />
   );
 };

@@ -7,11 +7,11 @@
 
 import { FC } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../common/types/kibana';
+import { type SavedSearch } from '@kbn/saved-search-plugin/public';
 
 declare const DataRecognizer: FC<{
   indexPattern: DataView;
-  savedSearch: SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   results: {
     count: number;
     onChange?: Function;

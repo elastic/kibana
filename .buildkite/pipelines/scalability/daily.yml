@@ -12,6 +12,10 @@ steps:
     agents:
       queue: kb-static-scalability
     timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - wait: ~
     continue_on_failure: true

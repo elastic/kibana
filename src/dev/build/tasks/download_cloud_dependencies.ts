@@ -58,11 +58,18 @@ export const DownloadCloudDependencies: Task = {
     let manifestUrl = '';
     let manifestJSON = null;
     const buildUrl = `https://${subdomain}.elastic.co/beats/latest/${config.getBuildVersion()}.json`;
+    const axiosConfigWithNoCacheHeaders = {
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
+    };
     try {
-      const latest = await Axios.get(buildUrl);
+      const latest = await Axios.get(buildUrl, axiosConfigWithNoCacheHeaders);
       buildId = latest.data.build_id;
       manifestUrl = latest.data.manifest_url;
-      manifestJSON = (await Axios.get(manifestUrl)).data;
+      manifestJSON = (await Axios.get(manifestUrl, axiosConfigWithNoCacheHeaders)).data;
       if (!(manifestUrl && manifestJSON)) throw new Error('Missing manifest.');
     } catch (e) {
       log.error(`Unable to find Beats artifacts for ${config.getBuildVersion()} at ${buildUrl}.`);

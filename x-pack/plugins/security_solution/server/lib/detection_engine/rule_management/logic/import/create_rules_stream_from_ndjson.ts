@@ -24,10 +24,11 @@ import type {
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   RuleToImport,
   validateRuleToImport,
-} from '../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../common/api/detection_engine/rule_management';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,
@@ -41,7 +42,9 @@ export const validateRulesStream = (): Transform => {
   return createMapStream<{
     exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
     rules: Array<RuleToImport | Error>;
+    actionConnectors: SavedObject[];
   }>((items) => ({
+    actionConnectors: items.actionConnectors,
     exceptions: items.exceptions,
     rules: validateRules(items.rules),
   }));
@@ -80,10 +83,14 @@ export const sortImports = (): Transform => {
   return createReduceStream<{
     exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
     rules: Array<RuleToImport | Error>;
+    actionConnectors: SavedObject[];
   }>(
     (acc, importItem) => {
       if (has('list_id', importItem) || has('item_id', importItem) || has('entries', importItem)) {
         return { ...acc, exceptions: [...acc.exceptions, importItem] };
+      }
+      if (has('attributes', importItem)) {
+        return { ...acc, actionConnectors: [...acc.actionConnectors, importItem] };
       } else {
         return { ...acc, rules: [...acc.rules, importItem] };
       }
@@ -91,6 +98,7 @@ export const sortImports = (): Transform => {
     {
       exceptions: [],
       rules: [],
+      actionConnectors: [],
     }
   );
 };

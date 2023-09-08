@@ -8,6 +8,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 
+import type { SessionViewConfig } from '../../../../common/types';
 import type {
   DataProvider,
   DataProviderType,
@@ -21,7 +22,6 @@ import type {
   TimelineNonEcsData,
 } from '../../../../common/search_strategy/timeline';
 import type {
-  RowRendererId,
   TimelineTabs,
   TimelinePersistInput,
   SerializedFilterQuery,
@@ -29,8 +29,8 @@ import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 

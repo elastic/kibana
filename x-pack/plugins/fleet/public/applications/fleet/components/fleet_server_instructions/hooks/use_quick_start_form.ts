@@ -46,6 +46,7 @@ export interface QuickStartCreateForm {
     nameInput: ReturnType<typeof useInput>;
     isDefaultInput: ReturnType<typeof useSwitchInput>;
   };
+  onClose?: () => void;
 }
 
 /**

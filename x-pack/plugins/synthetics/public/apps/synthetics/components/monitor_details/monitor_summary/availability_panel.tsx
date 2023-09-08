@@ -7,47 +7,54 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
-import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 interface AvailabilityPanelprops {
   from: string;
   to: string;
+  id: string;
 }
 
 export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
   const {
     services: {
-      observability: { ExploratoryViewEmbeddable },
+      exploratoryView: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const selectedLocation = useSelectedLocation();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  const monitorId = useMonitorQueryId();
-
-  if (!selectedLocation || !monitorId) {
+  if (!queryIdFilter) {
     return null;
   }
 
   return (
     <ExploratoryViewEmbeddable
+      id={props.id}
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
           time: props,
-          name: 'Monitor availability',
+          name: AVAILABILITY_LABEL,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_availability',
           reportDefinitions: {
-            'monitor.id': [monitorId],
-            'observer.geo.name': [selectedLocation?.label],
+            ...queryIdFilter,
           },
+          filters: locationFilter,
         },
       ]}
     />
   );
 };
+
+export const AVAILABILITY_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.availability',
+  {
+    defaultMessage: 'Availability',
+  }
+);

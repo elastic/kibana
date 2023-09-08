@@ -8,13 +8,15 @@
 
 import expect from '@kbn/expect';
 import chroma from 'chroma-js';
-
+import rison from '@kbn/rison';
 import { DEFAULT_PANEL_WIDTH } from '@kbn/dashboard-plugin/public/dashboard_constants';
+import type { SharedDashboardState } from '@kbn/dashboard-plugin/common';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../../page_objects/dashboard_page';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
+    'common',
     'dashboard',
     'visualize',
     'header',
@@ -22,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
     'share',
     'timePicker',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -29,9 +32,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const retry = getService('retry');
   const elasticChart = getService('elasticChart');
-  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const xyChartSelector = 'xyVisChart';
+  const log = getService('log');
+
+  const updateAppStateQueryParam = (
+    url: string,
+    setAppState: (appState: Partial<SharedDashboardState>) => Partial<SharedDashboardState>
+  ) => {
+    log.debug(`updateAppStateQueryParam, before url: ${url}`);
+
+    // Using lastIndexOf because URL may have 2 sets of query parameters.
+    // 1) server query parameters, '_t'
+    // 2) client query parameters, '_g' and '_a'. Anything after the '#' in a URL is used by the client
+    // Example shape of URL http://localhost:5620/app/dashboards?_t=12345#/create?_g=()
+    const clientQueryParamsStartIndex = url.lastIndexOf('?');
+    if (clientQueryParamsStartIndex === -1) {
+      throw Error(`Unable to locate query parameters in URL: ${url}`);
+    }
+    const urlBeforeClientQueryParams = url.substring(0, clientQueryParamsStartIndex);
+    const urlParams = new URLSearchParams(url.substring(clientQueryParamsStartIndex + 1));
+    const appState: Partial<SharedDashboardState> = urlParams.has('_a')
+      ? (rison.decode(urlParams.get('_a')!) as Partial<SharedDashboardState>)
+      : {};
+    const newAppState = {
+      ...appState,
+      ...setAppState(appState),
+    };
+    urlParams.set('_a', rison.encode(newAppState));
+    const newUrl = urlBeforeClientQueryParams + '?' + urlParams.toString();
+    log.debug(`updateAppStateQueryParam, after url: ${newUrl}`);
+    return newUrl;
+  };
 
   const enableNewChartLibraryDebug = async (force = false) => {
     if ((await PageObjects.visChart.isNewChartsLibraryEnabled()) || force) {
@@ -40,21 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/139762
-  describe.skip('dashboard state', function describeIndexTests() {
-    // Used to track flag before and after reset
-    let isNewChartsLibraryEnabled = true;
-
+  describe('dashboard state', function () {
     before(async function () {
-      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
 
-      if (!isNewChartsLibraryEnabled) {
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': true,
-        });
-      }
       await browser.refresh();
     });
 
@@ -100,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.clickDiscover();
       await PageObjects.timePicker.setHistoricalDataRange();
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -114,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(inViewMode).to.be(true);
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.discover.clickFieldListItemAdd('agent');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -133,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard('Has local edits');
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.discover.clickFieldListItemAdd('clientip');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('clientip');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -148,8 +170,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Saved search will update when the query is changed in the URL', async () => {
       const currentQuery = await queryBar.getQueryString();
       expect(currentQuery).to.equal('');
-      const currentUrl = await getUrlFromShare();
-      const newUrl = currentUrl.replace(`query:''`, `query:'abc12345678910'`);
+      const newUrl = updateAppStateQueryParam(
+        await getUrlFromShare(),
+        (appState: Partial<SharedDashboardState>) => {
+          return {
+            query: {
+              language: 'kuery',
+              query: 'abc12345678910',
+            },
+          };
+        }
+      );
 
       // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
       await browser.get(newUrl.toString());
@@ -161,9 +192,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const getUrlFromShare = async () => {
+      log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
       await PageObjects.share.clickShareTopNavButton();
+      log.debug(`sharedUrl: ${sharedUrl}`);
       return sharedUrl;
     };
 
@@ -185,11 +218,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
         await queryBar.clickQuerySubmitButton();
-        const oldQuery = await queryBar.getQueryString();
         const currentUrl = await getUrlFromShare();
-        const newUrl = currentUrl.replace(`query:'${oldQuery}'`, `query:'${newQuery}'`);
+        const newUrl = updateAppStateQueryParam(
+          currentUrl,
+          (appState: Partial<SharedDashboardState>) => {
+            return {
+              query: {
+                language: 'kuery',
+                query: newQuery,
+              },
+            };
+          }
+        );
 
         await browser.get(newUrl.toString(), !useHardRefresh);
+        await PageObjects.dashboard.waitForRenderComplete();
         const queryBarContentsAfterRefresh = await queryBar.getQueryString();
         expect(queryBarContentsAfterRefresh).to.equal(newQuery);
       };
@@ -210,9 +253,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await getUrlFromShare();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-        const newUrl = currentUrl.replace(
-          `w:${DEFAULT_PANEL_WIDTH}`,
-          `w:${DEFAULT_PANEL_WIDTH * 2}`
+        const newUrl = updateAppStateQueryParam(
+          currentUrl,
+          (appState: Partial<SharedDashboardState>) => {
+            log.debug(JSON.stringify(appState, null, ' '));
+            return {
+              panels: (appState.panels ?? []).map((panel) => {
+                return {
+                  ...panel,
+                  gridData: {
+                    ...panel.gridData,
+                    w:
+                      panel.gridData.w === DEFAULT_PANEL_WIDTH
+                        ? DEFAULT_PANEL_WIDTH * 2
+                        : panel.gridData.w,
+                  },
+                };
+              }),
+            };
+          }
         );
         await hardRefresh(newUrl);
 
@@ -237,7 +296,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when removing a panel', async function () {
         await PageObjects.dashboard.waitForRenderComplete();
         const currentUrl = await getUrlFromShare();
-        const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
+        const newUrl = updateAppStateQueryParam(
+          currentUrl,
+          (appState: Partial<SharedDashboardState>) => {
+            return {
+              panels: [],
+            };
+          }
+        );
         await hardRefresh(newUrl);
 
         await retry.try(async () => {
@@ -263,7 +329,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await getUrlFromShare();
-          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          const newUrl = updateAppStateQueryParam(
+            currentUrl,
+            (appState: Partial<SharedDashboardState>) => {
+              return {
+                panels: (appState.panels ?? []).map((panel) => {
+                  return {
+                    ...panel,
+                    embeddableConfig: {
+                      ...(panel.embeddableConfig ?? {}),
+                      vis: {
+                        ...((panel.embeddableConfig?.vis as object) ?? {}),
+                        colors: {
+                          ...((panel.embeddableConfig?.vis as { colors: object })?.colors ?? {}),
+                          ['80000']: 'FFFFFF',
+                        },
+                      },
+                    },
+                  };
+                }),
+              };
+            }
+          );
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -288,9 +375,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = isNewChartsLibraryEnabled
-            ? currentUrl.replace(`'80000':%23FFFFFF`, '')
-            : currentUrl.replace(`vis:(colors:('80,000':%23FFFFFF))`, '');
+          const newUrl = updateAppStateQueryParam(
+            currentUrl,
+            (appState: Partial<SharedDashboardState>) => {
+              return {
+                panels: (appState.panels ?? []).map((panel) => {
+                  return {
+                    ...panel,
+                    embeddableConfig: {
+                      ...(panel.embeddableConfig ?? {}),
+                      vis: {
+                        ...((panel.embeddableConfig?.vis as object) ?? {}),
+                        colors: {},
+                      },
+                    },
+                  };
+                }),
+              };
+            }
+          );
 
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();

@@ -28,10 +28,8 @@ export class SettingsStorage<TSettingsDef extends object = object> {
   private dirExists: boolean = false;
 
   constructor(fileName: string, options: SettingStorageOptions<TSettingsDef> = {}) {
-    const {
-      directory = join(homedir(), '.kibanaSecuritySolutionCliTools'),
-      defaultSettings = {} as TSettingsDef,
-    } = options;
+    const { directory = SettingsStorage.getDirectory(), defaultSettings = {} as TSettingsDef } =
+      options;
 
     this.options = {
       directory,
@@ -41,7 +39,17 @@ export class SettingsStorage<TSettingsDef extends object = object> {
     this.settingsFileFullPath = join(this.options.directory, fileName);
   }
 
-  private async ensureExists(): Promise<void> {
+  /** Returns the default path to the directory where settings are saved to. */
+  public static getDirectory(): string {
+    return join(homedir(), '.kibanaSecuritySolutionCliTools');
+  }
+
+  /** Build a path using the root directory of where settings are saved */
+  protected buildPath(path: string): string {
+    return join(this.options.directory, path);
+  }
+
+  protected async ensureExists(): Promise<void> {
     if (!this.dirExists) {
       await mkdir(this.options.directory, { recursive: true });
       this.dirExists = true;

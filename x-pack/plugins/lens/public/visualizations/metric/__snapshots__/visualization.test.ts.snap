@@ -8,16 +8,13 @@ Object {
         Object {
           "columnId": "metric-col-id",
           "palette": Array [],
-          "triggerIcon": "colorBy",
+          "triggerIconType": "colorBy",
         },
       ],
       "dataTestSubj": "lnsMetric_primaryMetricDimensionPanel",
       "enableDimensionEditor": true,
       "enableFormatSelector": true,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "metric",
       "groupLabel": "Primary metric",
       "isMetricDimension": true,
@@ -37,9 +34,6 @@ Object {
       "enableDimensionEditor": true,
       "enableFormatSelector": true,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "secondaryMetric",
       "groupLabel": "Secondary metric",
       "isMetricDimension": true,
@@ -58,9 +52,6 @@ Object {
       "enableDimensionEditor": true,
       "enableFormatSelector": false,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "max",
       "groupLabel": "Maximum value",
       "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
@@ -75,16 +66,13 @@ Object {
       "accessors": Array [
         Object {
           "columnId": "breakdown-col-id",
-          "triggerIcon": "aggregate",
+          "triggerIconType": "aggregate",
         },
       ],
       "dataTestSubj": "lnsMetric_breakdownByDimensionPanel",
       "enableDimensionEditor": true,
       "enableFormatSelector": true,
       "filterOperations": [Function],
-      "formatSelectorOptions": Object {
-        "disableExtraOptions": true,
-      },
       "groupId": "breakdownBy",
       "groupLabel": "Break down by",
       "supportsMoreColumns": false,

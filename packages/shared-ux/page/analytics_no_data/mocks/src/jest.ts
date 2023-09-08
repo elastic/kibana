@@ -8,11 +8,28 @@
 
 import type { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { getKibanaNoDataPageServicesMock } from '@kbn/shared-ux-page-kibana-no-data-mocks';
+import { of } from 'rxjs';
 
 export const getServicesMock = () => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageServicesMock(),
     kibanaGuideDocLink: 'Kibana guide',
+    customBranding: { hasCustomBranding$: of(false) },
+    prependBasePath: (path) => path,
+    pageFlavor: 'kibana',
+  };
+
+  return services;
+};
+
+export const getServicesMockCustomBranding = () => {
+  const services: AnalyticsNoDataPageServices = {
+    ...getKibanaNoDataPageServicesMock(),
+    // this mock will have custom branding set to true
+    customBranding: { hasCustomBranding$: of(true) },
+    kibanaGuideDocLink: 'Kibana guide',
+    prependBasePath: (path) => path,
+    pageFlavor: 'kibana',
   };
 
   return services;

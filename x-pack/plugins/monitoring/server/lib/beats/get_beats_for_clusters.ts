@@ -10,7 +10,7 @@ import { createBeatsQuery } from './create_beats_query';
 import { beatsAggFilterPath, beatsUuidsAgg, beatsAggResponseHandler } from './_beats_stats';
 import type { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest, Cluster } from '../../types';
-import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 export function handleResponse(clusterUuid: string, response: ElasticsearchResponse) {
@@ -37,8 +37,9 @@ export function getBeatsForClusters(req: LegacyRequest, clusters: Cluster[], ccs
   const end = req.payload.timeRange.max;
   const config = req.server.config;
   const maxBucketSize = config.ui.max_bucket_size;
-  const indexPatterns = getLegacyIndexPattern({
+  const indexPatterns = getIndexPatterns({
     moduleType: 'beats',
+    dataset: 'stats',
     ccs,
     config: Globals.app.config,
   });

@@ -20,6 +20,7 @@ export const fetchPendingActionsByAgentId = (
   agentIds: PendingActionsRequestQuery['agent_ids']
 ): Promise<PendingActionsResponse> => {
   return KibanaServices.get().http.get<PendingActionsResponse>(ACTION_STATUS_ROUTE, {
+    version: '2023-10-31',
     query: {
       agent_ids: agentIds,
     },

@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
+    "outDir": "target/types",
   },
   "include": [
     "public/**/*.ts",
@@ -10,8 +10,12 @@
     "../../../typings/**/*",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../plugins/maps/tsconfig.json"},
-    { "path": "../../../examples/developer_examples/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/maps-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

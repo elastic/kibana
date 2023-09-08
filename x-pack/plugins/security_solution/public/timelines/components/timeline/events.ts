@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PrimitiveOrArrayOfPrimitives } from '../../../common/lib/kuery';
 import type { ColumnId } from './body/column_id';
 import type { DataProvider, QueryOperator } from './data_providers/data_provider';
 export type {
@@ -36,7 +37,7 @@ export type OnDataProviderEdited = ({
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
   type: DataProvider['type'];
 }) => void;
 

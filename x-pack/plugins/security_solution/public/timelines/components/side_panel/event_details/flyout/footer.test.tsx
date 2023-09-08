@@ -10,13 +10,13 @@ import { FlyoutFooter } from './footer';
 import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId } from '../../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockAlertDetailsData } from '../../../../../common/components/event_details/__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import {
   KibanaServices,
-  useKibana,
   useGetUserCasesPermissions,
+  useKibana,
 } from '../../../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
@@ -115,7 +115,6 @@ const defaultProps = {
   isHostIsolationPanelOpen: false,
   handleOnEventClosed: jest.fn(),
   onAddIsolationStatusClick: jest.fn(),
-  expandedEvent: { eventId: ecsData._id, indexName: '' },
   detailsData: mockAlertDetailsDataWithIsObject,
   refetchFlyoutData: jest.fn(),
 };
@@ -133,6 +132,15 @@ describe('event details footer component', () => {
           query: jest.fn(),
         },
         cases: mockCasesContract(),
+        application: {
+          ...coreStartMock.application,
+          capabilities: {
+            ...coreStartMock.application.capabilities,
+            siem: {
+              crudEndpointExceptions: true,
+            },
+          },
+        },
       },
     });
   });

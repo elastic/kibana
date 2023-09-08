@@ -117,7 +117,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
                   data-test-subj="errorCallOut"
                   title={i18nTexts.error.title}
                   color="danger"
-                  iconType="alert"
+                  iconType="warning"
                 >
                   {i18nTexts.error.body}
                 </EuiCallOut>
@@ -128,7 +128,7 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
             <JsonEditor
               label={i18nTexts.editor.label}
               onUpdate={onJsonUpdate}
-              euiCodeEditorProps={{
+              codeEditorProps={{
                 height: '300px',
               }}
             />

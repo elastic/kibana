@@ -7,8 +7,8 @@
  */
 
 import { compact, shuffle } from 'lodash';
-import { apm, ApmFields, EntityArrayIterable, timerange } from '../..';
-import { generateLongId, generateShortId } from '../lib/utils/generate_id';
+import { Readable } from 'stream';
+import { apm, ApmFields, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
@@ -32,15 +32,12 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
 
 const scenario: Scenario<ApmFields> = async () => {
   return {
-    generate: ({ from, to }) => {
+    generate: ({ range }) => {
       const producerInternalOnlyInstance = apm
 
         .service({ name: 'producer-internal-only', environment: ENVIRONMENT, agentName: 'go' })
         .instance('instance-a');
-      const producerInternalOnlyEvents = timerange(
-        new Date('2022-04-25T19:00:00.000Z'),
-        new Date('2022-04-25T19:01:00.000Z')
-      )
+      const producerInternalOnlyEvents = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -58,13 +55,14 @@ const scenario: Scenario<ApmFields> = async () => {
             );
         });
 
-      const producerInternalOnlyApmFields = producerInternalOnlyEvents.toArray();
-      const spanASpanLink = getSpanLinksFromEvents(producerInternalOnlyApmFields);
+      const spanASpanLink = getSpanLinksFromEvents(
+        Array.from(producerInternalOnlyEvents).flatMap((event) => event.serialize())
+      );
 
       const producerConsumerInstance = apm
         .service({ name: 'producer-consumer', environment: ENVIRONMENT, agentName: 'java' })
         .instance('instance-b');
-      const producerConsumerEvents = timerange(from, to)
+      const producerConsumerEvents = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -85,13 +83,16 @@ const scenario: Scenario<ApmFields> = async () => {
             );
         });
 
-      const producerConsumerApmFields = producerConsumerEvents.toArray();
+      const producerConsumerApmFields = Array.from(producerConsumerEvents).flatMap((event) =>
+        event.serialize()
+      );
+
       const spanBSpanLink = getSpanLinksFromEvents(producerConsumerApmFields);
 
       const consumerInstance = apm
         .service({ name: 'consumer', environment: ENVIRONMENT, agentName: 'ruby' })
         .instance('instance-c');
-      const consumerEvents = timerange(from, to)
+      const consumerEvents = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -110,9 +111,9 @@ const scenario: Scenario<ApmFields> = async () => {
             );
         });
 
-      return new EntityArrayIterable(producerInternalOnlyApmFields)
-        .merge(consumerEvents)
-        .merge(new EntityArrayIterable(producerConsumerApmFields));
+      return Readable.from(
+        Array.from(producerInternalOnlyEvents).concat(Array.from(consumerEvents))
+      );
     },
   };
 };

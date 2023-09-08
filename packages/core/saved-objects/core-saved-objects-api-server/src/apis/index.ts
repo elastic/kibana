@@ -52,6 +52,7 @@ export type {
   SavedObjectsFindResult,
   SavedObjectsPitParams,
 } from './find';
+export type { SavedObjectsGetOptions } from './get';
 export type {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
@@ -64,7 +65,7 @@ export type {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from './remove_references_to';
-export type { SavedObjectsResolveResponse } from './resolve';
+export type { SavedObjectsResolveOptions, SavedObjectsResolveResponse } from './resolve';
 export type { SavedObjectsUpdateResponse, SavedObjectsUpdateOptions } from './update';
 export type {
   SavedObjectsUpdateObjectsSpacesObject,

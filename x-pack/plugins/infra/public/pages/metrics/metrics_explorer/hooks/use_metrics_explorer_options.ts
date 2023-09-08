@@ -5,84 +5,50 @@
  * 2.0.
  */
 
+import DateMath from '@kbn/datemath';
 import * as t from 'io-ts';
-import { values } from 'lodash';
 import createContainer from 'constate';
+import type { TimeRange } from '@kbn/es-query';
 import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
+import {
+  type MetricsExplorerChartOptions,
+  type MetricsExplorerOptions,
+  type MetricsExplorerOptionsMetric,
+  type MetricsExplorerTimeOptions,
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartType,
+  metricsExplorerOptionsRT,
+  metricsExplorerChartOptionsRT,
+  metricsExplorerTimeOptionsRT,
+} from '../../../../../common/metrics_explorer_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { Color } from '../../../../../common/color_palette';
-import { metricsExplorerMetricRT } from '../../../../../common/http_api/metrics_explorer';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
 
-const metricsExplorerOptionsMetricRT = t.intersection([
-  metricsExplorerMetricRT,
-  t.partial({
-    rate: t.boolean,
-    color: t.keyof(Object.fromEntries(values(Color).map((c) => [c, null])) as Record<Color, null>),
-    label: t.string,
-  }),
-]);
-
-export type MetricsExplorerOptionsMetric = t.TypeOf<typeof metricsExplorerOptionsMetricRT>;
-
-export enum MetricsExplorerChartType {
-  line = 'line',
-  area = 'area',
-  bar = 'bar',
-}
-
-export enum MetricsExplorerYAxisMode {
-  fromZero = 'fromZero',
-  auto = 'auto',
-}
-
-export const metricsExplorerChartOptionsRT = t.type({
-  yAxisMode: t.keyof(
-    Object.fromEntries(values(MetricsExplorerYAxisMode).map((v) => [v, null])) as Record<
-      MetricsExplorerYAxisMode,
-      null
-    >
-  ),
-  type: t.keyof(
-    Object.fromEntries(values(MetricsExplorerChartType).map((v) => [v, null])) as Record<
-      MetricsExplorerChartType,
-      null
-    >
-  ),
-  stack: t.boolean,
-});
-
-export type MetricsExplorerChartOptions = t.TypeOf<typeof metricsExplorerChartOptionsRT>;
-
-const metricExplorerOptionsRequiredRT = t.type({
-  aggregation: t.string,
-  metrics: t.array(metricsExplorerOptionsMetricRT),
-});
-
-const metricExplorerOptionsOptionalRT = t.partial({
-  limit: t.number,
-  groupBy: t.union([t.string, t.array(t.string)]),
-  filterQuery: t.string,
-  source: t.string,
-  forceInterval: t.boolean,
-  dropLastBucket: t.boolean,
-});
-export const metricExplorerOptionsRT = t.intersection([
-  metricExplorerOptionsRequiredRT,
-  metricExplorerOptionsOptionalRT,
-]);
-
-export type MetricsExplorerOptions = t.TypeOf<typeof metricExplorerOptionsRT>;
-
-export const metricsExplorerTimeOptionsRT = t.type({
-  from: t.string,
-  to: t.string,
+export const metricsExplorerTimestampsRT = t.type({
+  fromTimestamp: t.number,
+  toTimestamp: t.number,
   interval: t.string,
 });
-export type MetricsExplorerTimeOptions = t.TypeOf<typeof metricsExplorerTimeOptionsRT>;
+
+export type {
+  MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
+  MetricsExplorerOptionsMetric,
+};
+
+export {
+  MetricsExplorerYAxisMode,
+  MetricsExplorerChartType,
+  metricsExplorerOptionsRT,
+  metricsExplorerChartOptionsRT,
+  metricsExplorerTimeOptionsRT,
+};
+export type MetricsExplorerTimestamp = t.TypeOf<typeof metricsExplorerTimestampsRT>;
 
 export const DEFAULT_TIMERANGE: MetricsExplorerTimeOptions = {
   from: 'now-1h',
@@ -149,25 +115,37 @@ function useStateWithLocalStorage<State>(
   return [state, setState];
 }
 
+const getDefaultTimeRange = ({ from, to }: TimeRange) => {
+  const fromTimestamp = DateMath.parse(from)!.valueOf();
+  const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
+  return {
+    fromTimestamp,
+    toTimestamp,
+    interval: DEFAULT_TIMERANGE.interval,
+  };
+};
+
 export const useMetricsExplorerOptions = () => {
   const TIME_DEFAULTS = { from: 'now-1h', to: 'now' };
   const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
   const { from, to } = getTime();
-  const defaultTimeRange = {
-    from,
-    to,
-    interval: DEFAULT_TIMERANGE.interval,
-  };
 
   const [options, setOptions] = useStateWithLocalStorage<MetricsExplorerOptions>(
     'MetricsExplorerOptions',
     DEFAULT_OPTIONS
   );
-  const [currentTimerange, setTimeRange] = useState<MetricsExplorerTimeOptions>(defaultTimeRange);
+  const [timeRange, setTimeRange] = useState<MetricsExplorerTimeOptions>({
+    from,
+    to,
+    interval: DEFAULT_TIMERANGE.interval,
+  });
+  const [timestamps, setTimestamps] = useState<MetricsExplorerTimestamp>(
+    getDefaultTimeRange({ from, to })
+  );
 
   useSyncKibanaTimeFilterTime(TIME_DEFAULTS, {
-    from: currentTimerange.from,
-    to: currentTimerange.to,
+    from: timeRange.from,
+    to: timeRange.to,
   });
 
   const [chartOptions, setChartOptions] = useStateWithLocalStorage<MetricsExplorerChartOptions>(
@@ -194,17 +172,19 @@ export const useMetricsExplorerOptions = () => {
     defaultViewState: {
       options: DEFAULT_OPTIONS,
       chartOptions: DEFAULT_CHART_OPTIONS,
-      currentTimerange: defaultTimeRange,
+      currentTimerange: timeRange,
     },
     options,
     chartOptions,
     setChartOptions,
-    currentTimerange,
+    timeRange,
     isAutoReloading,
     setOptions,
     setTimeRange,
     startAutoReload: () => setAutoReloading(true),
     stopAutoReload: () => setAutoReloading(false),
+    timestamps,
+    setTimestamps,
   };
 };
 

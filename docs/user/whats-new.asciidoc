@@ -5,7 +5,7 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the

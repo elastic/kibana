@@ -127,20 +127,21 @@ With PATH_TO_CONFIG and other options as follows.
     short tests | `test/functional/apps/ml/short_tests/config.ts`
 
     The `short tests` group contains tests for page navigation, model management,
-    feature controls, settings and embeddables. Test files for each group are located
+    feature controls, settings and notifications. Test files for each group are located
     in the directory of their configuration file.
-  
+
 1.  Functional UI tests with `Basic` license:
 
-    - PATH_TO_CONFIG: `test/functional_basic/config.ts`
-    - Add `--include-tag ml` to the test runner command
-    - Tests are located in `x-pack/test/functional_basic/apps/ml`
+    Group | PATH_TO_CONFIG
+    ----- | --------------
+    permissions | `test/functional_basic/apps/ml/permissions/config.ts`
+    data visualizer group1 (file data viz) | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts`
+    data visualizer group2 (index data viz) | `test/functional_basic/apps/ml/data_visualizer/group2/config.ts`
+    data visualizer group3 (actions panel, discover grid) | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts`
 
 1.  API integration tests with `Trial` license:
 
-    - PATH_TO_CONFIG: `test/api_integration/config.ts`
-    - Add `--include-tag ml` to the test runner command
-    - Tests are located in `x-pack/test/api_integration/apis/ml`
+    - PATH_TO_CONFIG: `test/api_integration/apis/ml/config.ts`
 
 1.  Accessibility tests:
 
@@ -164,7 +165,10 @@ and Kibana instance that the tests will be run against.
 
 The generated screenshots are stored in `x-pack/test/functional/screenshots/session/ml_docs`.
 ML screenshot generation tests are located in `x-pack/test/screenshot_creation/apps/ml_docs`.
+
 ## Shared functions
+
+Note: We are in the process of moving shared code to packages, for example `@kbn/ml-anomaly-utils`. We'll update the docs accordingly once this work is done.
 
 You can find the ML shared functions in the following files in GitHub:
 
@@ -185,7 +189,7 @@ import { MlPluginSetup } from '../../../../ml/server';
 or
 
 ```
-import { ANOMALY_SEVERITY } from '../../ml/common';
+import { ML_ANOMALY_SEVERITY } from '../../ml/common';
 ```
 
 Functions are shared from the following directories:

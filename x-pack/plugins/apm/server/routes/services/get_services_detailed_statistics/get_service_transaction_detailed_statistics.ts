@@ -5,39 +5,43 @@
  * 2.0.
  */
 
-import { keyBy } from 'lodash';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { keyBy } from 'lodash';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+import { RollupInterval } from '../../../../common/rollup';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
-import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
-import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { maybe } from '../../../../common/utils/maybe';
+
+interface ServiceTransactionDetailedStat {
+  serviceName: string;
+  latency: Array<{ x: number; y: number | null }>;
+  transactionErrorRate?: Array<{ x: number; y: number }>;
+  throughput?: Array<{ x: number; y: number }>;
+}
 
 export async function getServiceTransactionDetailedStats({
   serviceNames,
   environment,
   kuery,
   apmEventClient,
-  searchAggregatedTransactions,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
   offset,
   start,
   end,
@@ -47,7 +51,9 @@ export async function getServiceTransactionDetailedStats({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
   offset?: string;
   start: number;
   end: number;
@@ -59,23 +65,26 @@ export async function getServiceTransactionDetailedStats({
     offset,
   });
 
-  const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(searchAggregatedTransactions),
+        field: getDurationFieldForTransactions(documentType),
       },
     },
-    outcomes,
+    ...outcomes,
   };
 
   const response = await apmEventClient.search(
     'get_service_transaction_detail_stats',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
+        sources: [
+          {
+            documentType,
+            rollupInterval,
+          },
         ],
       },
       body: {
@@ -85,9 +94,6 @@ export async function getServiceTransactionDetailedStats({
           bool: {
             filter: [
               { terms: { [SERVICE_NAME]: serviceNames } },
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -113,13 +119,7 @@ export async function getServiceTransactionDetailedStats({
                       timeseries: {
                         date_histogram: {
                           field: '@timestamp',
-                          fixed_interval:
-                            getBucketSizeForAggregatedTransactions({
-                              start: startWithOffset,
-                              end: endWithOffset,
-                              numBuckets: 20,
-                              searchAggregatedTransactions,
-                            }).intervalString,
+                          fixed_interval: `${bucketSizeInSeconds}s`,
                           min_doc_count: 0,
                           extended_bounds: {
                             min: startWithOffset,
@@ -141,32 +141,29 @@ export async function getServiceTransactionDetailedStats({
 
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-        ) ?? bucket.transactionType.buckets[0];
+      const topTransactionTypeBucket = maybe(
+        bucket.transactionType.buckets.find(({ key }) =>
+          isDefaultTransactionType(key as string)
+        ) ?? bucket.transactionType.buckets[0]
+      );
 
       return {
         serviceName: bucket.key as string,
-        latency: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+        latency:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: dateBucket.avg_duration.value,
-          })
-        ),
-        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
+          })) ?? [],
+        transactionErrorRate:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
+            x: dateBucket.key + offsetInMs,
+            y: calculateFailedTransactionRate(dateBucket),
+          })) ?? undefined,
+        throughput: topTransactionTypeBucket?.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateFailedTransactionRate(dateBucket.outcomes),
-          })
-        ),
-        throughput: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
-            x: dateBucket.key + offsetInMs,
-            y: calculateThroughputWithRange({
-              start,
-              end,
+            y: calculateThroughputWithInterval({
+              bucketSize: bucketSizeInSeconds,
               value: dateBucket.doc_count,
             }),
           })
@@ -177,12 +174,19 @@ export async function getServiceTransactionDetailedStats({
   );
 }
 
-export async function getServiceDetailedStatsPeriods({
+export interface ServiceTransactionDetailedStatPeriodsResponse {
+  currentPeriod: Record<string, ServiceTransactionDetailedStat>;
+  previousPeriod: Record<string, ServiceTransactionDetailedStat>;
+}
+
+export async function getServiceTransactionDetailedStatsPeriods({
   serviceNames,
   environment,
   kuery,
   apmEventClient,
-  searchAggregatedTransactions,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
   offset,
   start,
   end,
@@ -192,19 +196,23 @@ export async function getServiceDetailedStatsPeriods({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
   offset?: string;
   start: number;
   end: number;
   randomSampler: RandomSampler;
-}) {
+}): Promise<ServiceTransactionDetailedStatPeriodsResponse> {
   return withApmSpan('get_service_detailed_statistics', async () => {
     const commonProps = {
       serviceNames,
       environment,
       kuery,
       apmEventClient,
-      searchAggregatedTransactions,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
       start,
       end,
       randomSampler,

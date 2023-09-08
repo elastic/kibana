@@ -21,7 +21,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
@@ -34,42 +33,42 @@ import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 
-const TruncateTooltipText = styled.div`
-  width: 100%;
+const truncateTooltipTextCss = {
+  width: '100%',
 
-  > span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-`;
+  '> span': {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
+  },
+};
 
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  cursor: pointer;
-`;
+const euiFlexItemCss = {
+  cursor: 'pointer',
+};
+
+// TODO fix types
+const euiBasicTableCss = {
+  '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
+    padding: '0',
+    border: '1px solid #d3dae6',
+  },
+
+  'div.euiDataGrid__virtualized::-webkit-scrollbar': {
+    display: 'none',
+  },
+
+  '.euiDataGrid > div': {
+    '.euiDataGrid__scrollOverlay': {
+      boxShadow: 'none',
+    },
+
+    borderLeft: '0px',
+    borderRight: '0px',
+  },
+};
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
-
-// @ts-expect-error TS2769
-const StyledEuiBasicTable = styled(EuiBasicTable)`
-  .euiTableRow.euiTableRow-isExpandedRow > td > div {
-    padding: 0;
-    border: 1px solid #d3dae6;
-  }
-
-  div.euiDataGrid__virtualized::-webkit-scrollbar {
-    display: none;
-  }
-
-  .euiDataGrid > div {
-    .euiDataGrid__scrollOverlay {
-      box-shadow: none;
-    }
-
-    border-left: 0px;
-    border-right: 0px;
-  }
-`;
 
 export enum ViewResultsActionButtonType {
   icon = 'icon',
@@ -86,7 +85,7 @@ const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) 
     <EuiFlexItem grow={false}>
       {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
     </EuiFlexItem>
-    {isLive ? (
+    {!isLive ? (
       <EuiFlexItem grow={false} data-test-subj={'live-query-loading'}>
         <EuiLoadingSpinner />
       </EuiFlexItem>
@@ -130,6 +129,7 @@ type PackQueryStatusItem = Partial<{
   status?: string;
   pending?: number;
   docs?: number;
+  error?: string;
 }>;
 
 interface PackQueriesStatusTableProps {
@@ -164,14 +164,16 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
   const handleQueryFlyoutClose = useCallback(() => setQueryDetailsFlyoutOpen(null), []);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
   const renderIDColumn = useCallback(
     (id: string) => (
-      <TruncateTooltipText>
+      <div css={truncateTooltipTextCss}>
         <EuiToolTip content={id} display="block">
           <>{id}</>
         </EuiToolTip>
-      </TruncateTooltipText>
+      </div>
     ),
     []
   );
@@ -182,25 +184,22 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
       return (
-        <StyledEuiFlexItem onClick={handleQueryFlyoutOpen(item)}>
+        <EuiFlexItem css={euiFlexItemCss} onClick={handleQueryFlyoutOpen(item)}>
           <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
             {content}
           </EuiCodeBlock>
-        </StyledEuiFlexItem>
+        </EuiFlexItem>
       );
     },
     [handleQueryFlyoutOpen]
   );
 
-  const renderDocsColumn = useCallback(
-    (item: PackQueryStatusItem) => (
-      <DocsColumnResults
-        count={item?.docs ?? 0}
-        isLive={item?.status === 'running' && item?.pending !== 0}
-      />
-    ),
-    []
-  );
+  const renderDocsColumn = useCallback((item: PackQueryStatusItem) => {
+    const isLive =
+      !item?.status || !!item.error || (item?.status !== 'running' && item?.pending === 0);
+
+    return <DocsColumnResults count={item?.docs ?? 0} isLive={isLive} />;
+  }, []);
 
   const renderAgentsColumn = useCallback((item) => {
     if (!item.action_id) return;
@@ -239,6 +238,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   endDate={expirationDate}
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
+                  error={item.error}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -265,7 +265,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [data, getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
 
-  const getItemId = useCallback((item: PackItem) => get(item, 'id'), []);
+  const getItemId = useCallback((item: PackItem) => get(item, 'id'), []) as unknown as string;
 
   const renderResultActions = useCallback(
     (row: { action_id: string }) => {
@@ -277,9 +277,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           render: renderLensResultsAction,
         },
         {
-          render: (item: { action_id: string }) => (
-            <AddToTimelineButton field="action_id" value={item.action_id} isIcon={true} />
-          ),
+          render: (item: { action_id: string }) =>
+            item.action_id && (
+              <AddToTimelineButton field="action_id" value={item.action_id} isIcon={true} />
+            ),
         },
         {
           render: (item: { action_id: string }) =>
@@ -329,6 +330,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         width: '40%',
       },
       {
+        field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
           defaultMessage: 'Docs',
         }),
@@ -336,6 +338,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         render: renderDocsColumn,
       },
       {
+        field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.agentsResultsColumnTitle', {
           defaultMessage: 'Agents',
         }),
@@ -343,13 +346,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         render: renderAgentsColumn,
       },
       {
+        field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
           defaultMessage: 'View results',
         }),
-        width: '90px',
+        width: '120px',
         render: renderResultActions,
       },
       {
+        field: '',
         id: 'actions',
         width: '45px',
         isVisuallyHiddenLabel: true,
@@ -373,7 +378,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'id' as keyof PackItem,
+        field: 'id' as const,
         direction: Direction.asc,
       },
     }),
@@ -407,8 +412,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
         />
       )}
-
-      <StyledEuiBasicTable
+      <EuiBasicTable
+        css={euiBasicTableCss}
         items={data ?? EMPTY_ARRAY}
         itemId={getItemId}
         columns={columns}

@@ -11,7 +11,13 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
+import {
+  ActionsConfig,
+  AllowedHosts,
+  EnabledActionTypes,
+  CustomHostSettings,
+  DEFAULT_QUEUED_MAX,
+} from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings, SSLSettings } from './types';
@@ -28,6 +34,8 @@ enum AllowListingField {
   hostname = 'hostname',
 }
 
+export const DEFAULT_MAX_ATTEMPTS: number = 3;
+
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;
   isUriAllowed: (uri: string) => boolean;
@@ -40,10 +48,19 @@ export interface ActionsConfigurationUtilities {
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
   getMicrosoftGraphApiUrl: () => undefined | string;
+  getMaxAttempts: ({
+    actionTypeMaxAttempts,
+    actionTypeId,
+  }: {
+    actionTypeMaxAttempts?: number;
+    actionTypeId: string;
+  }) => number;
   validateEmailAddresses(
     addresses: string[],
     options?: ValidateEmailAddressesOptions
   ): string | undefined;
+  enableFooterInEmail: () => boolean;
+  getMaxQueued: () => number;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -194,5 +211,19 @@ export function getActionsConfigurationUtilities(
     getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
     validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
       validatedEmailCurried(addresses, options),
+    getMaxAttempts: ({ actionTypeMaxAttempts, actionTypeId }) => {
+      const connectorTypeConfig = config.run?.connectorTypeOverrides?.find(
+        (connectorType) => actionTypeId === connectorType.id
+      );
+
+      return (
+        connectorTypeConfig?.maxAttempts ||
+        config.run?.maxAttempts ||
+        actionTypeMaxAttempts ||
+        DEFAULT_MAX_ATTEMPTS
+      );
+    },
+    enableFooterInEmail: () => config.enableFooterInEmail,
+    getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
   };
 }

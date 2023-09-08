@@ -10,10 +10,15 @@ import React, { useState } from 'react';
 
 interface PopoverTooltipProps {
   ariaLabel?: string;
+  iconType?: string;
   children: React.ReactNode;
 }
 
-export function PopoverTooltip({ ariaLabel, children }: PopoverTooltipProps) {
+export function PopoverTooltip({
+  ariaLabel,
+  iconType = 'questionInCircle',
+  children,
+}: PopoverTooltipProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -23,6 +28,7 @@ export function PopoverTooltip({ ariaLabel, children }: PopoverTooltipProps) {
       closePopover={() => setIsPopoverOpen(false)}
       button={
         <EuiButtonIcon
+          data-test-subj="apmPopoverTooltipButton"
           aria-label={ariaLabel}
           onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
             setIsPopoverOpen(!isPopoverOpen);
@@ -30,7 +36,7 @@ export function PopoverTooltip({ ariaLabel, children }: PopoverTooltipProps) {
           }}
           size="xs"
           color="primary"
-          iconType="questionInCircle"
+          iconType={iconType}
           style={{ height: 'auto' }}
         />
       }

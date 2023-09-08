@@ -143,7 +143,10 @@ export const getMlModelConfigsForModelIds = async (
   trainedModelsStats.trained_model_stats.forEach((trainedModelStats) => {
     const trainedModelName = trainedModelStats.model_id;
     if (modelConfigs.hasOwnProperty(trainedModelName)) {
-      modelConfigs[trainedModelName].modelState = parseModelStateFromStats(trainedModelStats);
+      modelConfigs[trainedModelName].modelState = parseModelStateFromStats(
+        trainedModelStats,
+        modelConfigs[trainedModelName].types
+      );
       modelConfigs[trainedModelName].modelStateReason =
         parseModelStateReasonFromStats(trainedModelStats);
     }

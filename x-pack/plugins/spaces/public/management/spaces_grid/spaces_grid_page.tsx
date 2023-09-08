@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
@@ -50,6 +51,7 @@ interface Props {
   capabilities: Capabilities;
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  maxSpaces: number;
 }
 
 interface State {
@@ -90,7 +92,11 @@ export class SpacesGridPage extends Component<Props, State> {
             />
           }
           description={getSpacesFeatureDescription()}
-          rightSideItems={[this.getPrimaryActionButton()]}
+          rightSideItems={
+            !this.state.loading && this.canCreateSpaces()
+              ? [this.getPrimaryActionButton()]
+              : undefined
+          }
         />
         <EuiSpacer size="l" />
         {this.getPageContent()}
@@ -109,38 +115,50 @@ export class SpacesGridPage extends Component<Props, State> {
     }
 
     return (
-      <EuiInMemoryTable
-        itemId={'id'}
-        items={this.state.spaces}
-        tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
-          defaultMessage: 'Kibana spaces',
-        })}
-        rowHeader="name"
-        columns={this.getColumnConfig()}
-        hasActions
-        pagination={true}
-        sorting={true}
-        search={{
-          box: {
-            placeholder: i18n.translate(
-              'xpack.spaces.management.spacesGridPage.searchPlaceholder',
-              {
-                defaultMessage: 'Search',
-              }
-            ),
-          },
-        }}
-        loading={this.state.loading}
-        message={
-          this.state.loading ? (
-            <FormattedMessage
-              id="xpack.spaces.management.spacesGridPage.loadingTitle"
-              defaultMessage="loading…"
-            />
-          ) : undefined
-        }
-      />
+      <>
+        {!this.state.loading && !this.canCreateSpaces() ? (
+          <>
+            <EuiCallOut title="You have reached the maximum number of allowed spaces." />
+            <EuiSpacer />
+          </>
+        ) : undefined}
+        <EuiInMemoryTable
+          itemId={'id'}
+          items={this.state.spaces}
+          tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
+            defaultMessage: 'Kibana spaces',
+          })}
+          rowHeader="name"
+          columns={this.getColumnConfig()}
+          hasActions
+          pagination={true}
+          sorting={true}
+          search={{
+            box: {
+              placeholder: i18n.translate(
+                'xpack.spaces.management.spacesGridPage.searchPlaceholder',
+                {
+                  defaultMessage: 'Search',
+                }
+              ),
+            },
+          }}
+          loading={this.state.loading}
+          message={
+            this.state.loading ? (
+              <FormattedMessage
+                id="xpack.spaces.management.spacesGridPage.loadingTitle"
+                defaultMessage="loading…"
+              />
+            ) : undefined
+          }
+        />
+      </>
     );
+  }
+
+  private canCreateSpaces() {
+    return this.props.maxSpaces > this.state.spaces.length;
   }
 
   public getPrimaryActionButton() {

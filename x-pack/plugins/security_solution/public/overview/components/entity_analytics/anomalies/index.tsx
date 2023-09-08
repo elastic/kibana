@@ -20,7 +20,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import * as i18n from './translations';
-import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { useAggregatedAnomaliesByJob } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useAnomaliesColumns } from './columns';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -29,13 +29,12 @@ import {
   LinkButton,
   useGetSecuritySolutionLinkProps,
 } from '../../../../common/components/links';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../users/store/model';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 
 const TABLE_QUERY_ID = 'entityAnalyticsDashboardAnomaliesTable';
@@ -50,6 +49,8 @@ const TABLE_SORTING = {
 export const ENTITY_ANALYTICS_ANOMALIES_PANEL = 'entity_analytics_anomalies';
 
 export const EntityAnalyticsAnomalies = () => {
+  const [recentlyEnabledJobIds, setRecentlyEnabledJobIds] = useState<string[]>([]);
+
   const {
     services: { ml, http, docLinks },
   } = useKibana();
@@ -60,31 +61,22 @@ export const EntityAnalyticsAnomalies = () => {
 
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
-  const { deleteQuery, setQuery, from, to } = useGlobalTime(false);
+  const { deleteQuery, setQuery, from, to } = useGlobalTime();
   const {
     isLoading: isSearchLoading,
     data,
     refetch,
-  } = useNotableAnomaliesSearch({
+  } = useAggregatedAnomaliesByJob({
     skip: !toggleStatus,
     from,
     to,
   });
-  const { isLoading: isEnableDataFeedLoading, enableDatafeed } = useEnableDataFeed();
 
-  const handleJobStateChange = useCallback(
-    async (job: SecurityJob) => {
-      const result = await enableDatafeed(job, job.latestTimestampMs || 0, true);
-      refetch();
-      return result;
-    },
-    [refetch, enableDatafeed]
-  );
+  const onJobEnabled = useCallback(async (job: SecurityJob) => {
+    setRecentlyEnabledJobIds((current) => [...current, job.id]);
+  }, []);
 
-  const columns = useAnomaliesColumns(
-    isSearchLoading || isEnableDataFeedLoading,
-    handleJobStateChange
-  );
+  const columns = useAnomaliesColumns(isSearchLoading, onJobEnabled, recentlyEnabledJobIds);
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   useEffect(() => {
@@ -116,8 +108,12 @@ export const EntityAnalyticsAnomalies = () => {
   }, [getSecuritySolutionLinkProps]);
 
   const installedJobsIds = useMemo(
-    () => data.filter(({ job }) => !!job && job.isInstalled).map(({ job }) => job?.id ?? ''),
-    [data]
+    () =>
+      data
+        .filter(({ job }) => !!job && job.isInstalled)
+        .map(({ job }) => job?.id ?? '')
+        .concat(recentlyEnabledJobIds),
+    [data, recentlyEnabledJobIds]
   );
 
   const incompatibleJobCount = useMemo(
@@ -133,6 +129,7 @@ export const EntityAnalyticsAnomalies = () => {
         subtitle={<LastUpdatedAt isUpdating={isSearchLoading} updatedAt={updatedAt} />}
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
+        tooltip={i18n.ANOMALIES_TOOLTIP}
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -171,7 +168,7 @@ export const EntityAnalyticsAnomalies = () => {
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 data-test-subj="incompatible_jobs_warnings"
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 <p>
@@ -192,7 +189,6 @@ export const EntityAnalyticsAnomalies = () => {
                   />
                 </p>
               </EuiCallOut>
-
               <EuiSpacer size="m" />
             </>
           )}
@@ -201,6 +197,9 @@ export const EntityAnalyticsAnomalies = () => {
             responsive={false}
             items={data}
             columns={columns}
+            pagination={{
+              showPerPageOptions: true,
+            }}
             loading={isSearchLoading}
             id={TABLE_QUERY_ID}
             sorting={TABLE_SORTING}

@@ -49,6 +49,8 @@ const ruleTypes = [
     enabledInLicense: true,
     minimumScheduleInterval: '1m',
     defaultScheduleInterval: '10m',
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
   } as RegistryAlertTypeWithAuth,
 ];
 
@@ -72,7 +74,7 @@ beforeEach(() => {
 
 describe('healthRoute', () => {
   it('registers the route', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -85,7 +87,7 @@ describe('healthRoute', () => {
   });
 
   it('queries the usage api', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -109,7 +111,7 @@ describe('healthRoute', () => {
   });
 
   it('throws error when user does not have any access to any rule types', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set());
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set());
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -135,7 +137,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates whether Encrypted Saved Objects is missing encryption key', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
@@ -155,22 +157,6 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
-          // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-          decryption_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          execution_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          read_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
         alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
@@ -192,7 +178,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security status cannot be determined from license state, isSufficientlySecure should return false', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -213,22 +199,6 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
-          // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-          decryption_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          execution_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          read_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
         alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
@@ -250,7 +220,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is disabled, isSufficientlySecure should return true', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -271,22 +241,6 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
-          // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-          decryption_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          execution_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          read_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
         alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
@@ -308,7 +262,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is enabled but user cannot generate api keys, isSufficientlySecure should return false', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -329,22 +283,6 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
-          // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-          decryption_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          execution_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          read_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
         alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,
@@ -366,7 +304,7 @@ describe('healthRoute', () => {
   });
 
   test('when ES security is enabled and user can generate api keys, isSufficientlySecure should return true', async () => {
-    rulesClient.listAlertTypes.mockResolvedValueOnce(new Set(ruleTypes));
+    rulesClient.listRuleTypes.mockResolvedValueOnce(new Set(ruleTypes));
     const router = httpServiceMock.createRouter();
     const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
@@ -387,22 +325,6 @@ describe('healthRoute', () => {
 
     expect(await handler(context, req, res)).toStrictEqual({
       body: {
-        alerting_framework_heath: {
-          // Legacy: pre-v8.0 typo
-          _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-          decryption_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          execution_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-          read_health: {
-            status: HealthStatus.OK,
-            timestamp: currentDate,
-          },
-        },
         alerting_framework_health: {
           decryption_health: {
             status: HealthStatus.OK,

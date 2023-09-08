@@ -7,7 +7,7 @@
 
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { SanitizedRule } from '../types';
 
 const alert: SanitizedRule<{
@@ -37,13 +37,13 @@ const alert: SanitizedRule<{
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 };
 
 describe('Alert Task Instance', () => {
-  test(`validates that a TaskInstance has valid Alert Task State`, () => {
-    const lastScheduledActionsDate = new Date();
+  test(`passes-through the state object`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',
@@ -51,129 +51,7 @@ describe('Alert Task Instance', () => {
       scheduledAt: new Date(),
       startedAt: new Date(),
       retryAt: new Date(Date.now() + 5 * 60 * 1000),
-      state: {
-        alertTypeState: {
-          some: 'value',
-        },
-        alertInstances: {
-          first_instance: {
-            state: {},
-            meta: {
-              lastScheduledActions: {
-                group: 'first_group',
-                date: lastScheduledActionsDate.toISOString(),
-              },
-            },
-          },
-          second_instance: {},
-        },
-      },
-      taskType: 'alerting:test',
-      params: {
-        alertId: '1',
-      },
-      ownerId: null,
-    };
-
-    const alertTaskInsatnce: AlertTaskInstance = taskInstanceToAlertTaskInstance(taskInstance);
-
-    expect(alertTaskInsatnce).toEqual({
-      ...taskInstance,
-      state: {
-        alertTypeState: {
-          some: 'value',
-        },
-        alertInstances: {
-          first_instance: {
-            state: {},
-            meta: {
-              lastScheduledActions: {
-                group: 'first_group',
-                date: lastScheduledActionsDate,
-              },
-            },
-          },
-          second_instance: {},
-        },
-      },
-    });
-  });
-
-  test(`throws if state is invalid`, () => {
-    const taskInstance: ConcreteTaskInstance = {
-      id: '215ee69b-1df9-428e-ab1a-ccf274f8fa5b',
-      attempts: 0,
-      status: TaskStatus.Running,
-      version: '123',
-      runAt: new Date(),
-      scheduledAt: new Date(),
-      startedAt: new Date(),
-      retryAt: new Date(Date.now() + 5 * 60 * 1000),
-      state: {
-        alertTypeState: {
-          some: 'value',
-        },
-        alertInstances: {
-          first_instance: 'invalid',
-          second_instance: {},
-        },
-      },
-      taskType: 'alerting:test',
-      params: {
-        alertId: '1',
-      },
-      ownerId: null,
-    };
-
-    expect(() => taskInstanceToAlertTaskInstance(taskInstance)).toThrowErrorMatchingInlineSnapshot(
-      `"Task \\"215ee69b-1df9-428e-ab1a-ccf274f8fa5b\\" has invalid state at .alertInstances.first_instance"`
-    );
-  });
-
-  test(`throws with Alert id when alert is present and state is invalid`, () => {
-    const taskInstance: ConcreteTaskInstance = {
-      id: '215ee69b-1df9-428e-ab1a-ccf274f8fa5b',
-      attempts: 0,
-      status: TaskStatus.Running,
-      version: '123',
-      runAt: new Date(),
-      scheduledAt: new Date(),
-      startedAt: new Date(),
-      retryAt: new Date(Date.now() + 5 * 60 * 1000),
-      state: {
-        alertTypeState: {
-          some: 'value',
-        },
-        alertInstances: {
-          first_instance: 'invalid',
-          second_instance: {},
-        },
-      },
-      taskType: 'alerting:test',
-      params: {
-        alertId: '1',
-      },
-      ownerId: null,
-    };
-
-    expect(() =>
-      taskInstanceToAlertTaskInstance(taskInstance, alert)
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Task \\"215ee69b-1df9-428e-ab1a-ccf274f8fa5b\\" (underlying Alert \\"alert-123\\") has invalid state at .alertInstances.first_instance"`
-    );
-  });
-
-  test(`allows an initial empty state`, () => {
-    const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
-      attempts: 0,
-      status: TaskStatus.Running,
-      version: '123',
-      runAt: new Date(),
-      scheduledAt: new Date(),
-      startedAt: new Date(),
-      retryAt: new Date(Date.now() + 5 * 60 * 1000),
-      state: {},
+      state: { foo: true },
       taskType: 'alerting:test',
       params: {
         alertId: '1',
@@ -188,7 +66,7 @@ describe('Alert Task Instance', () => {
 
   test(`validates that a TaskInstance has valid Params`, () => {
     const taskInstance: ConcreteTaskInstance = {
-      id: uuid.v4(),
+      id: uuidv4(),
       attempts: 0,
       status: TaskStatus.Running,
       version: '123',

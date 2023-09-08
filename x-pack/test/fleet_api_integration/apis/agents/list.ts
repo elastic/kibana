@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
@@ -14,13 +15,34 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
-
+  const es = getService('es');
+  let elasticAgentpkgVersion: string;
   describe('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
+      const getPkRes = await supertest
+        .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      elasticAgentpkgVersion = getPkRes.body.item.version;
+      // Install latest version of the package
+      await supertest
+        .post(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
+        .send({
+          force: true,
+        })
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await supertest
+        .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${elasticAgentpkgVersion}`)
+        .set('kbn-xsrf', 'xxxx');
+      await es.transport.request({
+        method: 'DELETE',
+        path: `/_data_stream/metrics-elastic_agent.elastic_agent-default`,
+      });
     });
 
     it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
@@ -50,15 +72,29 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.total).to.eql(4);
     });
 
-    it('should return a 400 when given an invalid "kuery" value', async () => {
-      await supertest.get(`/api/fleet/agents?kuery=.test%3A`).expect(400);
+    it('should return 200 if the passed kuery is valid', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=fleet-agents.local_metadata.host.hostname:test`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
     });
 
-    it('should return a 200 and an empty list when given a "kuery" value with a missing saved object type', async () => {
-      const { body: apiResponse } = await supertest
-        .get(`/api/fleet/agents?kuery=m`) // missing saved object type
+    it('should return 200 also if the passed kuery does not have prefix fleet-agents', async () => {
+      await supertest
+        .get(`/api/fleet/agent_status?kuery=local_metadata.host.hostname:test`)
+        .set('kbn-xsrf', 'xxxx')
         .expect(200);
-      expect(apiResponse.total).to.eql(0);
+    });
+
+    it('should return a 400 when given an invalid "kuery" value', async () => {
+      await supertest.get(`/api/fleet/agents?kuery='test%3A'`).expect(400);
+    });
+
+    it('should return 400 if passed kuery has non existing parameters', async () => {
+      await supertest
+        .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:healthy`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(400);
     });
 
     it('should accept a valid "kuery" value', async () => {
@@ -105,6 +141,97 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return tags of all agents', async () => {
       const { body: apiResponse } = await supertest.get('/api/fleet/agents/tags').expect(200);
       expect(apiResponse.items).to.eql(['existingTag', 'tag1']);
+    });
+
+    it('should return metrics if available and called with withMetrics', async () => {
+      const now = Date.now();
+      await es.index({
+        index: 'metrics-elastic_agent.elastic_agent-default',
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': new Date(now - 2 * 60 * 1000).toISOString(),
+          data_stream: {
+            namespace: 'default',
+            type: 'metrics',
+            dataset: 'elastic_agent.elastic_agent',
+          },
+          elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          system: {
+            process: {
+              memory: {
+                size: 25510920,
+              },
+              cpu: {
+                total: {
+                  value: 500,
+                },
+              },
+            },
+          },
+        },
+      });
+      await es.index({
+        index: 'metrics-elastic_agent.elastic_agent-default',
+        refresh: 'wait_for',
+        document: {
+          '@timestamp': new Date(now - 1 * 60 * 1000).toISOString(),
+          elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          data_stream: {
+            namespace: 'default',
+            type: 'metrics',
+            dataset: 'elastic_agent.elastic_agent',
+          },
+          system: {
+            process: {
+              memory: {
+                size: 25510920,
+              },
+              cpu: {
+                total: {
+                  value: 1500,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?withMetrics=true`)
+        .expect(200);
+
+      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
+      expect(apiResponse.total).to.eql(4);
+
+      const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');
+
+      expect(agent1.metrics?.memory_size_byte_avg).to.eql('25510920');
+      expect(agent1.metrics?.cpu_avg).to.eql('0.01666');
+
+      const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
+      expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);
+      expect(agent2.metrics?.cpu_avg).equal(undefined);
+    });
+
+    it('should return a status summary if getStatusSummary provided', async () => {
+      const { body: apiResponse } = await supertest
+        .get('/api/fleet/agents?getStatusSummary=true&perPage=0')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(apiResponse.items).to.eql([]);
+
+      expect(apiResponse.statusSummary).to.eql({
+        degraded: 0,
+        enrolling: 0,
+        error: 0,
+        inactive: 0,
+        offline: 4,
+        online: 0,
+        unenrolled: 0,
+        unenrolling: 0,
+        updating: 0,
+      });
     });
   });
 }

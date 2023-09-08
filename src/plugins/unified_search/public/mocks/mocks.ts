@@ -34,8 +34,10 @@ const createStartContract = (): Start => {
     autocomplete: autocompleteStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
+      getCustomSearchBar: jest.fn(),
       SearchBar: jest.fn().mockReturnValue(null),
       AggregateQuerySearchBar: jest.fn().mockReturnValue(null),
+      FiltersBuilderLazy: jest.fn(),
     },
   };
 };

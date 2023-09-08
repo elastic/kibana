@@ -43,7 +43,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
           throw new Error();
         }
       });
-      return await testSubjects.find('waffleMap');
+      return testSubjects.find('waffleMap');
     },
 
     async getWaffleMapTooltips() {
@@ -84,7 +84,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
         const color = await nodeValue.getAttribute('color');
         return { name, value: parseFloat(value), color };
       });
-      return await Promise.all(promises);
+      return Promise.all(promises);
     },
 
     async sortNodesBy(sort: string) {
@@ -163,30 +163,39 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async closeTimeline() {
       await testSubjects.click('toggleTimelineButton');
-      await testSubjects.existOrFail('timelineContainerClosed');
+      const timelineSelectorsVisible = await Promise.all([
+        testSubjects.exists('timelineContainerClosed'),
+        testSubjects.exists('timelineContainerOpen'),
+      ]);
+
+      return timelineSelectorsVisible.every((visible) => !visible);
     },
 
-    async openInvenotrySwitcher() {
+    async toggleInventorySwitcher() {
       await testSubjects.click('openInventorySwitcher');
-      return await testSubjects.find('goToHost');
+      await testSubjects.find('goToHost');
+      await testSubjects.click('openInventorySwitcher');
+      retry.tryForTime(2 * 1000, async () => {
+        return testSubjects.missingOrFail('goToHost');
+      });
     },
 
     async goToHost() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return await testSubjects.click('goToHost');
+      return testSubjects.click('goToHost');
     },
 
     async goToPods() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return await testSubjects.click('goToPods');
+      return testSubjects.click('goToPods');
     },
 
     async goToDocker() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return await testSubjects.click('goToDocker');
+      return testSubjects.click('goToDocker');
     },
 
     async goToSettings() {
@@ -216,37 +225,58 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
     },
 
+    async goToHostsView() {
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraOps',
+        `/hosts`,
+        undefined,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
+    },
+
     async getSaveViewButton() {
-      return await testSubjects.find('openSaveViewModal');
+      return testSubjects.find('openSaveViewModal');
     },
 
     async getLoadViewsButton() {
-      return await testSubjects.find('loadViews');
+      return testSubjects.find('loadViews');
     },
 
     async openSaveViewsFlyout() {
-      return await testSubjects.click('loadViews');
+      return testSubjects.click('loadViews');
     },
 
     async closeSavedViewFlyout() {
-      return await testSubjects.click('cancelSavedViewModal');
+      return testSubjects.click('cancelSavedViewModal');
     },
 
     async openCreateSaveViewModal() {
-      return await testSubjects.click('openSaveViewModal');
+      return testSubjects.click('openSaveViewModal');
     },
 
     async openEnterViewNameAndSave() {
-      await testSubjects.setValue('savedViewViweName', 'View1');
+      await testSubjects.setValue('savedViewName', 'View1');
       await testSubjects.click('createSavedViewButton');
     },
 
     async getNoMetricsIndicesPrompt() {
-      return await testSubjects.find('noDataPage');
+      return testSubjects.find('noDataPage');
     },
 
     async getNoMetricsDataPrompt() {
-      return await testSubjects.find('noMetricsDataPrompt');
+      return testSubjects.find('noMetricsDataPrompt');
+    },
+
+    async getNoRemoteClusterPrompt() {
+      return testSubjects.find('infraHostsNoRemoteCluster');
+    },
+
+    async getInfraMissingMetricsIndicesCallout() {
+      return testSubjects.find('infraIndicesPanelSettingsWarningCallout');
+    },
+
+    async getInfraMissingRemoteClusterIndicesCallout() {
+      return testSubjects.find('infraIndicesPanelSettingsDangerCallout');
     },
 
     async openSourceConfigurationFlyout() {
@@ -309,20 +339,40 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('metrics-alert-menu');
     },
 
+    async dismissDatePickerTooltip() {
+      const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
+        timeout: 1000,
+      });
+
+      if (isTooltipOpen) {
+        await testSubjects.click(`waffleDatePickerIntervalTooltip`);
+      }
+    },
+
     async openInventoryAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('inventory-alerts-menu-option');
-      await testSubjects.click('inventory-alerts-create-rule');
-      await testSubjects.missingOrFail('inventory-alerts-create-rule');
-      await testSubjects.find('euiFlyoutCloseButton');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () => testSubjects.click('inventory-alerts-create-rule'));
+      await testSubjects.missingOrFail('inventory-alerts-create-rule', { timeout: 30000 });
     },
 
     async openMetricsThresholdAlertFlyout() {
+      await this.dismissDatePickerTooltip();
       await testSubjects.click('infrastructure-alerts-and-rules');
       await testSubjects.click('metrics-threshold-alerts-menu-option');
-      await testSubjects.click('metrics-threshold-alerts-create-rule');
-      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule');
-      await testSubjects.find('euiFlyoutCloseButton');
+
+      // forces date picker tooltip to close in case it pops up after Alerts and rules opens
+      await testSubjects.moveMouseTo('contextMenuPanelTitleButton');
+
+      await retry.tryForTime(1000, () =>
+        testSubjects.click('metrics-threshold-alerts-create-rule')
+      );
+      await testSubjects.missingOrFail('metrics-threshold-alerts-create-rule', { timeout: 30000 });
     },
 
     async closeAlertFlyout() {
@@ -366,6 +416,24 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async ensureSuggestionsPanelVisible() {
       await testSubjects.find('infraSuggestionsPanel');
+    },
+
+    async ensureInventoryFeedbackLinkIsVisible() {
+      await testSubjects.existOrFail('infraInventoryFeedbackLink');
+    },
+
+    async ensureKubernetesTourIsVisible() {
+      const container = await testSubjects.find('infra-kubernetesTour-text');
+      const containerText = await container.getVisibleText();
+      return containerText;
+    },
+
+    async ensureKubernetesTourIsClosed() {
+      await testSubjects.missingOrFail('infra-kubernetesTour-text');
+    },
+
+    async clickDismissKubernetesTourButton() {
+      return testSubjects.click('infra-kubernetesTour-dismiss');
     },
   };
 }

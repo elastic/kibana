@@ -25,7 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
     return appLinks.some((item) => item.path === path);
   };
 
-  describe('sample data apis', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/164568
+  describe.skip('sample data apis', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
     });
@@ -64,12 +65,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(resp.body).to.eql({
             elasticsearchIndicesCreated: { kibana_sample_data_flights: 13059 },
-            kibanaSavedObjectsLoaded: 11,
+            kibanaSavedObjectsLoaded: 8,
           });
         });
 
-        // Failing: See https://github.com/elastic/kibana/issues/121051
-        describe.skip('dates', () => {
+        describe('dates', () => {
           it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
             const resp = await es.search<{ timestamp: string }>({
               index: 'kibana_sample_data_flights',

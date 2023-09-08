@@ -1,15 +1,16 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "allowJs": false,
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "stripInternal": true,
     "types": ["node"]
   },
   "include": [
     "**/*.ts",
     "src/ace/modes/x_json/worker/x_json.ace.worker.js"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

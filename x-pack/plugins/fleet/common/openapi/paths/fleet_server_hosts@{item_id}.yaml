@@ -1,6 +1,7 @@
 get:
-  summary: Fleet Server Hosts - Info
-  tags: []
+  summary: Get Fleet Server host by ID
+  tags:
+    - Fleet Server hosts
   responses:
     '200':
       description: OK
@@ -13,6 +14,8 @@ get:
                 $ref: ../components/schemas/fleet_server_host.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-one-fleet-server-hosts
 parameters:
   - schema:
@@ -21,7 +24,9 @@ parameters:
     in: path
     required: true
 delete:
-  summary: Fleet Server Hosts - Delete
+  summary: Delete Fleet Server host by ID
+  tags:
+    - Fleet Server hosts
   operationId: delete-fleet-server-hosts
   responses:
     '200':
@@ -35,15 +40,14 @@ delete:
                 type: string
             required:
               - id
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
-  summary: Fleet Server Hosts - Update
+  summary: Update Fleet Server host by ID
+  tags:
+    - Fleet Server hosts
   operationId: update-fleet-server-hosts
   requestBody:
     content:
@@ -71,10 +75,7 @@ put:
                 $ref: ../components/schemas/fleet_server_host.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml

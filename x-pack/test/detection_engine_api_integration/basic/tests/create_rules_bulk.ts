@@ -11,8 +11,8 @@ import { DETECTION_ENGINE_RULES_BULK_CREATE } from '@kbn/security-solution-plugi
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -26,6 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rules_bulk', () => {
     describe('creating rules in bulk', () => {
@@ -42,14 +43,15 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule()])
           .expect(200);
 
@@ -61,6 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRuleWithoutRuleId()])
           .expect(200);
 
@@ -72,6 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule(), getSimpleRule()])
           .expect(200);
 
@@ -90,12 +94,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule()])
           .expect(200);
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_BULK_CREATE)
           .set('kbn-xsrf', 'foo')
+          .set('elastic-api-version', '2023-10-31')
           .send([getSimpleRule()])
           .expect(200);
 

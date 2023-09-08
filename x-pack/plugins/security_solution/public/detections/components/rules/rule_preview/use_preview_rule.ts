@@ -8,16 +8,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type {
-  PreviewResponse,
-  RuleCreateProps,
-} from '../../../../../common/detection_engine/rule_schema';
+import type { PreviewResponse, RuleCreateProps } from '../../../../../common/api/detection_engine';
 
 import { previewRule } from '../../../../detection_engine/rule_management/api/api';
-import * as i18n from '../../../../detection_engine/rule_management/logic/translations';
 import { transformOutput } from '../../../containers/detection_engine/rules/transforms';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
+import * as i18n from './translations';
 
 const emptyPreviewRule: PreviewResponse = {
   previewId: undefined,
@@ -73,7 +70,7 @@ export const usePreviewRule = ({
           }
         } catch (error) {
           if (isSubscribed) {
-            addError(error, { title: i18n.RULE_ADD_FAILURE });
+            addError(error, { title: i18n.RULE_PREVIEW_ERROR });
           }
         }
         if (isSubscribed) {

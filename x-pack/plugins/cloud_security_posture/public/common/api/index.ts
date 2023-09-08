@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './use_compliance_dashboard_data_api';
+export * from './use_stats_api';
+export * from './use_fetch_detection_rules_by_tags';

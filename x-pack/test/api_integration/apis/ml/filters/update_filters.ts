@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -55,9 +55,9 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should update filter by id`, async () => {
       const { filterId } = validFilters[0];
       const { body, status } = await supertest
-        .put(`/api/ml/filters/${filterId}`)
+        .put(`/internal/ml/filters/${filterId}`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(updateFilterRequestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -69,9 +69,9 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should not allow to update filter for user without required permission`, async () => {
       const { filterId, requestBody: oldFilterRequest } = validFilters[1];
       const { body, status } = await supertest
-        .put(`/api/ml/filters/${filterId}`)
+        .put(`/internal/ml/filters/${filterId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(updateFilterRequestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 
@@ -89,9 +89,9 @@ export default ({ getService }: FtrProviderContext) => {
     it(`should not allow to update filter for unauthorized user`, async () => {
       const { filterId, requestBody: oldFilterRequest } = validFilters[2];
       const { body, status } = await supertest
-        .put(`/api/ml/filters/${filterId}`)
+        .put(`/internal/ml/filters/${filterId}`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(updateFilterRequestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 
@@ -106,9 +106,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should return appropriate error if invalid filterId`, async () => {
       const { body, status } = await supertest
-        .put(`/api/ml/filters/filter_id_dne`)
+        .put(`/internal/ml/filters/filter_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(updateFilterRequestBody);
       ml.api.assertResponseStatusCode(404, status, body);
 

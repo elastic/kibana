@@ -50,7 +50,7 @@ function formatDate({
   )} - ${previousPeriodEnd.format(dateFormat)}`;
 }
 
-function isDefined<T>(argument: T | undefined | null): argument is T {
+export function isDefined<T>(argument: T | undefined | null): argument is T {
   return argument !== undefined && argument !== null;
 }
 
@@ -143,11 +143,9 @@ export function getComparisonOptions({
     comparisonTypes = [TimeRangeComparisonEnum.PeriodBefore];
   }
 
-  const hasMLJobsMatchingEnv =
-    Array.isArray(anomalyDetectionJobsData?.jobs) &&
-    anomalyDetectionJobsData?.jobs.some(
-      (j) => j.environment === preferredEnvironment
-    );
+  const hasMLJob =
+    isDefined(anomalyDetectionJobsData) &&
+    anomalyDetectionJobsData.jobs.length > 0;
 
   const comparisonOptions = getSelectOptions({
     comparisonTypes,
@@ -156,9 +154,12 @@ export function getComparisonOptions({
     msDiff,
   });
 
-  if (showSelectedBoundsOption) {
+  if (showSelectedBoundsOption && hasMLJob) {
     const disabled =
-      anomalyDetectionJobsStatus === 'success' && !hasMLJobsMatchingEnv;
+      anomalyDetectionJobsStatus === 'success' &&
+      !anomalyDetectionJobsData.jobs.some(
+        (j) => j.environment === preferredEnvironment
+      );
     comparisonOptions.push({
       value: TimeRangeComparisonEnum.ExpectedBounds,
       text: disabled

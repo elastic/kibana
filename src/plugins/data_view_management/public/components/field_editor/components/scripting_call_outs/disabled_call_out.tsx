@@ -24,7 +24,7 @@ export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage

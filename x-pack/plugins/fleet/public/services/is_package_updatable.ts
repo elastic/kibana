@@ -6,9 +6,9 @@
  */
 import semverLt from 'semver/functions/lt';
 
-import type { PackageInfo, PackageListItem } from '../types';
+import type { PackageListItem } from '../types';
 
-export const isPackageUpdatable = (pkg: PackageInfo | PackageListItem): boolean =>
-  'savedObject' in pkg &&
-  pkg.savedObject &&
-  semverLt(pkg.savedObject.attributes.version, pkg.version);
+export const isPackageUpdatable = (pkg: PackageListItem): boolean =>
+  'installationInfo' in pkg && pkg.installationInfo?.version
+    ? semverLt(pkg.installationInfo?.version, pkg.version)
+    : false;

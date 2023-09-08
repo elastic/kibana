@@ -63,6 +63,7 @@ export interface IExecutionLog {
   rule_id: string;
   space_ids: string[];
   rule_name: string;
+  maintenance_window_ids: string[];
 }
 
 export interface IExecutionErrors {

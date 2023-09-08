@@ -21,6 +21,12 @@ get:
               type: object
               properties:
                 $ref: '../components/schemas/case_configure_response_properties.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
         - url: https://localhost:5601
 
@@ -45,36 +51,7 @@ post:
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            closure_type:
-              $ref: '../components/schemas/closure_types.yaml'
-            connector:
-              description: An object that contains the connector configuration.
-              type: object
-              properties:
-                $ref: '../components/schemas/case_configure_connector_properties.yaml'
-              required:
-                - fields
-                - id
-                - name
-                - type
-            owner:
-              $ref: '../components/schemas/owners.yaml'
-            settings:
-              description: An object that contains the case settings.
-              type: object
-              properties:
-                syncAlerts:
-                  description: Turns alert syncing on or off.
-                  type: boolean
-                  example: true
-              required: 
-                - syncAlerts
-          required:
-            - closure_type
-            - connector
-            - owner
+          $ref: '../components/schemas/set_case_configuration_request.yaml'
         examples:
           setCaseConfigRequest:
             $ref: '../components/examples/set_case_configuration_request.yaml'
@@ -90,8 +67,13 @@ post:
           examples:
             setCaseConfigResponse:
               $ref: '../components/examples/set_case_configuration_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
      - url: https://localhost:5601
-
 servers:
       - url: https://localhost:5601

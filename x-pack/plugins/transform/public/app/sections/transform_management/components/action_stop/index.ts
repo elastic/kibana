@@ -6,4 +6,4 @@
  */
 
 export { useStopAction } from './use_stop_action';
-export { StopActionName } from './stop_action_name';
+export { isStopActionDisabled, StopActionName } from './stop_action_name';

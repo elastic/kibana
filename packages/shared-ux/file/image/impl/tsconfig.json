@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "node",
       "jest",
@@ -13,5 +11,13 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-file-util",
+    "@kbn/shared-ux-file-types",
+    "@kbn/shared-ux-file-image-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

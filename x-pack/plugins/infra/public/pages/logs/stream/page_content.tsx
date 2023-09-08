@@ -5,52 +5,94 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
+import { TimeRange } from '@kbn/es-query';
+import { useActor } from '@xstate/react';
+import React, { useMemo } from 'react';
+import { VisiblePositions } from '../../../observability_logs/log_stream_position_state';
+import { TimeKey } from '../../../../common/time';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogsPageTemplate } from '../page_template';
-import { LogsPageLogsContent } from './page_logs_content';
-import { fullHeightContentStyles } from '../../../page_template.styles';
+import {
+  LogStreamPageCallbacks,
+  LogStreamPageState,
+  useLogStreamPageStateContext,
+} from '../../../observability_logs/log_stream_page/state';
+import { InvalidStateCallout } from '../../../observability_logs/xstate_helpers';
+import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
+import { LogStreamPageTemplate } from './components/stream_page_template';
+import { StreamPageLogsContentForState } from './page_logs_content';
+import { StreamPageMissingIndicesContent } from './page_missing_indices_content';
+import { LogStreamPageContentProviders } from './page_providers';
 
-const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
-  defaultMessage: 'Stream',
-});
+export const ConnectedStreamPageContent: React.FC = () => {
+  const logStreamPageStateService = useLogStreamPageStateContext();
+  const [logStreamPageState, logStreamPageSend] = useActor(logStreamPageStateService);
 
-export const StreamPageContent: React.FunctionComponent = () => {
-  const {
-    hasFailedLoading,
-    isLoading,
-    isUninitialized,
-    latestLoadLogViewFailures,
-    load,
-    logViewStatus,
-  } = useLogViewContext();
+  const pageStateCallbacks = useMemo(() => {
+    return {
+      updateTimeRange: (timeRange: Partial<TimeRange>) => {
+        logStreamPageSend({
+          type: 'UPDATE_TIME_RANGE',
+          timeRange,
+        });
+      },
+      jumpToTargetPosition: (targetPosition: TimeKey | null) => {
+        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition });
+      },
+      jumpToTargetPositionTime: (time: number) => {
+        logStreamPageSend({ type: 'JUMP_TO_TARGET_POSITION', targetPosition: { time } });
+      },
+      reportVisiblePositions: (visiblePositions: VisiblePositions) => {
+        logStreamPageSend({
+          type: 'REPORT_VISIBLE_POSITIONS',
+          visiblePositions,
+        });
+      },
+      startLiveStreaming: () => {
+        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: false } });
+      },
+      stopLiveStreaming: () => {
+        logStreamPageSend({ type: 'UPDATE_REFRESH_INTERVAL', refreshInterval: { pause: true } });
+      },
+    };
+  }, [logStreamPageSend]);
 
-  if (isLoading || isUninitialized) {
+  return (
+    <StreamPageContentForState
+      logStreamPageState={logStreamPageState}
+      logStreamPageCallbacks={pageStateCallbacks}
+    />
+  );
+};
+
+export const StreamPageContentForState: React.FC<{
+  logStreamPageState: LogStreamPageState;
+  logStreamPageCallbacks: LogStreamPageCallbacks;
+}> = ({ logStreamPageState, logStreamPageCallbacks }) => {
+  if (
+    logStreamPageState.matches('uninitialized') ||
+    logStreamPageState.matches({ hasLogViewIndices: 'uninitialized' }) ||
+    logStreamPageState.matches('loadingLogView')
+  ) {
     return <SourceLoadingPage />;
-  } else if (hasFailedLoading) {
-    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
-  } else {
+  } else if (logStreamPageState.matches('loadingLogViewFailed')) {
+    return <ConnectedLogViewErrorPage />;
+  } else if (logStreamPageState.matches('missingLogViewIndices')) {
+    return <StreamPageMissingIndicesContent />;
+  } else if (logStreamPageState.matches({ hasLogViewIndices: 'initialized' })) {
     return (
-      <div className={APP_WRAPPER_CLASS}>
-        <LogsPageTemplate
-          hasData={logViewStatus?.index !== 'missing'}
-          isDataLoading={isLoading}
-          pageHeader={{
-            pageTitle: streamTitle,
-          }}
-          pageSectionProps={{
-            contentProps: {
-              css: fullHeightContentStyles,
-            },
-          }}
+      <LogStreamPageTemplate hasData={true} isDataLoading={false}>
+        <LogStreamPageContentProviders
+          logStreamPageState={logStreamPageState}
+          logStreamPageCallbacks={logStreamPageCallbacks}
         >
-          <LogsPageLogsContent />
-        </LogsPageTemplate>
-      </div>
+          <StreamPageLogsContentForState
+            logStreamPageState={logStreamPageState}
+            logStreamPageCallbacks={logStreamPageCallbacks}
+          />
+        </LogStreamPageContentProviders>
+      </LogStreamPageTemplate>
     );
+  } else {
+    return <InvalidStateCallout state={logStreamPageState} />;
   }
 };

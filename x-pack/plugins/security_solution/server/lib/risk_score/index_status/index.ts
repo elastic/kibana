@@ -7,21 +7,21 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
+import { APP_ID, RISK_SCORE_INDEX_STATUS_API_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../detection_engine/routes/utils';
-import { indexStatusSchema } from './schema';
+import { indexStatusRequestQuery } from '../../../../common/api/risk_score';
 
 export const getRiskScoreIndexStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: RISK_SCORE_INDEX_STATUS_API_URL,
       validate: {
-        query: buildRouteValidation(indexStatusSchema),
+        query: buildRouteValidation(indexStatusRequestQuery),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     },
     async (context, request, response) => {

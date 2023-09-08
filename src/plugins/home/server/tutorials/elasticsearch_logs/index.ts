@@ -58,6 +58,6 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['containers', 'os_system'],
+    integrationBrowserCategories: ['observability'],
   };
 }

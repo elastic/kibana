@@ -1,6 +1,7 @@
 get:
-  summary: Fleet Proxies - Info
-  tags: []
+  summary: Get proxy by ID
+  tags:
+    - Proxies
   responses:
     '200':
       description: OK
@@ -13,6 +14,8 @@ get:
                 $ref: ../components/schemas/proxies.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-one-fleet-proxies
 parameters:
   - schema:
@@ -21,7 +24,9 @@ parameters:
     in: path
     required: true
 delete:
-  summary: Fleet Proxies - Delete
+  summary: Delete proxy by ID
+  tags:
+    - Proxies
   operationId: delete-fleet-proxies
   responses:
     '200':
@@ -35,15 +40,14 @@ delete:
                 type: string
             required:
               - id
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
-  summary: Fleet Proxies - Update
+  summary: Update proxy by ID
+  tags:
+    - Proxies
   operationId: update-fleet-proxies
   requestBody:
     content:
@@ -75,10 +79,7 @@ put:
                 $ref: ../components/schemas/proxies.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml

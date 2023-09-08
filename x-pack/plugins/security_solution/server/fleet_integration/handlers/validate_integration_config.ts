@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import {
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
@@ -39,6 +40,7 @@ const validateEndpointIntegrationConfig = (
       ENDPOINT_CONFIG_PRESET_NGAV,
       ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
       ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
+      ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
     ].includes(config.endpointConfig.preset)
   ) {
     logger.warn(`invalid endpointConfig preset: ${config.endpointConfig.preset}`);

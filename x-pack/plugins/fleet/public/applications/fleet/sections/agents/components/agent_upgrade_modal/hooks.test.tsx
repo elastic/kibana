@@ -12,13 +12,6 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useScheduleDateTime } from './hooks';
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn().mockReturnValue({}),
-}));
-
 describe('useScheduleDateTime', () => {
   it('do not allow to set a date before the current time', async () => {
     const renderer = createFleetTestRendererMock();

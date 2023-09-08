@@ -12,11 +12,15 @@ import { render, screen } from '@testing-library/react';
 
 import type { Props } from './connectors';
 import { Connectors } from './connectors';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  type AppMockRenderer,
+  noConnectorsCasePermission,
+  createAppMockRenderer,
+  TestProviders,
+} from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
@@ -121,7 +125,7 @@ describe('Connectors', () => {
       newWrapper
         .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .text()
-    ).toBe('Update My Connector');
+    ).toBe('Update My SN connector');
   });
 
   it('shows the deprecated callout when the connector is deprecated', async () => {
@@ -154,6 +158,16 @@ describe('Connectors', () => {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    const result = appMockRender.render(<Connectors {...props} />);
+    expect(
+      result.getByTestId('configure-case-connector-permissions-error-msg')
+    ).toBeInTheDocument();
+    expect(result.queryByTestId('case-connectors-dropdown')).toBe(null);
+  });
+
+  it('shows the actions permission message if the user does not have access to case connector', async () => {
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(<Connectors {...props} />);
     expect(

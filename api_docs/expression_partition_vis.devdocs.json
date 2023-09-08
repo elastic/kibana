@@ -143,9 +143,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -272,9 +272,9 @@
               "<{}, ",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               "> | undefined; }"
@@ -1070,6 +1070,31 @@
     "misc": [
       {
         "parentPluginId": "expressionPartitionVis",
+        "id": "def-common.AllowedPartitionOverrides",
+        "type": "Type",
+        "tags": [],
+        "label": "AllowedPartitionOverrides",
+        "description": [],
+        "signature": [
+          "{ partition?: { animation?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<{ duration: number; } | undefined>; valueGetter?: ",
+          "ValueGetter",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; } | undefined; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_partition_vis/common/types/expression_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionPartitionVis",
         "id": "def-common.ExpressionValuePartitionLabels",
         "type": "Type",
         "tags": [],
@@ -1154,7 +1179,7 @@
             "text": "ExpressionValueRender"
           },
           "<",
-          "RenderValue",
+          "PartitionChartProps",
           ">, ",
           {
             "pluginId": "expressions",
@@ -1174,9 +1199,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1268,9 +1293,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1335,7 +1360,7 @@
             "text": "ExpressionValueRender"
           },
           "<",
-          "RenderValue",
+          "PartitionChartProps",
           ">, ",
           {
             "pluginId": "expressions",
@@ -1355,9 +1380,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1452,7 +1477,7 @@
             "text": "ExpressionValueRender"
           },
           "<",
-          "RenderValue",
+          "PartitionChartProps",
           ">, ",
           {
             "pluginId": "expressions",
@@ -1472,9 +1497,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"
@@ -1539,7 +1564,7 @@
             "text": "ExpressionValueRender"
           },
           "<",
-          "RenderValue",
+          "PartitionChartProps",
           ">, ",
           {
             "pluginId": "expressions",
@@ -1559,9 +1584,9 @@
           ", ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">>"

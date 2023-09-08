@@ -12,21 +12,17 @@ import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import {
-  ApplicationStart,
-  IUiSettingsClient,
-  SavedObjectsStart,
-  DocLinksStart,
-} from '@kbn/core/public';
+import { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
 import type { TypesStart, BaseVisType, VisTypeAlias } from '../vis_types';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import './dialog.scss';
 
 interface TypeSelectionProps {
+  contentClient: ContentClient;
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: TypesStart;
@@ -34,7 +30,6 @@ interface TypeSelectionProps {
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
-  savedObjects: SavedObjectsStart;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
@@ -59,14 +54,12 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     editorParams: [],
   };
 
-  private readonly isLabsEnabled: boolean;
   private readonly trackUiMetric:
     | ((type: UiCounterMetricType, eventNames: string | string[], count?: number) => void)
     | undefined;
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = props.uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
 
     this.state = {
       showSearchVisModal: Boolean(this.props.selectedVisType),
@@ -94,10 +87,10 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
           <SearchSelection
+            contentClient={this.props.contentClient}
+            uiSettings={this.props.uiSettings}
             onSearchSelected={this.onSearchSelected}
             visType={this.state.visType}
-            uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
             goBack={() => this.setState({ showSearchVisModal: false })}
           />
         </EuiModal>
@@ -108,7 +101,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
           aria-label={visNewVisDialogAriaLabel}
         >
           <WizardComponent
-            showExperimental={this.isLabsEnabled}
+            showExperimental={true}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
             docLinks={this.props.docLinks}

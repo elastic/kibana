@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
-import { Controller, useFormContext, FieldError, ControllerFieldState } from 'react-hook-form';
+import { Controller, useFormContext, FieldError } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
-import { useKibanaSpace, useIsEditFlow } from '../hooks';
+import { useKibanaSpace, useIsEditFlow, useValidateField } from '../hooks';
 import { ControlledField } from './controlled_field';
-import { FieldMeta } from '../types';
+import { FormConfig, FieldMeta } from '../types';
 
-type Props = FieldMeta & { fieldError?: FieldError };
+type Props = FieldMeta<any> & { fieldError?: FieldError };
 
 export const Field = memo<Props>(
   ({
@@ -24,47 +24,31 @@ export const Field = memo<Props>(
     props,
     fieldKey,
     controlled,
-    showWhen,
-    shouldUseSetValue,
     required,
     validation,
-    error,
+    error: validationError,
     fieldError,
     dependencies,
     customHook,
+    hidden,
   }: Props) => {
-    const { register, watch, control, setValue, reset, getFieldState, formState } =
-      useFormContext();
+    const { register, control, setValue, reset, formState, trigger } = useFormContext<FormConfig>();
     const { locations } = useSelector(selectServiceLocationsState);
     const { space } = useKibanaSpace();
     const isEdit = useIsEditFlow();
-    const [dependenciesFieldMeta, setDependenciesFieldMeta] = useState<
-      Record<string, ControllerFieldState>
-    >({});
-    let show = true;
-    let dependenciesValues: unknown[] = [];
-    if (showWhen) {
-      const [showKey, expectedValue] = showWhen;
-      const [actualValue] = watch([showKey]);
-      show = actualValue === expectedValue;
-    }
-    if (dependencies) {
-      dependenciesValues = watch(dependencies);
-    }
-    useEffect(() => {
-      if (dependencies) {
-        dependencies.forEach((dependency) => {
-          setDependenciesFieldMeta((prevState) => ({
-            ...prevState,
-            [dependency]: getFieldState(dependency),
-          }));
-        });
-      }
-      // run effect when dependencies values change, to get the most up to date meta state
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(dependenciesValues || []), dependencies, getFieldState]);
 
-    if (!show) {
+    const { dependenciesValues, dependenciesFieldMeta, error, isInvalid, rules } = useValidateField(
+      {
+        fieldKey,
+        validation,
+        dependencies,
+        required: required ?? false,
+        customHook,
+        validationError,
+      }
+    );
+
+    if (hidden && hidden(dependenciesValues)) {
       return null;
     }
 
@@ -76,25 +60,21 @@ export const Field = memo<Props>(
     };
 
     return controlled ? (
-      <Controller
+      <Controller<FormConfig, keyof FormConfig>
         control={control}
         name={fieldKey}
-        rules={{
-          required,
-          ...(validation ? validation(dependenciesValues) : {}),
-        }}
+        rules={rules}
         render={({ field, fieldState: fieldStateT }) => {
           return (
             <ControlledField
               field={field}
               component={Component}
               props={props}
-              shouldUseSetValue={shouldUseSetValue}
               fieldKey={fieldKey}
-              customHook={customHook}
               formRowProps={formRowProps}
               fieldState={fieldStateT}
               error={error}
+              isInvalid={isInvalid}
               dependenciesValues={dependenciesValues}
               dependenciesFieldMeta={dependenciesFieldMeta}
             />
@@ -108,24 +88,22 @@ export const Field = memo<Props>(
         error={fieldError?.message || error}
       >
         <Component
-          {...register(fieldKey, {
-            required,
-            ...(validation ? validation(dependenciesValues) : {}),
-          })}
+          {...register(fieldKey, rules)}
           {...(props
             ? props({
                 field: undefined,
                 formState,
                 setValue,
+                trigger,
                 reset,
-                locations,
+                locations: locations.map((location) => ({ ...location, key: location.id })),
                 dependencies: dependenciesValues,
                 dependenciesFieldMeta,
                 space: space?.id,
                 isEdit,
               })
             : {})}
-          isInvalid={Boolean(fieldError)}
+          isInvalid={isInvalid}
           fullWidth
         />
       </EuiFormRow>

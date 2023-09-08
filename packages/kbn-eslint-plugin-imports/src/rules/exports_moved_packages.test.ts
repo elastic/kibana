@@ -16,8 +16,8 @@ const OPTIONS: MovedExportsRule[][] = [
   [
     {
       exportNames: ['foo', 'bar'],
-      fromPackage: 'old',
-      toPackage: 'new',
+      from: 'old',
+      to: 'new',
     },
   ],
 ];

@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback, FC } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   getFlightOptionsAsync,
@@ -35,7 +35,11 @@ import { injectStorybookDataView } from '../services/data_views/data_views.story
 import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
 import { populateStorybookControlFactories } from './storybook_control_factories';
 import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
-import { OptionsListResponse, OptionsListRequest } from '../../common/options_list/types';
+import {
+  OptionsListResponse,
+  OptionsListRequest,
+  OptionsListSuggestions,
+} from '../../common/options_list/types';
 
 export default {
   title: 'Controls',
@@ -54,7 +58,12 @@ const storybookStubOptionsListRequest = async (
     setTimeout(
       () =>
         r({
-          suggestions: getFlightSearchOptions(request.field.name, request.searchString),
+          suggestions: getFlightSearchOptions(request.field.name, request.searchString).reduce(
+            (o, current, index) => {
+              return [...o, { value: current, docCount: index }];
+            },
+            [] as OptionsListSuggestions
+          ),
           totalCardinality: 100,
         }),
       120
@@ -92,7 +101,7 @@ export const ControlGroupStoryComponent: FC<{
         controlStyle: 'oneLine',
         chainingSystem: 'NONE', // a chaining system doesn't make sense in storybook since the controls aren't backed by elasticsearch
         panels: panels ?? {},
-        id: uuid.v4(),
+        id: uuidv4(),
         viewMode,
       });
 

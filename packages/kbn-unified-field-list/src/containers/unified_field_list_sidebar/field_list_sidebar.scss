@@ -1,0 +1,40 @@
+.unifiedFieldListSidebar {
+  overflow: hidden;
+  margin: 0 !important;
+  flex-grow: 1;
+  padding: 0;
+  width: $euiSize * 19;
+  height: 100%;
+
+  @include euiBreakpoint('xs', 's') {
+    width: 100%;
+    padding: $euiSize;
+    background-color: $euiPageBackgroundColor;
+  }
+}
+
+.unifiedFieldListSidebar__list {
+  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+
+  @include euiBreakpoint('xs', 's') {
+    padding: $euiSizeS 0 0 0;
+  }
+}
+
+.unifiedFieldListSidebar__group {
+  height: 100%;
+}
+
+.unifiedFieldListSidebar__mobile {
+  width: 100%;
+  padding: $euiSizeS $euiSizeS 0;
+
+  .unifiedFieldListSidebar__mobileBadge {
+    margin-left: $euiSizeS;
+    vertical-align: text-bottom;
+  }
+}
+
+.unifiedFieldListSidebar__flyoutHeader {
+  align-items: center;
+}

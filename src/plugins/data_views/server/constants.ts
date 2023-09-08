@@ -65,6 +65,11 @@ export const SPECIFIC_SCRIPTED_FIELD_PATH = `${SCRIPTED_FIELD_PATH}/{name}`;
 export const SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY = `${SCRIPTED_FIELD_PATH_LEGACY}/{name}`;
 
 /**
+ * Path to swap references
+ */
+export const DATA_VIEW_SWAP_REFERENCES_PATH = `${SERVICE_PATH}/swap_references`;
+
+/**
  * name of service in path form
  */
 export const SERVICE_KEY = 'data_view';
@@ -76,3 +81,15 @@ export const SERVICE_KEY_LEGACY = 'index_pattern';
  * Service keys as type
  */
 export type SERVICE_KEY_TYPE = typeof SERVICE_KEY | typeof SERVICE_KEY_LEGACY;
+
+/**
+ * Initial REST version date
+ */
+
+export const INITIAL_REST_VERSION = '2023-10-31';
+
+/**
+ * Initial REST version internal
+ */
+
+export const INITIAL_REST_VERSION_INTERNAL = '1';

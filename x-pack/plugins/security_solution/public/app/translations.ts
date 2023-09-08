@@ -7,9 +7,27 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
+  defaultMessage: 'Elastic AI Assistant',
+});
+
 export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overview', {
   defaultMessage: 'Overview',
 });
+
+export const DATA_QUALITY = i18n.translate(
+  'xpack.securitySolution.navigation.ecsDataQualityDashboard',
+  {
+    defaultMessage: 'Data Quality',
+  }
+);
+
+export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.navigation.entityRiskScore',
+  {
+    defaultMessage: 'Entity Risk Score',
+  }
+);
 
 export const DETECTION_RESPONSE = i18n.translate(
   'xpack.securitySolution.navigation.detectionResponse',
@@ -37,6 +55,13 @@ export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dash
   defaultMessage: 'Dashboards',
 });
 
+export const COVERAGE_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.navigation.coverageOverviewDashboard',
+  {
+    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+  }
+);
+
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
   defaultMessage: 'Network',
 });
@@ -53,8 +78,16 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
 
+export const SIEM_RULES = i18n.translate('xpack.securitySolution.navigation.detectionRules', {
+  defaultMessage: 'Detection rules (SIEM)',
+});
+
+export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRules', {
+  defaultMessage: 'Add Rules',
+});
+
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Rule Exceptions',
+  defaultMessage: 'Shared exception lists',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
@@ -109,9 +142,6 @@ export const FINDINGS = i18n.translate('xpack.securitySolution.navigation.findin
 export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore', {
   defaultMessage: 'Explore',
 });
-export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.investigate', {
-  defaultMessage: 'Investigate',
-});
 export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
   defaultMessage: 'Manage',
 });
@@ -127,26 +157,15 @@ export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
   }
 );
 
-export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
-  defaultMessage: 'Create new rule',
-});
-
-export const GO_TO_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.goToDocumentationButton',
+export const PROTECTION_UPDATES = i18n.translate(
+  'xpack.securitySolution.navigation.protectionUpdates',
   {
-    defaultMessage: 'View documentation',
+    defaultMessage: 'Protection updates',
   }
 );
 
-export const NO_PERMISSIONS_MSG = (subPluginKey: string) =>
-  i18n.translate('xpack.securitySolution.noPermissionsMessage', {
-    values: { subPluginKey },
-    defaultMessage:
-      'To view {subPluginKey}, you must update privileges. For more information, contact your Kibana administrator.',
-  });
-
-export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPermissionsTitle', {
-  defaultMessage: 'Privileges required',
+export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
+  defaultMessage: 'Create new rule',
 });
 
 export const THREAT_INTELLIGENCE = i18n.translate(

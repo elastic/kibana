@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { RowRendererId } from '..';
-import { Ecs } from '../../../ecs';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { DeprecatedRowRendererId } from '..';
 
-export interface RowRenderer {
-  id: RowRendererId;
+/**
+ * This interface should not be used anymore.
+ * Use the one from `plugins/security_solution/common/types/timeline`.
+ * @deprecated
+ */
+export interface DeprecatedRowRenderer {
+  id: DeprecatedRowRendererId;
   isInstance: (data: Ecs) => boolean;
   renderRow: ({
     contextId,

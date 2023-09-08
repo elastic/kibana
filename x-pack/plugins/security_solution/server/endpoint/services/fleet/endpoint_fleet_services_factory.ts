@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectsServiceStart,
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceStart } from '@kbn/core/server';
 import type {
   AgentClient,
   AgentPolicyServiceInterface,
@@ -17,11 +13,11 @@ import type {
   PackagePolicyClient,
   PackageClient,
 } from '@kbn/fleet-plugin/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { createInternalSoClient } from '../../utils/create_internal_so_client';
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 
 export interface EndpointFleetServicesFactoryInterface {
-  asScoped(req: KibanaRequest): EndpointScopedFleetServicesInterface;
-
   asInternalUser(): EndpointInternalFleetServicesInterface;
 }
 
@@ -33,24 +29,6 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     >,
     private savedObjectsStart: SavedObjectsServiceStart
   ) {}
-
-  asScoped(req: KibanaRequest): EndpointScopedFleetServicesInterface {
-    const {
-      agentPolicyService: agentPolicy,
-      packagePolicyService: packagePolicy,
-      agentService,
-      packageService,
-    } = this.fleetDependencies;
-
-    return {
-      agent: agentService.asScoped(req),
-      agentPolicy,
-      packages: packageService.asScoped(req),
-      packagePolicy,
-
-      asInternal: this.asInternalUser.bind(this),
-    };
-  }
 
   asInternalUser(): EndpointInternalFleetServicesInterface {
     const {
@@ -66,8 +44,10 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       packages: packageService.asInternalUser,
       packagePolicy,
 
-      asScoped: this.asScoped.bind(this),
+      endpointPolicyKuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "endpoint"`,
+
       internalReadonlySoClient: createInternalReadonlySoClient(this.savedObjectsStart),
+      internalSoClient: createInternalSoClient(this.savedObjectsStart),
     };
   }
 }
@@ -80,23 +60,16 @@ export interface EndpointFleetServicesInterface {
   agentPolicy: AgentPolicyServiceInterface;
   packages: PackageClient;
   packagePolicy: PackagePolicyClient;
-}
-
-export interface EndpointScopedFleetServicesInterface extends EndpointFleetServicesInterface {
-  /**
-   * get internal fleet services instance
-   */
-  asInternal: EndpointFleetServicesFactoryInterface['asInternalUser'];
+  /** The `kuery` that can be used to filter for Endpoint integration policies */
+  endpointPolicyKuery: string;
 }
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
   /**
-   * get scoped endpoint fleet services instance
-   */
-  asScoped: EndpointFleetServicesFactoryInterface['asScoped'];
-
-  /**
    * An internal SO client (readonly) that can be used with the Fleet services that require it
    */
   internalReadonlySoClient: SavedObjectsClientContract;
+
+  /** Internal SO client. USE ONLY WHEN ABSOLUTELY NEEDED. Else, use the `internalReadonlySoClient` */
+  internalSoClient: SavedObjectsClientContract;
 }

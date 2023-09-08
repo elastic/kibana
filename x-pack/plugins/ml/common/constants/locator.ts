@@ -15,7 +15,10 @@ export const ML_PAGES = {
   DATA_FRAME_ANALYTICS_SOURCE_SELECTION: 'data_frame_analytics/source_selection',
   DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
   TRAINED_MODELS_MANAGE: 'trained_models',
-  TRAINED_MODELS_NODES: 'trained_models/nodes',
+  DATA_COMPARISON_INDEX_SELECT: 'data_comparison_index_select',
+  DATA_COMPARISON: 'data_comparison',
+  NODES: 'nodes',
+  MEMORY_USAGE: 'memory_usage',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
   /**
@@ -43,10 +46,16 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC: 'jobs/new_job/multi_metric',
   ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC: 'jobs/new_job/convert_to_multi_metric',
   ANOMALY_DETECTION_CREATE_JOB_ADVANCED: 'jobs/new_job/advanced',
+  ANOMALY_DETECTION_CREATE_JOB_POPULATION: 'jobs/new_job/population',
+  ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION: 'jobs/new_job/categorization',
+  ANOMALY_DETECTION_CREATE_JOB_RARE: 'jobs/new_job/rare',
+  ANOMALY_DETECTION_CREATE_JOB_GEO: 'jobs/new_job/geo',
   ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: 'jobs/new_job/convert_to_advanced',
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: 'jobs/new_job/step/job_type',
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: 'jobs/new_job/step/index_or_search',
   ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: 'jobs/new_job/from_lens',
+  ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: 'jobs/new_job/from_map',
+  ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: 'modules/check_view_or_create',
   SETTINGS: 'settings',
   CALENDARS_MANAGE: 'settings/calendars_list',
   CALENDARS_NEW: 'settings/calendars_list/new_calendar',
@@ -54,12 +63,19 @@ export const ML_PAGES = {
   FILTER_LISTS_MANAGE: 'settings/filter_lists',
   FILTER_LISTS_NEW: 'settings/filter_lists/new_filter_list',
   FILTER_LISTS_EDIT: 'settings/filter_lists/edit_filter_list',
-  ACCESS_DENIED: 'access-denied',
   OVERVIEW: 'overview',
   NOTIFICATIONS: 'notifications',
   AIOPS: 'aiops',
+  /**
+   * @deprecated since 8.10, kept here to redirect old bookmarks.
+   */
   AIOPS_EXPLAIN_LOG_RATE_SPIKES: 'aiops/explain_log_rate_spikes',
+  /**
+   * @deprecated since 8.10, kept here to redirect old bookmarks.
+   */
   AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: 'aiops/explain_log_rate_spikes_index_select',
+  AIOPS_LOG_RATE_ANALYSIS: 'aiops/log_rate_analysis',
+  AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT: 'aiops/log_rate_analysis_index_select',
   AIOPS_LOG_CATEGORIZATION: 'aiops/log_categorization',
   AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: 'aiops/log_categorization_index_select',
   AIOPS_CHANGE_POINT_DETECTION: 'aiops/change_point_detection',

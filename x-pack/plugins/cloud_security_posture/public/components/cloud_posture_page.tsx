@@ -7,20 +7,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
 import { SubscriptionNotAllowed } from './subscription_not_allowed';
 import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
-import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
+export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
+export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
 export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
@@ -45,51 +46,52 @@ export const isCommonError = (error: unknown): error is CommonError => {
   return true;
 };
 
-const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
-  <FullSizeCenteredPage>
+export interface CspNoDataPageProps {
+  pageTitle: NoDataPageProps['pageTitle'];
+  docsLink: NoDataPageProps['docsLink'];
+  actionHref: NoDataPageProps['actions']['elasticAgent']['href'];
+  actionTitle: NoDataPageProps['actions']['elasticAgent']['title'];
+  actionDescription: NoDataPageProps['actions']['elasticAgent']['description'];
+  testId: string;
+}
+
+export const CspNoDataPage = ({
+  pageTitle,
+  docsLink,
+  actionHref,
+  actionTitle,
+  actionDescription,
+  testId,
+}: CspNoDataPageProps) => {
+  return (
     <NoDataPage
-      data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
+      data-test-subj={testId}
       css={css`
-        max-width: 950px;
+        > :nth-child(3) {
+          display: block;
+          margin: auto;
+          width: 450px;
+        }
       `}
-      pageTitle={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
-        defaultMessage: 'Install Integration to get started',
-      })}
+      pageTitle={pageTitle}
       solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
         defaultMessage: 'Cloud Security Posture',
       })}
-      docsLink={'https://ela.st/kspm'}
-      logo={'logoSecurity'}
+      docsLink={docsLink}
+      logo="logoSecurity"
       actions={{
         elasticAgent: {
-          href: cisIntegrationLink,
-          isDisabled: !cisIntegrationLink,
-          title: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
-            defaultMessage: 'Add a KSPM integration',
-          }),
-          description: (
-            <FormattedMessage
-              id="xpack.csp.cloudPosturePage.packageNotInstalled.description"
-              defaultMessage="Use our {integrationFullName} (KSPM) integration to measure your Kubernetes cluster setup against CIS recommendations."
-              values={{
-                integrationFullName: (
-                  <EuiLink href="https://ela.st/kspm">
-                    <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.packageNotInstalled.integrationNameLabel"
-                      defaultMessage="Kubernetes Security Posture Management"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ),
+          href: actionHref,
+          isDisabled: !actionHref,
+          title: actionTitle,
+          description: actionDescription,
         },
       }}
     />
-  </FullSizeCenteredPage>
-);
+  );
+};
 
-const defaultLoadingRenderer = () => (
+export const defaultLoadingRenderer = () => (
   <CspLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
     <FormattedMessage
       id="xpack.csp.cloudPosturePage.loadingDescription"
@@ -102,7 +104,7 @@ const defaultErrorRenderer = (error: unknown) => (
   <FullSizeCenteredPage>
     <EuiEmptyPrompt
       color="danger"
-      iconType="alert"
+      iconType="warning"
       data-test-subj={ERROR_STATE_TEST_SUBJECT}
       title={
         <h2>
@@ -131,7 +133,7 @@ const defaultErrorRenderer = (error: unknown) => (
   </FullSizeCenteredPage>
 );
 
-const defaultNoDataRenderer = () => (
+export const defaultNoDataRenderer = () => (
   <FullSizeCenteredPage>
     <NoDataPage
       data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
@@ -149,9 +151,9 @@ const defaultNoDataRenderer = () => (
   </FullSizeCenteredPage>
 );
 
-const subscriptionNotAllowedRenderer = () => (
+const subscriptionNotAllowedRenderer = (licenseManagementLocator?: string) => (
   <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
-    <SubscriptionNotAllowed />
+    <SubscriptionNotAllowed licenseManagementLocator={licenseManagementLocator} />
   </FullSizeCenteredPage>
 );
 
@@ -171,32 +173,19 @@ export const CloudPosturePage = <TData, TError>({
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
   const subscriptionStatus = useSubscriptionStatus();
-  const getSetupStatus = useCspSetupStatusApi();
-  const cisIntegrationLink = useCISIntegrationLink();
+  const getLicenseManagementLocator = useLicenseManagementLocatorApi();
 
   const render = () => {
     if (subscriptionStatus.isError) {
       return defaultErrorRenderer(subscriptionStatus.error);
     }
 
-    if (subscriptionStatus.isLoading) {
+    if (subscriptionStatus.isLoading || getLicenseManagementLocator.isLoading) {
       return defaultLoadingRenderer();
     }
 
     if (!subscriptionStatus.data) {
-      return subscriptionNotAllowedRenderer();
-    }
-
-    if (getSetupStatus.isError) {
-      return defaultErrorRenderer(getSetupStatus.error);
-    }
-
-    if (getSetupStatus.isLoading) {
-      return defaultLoadingRenderer();
-    }
-
-    if (getSetupStatus.data.status === 'not-installed') {
-      return packageNotInstalledRenderer(cisIntegrationLink);
+      return subscriptionNotAllowedRenderer(getLicenseManagementLocator.data);
     }
 
     if (!query) {

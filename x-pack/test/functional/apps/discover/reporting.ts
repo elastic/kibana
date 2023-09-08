@@ -29,6 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const getReport = async () => {
+    // close any open notification toasts
+    await PageObjects.reporting.clearToastNotifications();
+
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 
@@ -51,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
+        await esArchiver.emptyKibanaIndex();
       });
 
       it('is available if new', async () => {
@@ -72,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
+        await esArchiver.emptyKibanaIndex();
       });
 
       beforeEach(async () => {
@@ -85,8 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('single-timefilter-search');
 
         // get shared URL value
-        await PageObjects.share.clickShareTopNavButton();
-        const sharedURL = await PageObjects.share.getSharedUrl();
+        const sharedURL = await browser.getCurrentUrl();
 
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
@@ -98,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // get clipboard value using field search input, since
         // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const textInput = await testSubjects.find('fieldFilterSearchInput');
+        const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
         await textInput.click();
         await browser.getActions().keyDown(Key.CONTROL).perform();
         await browser.getActions().keyDown('v').perform();
@@ -291,7 +295,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // filter
-        await filterBar.addFilter('category', 'is', `Men's Shoes`);
+        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('154');
         });

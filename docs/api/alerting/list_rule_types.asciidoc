@@ -6,6 +6,13 @@
 
 Retrieve a list of rule types that the user is authorized to access.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
+
 [[list-rule-types-api-request]]
 === {api-request-title}
 

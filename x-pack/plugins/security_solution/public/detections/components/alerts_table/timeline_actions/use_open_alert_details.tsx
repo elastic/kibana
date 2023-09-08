@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../../common/constants';
+import type { AlertTableContextMenuItem } from '../types';
 
 interface Props {
   ruleId?: string;
@@ -28,7 +27,7 @@ export const ACTION_OPEN_ALERT_DETAILS_PAGE = i18n.translate(
 
 export const useOpenAlertDetailsAction = ({ ruleId, closePopover, alertId }: Props) => {
   const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
-  const alertDetailsActionItems = [];
+  const alertDetailsActionItems: AlertTableContextMenuItem[] = [];
   const { onClick } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
     path: alertId ? getAlertDetailsUrl(alertId) : '',
@@ -36,15 +35,12 @@ export const useOpenAlertDetailsAction = ({ ruleId, closePopover, alertId }: Pro
 
   // We check ruleId to confirm this is an alert, as this page does not support events as of 8.6
   if (ruleId && alertId && isAlertDetailsPageEnabled) {
-    alertDetailsActionItems.push(
-      <EuiContextMenuItem
-        key="open-alert-details-item"
-        data-test-subj="open-alert-details-page-menu-item"
-        onClick={onClick}
-      >
-        {ACTION_OPEN_ALERT_DETAILS_PAGE}
-      </EuiContextMenuItem>
-    );
+    alertDetailsActionItems.push({
+      key: 'open-alert-details-item',
+      'data-test-subj': 'open-alert-details-page-menu-item',
+      onClick,
+      name: ACTION_OPEN_ALERT_DETAILS_PAGE,
+    });
   }
 
   return {

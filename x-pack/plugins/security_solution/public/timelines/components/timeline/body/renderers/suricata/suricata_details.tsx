@@ -10,7 +10,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { NetflowRenderer } from '../netflow';
 import { SuricataSignature } from './suricata_signature';

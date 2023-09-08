@@ -162,7 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should preserve app filters in lens', async () => {
-      await filterBar.addFilter('extension', 'is', 'css');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
@@ -178,6 +178,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
+    });
+
+    it('should bring the ignore global filters configured at series level over', async () => {
+      await visualBuilder.clickSeriesOption();
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('topN');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
   });
 }

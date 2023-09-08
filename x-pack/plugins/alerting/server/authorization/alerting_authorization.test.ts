@@ -20,10 +20,11 @@ import {
   ReadOperations,
   AlertingAuthorizationEntity,
 } from './alerting_authorization';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
+import { schema } from '@kbn/config-schema';
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -51,27 +52,28 @@ function mockSecurity() {
   return { authorization };
 }
 
-function mockFeature(appName: string, typeName?: string) {
+function mockFeature(appName: string, typeName?: string | string[]) {
+  const typeNameArray = typeName ? (Array.isArray(typeName) ? typeName : [typeName]) : undefined;
   return new KibanaFeature({
     id: appName,
     name: appName,
     app: [],
     category: { id: 'foo', label: 'foo' },
-    ...(typeName
+    ...(typeNameArray
       ? {
-          alerting: [typeName],
+          alerting: typeNameArray,
         }
       : {}),
     privileges: {
       all: {
-        ...(typeName
+        ...(typeNameArray
           ? {
               alerting: {
                 rule: {
-                  all: [typeName],
+                  all: typeNameArray,
                 },
                 alert: {
-                  all: [typeName],
+                  all: typeNameArray,
                 },
               },
             }
@@ -83,14 +85,14 @@ function mockFeature(appName: string, typeName?: string) {
         ui: [],
       },
       read: {
-        ...(typeName
+        ...(typeNameArray
           ? {
               alerting: {
                 rule: {
-                  read: [typeName],
+                  read: typeNameArray,
                 },
                 alert: {
-                  read: [typeName],
+                  read: typeNameArray,
                 },
               },
             }
@@ -192,8 +194,13 @@ beforeEach(() => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'myApp',
+    validate: {
+      params: schema.any(),
+    },
   }));
   features.getKibanaFeatures.mockReturnValue([
     myAppFeature,
@@ -208,8 +215,8 @@ describe('AlertingAuthorization', () => {
   describe('constructor', () => {
     test(`fetches the user's current space`, async () => {
       const space = {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         disabledFeatures: [],
       };
       getSpace.mockResolvedValue(space);
@@ -743,6 +750,8 @@ describe('AlertingAuthorization', () => {
       name: 'myOtherAppAlertType',
       producer: 'alerts',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     };
     const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -755,6 +764,8 @@ describe('AlertingAuthorization', () => {
       name: 'myAppAlertType',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     };
     const mySecondAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -767,6 +778,8 @@ describe('AlertingAuthorization', () => {
       name: 'mySecondAppAlertType',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
     test('omits filter when there is no authorization api', async () => {
@@ -809,6 +822,12 @@ describe('AlertingAuthorization', () => {
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
     });
     test('creates a filter based on the privileged types', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myAppAlertType', 'mySecondAppAlertType']),
+        mockFeature('alerts', 'myOtherAppAlertType'),
+        myOtherAppFeature,
+        myAppWithSubFeature,
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -840,7 +859,7 @@ describe('AlertingAuthorization', () => {
         ).filter
       ).toEqual(
         fromKueryExpression(
-          `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+          `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );
     });
@@ -888,6 +907,10 @@ describe('AlertingAuthorization', () => {
       );
     });
     test('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
+        mockFeature('myOtherApp', ['myOtherAppAlertType', 'myAppAlertType']),
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -948,6 +971,10 @@ describe('AlertingAuthorization', () => {
       );
     });
     test('creates an `ensureRuleTypeIsAuthorized` function which is no-op if type is authorized', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
+        mockFeature('myOtherApp', 'myAppAlertType'),
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1006,6 +1033,10 @@ describe('AlertingAuthorization', () => {
       }).not.toThrow();
     });
     test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType', 'mySecondAppAlertType']),
+        mockFeature('myOtherApp', ['mySecondAppAlertType', 'myAppAlertType']),
+      ]);
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
         ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -1120,6 +1151,8 @@ describe('AlertingAuthorization', () => {
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     };
     const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -1132,10 +1165,23 @@ describe('AlertingAuthorization', () => {
       name: 'myAppAlertType',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
-
+    beforeEach(() => {
+      features.getKibanaFeatures.mockReturnValue([
+        mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
+        mockFeature('myOtherApp', ['myAppAlertType', 'myOtherAppAlertType']),
+      ]);
+    });
     test('augments a list of types with all features when there is no authorization api', async () => {
+      features.getKibanaFeatures.mockReturnValue([
+        myAppFeature,
+        myOtherAppFeature,
+        myAppWithSubFeature,
+        myFeatureWithoutAlerting,
+      ]);
       const alertAuthorization = new AlertingAuthorization({
         request,
         ruleTypeRegistry,
@@ -1152,75 +1198,79 @@ describe('AlertingAuthorization', () => {
           AlertingAuthorizationEntity.Rule
         )
       ).resolves.toMatchInlineSnapshot(`
-              Set {
-                Object {
-                  "actionGroups": Array [],
-                  "actionVariables": undefined,
-                  "authorizedConsumers": Object {
-                    "alerts": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                    "myApp": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                    "myAppWithSubFeature": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                    "myOtherApp": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                  },
-                  "defaultActionGroupId": "default",
-                  "enabledInLicense": true,
-                  "id": "myAppAlertType",
-                  "isExportable": true,
-                  "minimumLicenseRequired": "basic",
-                  "name": "myAppAlertType",
-                  "producer": "myApp",
-                  "recoveryActionGroup": Object {
-                    "id": "recovered",
-                    "name": "Recovered",
-                  },
-                },
-                Object {
-                  "actionGroups": Array [],
-                  "actionVariables": undefined,
-                  "authorizedConsumers": Object {
-                    "alerts": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                    "myApp": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                    "myAppWithSubFeature": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                    "myOtherApp": Object {
-                      "all": true,
-                      "read": true,
-                    },
-                  },
-                  "defaultActionGroupId": "default",
-                  "enabledInLicense": true,
-                  "id": "myOtherAppAlertType",
-                  "isExportable": true,
-                  "minimumLicenseRequired": "basic",
-                  "name": "myOtherAppAlertType",
-                  "producer": "myOtherApp",
-                  "recoveryActionGroup": Object {
-                    "id": "recovered",
-                    "name": "Recovered",
-                  },
-                },
-              }
-            `);
+        Set {
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "alerts": Object {
+                "all": true,
+                "read": true,
+              },
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+              "myAppWithSubFeature": Object {
+                "all": true,
+                "read": true,
+              },
+              "myOtherApp": Object {
+                "all": true,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myAppAlertType",
+            "producer": "myApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "alerts": Object {
+                "all": true,
+                "read": true,
+              },
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+              "myAppWithSubFeature": Object {
+                "all": true,
+                "read": true,
+              },
+              "myOtherApp": Object {
+                "all": true,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myOtherAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myOtherAppAlertType",
+            "producer": "myOtherApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+        }
+      `);
     });
 
     test('augments a list of types with consumers under which the operation is authorized', async () => {
@@ -1276,59 +1326,63 @@ describe('AlertingAuthorization', () => {
           AlertingAuthorizationEntity.Rule
         )
       ).resolves.toMatchInlineSnapshot(`
-                Set {
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "myApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myOtherAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myOtherAppAlertType",
-                    "producer": "myOtherApp",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "alerts": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                      "myApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                      "myOtherApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myAppAlertType",
-                    "producer": "myApp",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
-                }
-              `);
+        Set {
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myOtherAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myOtherAppAlertType",
+            "producer": "myOtherApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "alerts": Object {
+                "all": true,
+                "read": true,
+              },
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+              "myOtherApp": Object {
+                "all": true,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myAppAlertType",
+            "producer": "myApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+        }
+      `);
     });
 
     test('authorizes user under the `alerts` consumer when they are authorized by the producer', async () => {
@@ -1371,34 +1425,36 @@ describe('AlertingAuthorization', () => {
           AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
-                Set {
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "alerts": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                      "myApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myAppAlertType",
-                    "producer": "myApp",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
-                }
-              `);
+        Set {
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "alerts": Object {
+                "all": true,
+                "read": true,
+              },
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myAppAlertType",
+            "producer": "myApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+        }
+      `);
     });
 
     test('augments a list of types with consumers under which multiple operations are authorized', async () => {
@@ -1475,67 +1531,71 @@ describe('AlertingAuthorization', () => {
           AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
-                Set {
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "alerts": Object {
-                        "all": false,
-                        "read": true,
-                      },
-                      "myApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                      "myOtherApp": Object {
-                        "all": false,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myOtherAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myOtherAppAlertType",
-                    "producer": "myOtherApp",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "alerts": Object {
-                        "all": false,
-                        "read": true,
-                      },
-                      "myApp": Object {
-                        "all": false,
-                        "read": true,
-                      },
-                      "myOtherApp": Object {
-                        "all": false,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myAppAlertType",
-                    "producer": "myApp",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
-                }
-              `);
+        Set {
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "alerts": Object {
+                "all": false,
+                "read": true,
+              },
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+              "myOtherApp": Object {
+                "all": false,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myOtherAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myOtherAppAlertType",
+            "producer": "myOtherApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "alerts": Object {
+                "all": false,
+                "read": true,
+              },
+              "myApp": Object {
+                "all": false,
+                "read": true,
+              },
+              "myOtherApp": Object {
+                "all": false,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myAppAlertType",
+            "producer": "myApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+        }
+      `);
     });
 
     test('omits types which have no consumers under which the operation is authorized', async () => {
@@ -1591,38 +1651,40 @@ describe('AlertingAuthorization', () => {
           AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
-                Set {
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "alerts": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                      "myApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                      "myOtherApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myOtherAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myOtherAppAlertType",
-                    "producer": "myOtherApp",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
-                }
-              `);
+        Set {
+          Object {
+            "actionGroups": Array [],
+            "actionVariables": undefined,
+            "authorizedConsumers": Object {
+              "alerts": Object {
+                "all": true,
+                "read": true,
+              },
+              "myApp": Object {
+                "all": true,
+                "read": true,
+              },
+              "myOtherApp": Object {
+                "all": true,
+                "read": true,
+              },
+            },
+            "defaultActionGroupId": "default",
+            "enabledInLicense": true,
+            "hasAlertsMappings": false,
+            "hasFieldsForAAD": false,
+            "id": "myOtherAppAlertType",
+            "isExportable": true,
+            "minimumLicenseRequired": "basic",
+            "name": "myOtherAppAlertType",
+            "producer": "myOtherApp",
+            "recoveryActionGroup": Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          },
+        }
+      `);
     });
   });
 
@@ -1638,6 +1700,8 @@ describe('AlertingAuthorization', () => {
       producer: 'alerts',
       enabledInLicense: true,
       isExportable: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     };
     const myAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -1650,6 +1714,8 @@ describe('AlertingAuthorization', () => {
       producer: 'myApp',
       enabledInLicense: true,
       isExportable: true,
+      hasAlertsMappings: true,
+      hasFieldsForAAD: true,
     };
     const mySecondAppAlertType: RegistryRuleType = {
       actionGroups: [],
@@ -1662,9 +1728,13 @@ describe('AlertingAuthorization', () => {
       producer: 'myApp',
       enabledInLicense: true,
       isExportable: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
-
+    beforeEach(() => {
+      features.getKibanaFeatures.mockReturnValue([mockFeature('myApp', ['myOtherAppAlertType'])]);
+    });
     test('it returns authorized rule types given a set of feature ids', async () => {
       const { authorization } = mockSecurity();
       const checkPrivileges: jest.MockedFunction<
@@ -1700,34 +1770,36 @@ describe('AlertingAuthorization', () => {
           AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
-              Object {
-                "authorizedRuleTypes": Set {
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "myApp": Object {
-                        "all": false,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myOtherAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myOtherAppAlertType",
-                    "producer": "alerts",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
+        Object {
+          "authorizedRuleTypes": Set {
+            Object {
+              "actionGroups": Array [],
+              "actionVariables": undefined,
+              "authorizedConsumers": Object {
+                "myApp": Object {
+                  "all": false,
+                  "read": true,
                 },
-                "hasAllRequested": false,
-                "username": "some-user",
-              }
-            `);
+              },
+              "defaultActionGroupId": "default",
+              "enabledInLicense": true,
+              "hasAlertsMappings": false,
+              "hasFieldsForAAD": false,
+              "id": "myOtherAppAlertType",
+              "isExportable": true,
+              "minimumLicenseRequired": "basic",
+              "name": "myOtherAppAlertType",
+              "producer": "alerts",
+              "recoveryActionGroup": Object {
+                "id": "recovered",
+                "name": "Recovered",
+              },
+            },
+          },
+          "hasAllRequested": false,
+          "username": "some-user",
+        }
+      `);
     });
 
     test('it returns all authorized if user has read, get and update alert privileges', async () => {
@@ -1773,34 +1845,36 @@ describe('AlertingAuthorization', () => {
           AlertingAuthorizationEntity.Alert
         )
       ).resolves.toMatchInlineSnapshot(`
-              Object {
-                "authorizedRuleTypes": Set {
-                  Object {
-                    "actionGroups": Array [],
-                    "actionVariables": undefined,
-                    "authorizedConsumers": Object {
-                      "myApp": Object {
-                        "all": true,
-                        "read": true,
-                      },
-                    },
-                    "defaultActionGroupId": "default",
-                    "enabledInLicense": true,
-                    "id": "myOtherAppAlertType",
-                    "isExportable": true,
-                    "minimumLicenseRequired": "basic",
-                    "name": "myOtherAppAlertType",
-                    "producer": "alerts",
-                    "recoveryActionGroup": Object {
-                      "id": "recovered",
-                      "name": "Recovered",
-                    },
-                  },
+        Object {
+          "authorizedRuleTypes": Set {
+            Object {
+              "actionGroups": Array [],
+              "actionVariables": undefined,
+              "authorizedConsumers": Object {
+                "myApp": Object {
+                  "all": true,
+                  "read": true,
                 },
-                "hasAllRequested": false,
-                "username": "some-user",
-              }
-            `);
+              },
+              "defaultActionGroupId": "default",
+              "enabledInLicense": true,
+              "hasAlertsMappings": false,
+              "hasFieldsForAAD": false,
+              "id": "myOtherAppAlertType",
+              "isExportable": true,
+              "minimumLicenseRequired": "basic",
+              "name": "myOtherAppAlertType",
+              "producer": "alerts",
+              "recoveryActionGroup": Object {
+                "id": "recovered",
+                "name": "Recovered",
+              },
+            },
+          },
+          "hasAllRequested": false,
+          "username": "some-user",
+        }
+      `);
     });
   });
 });

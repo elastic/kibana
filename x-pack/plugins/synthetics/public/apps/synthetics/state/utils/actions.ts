@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { createAction } from '@reduxjs/toolkit';
+import { createAction, PayloadAction } from '@reduxjs/toolkit';
 import type { IHttpSerializedFetchError } from './http_error';
 
-export function createAsyncAction<Payload, SuccessPayload>(actionStr: string) {
+export function createAsyncAction<
+  Payload,
+  SuccessPayload,
+  FailurePayload = IHttpSerializedFetchError<Payload>
+>(actionStr: string) {
   return {
     get: createAction(actionStr, (payload: Payload) => prepareForTimestamp(payload)),
     success: createAction<SuccessPayload>(`${actionStr}_SUCCESS`),
-    fail: createAction<IHttpSerializedFetchError>(`${actionStr}_FAIL`),
+    fail: createAction<FailurePayload>(`${actionStr}_FAIL`),
   };
 }
 
@@ -26,4 +30,8 @@ function prepareForTimestamp<Payload>(payload: Payload) {
       dispatchedAt: Date.now(),
     },
   };
+}
+
+export interface ActionPayload<P, G> extends PayloadAction<P> {
+  payload: P & { getPayload?: G };
 }

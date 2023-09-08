@@ -21,9 +21,37 @@ function withParams(col: DatatableColumn, params: Record<string, unknown>) {
   return { ...col, meta: { ...col.meta, params } };
 }
 
+function getSafeFormatId(format: string) {
+  return supportedFormats[format].formatId !== 'custom'
+    ? supportedFormats[format].formatId
+    : 'number';
+}
+
+function getPatternFromFormat(
+  format: string,
+  decimals: number | undefined,
+  compact: boolean | undefined,
+  pattern: string | undefined
+) {
+  const basePattern = supportedFormats[format].decimalsToPattern(decimals, compact);
+  if (supportedFormats[format].formatId === 'custom') {
+    return pattern ?? basePattern;
+  }
+  return basePattern;
+}
+
 export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
   input,
-  { format, columnId, decimals, suffix, parentFormat }: FormatColumnArgs
+  {
+    format,
+    columnId,
+    decimals,
+    compact,
+    suffix,
+    pattern,
+    parentFormat,
+    ...otherArgs
+  }: FormatColumnArgs
 ) => ({
   ...input,
   columns: input.columns
@@ -32,8 +60,18 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
-              id: supportedFormats[format].formatId,
-              params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
+              // Lens custom formatter is still a number format, different from the Kibana custom one
+              id: getSafeFormatId(format),
+              params: {
+                pattern: getPatternFromFormat(format, decimals, compact, pattern),
+                formatOverride: true,
+                ...supportedFormats[format].translateToFormatParams?.({
+                  decimals,
+                  compact,
+                  suffix,
+                  ...otherArgs,
+                }),
+              },
             };
             return withParams(col, serializedFormat as Record<string, unknown>);
           } else if (format) {
@@ -55,7 +93,14 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
 
         if (format && supportedFormats[format]) {
           const customParams = {
-            pattern: supportedFormats[format].decimalsToPattern(decimals),
+            pattern: getPatternFromFormat(format, decimals, compact, pattern),
+            formatOverride: true,
+            ...supportedFormats[format].translateToFormatParams?.({
+              decimals,
+              compact,
+              suffix,
+              ...otherArgs,
+            }),
           };
           // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"
           // property. Here the format is passed to this property to make it work properly
@@ -64,7 +109,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               id: parentFormatId,
               params: {
                 ...col.meta.params?.params,
-                id: supportedFormats[format].formatId,
+                id: getSafeFormatId(format),
                 ...parentFormatParams,
                 // some wrapper formatters require params to be flatten out (i.e. terms) while others
                 // require them to be in the params property (i.e. ranges)
@@ -83,7 +128,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
             id: parentFormatId,
             params: {
               ...col.meta.params?.params,
-              id: supportedFormats[format].formatId,
+              id: getSafeFormatId(format),
               // some wrapper formatters require params to be flatten out (i.e. terms) while others
               // require them to be in the params property (i.e. ranges)
               // so for now duplicate
@@ -128,6 +173,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
             params: {
               ...col.meta.params,
               suffixString: suffix,
+              formatOverride: true,
             },
           },
         },

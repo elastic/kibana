@@ -44,6 +44,30 @@ export const noCasesPrivilegesSpace1: Role = {
   },
 };
 
+export const noCasesConnectors: Role = {
+  name: 'no_cases_connectors',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          testNoCasesConnectorFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const globalRead: Role = {
   name: 'global_read',
   privileges: {
@@ -142,6 +166,30 @@ export const securitySolutionOnlyDelete: Role = {
   },
 };
 
+export const securitySolutionOnlyReadDelete: Role = {
+  name: 'sec_only_read_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['read', 'cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const securitySolutionOnlyNoDelete: Role = {
   name: 'sec_only_no_delete',
   privileges: {
@@ -183,6 +231,47 @@ export const securitySolutionOnlyRead: Role = {
           securitySolutionFixture: ['read'],
           actions: ['read'],
           actionsSimulators: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadAlerts: Role = {
+  name: 'sec_only_read_alerts',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['all'],
+          siem: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyReadNoIndexAlerts: Role = {
+  name: 'sec_only_read_no_index_alerts',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['all'],
+          siem: ['read'],
         },
         spaces: ['space1'],
       },
@@ -238,6 +327,25 @@ export const observabilityOnlyRead: Role = {
   },
 };
 
+export const observabilityOnlyReadAlerts: Role = {
+  name: 'obs_only_read_alerts',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          observabilityFixture: ['all'],
+          apm: ['read'],
+          logs: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 /**
  * These roles have access to all spaces.
  */
@@ -269,12 +377,17 @@ export const securitySolutionOnlyAllSpacesRole: Role = {
 export const roles = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
+  noCasesConnectors,
   globalRead,
   securitySolutionOnlyAll,
   securitySolutionOnlyRead,
+  securitySolutionOnlyReadAlerts,
   securitySolutionOnlyDelete,
+  securitySolutionOnlyReadDelete,
   securitySolutionOnlyNoDelete,
   observabilityOnlyAll,
   observabilityOnlyRead,
+  observabilityOnlyReadAlerts,
   testDisabledPluginAll,
+  securitySolutionOnlyReadNoIndexAlerts,
 ];

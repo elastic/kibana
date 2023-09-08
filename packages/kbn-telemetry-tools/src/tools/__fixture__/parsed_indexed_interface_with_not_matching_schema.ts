@@ -10,7 +10,7 @@ import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedIndexedInterfaceWithNoMatchingSchema: ParsedUsageCollection = [
-  'src/fixtures/telemetry_collectors/indexed_interface_with_not_matching_schema.ts',
+  'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/indexed_interface_with_not_matching_schema.ts',
   {
     collectorName: 'indexed_interface_with_not_matching_schema',
     schema: {

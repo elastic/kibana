@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { type FC } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useColumns } from './use_columns';
@@ -14,13 +16,19 @@ jest.mock('../../../../app_dependencies');
 
 describe('Transform: Job List Columns', () => {
   test('useColumns()', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, []));
+    const queryClient = new QueryClient();
+    const wrapper: FC = ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, []), {
+      wrapper,
+    });
 
     await waitForNextUpdate();
 
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
-    expect(columns).toHaveLength(9);
+    expect(columns).toHaveLength(10);
     expect(columns[0].isExpander).toBeTruthy();
     expect(columns[1].name).toBe('ID');
     expect(columns[2].id).toBe('alertRule');
@@ -29,6 +37,7 @@ describe('Transform: Job List Columns', () => {
     expect(columns[5].name).toBe('Status');
     expect(columns[6].name).toBe('Mode');
     expect(columns[7].name).toBe('Progress');
-    expect(columns[8].name).toBe('Actions');
+    expect(columns[8].name).toBe('Health');
+    expect(columns[9].name).toBe('Actions');
   });
 });

@@ -7,15 +7,17 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import { API_VERSIONS } from '../../../common/constants';
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { SETTINGS_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
-import type { FleetAuthzRouter } from '../security';
 
 export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
-  const soClient = (await context.fleet).epm.internalSoClient;
+  const soClient = (await context.fleet).internalSoClient;
 
   try {
     const settings = await settingsService.getSettings(soClient);
@@ -39,7 +41,7 @@ export const putSettingsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = (await context.fleet).epm.internalSoClient;
+  const soClient = (await context.fleet).internalSoClient;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
 
@@ -64,24 +66,32 @@ export const putSettingsHandler: FleetRequestHandler<
 };
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: SETTINGS_API_ROUTES.INFO_PATTERN,
-      validate: GetSettingsRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getSettingsHandler
-  );
-  router.put(
-    {
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetSettingsRequestSchema },
+      },
+      getSettingsHandler
+    );
+  router.versioned
+    .put({
       path: SETTINGS_API_ROUTES.UPDATE_PATTERN,
-      validate: PutSettingsRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    putSettingsHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PutSettingsRequestSchema },
+      },
+      putSettingsHandler
+    );
 };

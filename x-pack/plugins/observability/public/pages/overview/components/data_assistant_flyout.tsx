@@ -15,7 +15,7 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ObservabilityStatus } from '../../../components/app/observability_status';
+import { ObservabilityStatus } from './observability_status';
 
 interface DataAsssistantFlyoutProps {
   onClose: () => void;

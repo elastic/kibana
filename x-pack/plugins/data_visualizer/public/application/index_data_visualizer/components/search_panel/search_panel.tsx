@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Query, Filter } from '@kbn/es-query';
-import type { TimeRange } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import React, { FC } from 'react';
 import { css } from '@emotion/react';
-import { isDefined } from '../../../common/util/is_defined';
+import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+} from '@elastic/eui';
+import { Query, Filter } from '@kbn/es-query';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { SearchPanelContent } from './search_bar';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { SupportedFieldType } from '../../../../../common/types';
-import { SearchQueryLanguage } from '../../types/combined_query';
-import { useDataVisualizerKibana } from '../../../kibana_context';
-import './_index.scss';
-import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { OverallStats } from '../../types/overall_stats';
+
 interface Props {
   dataView: DataView;
   searchString: Query['query'];
   searchQuery: Query['query'];
   searchQueryLanguage: SearchQueryLanguage;
-  samplerShardSize: number;
-  setSamplerShardSize(s: number): void;
   overallStats: OverallStats;
-  indexedFieldTypes: SupportedFieldType[];
+  indexedFieldTypes: string[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
   setVisibleFieldNames(q: string[]): void;
@@ -52,9 +51,8 @@ interface Props {
 export const SearchPanel: FC<Props> = ({
   dataView,
   searchString,
+  searchQuery,
   searchQueryLanguage,
-  samplerShardSize,
-  setSamplerShardSize,
   overallStats,
   indexedFieldTypes,
   setVisibleFieldTypes,
@@ -64,98 +62,49 @@ export const SearchPanel: FC<Props> = ({
   setSearchParams,
   showEmptyFields,
 }) => {
-  const {
-    services: {
-      uiSettings,
-      notifications: { toasts },
-      data: { query: queryManager },
-      unifiedSearch: {
-        ui: { SearchBar },
-      },
+  const dvSearchPanelControls = css({
+    marginLeft: '0px !important',
+    paddingLeft: '0px !important',
+    paddingRight: '0px !important',
+    flexDirection: 'row',
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      padding: 0,
     },
-  } = useDataVisualizerKibana();
-  // The internal state of the input query bar updated on every key stroke.
-  const [searchInput, setSearchInput] = useState<Query>({
-    query: searchString || '',
-    language: searchQueryLanguage,
   });
 
-  useEffect(() => {
-    setSearchInput({
-      query: searchString || '',
-      language: searchQueryLanguage,
-    });
-  }, [searchQueryLanguage, searchString, queryManager.filterManager]);
+  const dvSearchPanelContainer = css({
+    alignItems: 'baseline',
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      flexDirection: 'column',
+    },
+  });
+  const dvSearchBar = css({
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      minWidth: `max(100%, 300px)`,
+    },
+  });
 
-  const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
-    const mergedQuery = isDefined(query) ? query : searchInput;
-    const mergedFilters = isDefined(filters) ? filters : queryManager.filterManager.getFilters();
-    try {
-      if (mergedFilters) {
-        queryManager.filterManager.setFilters(mergedFilters);
-      }
-
-      const combinedQuery = createMergedEsQuery(
-        mergedQuery,
-        queryManager.filterManager.getFilters() ?? [],
-        dataView,
-        uiSettings
-      );
-
-      setSearchParams({
-        searchQuery: combinedQuery,
-        searchString: mergedQuery.query,
-        queryLanguage: mergedQuery.language as SearchQueryLanguage,
-        filters: mergedFilters,
-      });
-    } catch (e) {
-      console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
-      toasts.addError(e, {
-        title: i18n.translate('xpack.dataVisualizer.searchPanel.invalidSyntax', {
-          defaultMessage: 'Invalid syntax',
-        }),
-      });
-    }
-  };
+  const isWithinXl = useIsWithinMaxBreakpoint('xl');
 
   return (
     <EuiFlexGroup
-      gutterSize="s"
+      gutterSize="none"
       data-test-subj="dataVisualizerSearchPanel"
-      className={'dvSearchPanel__container'}
+      css={dvSearchPanelContainer}
       responsive={false}
     >
-      <EuiFlexItem grow={9} className={'dvSearchBar'}>
-        <SearchBar
-          dataTestSubj="dataVisualizerQueryInput"
-          appName={'dataVisualizer'}
-          showFilterBar={true}
-          showDatePicker={false}
-          showQueryInput={true}
-          query={searchInput}
-          onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
-            searchHandler({ query: params.query })
-          }
-          onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
-          indexPatterns={[dataView]}
-          placeholder={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholderText', {
-            defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
-          })}
-          displayStyle={'inPage'}
-          isClearable={true}
-          customSubmitButton={<div />}
+      <EuiFlexItem grow={9} css={dvSearchBar}>
+        <SearchPanelContent
+          dataView={dataView}
+          setSearchParams={setSearchParams}
+          searchString={searchString}
+          searchQuery={searchQuery}
+          searchQueryLanguage={searchQueryLanguage}
         />
       </EuiFlexItem>
 
-      <EuiFlexItem
-        grow={2}
-        className={'dvSearchPanel__controls'}
-        css={css`
-          margin-left: 0px !important;
-          padding-left: 0px !important;
-          padding-right: 0px !important;
-        `}
-      >
+      {isWithinXl ? <EuiSpacer size="s" /> : null}
+      <EuiFlexItem grow={2} css={dvSearchPanelControls}>
         <DataVisualizerFieldNamesFilter
           overallStats={overallStats}
           setVisibleFieldNames={setVisibleFieldNames}

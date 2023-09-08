@@ -9,7 +9,7 @@
 import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
 import { useIsWithinBreakpoints } from '@elastic/eui';
-import { EuiPageSideBarProps } from '@elastic/eui/src/components/page/page_side_bar';
+import { EuiPageSideBarProps_Deprecated as EuiPageSideBarProps } from '@elastic/eui/src/components/page/page_side_bar';
 import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
 import { KibanaPageTemplateProps } from '.';
 

@@ -8,9 +8,6 @@
 
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { todoSavedObject } from './todo_saved_object';
-import { bookSavedObject } from './book_saved_object';
-import { searchableListSavedObject } from './searchable_list_saved_object';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -19,11 +16,7 @@ export interface EmbeddableExamplesSetupDependencies {
 export class EmbeddableExamplesPlugin
   implements Plugin<void, void, EmbeddableExamplesSetupDependencies>
 {
-  public setup(core: CoreSetup, { embeddable }: EmbeddableExamplesSetupDependencies) {
-    core.savedObjects.registerType(todoSavedObject);
-    core.savedObjects.registerType(bookSavedObject);
-    core.savedObjects.registerType(searchableListSavedObject(embeddable));
-  }
+  public setup(core: CoreSetup, { embeddable }: EmbeddableExamplesSetupDependencies) {}
 
   public start(core: CoreStart) {}
 

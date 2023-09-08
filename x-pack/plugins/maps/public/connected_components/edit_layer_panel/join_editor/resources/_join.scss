@@ -3,6 +3,7 @@
   background: tintOrShade($euiColorLightShade, 85%, 0);
   border-radius: $euiBorderRadius;
   padding: $euiSizeS $euiSizeXS;
+  margin-bottom: $euiSizeM;
 
   .mapJoinItem__inner {
     @include euiScrollBar;

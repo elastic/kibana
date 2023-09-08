@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
@@ -15,6 +15,8 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -32,7 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   async function callApi(
     overrides?: RecursivePartial<
       APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/throughput'>['params']
-    >
+    >,
+    processorEvent: 'transaction' | 'metric' = 'metric'
   ) {
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/throughput',
@@ -48,6 +51,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
           ...overrides?.query,
+          ...(processorEvent === 'metric'
+            ? {
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                bucketSizeInSeconds: 60,
+              }
+            : {
+                documentType: ApmDocumentType.TransactionEvent,
+                rollupInterval: RollupInterval.None,
+                bucketSizeInSeconds: 30,
+              }),
         },
       },
     });
@@ -120,8 +134,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const [throughputMetricsResponse, throughputTransactionsResponse] = await Promise.all([
-            callApi({ query: { kuery: 'processor.event : "metric"' } }),
-            callApi({ query: { kuery: 'processor.event : "transaction"' } }),
+            callApi({}, 'metric'),
+            callApi({}, 'transaction'),
           ]);
           throughputMetrics = throughputMetricsResponse.body;
           throughputTransactions = throughputTransactionsResponse.body;

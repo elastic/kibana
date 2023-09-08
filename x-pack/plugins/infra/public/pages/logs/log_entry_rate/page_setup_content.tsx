@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiText, EuiButton } from '@elastic/eui';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 interface LogEntryRateSetupContentProps {
   onOpenSetup: () => void;
@@ -43,7 +43,11 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
         </EuiText>
       }
       actions={
-        <EuiButton fill onClick={onOpenSetup}>
+        <EuiButton
+          data-test-subj="infraLogEntryRateSetupContentMlSetupButton"
+          fill
+          onClick={onOpenSetup}
+        >
           <FormattedMessage
             id="xpack.infra.logs.logEntryRate.showAnalysisSetupButtonLabel"
             defaultMessage="ML Setup"

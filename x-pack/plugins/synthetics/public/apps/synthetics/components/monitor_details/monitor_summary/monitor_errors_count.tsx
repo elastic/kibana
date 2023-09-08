@@ -7,46 +7,50 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
-import { ReportTypes } from '@kbn/observability-plugin/public';
+import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorErrorsCountProps {
   from: string;
   to: string;
-  monitorId: string[];
+  id: string;
 }
 
-export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountProps) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
+export const MonitorErrorsCount = ({ from, to, id }: MonitorErrorsCountProps) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
-  const { ExploratoryViewEmbeddable } = observability;
-
-  const selectedLocation = useSelectedLocation();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
-  if (!selectedLocation || !monitorId) {
+  if (!queryIdFilter) {
     return null;
   }
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
           time,
-          reportDefinitions: {
-            'monitor.id': monitorId,
-            'observer.geo.name': [selectedLocation?.label],
-          },
+          reportDefinitions: queryIdFilter,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
-          name: 'synthetics-series-1',
+          name: ERRORS_LABEL,
+          filters: locationFilter,
         },
       ]}
     />
   );
 };
+
+export const ERRORS_LABEL = i18n.translate('xpack.synthetics.monitorDetails.summary.errors', {
+  defaultMessage: 'Errors',
+});

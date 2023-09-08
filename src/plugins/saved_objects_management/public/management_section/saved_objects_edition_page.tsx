@@ -57,7 +57,6 @@ const SavedObjectsEditionPage = ({
         id={id}
         savedObjectType={type}
         http={coreStart.http}
-        savedObjectsClient={coreStart.savedObjects.client}
         overlays={coreStart.overlays}
         notifications={coreStart.notifications}
         capabilities={capabilities}
@@ -65,6 +64,8 @@ const SavedObjectsEditionPage = ({
         uiSettings={coreStart.uiSettings}
         history={history}
         docLinks={docLinks}
+        settings={coreStart.settings}
+        theme={coreStart.theme}
       />
     </RedirectAppLinks>
   );

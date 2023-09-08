@@ -271,6 +271,11 @@ in this code, there's really no reason not to aim for 100% test code coverage.
 ==== Type visibility
 It is recommended that plugins only expose Saved Object types that are necessary.
 That is so to provide better backward compatibility.
+
+There are two options to register a type: either as completely unexposed to the global Saved Objects HTTP APIs and client or to only expose it to the client but not to the APIs.
+
+===== Hidden types
+
 In case when the type is not hidden, it will be exposed via the global Saved Objects HTTP API.
 That brings the limitation of introducing backward incompatible changes as there might be a service consuming the API.
 
@@ -301,6 +306,40 @@ class SomePlugin implements Plugin {
   }
 }
 ----
+
+===== Hidden from the HTTP APIs 
+
+When a saved object is registered as hidden from the HTTP APIs, it will remain exposed to the global Saved Objects client:
+
+[source,typescript]
+----
+import { SavedObjectsType } from 'src/core/server';
+
+export const myCustomVisualization: SavedObjectsType = {
+  name: 'my_custom_visualization', // <1>
+  hidden: false,
+  hiddenFromHttpApis: true, // <2>
+  namespaceType: 'multiple-isolated',
+  mappings: {
+    dynamic: false,
+    properties: {
+      description: {
+        type: 'text',
+      },
+      hits: {
+        type: 'integer',
+      },
+    },
+  },
+  migrations: {
+    '1.0.0': migrateMyCustomVisualizationToV1,
+    '2.0.0': migrateMyCustomVisualizationToV2,
+  },
+};
+----
+
+<1> MyCustomVisualization types have their own domain-specific HTTP API's that leverage the global Saved Objects client
+<2> This field determines "hidden from http apis" behavior -- any attempts to use the global Saved Objects HTTP APIs will throw errors
 
 === Client side usage
 

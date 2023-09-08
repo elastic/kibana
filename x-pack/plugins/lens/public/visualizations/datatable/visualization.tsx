@@ -6,13 +6,10 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry, CUSTOM_PALETTE } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -27,7 +24,7 @@ import type {
 } from '../../types';
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import type { LayerType } from '../../../common';
+import type { LayerType } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import type {
   ColumnState,
@@ -226,7 +223,7 @@ export const getDatatableVisualization = ({
             )
             .map((accessor) => ({
               columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden
+              triggerIconType: columnMap[accessor].hidden
                 ? 'invisible'
                 : columnMap[accessor].collapseFn
                 ? 'aggregate'
@@ -289,7 +286,7 @@ export const getDatatableVisualization = ({
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig?.hidden
+                triggerIconType: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
@@ -337,37 +334,16 @@ export const getDatatableVisualization = ({
       sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TableDimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <TableDimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  renderDimensionEditorAdditionalSection(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TableDimensionEditorAdditionalSection {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorAdditionalSectionComponent(props) {
+    return <TableDimensionEditorAdditionalSection {...props} paletteService={paletteService} />;
   },
 
-  renderDimensionEditorDataExtra(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <TableDimensionDataExtraEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorDataExtraComponent(props) {
+    return <TableDimensionDataExtraEditor {...props} paletteService={paletteService} />;
   },
 
   getSupportedLayers() {
@@ -499,10 +475,6 @@ export const getDatatableVisualization = ({
     };
   },
 
-  getErrorMessages(state) {
-    return undefined;
-  },
-
   getRenderEventCounters(state) {
     const events = {
       color_by_value: false,
@@ -526,15 +498,8 @@ export const getDatatableVisualization = ({
     }, []);
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <DataTableToolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <DataTableToolbar {...props} />;
   },
 
   onEditAction(state, event) {
@@ -614,7 +579,11 @@ export const getDatatableVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: DatatableVisualizationState) {
+  getVisualizationInfo(state) {
+    const visibleMetricColumns = state.columns.filter(
+      (c) => !c.hidden && c.colorMode && c.colorMode !== 'none'
+    );
+
     return {
       layers: [
         {
@@ -622,6 +591,11 @@ export const getDatatableVisualization = ({
           layerType: state.layerType,
           chartType: 'table',
           ...this.getDescription(state),
+          palette:
+            // if multiple columns have color by value, do not show the palette for now: see #154349
+            visibleMetricColumns.length > 1
+              ? undefined
+              : visibleMetricColumns[0]?.palette?.params?.stops?.map(({ color }) => color),
           dimensions: state.columns.map((column) => {
             let name = i18n.translate('xpack.lens.datatable.metric', {
               defaultMessage: 'Metric',

@@ -105,3 +105,9 @@ export const TOP_VALUE = (field: string) =>
 export const COUNT = i18n.translate('xpack.securitySolution.visualizationActions.countLabel', {
   defaultMessage: 'Count of records',
 });
+
+export const COUNT_OF = (field: string) =>
+  i18n.translate('xpack.securitySolution.visualizationActions.countOfFieldLabel', {
+    values: { field },
+    defaultMessage: 'Count of {field}',
+  });

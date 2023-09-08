@@ -14,6 +14,7 @@ import type { SimpleSavedObject } from '../simple_saved_object';
  * with the {@link SavedObjectsClientContract}.
  *
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface ResolvedSimpleSavedObject<T = unknown> {
   /**

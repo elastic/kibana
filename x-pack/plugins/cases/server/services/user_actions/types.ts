@@ -5,21 +5,40 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { CaseAssignees } from '../../../common/api/cases/assignee';
 import type {
-  CasePostRequest,
-  CaseSettings,
-  CaseSeverity,
-  CaseStatuses,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  Logger,
+  ISavedObjectsSerializer,
+  SavedObjectsRawDoc,
+} from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type {
+  UserActionAction,
+  CaseUserActionWithoutReferenceIds,
   CommentUserAction,
   ConnectorUserAction,
   PushedUserAction,
+  UserActionType,
+  CaseSettings,
+  CaseSeverity,
+  CaseStatuses,
   User,
-  UserAction,
-  UserActionTypes,
-} from '../../../common/api';
+  CaseAssignees,
+} from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type {
+  UserActionPersistedAttributes,
+  UserActionSavedObjectTransformed,
+} from '../../common/types/user_actions';
+import type { IndexRefresh } from '../types';
+import type { PatchCasesArgs } from '../cases/types';
+import type {
+  AttachmentRequest,
+  CasePostRequest,
+  UserActionFindRequest,
+} from '../../../common/types/api';
 
 export interface BuilderParameters {
   title: {
@@ -70,6 +89,9 @@ export interface BuilderParameters {
   delete_case: {
     parameters: { payload: {} };
   };
+  category: {
+    parameters: { payload: { category: string | null } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -86,30 +108,215 @@ export interface CommonArguments {
   owner: string;
   attachmentId?: string;
   connectorId?: string;
-  action?: UserAction;
+  action?: UserActionAction;
 }
 
 export interface Attributes {
-  action: UserAction;
+  action: UserActionAction;
   created_at: string;
   created_by: User;
   owner: string;
-  type: UserActionTypes;
+  type: UserActionType;
   payload: Record<string, unknown>;
 }
 
-export interface BuilderReturnValue {
-  attributes: Attributes;
+export interface SavedObjectParameters {
+  attributes: UserActionPersistedAttributes;
   references: SavedObjectReference[];
 }
 
+export interface EventDetails {
+  getMessage: (storedUserActionId?: string) => string;
+  action: UserActionAction;
+  descriptiveAction: string;
+  savedObjectId: string;
+  savedObjectType: string;
+}
+
+export interface UserActionEvent {
+  parameters: SavedObjectParameters;
+  eventDetails: EventDetails;
+}
+
 export type CommonBuilderArguments = CommonArguments & {
-  action: UserAction;
-  type: UserActionTypes;
+  action: UserActionAction;
+  type: UserActionType;
   value: unknown;
   valueKey: string;
 };
 
 export interface BuilderDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+}
+
+export interface ServiceContext {
+  log: Logger;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsSerializer: ISavedObjectsSerializer;
+  auditLogger: AuditLogger;
+}
+
+export interface PushTimeFrameInfo {
+  mostRecent: UserActionSavedObjectTransformed;
+  oldest: UserActionSavedObjectTransformed;
+}
+
+export interface CaseConnectorActivity {
+  connectorId: string;
+  fields: UserActionSavedObjectTransformed;
+  push?: PushTimeFrameInfo;
+}
+
+export type CaseConnectorFields = Map<string, UserActionSavedObjectTransformed>;
+
+export interface PushInfo {
+  date: Date;
+  connectorId: string;
+}
+
+export interface UserActionItem {
+  attributes: CaseUserActionWithoutReferenceIds;
+  references: SavedObjectReference[];
+}
+
+export interface TopHits {
+  hits: {
+    total: number;
+    hits: SavedObjectsRawDoc[];
+  };
+}
+
+export interface TimeFrameInfo {
+  mostRecent: TopHits;
+  oldest: TopHits;
+}
+
+export interface ConnectorActivityAggsResult {
+  references: {
+    connectors: {
+      ids: {
+        buckets: Array<{
+          key: string;
+          reverse: {
+            connectorActivity: {
+              buckets: {
+                changeConnector: TimeFrameInfo;
+                createCase: TimeFrameInfo;
+                pushInfo: TimeFrameInfo;
+              };
+            };
+          };
+        }>;
+      };
+    };
+  };
+}
+
+export interface ConnectorFieldsBeforePushAggsResult {
+  references: {
+    connectors: {
+      reverse: {
+        ids: {
+          buckets: Record<string, TimeFrameInfo>;
+        };
+      };
+    };
+  };
+}
+
+export interface UserActionsStatsAggsResult {
+  total: number;
+  totals: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
+export interface MultipleCasesUserActionsTotalAggsResult {
+  references: {
+    caseUserActions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
+  };
+}
+
+export interface ParticipantsAggsResult {
+  participants: {
+    buckets: Array<{
+      key: string;
+      docs: {
+        hits: {
+          hits: SavedObjectsRawDoc[];
+        };
+      };
+    }>;
+  };
+  assignees: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
+export interface GetUsersResponse {
+  participants: Array<{ id: string; owner: string; user: User }>;
+  assignedAndUnassignedUsers: Set<string>;
+}
+
+export interface FindOptions extends UserActionFindRequest {
+  caseId: string;
+  filter?: KueryNode;
+}
+
+export type CommonUserActionArgs = CommonArguments;
+
+export interface GetUserActionItemByDifference extends CommonUserActionArgs {
+  field: string;
+  originalValue: unknown;
+  newValue: unknown;
+}
+
+export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {
+  originalValue: T[];
+  newValue: T[];
+}
+
+export type CreatePayloadFunction<Item, ActionType extends UserActionType> = (
+  items: Item[]
+) => UserActionParameters<ActionType>['payload'];
+
+export interface BuildUserActionsDictParams {
+  updatedCases: PatchCasesArgs;
+  user: User;
+}
+
+export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
+  builtUserActions: UserActionEvent[];
+}
+
+export interface BulkCreateAttachmentUserAction
+  extends Omit<CommonUserActionArgs, 'owner'>,
+    IndexRefresh {
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+}
+
+export type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
+  CommonUserActionArgs &
+  IndexRefresh;
+
+export interface CreateUserActionES<T> extends IndexRefresh {
+  attributes: T;
+  references: SavedObjectReference[];
+}
+
+export interface PostCaseUserActionArgs extends IndexRefresh {
+  actions: UserActionEvent[];
 }

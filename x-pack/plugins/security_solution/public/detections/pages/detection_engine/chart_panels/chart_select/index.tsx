@@ -6,14 +6,14 @@
  */
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover, EuiButtonGroup } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { AlertViewSelection } from './helpers';
-import { getButtonProperties, getContextMenuPanels } from './helpers';
+import { getButtonProperties, getContextMenuPanels, getOptionProperties } from './helpers';
 import * as i18n from './translations';
-
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 interface Props {
   alertViewSelection: AlertViewSelection;
   setAlertViewSelection: (alertViewSelection: AlertViewSelection) => void;
@@ -22,6 +22,7 @@ interface Props {
 const ChartTypeIcon = styled(EuiIcon)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
+const AlertViewOptions: AlertViewSelection[] = ['charts', 'trend', 'table', 'treemap'];
 
 const ChartSelectComponent: React.FC<Props> = ({
   alertViewSelection,
@@ -49,22 +50,47 @@ const ChartSelectComponent: React.FC<Props> = ({
       </EuiButton>
     );
   }, [alertViewSelection, onButtonClick]);
+  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
+  const options = useMemo(() => {
+    return AlertViewOptions.map((option: AlertViewSelection) => getOptionProperties(option));
+  }, []);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => getContextMenuPanels({ alertViewSelection, closePopover, setAlertViewSelection }),
-    [alertViewSelection, closePopover, setAlertViewSelection]
+    () =>
+      getContextMenuPanels({
+        alertViewSelection,
+        closePopover,
+        setAlertViewSelection,
+        isAlertsPageChartsEnabled,
+      }),
+    [alertViewSelection, closePopover, setAlertViewSelection, isAlertsPageChartsEnabled]
   );
 
   return (
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={button}
-      closePopover={closePopover}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    <>
+      {isAlertsPageChartsEnabled ? (
+        <EuiButtonGroup
+          name="chart-select"
+          legend={i18n.LEGEND_TITLE}
+          options={options}
+          idSelected={alertViewSelection}
+          onChange={(id) => setAlertViewSelection(id as AlertViewSelection)}
+          buttonSize="compressed"
+          color="primary"
+          data-test-subj="chart-select-tabs"
+        />
+      ) : (
+        <EuiPopover
+          anchorPosition="downLeft"
+          button={button}
+          closePopover={closePopover}
+          isOpen={isPopoverOpen}
+          panelPaddingSize="none"
+        >
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+        </EuiPopover>
+      )}
+    </>
   );
 };
 

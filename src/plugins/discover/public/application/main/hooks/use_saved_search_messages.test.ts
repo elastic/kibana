@@ -6,16 +6,27 @@
  * Side Public License, v 1.
  */
 import {
+  checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
+  sendErrorTo,
   sendLoadingMsg,
+  sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
   sendNoResultsFoundMsg,
   sendPartialMsg,
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { DataMainMsg, RecordRawType } from './use_saved_search';
+import {
+  DataDocumentsMsg,
+  DataMainMsg,
+  RecordRawType,
+} from '../services/discover_data_state_container';
 import { filter } from 'rxjs/operators';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { searchResponseWarningsMock } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 
 describe('test useSavedSearch message generators', () => {
   test('sendCompleteMsg', (done) => {
@@ -62,7 +73,70 @@ describe('test useSavedSearch message generators', () => {
         done();
       }
     });
-    sendLoadingMsg(main$, RecordRawType.DOCUMENT);
+    sendLoadingMsg(main$, {
+      foundDocuments: true,
+      recordRawType: RecordRawType.DOCUMENT,
+    });
+  });
+  test('sendLoadingMoreMsg', (done) => {
+    const documents$ = new BehaviorSubject<DataDocumentsMsg>({
+      fetchStatus: FetchStatus.COMPLETE,
+    });
+    documents$.subscribe((value) => {
+      if (value.fetchStatus !== FetchStatus.COMPLETE) {
+        expect(value.fetchStatus).toBe(FetchStatus.LOADING_MORE);
+        done();
+      }
+    });
+    sendLoadingMoreMsg(documents$);
+  });
+  test('sendLoadingMoreFinishedMsg', (done) => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const initialRecords = [records[0], records[1]];
+    const moreRecords = [records[2], records[3]];
+
+    const documents$ = new BehaviorSubject<DataDocumentsMsg>({
+      fetchStatus: FetchStatus.LOADING_MORE,
+      result: initialRecords,
+    });
+    documents$.subscribe((value) => {
+      if (value.fetchStatus !== FetchStatus.LOADING_MORE) {
+        expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+        expect(value.result).toStrictEqual([...initialRecords, ...moreRecords]);
+        expect(value.interceptedWarnings).toHaveLength(searchResponseWarningsMock.length);
+        done();
+      }
+    });
+    sendLoadingMoreFinishedMsg(documents$, {
+      moreRecords,
+      interceptedWarnings: searchResponseWarningsMock.map((warning) => ({
+        originalWarning: warning,
+      })),
+    });
+  });
+  test('sendLoadingMoreFinishedMsg after an exception', (done) => {
+    const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const initialRecords = [records[0], records[1]];
+
+    const documents$ = new BehaviorSubject<DataDocumentsMsg>({
+      fetchStatus: FetchStatus.LOADING_MORE,
+      result: initialRecords,
+      interceptedWarnings: searchResponseWarningsMock.map((warning) => ({
+        originalWarning: warning,
+      })),
+    });
+    documents$.subscribe((value) => {
+      if (value.fetchStatus !== FetchStatus.LOADING_MORE) {
+        expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+        expect(value.result).toBe(initialRecords);
+        expect(value.interceptedWarnings).toBeUndefined();
+        done();
+      }
+    });
+    sendLoadingMoreFinishedMsg(documents$, {
+      moreRecords: [],
+      interceptedWarnings: undefined,
+    });
   });
   test('sendErrorMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
@@ -91,5 +165,35 @@ describe('test useSavedSearch message generators', () => {
       }
     });
     sendCompleteMsg(main$, false);
+  });
+
+  test('sendErrorTo', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });
+    const error = new Error('Pls help!');
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.ERROR);
+      expect(value.error).toBe(error);
+      done();
+    });
+    sendErrorTo(main$)(error);
+  });
+
+  test('checkHitCount with hits', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.PARTIAL);
+      done();
+    });
+    checkHitCount(main$, 100);
+  });
+
+  test('checkHitCount without hits', (done) => {
+    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.LOADING });
+    main$.subscribe((value) => {
+      expect(value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      expect(value.foundDocuments).toBe(false);
+      done();
+    });
+    checkHitCount(main$, 0);
   });
 });

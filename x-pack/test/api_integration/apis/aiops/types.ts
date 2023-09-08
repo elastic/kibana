@@ -5,26 +5,28 @@
  * 2.0.
  */
 
-import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
-import type { ChangePoint, ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { AiopsApiLogRateAnalysis } from '@kbn/aiops-plugin/common/api';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 export interface TestData {
   testName: string;
   esArchive?: string;
   dataGenerator?: string;
-  requestBody: ApiExplainLogRateSpikes['body'];
+  requestBody: AiopsApiLogRateAnalysis['body'];
   expected: {
     chunksLength: number;
+    chunksLengthGroupOnly: number;
     actionsLength: number;
+    actionsLengthGroupOnly: number;
     noIndexChunksLength: number;
     noIndexActionsLength: number;
-    changePointFilter: 'add_change_points';
-    groupFilter: 'add_change_point_group';
-    groupHistogramFilter: 'add_change_point_group_histogram';
-    histogramFilter: 'add_change_points_histogram';
+    significantTermFilter: 'add_significant_terms';
+    groupFilter: 'add_significant_terms_group';
+    groupHistogramFilter: 'add_significant_terms_group_histogram';
+    histogramFilter: 'add_significant_terms_histogram';
     errorFilter: 'add_error';
-    changePoints: ChangePoint[];
-    groups: ChangePointGroup[];
+    significantTerms: SignificantTerm[];
+    groups: SignificantTermGroup[];
     histogramLength: number;
   };
 }

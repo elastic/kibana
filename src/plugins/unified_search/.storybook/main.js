@@ -5,5 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { defaultConfig } from '@kbn/storybook';
+import webpackMerge from 'webpack-merge';
+import { resolve } from 'path';
 
-module.exports = require('@kbn/storybook').defaultConfig;
+const mockConfig = {
+  resolve: {
+    alias: {
+      '@kbn/text-based-languages/public': resolve(
+        __dirname,
+        '../public/mocks/text_based_languages_editor.tsx'
+      ),
+    },
+  },
+};
+
+module.exports = {
+  ...defaultConfig,
+  webpackFinal: (config) => webpackMerge(config, mockConfig),
+};

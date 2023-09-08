@@ -7,6 +7,61 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 
+export const fleetAgentsSchema: RootSchema<any> = {
+  agents_per_version: {
+    properties: {
+      version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Agent version enrolled to this kibana',
+        },
+      },
+      count: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents enrolled that use this version',
+        },
+      },
+      healthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in a healthy state',
+        },
+      },
+      unhealthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an unhealthy state',
+        },
+      },
+      updating: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an updating state',
+        },
+      },
+      offline: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
+    },
+  },
+};
+
 export const fleetUsagesSchema: RootSchema<any> = {
   agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
   agents: {
@@ -39,6 +94,18 @@ export const fleetUsagesSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
         },
       },
       total_all_statuses: {
@@ -106,13 +173,6 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  agent_versions: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: { description: 'The agent versions enrolled in this deployment.' },
-    },
-  },
   agents_per_policy: {
     type: 'array',
     items: {
@@ -165,6 +225,28 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
+  agent_logs_panics_last_hour: {
+    type: 'array',
+    _meta: {
+      description: 'Array of log messages containing the word panic from the last hour',
+    },
+    items: {
+      properties: {
+        timestamp: {
+          type: 'date',
+          _meta: {
+            description: 'Timestamp of the log message containing the word panic',
+          },
+        },
+        message: {
+          type: 'text',
+          _meta: {
+            description: 'Log message containing the word panic',
+          },
+        },
+      },
+    },
+  },
   agent_logs_top_errors: {
     type: 'array',
     items: {
@@ -177,6 +259,31 @@ export const fleetUsagesSchema: RootSchema<any> = {
     items: {
       type: 'text',
       _meta: { description: 'Top messages from fleet server error logs' },
+    },
+  },
+  agents_per_os: {
+    type: 'array',
+    items: {
+      properties: {
+        name: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS enrolled to this kibana',
+          },
+        },
+        version: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS version enrolled to this kibana',
+          },
+        },
+        count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of agents enrolled that use this OS',
+          },
+        },
+      },
     },
   },
 };

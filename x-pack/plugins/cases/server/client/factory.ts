@@ -13,14 +13,27 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
+
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { FilesStart } from '@kbn/files-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -44,15 +57,17 @@ import { EmailNotificationService } from '../services/notifications/email_notifi
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
   securityPluginStart: SecurityPluginStart;
-  spacesPluginStart: SpacesPluginStart;
+  spacesPluginStart?: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   licensingPluginStart: LicensingPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  notifications: NotificationsPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
-  notifications: NotificationsPluginStart;
+  filesPluginStart: FilesStart;
 }
 
 /**
@@ -115,13 +130,21 @@ export class CasesClientFactory {
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
 
+    const savedObjectsSerializer = savedObjectsService.createSerializer();
+    const alertsClient = await this.options.ruleRegistry.getRacClientWithRequest(request);
+
     const services = this.createServices({
       unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
       esClient: scopedClusterClient,
       request,
+      auditLogger,
+      alertsClient,
     });
 
     const userInfo = await this.getUserInfo(request);
+
+    const fileService = this.options.filesPluginStart.fileServiceFactory.asScoped(request);
 
     return createCasesClient({
       services,
@@ -135,7 +158,10 @@ export class CasesClientFactory {
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      spaceId:
+        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      savedObjectsSerializer,
+      fileService,
     });
   }
 
@@ -147,19 +173,26 @@ export class CasesClientFactory {
 
   private createServices({
     unsecuredSavedObjectsClient,
+    savedObjectsSerializer,
     esClient,
     request,
+    auditLogger,
+    alertsClient,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
+    auditLogger: AuditLogger;
+    alertsClient: PublicMethodsOf<AlertsClient>;
   }): CasesServices {
     this.validateInitialization();
 
-    const attachmentService = new AttachmentService(
-      this.logger,
-      this.options.persistableStateAttachmentTypeRegistry
-    );
+    const attachmentService = new AttachmentService({
+      log: this.logger,
+      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+      unsecuredSavedObjectsClient,
+    });
 
     const caseService = new CasesService({
       log: this.logger,
@@ -182,18 +215,22 @@ export class CasesClientFactory {
       notifications: this.options.notifications,
       security: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      spaceId:
+        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
     });
 
     return {
-      alertsService: new AlertService(esClient, this.logger),
+      alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
-      userActionService: new CaseUserActionService(
-        this.logger,
-        this.options.persistableStateAttachmentTypeRegistry
-      ),
+      userActionService: new CaseUserActionService({
+        log: this.logger,
+        persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+        unsecuredSavedObjectsClient,
+        savedObjectsSerializer,
+        auditLogger,
+      }),
       attachmentService,
       licensingService,
       notificationService,

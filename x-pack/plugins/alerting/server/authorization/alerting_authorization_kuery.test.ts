@@ -32,6 +32,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -67,6 +69,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -105,6 +109,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
           {
             actionGroups: [],
@@ -122,6 +128,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
           {
             actionGroups: [],
@@ -139,6 +147,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -177,6 +187,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
           {
             actionGroups: [],
@@ -194,6 +206,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -233,6 +247,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
           {
             actionGroups: [],
@@ -250,6 +266,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -283,6 +301,8 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
           isExportable: true,
           authorizedConsumers: {},
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ]),
       {
@@ -317,6 +337,8 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -379,6 +401,8 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -449,6 +473,8 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
           {
             actionGroups: [],
@@ -466,6 +492,8 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
           {
             actionGroups: [],
@@ -483,6 +511,8 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
           },
         ]),
         {
@@ -646,6 +676,8 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
           isExportable: true,
           authorizedConsumers: {},
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ]),
       {

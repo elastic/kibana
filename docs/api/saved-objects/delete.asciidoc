@@ -4,9 +4,17 @@
 <titleabbrev>Delete object</titleabbrev>
 ++++
 
-experimental[] Remove {kib} saved objects.
+deprecated::[8.7.0, To be removed in an upcoming version]
+
+Remove {kib} saved objects.
 
 WARNING: Once you delete a saved object, _it cannot be recovered_.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
 
 [[saved-objects-api-delete-request]]
 ==== Request

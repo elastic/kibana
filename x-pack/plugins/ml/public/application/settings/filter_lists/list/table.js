@@ -136,6 +136,7 @@ function renderToolsRight(
   return [
     <NewFilterButton key="new_filter_list" canCreateFilter={canCreateFilter} />,
     <DeleteFilterListModal
+      key="delete_filter_list"
       canDeleteFilter={canDeleteFilter}
       selectedFilterLists={selectedFilterLists}
       refreshFilterLists={refreshFilterLists}

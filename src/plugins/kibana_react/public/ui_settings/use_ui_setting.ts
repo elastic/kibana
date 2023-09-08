@@ -20,13 +20,36 @@ import { useKibana } from '../context';
  * ```
  */
 export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  if (typeof services.uiSettings !== 'object') {
+  if (!settings) {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
-  return services.uiSettings.get(key, defaultValue);
+  return settings.client.get(key, defaultValue);
+};
+
+/**
+ * Returns the current global UI-settings value.
+ *
+ * Usage:
+ *
+ * ```js
+ * const customBranding = useGlobalUiSetting('customBranding:pageTitle');
+ * ```
+ */
+export const useGlobalUiSetting = <T>(key: string, defaultValue?: T): T => {
+  const {
+    services: { settings },
+  } = useKibana();
+
+  if (!settings) {
+    throw new TypeError('uiSettings service not available in kibana-react context.');
+  }
+
+  return settings.globalClient.get(key, defaultValue);
 };
 
 type Setter<T> = (newValue: T) => Promise<boolean>;
@@ -45,18 +68,52 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  * ```
  */
 export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  if (typeof services.uiSettings !== 'object') {
+  if (!settings) {
     throw new TypeError('uiSettings service not available in kibana-react context.');
   }
 
   const observable$ = useMemo(
-    () => services.uiSettings!.get$(key, defaultValue),
-    [key, defaultValue, services.uiSettings]
+    () => settings!.client.get$(key, defaultValue),
+    [key, defaultValue, settings]
   );
-  const value = useObservable<T>(observable$, services.uiSettings!.get(key, defaultValue));
-  const set = useCallback((newValue: T) => services.uiSettings!.set(key, newValue), [key]);
+  const value = useObservable<T>(observable$, settings!.client.get(key, defaultValue));
+  const set = useCallback((newValue: T) => settings!.client.set(key, newValue), [key]);
+
+  return [value, set];
+};
+
+/**
+ * Returns a 2-tuple, where first entry is the setting value and second is a
+ * function to update the setting value.
+ *
+ * Synchronously returns the most current value of the setting and subscribes
+ * to all subsequent updates, which will re-render your component on new values.
+ *
+ * Usage:
+ *
+ * ```js
+ * const [customBranding, setCustomBranding] = useGlobalUiSetting$('customBranding:pageTitle');
+ * ```
+ */
+export const useGlobalUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
+  const {
+    services: { settings },
+  } = useKibana();
+
+  if (!settings) {
+    throw new TypeError('uiSettings service not available in kibana-react context.');
+  }
+
+  const observable$ = useMemo(
+    () => settings!.globalClient.get$(key, defaultValue),
+    [key, defaultValue, settings!.globalClient]
+  );
+  const value = useObservable<T>(observable$, settings!.globalClient.get(key, defaultValue));
+  const set = useCallback((newValue: T) => settings!.globalClient.set(key, newValue), [key]);
 
   return [value, set];
 };

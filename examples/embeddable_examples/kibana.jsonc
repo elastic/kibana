@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/embeddable-examples-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Example app that shows how to register custom embeddables",
+  "plugin": {
+    "id": "embeddableExamples",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable",
+      "uiActions",
+      "dashboard",
+    ],
+    "extraPublicDirs": [
+      "public/hello_world"
+    ]
+  }
+}

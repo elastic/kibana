@@ -33,11 +33,22 @@ export const securityResponseHeadersSchema = schema.object({
     { defaultValue: 'no-referrer-when-downgrade' }
   ),
   permissionsPolicy: schema.oneOf([schema.string(), schema.literal(null)], {
-    // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
-    // Note: Feature-Policy is superseded by Permissions-Policy; the link above is temporary until MDN releases an updated page
-    defaultValue: null,
+    // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
+    // Note: this currently lists all non-experimental permissions, as of May 2023
+    defaultValue:
+      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
   }),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers
+  crossOriginOpenerPolicy: schema.oneOf(
+    // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy
+    [
+      schema.literal('unsafe-none'),
+      schema.literal('same-origin-allow-popups'),
+      schema.literal('same-origin'),
+      schema.literal(null),
+    ],
+    { defaultValue: 'same-origin' }
+  ),
 });
 
 /**
@@ -63,6 +74,9 @@ export function parseRawSecurityResponseHeadersConfig(
   }
   if (raw.permissionsPolicy) {
     securityResponseHeaders['Permissions-Policy'] = raw.permissionsPolicy;
+  }
+  if (raw.crossOriginOpenerPolicy) {
+    securityResponseHeaders['Cross-Origin-Opener-Policy'] = raw.crossOriginOpenerPolicy;
   }
   if (disableEmbedding) {
     securityResponseHeaders['X-Frame-Options'] = 'SAMEORIGIN';

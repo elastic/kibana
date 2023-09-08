@@ -21,11 +21,11 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
 import { getAllTimeline } from '../../../saved_object/timelines';
-import { getTimelinesQuerySchema } from '../../../schemas/timelines';
+import { getTimelinesQuerySchema } from '../../../../../../common/api/timeline';
 
 export const getTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  _config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(

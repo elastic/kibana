@@ -6,7 +6,7 @@
  */
 
 import { BaseWatch } from './base_watch';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from '../../../../common/constants';
 import { getTimeUnitLabel } from '../../lib/get_time_unit_label';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +31,7 @@ const DEFAULT_VALUES = {
  */
 export class ThresholdWatch extends BaseWatch {
   constructor(props = {}) {
-    props.id = props.id || uuid.v4();
+    props.id = props.id || uuidv4();
     props.type = WATCH_TYPES.THRESHOLD;
     super(props);
 

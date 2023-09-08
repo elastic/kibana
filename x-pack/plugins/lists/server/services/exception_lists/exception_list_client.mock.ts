@@ -88,6 +88,7 @@ export const getCreateExceptionListItemOptionsMock = (): CreateExceptionListItem
     comments,
     description,
     entries,
+    expire_time: expireTime,
     item_id: itemId,
     list_id: listId,
     meta,
@@ -102,6 +103,7 @@ export const getCreateExceptionListItemOptionsMock = (): CreateExceptionListItem
     comments,
     description,
     entries,
+    expireTime,
     itemId,
     listId,
     meta,
@@ -114,14 +116,26 @@ export const getCreateExceptionListItemOptionsMock = (): CreateExceptionListItem
 };
 
 export const getUpdateExceptionListItemOptionsMock = (): UpdateExceptionListItemOptions => {
-  const { comments, entries, itemId, namespaceType, name, osTypes, description, meta, tags, type } =
-    getCreateExceptionListItemOptionsMock();
+  const {
+    comments,
+    entries,
+    expireTime,
+    itemId,
+    namespaceType,
+    name,
+    osTypes,
+    description,
+    meta,
+    tags,
+    type,
+  } = getCreateExceptionListItemOptionsMock();
 
   return {
     _version: undefined,
     comments,
     description,
     entries,
+    expireTime,
     id: ID,
     itemId,
     meta,
@@ -161,6 +175,7 @@ export const getExceptionListSoSchemaMock = (
     created_by,
     description,
     entries,
+    expire_time: undefined,
     immutable: undefined,
     item_id,
     list_id,

@@ -30,6 +30,8 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
   const popoverPanelStyles = useMemo<CSSProperties>(() => {
     return {
       width,
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
     };
   }, [width]);
 

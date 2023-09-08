@@ -10,23 +10,21 @@ import dateMath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
-import uuid from 'uuid';
-import {
-  getRuleExecutionResultsUrl,
-  RuleExecutionStatus,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { v4 as uuidv4 } from 'uuid';
+import { getRuleExecutionResultsUrl } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteAllEventLogExecutionEvents,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getRuleForSignalTesting,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
-  waitForRuleSuccessOrStatus,
+  waitForRulePartialFailure,
+  waitForRuleSuccess,
 } from '../../utils';
 import {
   failedGapExecution,
@@ -51,11 +49,11 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alias');
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
     });
 
     beforeEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
@@ -65,6 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl('1'))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(404);
@@ -74,9 +73,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed successfully', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*']);
+      const rule = {
+        ...getRuleForSignalTesting(['auditbeat-*']),
+        query: 'process.executable: "/usr/bin/sudo"',
+      };
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();
@@ -84,6 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -102,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return execution events for a rule that has executed in a warning state', async () => {
       const rule = getRuleForSignalTesting(['no-name-index']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus['partial failure']);
+      await waitForRulePartialFailure({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();
@@ -110,6 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -128,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return execution events for a rule that has executed in a failure state with a gap', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*'], uuid.v4(), false);
+      const rule = getRuleForSignalTesting(['auditbeat-*'], uuidv4(), false);
       const { id } = await createRule(supertest, log, rule);
 
       const start = dateMath.parse('now')?.utc().toISOString();
@@ -157,6 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '1')
         .query({ start, end });
 
       expect(response.status).to.eql(200);
@@ -176,7 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // For details, see: https://github.com/elastic/kibana/issues/131382
     it('should return execution events ordered by @timestamp desc when a status filter is active and there are more than 1000 executions', async () => {
-      const rule = getRuleForSignalTesting(['auditbeat-*'], uuid.v4(), false);
+      const rule = getRuleForSignalTesting(['auditbeat-*'], uuidv4(), false);
       const { id } = await createRule(supertest, log, rule);
 
       // Daterange for which we'll generate execution events between
@@ -193,7 +198,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Create 1000 successful executions
       const events = dateTimes.slice(0, 1000).flatMap((dateTime) => {
-        const executionId = uuid.v4();
+        const executionId = uuidv4();
         return cloneDeep(successfulExecution).map((e, i) => {
           set(e, '@timestamp', dateTime);
           set(e, 'event.start', dateTime);
@@ -209,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Create 2 failed executions
       const failedEvents = dateTimes.slice(1000).flatMap((dateTime) => {
-        const executionId = uuid.v4();
+        const executionId = uuidv4();
         return cloneDeep(failedRanAfterDisabled).map((e, i) => {
           set(e, '@timestamp', dateTime);
           set(e, 'event.start', dateTime);
@@ -228,6 +233,8 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .get(getRuleExecutionResultsUrl(id))
         .set('kbn-xsrf', 'true')
+        .set('x-elastic-internal-origin', 'Kibana')
+        .set('elastic-api-version', '1')
         .query({ start, end, status_filters: 'failed,succeeded' });
 
       // Verify the most recent execution was one of the failedRanAfterDisabled executions, which have a duration of 3ms and are made up of 2 docs per execution,

@@ -6,29 +6,31 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
-
 import {
   isRegressionAnalysis,
   isClassificationAnalysis,
-} from '@kbn/ml-plugin/common/util/analytics_utils';
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
-import { MlApi } from './api';
+import type { MlApi } from './api';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
-  mlApi: MlApi
+  mlApi: MlApi,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const headerPage = getPageObject('header');
   const commonPage = getPageObject('common');
 
-  const testSubjects = getService('testSubjects');
+  const aceEditor = getService('aceEditor');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const aceEditor = getService('aceEditor');
+  const testSubjects = getService('testSubjects');
 
   return {
     async assertJobTypeSelectExists() {
@@ -202,6 +204,19 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
+    async assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromTrigger(
+        'mlAnalyticsCreateJobWizardIncludesSelect',
+        fieldName,
+        fieldType,
+        expectedContent
+      );
+    },
+
     async assertIncludeFieldsSelectionExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesTable', { timeout: 8000 });
 
@@ -253,6 +268,23 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
           '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
         );
       });
+    },
+
+    async assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlAnalyticsCreateJobWizardDependentVariableSelect loaded',
+        fieldName,
+        fieldType,
+        expectedContent
+      );
+    },
+
+    async assertFieldStatTopValuesContent(fieldName: string, expectedContent: string[]) {
+      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, expectedContent);
     },
 
     async assertDependentVariableInputMissing() {

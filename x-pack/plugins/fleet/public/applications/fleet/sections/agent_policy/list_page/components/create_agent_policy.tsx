@@ -24,13 +24,13 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 import { DevtoolsRequestFlyoutButton } from '../../../../components';
 import { generateCreateAgentPolicyDevToolsRequest } from '../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
   z-index: ${(props) => props.theme.eui.euiZLevel5};
@@ -47,12 +47,9 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>({
-    name: '',
-    description: '',
-    namespace: 'default',
-    monitoring_enabled: Object.values(dataTypes),
-  });
+  const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>(
+    generateNewAgentPolicyWithDefaults()
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(agentPolicy);

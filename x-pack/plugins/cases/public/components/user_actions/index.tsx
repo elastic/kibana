@@ -5,267 +5,215 @@
  * 2.0.
  */
 
-import type { EuiCommentProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList } from '@elastic/eui';
-
-import React, { useMemo, useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 
 import { AddComment } from '../add_comment';
 import { useCaseViewParams } from '../../common/navigation';
-import { builderMap } from './builder';
-import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
+import { getManualAlertIdsWithNoRuleId } from './helpers';
 import type { UserActionTreeProps } from './types';
-import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
 import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
+import { UserActionsList } from './user_actions_list';
+import { useUserActionsPagination } from './use_user_actions_pagination';
+import { useLastPageUserActions } from './use_user_actions_last_page';
+import { ShowMoreButton } from './show_more_button';
+import { useLastPage } from './use_last_page';
 
-const MyEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: 8px;
-`;
-
-const MyEuiCommentList = styled(EuiCommentList)`
-  ${({ theme }) => `
-    & .userAction__comment.outlined .euiCommentEvent {
-      outline: solid 5px ${theme.eui.euiColorVis1_behindText};
-      margin: 0.5em;
-      transition: 0.8s;
-    }
-
-    & .euiComment.isEdit {
-      & .euiCommentEvent {
-        border: none;
-        box-shadow: none;
+const getIconsCss = (hasNextPage: boolean | undefined, euiTheme: EuiThemeComputed<{}>): string => {
+  const customSize = hasNextPage
+    ? {
+        showMoreSectionSize: euiTheme.size.xxxl,
+        marginTopShowMoreSectionSize: euiTheme.size.xxxl,
+        marginBottomShowMoreSectionSize: euiTheme.size.xxxl,
       }
+    : {
+        showMoreSectionSize: euiTheme.size.m,
+        marginTopShowMoreSectionSize: euiTheme.size.m,
+        marginBottomShowMoreSectionSize: euiTheme.size.m,
+      };
 
-      & .euiCommentEvent__body {
-        padding: 0;
-      }
+  const blockSize = `${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
+  ${customSize.marginBottomShowMoreSectionSize}`;
+  return `
+          .commentList--hasShowMore
+            [class*='euiTimelineItem-center']:last-child:not(:only-child)
+            > [class*='euiTimelineItemIcon-']::before {
+            block-size: calc(
+              100% + ${blockSize}
+            );
+          }
+          .commentList--hasShowMore
+            [class*='euiTimelineItem-center']:first-child
+            > [class*='euiTimelineItemIcon-']::before {
+            inset-block-start: 0%;
+            block-size: calc(
+              100% + ${blockSize}
+            );
+          }
+          .commentList--hasShowMore
+              [class*='euiTimelineItem-']
+              > [class*='euiTimelineItemIcon-']::before {
+              block-size: calc(
+                100% + ${blockSize}
+              );
+              }
+        `;
+};
 
-      & .euiCommentEvent__header {
-        display: none;
-      }
-    }
-
-    & .comment-alert .euiCommentEvent {
-      background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiBorderThin};
-      padding: ${theme.eui.euiSizeS};
-      border-radius: ${theme.eui.euiSizeXS};
-    }
-
-    & .comment-alert .euiCommentEvent__headerData {
-      flex-grow: 1;
-    }
-
-    & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
-      box-shadow: none;
-      .euiCommentEvent__header {
-        padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
-        border-bottom: 0;
-      }
-    }
-  `}
-`;
-
-export const UserActions = React.memo(
-  ({
-    caseServices,
-    caseUserActions,
-    userProfiles,
+export const UserActions = React.memo((props: UserActionTreeProps) => {
+  const {
     currentUserProfile,
     data: caseData,
-    getRuleDetailsHref,
-    actionsNavigation,
-    isLoadingDescription,
-    isLoadingUserActions,
-    onRuleDetailsClick,
-    onShowAlertDetails,
-    onUpdateField,
     statusActionButton,
     useFetchAlertData,
-  }: UserActionTreeProps) => {
-    const { detailName: caseId, commentId } = useCaseViewParams();
-    const [initLoading, setInitLoading] = useState(true);
-    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
-      useCasesContext();
+    userActivityQueryParams,
+    userActionsStats,
+  } = props;
+  const { detailName: caseId } = useCaseViewParams();
 
-    const alertIdsWithoutRuleInfo = useMemo(
-      () => getManualAlertIdsWithNoRuleId(caseData.comments),
-      [caseData.comments]
-    );
+  const { lastPage } = useLastPage({ userActivityQueryParams, userActionsStats });
 
-    const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
+  const {
+    infiniteCaseUserActions,
+    isLoadingInfiniteUserActions,
+    hasNextPage,
+    fetchNextPage,
+    showBottomList,
+    isFetchingNextPage,
+  } = useUserActionsPagination({
+    userActivityQueryParams,
+    caseId: caseData.id,
+    lastPage,
+  });
 
-    const {
-      loadingCommentIds,
-      commentRefs,
-      selectedOutlineCommentId,
-      manageMarkdownEditIds,
-      handleManageMarkdownEditId,
-      handleOutlineComment,
-      handleSaveComment,
-      handleManageQuote,
-      handleDeleteComment,
-      handleUpdate,
-    } = useUserActionsHandler();
+  const { euiTheme } = useEuiTheme();
 
-    const MarkdownNewComment = useMemo(
-      () => (
-        <AddComment
-          id={NEW_COMMENT_ID}
-          caseId={caseId}
-          ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
-          onCommentPosted={handleUpdate}
-          onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
-          showLoading={false}
-          statusActionButton={statusActionButton}
-        />
-      ),
-      [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
-    );
+  const { isLoadingLastPageUserActions, lastPageUserActions } = useLastPageUserActions({
+    userActivityQueryParams,
+    caseId: caseData.id,
+    lastPage,
+  });
 
-    useEffect(() => {
-      if (initLoading && !isLoadingUserActions && loadingCommentIds.length === 0) {
-        setInitLoading(false);
-        if (commentId != null) {
-          handleOutlineComment(commentId);
-        }
+  const alertIdsWithoutRuleInfo = useMemo(
+    () => getManualAlertIdsWithNoRuleId(caseData.comments),
+    [caseData.comments]
+  );
+
+  const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
+
+  const { permissions } = useCasesContext();
+
+  // add-comment markdown is not visible in History filter
+  const showCommentEditor = permissions.create && userActivityQueryParams.type !== 'action';
+
+  const {
+    commentRefs,
+    handleManageMarkdownEditId,
+    handleManageQuote,
+    handleUpdate,
+    loadingCommentIds,
+  } = useUserActionsHandler();
+
+  const MarkdownNewComment = useMemo(
+    () => (
+      <AddComment
+        id={NEW_COMMENT_ID}
+        caseId={caseId}
+        ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
+        onCommentPosted={handleUpdate}
+        onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
+        showLoading={false}
+        statusActionButton={statusActionButton}
+      />
+    ),
+    [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
+  );
+
+  const bottomActions = showCommentEditor
+    ? [
+        {
+          username: (
+            <UserToolTip userInfo={currentUserProfile}>
+              <Username userInfo={currentUserProfile} />
+            </UserToolTip>
+          ),
+          'data-test-subj': 'add-comment',
+          timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
+          className: 'isEdit',
+          children: MarkdownNewComment,
+        },
+      ]
+    : [];
+
+  const handleShowMore = useCallback(() => {
+    if (fetchNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage]);
+
+  return (
+    <EuiSkeletonText
+      lines={8}
+      data-test-subj="user-actions-loading"
+      isLoading={
+        isLoadingLastPageUserActions ||
+        loadingCommentIds.includes(NEW_COMMENT_ID) ||
+        isLoadingInfiniteUserActions
       }
-    }, [commentId, initLoading, isLoadingUserActions, loadingCommentIds, handleOutlineComment]);
-
-    const descriptionCommentListObj: EuiCommentProps = useMemo(
-      () =>
-        getDescriptionUserAction({
-          userProfiles,
-          caseData,
-          commentRefs,
-          manageMarkdownEditIds,
-          isLoadingDescription,
-          onUpdateField,
-          handleManageMarkdownEditId,
-          handleManageQuote,
-        }),
-      [
-        userProfiles,
-        caseData,
-        commentRefs,
-        manageMarkdownEditIds,
-        isLoadingDescription,
-        onUpdateField,
-        handleManageMarkdownEditId,
-        handleManageQuote,
-      ]
-    );
-
-    const userActions: EuiCommentProps[] = useMemo(
-      () =>
-        caseUserActions.reduce<EuiCommentProps[]>(
-          (comments, userAction, index) => {
-            if (!isUserActionTypeSupported(userAction.type)) {
-              return comments;
+    >
+      <EuiFlexItem
+        {...(showBottomList
+          ? {
+              css: css`
+                ${getIconsCss(hasNextPage, euiTheme)}
+              `,
             }
-
-            const builder = builderMap[userAction.type];
-
-            if (builder == null) {
-              return comments;
-            }
-
-            const userActionBuilder = builder({
-              caseData,
-              externalReferenceAttachmentTypeRegistry,
-              persistableStateAttachmentTypeRegistry,
-              userAction,
-              userProfiles,
-              currentUserProfile,
-              caseServices,
-              comments: caseData.comments,
-              index,
-              commentRefs,
-              manageMarkdownEditIds,
-              selectedOutlineCommentId,
-              loadingCommentIds,
-              loadingAlertData,
-              alertData: manualAlertsData,
-              handleOutlineComment,
-              handleManageMarkdownEditId,
-              handleDeleteComment,
-              handleSaveComment,
-              handleManageQuote,
-              onShowAlertDetails,
-              actionsNavigation,
-              getRuleDetailsHref,
-              onRuleDetailsClick,
-            });
-            return [...comments, ...userActionBuilder.build()];
-          },
-          [descriptionCommentListObj]
-        ),
-      [
-        caseUserActions,
-        userProfiles,
-        currentUserProfile,
-        externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
-        descriptionCommentListObj,
-        caseData,
-        caseServices,
-        commentRefs,
-        manageMarkdownEditIds,
-        selectedOutlineCommentId,
-        loadingCommentIds,
-        loadingAlertData,
-        manualAlertsData,
-        handleOutlineComment,
-        handleManageMarkdownEditId,
-        handleDeleteComment,
-        handleSaveComment,
-        handleManageQuote,
-        onShowAlertDetails,
-        actionsNavigation,
-        getRuleDetailsHref,
-        onRuleDetailsClick,
-      ]
-    );
-
-    const { permissions } = useCasesContext();
-
-    const bottomActions = permissions.create
-      ? [
-          {
-            username: (
-              <UserToolTip userInfo={currentUserProfile}>
-                <Username userInfo={currentUserProfile} />
-              </UserToolTip>
-            ),
-            'data-test-subj': 'add-comment',
-            timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
-            className: 'isEdit',
-            children: MarkdownNewComment,
-          },
-        ]
-      : [];
-
-    const comments = [...userActions, ...bottomActions];
-
-    return (
-      <>
-        <MyEuiCommentList comments={comments} data-test-subj="user-actions" />
-        {(isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)) && (
-          <MyEuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner data-test-subj="user-actions-loading" size="l" />
-            </EuiFlexItem>
-          </MyEuiFlexGroup>
+          : {})}
+      >
+        <UserActionsList
+          {...props}
+          caseUserActions={infiniteCaseUserActions}
+          loadingAlertData={loadingAlertData}
+          manualAlertsData={manualAlertsData}
+          commentRefs={commentRefs}
+          handleManageQuote={handleManageQuote}
+          bottomActions={lastPage <= 1 ? bottomActions : []}
+          isExpandable
+        />
+        {hasNextPage && (
+          <ShowMoreButton onShowMoreClick={handleShowMore} isLoading={isFetchingNextPage} />
         )}
-      </>
-    );
-  }
-);
+        {lastPageUserActions?.length ? (
+          <EuiFlexItem
+            {...(!hasNextPage
+              ? {
+                  css: css`
+                    margin-top: 24px;
+                  `,
+                }
+              : {})}
+          >
+            <UserActionsList
+              {...props}
+              caseUserActions={lastPageUserActions}
+              loadingAlertData={loadingAlertData}
+              manualAlertsData={manualAlertsData}
+              bottomActions={bottomActions}
+              commentRefs={commentRefs}
+              handleManageQuote={handleManageQuote}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexItem>
+    </EuiSkeletonText>
+  );
+});
 
 UserActions.displayName = 'UserActions';

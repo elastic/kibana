@@ -24,15 +24,14 @@ jest.mock('./cases');
 
 const create = (versionNumber: string) => {
   const t = {
-    api: new ApiActions(versionNumber),
-    app: new AppActions(versionNumber),
+    api: new ApiActions(),
+    app: new AppActions(),
     login: 'login:',
-    savedObject: new SavedObjectActions(versionNumber),
-    alerting: new AlertingActions(versionNumber),
-    cases: new CasesActions(versionNumber),
-    space: new SpaceActions(versionNumber),
-    ui: new UIActions(versionNumber),
-    version: `version:${versionNumber}`,
+    savedObject: new SavedObjectActions(),
+    alerting: new AlertingActions(),
+    cases: new CasesActions(),
+    space: new SpaceActions(),
+    ui: new UIActions(),
   } as unknown as jest.Mocked<Actions>;
   return t;
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DependencyList } from 'react';
 import { MlPluginStart } from '..';
 import { MlLocatorParams } from '../../common/types/locator';
 
@@ -15,10 +16,11 @@ import { MlLocatorParams } from '../../common/types/locator';
 export const useMlHref = (
   ml: MlPluginStart | undefined,
   basePath: string | undefined,
-  params: MlLocatorParams
+  params: MlLocatorParams,
+  dependencies?: DependencyList
 ) => {
   return ml && ml.locator
-    ? ml.locator!.useUrl(params)
+    ? ml.locator.useUrl(params, undefined, dependencies)
     : basePath !== undefined
     ? `${basePath}/app/ml/${params.page}`
     : '';

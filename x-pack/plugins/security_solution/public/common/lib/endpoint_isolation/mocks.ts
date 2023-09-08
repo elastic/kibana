@@ -11,7 +11,10 @@ import type {
 } from '../../../../common/endpoint/types';
 import type { ResponseProvidersInterface } from '../../mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../mock/endpoint/http_handler_mock_factory';
-import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
+import {
+  ISOLATE_HOST_ROUTE_V2,
+  UNISOLATE_HOST_ROUTE_V2,
+} from '../../../../common/endpoint/constants';
 
 export const hostIsolationRequestBodyMock = (): HostIsolationRequestBody => {
   return {
@@ -37,13 +40,13 @@ export const hostIsolationHttpMocks = httpHandlerMockFactory<HostIsolationHttpMo
   {
     id: 'isolateHost',
     method: 'post',
-    path: ISOLATE_HOST_ROUTE,
+    path: ISOLATE_HOST_ROUTE_V2,
     handler: () => hostIsolationResponseMock(),
   },
   {
     id: 'unIsolateHost',
     method: 'post',
-    path: UNISOLATE_HOST_ROUTE,
+    path: UNISOLATE_HOST_ROUTE_V2,
     handler: () => hostIsolationResponseMock(),
   },
 ]);

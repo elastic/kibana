@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
 
 import { useValues } from 'kea';
+
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { ENGINE_REINDEX_JOB_PATH } from '../../routes';
 import { EngineLogic } from '../engine';
@@ -20,11 +21,11 @@ export const SchemaRouter: React.FC = () => {
   const { isMetaEngine } = useValues(EngineLogic);
 
   return (
-    <Switch>
+    <Routes>
       <Route path={ENGINE_REINDEX_JOB_PATH}>
         <ReindexJob />
       </Route>
       <Route>{isMetaEngine ? <MetaEngineSchema /> : <Schema />}</Route>
-    </Switch>
+    </Routes>
   );
 };

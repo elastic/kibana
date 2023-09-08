@@ -20,8 +20,9 @@ import {
   getNormalizeCommonFields,
   getOptionalArrayField,
   getOptionalListField,
-  getMultipleUrlsOrHostsError,
+  getInvalidUrlsOrHostsError,
   getUnsupportedKeysError,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeTCPFields = ({
@@ -36,7 +37,7 @@ export const getNormalizeTCPFields = ({
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
-  const commonFields = getNormalizeCommonFields({
+  const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -45,10 +46,13 @@ export const getNormalizeTCPFields = ({
     version,
   });
 
+  // Add common erros to errors arary
+  errors.push(...commonErrors);
+
   /* Check if monitor has multiple hosts */
   const hosts = getOptionalListField(monitor.hosts);
-  if (hosts.length > 1) {
-    errors.push(getMultipleUrlsOrHostsError(monitor, 'hosts', version));
+  if (hosts.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'hosts', version));
   }
 
   if (unsupportedKeys.length) {
@@ -65,6 +69,10 @@ export const getNormalizeTCPFields = ({
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.METADATA]: {
+      ...DEFAULT_FIELDS[DataStream.TCP][ConfigKey.METADATA],
+      is_tls_enabled: getHasTLSFields(monitor),
+    },
   };
   return {
     normalizedFields: {

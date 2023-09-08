@@ -107,7 +107,11 @@ export function Controls() {
 
   const {
     query: { kuery },
-  } = useAnyOfApmParams('/service-map', '/services/{serviceName}/service-map');
+  } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
   const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);

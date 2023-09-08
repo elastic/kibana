@@ -6,47 +6,60 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
-
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { FieldTypeIcon } from './field_type_icon';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 
 describe('FieldTypeIcon', () => {
-  test(`render component when type matches a field type`, () => {
-    const typeIconComponent = shallow(
-      <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
+  it('renders label and icon but not tooltip content on mouseover if tooltipEnabled=false', async () => {
+    const { getByText, container } = render(
+      <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={false} />
     );
-    expect(typeIconComponent).toMatchSnapshot();
+
+    expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
+
+    fireEvent.mouseOver(getByText('Keyword'));
+
+    await waitFor(
+      () => {
+        const tooltip = document.querySelector('[data-test-subj="dvFieldTypeTooltip"]');
+        expect(tooltip).toBeNull();
+      },
+      { timeout: 1500 } // Account for long delay on tooltips
+    );
   });
 
-  // TODO: Broken with Jest 27
-  test.skip(`render with tooltip and test hovering`, () => {
-    // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers({ legacyFakeTimers: true });
-
-    const typeIconComponent = mount(
+  it(`renders component when type matches a field type`, () => {
+    const { container } = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
 
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
+    expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
+    expect(container).toHaveTextContent('keyword');
+  });
 
-    typeIconComponent.simulate('mouseover');
+  it('shows tooltip content on mouseover', async () => {
+    const { getByText, container } = render(
+      <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
+    );
+    expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
+    expect(container).toHaveTextContent('keyword');
 
-    // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    fireEvent.mouseOver(getByText('keyword'));
 
-    typeIconComponent.update();
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
+    await waitFor(
+      () => {
+        const tooltip = document.querySelector('[data-test-subj="dvFieldTypeTooltip"]');
+        expect(tooltip).toBeVisible();
+        expect(tooltip?.textContent).toEqual('Keyword');
+      },
+      { timeout: 1500 } // Account for long delay on tooltips
+    );
+    fireEvent.mouseOut(getByText('keyword'));
 
-    typeIconComponent.simulate('mouseout');
-
-    // Run the timers so the EuiTooltip will be hidden again
-    jest.runAllTimers();
-
-    typeIconComponent.update();
-    expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(2);
-
-    // Clearing all mocks will also reset fake timers.
-    jest.clearAllMocks();
+    await waitFor(() => {
+      const tooltip = document.querySelector('[data-test-subj="dvFieldTypeTooltip"]');
+      expect(tooltip).toBeNull();
+    });
   });
 });

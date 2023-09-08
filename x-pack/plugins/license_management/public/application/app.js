@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LicenseDashboard, UploadLicense } from './sections';
-import { Switch, Route } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
 import {
@@ -16,6 +16,7 @@ import {
   EuiPageBody,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+import { UPLOAD_LICENSE_ROUTE } from '../locator';
 
 export const App = ({
   hasPermission,
@@ -53,7 +54,7 @@ export const App = ({
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h1>
               <FormattedMessage
@@ -100,10 +101,10 @@ export const App = ({
   const withTelemetry = (Component) => (props) => <Component {...props} telemetry={telemetry} />;
   return (
     <EuiPageBody>
-      <Switch>
-        <Route path={`/upload_license`} component={withTelemetry(UploadLicense)} />
+      <Routes>
+        <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
         <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
-      </Switch>
+      </Routes>
     </EuiPageBody>
   );
 };

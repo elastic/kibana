@@ -11,7 +11,8 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
 
 import type { OnDataProviderEdited } from '../events';
@@ -35,7 +36,7 @@ interface OwnProps {
   closePopover: () => void;
   deleteProvider: () => void;
   field: string;
-  kqlQuery: string;
+  kqlQuery: string; // eslint-disable-line react/no-unused-prop-types
   isEnabled: boolean;
   isExcluded: boolean;
   isLoading: boolean;
@@ -48,7 +49,7 @@ interface OwnProps {
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
   type: DataProviderType;
 }
 
@@ -80,7 +81,7 @@ interface GetProviderActionsProps {
   toggleEnabled: () => void;
   toggleExcluded: () => void;
   toggleType: () => void;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
   type: DataProviderType;
 }
 

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -69,8 +69,8 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem auditbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_auditbeat',
-      indexPattern: 'ft_module_siem_auditbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_auditbeat',
+      indexPattern: 'ft_module_security_auditbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
@@ -79,18 +79,18 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem packetbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_packetbeat',
-      indexPattern: 'ft_module_siem_packetbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_packetbeat',
+      indexPattern: 'ft_module_security_packetbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_packetbeat'],
+        moduleIds: ['security_packetbeat'],
       },
     },
     {
       testTitleSuffix: 'for siem winlogbeat dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_winlogbeat',
-      indexPattern: 'ft_module_siem_winlogbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_winlogbeat',
+      indexPattern: 'ft_module_security_winlogbeat',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
@@ -153,12 +153,12 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for siem clodutrail dataset',
-      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_cloudtrail',
-      indexPattern: 'ft_module_siem_cloudtrail',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_security_cloudtrail',
+      indexPattern: 'ft_module_security_cloudtrail',
       user: USER.ML_POWERUSER,
       expected: {
         responseCode: 200,
-        moduleIds: ['siem_cloudtrail'],
+        moduleIds: ['security_cloudtrail'],
       },
     },
     {
@@ -205,9 +205,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {
     const { body, status } = await supertest
-      .get(`/api/ml/modules/recognize/${indexPattern}`)
+      .get(`/internal/ml/modules/recognize/${indexPattern}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;

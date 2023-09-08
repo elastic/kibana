@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { FilteringRule, FilteringRules } from '../../../../../common/types/connectors';
+import { i18n } from '@kbn/i18n';
+
+import { FilteringRule, FilteringRules } from '@kbn/search-connectors';
+
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -34,5 +37,12 @@ export const putConnectorFilteringDraft = async ({
 
 export const ConnectorFilteringDraftApiLogic = createApiLogic(
   ['content', 'connector_filtering_draft_api_logic'],
-  putConnectorFilteringDraft
+  putConnectorFilteringDraft,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate(
+        'xpack.enterpriseSearch.content.index.connector.syncRules.successToastDraft.title',
+        { defaultMessage: 'Draft rules saved' }
+      ),
+  }
 );

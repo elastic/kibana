@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { GuideState, GuideId, GuideStepIds } from '@kbn/guided-onboarding';
+import type { GuideState, GuideStepIds } from '@kbn/guided-onboarding';
 
 import { PluginState } from '../../common';
 
-export const testGuide: GuideId = 'testGuide';
 export const testGuideFirstStep: GuideStepIds = 'step1';
 export const testGuideManualCompletionStep = 'step2';
-export const testGuideLastStep: GuideStepIds = 'step3';
+export const testGuideLastStep: GuideStepIds = 'step4';
 export const testIntegration = 'testIntegration';
 export const wrongIntegration = 'notTestIntegration';
 
@@ -34,6 +33,10 @@ export const testGuideStep1ActiveState: GuideState = {
       id: 'step3',
       status: 'inactive',
     },
+    {
+      id: 'step4',
+      status: 'inactive',
+    },
   ],
 };
 
@@ -46,6 +49,7 @@ export const testGuideStep1InProgressState: GuideState = {
     },
     testGuideStep1ActiveState.steps[1],
     testGuideStep1ActiveState.steps[2],
+    testGuideStep1ActiveState.steps[3],
   ],
 };
 
@@ -61,6 +65,7 @@ export const testGuideStep2ActiveState: GuideState = {
       status: 'active',
     },
     testGuideStep1ActiveState.steps[2],
+    testGuideStep1ActiveState.steps[3],
   ],
 };
 
@@ -76,6 +81,7 @@ export const testGuideStep2InProgressState: GuideState = {
       status: 'in_progress',
     },
     testGuideStep1ActiveState.steps[2],
+    testGuideStep1ActiveState.steps[3],
   ],
 };
 
@@ -91,6 +97,7 @@ export const testGuideStep2ReadyToCompleteState: GuideState = {
       status: 'ready_to_complete',
     },
     testGuideStep1ActiveState.steps[2],
+    testGuideStep1ActiveState.steps[3],
   ],
 };
 
@@ -107,6 +114,29 @@ export const testGuideStep3ActiveState: GuideState = {
     },
     {
       id: testGuideStep1ActiveState.steps[2].id,
+      status: 'active',
+    },
+    testGuideStep1ActiveState.steps[3],
+  ],
+};
+
+export const testGuideStep4ActiveState: GuideState = {
+  ...testGuideStep1ActiveState,
+  steps: [
+    {
+      ...testGuideStep1ActiveState.steps[0],
+      status: 'complete',
+    },
+    {
+      id: testGuideStep1ActiveState.steps[1].id,
+      status: 'complete',
+    },
+    {
+      id: testGuideStep1ActiveState.steps[2].id,
+      status: 'complete',
+    },
+    {
+      id: testGuideStep1ActiveState.steps[3].id,
       status: 'active',
     },
   ],
@@ -127,6 +157,10 @@ export const readyToCompleteGuideState: GuideState = {
       ...testGuideStep1ActiveState.steps[2],
       status: 'complete',
     },
+    {
+      ...testGuideStep1ActiveState.steps[3],
+      status: 'complete',
+    },
   ],
 };
 
@@ -144,4 +178,9 @@ export const mockPluginStateInProgress: PluginState = {
   status: 'in_progress',
   isActivePeriod: true,
   activeGuide: testGuideStep1ActiveState,
+};
+
+export const testGuideParams = {
+  param1: 'test1',
+  param2: 'test2',
 };

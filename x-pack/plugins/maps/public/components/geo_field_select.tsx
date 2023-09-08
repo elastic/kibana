@@ -9,15 +9,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { SingleFieldSelect } from './single_field_select';
+import { type Props as SingleFieldSelectProps, SingleFieldSelect } from './single_field_select';
 
-interface Props {
-  value: string;
+type Props = SingleFieldSelectProps & {
   geoFields: DataViewField[];
-  onChange: (geoFieldName?: string) => void;
-}
+};
 
 export function GeoFieldSelect(props: Props) {
+  const { geoFields, ...rest } = props;
   return (
     <EuiFormRow
       label={i18n.translate('xpack.maps.source.geofieldLabel', {
@@ -28,9 +27,8 @@ export function GeoFieldSelect(props: Props) {
         placeholder={i18n.translate('xpack.maps.source.selectLabel', {
           defaultMessage: 'Select geo field',
         })}
-        value={props.value}
-        onChange={props.onChange}
         fields={props.geoFields}
+        {...rest}
       />
     </EuiFormRow>
   );

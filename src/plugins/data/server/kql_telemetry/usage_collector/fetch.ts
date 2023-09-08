@@ -18,19 +18,19 @@ export interface Usage {
   defaultQueryLanguage: string;
 }
 
-export function fetchProvider(index: string) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>) {
   return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
     const [response, config] = await Promise.all([
       esClient.get(
         {
-          index,
+          index: await getIndexForType('kql-telemetry'),
           id: 'kql-telemetry:kql-telemetry',
         },
         { ignore: [404] }
       ),
       esClient.search(
         {
-          index,
+          index: await getIndexForType('config'),
           body: { query: { term: { type: 'config' } } },
         },
         { ignore: [404] }

@@ -17,7 +17,7 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
 import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -126,42 +126,6 @@ describe('DefaultCellRenderer', () => {
       truncate,
       values: ['2018-11-05T19:03:25.937Z'],
     });
-  });
-
-  test('if in tgrid expanded value, it renders ExpandedCellValueActions', () => {
-    const data = cloneDeep(mockTimelineData[0].data);
-    const header = cloneDeep(defaultHeaders[1]);
-    const isDetails = true;
-    const id = 'event.severity';
-    const wrapper = mount(
-      <TestProviders>
-        <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <DroppableWrapper droppableId="testing">
-            <DefaultCellRenderer
-              browserFields={browserFields}
-              columnId={id}
-              ecsData={ecsData}
-              data={data}
-              eventId={eventId}
-              header={header}
-              isDetails={isDetails}
-              isDraggable={true}
-              isExpandable={isExpandable}
-              isExpanded={isExpanded}
-              linkValues={linkValues}
-              rowIndex={rowIndex}
-              colIndex={colIndex}
-              setCellProps={setCellProps}
-              scopeId={scopeId}
-            />
-          </DroppableWrapper>
-        </DragDropContextWrapper>
-      </TestProviders>
-    );
-
-    expect(
-      wrapper.find('[data-test-subj="data-grid-expanded-cell-value-actions"]').exists()
-    ).toBeTruthy();
   });
 });
 

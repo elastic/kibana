@@ -7,6 +7,10 @@
  */
 
 export const capabilitiesProvider = () => ({
+  globalSettings: {
+    show: true,
+    save: true,
+  },
   advancedSettings: {
     show: true,
     save: true,

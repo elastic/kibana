@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getRiskEntityTranslation } from '../../../../risk_score/components/translations';
+import { getRiskEntityTranslation } from '../../../../explore/components/risk_score/translations';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-export * from '../../../../risk_score/components/translations';
+export * from '../../../../explore/components/risk_score/translations';
 
 export const FEED_NAME_PREPOSITION = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.feedNamePreposition',
@@ -20,22 +20,21 @@ export const FEED_NAME_PREPOSITION = i18n.translate(
 export const INDICATOR_ENRICHMENT_TITLE = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTitle',
   {
-    defaultMessage: 'Threat Match Detected',
+    defaultMessage: 'Threat match detected',
   }
 );
 
 export const INVESTIGATION_ENRICHMENT_TITLE = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTitle',
   {
-    defaultMessage: 'Enriched with Threat Intelligence',
+    defaultMessage: 'Enriched with threat intelligence',
   }
 );
 
 export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipContent',
   {
-    defaultMessage:
-      'This field value matched a threat intelligence indicator with a rule you created.',
+    defaultMessage: 'Shows available threat indicator matches.',
   }
 );
 
@@ -50,23 +49,21 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentTooltipContent',
   {
     defaultMessage:
-      'This field value has additional information available from threat intelligence sources.',
+      'Shows additional threat intelligence for the alert. The past 30 days were queried by default.',
   }
 );
 
 export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
   {
-    defaultMessage:
-      "We haven't found field value has additional information available from threat intelligence sources we searched in the past 30 days by default.",
+    defaultMessage: 'This alert does not have supplemental threat intelligence data.',
   }
 );
 
 export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.alertDetails.noEnrichmentsFoundDescription',
   {
-    defaultMessage:
-      'We did not find threat intelligence that matches any of the indicator match rules, or any enrichment for this alert.',
+    defaultMessage: 'This alert does not have threat intelligence.',
   }
 );
 

@@ -7,6 +7,7 @@
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
 
+import { useFieldStatsFlyoutContext } from '../../../../../components/field_stats_flyout';
 import { JobCreatorContext } from '../job_creator_context';
 import { WizardNav } from '../wizard_nav';
 import { WIZARD_STEPS, StepProps } from '../step_types';
@@ -16,6 +17,7 @@ import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
 import { CategorizationView } from './components/categorization_view';
 import { RareView } from './components/rare_view';
+import { GeoView } from './components/geo_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import {
   isSingleMetricJobCreator,
@@ -24,16 +26,23 @@ import {
   isCategorizationJobCreator,
   isAdvancedJobCreator,
   isRareJobCreator,
+  isGeoJobCreator,
 } from '../../../common/job_creator';
 
 export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
   const [selectionValid, setSelectionValid] = useState(false);
+  const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
 
   useEffect(() => {
     setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
-  }, [jobValidator, jobValidatorUpdated, selectionValid]);
+
+    return () => {
+      setIsFlyoutVisible(false);
+      setFieldName(undefined);
+    };
+  }, [jobValidator, jobValidatorUpdated, selectionValid, setIsFlyoutVisible, setFieldName]);
 
   return (
     <Fragment>
@@ -56,6 +65,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           )}
           {isRareJobCreator(jobCreator) && (
             <RareView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
+          )}
+          {isGeoJobCreator(jobCreator) && (
+            <GeoView isActive={isCurrentStep} setCanProceed={setSelectionValid} />
           )}
           <WizardNav
             previous={() =>

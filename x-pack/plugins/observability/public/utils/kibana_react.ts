@@ -14,6 +14,7 @@ export type StartServices<AdditionalServices extends object = {}> = CoreStart &
   ObservabilityPublicPluginsStart &
   AdditionalServices & {
     storage: Storage;
+    kibanaVersion: string;
   };
 const useTypedKibana = <AdditionalServices extends object = {}>() =>
   useKibana<StartServices<AdditionalServices>>();

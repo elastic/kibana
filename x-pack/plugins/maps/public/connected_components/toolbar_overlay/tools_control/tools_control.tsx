@@ -6,6 +6,7 @@
  */
 
 import React, { Component } from 'react';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiButtonIcon,
   EuiPopover,
@@ -18,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { DRAW_SHAPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+import { DRAW_SHAPE, ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 import { DistanceFilterForm } from '../../../components/draw_forms/distance_filter_form';
 import { DrawState } from '../../../../common/descriptor_types';
@@ -87,7 +88,7 @@ export class ToolsControl extends Component<Props, State> {
     indexPatternId?: string;
     geoFieldName?: string;
     geoFieldType?: ES_GEO_FIELD_TYPE;
-    relation?: ES_SPATIAL_RELATIONS;
+    relation?: GeoShapeRelation;
   }) => {
     this.props.initiateDraw({
       drawShape: DRAW_SHAPE.POLYGON,
@@ -102,7 +103,7 @@ export class ToolsControl extends Component<Props, State> {
     indexPatternId?: string;
     geoFieldName?: string;
     geoFieldType?: ES_GEO_FIELD_TYPE;
-    relation?: ES_SPATIAL_RELATIONS;
+    relation?: GeoShapeRelation;
   }) => {
     this.props.initiateDraw({
       drawShape: DRAW_SHAPE.BOUNDS,
@@ -201,6 +202,7 @@ export class ToolsControl extends Component<Props, State> {
     return (
       <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
         <EuiButtonIcon
+          className="mapToolbarOverlay__buttonIcon-empty"
           size="s"
           color="text"
           iconType="wrench"

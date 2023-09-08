@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
@@ -40,7 +40,10 @@ export function SpanLinks({
 }: Props) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(

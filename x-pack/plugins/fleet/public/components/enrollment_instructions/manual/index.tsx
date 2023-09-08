@@ -35,8 +35,10 @@ export const ManualInstructions = ({
   kibanaVersion: string;
 }) => {
   const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts, fleetProxy);
+  const fleetServerUrl = enrollArgs?.split('--url=')?.pop()?.split('--enrollment')[0];
+  const enrollmentToken = enrollArgs?.split('--enrollment-token=')[1];
 
-  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yaml';
+  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yml';
 
   const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
 tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
@@ -62,6 +64,8 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
 sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm
 sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent`;
 
+  const googleCloudShellCommand = `gcloud config set project <PROJECT_ID> && \nFLEET_URL=${fleetServerUrl} ENROLLMENT_TOKEN=${enrollmentToken} STACK_VERSION=${kibanaVersion} ./deploy.sh`;
+
   return {
     linux: linuxCommand,
     mac: macCommand,
@@ -69,5 +73,7 @@ sudo elastic-agent enroll ${enrollArgs} \nsudo systemctl enable elastic-agent \n
     deb: linuxDebCommand,
     rpm: linuxRpmCommand,
     kubernetes: k8sCommand,
+    cloudFormation: '',
+    googleCloudShell: googleCloudShellCommand,
   };
 };

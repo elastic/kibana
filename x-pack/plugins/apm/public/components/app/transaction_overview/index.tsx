@@ -8,18 +8,16 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { isServerlessAgent } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { AggregatedTransactionsBadge } from '../../shared/aggregated_transactions_badge';
 import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
+import { SloCallout } from '../../shared/slo_callout';
 import { TransactionsTable } from '../../shared/transactions_table';
-import {
-  isMobileAgentName,
-  isServerlessAgent,
-} from '../../../../common/agent_name';
-import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
 
 export function TransactionOverview() {
   const {
@@ -38,10 +36,9 @@ export function TransactionOverview() {
 
   const {
     transactionType,
-    serviceName,
     fallbackToTransactions,
-    runtimeName,
-    agentName,
+    serverlessType,
+    serviceName,
   } = useApmServiceContext();
 
   const history = useHistory();
@@ -51,17 +48,25 @@ export function TransactionOverview() {
     replace(history, { query: { transactionType } });
   }
 
-  // TODO: improve urlParams typings.
-  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName) {
-    return null;
-  }
+  const isServerless = isServerlessAgent(serverlessType);
 
-  const isServerless = isServerlessAgent(runtimeName);
-  const isMobileAgent = isMobileAgentName(agentName);
+  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
+    'apm.sloCalloutDismissed',
+    false
+  );
 
   return (
     <>
+      {!sloCalloutDismissed && (
+        <SloCallout
+          dismissCallout={() => {
+            setSloCalloutDismissed(true);
+          }}
+          serviceName={serviceName}
+          environment={environment}
+          transactionType={transactionType}
+        />
+      )}
       {fallbackToTransactions && (
         <>
           <EuiFlexGroup>
@@ -72,30 +77,22 @@ export function TransactionOverview() {
           <EuiSpacer size="s" />
         </>
       )}
-      {isMobileAgent ? (
-        <MobileTransactionCharts
-          kuery={kuery}
-          environment={environment}
-          start={start}
-          end={end}
-        />
-      ) : (
-        <TransactionCharts
-          kuery={kuery}
-          environment={environment}
-          start={start}
-          end={end}
-          isServerlessContext={isServerless}
-          comparisonEnabled={comparisonEnabled}
-          offset={offset}
-        />
-      )}
+      <TransactionCharts
+        serviceName={serviceName}
+        kuery={kuery}
+        environment={environment}
+        start={start}
+        end={end}
+        isServerlessContext={isServerless}
+        comparisonEnabled={comparisonEnabled}
+        offset={offset}
+      />
       <EuiSpacer size="s" />
       <EuiPanel hasBorder={true}>
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
-          showAggregationAccurateCallout
+          showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kuery}
           start={start}

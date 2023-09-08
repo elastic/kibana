@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
@@ -30,7 +30,7 @@ import {
   TaskRunStat,
   SummarizedTaskRunStat,
 } from './task_run_statistics';
-import { AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { FillPoolResult } from '../lib/fill_pool';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { configSchema } from '../config';
@@ -916,7 +916,7 @@ const mockTaskPollingEvent = (overrides: Partial<ConcreteTaskInstance> = {}) => 
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
-  id: uuid.v4(),
+  id: uuidv4(),
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',

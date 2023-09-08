@@ -8,13 +8,16 @@
 import React, { forwardRef, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import * as i18n from '../../common/translations';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
+import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 
+/* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   id: string;
   field: FieldHook<string>;
@@ -24,8 +27,11 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
   caseTags?: string[];
+  draftStorageKey: string;
   disabledUiPlugins?: string[];
+  initialValue?: string;
 };
+/* eslint-enable react/no-unused-prop-types */
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
@@ -44,11 +50,22 @@ export const MarkdownEditorForm = React.memo(
         bottomRightContent,
         caseTitle,
         caseTags,
+        draftStorageKey,
         disabledUiPlugins,
+        initialValue,
       },
       ref
     ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+      const { hasConflicts } = useMarkdownSessionStorage({
+        field,
+        sessionKey: draftStorageKey,
+        initialValue,
+      });
+
+      const conflictWarningText = i18n.VERSION_CONFLICT_WARNING(
+        id === 'description' ? id : 'comment'
+      );
 
       const commentEditorContextValue = useMemo(
         () => ({
@@ -84,7 +101,13 @@ export const MarkdownEditorForm = React.memo(
           </EuiFormRow>
           {bottomRightContent && (
             <BottomContentWrapper justifyContent={'flexEnd'}>
-              <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="danger" size="s">
+                  {hasConflicts && conflictWarningText}
+                </EuiText>
+                <EuiSpacer size="s" />
+                {bottomRightContent}
+              </EuiFlexItem>
             </BottomContentWrapper>
           )}
         </CommentEditorContext.Provider>

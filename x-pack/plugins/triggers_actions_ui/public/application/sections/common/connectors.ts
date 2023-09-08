@@ -10,13 +10,15 @@ import { ActionConnector, ActionTypeIndex, RuleAction } from '../../../types';
 export const getValidConnectors = (
   connectors: ActionConnector[],
   actionItem: RuleAction,
-  actionTypesIndex: ActionTypeIndex
+  actionTypesIndex: ActionTypeIndex,
+  allowGroupConnector: string[] = []
 ): ActionConnector[] => {
   const actionType = actionTypesIndex[actionItem.actionTypeId];
 
   return connectors.filter(
     (connector) =>
-      connector.actionTypeId === actionItem.actionTypeId &&
+      (allowGroupConnector.includes(connector.actionTypeId) ||
+        connector.actionTypeId === actionItem.actionTypeId) &&
       // include only enabled by config connectors or preconfigured
       (actionType?.enabledInConfig || connector.isPreconfigured)
   );

@@ -8,11 +8,14 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { parseKibanaPlatformPlugin, KibanaPlatformPlugin } from '@kbn/plugin-discovery';
+import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  parseLegacyKibanaPlatformPlugin,
+  type LegacyKibanaPlatformPlugin,
+} from '@kbn/repo-packages/legacy';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-export type Plugin = KibanaPlatformPlugin;
+export type Plugin = LegacyKibanaPlatformPlugin;
 
 export function loadKibanaPlatformPlugin(pluginDir: string) {
   const parentDir = Path.resolve(pluginDir, '..');
@@ -22,7 +25,7 @@ export function loadKibanaPlatformPlugin(pluginDir: string) {
   const isRootPlugin = parentDir === Path.resolve(REPO_ROOT, 'plugins');
 
   if (isFixture || isExample || isRootPlugin) {
-    return parseKibanaPlatformPlugin(Path.resolve(pluginDir, 'kibana.json'));
+    return parseLegacyKibanaPlatformPlugin(Path.resolve(pluginDir, 'kibana.json'));
   }
 
   throw createFailError(

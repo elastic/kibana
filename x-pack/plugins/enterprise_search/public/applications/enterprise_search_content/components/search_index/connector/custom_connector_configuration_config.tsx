@@ -18,16 +18,16 @@ export const ConnectorConfigurationConfig: React.FC = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.enterpriseSearch.content.indices.configurationConnector.config.description.firstParagraph"
-          defaultMessage="Now that your connector is deployed, enhance the deployed connector client for your custom data source. There’s an {link} for you to start adding your data source specific implementation logic."
+          defaultMessage="Now that your connector is deployed, enhance the connector client for your custom data source. There are several {link} you can customize with your own additional implementation logic."
           values={{
             link: (
               <EuiLink
-                href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors/example"
+                href="https://github.com/elastic/connectors-python/tree/main/connectors/sources"
                 target="_blank"
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.configurationConnector.config.connectorClientLink',
-                  { defaultMessage: 'example connector client' }
+                  { defaultMessage: 'connectors' }
                 )}
               </EuiLink>
             ),
@@ -56,7 +56,7 @@ export const ConnectorConfigurationConfig: React.FC = () => {
               </EuiLink>
             ),
             issuesLink: (
-              <EuiLink href="https://github.com/elastic/connectors-ruby/issues" target="_blank">
+              <EuiLink href="https://github.com/elastic/connectors-python/issues" target="_blank">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.configurationConnector.config.issuesLink',
                   { defaultMessage: 'issue' }
@@ -67,7 +67,7 @@ export const ConnectorConfigurationConfig: React.FC = () => {
         />
         <EuiSpacer />
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           title={i18n.translate(
             'xpack.enterpriseSearch.content.indices.configurationConnector.config.warning.title',

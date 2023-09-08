@@ -695,60 +695,6 @@ describe('Datatable Visualization', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
-    it('returns undefined if the datasource is missing a metric dimension', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'c', fields: [] },
-        { columnId: 'b', fields: [] },
-      ]);
-      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        isBucketed: true, // move it from the metric to the break down by side
-        label: 'label',
-        isStaticValue: false,
-        hasTimeShift: false,
-        hasReducedTimeRange: false,
-      });
-
-      const error = datatableVisualization.getErrorMessages({
-        layerId: 'a',
-        layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }],
-      });
-
-      expect(error).toBeUndefined();
-    });
-
-    it('returns undefined if the metric dimension is defined', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'c', fields: [] },
-        { columnId: 'b', fields: [] },
-      ]);
-      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        isBucketed: false, // keep it a metric
-        label: 'label',
-        isStaticValue: false,
-        hasTimeShift: false,
-        hasReducedTimeRange: false,
-      });
-
-      const error = datatableVisualization.getErrorMessages({
-        layerId: 'a',
-        layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }],
-      });
-
-      expect(error).toBeUndefined();
-    });
-  });
-
   describe('#onEditAction', () => {
     it('should add a sort column to the state', () => {
       const currentState: DatatableVisualizationState = {

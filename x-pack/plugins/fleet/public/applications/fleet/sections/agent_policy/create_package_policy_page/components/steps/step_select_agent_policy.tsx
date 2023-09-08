@@ -22,23 +22,20 @@ import {
 } from '@elastic/eui';
 
 import { Error } from '../../../../../components';
-import type {
-  AgentPolicy,
-  Output,
-  PackageInfo,
-  GetAgentPoliciesResponseItem,
-} from '../../../../../types';
+import type { AgentPolicy, Output, PackageInfo } from '../../../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
 import {
   useGetAgentPolicies,
   useGetOutputs,
   sendGetOneAgentPolicy,
   useFleetStatus,
+  useGetPackagePolicies,
 } from '../../../../../hooks';
 import {
   FLEET_APM_PACKAGE,
   SO_SEARCH_LIMIT,
   outputType,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../../../../common/constants';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
@@ -58,21 +55,35 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
     perPage: SO_SEARCH_LIMIT,
     sortField: 'name',
     sortOrder: 'asc',
-    full: true,
+    noAgentCount: true, // agentPolicy.agents will always be 0
+    full: false, // package_policies will always be empty
   });
   const agentPolicies = useMemo(
     () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
     [agentPoliciesData?.items]
   );
 
-  const agentPoliciesById = useMemo(() => {
-    return agentPolicies.reduce((acc: { [key: string]: GetAgentPoliciesResponseItem }, policy) => {
-      acc[policy.id] = policy;
-      return acc;
-    }, {});
-  }, [agentPolicies]);
-
   const { data: outputsData, isLoading: isOutputLoading } = useGetOutputs();
+
+  // get all package policies with apm integration or the current integration
+  const { data: packagePoliciesForThisPackage, isLoading: isLoadingPackagePolicies } =
+    useGetPackagePolicies({
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${packageInfo?.name}`,
+    });
+
+  const packagePoliciesForThisPackageByAgentPolicyId = useMemo(
+    () =>
+      packagePoliciesForThisPackage?.items.reduce(
+        (acc: { [key: string]: boolean }, packagePolicy) => {
+          acc[packagePolicy.policy_id] = true;
+          return acc;
+        },
+        {}
+      ),
+    [packagePoliciesForThisPackage?.items]
+  );
 
   const { getDataOutputForPolicy } = useMemo(() => {
     const defaultOutput = (outputsData?.items ?? []).find((output) => output.is_default);
@@ -85,7 +96,7 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
     );
 
     return {
-      getDataOutputForPolicy: (policy: AgentPolicy) => {
+      getDataOutputForPolicy: (policy: Pick<AgentPolicy, 'data_output_id'>) => {
         return policy.data_output_id ? outputsById[policy.data_output_id] : defaultOutput;
       },
     };
@@ -94,20 +105,19 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
   const agentPolicyOptions: Array<EuiSuperSelectOption<string>> = useMemo(
     () =>
       packageInfo
-        ? agentPolicies.map((agentConf) => {
-            const isLimitedPackageAlreadyInPolicy = doesAgentPolicyHaveLimitedPackage(
-              agentConf,
-              packageInfo
-            );
+        ? agentPolicies.map((policy) => {
+            const isLimitedPackageAlreadyInPolicy =
+              isPackageLimited(packageInfo) &&
+              packagePoliciesForThisPackageByAgentPolicyId?.[policy.id];
 
             const isAPMPackageAndDataOutputIsLogstash =
-              packageInfo.name === FLEET_APM_PACKAGE &&
-              getDataOutputForPolicy(agentConf)?.type === outputType.Logstash;
+              packageInfo?.name === FLEET_APM_PACKAGE &&
+              getDataOutputForPolicy(policy)?.type === outputType.Logstash;
 
             return {
               inputDisplay: (
                 <>
-                  <EuiText size="s">{agentConf.name}</EuiText>
+                  <EuiText size="s">{policy.name}</EuiText>
                   {isAPMPackageAndDataOutputIsLogstash && (
                     <>
                       <EuiSpacer size="xs" />
@@ -121,21 +131,25 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
                   )}
                 </>
               ),
-              value: agentConf.id,
+              value: policy.id,
               disabled: isLimitedPackageAlreadyInPolicy || isAPMPackageAndDataOutputIsLogstash,
               'data-test-subj': 'agentPolicyItem',
             };
           })
         : [],
-    [agentPolicies, packageInfo, getDataOutputForPolicy]
+    [
+      packageInfo,
+      agentPolicies,
+      packagePoliciesForThisPackageByAgentPolicyId,
+      getDataOutputForPolicy,
+    ]
   );
 
   return {
     agentPoliciesError,
-    isLoading: isOutputLoading || isAgentPoliciesLoading,
-    agentPolicies,
-    agentPoliciesById,
+    isLoading: isOutputLoading || isAgentPoliciesLoading || isLoadingPackagePolicies,
     agentPolicyOptions,
+    agentPolicies,
   };
 }
 
@@ -154,7 +168,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 }> = ({
   packageInfo,
   agentPolicy,
-  updateAgentPolicy,
+  updateAgentPolicy: updateSelectedAgentPolicy,
   setHasAgentPolicyError,
   selectedAgentPolicyId,
 }) => {
@@ -162,7 +176,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
-  const { agentPolicies, agentPoliciesById, isLoading, agentPoliciesError, agentPolicyOptions } =
+  const { isLoading, agentPoliciesError, agentPolicyOptions, agentPolicies } =
     useAgentPoliciesOptions(packageInfo);
   // Selected agent policy state
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
@@ -170,10 +184,23 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       (selectedAgentPolicyId || (agentPolicies.length === 1 ? agentPolicies[0].id : undefined))
   );
 
+  const [isLoadingSelectedAgentPolicy, setIsLoadingSelectedAgentPolicy] = useState<boolean>(false);
+  const [selectedAgentPolicy, setSelectedAgentPolicy] = useState<AgentPolicy | undefined>(
+    agentPolicy
+  );
+
+  const updateAgentPolicy = useCallback(
+    (selectedPolicy: AgentPolicy | undefined) => {
+      setSelectedAgentPolicy(selectedPolicy);
+      updateSelectedAgentPolicy(selectedPolicy);
+    },
+    [updateSelectedAgentPolicy]
+  );
   // Update parent selected agent policy state
   useEffect(() => {
     const fetchAgentPolicyInfo = async () => {
       if (selectedPolicyId) {
+        setIsLoadingSelectedAgentPolicy(true);
         const { data, error } = await sendGetOneAgentPolicy(selectedPolicyId);
         if (error) {
           setSelectedAgentPolicyError(error);
@@ -182,6 +209,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
           setSelectedAgentPolicyError(undefined);
           updateAgentPolicy(data.item);
         }
+        setIsLoadingSelectedAgentPolicy(false);
       } else {
         setSelectedAgentPolicyError(undefined);
         updateAgentPolicy(undefined);
@@ -268,12 +296,12 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               helpText={
-                isFleetReady && selectedPolicyId ? (
+                isFleetReady && selectedPolicyId && !isLoadingSelectedAgentPolicy ? (
                   <FormattedMessage
                     id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsDescriptionText"
                     defaultMessage="{count, plural, one {# agent is} other {# agents are}} enrolled with the selected agent policy."
                     values={{
-                      count: agentPoliciesById[selectedPolicyId]?.agents ?? 0,
+                      count: selectedAgentPolicy?.agents ?? 0,
                     }}
                   />
                 ) : null
@@ -281,10 +309,8 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
               isInvalid={Boolean(
                 !selectedPolicyId ||
                   !packageInfo ||
-                  doesAgentPolicyHaveLimitedPackage(
-                    agentPoliciesById[selectedPolicyId],
-                    packageInfo
-                  )
+                  (selectedAgentPolicy &&
+                    doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo))
               )}
               error={
                 !selectedPolicyId ? (
@@ -308,7 +334,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   }
                 )}
                 fullWidth
-                isLoading={isLoading || !packageInfo}
+                isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicy}
                 options={agentPolicyOptions}
                 valueOfSelected={selectedPolicyId}
                 onChange={onChange}

@@ -11,6 +11,7 @@ const _ = require('lodash');
 // eslint-disable-next-line no-restricted-modules
 const template = require('lodash/template');
 const fp = require('lodash/fp');
+// eslint-disable-next-line no-restricted-modules
 const fpTemplate = require('lodash/fp/template');
 const test = require('tape');
 

@@ -5,64 +5,52 @@
  * 2.0.
  */
 
-import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
-import { computeErrorBudget, computeSLI } from '../../domain/services';
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '../../types/rest_specs';
-import { SLIClient } from './sli_client';
-import { Criteria, Paginated, Pagination, SLORepository } from './slo_repository';
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
+import { SLO, SLOWithSummary } from '../../domain/models';
+import { SLORepository } from './slo_repository';
+import { Pagination, SLOSummary, Sort, SummarySearchClient } from './summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
 
 export class FindSLO {
-  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
+  constructor(
+    private repository: SLORepository,
+    private summarySearchClient: SummarySearchClient
+  ) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
-    const pagination: Pagination = toPagination(params);
-    const criteria: Criteria = toCriteria(params);
-
-    const { results: sloList, ...resultMeta }: Paginated<SLO> = await this.repository.find(
-      criteria,
-      pagination
+    const sloSummaryList = await this.summarySearchClient.search(
+      params.kqlQuery ?? '',
+      toSort(params),
+      toPagination(params)
     );
-    const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData(sloList);
-    const sloListWithSummary = computeSloWithSummary(sloList, indicatorDataBySlo);
 
-    return this.toResponse(sloListWithSummary, resultMeta);
-  }
+    const sloList = await this.repository.findAllByIds(sloSummaryList.results.map((slo) => slo.id));
+    const sloListWithSummary = mergeSloWithSummary(sloList, sloSummaryList.results);
 
-  private toResponse(
-    sloList: SLOWithSummary[],
-    resultMeta: Omit<Paginated<SLO>, 'results'>
-  ): FindSLOResponse {
     return findSLOResponseSchema.encode({
-      page: resultMeta.page,
-      per_page: resultMeta.perPage,
-      total: resultMeta.total,
-      results: sloList,
+      page: sloSummaryList.page,
+      perPage: sloSummaryList.perPage,
+      total: sloSummaryList.total,
+      results: sloListWithSummary,
     });
   }
 }
 
-function computeSloWithSummary(
-  sloList: SLO[],
-  indicatorDataBySlo: Record<SLOId, IndicatorData>
-): SLOWithSummary[] {
-  const sloListWithSummary: SLOWithSummary[] = [];
-  for (const slo of sloList) {
-    const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
-    const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
-    sloListWithSummary.push({
-      ...slo,
-      summary: { sli_value: sliValue, error_budget: errorBudget },
-    });
-  }
-  return sloListWithSummary;
+function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
+  return sloSummaryList
+    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
+    .map((sloSummary) => ({
+      ...sloList.find((s) => s.id === sloSummary.id)!,
+      instanceId: sloSummary.instanceId,
+      summary: sloSummary.summary,
+    }));
 }
 
 function toPagination(params: FindSLOParams): Pagination {
   const page = Number(params.page);
-  const perPage = Number(params.per_page);
+  const perPage = Number(params.perPage);
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
@@ -70,6 +58,9 @@ function toPagination(params: FindSLOParams): Pagination {
   };
 }
 
-function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name };
+function toSort(params: FindSLOParams): Sort {
+  return {
+    field: params.sortBy ?? 'status',
+    direction: params.sortDirection ?? 'asc',
+  };
 }

@@ -1,24 +1,31 @@
 {
-    "extends": "../../../../tsconfig.base.json",
-    "compilerOptions": {
-      "outDir": "./target/types",
-      "emitDeclarationOnly": true,
-      "declaration": true,
-    },
-    "include": [
-      "common/**/*",
-      "public/**/*",
-      "server/**/*",
-      "*.ts"
-    ],
-    "kbn_references": [
-      { "path": "../../../core/tsconfig.json" },
-      { "path": "../../charts/tsconfig.json" },
-      { "path": "../../data/tsconfig.json" },
-      { "path": "../../expressions/tsconfig.json" },
-      { "path": "../../visualizations/tsconfig.json" },
-      { "path": "../../usage_collection/tsconfig.json" },
-      { "path": "../../vis_default_editor/tsconfig.json" },
-      { "path": "../../field_formats/tsconfig.json" }
-    ]
-  }
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/vis-default-editor-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

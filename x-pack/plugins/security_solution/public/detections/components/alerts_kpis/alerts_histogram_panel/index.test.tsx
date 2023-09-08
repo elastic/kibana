@@ -21,6 +21,8 @@ import * as helpers from './helpers';
 import { mockAlertSearchResponse } from './mock_data';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { AlertsHistogramPanel, LEGEND_WITH_COUNTS_WIDTH } from '.';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -76,7 +78,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../common/components/navigation/use_get_url_search');
+jest.mock('../../../../common/components/navigation/use_url_state_query_params');
 
 const defaultUseQueryAlertsReturn = {
   loading: true,
@@ -95,23 +97,40 @@ jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/page/use_refetch_by_session');
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+
+jest.mock('../../../../common/components/page/use_refetch_by_session');
+jest.mock('../common/hooks', () => {
+  const actual = jest.requireActual('../common/hooks');
+  return {
+    ...actual,
+    useInspectButton: jest.fn(),
+  };
+});
+
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../hooks/alerts_visualization/use_alert_histogram_count', () => ({
+  useAlertHistogramCount: jest.fn().mockReturnValue(999),
+}));
+
+const defaultProps = {
+  setQuery: jest.fn(),
+  showBuildingBlockAlerts: false,
+  showOnlyThreatIndicatorAlerts: false,
+  showTotalAlertsCount: true,
+  signalIndexName: 'signalIndexName',
+  updateDateRange: jest.fn(),
+};
+const mockSetToggle = jest.fn();
+const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('AlertsHistogramPanel', () => {
-  const defaultProps = {
-    signalIndexName: 'signalIndexName',
-    setQuery: jest.fn(),
-    updateDateRange: jest.fn(),
-  };
-
-  const mockSetToggle = jest.fn();
-  const mockUseQueryToggle = useQueryToggle as jest.Mock;
   beforeEach(() => {
-    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
   });
 
   it('renders correctly', () => {
@@ -675,26 +694,150 @@ describe('AlertsHistogramPanel', () => {
         expect(mockSetToggle).toBeCalledWith(false);
       });
     });
-    it('toggleStatus=true, render', async () => {
-      await act(async () => {
-        const wrapper = mount(
-          <TestProviders>
-            <AlertsHistogramPanel {...defaultProps} />
-          </TestProviders>
-        );
 
-        expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+    describe('when alertsPageChartsEnabled = false', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for chartEmbeddablesEnabled flag
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+      });
+
+      it('toggleStatus=true, render', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+        });
+      });
+      it('toggleStatus=false, hide', async () => {
+        mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        });
       });
     });
-    it('toggleStatus=false, hide', async () => {
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+
+    describe('when alertsPageChartsEnabled = true', () => {
+      beforeEach(() => {
+        jest.clearAllMocks();
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for chartEmbeddablesEnabled flag
+        mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for alertsPageChartsEnabled flag
+      });
+
+      it('isExpanded=true, render', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} isExpanded={true} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+        });
+      });
+      it('isExpanded=false, hide', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} isExpanded={false} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        });
+      });
+      it('isExpanded is not passed in and toggleStatus =true, render', async () => {
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(true);
+        });
+      });
+      it('isExpanded is not passed in and toggleStatus =false, hide', async () => {
+        mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+        await act(async () => {
+          const wrapper = mount(
+            <TestProviders>
+              <AlertsHistogramPanel {...defaultProps} />
+            </TestProviders>
+          );
+          expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        });
+      });
+    });
+  });
+
+  describe('when isChartEmbeddablesEnabled = true', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for chartEmbeddablesEnabled flag
+      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+    });
+
+    test('it renders the header with alerts count', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <AlertsHistogramPanel {...defaultProps} alignHeader="flexEnd" />
+        </TestProviders>
+      );
+
+      mockUseQueryAlerts.mockReturnValue({
+        loading: false,
+        setQuery: () => undefined,
+        data: null,
+        response: '',
+        request: '',
+        refetch: null,
+      });
+      wrapper.setProps({ filters: [] });
+      wrapper.update();
+
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
+    });
+
+    it('renders LensEmbeddable', async () => {
       await act(async () => {
         const wrapper = mount(
           <TestProviders>
             <AlertsHistogramPanel {...defaultProps} />
           </TestProviders>
         );
-        expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+        expect(
+          wrapper.find('[data-test-subj="embeddable-matrix-histogram"]').exists()
+        ).toBeTruthy();
+      });
+    });
+
+    it('renders LensEmbeddable with provided height', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual(155);
+      });
+    });
+
+    it('should skip calling getAlertsRiskQuery', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(mockUseQueryAlerts.mock.calls[0][0].skip).toBeTruthy();
       });
     });
   });

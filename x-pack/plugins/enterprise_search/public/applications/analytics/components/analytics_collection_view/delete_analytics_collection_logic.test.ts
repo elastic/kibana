@@ -14,7 +14,7 @@ import {
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
-import { HttpError, Status } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
 
 import { DeleteAnalyticsCollectionLogic } from './delete_analytics_collection_logic';
 
@@ -48,12 +48,6 @@ describe('deleteAnalyticsCollectionLogic', () => {
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
 
-    it('calls flashAPIErrors on apiError', () => {
-      DeleteAnalyticsCollectionLogic.actions.apiError({} as HttpError);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledTimes(1);
-      expect(mockFlashMessageHelpers.flashAPIErrors).toHaveBeenCalledWith({});
-    });
-
     it('calls makeRequest on deleteAnalyticsCollections', async () => {
       const collectionName = 'name';
 
@@ -63,7 +57,7 @@ describe('deleteAnalyticsCollectionLogic', () => {
       jest.advanceTimersByTime(150);
       await nextTick();
       expect(DeleteAnalyticsCollectionLogic.actions.makeRequest).toHaveBeenCalledWith({
-        id: collectionName,
+        name: collectionName,
       });
     });
   });

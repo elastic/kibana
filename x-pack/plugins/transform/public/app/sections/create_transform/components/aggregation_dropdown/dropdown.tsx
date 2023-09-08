@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionsListProps, EuiComboBoxOptionOption } from '@elastic/eui';
 
 interface Props {
   options: EuiComboBoxOptionOption[];
@@ -15,9 +15,13 @@ interface Props {
   changeHandler(d: EuiComboBoxOptionOption[]): void;
   testSubj?: string;
   isDisabled?: boolean;
+  renderOption?: EuiComboBoxOptionsListProps<
+    string | number | string[] | undefined
+  >['renderOption'];
 }
 
 export const DropDown: React.FC<Props> = ({
+  renderOption,
   changeHandler,
   options,
   placeholder = 'Search ...',
@@ -35,6 +39,7 @@ export const DropDown: React.FC<Props> = ({
       isClearable={false}
       data-test-subj={testSubj}
       isDisabled={isDisabled}
+      renderOption={renderOption}
     />
   );
 };

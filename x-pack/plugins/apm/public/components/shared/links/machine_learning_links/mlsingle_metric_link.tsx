@@ -10,6 +10,7 @@ import { EuiLink } from '@elastic/eui';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { DEFAULT_REFRESH_INTERVAL } from '../../date_picker/apm_date_picker';
 
 interface Props {
   children?: ReactNode;
@@ -30,6 +31,7 @@ export function MLSingleMetricLink({
 
   return (
     <EuiLink
+      data-test-subj="apmMLSingleMetricLinkLink"
       children={children}
       href={href}
       external={external}
@@ -74,7 +76,7 @@ function useSingleMetricHref({
     pageState: {
       jobIds: [jobId],
       timeRange: { from: rangeFrom, to: rangeTo },
-      refreshInterval: { pause: true, value: 10000 },
+      refreshInterval: { pause: true, value: DEFAULT_REFRESH_INTERVAL },
       ...entities,
     },
   });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { TraceSearchType } from '@kbn/apm-plugin/common/trace_explorer';
 import { Environment } from '@kbn/apm-plugin/common/environment_rt';
@@ -12,9 +12,7 @@ import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_value
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
-
-type Instance = ReturnType<ReturnType<typeof apm.service>['instance']>;
-type Transaction = ReturnType<Instance['transaction']>;
+import { generateTrace } from './generate_trace';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -58,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
 
     return Promise.all(
-      traceSamples.map(async ({ traceId }) => {
+      traceSamples.map(async ({ traceId, transactionId }) => {
         const response = await apmApiClient.readUser({
           endpoint: `GET /internal/apm/traces/{traceId}`,
           params: {
@@ -66,10 +64,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             query: {
               start: new Date(start).toISOString(),
               end: new Date(endWithOffset).toISOString(),
+              entryTransactionId: transactionId,
             },
           },
         });
-        return response.body.traceDocs;
+        return response.body.traceItems.traceDocs;
       })
     );
   }
@@ -102,45 +101,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const python = apm
         .service({ name: 'python', environment: 'production', agentName: 'python' })
         .instance('python');
-
-      function generateTrace(timestamp: number, order: Instance[], db?: 'elasticsearch' | 'redis') {
-        return order
-          .concat()
-          .reverse()
-          .reduce<Transaction | undefined>((prev, instance, index) => {
-            const invertedIndex = order.length - index - 1;
-
-            const duration = 50;
-            const time = timestamp + invertedIndex * 10;
-
-            const transaction: Transaction = instance
-              .transaction({ transactionName: `GET /${instance.fields['service.name']!}/api` })
-              .timestamp(time)
-              .duration(duration);
-
-            if (prev) {
-              const next = order[invertedIndex + 1].fields['service.name']!;
-              transaction.children(
-                instance
-                  .span({ spanName: `GET ${next}/api`, spanType: 'external', spanSubtype: 'http' })
-                  .destination(next)
-                  .duration(duration)
-                  .timestamp(time + 1)
-                  .children(prev)
-              );
-            } else if (db) {
-              transaction.children(
-                instance
-                  .span({ spanName: db, spanType: 'db', spanSubtype: db })
-                  .destination(db)
-                  .duration(duration)
-                  .timestamp(time + 1)
-              );
-            }
-
-            return transaction;
-          }, undefined)!;
-      }
 
       return synthtraceEsClient.index(
         timerange(start, end)
@@ -256,37 +216,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(mapped).to.eql([['java', 'python', 'node']]);
-      });
-
-      it('returns the correct trace samples for exit spans', async () => {
-        const {
-          body: { traceSamples },
-        } = await fetchTraceSamples({
-          query: `sequence by trace.id
-              [ transaction where service.name == "python" ]
-              [ span where span.destination.service.resource == "redis" ]`,
-          type: TraceSearchType.eql,
-          environment: 'ENVIRONMENT_ALL',
-        });
-
-        const traces = await fetchTraces(traceSamples);
-
-        expect(traces.length).to.eql(1);
-
-        const mapped = traces.map((traceDocs) => {
-          return sortBy(traceDocs, '@timestamp')
-            .filter(
-              (doc) => doc.processor.event === 'transaction' || doc.processor.event === 'span'
-            )
-            .map((doc) => {
-              if (doc.span && 'destination' in doc.span) {
-                return doc.span.destination!.service.resource;
-              }
-              return doc.service.name;
-            });
-        });
-
-        expect(mapped).to.eql([['python', 'redis']]);
       });
     });
 

@@ -8,15 +8,13 @@
 import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/server';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 
-import { Actions } from '../../actions';
 import { FeaturePrivilegeCasesBuilder } from './cases';
-
-const version = '1.0.0-zeta1';
+import { Actions } from '../../actions';
 
 describe(`cases`, () => {
   describe(`feature_privilege_builder`, () => {
     it('grants no privileges by default', () => {
-      const actions = new Actions(version);
+      const actions = new Actions();
       const casesFeaturePrivileges = new FeaturePrivilegeCasesBuilder(actions);
 
       const privilege: FeatureKibanaPrivileges = {
@@ -50,7 +48,7 @@ describe(`cases`, () => {
         ['update', 'observability'],
         ['delete', 'securitySolution'],
       ])('grants %s privileges under feature with id %s', (operation, featureID) => {
-        const actions = new Actions(version);
+        const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
@@ -80,7 +78,7 @@ describe(`cases`, () => {
       });
 
       it('grants all privileges under feature', () => {
-        const actions = new Actions(version);
+        const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
@@ -112,36 +110,36 @@ describe(`cases`, () => {
 
         expect(casesFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "cases:1.0.0-zeta1:security/pushCase",
-            "cases:1.0.0-zeta1:security/createCase",
-            "cases:1.0.0-zeta1:security/createComment",
-            "cases:1.0.0-zeta1:security/createConfiguration",
-            "cases:1.0.0-zeta1:security/getCase",
-            "cases:1.0.0-zeta1:security/getComment",
-            "cases:1.0.0-zeta1:security/getTags",
-            "cases:1.0.0-zeta1:security/getReporters",
-            "cases:1.0.0-zeta1:security/getUserActions",
-            "cases:1.0.0-zeta1:security/findConfigurations",
-            "cases:1.0.0-zeta1:security/updateCase",
-            "cases:1.0.0-zeta1:security/updateComment",
-            "cases:1.0.0-zeta1:security/updateConfiguration",
-            "cases:1.0.0-zeta1:security/deleteCase",
-            "cases:1.0.0-zeta1:security/deleteComment",
-            "cases:1.0.0-zeta1:obs/getCase",
-            "cases:1.0.0-zeta1:obs/getComment",
-            "cases:1.0.0-zeta1:obs/getTags",
-            "cases:1.0.0-zeta1:obs/getReporters",
-            "cases:1.0.0-zeta1:obs/getUserActions",
-            "cases:1.0.0-zeta1:obs/findConfigurations",
-            "cases:1.0.0-zeta1:obs/updateCase",
-            "cases:1.0.0-zeta1:obs/updateComment",
-            "cases:1.0.0-zeta1:obs/updateConfiguration",
+            "cases:security/pushCase",
+            "cases:security/createCase",
+            "cases:security/createComment",
+            "cases:security/createConfiguration",
+            "cases:security/getCase",
+            "cases:security/getComment",
+            "cases:security/getTags",
+            "cases:security/getReporters",
+            "cases:security/getUserActions",
+            "cases:security/findConfigurations",
+            "cases:security/updateCase",
+            "cases:security/updateComment",
+            "cases:security/updateConfiguration",
+            "cases:security/deleteCase",
+            "cases:security/deleteComment",
+            "cases:obs/getCase",
+            "cases:obs/getComment",
+            "cases:obs/getTags",
+            "cases:obs/getReporters",
+            "cases:obs/getUserActions",
+            "cases:obs/findConfigurations",
+            "cases:obs/updateCase",
+            "cases:obs/updateComment",
+            "cases:obs/updateConfiguration",
           ]
         `);
       });
 
       it('grants both `all` and `read` privileges under feature with multiple values in cases array', () => {
-        const actions = new Actions(version);
+        const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
@@ -170,48 +168,48 @@ describe(`cases`, () => {
 
         expect(casesFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "cases:1.0.0-zeta1:security/pushCase",
-            "cases:1.0.0-zeta1:security/createCase",
-            "cases:1.0.0-zeta1:security/createComment",
-            "cases:1.0.0-zeta1:security/createConfiguration",
-            "cases:1.0.0-zeta1:security/getCase",
-            "cases:1.0.0-zeta1:security/getComment",
-            "cases:1.0.0-zeta1:security/getTags",
-            "cases:1.0.0-zeta1:security/getReporters",
-            "cases:1.0.0-zeta1:security/getUserActions",
-            "cases:1.0.0-zeta1:security/findConfigurations",
-            "cases:1.0.0-zeta1:security/updateCase",
-            "cases:1.0.0-zeta1:security/updateComment",
-            "cases:1.0.0-zeta1:security/updateConfiguration",
-            "cases:1.0.0-zeta1:security/deleteCase",
-            "cases:1.0.0-zeta1:security/deleteComment",
-            "cases:1.0.0-zeta1:other-security/pushCase",
-            "cases:1.0.0-zeta1:other-security/createCase",
-            "cases:1.0.0-zeta1:other-security/createComment",
-            "cases:1.0.0-zeta1:other-security/createConfiguration",
-            "cases:1.0.0-zeta1:other-security/getCase",
-            "cases:1.0.0-zeta1:other-security/getComment",
-            "cases:1.0.0-zeta1:other-security/getTags",
-            "cases:1.0.0-zeta1:other-security/getReporters",
-            "cases:1.0.0-zeta1:other-security/getUserActions",
-            "cases:1.0.0-zeta1:other-security/findConfigurations",
-            "cases:1.0.0-zeta1:other-security/updateCase",
-            "cases:1.0.0-zeta1:other-security/updateComment",
-            "cases:1.0.0-zeta1:other-security/updateConfiguration",
-            "cases:1.0.0-zeta1:other-security/deleteCase",
-            "cases:1.0.0-zeta1:other-security/deleteComment",
-            "cases:1.0.0-zeta1:obs/getCase",
-            "cases:1.0.0-zeta1:obs/getComment",
-            "cases:1.0.0-zeta1:obs/getTags",
-            "cases:1.0.0-zeta1:obs/getReporters",
-            "cases:1.0.0-zeta1:obs/getUserActions",
-            "cases:1.0.0-zeta1:obs/findConfigurations",
-            "cases:1.0.0-zeta1:other-obs/getCase",
-            "cases:1.0.0-zeta1:other-obs/getComment",
-            "cases:1.0.0-zeta1:other-obs/getTags",
-            "cases:1.0.0-zeta1:other-obs/getReporters",
-            "cases:1.0.0-zeta1:other-obs/getUserActions",
-            "cases:1.0.0-zeta1:other-obs/findConfigurations",
+            "cases:security/pushCase",
+            "cases:security/createCase",
+            "cases:security/createComment",
+            "cases:security/createConfiguration",
+            "cases:security/getCase",
+            "cases:security/getComment",
+            "cases:security/getTags",
+            "cases:security/getReporters",
+            "cases:security/getUserActions",
+            "cases:security/findConfigurations",
+            "cases:security/updateCase",
+            "cases:security/updateComment",
+            "cases:security/updateConfiguration",
+            "cases:security/deleteCase",
+            "cases:security/deleteComment",
+            "cases:other-security/pushCase",
+            "cases:other-security/createCase",
+            "cases:other-security/createComment",
+            "cases:other-security/createConfiguration",
+            "cases:other-security/getCase",
+            "cases:other-security/getComment",
+            "cases:other-security/getTags",
+            "cases:other-security/getReporters",
+            "cases:other-security/getUserActions",
+            "cases:other-security/findConfigurations",
+            "cases:other-security/updateCase",
+            "cases:other-security/updateComment",
+            "cases:other-security/updateConfiguration",
+            "cases:other-security/deleteCase",
+            "cases:other-security/deleteComment",
+            "cases:obs/getCase",
+            "cases:obs/getComment",
+            "cases:obs/getTags",
+            "cases:obs/getReporters",
+            "cases:obs/getUserActions",
+            "cases:obs/findConfigurations",
+            "cases:other-obs/getCase",
+            "cases:other-obs/getComment",
+            "cases:other-obs/getTags",
+            "cases:other-obs/getReporters",
+            "cases:other-obs/getUserActions",
+            "cases:other-obs/findConfigurations",
           ]
         `);
       });

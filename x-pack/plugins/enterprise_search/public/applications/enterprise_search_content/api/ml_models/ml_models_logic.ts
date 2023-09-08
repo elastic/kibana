@@ -14,11 +14,18 @@ export type GetMlModelsArgs = number | undefined;
 export type GetMlModelsResponse = TrainedModelConfigResponse[];
 
 export const getMLModels = async (size: GetMlModelsArgs = 1000) => {
-  return await HttpLogic.values.http.get<TrainedModelConfigResponse[]>('/api/ml/trained_models', {
-    query: { size, with_pipelines: true },
-  });
+  return await HttpLogic.values.http.get<TrainedModelConfigResponse[]>(
+    '/internal/ml/trained_models',
+    {
+      query: { size, with_pipelines: true },
+      version: '1',
+    }
+  );
 };
 
-export const MLModelsApiLogic = createApiLogic(['ml_models_api_logic'], getMLModels);
+export const MLModelsApiLogic = createApiLogic(['ml_models_api_logic'], getMLModels, {
+  clearFlashMessagesOnMakeRequest: false,
+  showErrorFlash: false,
+});
 
 export type MLModelsApiLogicActions = Actions<GetMlModelsArgs, GetMlModelsResponse>;

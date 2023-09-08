@@ -10,6 +10,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -18,6 +19,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -35,6 +38,10 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -66,6 +73,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -74,6 +82,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -91,6 +101,10 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -126,6 +140,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -134,6 +149,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -151,6 +168,10 @@ Object {
     "translationsUrl": "/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -182,6 +203,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -190,6 +212,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -207,6 +231,140 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService preboot() render() renders "core" page with global settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "customBranding": Object {},
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {
+        "foo:bar": Object {
+          "userValue": true,
+        },
+      },
+    },
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService preboot() render() renders "core" with excluded global user settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "customBranding": Object {},
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -238,6 +396,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -246,6 +405,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -263,6 +424,10 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -294,6 +459,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -302,6 +468,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -319,6 +487,10 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -347,6 +519,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",
@@ -354,6 +527,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -362,6 +536,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -379,6 +555,10 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -411,6 +591,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",
@@ -418,6 +599,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -426,6 +608,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -443,6 +627,10 @@ Object {
     "translationsUrl": "/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -474,6 +662,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -482,6 +671,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -499,6 +690,150 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" page with global settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {
+    "cluster_build_flavor": "default",
+    "cluster_name": "cluster-name",
+    "cluster_uuid": "cluster-uuid",
+    "cluster_version": "8.0.0",
+  },
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "customBranding": Object {},
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {
+        "foo:bar": Object {
+          "userValue": true,
+        },
+      },
+    },
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" with excluded global user settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {
+    "cluster_build_flavor": "default",
+    "cluster_name": "cluster-name",
+    "cluster_uuid": "cluster-uuid",
+    "cluster_version": "8.0.0",
+  },
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "customBranding": Object {},
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -527,6 +862,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",
@@ -534,6 +870,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
+  "customBranding": Object {},
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -542,6 +879,8 @@ Object {
     },
     "packageInfo": Object {
       "branch": Any<String>,
+      "buildDate": "2023-05-15T23:12:09.000Z",
+      "buildFlavor": Any<String>,
       "buildNum": Any<Number>,
       "buildSha": Any<String>,
       "dist": Any<Boolean>,
@@ -559,6 +898,10 @@ Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
+    "globalUiSettings": Object {
+      "defaults": Object {},
+      "user": Object {},
+    },
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {

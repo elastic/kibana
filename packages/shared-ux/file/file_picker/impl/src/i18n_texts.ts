@@ -50,4 +50,18 @@ export const i18nTexts = {
       defaultMessage: 'Drag and drop to upload new files',
     }
   ),
+  delete: i18n.translate('sharedUXPackages.filePicker.delete', {
+    defaultMessage: 'Delete',
+  }),
+  deleteFile: i18n.translate('sharedUXPackages.filePicker.deleteFile', {
+    defaultMessage: 'Delete file',
+  }),
+  cancel: i18n.translate('sharedUXPackages.filePicker.cancel', {
+    defaultMessage: 'Cancel',
+  }),
+  deleteFileQuestion: (fileName: string) =>
+    i18n.translate('sharedUXPackages.filePicker.deleteFileQuestion', {
+      defaultMessage: 'Are you sure you want to delete "{fileName}"?',
+      values: { fileName },
+    }),
 };

@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
@@ -11,5 +9,20 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/utils",
+    "@kbn/logging",
+    "@kbn/config",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-analytics-server",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/config-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

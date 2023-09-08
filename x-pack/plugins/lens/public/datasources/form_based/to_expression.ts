@@ -12,6 +12,7 @@ import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
+  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
 import { queryToAst } from '@kbn/data-plugin/common';
 import {
@@ -21,14 +22,17 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
+import { resolveTimeShift } from './time_shift_utils';
+import { getSamplingValue } from './utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -54,6 +58,8 @@ function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient,
+  dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
@@ -120,17 +126,27 @@ function getExpressionForLayer(
       operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
       operationDefinitionMap[col.operationType]?.input === 'managedReference'
   );
-  const hasDateHistogram = columnEntries.some(([, c]) => c.operationType === 'date_histogram');
+  const firstDateHistogramColumn = columnEntries.find(
+    ([, col]) => col.operationType === 'date_histogram'
+  );
+  const hasDateHistogram = Boolean(firstDateHistogramColumn);
 
   if (referenceEntries.length || esAggEntries.length) {
     let aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
+    const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
     sortedReferences(referenceEntries).forEach((colId) => {
       const col = columns[colId];
       const def = operationDefinitionMap[col.operationType];
       if (def.input === 'fullReference' || def.input === 'managedReference') {
-        expressions.push(...def.toExpression(layer, colId, indexPattern));
+        expressions.push(
+          ...def.toExpression(layer, colId, indexPattern, {
+            dateRange,
+            now: nowInstant,
+            targetBars: histogramBarsTarget,
+          })
+        );
       }
     });
 
@@ -149,7 +165,15 @@ function getExpressionForLayer(
           col.reducedTimeRange &&
           indexPattern.timeFieldName;
         let aggAst = def.toEsAggsFn(
-          col,
+          {
+            ...col,
+            timeShift: resolveTimeShift(
+              col.timeShift,
+              dateRange,
+              histogramBarsTarget,
+              hasDateHistogram
+            ),
+          },
           wrapInFilter || wrapInTimeFilter ? `${aggId}-metric` : aggId,
           indexPattern,
           layer,
@@ -171,11 +195,21 @@ function getExpressionForLayer(
                   schema: 'bucket',
                   filter: col.filter && queryToAst(col.filter),
                   timeWindow: wrapInTimeFilter ? col.reducedTimeRange : undefined,
-                  timeShift: col.timeShift,
+                  timeShift: resolveTimeShift(
+                    col.timeShift,
+                    dateRange,
+                    histogramBarsTarget,
+                    hasDateHistogram
+                  ),
                 }),
               ]),
               customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
-              timeShift: col.timeShift,
+              timeShift: resolveTimeShift(
+                col.timeShift,
+                dateRange,
+                histogramBarsTarget,
+                hasDateHistogram
+              ),
             }
           ).toAst();
         }
@@ -194,6 +228,13 @@ function getExpressionForLayer(
           {
             ...col,
             id: colId,
+            label: col.customLabel
+              ? col.label
+              : operationDefinitionMap[col.operationType].getDefaultLabel(
+                  col,
+                  indexPattern,
+                  layer.columns
+                ),
           },
         ];
 
@@ -303,16 +344,28 @@ function getExpressionForLayer(
             format?.params && 'suffix' in format.params && format.params.suffix
               ? [format.params.suffix]
               : [],
+          compact:
+            format?.params && 'compact' in format.params && format.params.compact
+              ? [format.params.compact]
+              : [],
+          pattern:
+            format?.params && 'pattern' in format.params && format.params.pattern
+              ? [format.params.pattern]
+              : [],
+          fromUnit:
+            format?.params && 'fromUnit' in format.params && format.params.fromUnit
+              ? [format.params.fromUnit]
+              : [],
+          toUnit:
+            format?.params && 'toUnit' in format.params && format.params.toUnit
+              ? [format.params.toUnit]
+              : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },
       };
 
       return base;
     });
-
-    const firstDateHistogramColumn = columnEntries.find(
-      ([, col]) => col.operationType === 'date_histogram'
-    );
 
     const columnsWithTimeScale = columnEntries.filter(
       ([, col]) =>
@@ -330,7 +383,15 @@ function getExpressionForLayer(
             dateColumnId: firstDateHistogramColumn?.length ? [firstDateHistogramColumn[0]] : [],
             inputColumnId: [id],
             outputColumnId: [id],
-            outputColumnName: [col.label],
+            outputColumnName: [
+              col.customLabel
+                ? col.label
+                : operationDefinitionMap[col.operationType].getDefaultLabel(
+                    col,
+                    indexPattern,
+                    layer.columns
+                  ),
+            ],
             targetUnit: [col.timeScale!],
             reducedTimeRange: col.reducedTimeRange ? [col.reducedTimeRange] : [],
           },
@@ -394,8 +455,9 @@ function getExpressionForLayer(
           metricsAtAllLevels: false,
           partialRows: false,
           timeFields: allDateHistogramFields,
-          probability: layer.sampling || 1,
+          probability: getSamplingValue(layer),
           samplerSeed: seedrandom(searchSessionId).int32(),
+          ignoreGlobalFilters: Boolean(layer.ignoreGlobalFilters),
         }).toAst(),
         {
           type: 'function',
@@ -446,6 +508,8 @@ export function toExpression(
   layerId: string,
   indexPatterns: IndexPatternMap,
   uiSettings: IUiSettingsClient,
+  dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
@@ -453,6 +517,8 @@ export function toExpression(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
       uiSettings,
+      dateRange,
+      nowInstant,
       searchSessionId
     );
   }

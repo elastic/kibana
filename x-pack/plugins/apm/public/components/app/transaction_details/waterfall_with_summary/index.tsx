@@ -12,7 +12,7 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiTitle,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
@@ -60,8 +60,10 @@ export function WaterfallWithSummary<TSample extends {}>({
   const isLoading =
     waterfallFetchResult.status === FETCH_STATUS.LOADING ||
     traceSamplesFetchStatus === FETCH_STATUS.LOADING;
+  // When traceId is not present, call to waterfallFetchResult will not be initiated
   const isSucceded =
-    waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
+    (waterfallFetchResult.status === FETCH_STATUS.SUCCESS ||
+      waterfallFetchResult.status === FETCH_STATUS.NOT_INITIATED) &&
     traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
@@ -84,9 +86,9 @@ export function WaterfallWithSummary<TSample extends {}>({
       : 0
     : sampleActivePage;
 
-  const { entryWaterfallTransaction } = waterfallFetchResult.waterfall;
+  const { entryTransaction } = waterfallFetchResult.waterfall;
 
-  if (!entryWaterfallTransaction && traceSamples?.length === 0 && isSucceded) {
+  if (!entryTransaction && traceSamples?.length === 0 && isSucceded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -96,12 +98,11 @@ export function WaterfallWithSummary<TSample extends {}>({
             })}
           </div>
         }
+        data-test-subj="apmNoTraceFound"
         titleSize="s"
       />
     );
   }
-
-  const entryTransaction = entryWaterfallTransaction?.doc;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -153,17 +154,14 @@ export function WaterfallWithSummary<TSample extends {}>({
       {isLoading || !entryTransaction ? (
         <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <EuiLoadingContent lines={1} data-test-sub="loading-content" />
+          <EuiSkeletonText lines={1} data-test-sub="loading-content" />
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
           <TransactionSummary
-            errorCount={
-              waterfallFetchResult.waterfall.apiResponse.errorDocs.length
-            }
+            errorCount={waterfallFetchResult.waterfall.totalErrorsCount}
             totalDuration={
-              waterfallFetchResult.waterfall.rootTransaction?.transaction
-                .duration.us
+              waterfallFetchResult.waterfall.rootWaterfallTransaction?.duration
             }
             transaction={entryTransaction}
           />

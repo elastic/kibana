@@ -12,7 +12,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useRiskScore } from '../../../risk_score/containers/all';
+import { useRiskScore } from '../../../explore/containers/risk_score/all';
 import type { UserSummaryProps } from '.';
 import { UserOverview } from '.';
 
@@ -21,11 +21,11 @@ const defaultProps = {
   inspect: null,
   refetch: () => {},
   isModuleEnabled: true,
-  isLicenseValid: true,
+  isAuthorized: true,
   loading: false,
 };
 
-jest.mock('../../../risk_score/containers/all');
+jest.mock('../../../explore/containers/risk_score/all');
 
 const mockRiskScore = useRiskScore as jest.Mock;
 
@@ -55,6 +55,7 @@ describe('User Summary Component', () => {
     startDate: '2019-06-15T06:00:00.000Z',
     userName: 'testUserName',
     indexPatterns: [],
+    jobNameById: {},
   };
 
   beforeEach(() => {
@@ -100,7 +101,7 @@ describe('User Summary Component', () => {
       data: [
         {
           user: {
-            name: 'testUsermame',
+            name: 'testUsername',
             risk: {
               rule_risks: [],
               calculated_level: risk,

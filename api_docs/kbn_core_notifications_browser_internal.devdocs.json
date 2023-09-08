@@ -820,17 +820,7 @@
         "label": "NotificationsServiceContract",
         "description": [],
         "signature": [
-          "{ setup: ({ uiSettings }: ",
-          "SetupDeps",
-          ") => ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-common.NotificationsSetup",
-            "text": "NotificationsSetup"
-          },
-          "; start: ({ i18n: i18nDep, overlays, theme, targetDomElement, }: ",
+          "{ start: ({ i18n: i18nDep, overlays, theme, targetDomElement, }: ",
           "StartDeps",
           ") => ",
           {
@@ -839,6 +829,16 @@
             "docId": "kibKbnCoreNotificationsBrowserPluginApi",
             "section": "def-common.NotificationsStart",
             "text": "NotificationsStart"
+          },
+          "; setup: ({ uiSettings }: ",
+          "SetupDeps",
+          ") => ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.NotificationsSetup",
+            "text": "NotificationsSetup"
           },
           "; stop: () => void; }"
         ],

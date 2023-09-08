@@ -49,7 +49,7 @@ export function AnomalyDetection() {
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           body={<>{ML_ERRORS.MISSING_READ_PRIVILEGES}</>}
         />
       </EuiPanel>

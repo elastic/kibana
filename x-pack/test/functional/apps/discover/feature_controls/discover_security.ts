@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'share',
     'spaceSelector',
     'header',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -234,8 +235,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.waitForTopNavToBeVisible();
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
@@ -326,8 +327,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectMissingFieldListItemVisualize('bytes');
       });
 
       it('Permalinks shows create short-url button', async () => {
@@ -404,8 +405,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.waitForTopNavToBeVisible();
         await setDiscoverTimeRange();
-        await PageObjects.discover.clickFieldListItem('bytes');
-        await PageObjects.discover.expectFieldListItemVisualize('bytes');
+        await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+        await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
       });
     });
 
@@ -429,6 +430,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           password: 'no_discover_privileges_user-password',
           roles: ['no_discover_privileges_role'],
           full_name: 'test user',
+        });
+
+        // Navigate home before attempting to login or we may get redirected to
+        // Discover with a forbidden error, which hides the chrome and causes
+        // PageObjects.security.login to fail when checking for the logout button
+        await PageObjects.common.navigateToUrl('home', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.security.login(

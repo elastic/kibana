@@ -103,7 +103,7 @@ export class EditSettingsJson extends React.PureComponent {
             defaultMessage: 'There was an error while trying to save your settings',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj="updateIndexSettingsErrorCallout"
         >
           <p>{error}</p>

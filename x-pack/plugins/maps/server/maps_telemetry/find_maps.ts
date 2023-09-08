@@ -8,16 +8,16 @@
 import { asyncForEach } from '@kbn/std';
 import type { ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapAttributes } from '../../common/content_management';
 
 export async function findMaps(
   savedObjectsClient: Pick<ISavedObjectsRepository, 'find'>,
-  callback: (savedObject: SavedObject<MapSavedObjectAttributes>) => Promise<void>
+  callback: (savedObject: SavedObject<MapAttributes>) => Promise<void>
 ) {
   let nextPage = 1;
   let hasMorePages = false;
   do {
-    const results = await savedObjectsClient.find<MapSavedObjectAttributes>({
+    const results = await savedObjectsClient.find<MapAttributes>({
       type: MAP_SAVED_OBJECT_TYPE,
       page: nextPage,
     });

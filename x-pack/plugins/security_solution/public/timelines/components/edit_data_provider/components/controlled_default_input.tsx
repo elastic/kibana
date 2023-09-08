@@ -9,13 +9,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
 
-import { isStringOrNumberArray } from '../../timeline/helpers';
+import { isPrimitiveArray } from '../../timeline/helpers';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import { sanatizeValue } from '../helpers';
 import * as i18n from '../translations';
 
 interface ControlledDataProviderInput {
   onChangeCallback: (value: string | number | string[]) => void;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }
 
 const VALUE_INPUT_CLASS_NAME = 'edit-data-provider-value';
@@ -24,7 +25,9 @@ export const ControlledDefaultInput = ({
   value,
   onChangeCallback,
 }: ControlledDataProviderInput) => {
-  const [primitiveValue, setPrimitiveValue] = useState<string | number>(getDefaultValue(value));
+  const [primitiveValue, setPrimitiveValue] = useState<string | number | boolean>(
+    getDefaultValue(value)
+  );
 
   useEffect(() => {
     onChangeCallback(sanatizeValue(primitiveValue));
@@ -44,10 +47,8 @@ export const ControlledDefaultInput = ({
   );
 };
 
-export const getDefaultValue = (
-  value: string | number | Array<string | number>
-): string | number => {
-  if (isStringOrNumberArray(value)) {
+export const getDefaultValue = (value: PrimitiveOrArrayOfPrimitives): string | number | boolean => {
+  if (isPrimitiveArray(value)) {
     return value[0] ?? '';
   } else return value;
 };

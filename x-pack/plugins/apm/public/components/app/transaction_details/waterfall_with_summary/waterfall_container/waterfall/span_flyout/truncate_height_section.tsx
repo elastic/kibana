@@ -48,6 +48,7 @@ export function TruncateHeightSection({ children, previewHeight }: Props) {
       {showToggle ? (
         <ToggleButtonContainer>
           <EuiLink
+            data-test-subj="apmTruncateHeightSectionLink"
             onClick={() => {
               setIsOpen(!isOpen);
             }}

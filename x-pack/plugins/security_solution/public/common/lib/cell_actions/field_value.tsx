@@ -9,10 +9,10 @@ import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common/types';
-import { getPageRowIndex } from '@kbn/timelines-plugin/public';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { getPageRowIndex } from '@kbn/securitysolution-data-table';
+import type { ColumnHeaderOptions } from '../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CasesStatus } from '@kbn/cases-plugin/common/ui';
+import type { CasesStatus } from '@kbn/cases-plugin/common';
 import { useState, useEffect, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -31,7 +31,7 @@ export const useCasesByStatus = ({ skip = false }) => {
   } = useKibana();
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
   // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `useCaseItems-${uuid.v4()}`, []);
+  const uniqueQueryId = useMemo(() => `useCaseItems-${uuidv4()}`, []);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
   const [casesCounts, setCasesCounts] = useState<CasesStatus | null>(null);

@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('edits map by-value embeddable', async () => {
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
-        await dashboardPanelActions.toggleContextMenu();
+        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.maps.saveMap('canvas test map');
         const embeddableCount = await PageObjects.canvas.getEmbeddableCount();

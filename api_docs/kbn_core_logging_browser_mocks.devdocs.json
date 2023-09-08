@@ -63,9 +63,9 @@
               "(context?: string[]) => ",
               {
                 "pluginId": "@kbn/logging-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingMocksPluginApi",
-                "section": "def-server.MockedLogger",
+                "section": "def-common.MockedLogger",
                 "text": "MockedLogger"
               }
             ],

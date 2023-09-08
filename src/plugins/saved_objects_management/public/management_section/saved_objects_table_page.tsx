@@ -83,7 +83,6 @@ const SavedObjectsTablePage = ({
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
-        savedObjectsClient={coreStart.savedObjects.client}
         dataViews={dataViewsApi}
         search={dataStart.search}
         http={coreStart.http}
@@ -103,6 +102,7 @@ const SavedObjectsTablePage = ({
           if (!inAppUrl.uiCapabilitiesPath) return true;
           return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
         }}
+        customBranding={coreStart.customBranding}
       />
     </ContextWrapper>
   );

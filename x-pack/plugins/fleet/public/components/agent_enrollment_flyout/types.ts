@@ -14,8 +14,25 @@ export type K8sMode =
   | 'IS_KUBERNETES'
   | 'IS_NOT_KUBERNETES'
   | 'IS_KUBERNETES_MULTIPAGE';
+
+export type CloudSecurityIntegrationType = 'kspm' | 'vuln_mgmt' | 'cspm';
+export type CloudSecurityIntegrationAwsAccountType = 'single-account' | 'organization-account';
+
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
+
+export interface CloudFormationProps {
+  templateUrl: string | undefined;
+  awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined;
+}
+
+export interface CloudSecurityIntegration {
+  integrationType: CloudSecurityIntegrationType | undefined;
+  isLoading: boolean;
+  isCloudFormation: boolean;
+  cloudFormationProps?: CloudFormationProps;
+  cloudShellUrl: string | undefined;
+}
 
 export interface BaseProps {
   /**
@@ -26,6 +43,8 @@ export interface BaseProps {
   isFleetServerPolicySelected?: boolean;
 
   isK8s?: K8sMode;
+
+  cloudSecurityIntegration?: CloudSecurityIntegration;
 
   /**
    * There is a step in the agent enrollment process that allows users to see the data from an integration represented in the UI

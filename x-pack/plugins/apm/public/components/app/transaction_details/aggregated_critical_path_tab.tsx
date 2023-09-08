@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { CriticalPathFlamegraph } from '../../shared/critical_path_flamegraph';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
@@ -20,7 +20,10 @@ function TransactionDetailAggregatedCriticalPath({
   const {
     path: { serviceName },
     query: { rangeFrom, rangeTo, transactionName },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

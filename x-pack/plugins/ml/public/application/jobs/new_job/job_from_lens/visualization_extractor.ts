@@ -10,8 +10,8 @@ import { layerTypes } from '@kbn/lens-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 
+import type { ErrorType } from '@kbn/ml-error-utils';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
-import { ErrorType } from '../../../../../common/util/errors';
 import {
   getVisTypeFactory,
   isCompatibleLayer,
@@ -55,7 +55,9 @@ export class VisualizationExtractor {
       );
     }
 
-    const timeField = layer.dimensions.find(({ operation }) => operation.dataType === 'date');
+    const timeField = layer.dimensions.find(
+      (dimension) => dimension.operation?.dataType === 'date'
+    );
     if (timeField === undefined || !timeField.operation.fields?.length) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDateField', {

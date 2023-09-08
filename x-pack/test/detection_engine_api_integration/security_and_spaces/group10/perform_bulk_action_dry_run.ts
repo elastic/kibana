@@ -12,34 +12,42 @@ import expect from 'expect';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleMlRule,
   getSimpleRule,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   const postDryRunBulkAction = () =>
     supertest
       .post(DETECTION_ENGINE_RULES_BULK_ACTION)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .query({ dry_run: true });
 
   const fetchRule = (ruleId: string) =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   const findRules = () =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}/_find`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   describe('perform_bulk_action dry_run', () => {
     beforeEach(async () => {
@@ -47,8 +55,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     it('should not support export action', async () => {
@@ -73,9 +81,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.delete })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that rule wasn't deleted
       await fetchRule(ruleId).expect(200);
@@ -89,9 +102,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.enable })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that the updates have not been persisted
       const { body: ruleBody } = await fetchRule(ruleId).expect(200);
@@ -106,9 +124,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.disable })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that the updates have not been persisted
       const { body: ruleBody } = await fetchRule(ruleId).expect(200);
@@ -124,9 +147,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({ action: BulkActionType.disable })
         .expect(200);
 
-      expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
       // dry_run mode shouldn't return any rules in results
-      expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+      expect(body.attributes.results).toEqual({
+        updated: [],
+        skipped: [],
+        created: [],
+        deleted: [],
+      });
 
       // Check that the rule wasn't duplicated
       const { body: rulesResponse } = await findRules().expect(200);
@@ -152,9 +180,14 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
-        expect(body.attributes.summary).toEqual({ failed: 0, succeeded: 1, total: 1 });
+        expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
         // dry_run mode shouldn't return any rules in results
-        expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+        expect(body.attributes.results).toEqual({
+          updated: [],
+          skipped: [],
+          created: [],
+          deleted: [],
+        });
 
         // Check that the updates have not been persisted
         const { body: ruleBody } = await fetchRule(ruleId).expect(200);
@@ -162,7 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should validate immutable rule edit', async () => {
-        await installPrePackagedRules(supertest, log);
+        await installMockPrebuiltRules(supertest, es);
         const { body: findBody } = await findRules()
           .query({ per_page: 1, filter: 'alert.attributes.params.immutable: true' })
           .send()
@@ -183,8 +216,13 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body.attributes.summary).toEqual({ failed: 1, succeeded: 0, total: 1 });
-        expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+        expect(body.attributes.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
+        expect(body.attributes.results).toEqual({
+          updated: [],
+          skipped: [],
+          created: [],
+          deleted: [],
+        });
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
@@ -224,8 +262,18 @@ export default ({ getService }: FtrProviderContext): void => {
               })
               .expect(500);
 
-            expect(body.attributes.summary).toEqual({ failed: 1, succeeded: 0, total: 1 });
-            expect(body.attributes.results).toEqual({ updated: [], created: [], deleted: [] });
+            expect(body.attributes.summary).toEqual({
+              failed: 1,
+              skipped: 0,
+              succeeded: 0,
+              total: 1,
+            });
+            expect(body.attributes.results).toEqual({
+              updated: [],
+              skipped: [],
+              created: [],
+              deleted: [],
+            });
 
             expect(body.attributes.errors).toHaveLength(1);
             expect(body.attributes.errors[0]).toEqual({

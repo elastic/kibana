@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiRange,
 } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -67,8 +68,8 @@ export const RiskScoreField = ({
   const fieldTypeFilter = useMemo(() => ['number'], []);
   const selectedField = useMemo(() => getFieldTypeByMapping(mapping, indices), [mapping, indices]);
 
-  const handleDefaultRiskScoreChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>): void => {
+  const handleDefaultRiskScoreChange: EuiRangeProps['onChange'] = useCallback(
+    (e) => {
       const range = (e.target as HTMLInputElement).value;
       setValue({
         value: Number(range.trim()),

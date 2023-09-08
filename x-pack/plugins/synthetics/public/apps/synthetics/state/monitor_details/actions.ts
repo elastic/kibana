@@ -27,6 +27,8 @@ export const getMonitorLastRunAction = createAsyncAction<
   PingsResponse
 >('[MONITOR DETAILS] GET LAST RUN');
 
+export const resetMonitorLastRunAction = createAction('[MONITOR DETAILS] LAST RUN RESET');
+
 export const updateMonitorLastRunAction = createAction<{ data: Ping }>(
   '[MONITOR DETAILS] UPdATE LAST RUN'
 );

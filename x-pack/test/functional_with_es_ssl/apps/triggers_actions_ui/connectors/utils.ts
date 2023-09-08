@@ -7,10 +7,10 @@
 
 import type SuperTest from 'supertest';
 import { findIndex } from 'lodash';
-
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getTestActionData } from '../../../lib/get_test_data';
+import { getTestActionData, getTestAlertData } from '../../../lib/get_test_data';
 
 export const createSlackConnectorAndObjectRemover = async ({
   getService,
@@ -59,3 +59,62 @@ export const getConnectorByName = async (
   const i = findIndex(body, (c: any) => c.name === name);
   return body[i];
 };
+
+export async function createRuleWithActionsAndParams(
+  connectorId: string,
+  testRunUuid: string,
+  params: Record<string, any> = {},
+  overwrites: Record<string, any> = {},
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+) {
+  return await createAlwaysFiringRule(
+    {
+      name: `test-rule-${testRunUuid}`,
+      actions: [
+        {
+          id: connectorId,
+          group: 'default',
+          params: {
+            message: 'from alert 1s',
+            level: 'warn',
+          },
+          frequency: {
+            summary: false,
+            notify_when: RuleNotifyWhen.THROTTLE,
+            throttle: '1m',
+          },
+        },
+      ],
+      params,
+      ...overwrites,
+    },
+    supertest
+  );
+}
+
+async function createAlwaysFiringRule(
+  overwrites: Record<string, any> = {},
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+) {
+  const { body: createdRule } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .send(
+      getTestAlertData({
+        rule_type_id: 'test.always-firing',
+        ...overwrites,
+      })
+    )
+    .expect(200);
+  return createdRule;
+}
+
+export async function getAlertSummary(
+  ruleId: string,
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+) {
+  const { body: summary } = await supertest
+    .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
+    .expect(200);
+  return summary;
+}

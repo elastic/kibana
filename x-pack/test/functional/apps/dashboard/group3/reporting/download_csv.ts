@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-ignore we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
@@ -81,9 +82,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Default Saved Search Data', () => {
-      const dashboardAllDataHiddenTitles = 'Ecom Dashboard Hidden Panel Titles';
-      const dashboardPeriodOf2DaysData = 'Ecom Dashboard - 3 Day Period';
-
       before(async () => {
         await reporting.initEcommerce();
         await navigateToDashboardApp();
@@ -94,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Download CSV export of a saved search panel', async function () {
-        await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
@@ -103,10 +101,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Downloads a filtered CSV export of a saved search panel', async function () {
-        await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
-        await filterBar.addFilter('category', 'is', `Men's Shoes`);
+        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
+
+        await clickActionsMenu('EcommerceData');
+        await clickDownloadCsv();
+
+        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
+        expectSnapshot(csvFile).toMatch();
+      });
+
+      it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
+        await PageObjects.dashboard.loadSavedDashboard(
+          'Ecom Dashboard - 3 Day Period - custom time range'
+        );
 
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
@@ -116,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Gets the correct filename if panel titles are hidden', async () => {
-        await PageObjects.dashboard.loadSavedDashboard(dashboardAllDataHiddenTitles);
+        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles');
         const savedSearchPanel = await find.byCssSelector(
           '[data-test-embeddable-id="94eab06f-60ac-4a85-b771-3a8ed475c9bb"]'
         ); // panel title is hidden
@@ -133,18 +143,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Filtered Saved Search', () => {
       const TEST_SEARCH_TITLE = 'Customer Betty';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
-      const setTimeRange = async () => {
-        const fromTime = 'Jun 20, 2019 @ 23:56:51.374';
-        const toTime = 'Jun 25, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      };
+      const from = 'Jun 20, 2019 @ 23:56:51.374';
+      const to = 'Jun 25, 2019 @ 16:18:51.821';
 
       before(async () => {
         await reporting.initEcommerce();
+        await PageObjects.common.setTime({ from, to });
         await navigateToDashboardApp();
         log.info(`Creating empty dashboard`);
         await PageObjects.dashboard.clickNewDashboard();
-        await setTimeRange();
         log.info(`Adding "${TEST_SEARCH_TITLE}" to dashboard`);
         await dashboardAddPanel.addSavedSearch(TEST_SEARCH_TITLE);
         await PageObjects.dashboard.saveDashboard(TEST_DASHBOARD_TITLE);
@@ -153,6 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       after(async () => {
         await reporting.teardownEcommerce();
         await esArchiver.emptyKibanaIndex();
+        await PageObjects.common.unsetTime();
       });
 
       it('Downloads filtered Discover saved search report', async () => {
@@ -179,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.common.sleep(1000);
-        await filterBar.addFilter('name.keyword', 'is', 'Fethany');
+        await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
         await PageObjects.common.sleep(1000);
       });
 

@@ -106,10 +106,15 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
          * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
          * is why we're using _data_stream here.
          */
-        await client.transport.request({
-          method: 'DELETE',
-          path: `_data_stream/${index}`,
-        });
+        await client.transport.request(
+          {
+            method: 'DELETE',
+            path: `_data_stream/${index}`,
+          },
+          {
+            ignore: [404],
+          }
+        );
       }
     },
   };

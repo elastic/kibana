@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/exploratory-view-example-plugin",
+  "owner": "@elastic/uptime",
+  "plugin": {
+    "id": "exploratoryViewExample",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "exploratory_view_example"
+    ],
+    "requiredPlugins": [
+      "cases",
+      "data",
+      "developerExamples",
+      "embeddable",
+      "observability"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

@@ -21,6 +21,12 @@ export const restoreStateFromSavedSearch = ({
     return;
   }
 
+  const isTimeBased = savedSearch.searchSource.getField('index')?.isTimeBased();
+
+  if (!isTimeBased) {
+    return;
+  }
+
   if (savedSearch.timeRestore && savedSearch.timeRange && isTimeRangeValid(savedSearch.timeRange)) {
     timefilter.setTime(savedSearch.timeRange);
   }

@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
@@ -17,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { RevealImageRendererConfig } from '../../common/types';
 
@@ -32,9 +32,6 @@ export const strings = {
     }),
 };
 
-const LazyRevealImageComponent = lazy(() => import('../components/reveal_image_component'));
-const RevealImageComponent = withSuspense(LazyRevealImageComponent, null);
-
 export const getRevealImageRenderer =
   (theme$: Observable<CoreTheme> = defaultTheme$) =>
   (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
@@ -42,21 +39,24 @@ export const getRevealImageRenderer =
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),
     reuseDomNode: true,
-    render: (
+    render: async (
       domNode: HTMLElement,
       config: RevealImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const { RevealImageComponent } = await import('../components/reveal_image_component');
       handlers.onDestroy(() => {
         unmountComponentAtNode(domNode);
       });
 
       render(
-        <KibanaThemeProvider theme$={theme$}>
-          <I18nProvider>
-            <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
-          </I18nProvider>
-        </KibanaThemeProvider>,
+        <EuiErrorBoundary>
+          <KibanaThemeProvider theme$={theme$}>
+            <I18nProvider>
+              <RevealImageComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
+            </I18nProvider>
+          </KibanaThemeProvider>
+        </EuiErrorBoundary>,
         domNode
       );
     },

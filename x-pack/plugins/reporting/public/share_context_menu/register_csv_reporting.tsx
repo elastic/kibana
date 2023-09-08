@@ -28,9 +28,13 @@ export const reportingCsvShareProvider = ({
       return [];
     }
 
-    const getSearchSource = sharingData.getSearchSource as (
-      absoluteTime?: boolean
-    ) => SearchSourceFields;
+    const getSearchSource = sharingData.getSearchSource as ({
+      addGlobalTimeFilter,
+      absoluteTime,
+    }: {
+      addGlobalTimeFilter?: boolean;
+      absoluteTime?: boolean;
+    }) => SearchSourceFields;
 
     const jobParams = {
       title: sharingData.title as string,
@@ -39,10 +43,12 @@ export const reportingCsvShareProvider = ({
     };
 
     const getJobParams = (forShareUrl?: boolean) => {
-      const absoluteTime = !forShareUrl;
       return {
         ...jobParams,
-        searchSource: getSearchSource(absoluteTime),
+        searchSource: getSearchSource({
+          addGlobalTimeFilter: true,
+          absoluteTime: !forShareUrl,
+        }),
       };
     };
 
@@ -72,7 +78,7 @@ export const reportingCsvShareProvider = ({
           icon: 'document',
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
-          ['data-test-subj']: 'csvReportMenuItem',
+          ['data-test-subj']: 'CSVReports',
           sortOrder: 1,
         },
         panel: {

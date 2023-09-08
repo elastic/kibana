@@ -15,20 +15,21 @@ import React, { Component } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 
-import { APPLIES_TO } from '../../../../../common/constants/detector_rule';
-import { formatValue } from '../../../formatters/format_value';
-import { getAppliesToValueFromAnomaly } from '../utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_DETECTOR_RULE_APPLIES_TO } from '@kbn/ml-anomaly-utils';
+
+import { formatValue } from '../../../formatters/format_value';
+import { getAppliesToValueFromAnomaly } from '../utils';
 
 export class EditConditionLink extends Component {
   static propTypes = {
     conditionIndex: PropTypes.number.isRequired,
     conditionValue: PropTypes.number.isRequired,
     appliesTo: PropTypes.oneOf([
-      APPLIES_TO.ACTUAL,
-      APPLIES_TO.TYPICAL,
-      APPLIES_TO.DIFF_FROM_TYPICAL,
+      ML_DETECTOR_RULE_APPLIES_TO.ACTUAL,
+      ML_DETECTOR_RULE_APPLIES_TO.TYPICAL,
+      ML_DETECTOR_RULE_APPLIES_TO.DIFF_FROM_TYPICAL,
     ]),
     anomaly: PropTypes.object.isRequired,
     updateConditionValue: PropTypes.func.isRequired,

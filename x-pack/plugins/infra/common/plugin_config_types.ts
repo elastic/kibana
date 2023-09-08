@@ -14,8 +14,12 @@ export interface InfraConfig {
       group_by_page_size: number;
     };
   };
+  enabled: boolean;
   inventory: {
     compositeSize: number;
+  };
+  logs: {
+    app_target: 'logs-ui' | 'discover';
   };
   sources?: {
     default?: {
@@ -28,6 +32,7 @@ export interface InfraConfig {
 
 export const publicConfigKeys = {
   sources: true,
+  logs: true,
 } as const;
 
 export type InfraPublicConfigKey = keyof {

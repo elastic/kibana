@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useApmParams } from './use_apm_params';
+import { useAnyOfApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
 
 export type TraceSamplesFetchResult = ReturnType<
@@ -29,7 +29,10 @@ export function useTransactionTraceSamplesFetcher({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

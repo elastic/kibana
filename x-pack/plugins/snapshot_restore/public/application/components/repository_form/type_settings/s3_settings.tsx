@@ -71,7 +71,13 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     });
   };
 
-  const storageClassOptions = ['standard', 'reduced_redundancy', 'standard_ia'].map((option) => ({
+  const storageClassOptions = [
+    'standard',
+    'reduced_redundancy',
+    'standard_ia',
+    'intelligent_tiering',
+    'onezone_ia',
+  ].map((option) => ({
     value: option,
     text: option,
   }));

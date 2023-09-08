@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ParsedCommandInterface } from './parsed_command_input';
 import { parseCommandInput } from './parsed_command_input';
+import type { ParsedCommandInterface } from './types';
 
 describe('when using parsed command input utils', () => {
   describe('when using parseCommandInput()', () => {

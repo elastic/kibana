@@ -9,12 +9,14 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { sortBy } from 'lodash';
 import { NO_ASSIGNEES_VALUE } from '../all_cases/assignees_filter';
 import type { CurrentUserProfile } from '../types';
-import type { AssigneesFilteringSelection } from './types';
+import { UNKNOWN } from './translations';
+import type { AssigneesFilteringSelection, UserInfoWithAvatar } from './types';
 
-export const getSortField = (profile: UserProfileWithAvatar) =>
-  profile.user.full_name?.toLowerCase() ??
-  profile.user.email?.toLowerCase() ??
-  profile.user.username.toLowerCase();
+export const getSortField = (profile: UserProfileWithAvatar | UserInfoWithAvatar) =>
+  profile.user?.full_name?.toLowerCase() ??
+  profile.user?.email?.toLowerCase() ??
+  profile.user?.username.toLowerCase() ??
+  UNKNOWN;
 
 export const moveCurrentUserToBeginning = <T extends { uid: string }>(
   currentUserProfile?: T,

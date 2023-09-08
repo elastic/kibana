@@ -7,14 +7,30 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+import moment from 'moment';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
-import { parseTimeShift } from '@kbn/data-plugin/common';
-import type { GenericIndexPatternColumn, FormBasedLayer, FormBasedPrivateState } from './types';
+import {
+  calcAutoIntervalNear,
+  DatatableUtilitiesService,
+  isAbsoluteTimeShift,
+  parseAbsoluteTimeShift,
+  parseTimeShift,
+} from '@kbn/data-plugin/common';
+import type { DateRange } from '../../../common/types';
+import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern } from '../../types';
+
+export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
+  if (isAbsoluteTimeShift(timeShiftString.trim())) {
+    return parseAbsoluteTimeShift(timeShiftString, {
+      from: dateRange.fromDate,
+      to: dateRange.toDate,
+    }).value;
+  }
+  return parseTimeShift(timeShiftString);
+}
 
 export const timeShiftOptions = [
   {
@@ -129,12 +145,11 @@ export function getDateHistogramInterval(
 
 export function getLayerTimeShiftChecks({
   interval: dateHistogramInterval,
-  hasDateHistogram,
   canShift,
 }: ReturnType<typeof getDateHistogramInterval>) {
   return {
     canShift,
-    isValueTooSmall: (parsedValue: ReturnType<typeof parseTimeShift>) => {
+    isValueTooSmall: (parsedValue: ReturnType<typeof parseTimeShiftWrapper>) => {
       return (
         dateHistogramInterval &&
         parsedValue &&
@@ -142,7 +157,7 @@ export function getLayerTimeShiftChecks({
         parsedValue.asMilliseconds() < dateHistogramInterval.asMilliseconds()
       );
     },
-    isValueNotMultiple: (parsedValue: ReturnType<typeof parseTimeShift>) => {
+    isValueNotMultiple: (parsedValue: ReturnType<typeof parseTimeShiftWrapper>) => {
       return (
         dateHistogramInterval &&
         parsedValue &&
@@ -150,39 +165,10 @@ export function getLayerTimeShiftChecks({
         !Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval.asMilliseconds())
       );
     },
-    isInvalid: (parsedValue: ReturnType<typeof parseTimeShift>) => {
-      return Boolean(
-        parsedValue === 'invalid' || (hasDateHistogram && parsedValue && parsedValue === 'previous')
-      );
+    isInvalid: (parsedValue: ReturnType<typeof parseTimeShiftWrapper>) => {
+      return Boolean(parsedValue === 'invalid');
     },
   };
-}
-
-export function getDisallowedPreviousShiftMessage(
-  layer: FormBasedLayer,
-  columnId: string
-): string[] | undefined {
-  const currentColumn = layer.columns[columnId];
-  const hasPreviousShift =
-    currentColumn.timeShift && parseTimeShift(currentColumn.timeShift) === 'previous';
-  if (!hasPreviousShift) {
-    return;
-  }
-  const hasDateHistogram = Object.values(layer.columns).some(
-    (column) => column.operationType === 'date_histogram'
-  );
-  if (!hasDateHistogram) {
-    return;
-  }
-  return [
-    i18n.translate('xpack.lens.indexPattern.dateHistogramTimeShift', {
-      defaultMessage:
-        'In a single layer, you are unable to combine previous time range shift with date histograms. Either use an explicit time shift duration in "{column}" or replace the date histogram.',
-      values: {
-        column: currentColumn.label,
-      },
-    }),
-  ];
 }
 
 export function getStateTimeShiftWarningMessages(
@@ -209,27 +195,28 @@ export function getStateTimeShiftWarningMessages(
     }
     const dateHistogramIntervalExpression = dateHistogramInterval.expression;
     const shiftInterval = dateHistogramInterval.interval.asMilliseconds();
-    let timeShifts: number[] = [];
+    const timeShifts = new Set<number>();
     const timeShiftMap: Record<number, string[]> = {};
     Object.entries(layer.columns).forEach(([columnId, column]) => {
       if (column.isBucketed) return;
       let duration: number = 0;
-      if (column.timeShift) {
+      // skip absolute time shifts as underneath it will be converted to be round
+      // and avoid this type of issues
+      if (column.timeShift && !isAbsoluteTimeShift(column.timeShift)) {
         const parsedTimeShift = parseTimeShift(column.timeShift);
         if (parsedTimeShift === 'previous' || parsedTimeShift === 'invalid') {
           return;
         }
         duration = parsedTimeShift.asMilliseconds();
       }
-      timeShifts.push(duration);
+      timeShifts.add(duration);
       if (!timeShiftMap[duration]) {
         timeShiftMap[duration] = [];
       }
       timeShiftMap[duration].push(columnId);
     });
-    timeShifts = uniq(timeShifts);
 
-    if (timeShifts.length < 2) {
+    if (timeShifts.size < 2) {
       return;
     }
 
@@ -273,13 +260,16 @@ export function getStateTimeShiftWarningMessages(
 
 export function getColumnTimeShiftWarnings(
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>,
-  column: GenericIndexPatternColumn
+  timeShift: string | undefined
 ) {
   const { isValueTooSmall, isValueNotMultiple } = getLayerTimeShiftChecks(dateHistogramInterval);
 
   const warnings: string[] = [];
+  if (isAbsoluteTimeShift(timeShift)) {
+    return warnings;
+  }
 
-  const parsedLocalValue = column.timeShift && parseTimeShift(column.timeShift);
+  const parsedLocalValue = timeShift && parseTimeShift(timeShift);
   const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
   if (localValueTooSmall) {
@@ -298,4 +288,44 @@ export function getColumnTimeShiftWarnings(
     );
   }
   return warnings;
+}
+
+function closestMultipleOfInterval(duration: number, interval: number) {
+  if (duration % interval === 0) {
+    return duration;
+  }
+  return Math.ceil(duration / interval) * interval;
+}
+
+function roundAbsoluteInterval(timeShift: string, dateRange: DateRange, targetBars: number) {
+  // workout the interval (most probably matching the ES one)
+  const interval = calcAutoIntervalNear(
+    targetBars,
+    moment(dateRange.toDate).diff(moment(dateRange.fromDate))
+  );
+  const duration = parseTimeShiftWrapper(timeShift, dateRange);
+  if (typeof duration !== 'string') {
+    const roundingOffset = timeShift.startsWith('end') ? interval.asMilliseconds() : 0;
+    return `${
+      (closestMultipleOfInterval(duration.asMilliseconds(), interval.asMilliseconds()) -
+        roundingOffset) /
+      1000
+    }s`;
+  }
+}
+
+export function resolveTimeShift(
+  timeShift: string | undefined,
+  dateRange: DateRange,
+  targetBars: number,
+  hasDateHistogram: boolean = false
+) {
+  if (timeShift && isAbsoluteTimeShift(timeShift)) {
+    return roundAbsoluteInterval(timeShift, dateRange, targetBars);
+  }
+  // Translate a relative "previous" shift into an absolute endAt(<current range start timestamp>)
+  if (timeShift && hasDateHistogram && timeShift === 'previous') {
+    return roundAbsoluteInterval(`endAt(${dateRange.fromDate})`, dateRange, targetBars);
+  }
+  return timeShift;
 }

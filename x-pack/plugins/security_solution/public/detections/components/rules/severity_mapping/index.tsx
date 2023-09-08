@@ -60,6 +60,7 @@ interface SeverityFieldProps {
   indices: DataViewBase;
   isDisabled: boolean;
   options: SeverityOptionItem[];
+  setRiskScore: (severity: Severity) => void;
 }
 
 export const SeverityField = ({
@@ -69,6 +70,7 @@ export const SeverityField = ({
   indices,
   isDisabled,
   options,
+  setRiskScore,
 }: SeverityFieldProps) => {
   const { services } = useKibana();
   const { value, isMappingChecked, mapping } = field.value;
@@ -108,8 +110,9 @@ export const SeverityField = ({
         isMappingChecked,
         mapping,
       });
+      setRiskScore(newValue);
     },
-    [isMappingChecked, mapping, setValue]
+    [isMappingChecked, mapping, setValue, setRiskScore]
   );
 
   const handleFieldMatchValueChange = useCallback(

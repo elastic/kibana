@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         packageName: 'system',
         composedOfTemplates: [],
         templatePriority: 200,
+        mappings: { properties: [] },
       });
 
       // This test is not an API integration test with Kibana

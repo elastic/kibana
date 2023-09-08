@@ -22,7 +22,6 @@ export type {
   ExistsFilter,
   FieldFilter,
   Filter,
-  FilterItem,
   FilterCompareOptions,
   FilterMeta,
   LatLon,
@@ -38,26 +37,25 @@ export type {
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
   TimeRange,
+  CombinedFilter,
 } from './src/filters';
 
-export type {
-  DslQuery,
-  FunctionTypeBuildNode,
-  KueryNode,
-  KueryParseOptions,
-  KueryQueryOptions,
-} from './src/kuery';
+export type { DslQuery, KueryNode, KueryParseOptions, KueryQueryOptions } from './src/kuery';
 
 export {
   buildEsQuery,
   buildQueryFromFilters,
+  filterToQueryDsl,
   decorateQuery,
   luceneStringToDsl,
   migrateFilter,
+  fromCombinedFilter,
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+  getLanguageDisplayName,
 } from './src/es_query';
 
 export {
@@ -105,18 +103,22 @@ export {
   toggleFilterPinned,
   uniqFilters,
   unpinFilter,
+  updateFilter,
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
+  BooleanRelation,
 } from './src/filters';
 
 export {
   KQLSyntaxError,
   fromKueryExpression,
+  toKqlExpression,
   nodeBuilder,
   nodeTypes,
   toElasticsearchQuery,
   escapeKuery,
+  escapeQuotes,
 } from './src/kuery';
 
 export {

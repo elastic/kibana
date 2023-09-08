@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, memo } from 'react';
+import React, { useCallback, memo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 
 import { EditorContentSpinner } from '../../components';
 import { Panel, PanelsContainer } from '..';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
-import { StorageKeys } from '../../../services';
+import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 import type { SenseEditor } from '../../models';
 
@@ -33,6 +33,15 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const { currentTextObject } = useEditorReadContext();
   const { requestInFlight } = useRequestReadContext();
 
+  const [fetchingMappings, setFetchingMappings] = useState(false);
+
+  useEffect(() => {
+    const subscription = getAutocompleteInfo().mapping.isLoading$.subscribe(setFetchingMappings);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
     INITIAL_PANEL_WIDTH,
@@ -50,7 +59,7 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
 
   return (
     <>
-      {requestInFlight ? (
+      {requestInFlight || fetchingMappings ? (
         <div className="conApp__requestProgressBarContainer">
           <EuiProgress size="xs" color="accent" position="absolute" />
         </div>

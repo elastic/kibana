@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useCallback, memo } from 'react';
+import React, { FC, Fragment, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import { XYBrushEvent, BrushEndListener } from '@elastic/charts';
+import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
+  EuiButtonIcon,
+  EuiDatePicker,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiFormRow,
-  EuiFieldText,
-  EuiDatePicker,
-  EuiButtonIcon,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
-
+import { useCurrentThemeVars } from '../../../contexts/kibana';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
-import { useCurrentEuiTheme } from '../../color_range_legend';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 
 export interface CalendarEvent {
@@ -54,7 +53,7 @@ export const CreateCalendar: FC<Props> = ({
   const maxSelectableTimeMoment = moment(maxSelectableTimeStamp);
   const minSelectableTimeMoment = moment(minSelectableTimeStamp);
 
-  const { euiTheme } = useCurrentEuiTheme();
+  const { euiTheme } = useCurrentThemeVars();
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {

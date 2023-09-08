@@ -8,7 +8,8 @@
 import React, { FC } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { Field, SplitField } from '../../../../../../../../../common/types/fields';
+import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
+import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 
 interface DropDownLabel {
   label: string;
@@ -32,11 +33,13 @@ export const SplitFieldSelect: FC<Props> = ({
   testSubject,
   placeholder,
 }) => {
+  const { renderOption, optionCss } = useFieldStatsTrigger();
   const options: EuiComboBoxOptionOption[] = fields.map(
     (f) =>
       ({
         label: f.name,
         field: f,
+        css: optionCss,
       } as DropDownLabel)
   );
 
@@ -63,6 +66,7 @@ export const SplitFieldSelect: FC<Props> = ({
       isClearable={isClearable}
       placeholder={placeholder}
       data-test-subj={testSubject}
+      renderOption={renderOption}
     />
   );
 };

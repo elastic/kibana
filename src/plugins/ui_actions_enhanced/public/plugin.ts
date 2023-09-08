@@ -8,20 +8,10 @@
 
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
-import { CustomTimeRangeAction } from './custom_time_range_action';
-import { CustomTimeRangeBadge } from './custom_time_range_badge';
-import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
 import { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldowns';
 import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
@@ -92,25 +82,6 @@ export class AdvancedUiActionsPublicPlugin
 
   public start(core: CoreStart, { uiActions, licensing }: StartDependencies): StartContract {
     if (licensing) this.subs.push(licensing.license$.subscribe(this.licenseInfo));
-
-    const dateFormat = core.uiSettings.get('dateFormat') as string;
-    const commonlyUsedRanges = core.uiSettings.get(
-      UI_SETTINGS.TIMEPICKER_QUICK_RANGES
-    ) as CommonlyUsedRange[];
-    const { openModal } = createReactOverlays(core);
-    const timeRangeAction = new CustomTimeRangeAction({
-      openModal,
-      dateFormat,
-      commonlyUsedRanges,
-    });
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, timeRangeAction);
-
-    const timeRangeBadge = new CustomTimeRangeBadge({
-      openModal,
-      dateFormat,
-      commonlyUsedRanges,
-    });
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     return {
       ...uiActions,

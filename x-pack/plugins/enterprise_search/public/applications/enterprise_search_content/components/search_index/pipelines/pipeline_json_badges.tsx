@@ -71,7 +71,7 @@ const SharedPipelineBadge: React.FC = () => (
     position="top"
     content={i18n.translate(
       'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations.shared.description',
-      { defaultMessage: 'This pipeline is shared across all Enterprise Search ingestion methods' }
+      { defaultMessage: 'This pipeline is shared across all Search ingestion methods' }
     )}
   >
     <EuiBadge iconType="logstashIf" color="hollow">
@@ -131,17 +131,17 @@ export const PipelineJSONBadges: React.FC = () => {
   }
   const badges: JSX.Element[] = [];
   if (isManagedPipeline(pipeline)) {
-    badges.push(<ManagedPipelineBadge />);
+    badges.push(<ManagedPipelineBadge key="managed-pipeline" />);
   } else {
-    badges.push(<UnmanagedPipelineBadge />);
+    badges.push(<UnmanagedPipelineBadge key="unmanaged-pipeline" />);
   }
   if (pipelineName === DEFAULT_PIPELINE_NAME) {
-    badges.push(<SharedPipelineBadge />);
+    badges.push(<SharedPipelineBadge key="shared-pipeline" />);
   }
   if (pipelineName?.endsWith('@ml-inference')) {
-    badges.push(<MlInferenceBadge />);
+    badges.push(<MlInferenceBadge key="inference-pipeline" />);
   } else if (pipelineName?.includes(indexName)) {
-    badges.push(<IndexPipelineBadge />);
+    badges.push(<IndexPipelineBadge key="index-pipeline" />);
   }
   return <EuiBadgeGroup gutterSize="s">{badges}</EuiBadgeGroup>;
 };

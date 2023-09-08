@@ -31,10 +31,10 @@ export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleP
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.esQuery.ui.alertType.defaultActionMessage',
       {
-        defaultMessage: `Elasticsearch query alert '\\{\\{alertName\\}\\}' is active:
+        defaultMessage: `Elasticsearch query rule '\\{\\{rule.name\\}\\}' is active:
 
 - Value: \\{\\{context.value\\}\\}
-- Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}
+- Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{rule.params.timeWindowSize\\}\\}\\{\\{rule.params.timeWindowUnit\\}\\}
 - Timestamp: \\{\\{context.date\\}\\}
 - Link: \\{\\{context.link\\}\\}`,
       }
@@ -48,7 +48,7 @@ function registerNavigation(alerting: AlertingSetup) {
     PLUGIN_ID,
     ES_QUERY_ALERT_TYPE,
     (alert: SanitizedRule<EsQueryRuleParams<SearchType.searchSource>>) => {
-      return `#/viewAlert/${alert.id}`;
+      return `/app/discover#/viewAlert/${alert.id}`;
     }
   );
 }

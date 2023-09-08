@@ -52,6 +52,7 @@ export function JSErrors() {
       name: I18LABELS.errorMessage,
       render: (errorMessage: string, item: JSErrorItem) => (
         <EuiLink
+          data-test-subj="uxColsLink"
           href={`${basePath}/app/apm/services/${serviceName}/errors/${item.errorGroupId}`}
         >
           {errorMessage}

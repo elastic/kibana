@@ -14,13 +14,6 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   }
 );
 
-export const SAVED_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError',
-  {
-    defaultMessage: 'Failed to load the saved query. Select a new one or add a custom query.',
-  }
-);
-
 export const EQL_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
   {
@@ -94,6 +87,14 @@ export const getSavedQueryCheckboxLabel = (savedQueryName: string) =>
     }
   );
 
+export const getSavedQueryCheckboxLabelWithoutName = () =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldShouldLoadQueryDynamicallyLabelWithoutName',
+    {
+      defaultMessage: 'Load saved query dynamically on each rule execution',
+    }
+  );
+
 export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
   {
@@ -147,5 +148,33 @@ export const RULE_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.rulePreviewTitle',
   {
     defaultMessage: 'Rule Preview',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_FORM_ROW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsLabel',
+  {
+    defaultMessage: 'If a suppression field is missing',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsSuppressLabel',
+  {
+    defaultMessage: 'Suppress and group alerts for events with missing fields',
+  }
+);
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsDoNotSuppressLabel',
+  {
+    defaultMessage: 'Do not suppress alerts for events with missing fields',
+  }
+);
+
+export const GROUP_BY_FIELD_LICENSE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.licenseWarning',
+  {
+    defaultMessage: 'Alert suppression is enabled with Platinum license or above',
   }
 );

@@ -10,10 +10,10 @@ import type {
   DraggableStateSnapshot,
   DroppableProvided,
   DroppableStateSnapshot,
-} from 'react-beautiful-dnd';
+} from '@hello-pangea/dnd';
 import type React from 'react';
 
-jest.mock('react-beautiful-dnd', () => ({
+jest.mock('@hello-pangea/dnd', () => ({
   Droppable: ({
     children,
   }: {
@@ -22,13 +22,16 @@ jest.mock('react-beautiful-dnd', () => ({
     children(
       {
         droppableProps: {
-          'data-rbd-droppable-context-id': '123',
-          'data-rbd-droppable-id': '123',
+          'data-rfd-droppable-context-id': '123',
+          'data-rfd-droppable-id': '123',
         },
         innerRef: jest.fn(),
+        placeholder: null,
       },
       {
         isDraggingOver: false,
+        draggingOverWith: null,
+        draggingFromThisWith: null,
         isUsingPlaceholder: false,
       }
     ),
@@ -40,14 +43,21 @@ jest.mock('react-beautiful-dnd', () => ({
     children(
       {
         draggableProps: {
-          'data-rbd-draggable-context-id': '123',
-          'data-rbd-draggable-id': '123',
+          'data-rfd-draggable-context-id': '123',
+          'data-rfd-draggable-id': '123',
         },
         innerRef: jest.fn(),
+        dragHandleProps: null,
       },
       {
         isDragging: false,
         isDropAnimating: false,
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
       }
     ),
   DragDropContext: ({ children }: { children: React.ReactNode }) => children,

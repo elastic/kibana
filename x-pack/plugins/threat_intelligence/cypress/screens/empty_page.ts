@@ -6,7 +6,5 @@
  */
 
 export const EMPTY_PAGE_BODY = '[data-test-subj="tiEmptyPage"]';
-
 export const EMPTY_PAGE_DOCS_LINK = '[data-test-subj="tiEmptyPageDocsLink"]';
-
 export const EMPTY_PAGE_INTEGRATIONS_LINK = '[data-test-subj="tiEmptyPageIntegrationsPageLink"]';

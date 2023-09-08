@@ -1,0 +1,13 @@
+title: Connector request properties for a IBM Resilient connector
+required:
+  - apiUrl
+  - orgId
+description: Defines properties for connectors when type is `.resilient`.
+type: object
+properties:
+  apiUrl:
+    description: The IBM Resilient instance URL.
+    type: string
+  orgId:
+    description: The IBM Resilient organization ID.
+    type: string

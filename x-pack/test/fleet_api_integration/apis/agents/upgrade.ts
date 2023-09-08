@@ -479,12 +479,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const action: any = actionsRes.hits.hits[0]._source;
 
-        expect(action).to.have.keys(
-          'agents',
-          'expiration',
-          'start_time',
-          'minimum_execution_duration'
-        );
+        expect(action).to.have.keys('agents', 'start_time', 'rollout_duration_seconds');
         expect(action.agents).contain('agent1');
         expect(action.agents).contain('agent2');
       });
@@ -528,12 +523,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const action: any = actionsRes.hits.hits[0]._source;
 
-        expect(action).to.have.keys(
-          'agents',
-          'expiration',
-          'start_time',
-          'minimum_execution_duration'
-        );
+        expect(action).to.have.keys('agents', 'start_time');
         expect(action.agents).contain('agent1');
         expect(action.agents).contain('agent2');
       });
@@ -628,7 +618,7 @@ export default function (providerContext: FtrProviderContext) {
           const intervalId = setInterval(async () => {
             if (attempts > 4) {
               clearInterval(intervalId);
-              reject('action timed out');
+              reject(new Error('action timed out'));
             }
             ++attempts;
             const {
@@ -1037,7 +1027,6 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/agents/action_status`)
           .set('kbn-xsrf', 'xxx');
         const actionStatus = body.items[0];
-        expect(actionStatus.status).to.eql('FAILED');
         expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
 

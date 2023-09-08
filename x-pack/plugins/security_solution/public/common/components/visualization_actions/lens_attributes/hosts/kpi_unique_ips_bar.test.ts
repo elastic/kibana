@@ -16,6 +16,7 @@ jest.mock('../../../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
+    indicesExist: true,
   }),
 }));
 

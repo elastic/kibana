@@ -21,9 +21,9 @@ import {
   createRule,
   getSimpleRule,
   createSignalsIndex,
-  deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   createExceptionList,
+  deleteAllAlerts,
 } from '../../utils';
 import {
   deleteAllExceptions,
@@ -48,6 +48,7 @@ const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rule_exception_route', () => {
     before(async () => {
@@ -56,8 +57,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await deleteAllExceptions(supertest, log);
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     it('creates and associates a `rule_default` exception list to a rule if one not already found', async () => {
@@ -66,6 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })
@@ -121,6 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })
@@ -194,6 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body: items } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/${rule.id}/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })
@@ -230,6 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${DETECTION_ENGINE_RULES_URL}/4656dc92-5832-11ea-8e2d-0242ac130003/exceptions`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send({
           items: [getRuleExceptionItemMock()],
         })

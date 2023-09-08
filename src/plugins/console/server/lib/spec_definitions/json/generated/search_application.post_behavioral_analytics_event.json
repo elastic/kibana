@@ -1,0 +1,15 @@
+{
+  "search_application.post_behavioral_analytics_event": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_application/analytics/{collection_name}/event/{event_type}"
+    ],
+    "documentation": "http://todo.com/tbd",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

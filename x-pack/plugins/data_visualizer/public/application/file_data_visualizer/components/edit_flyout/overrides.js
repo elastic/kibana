@@ -23,7 +23,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
-import { FILE_FORMATS } from '../../../../../common/constants';
+import { FILE_FORMATS, NO_TIME_FORMAT } from '../../../../../common/constants';
 
 import {
   getFormatOptions,
@@ -129,6 +129,7 @@ class OverridesUI extends Component {
       linesToSampleValid: true,
       timestampFormatValid: true,
       timestampFormatError: null,
+      containsTimeField: overrides.timestampFormat !== NO_TIME_FORMAT,
       overrides,
       ...state,
     };
@@ -203,6 +204,17 @@ class OverridesUI extends Component {
     this.setOverride({ timestampField });
   };
 
+  onContainsTimeFieldChange = (e) => {
+    this.setState({ containsTimeField: e.target.checked });
+    if (e.target.checked === false) {
+      this.setOverride({ timestampFormat: NO_TIME_FORMAT });
+    } else {
+      this.setOverride({
+        timestampFormat: this.props.originalSettings.timestampFormat,
+      });
+    }
+  };
+
   onDelimiterChange = ([opt]) => {
     const delimiter = opt ? opt.label : '';
     this.setOverride({ delimiter });
@@ -272,6 +284,7 @@ class OverridesUI extends Component {
       linesToSampleValid,
       timestampFormatError,
       timestampFormatValid,
+      containsTimeField,
       overrides,
     } = this.state;
 
@@ -437,69 +450,77 @@ class OverridesUI extends Component {
             </EuiFormRow>
           </React.Fragment>
         )}
-        <EuiFormRow
-          helpText={timestampFormatHelp}
-          label={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatFormRowLabel"
-              defaultMessage="Timestamp format"
-            />
-          }
-        >
-          <EuiComboBox
-            options={timestampFormatOptions}
-            selectedOptions={selectedOption(timestampFormat)}
-            onChange={this.onTimestampFormatChange}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
-          />
-        </EuiFormRow>
-        {timestampFormat === CUSTOM_DROPDOWN_OPTION && (
-          <EuiFormRow
-            error={timestampFormatErrorsList}
-            isInvalid={timestampFormatValid === false}
+
+        <EuiFormRow>
+          <EuiCheckbox
+            id={'shouldTrimFields'}
             label={
               <FormattedMessage
-                id="xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatFormRowLabel"
-                defaultMessage="Custom timestamp format"
+                id="xpack.dataVisualizer.file.editFlyout.overrides.containsTimeFieldLabel"
+                defaultMessage="Contains time field"
               />
             }
-          >
-            <EuiFieldText
-              value={customTimestampFormat}
-              onChange={this.onCustomTimestampFormatChange}
-              isInvalid={timestampFormatValid === false}
-            />
-          </EuiFormRow>
-        )}
-
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
-              defaultMessage="Time field"
-            />
-          }
-        >
-          <EuiComboBox
-            options={fieldOptions}
-            selectedOptions={selectedOption(timestampField)}
-            onChange={this.onTimestampFieldChange}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
+            checked={containsTimeField}
+            onChange={this.onContainsTimeFieldChange}
           />
         </EuiFormRow>
 
-        {/* <EuiFormRow
-          label="Charset"
-        >
-          <EuiComboBox
-            options={charsetOptions}
-            selectedOptions={selectedOption(charset)}
-            singleSelection={{ asPlainText: true }}
-            isClearable={false}
-          />
-        </EuiFormRow> */}
+        {containsTimeField ? (
+          <>
+            <EuiFormRow
+              helpText={timestampFormatHelp}
+              label={
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatFormRowLabel"
+                  defaultMessage="Timestamp format"
+                />
+              }
+            >
+              <EuiComboBox
+                options={timestampFormatOptions}
+                selectedOptions={selectedOption(timestampFormat)}
+                onChange={this.onTimestampFormatChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={false}
+              />
+            </EuiFormRow>
+            {timestampFormat === CUSTOM_DROPDOWN_OPTION && (
+              <EuiFormRow
+                error={timestampFormatErrorsList}
+                isInvalid={timestampFormatValid === false}
+                label={
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.editFlyout.overrides.customTimestampFormatFormRowLabel"
+                    defaultMessage="Custom timestamp format"
+                  />
+                }
+              >
+                <EuiFieldText
+                  value={customTimestampFormat}
+                  onChange={this.onCustomTimestampFormatChange}
+                  isInvalid={timestampFormatValid === false}
+                />
+              </EuiFormRow>
+            )}
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.editFlyout.overrides.timeFieldFormRowLabel"
+                  defaultMessage="Time field"
+                />
+              }
+            >
+              <EuiComboBox
+                options={fieldOptions}
+                selectedOptions={selectedOption(timestampField)}
+                onChange={this.onTimestampFieldChange}
+                singleSelection={{ asPlainText: true }}
+                isClearable={false}
+              />
+            </EuiFormRow>
+          </>
+        ) : null}
+
         {format === FILE_FORMATS.DELIMITED && originalColumnNames.length > 0 && (
           <React.Fragment>
             <EuiSpacer />

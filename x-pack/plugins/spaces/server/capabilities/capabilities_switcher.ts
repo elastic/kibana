@@ -24,7 +24,7 @@ export function setupCapabilitiesSwitcher(
     const shouldNotToggleCapabilities = isAuthRequiredOrOptional || useDefaultCapabilities;
 
     if (shouldNotToggleCapabilities) {
-      return capabilities;
+      return {};
     }
 
     try {

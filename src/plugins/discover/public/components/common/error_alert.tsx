@@ -10,19 +10,19 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export const DiscoverError = ({ error }: { error: Error }) => {
-  const history = useHistory();
+  const { locator } = useDiscoverServices();
 
-  const goToMain = () => {
-    history.push('/');
+  const goToMain = async () => {
+    await locator.navigate({});
   };
 
   return (
     <EuiEmptyPrompt
       paddingSize="l"
-      iconType="alert"
+      iconType="warning"
       iconColor="danger"
       title={
         <h2>
@@ -34,10 +34,7 @@ export const DiscoverError = ({ error }: { error: Error }) => {
       body={<p>{error.message}</p>}
       actions={
         <EuiButton color="primary" fill onClick={goToMain}>
-          <FormattedMessage
-            id="discover.goToDiscoverMainViewButtonText"
-            defaultMessage="Go to Discover main view"
-          />
+          <FormattedMessage id="discover.goToDiscoverButtonText" defaultMessage="Go to Discover" />
         </EuiButton>
       }
     />

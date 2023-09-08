@@ -7,12 +7,14 @@
 
 import {
   AreaSeries,
+  BarSeries,
   Chart,
   CurveType,
   LineSeries,
   PartialTheme,
   ScaleType,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -21,7 +23,7 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 import React from 'react';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
@@ -35,7 +37,10 @@ function hasValidTimeseries(
 
 const flexGroupStyle = { overflow: 'hidden' };
 
+type SparkPlotType = 'line' | 'bar';
+
 export function SparkPlot({
+  type = 'line',
   color,
   isLoading,
   series,
@@ -44,6 +49,7 @@ export function SparkPlot({
   compact,
   comparisonSeriesColor,
 }: {
+  type?: SparkPlotType;
   color: string;
   isLoading: boolean;
   series?: Coordinate[] | null;
@@ -65,6 +71,7 @@ export function SparkPlot({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SparkPlotItem
+          type={type}
           color={color}
           isLoading={isLoading}
           series={series}
@@ -78,6 +85,7 @@ export function SparkPlot({
 }
 
 function SparkPlotItem({
+  type,
   color,
   isLoading,
   series,
@@ -85,6 +93,7 @@ function SparkPlotItem({
   comparisonSeriesColor,
   compact,
 }: {
+  type?: SparkPlotType;
   color: string;
   isLoading: boolean;
   series?: Coordinate[] | null;
@@ -134,29 +143,56 @@ function SparkPlotItem({
         <Settings
           theme={[sparkplotChartTheme, ...defaultChartTheme]}
           showLegend={false}
-          tooltip="none"
         />
-        <LineSeries
-          id="Sparkline"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={series}
-          color={color}
-          curve={CurveType.CURVE_MONOTONE_X}
-        />
-        {hasComparisonSeries && (
-          <AreaSeries
-            id="comparisonSeries"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'x'}
-            yAccessors={['y']}
-            data={comparisonSeries}
-            color={comparisonSeriesColor}
-            curve={CurveType.CURVE_MONOTONE_X}
-          />
+        <Tooltip type="none" />
+        {type && type === 'bar' ? (
+          <>
+            <BarSeries
+              id="barSeries"
+              xScaleType={ScaleType.Linear}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={series}
+              color={color}
+            />
+            {hasComparisonSeries && (
+              <BarSeries
+                id="comparisonBarSeries"
+                xScaleType={ScaleType.Linear}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={comparisonSeries}
+                color={comparisonSeriesColor}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <LineSeries
+              id="Sparkline"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              data={series}
+              color={color}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+            {hasComparisonSeries && (
+              <AreaSeries
+                id="comparisonSeries"
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={comparisonSeries}
+                color={comparisonSeriesColor}
+                curve={CurveType.CURVE_MONOTONE_X}
+              />
+            )}
+          </>
         )}
       </Chart>
     );

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { IngestPipelineParams } from '../../../../../common/types/connectors';
+import { i18n } from '@kbn/i18n';
+
+import { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
@@ -25,5 +27,11 @@ export const updateDefaultPipeline = async (
 
 export const UpdateDefaultPipelineApiLogic = createApiLogic(
   ['content', 'update_default_pipeline_api_logic'],
-  updateDefaultPipeline
+  updateDefaultPipeline,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate('xpack.enterpriseSearch.content.indices.defaultPipelines.successToast.title', {
+        defaultMessage: 'Default pipeline successfully updated',
+      }),
+  }
 );

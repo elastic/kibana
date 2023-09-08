@@ -7,7 +7,7 @@
 import { BrushEndListener, BrushEvent, XYBrushEvent } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   EuiBadge,
   EuiFlexGroup,

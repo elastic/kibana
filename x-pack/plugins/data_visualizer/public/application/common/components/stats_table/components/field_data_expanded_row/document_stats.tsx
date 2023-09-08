@@ -9,9 +9,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, HorizontalAlignment, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps, isIndexBasedFieldVisConfig } from '../../types';
-import { roundToDecimalPlace } from '../../../utils';
 import { ExpandedRowPanel } from './expanded_row_panel';
 
 const metaTableColumns = [

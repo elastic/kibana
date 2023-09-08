@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   SYNC_FREQUENCY_PATH,
@@ -22,7 +24,7 @@ import { Frequency } from './frequency';
 import { Synchronization } from './synchronization';
 
 export const SynchronizationRouter: React.FC = () => (
-  <Switch>
+  <Routes>
     <Route exact path={getSourcesPath(SOURCE_SYNCHRONIZATION_PATH, true)}>
       <Synchronization />
     </Route>
@@ -39,5 +41,5 @@ export const SynchronizationRouter: React.FC = () => (
       from={getSourcesPath(OLD_OBJECTS_AND_ASSETS_PATH, true)}
       to={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}
     />
-  </Switch>
+  </Routes>
 );

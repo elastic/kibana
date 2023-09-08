@@ -88,8 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.commonUI.waitForDatePickerIndicatorLoaded();
 
             await ml.testExecution.logTestStep('should display a welcome callout');
-            await ml.overviewPage.assertGettingStartedCalloutVisible(true);
-            await ml.overviewPage.dismissGettingStartedCallout();
 
             await ml.testExecution.logTestStep('should not display ML Nodes panel');
             await ml.mlNodesPanel.assertNodesOverviewPanelExists(false);

@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import {
-  NotificationsStart,
-  HttpStart,
-  OverlayStart,
-  SavedObjectsClientContract,
-} from '@kbn/core/public';
+import { NotificationsStart, HttpStart, OverlayStart } from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
 import { ChromeStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
 import { Workspace } from '../types';
 
@@ -58,6 +54,12 @@ export function createMockGraphStore({
     } as unknown as ChromeStart,
     createWorkspace: jest.fn((index, advancedSettings) => workspaceMock),
     getWorkspace: jest.fn(() => workspaceMock),
+    contentClient: {
+      get: jest.fn(),
+      search: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    } as unknown as ContentClient,
     indexPatternProvider: {
       get: jest.fn(async (id: string) => {
         if (id === 'missing-dataview') {
@@ -66,9 +68,6 @@ export function createMockGraphStore({
         return { id: '123', title: 'test-pattern' } as unknown as DataView;
       }),
     },
-    I18nContext: jest
-      .fn()
-      .mockImplementation(({ children }: { children: React.ReactNode }) => children),
     notifications: {
       toasts: {
         addDanger: jest.fn(),
@@ -78,14 +77,9 @@ export function createMockGraphStore({
     http: {} as HttpStart,
     notifyReact: jest.fn(),
     savePolicy: 'configAndData',
-    showSaveModal: jest.fn(),
     overlays: {
       openModal: jest.fn(),
     } as unknown as OverlayStart,
-    savedObjectsClient: {
-      find: jest.fn(),
-      get: jest.fn(),
-    } as unknown as SavedObjectsClientContract,
     handleSearchQueryError: jest.fn(),
     ...mockedDepsOverwrites,
   };

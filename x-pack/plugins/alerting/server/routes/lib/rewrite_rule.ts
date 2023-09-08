@@ -9,10 +9,11 @@ import { omit } from 'lodash';
 import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
 
 export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
-  const { outcomeMsg, alertsCount, ...rest } = lastRun;
+  const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;
   return {
     alerts_count: alertsCount,
     outcome_msg: outcomeMsg,
+    outcome_order: outcomeOrder,
     ...rest,
   };
 };
@@ -24,6 +25,7 @@ export const rewriteRule = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
+  apiKeyCreatedByUser,
   notifyWhen,
   muteAll,
   mutedInstanceIds,
@@ -56,7 +58,7 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
     group,
     id,
     params,
@@ -64,12 +66,16 @@ export const rewriteRule = ({
     ...(frequency
       ? {
           frequency: {
-            ...frequency,
+            summary: frequency.summary,
             notify_when: frequency.notifyWhen,
+            throttle: frequency.throttle,
           },
         }
       : {}),
+    ...(uuid && { uuid }),
+    ...(alertsFilter && { alerts_filter: alertsFilter }),
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
 });

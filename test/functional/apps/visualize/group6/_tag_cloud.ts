@@ -35,12 +35,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickTagCloud');
       await PageObjects.visualize.clickTagCloud();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('select Tags');
       await PageObjects.visEditor.clickBucket('Tags');
       log.debug('Click aggregation Terms');
@@ -53,11 +53,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickGo();
     });
 
+    after(async () => {
+      await PageObjects.common.unsetTime();
+    });
+
     it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
     it('should show correct tag cloud data', async function () {
+      await PageObjects.visChart.waitForVisualization();
       const data = await PageObjects.tagCloud.getTextTag();
       log.debug(data);
       expect(data).to.eql([
@@ -86,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.clickEditorSidebarCollapse();
       // Give d3 tag cloud some time to rearrange tags
       await PageObjects.common.sleep(1000);
+      await PageObjects.visChart.waitForVisualization();
       const data = await PageObjects.tagCloud.getTextTag();
       log.debug(data);
       expect(data).to.eql([
@@ -102,6 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.sleep(1000);
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.sleep(1000);
+      await PageObjects.visChart.waitForVisualization();
       const data = await PageObjects.tagCloud.getTextTag();
       expect(data).to.eql([
         '32,212,254,720',
@@ -158,7 +165,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visChart.waitForVisualization();
       });
 
@@ -173,6 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should format tags with field formatter', async function () {
+        await PageObjects.visChart.waitForVisualization();
         const data = await PageObjects.tagCloud.getTextTag();
         log.debug(data);
         expect(data).to.eql(['30GB', '20GB', '18GB', '19GB', '17GB']);
@@ -181,6 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should apply filter with unformatted value', async function () {
         await PageObjects.tagCloud.selectTagCloudTag('30GB');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visChart.waitForVisualization();
         const data = await PageObjects.tagCloud.getTextTag();
         expect(data).to.eql(['30GB']);
       });

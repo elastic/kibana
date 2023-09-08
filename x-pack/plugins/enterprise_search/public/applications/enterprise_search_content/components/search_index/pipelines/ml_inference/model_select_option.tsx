@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle } from '@elastic/eui';
 
 import {
   getMlModelTypesForModelConfig,
@@ -18,6 +18,7 @@ import { TrainedModel } from '../../../../api/ml_models/ml_trained_models_logic'
 import { getMLType, getModelDisplayTitle } from '../../../shared/ml_inference/utils';
 
 import { TrainedModelHealth } from '../ml_model_health';
+import { MLModelTypeBadge } from '../ml_model_type_badge';
 
 export interface MlModelSelectOptionProps {
   model: TrainedModel;
@@ -48,9 +49,7 @@ export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
-                <span>
-                  <EuiBadge color="hollow">{type}</EuiBadge>
-                </span>
+                <MLModelTypeBadge type={type} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

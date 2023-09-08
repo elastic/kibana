@@ -49,59 +49,79 @@ Array [
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
-      <button
-        aria-label="close"
-        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
-        type="button"
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
       >
-        <span
-          aria-hidden="true"
-          class="euiButtonIcon__icon"
-          color="inherit"
-          data-euiicon-type="cross"
-        />
-      </button>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <button
+            aria-label="close"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="cross"
+            />
+          </button>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+          />
+        </div>
+      </div>
     </div>
   </div>,
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
-  <span
-    aria-label="Loading"
-    class="euiLoadingContent"
-    role="progressbar"
+  <div
+    aria-busy="true"
+    data-test-subj="euiSkeletonLoadingAriaWrapper"
   >
     <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-    <span
-      class="emotion-euiLoadingContent__singleLine"
-    />
-  </span>,
+      aria-label="Loading "
+      class="euiSkeletonText"
+      role="progressbar"
+    >
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+      <span
+        class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+      />
+    </span>
+  </div>,
   <div
     class="euiFlyoutFooter emotion-euiFlyoutFooter"
     data-test-subj="side-panel-flyout-footer"
@@ -163,6 +183,21 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       />
+      <div
+        class="euiFlexItem emotion-euiFlexItem-growZero"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-l-flexStart-flexEnd-column"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div
@@ -175,42 +210,47 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
       <div
         class="euiFlyoutBody__overflowContent"
       >
-        <span
-          aria-label="Loading"
-          class="euiLoadingContent"
-          role="progressbar"
+        <div
+          aria-busy="true"
+          data-test-subj="euiSkeletonLoadingAriaWrapper"
         >
           <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-          <span
-            class="emotion-euiLoadingContent__singleLine"
-          />
-        </span>
+            aria-label="Loading "
+            class="euiSkeletonText"
+            role="progressbar"
+          >
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+            <span
+              class="emotion-euiSkeletonGradientAnimation-euiSkeletonText-m"
+            />
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -324,7 +364,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Host ID
         </dt>
@@ -338,7 +378,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           First seen
         </dt>
@@ -353,7 +393,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           />
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Last seen
         </dt>
@@ -377,7 +417,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           IP addresses
         </dt>
@@ -391,7 +431,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           MAC addresses
         </dt>
@@ -405,7 +445,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Platform
         </dt>
@@ -428,7 +468,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Operating system
         </dt>
@@ -442,7 +482,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Family
         </dt>
@@ -456,7 +496,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Version
         </dt>
@@ -470,7 +510,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Architecture
         </dt>
@@ -493,7 +533,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Cloud provider
         </dt>
@@ -507,7 +547,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Region
         </dt>
@@ -521,7 +561,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Instance ID
         </dt>
@@ -535,7 +575,7 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Machine type
         </dt>
@@ -667,7 +707,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Location
         </dt>
@@ -681,7 +721,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Autonomous system
         </dt>
@@ -704,7 +744,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           First seen
         </dt>
@@ -719,7 +759,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           />
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Last seen
         </dt>
@@ -743,7 +783,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Host ID
         </dt>
@@ -757,7 +797,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Host name
         </dt>
@@ -780,7 +820,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
         data-type="row"
       >
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           WhoIs
         </dt>
@@ -813,7 +853,7 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
           </span>
         </dd>
         <dt
-          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-m-normal"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
         >
           Reputation
         </dt>

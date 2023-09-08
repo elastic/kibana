@@ -30,6 +30,7 @@ test('set correct defaults', () => {
   expect(configValue).toMatchInlineSnapshot(`
     ElasticsearchConfig {
       "apiVersion": "master",
+      "apisToRedactInLogs": Array [],
       "compression": false,
       "customHeaders": Object {},
       "healthCheckDelay": "PT2.5S",

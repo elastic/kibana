@@ -10,13 +10,13 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { useCallback, useMemo } from 'react';
 import { find } from 'lodash/fp';
 import type { EuiFlexItemProps } from '@elastic/eui';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import { isAlertFromEndpointEvent } from '../../../../../../common/utils/endpoint_alert_check';
 import { SummaryValueCell } from '../../../../../../common/components/event_details/table/summary_value_cell';
-import { useRiskScore } from '../../../../../../risk_score/containers';
+import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RiskScore } from '../../../../../../common/components/severity/common';
+import { RiskScore } from '../../../../../../explore/components/risk_score/severity/common';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -24,6 +24,7 @@ import {
 import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
 import { HostDetailsLink, NetworkDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../../common/store/sourcerer/model';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import {
@@ -87,7 +88,7 @@ export const HostPanel = React.memo(
       );
     }, [browserFields, data, id]);
 
-    const { data: hostRisk, isLicenseValid: isRiskLicenseValid } = useRiskScore({
+    const { data: hostRisk, isAuthorized: isRiskScoreAuthorized } = useRiskScore({
       riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
     });
@@ -148,7 +149,7 @@ export const HostPanel = React.memo(
               )}
             </EuiFlexGroup>
             <EuiSpacer size="l" />
-            {isRiskLicenseValid && (
+            {isRiskScoreAuthorized && (
               <>
                 <EuiFlexGroup data-test-subj="host-panel-risk">
                   {hostRiskScore && (
@@ -170,6 +171,7 @@ export const HostPanel = React.memo(
                   attrName={'host.ip'}
                   idPrefix="alert-details-page-user"
                   render={renderHostIp}
+                  sourcererScopeId={SourcererScopeName.detections}
                 />
               </HostPanelSection>
             </EuiFlexGroup>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { errors } from '@elastic/elasticsearch';
@@ -20,6 +20,8 @@ import { FleetError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
+
+import { auditLoggingService } from '../audit_logging';
 
 import { invalidateAPIKeys } from './security';
 
@@ -106,6 +108,10 @@ export async function deleteEnrollmentApiKey(
 ) {
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
+  auditLoggingService.writeCustomAuditLog({
+    message: `User deleting enrollment API key [id=${enrollmentApiKey.id}] [api_key_id=${enrollmentApiKey.api_key_id}]`,
+  });
+
   await invalidateAPIKeys([enrollmentApiKey.api_key_id]);
 
   if (forceDelete) {
@@ -161,7 +167,7 @@ export async function generateEnrollmentAPIKey(
     forceRecreate?: boolean;
   }
 ): Promise<EnrollmentAPIKey> {
-  const id = uuid.v4();
+  const id = uuidv4();
   const { name: providedKeyName, forceRecreate } = data;
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);
@@ -207,6 +213,10 @@ export async function generateEnrollmentAPIKey(
   }
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
+
+  auditLoggingService.writeCustomAuditLog({
+    message: `User creating enrollment API key [name=${name}] [policy_id=${agentPolicyId}]`,
+  });
 
   const key = await esClient.security
     .createApiKey({

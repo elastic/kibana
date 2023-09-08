@@ -120,32 +120,10 @@ export const TagsAddRemove: React.FC<Props> = ({
         errorMessage
       );
     } else {
-      // sending updated tags to add/remove, in case multiple actions are done quickly and the first one is not yet propagated
-      const updatedTagsToAdd = tagsToAdd.concat(
-        labels
-          .filter(
-            (tag) =>
-              tag.checked === 'on' &&
-              !selectedTags.includes(tag.label) &&
-              !tagsToRemove.includes(tag.label)
-          )
-          .map((tag) => tag.label)
-      );
-      const updatedTagsToRemove = tagsToRemove.concat(
-        labels
-          .filter(
-            (tag) =>
-              tag.checked !== 'on' &&
-              selectedTags.includes(tag.label) &&
-              !tagsToAdd.includes(tag.label)
-          )
-          .map((tag) => tag.label)
-      );
-
       updateTagsHook.bulkUpdateTags(
         agents!,
-        updatedTagsToAdd,
-        updatedTagsToRemove,
+        tagsToAdd,
+        tagsToRemove,
         (hasCompleted) => handleTagsUpdated(tagsToAdd, tagsToRemove, hasCompleted),
         successMessage,
         errorMessage

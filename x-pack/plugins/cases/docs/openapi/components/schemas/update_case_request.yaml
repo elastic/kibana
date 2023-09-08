@@ -8,6 +8,8 @@ properties:
   cases:
     type: array
     description: An array containing one or more case objects.
+    maxItems: 100
+    minItems: 1
     items:
       type: object
       required:
@@ -31,20 +33,28 @@ properties:
         id:
           description: The identifier for the case.
           type: string
+          maxLength: 30000
         settings:
           $ref: 'settings.yaml'
         severity:
-          $ref: 'severity_property.yaml' 
+          $ref: 'severity_property.yaml'
         status:
           $ref: 'status.yaml'
         tags:
           description: The words and phrases that help categorize cases.
           type: array
+          maxItems: 200
           items:
             type: string
+            maxLength: 256
+        category:
+          description: Category for the case. It could be a word or a phrase to categorize the case.
+          type: string
+          maxLength: 50
         title:
           description: A title for the case.
           type: string
+          maxLength: 160
         version:
           description: The current version of the case. To determine this value, use the get case or find cases APIs.
           type: string

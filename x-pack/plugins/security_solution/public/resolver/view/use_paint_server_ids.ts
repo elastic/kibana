@@ -7,16 +7,12 @@
 
 import { useMemo } from 'react';
 
-import { useSelector } from 'react-redux';
-
-import * as selectors from '../store/selectors';
-
 /**
  * Access the HTML IDs for this Resolver's reusable SVG 'paint servers'.
  * In the future these IDs may come from an outside provider (and may be shared by multiple Resolver instances.)
  */
-export function usePaintServerIDs() {
-  const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
+export function usePaintServerIDs({ id }: { id: string }) {
+  const resolverComponentInstanceID = id;
   return useMemo(() => {
     const prefix = `${resolverComponentInstanceID}-symbols`;
     return {

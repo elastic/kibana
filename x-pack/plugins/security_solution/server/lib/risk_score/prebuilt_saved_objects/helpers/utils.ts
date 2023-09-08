@@ -8,12 +8,6 @@
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { SavedObjectTemplate } from '../types';
 
-export interface Tag {
-  id: string;
-  name: string;
-  description: string;
-}
-
 export const HOST_RISK_SCORE = 'Host Risk Score';
 export const USER_RISK_SCORE = 'User Risk Score';
 

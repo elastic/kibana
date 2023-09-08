@@ -25,6 +25,13 @@ export interface ISavedObjectTypeRegistry {
   getVisibleTypes(): SavedObjectsType[];
 
   /**
+   * Returns all visible {@link SavedObjectsType | types} exposed to the global SO HTTP APIs
+   *
+   * A visibleToHttpApis type is a type that doesn't explicitly define `hidden=true` nor `hiddenFromHttpApis=true` during registration.
+   */
+  getVisibleToHttpApisTypes(): SavedObjectsType[];
+
+  /**
    * Return all {@link SavedObjectsType | types} currently registered, including the hidden ones.
    *
    * To only get the visible types (which is the most common use case), use `getVisibleTypes` instead.
@@ -66,6 +73,11 @@ export interface ISavedObjectTypeRegistry {
    */
   isHidden(type: string): boolean;
 
+  /**
+   * Returns the `hiddenFromHttpApis` property for a given type, or `false` if
+   * the type is not registered
+   */
+  isHiddenFromHttpApis(type: string): boolean;
   /**
    * Returns the `indexPattern` property for given type, or `undefined` if
    * the type is not registered.

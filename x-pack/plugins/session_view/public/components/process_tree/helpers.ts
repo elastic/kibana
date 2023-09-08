@@ -4,24 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { escapeRegExp } from 'lodash';
 import { sortProcesses } from '../../../common/utils/sort_processes';
-import {
+import type {
   AlertStatusEventEntityIdMap,
-  EventKind,
   Process,
   ProcessEvent,
   ProcessMap,
   ProcessFields,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { ProcessImpl } from './hooks';
 
 // Creates an instance of Process, from a nested leader process fieldset
 // This is used to ensure we always have a record for a session leader, as well as
 // a parent record for potentially orphaned processes
 export function inferProcessFromLeaderInfo(sourceEvent?: ProcessEvent, leader?: ProcessFields) {
-  const entityId = leader?.entity_id || uuid.v4();
+  const entityId = leader?.entity_id || uuidv4();
   const process = new ProcessImpl(entityId);
 
   if (sourceEvent && leader) {
@@ -94,7 +93,7 @@ export const updateProcessMap = (processMap: ProcessMap, events: ProcessEvent[])
 
     if (event.kibana?.alert) {
       process.addAlert(event);
-    } else if (event.event?.kind === EventKind.event) {
+    } else if (event.event?.kind === 'event') {
       process.addEvent(event);
     }
   });
@@ -264,6 +263,20 @@ export const autoExpandProcessTree = (processMap: ProcessMap, jumpToEntityId?: s
   }
 
   return processMap;
+};
+
+// recusively collapses all children below provided node
+export const collapseProcessTree = (node: Process) => {
+  if (!node.autoExpand) {
+    return;
+  }
+
+  if (node.children) {
+    node.children.forEach((child) => {
+      child.autoExpand = false;
+      collapseProcessTree(child);
+    });
+  }
 };
 
 export const processNewEvents = (

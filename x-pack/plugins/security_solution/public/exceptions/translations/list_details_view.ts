@@ -94,12 +94,6 @@ export const EXCEPTION_ITEM_DELETE_TEXT = (itemName: string) =>
     }
   );
 
-export const EXCEPTION_LIST_EXPORTED_SUCCESSFULLY = (listName: string) =>
-  i18n.translate('xpack.securitySolution.exceptions.list.exported_successfully', {
-    values: { listName },
-    defaultMessage: '{listName} exported successfully',
-  });
-
 export const EXCEPTION_LIST_DELETED_SUCCESSFULLY = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.list.deleted_successfully', {
     values: { listName },
@@ -118,10 +112,17 @@ export const MANAGE_RULES_SAVE = i18n.translate(
     defaultMessage: 'Save',
   }
 );
-export const MANAGE_RULES_HEADER = i18n.translate(
-  'xpack.securitySolution.exceptions.list.manage_rules_header',
+export const LINK_RULES_HEADER = i18n.translate(
+  'xpack.securitySolution.exceptions.list.link_rules_header',
   {
-    defaultMessage: 'Manage rules',
+    defaultMessage: 'Link rules',
+  }
+);
+
+export const LINK_RULES_OVERFLOW_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.list.link_rules_overflow_button_title',
+  {
+    defaultMessage: 'Link rules',
   }
 );
 
@@ -143,5 +144,40 @@ export const EXPORT_EXCEPTION_LIST = i18n.translate(
   'xpack.securitySolution.exceptionsTable.exportExceptionList',
   {
     defaultMessage: 'Export exception list',
+  }
+);
+
+export const EXCEPTION_MANAGE_RULES_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.manageRulesError',
+  {
+    defaultMessage: 'Manage rules error',
+  }
+);
+
+export const EXCEPTION_MANAGE_RULES_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.manageRulesErrorDescription',
+  {
+    defaultMessage: 'An error occurred linking or unlinking rules',
+  }
+);
+
+export const EXCEPTION_EXPORT_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.exportListDescription',
+  {
+    defaultMessage: 'An error occurred exporting a list',
+  }
+);
+
+export const DUPLICATE_EXCEPTION_LIST = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.duplicateExceptionList',
+  {
+    defaultMessage: 'Duplicate exception list',
+  }
+);
+
+export const EXCEPTION_DUPLICATE_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptionsTable.duplicateListDescription',
+  {
+    defaultMessage: 'An error occurred duplicating a list',
   }
 );

@@ -12,6 +12,7 @@ export enum JOB_TYPE {
   ADVANCED = 'advanced',
   CATEGORIZATION = 'categorization',
   RARE = 'rare',
+  GEO = 'geo',
 }
 
 export enum CREATED_BY_LABEL {
@@ -20,6 +21,7 @@ export enum CREATED_BY_LABEL {
   POPULATION = 'population-wizard',
   CATEGORIZATION = 'categorization-wizard',
   RARE = 'rare-wizard',
+  GEO = 'geo-wizard',
   APM_TRANSACTION = 'ml-module-apm-transaction',
   SINGLE_METRIC_FROM_LENS = 'single-metric-wizard-from-lens',
   MULTI_METRIC_FROM_LENS = 'multi-metric-wizard-from-lens',
@@ -31,3 +33,5 @@ export const DEFAULT_RARE_BUCKET_SPAN = '1h';
 export const DEFAULT_QUERY_DELAY = '60s';
 
 export const SHARED_RESULTS_INDEX_NAME = 'shared';
+
+export const NUMBER_OF_CATEGORY_EXAMPLES = 5;

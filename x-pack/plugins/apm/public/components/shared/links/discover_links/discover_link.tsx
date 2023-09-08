@@ -69,5 +69,5 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
     location,
   });
 
-  return <EuiLink {...rest} href={href} />;
+  return <EuiLink data-test-subj="apmDiscoverLinkLink" {...rest} href={href} />;
 }

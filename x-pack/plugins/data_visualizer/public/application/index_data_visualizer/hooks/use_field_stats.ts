@@ -12,6 +12,7 @@ import { last, cloneDeep } from 'lodash';
 import { mergeMap, switchMap } from 'rxjs/operators';
 import { Comparators } from '@elastic/eui';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
+import { buildBaseFilterCriteria, getSafeAggregationName } from '@kbn/ml-query-utils';
 import type {
   DataStatsFetchProgress,
   FieldStatsSearchStrategyReturnBase,
@@ -22,10 +23,6 @@ import type {
 import { useDataVisualizerKibana } from '../../kibana_context';
 import type { FieldRequestConfig } from '../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
-import {
-  buildBaseFilterCriteria,
-  getSafeAggregationName,
-} from '../../../../common/utils/query_utils';
 import type { FieldStats, FieldStatsError } from '../../../../common/types/field_stats';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { MAX_EXAMPLES_DEFAULT } from '../search_strategy/requests/constants';
@@ -173,16 +170,17 @@ export function useFieldStatsSearchStrategy(
       browserSessionSeed: searchStrategyParams.browserSessionSeed,
       samplingOption: searchStrategyParams.samplingOption,
     };
+
+    const { sessionId, embeddableExecutionContext } = searchStrategyParams;
     const searchOptions: ISearchOptions = {
       abortSignal: abortCtrl.current.signal,
-      sessionId: searchStrategyParams?.sessionId,
+      sessionId,
+      ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
     };
 
     const batches = createBatchedRequests(
       pageOfConfigs.map((config, idx) => ({
-        fieldName: config.fieldName,
-        type: config.type,
-        cardinality: config.cardinality,
+        ...config,
         safeFieldName: getSafeAggregationName(config.fieldName, idx),
       })),
       10

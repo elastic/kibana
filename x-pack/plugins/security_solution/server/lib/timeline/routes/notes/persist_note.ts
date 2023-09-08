@@ -17,12 +17,12 @@ import type { ConfigType } from '../../../..';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistNoteSchema } from '../../schemas/notes';
+import { persistNoteSchema } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.patch(

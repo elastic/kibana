@@ -15,9 +15,11 @@ import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { Switch, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
+
+import { Routes } from '@kbn/shared-ux-router';
 
 import { AnalyticsRouter } from '../analytics';
 import { ApiLogs } from '../api_logs';
@@ -107,7 +109,7 @@ describe('EngineRouter', () => {
   it('renders a default engine overview', () => {
     const wrapper = shallow(<EngineRouter />);
 
-    expect(wrapper.find(Switch)).toHaveLength(1);
+    expect(wrapper.find(Routes)).toHaveLength(1);
     expect(wrapper.find(EngineOverview)).toHaveLength(1);
   });
 

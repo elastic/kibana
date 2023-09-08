@@ -25,6 +25,8 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     online: 0,
     total: 0,
     other: 0,
+    all: 0,
+    active: 0,
   },
   artifacts: {
     location: {

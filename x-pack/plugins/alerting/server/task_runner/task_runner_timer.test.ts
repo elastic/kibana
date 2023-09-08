@@ -32,6 +32,7 @@ describe('TaskRunnerTimer', () => {
       timer.setDuration(TaskRunnerTimerSpan.StartTaskRun, new Date('2020-03-06'));
       expect(timer.toJson()).toEqual({
         claim_to_start_duration_ms: 259200000,
+        persist_alerts_duration_ms: 0,
         prepare_rule_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,
@@ -49,6 +50,7 @@ describe('TaskRunnerTimer', () => {
       );
       expect(timer.toJson()).toEqual({
         claim_to_start_duration_ms: 432000000,
+        persist_alerts_duration_ms: 0,
         prepare_rule_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,

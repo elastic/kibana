@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchBarProps } from './search_bar';
 
 const Fallback = () => <div />;
@@ -24,4 +24,3 @@ const WrappedSearchBar = <QT extends AggregateQuery | Query = Query>(
 export const SearchBar = WrappedSearchBar;
 export type { StatefulSearchBarProps } from './create_search_bar';
 export type { SearchBarProps, SearchBarOwnProps } from './search_bar';
-export { createSearchBar } from './create_search_bar';

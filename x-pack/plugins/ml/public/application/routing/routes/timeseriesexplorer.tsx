@@ -9,18 +9,22 @@ import { isEqual } from 'lodash';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
-
 import { i18n } from '@kbn/i18n';
-
+import { useUrlState } from '@kbn/ml-url-state';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import { ML_PAGES } from '../../../locator';
 import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
-import { NavigateToPath, useNotifications } from '../../contexts/kibana';
-import { useMlContext } from '../../contexts/ml';
-
+import {
+  NavigateToPath,
+  useMlApiContext,
+  useMlKibana,
+  useNotifications,
+  useUiSettings,
+} from '../../contexts/kibana';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
-import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { mlForecastService } from '../../services/forecast_service';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
@@ -31,15 +35,11 @@ import {
 } from '../../timeseriesexplorer/timeseriesexplorer_utils';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
-import { useUrlState } from '../../util/url_state';
 import { useTableInterval } from '../../components/controls/select_interval';
 import { useTableSeverity } from '../../components/controls/select_severity';
-
-import { MlRoute, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
-import { basicResolvers } from '../resolvers';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import { useRouteResolver } from '../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
-import { useTimefilter } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
@@ -49,13 +49,14 @@ import type { TimeRangeBounds } from '../../util/time_buckets';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 import { useRefresh } from '../use_refresh';
 import { TimeseriesexplorerNoChartData } from '../../timeseriesexplorer/components/timeseriesexplorer_no_chart_data';
+import { basicResolvers } from '../resolvers';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
   id: 'timeseriesexplorer',
-  path: '/timeseriesexplorer',
+  path: createPath(ML_PAGES.SINGLE_METRIC_VIEWER),
   title: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
     defaultMessage: 'Single Metric Viewer',
   }),
@@ -73,26 +74,25 @@ export const timeSeriesExplorerRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context, results } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    {
-      ...basicResolvers(deps),
-      jobs: mlJobService.loadJobsWrapper,
-      jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
-    }
-  );
+  const mlApi = useMlApiContext();
+  const uiSettings = useUiSettings();
+  const { context, results } = useRouteResolver('full', ['canGetJobs'], {
+    ...basicResolvers(),
+    jobs: mlJobService.loadJobsWrapper,
+    jobsWithTimeRange: () => mlApi.jobs.jobsWithTimerange(getDateFormatTz()),
+  });
+
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
     <PageLoader context={context}>
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
-        <TimeSeriesExplorerUrlStateManager
-          config={deps.config}
-          jobsWithTimeRange={results.jobsWithTimeRange.jobs}
-        />
+        {results ? (
+          <TimeSeriesExplorerUrlStateManager
+            config={uiSettings}
+            jobsWithTimeRange={results.jobsWithTimeRange.jobs}
+          />
+        ) : null}
       </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
   );
@@ -101,7 +101,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 type AppStateZoom = Exclude<TimeSeriesExplorerAppState['mlTimeSeriesExplorer'], undefined>['zoom'];
 
 interface TimeSeriesExplorerUrlStateManager {
-  config: any;
+  config: IUiSettingsClient;
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
@@ -109,7 +109,11 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
-  const dataViewsService = useMlContext().dataViewsContract;
+  const {
+    services: {
+      data: { dataViews: dataViewsService },
+    },
+  } = useMlKibana();
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =

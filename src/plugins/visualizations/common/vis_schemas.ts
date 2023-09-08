@@ -33,11 +33,6 @@ export function convertToSchemaConfig(agg: IAggConfig): SchemaConfig<METRIC_TYPE
 
   const params: SchemaConfigParams = {};
 
-  if (aggType === 'geohash_grid') {
-    params.precision = agg.params.precision;
-    params.useGeocentroid = agg.params.useGeocentroid;
-  }
-
   const label = agg.makeLabel && agg.makeLabel();
   return {
     accessor: 0,

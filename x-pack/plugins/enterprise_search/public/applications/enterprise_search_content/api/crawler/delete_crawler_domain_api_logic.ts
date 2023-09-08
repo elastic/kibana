@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -34,5 +36,14 @@ export const deleteCrawlerDomain = async ({
 
 export const DeleteCrawlerDomainApiLogic = createApiLogic(
   ['delete_crawler_domain'],
-  deleteCrawlerDomain
+  deleteCrawlerDomain,
+  {
+    showSuccessFlashFn: ({ domain }) =>
+      i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.delete.successMessage', {
+        defaultMessage: "Successfully deleted domain '{domainUrl}'",
+        values: {
+          domainUrl: domain.url,
+        },
+      }),
+  }
 );

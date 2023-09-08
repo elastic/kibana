@@ -7,14 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
-  clearFlashMessages,
-  flashAPIErrors,
-  flashSuccessToast,
-} from '../../../../shared/flash_messages';
 
 import {
   CancelSyncsApiArgs,
@@ -57,17 +50,6 @@ export const CancelSyncsLogic = kea<MakeLogicType<CancelSyncsLogicValues, Cancel
         if (values.isConnectorIndex && values.connectorId) {
           actions.makeCancelSyncsRequest({ connectorId: values.connectorId });
         }
-      },
-      cancelSyncsApiError: (e) => flashAPIErrors(e),
-      cancelSyncsApiSuccess: () => {
-        flashSuccessToast(
-          i18n.translate('xpack.enterpriseSearch.content.searchIndex.cancelSyncs.successMessage', {
-            defaultMessage: 'Successfully canceled syncs',
-          })
-        );
-      },
-      makeCancelSyncsRequest: () => {
-        clearFlashMessages();
       },
     }),
   }

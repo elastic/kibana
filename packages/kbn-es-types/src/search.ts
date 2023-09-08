@@ -162,6 +162,20 @@ export type AggregateOf<
       cardinality: {
         value: number;
       };
+      change_point: {
+        bucket?: {
+          key: string;
+        };
+        type: Record<
+          string,
+          {
+            change_point?: number;
+            r_value?: number;
+            trend?: string;
+            p_value: number;
+          }
+        >;
+      };
       children: {
         doc_count: number;
       } & SubAggregateOf<TAggregationContainer, TDocument>;
@@ -577,7 +591,7 @@ export type AggregateOf<
   >
 >;
 
-type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
+export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
     ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}

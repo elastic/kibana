@@ -8,7 +8,7 @@
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test-jest-helpers/target_node/src/stub_web_worker';
+import '@kbn/web-worker-stub';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
@@ -17,10 +17,10 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { AllRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';
 import { RuleEditorPanel } from './rule_editor_panel';
 import { VisualRuleEditor } from './visual_rule_editor';
+import { AllRule, FieldRule } from '../../model';
 
 describe('RuleEditorPanel', () => {
   const renderView = (props: Omit<React.ComponentProps<typeof RuleEditorPanel>, 'docLinks'>) => {

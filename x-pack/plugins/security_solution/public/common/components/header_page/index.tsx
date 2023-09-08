@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import { EuiProgress, EuiPageHeader, EuiPageHeaderSection, EuiSpacer } from '@elastic/eui';
+import {
+  EuiProgress,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
+import styled, { css as styleCss } from 'styled-components';
 
 import type { LinkIconProps } from '../link_icon';
 import { LinkIcon } from '../link_icon';
 import type { SubtitleProps } from '../subtitle';
 import { Subtitle } from '../subtitle';
 import { Title } from './title';
-import type { DraggableArguments, BadgeOptions, TitleProp } from './types';
+import type { BadgeOptions, TitleProp } from './types';
 import { useFormatUrl } from '../link_to';
 import type { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../lib/kibana';
@@ -23,19 +30,10 @@ interface HeaderProps {
   isLoading?: boolean;
 }
 
-const Header = styled.header.attrs({
-  className: 'securitySolutionHeaderPage',
-})<HeaderProps>`
-  ${({ border, theme }) => css`
-    margin-bottom: ${theme.eui.euiSizeL};
-  `}
-`;
-Header.displayName = 'Header';
-
 const LinkBack = styled.div.attrs({
   className: 'securitySolutionHeaderPage__linkBack',
 })`
-  ${({ theme }) => css`
+  ${({ theme }) => styleCss`
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
     margin-bottom: ${theme.eui.euiSizeS};
@@ -51,6 +49,18 @@ const HeaderSection = styled(EuiPageHeaderSection)`
 `;
 HeaderSection.displayName = 'HeaderSection';
 
+function Divider(): JSX.Element {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        border-bottom: ${euiTheme.border.thin};
+      `}
+    />
+  );
+}
+
 interface BackOptions {
   pageId: SecurityPageName;
   text: LinkIconProps['children'];
@@ -64,7 +74,6 @@ export interface HeaderPageProps extends HeaderProps {
   backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
-  draggableArguments?: DraggableArguments;
   rightSideItems?: React.ReactNode[];
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
@@ -103,7 +112,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   badgeOptions,
   border,
   children,
-  draggableArguments,
   isLoading,
   rightSideItems,
   subtitle,
@@ -112,21 +120,19 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   titleNode,
 }) => (
   <>
-    <EuiPageHeader alignItems="center" bottomBorder={border} rightSideItems={rightSideItems}>
+    <EuiPageHeader alignItems="center" rightSideItems={rightSideItems}>
       <HeaderSection>
         {backOptions && <HeaderLinkBack backOptions={backOptions} />}
         {!backOptions && backComponent && <>{backComponent}</>}
 
-        {titleNode || (
-          <Title
-            draggableArguments={draggableArguments}
-            title={title}
-            badgeOptions={badgeOptions}
-          />
-        )}
+        {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
 
-        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+        {subtitle && (
+          <>
+            <EuiSpacer size="s" />
+            <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />
+          </>
+        )}
         {border && isLoading && <EuiProgress size="xs" color="accent" />}
       </HeaderSection>
 
@@ -136,6 +142,18 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
         </EuiPageHeaderSection>
       )}
     </EuiPageHeader>
+    {subtitle2 && (
+      <>
+        <EuiSpacer size="xs" />
+        <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />
+      </>
+    )}
+    {border && (
+      <>
+        <EuiSpacer size="m" />
+        <Divider />
+      </>
+    )}
     {/* Manually add a 'padding-bottom' to header */}
     <EuiSpacer size="l" />
   </>

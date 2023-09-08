@@ -19,12 +19,20 @@ interface CommonProps {
   policyId: string;
   policyName: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS;
+  canWriteArtifact?: boolean;
   getPolicyArtifactsPath: (policyId: string) => string;
   getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
-  ({ policyId, policyName, labels, getPolicyArtifactsPath, getArtifactPath }) => {
+  ({
+    policyId,
+    policyName,
+    labels,
+    canWriteArtifact = false,
+    getPolicyArtifactsPath,
+    getArtifactPath,
+  }) => {
     const { onClickHandler, toRouteUrl } = useGetLinkTo(
       policyId,
       policyName,
@@ -42,10 +50,18 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
           title={<h2>{labels.emptyUnexistingTitle}</h2>}
           body={labels.emptyUnexistingMessage}
           actions={
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiButton color="primary" fill onClick={onClickHandler} href={toRouteUrl}>
-              {labels.emptyUnexistingPrimaryActionButtonTitle}
-            </EuiButton>
+            canWriteArtifact ? (
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiButton
+                color="primary"
+                fill
+                onClick={onClickHandler}
+                href={toRouteUrl}
+                data-test-subj="unexisting-manage-artifacts-button"
+              >
+                {labels.emptyUnexistingPrimaryActionButtonTitle}
+              </EuiButton>
+            ) : null
           }
         />
       </EuiPageTemplate>

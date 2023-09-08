@@ -46,6 +46,7 @@ describe('useGetEndpointDetails hook', () => {
 
     expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalledWith({
       path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: '123' }),
+      version: '2023-10-31',
     });
   });
 
@@ -53,7 +54,10 @@ describe('useGetEndpointDetails hook', () => {
     await renderReactQueryHook(() => useGetEndpointDetails(''));
 
     expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalledWith({
-      path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: 'undefined' }),
+      path: resolvePathVariables(HOST_METADATA_GET_ROUTE, {
+        id: 'undefined',
+      }),
+      version: '2023-10-31',
     });
   });
 

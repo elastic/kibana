@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
+import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteAllAlerts } from '../../utils';
+import { deleteAllRules } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   describe('create_new_terms', () => {
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should not be able to create a new terms rule with too small history window', async () => {
@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
 
       expect(response.status).to.equal(400);
@@ -50,6 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       const response = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
 
       expect(response.status).to.equal(400);

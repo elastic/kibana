@@ -34,38 +34,36 @@ import {
   CurveType,
   CustomAnnotationTooltip,
   LineAnnotation,
-  LineSeries,
   LineAnnotationDatum,
+  LineAnnotationEvent,
+  LineSeries,
   Position,
   RectAnnotation,
   RectAnnotationDatum,
+  RectAnnotationEvent,
   ScaleType,
   Settings,
   timeFormatter,
-  RectAnnotationEvent,
-  LineAnnotationEvent,
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
-
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import {
   CombinedJobWithStats,
-  ModelSnapshot,
   MlSummaryJob,
+  ModelSnapshot,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useMlApiContext } from '../../../../contexts/kibana';
-import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
+import { useCurrentThemeVars, useMlApiContext } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
-import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
+import { CHART_DIRECTION, CHART_SIZE, ChartDirectionType } from './constants';
 import { loadFullJob } from '../utils';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { fillMissingChartData, type ChartDataWithNullValues } from './fill_missing_chart_data';
+import { type ChartDataWithNullValues, fillMissingChartData } from './fill_missing_chart_data';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
@@ -131,7 +129,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<ChartDataWithNullValues>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
-  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
+  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(false);
   const [range, setRange] = useState<{ start: string; end: string } | undefined>();
   const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
   const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
@@ -142,10 +140,8 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     results: { getDatafeedResultChartData },
   } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
-  const { euiTheme } = useCurrentEuiTheme();
-
+  const { euiTheme } = useCurrentThemeVars();
   const handleChange = (date: moment.Moment) => setEndDate(date);
-
   const handleEndDateChange = (direction: ChartDirectionType) => {
     if (data.bucketSpan === undefined) return;
 
@@ -188,7 +184,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
           chartSourceData = fillMissingChartData(chartSourceData, chartBucketData);
         }
       }
-
       setSourceData(chartSourceData);
       setBucketData(chartBucketData);
       setAnnotationData({
@@ -260,6 +255,12 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const { datafeedConfig, bucketSpan, isInitialized } = data;
   const checkboxIdAnnotation = useMemo(() => htmlIdGenerator()(), []);
   const checkboxIdModelSnapshot = useMemo(() => htmlIdGenerator()(), []);
+  const hasOnlyEmptyValues = useMemo(
+    () =>
+      !bucketData.some((datum) => datum[1] !== null && datum[1] !== 0) &&
+      !sourceData.some((datum) => datum[1] !== null && datum[1] !== 0),
+    [bucketData, sourceData]
+  );
 
   return (
     <EuiPortal>
@@ -443,7 +444,15 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
-                          tickFormat={(d) => (d === null ? notAvailableMessage : d)}
+                          domain={
+                            hasOnlyEmptyValues
+                              ? {
+                                  min: 0,
+                                  max: 10,
+                                }
+                              : undefined
+                          }
+                          tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
                         />
                         {showAnnotations ? (
                           <>

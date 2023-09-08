@@ -75,7 +75,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
           {drilldown.error && (
             <EuiToolTip id={`drilldownError-${drilldown.id}`} content={drilldown.error}>
               <EuiIcon
-                type="alert"
+                type="warning"
                 color="danger"
                 title={drilldown.error}
                 aria-label={drilldown.error}

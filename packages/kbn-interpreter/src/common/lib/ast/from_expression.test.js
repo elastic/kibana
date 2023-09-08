@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromExpression } from '@kbn/interpreter';
+import { fromExpression } from './from_expression';
 import { getType } from '../get_type';
 
 describe('fromExpression', () => {

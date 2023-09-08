@@ -36,9 +36,9 @@ import {
 } from './selectors';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import { usersActions } from '../../../users/store';
-import { hostsActions } from '../../../hosts/store';
-import { networkActions } from '../../../network/store';
+import { usersActions } from '../../../explore/users/store';
+import { hostsActions } from '../../../explore/hosts/store';
+import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
@@ -295,7 +295,23 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, []);
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
-
+    const onTimeRangeChange = useCallback(
+      ({ query, dateRange }) => {
+        const isQuickSelection = dateRange.from.includes('now') || dateRange.to.includes('now');
+        updateSearch({
+          end: dateRange.to,
+          filterManager,
+          id,
+          isInvalid: false,
+          isQuickSelection,
+          query,
+          setTablesActivePageToZero,
+          start: dateRange.from,
+          updateTime: true,
+        });
+      },
+      [filterManager, id, setTablesActivePageToZero, updateSearch]
+    );
     return (
       <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
@@ -307,6 +323,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           onQuerySubmit={onQuerySubmit}
           onRefresh={onRefresh}
           onSaved={onSaved}
+          onTimeRangeChange={onTimeRangeChange}
           onSavedQueryUpdated={onSavedQueryUpdated}
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}

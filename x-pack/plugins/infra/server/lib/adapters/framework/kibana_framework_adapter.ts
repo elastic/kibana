@@ -11,12 +11,12 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   CallWithRequestParams,
-  InfraDatabaseFieldCapsResponse,
   InfraDatabaseGetIndicesAliasResponse,
   InfraDatabaseGetIndicesResponse,
   InfraDatabaseMultiResponse,
@@ -24,6 +24,7 @@ import {
   InfraRouteConfig,
   InfraServerPluginSetupDeps,
   InfraServerPluginStartDeps,
+  InfraVersionedRouteConfig,
 } from './adapter_types';
 
 interface FrozenIndexParams {
@@ -78,6 +79,37 @@ export class KibanaFramework {
     }
   }
 
+  public registerVersionedRoute<Method extends RouteMethod = any>(
+    config: InfraVersionedRouteConfig<Method>
+  ) {
+    const defaultOptions = {
+      tags: ['access:infra'],
+    };
+    const routeConfig = {
+      access: config.access,
+      path: config.path,
+      // Currently we have no use of custom options beyond tags, this can be extended
+      // beyond defaultOptions if it's needed.
+      options: defaultOptions,
+    };
+    switch (config.method) {
+      case 'get':
+        return this.router.versioned.get(routeConfig);
+      case 'post':
+        return this.router.versioned.post(routeConfig);
+      case 'delete':
+        return this.router.versioned.delete(routeConfig);
+      case 'put':
+        return this.router.versioned.put(routeConfig);
+      case 'patch':
+        return this.router.versioned.patch(routeConfig);
+      default:
+        throw new RangeError(
+          `#registerVersionedRoute: "${config.method}" is not an accepted method`
+        );
+    }
+  }
+
   callWithRequest<Hit = {}, Aggregation = undefined>(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'search',
@@ -88,11 +120,6 @@ export class KibanaFramework {
     endpoint: 'msearch',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
-  callWithRequest(
-    requestContext: InfraPluginRequestHandlerContext,
-    endpoint: 'fieldCaps',
-    options?: CallWithRequestParams
-  ): Promise<InfraDatabaseFieldCapsResponse>;
   callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'indices.existsAlias',
@@ -118,7 +145,6 @@ export class KibanaFramework {
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
-
   public async callWithRequest(
     requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
@@ -161,11 +187,6 @@ export class KibanaFramework {
           ...params,
           ...frozenIndicesParams,
         } as estypes.MsearchRequest);
-        break;
-      case 'fieldCaps':
-        apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
-          ...params,
-        });
         break;
       case 'indices.existsAlias':
         apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
@@ -225,17 +246,7 @@ export class KibanaFramework {
   }
 
   public getSpaceId(request: KibanaRequest): string {
-    const spacesPlugin = this.plugins.spaces;
-
-    if (
-      spacesPlugin &&
-      spacesPlugin.spacesService &&
-      typeof spacesPlugin.spacesService.getSpaceId === 'function'
-    ) {
-      return spacesPlugin.spacesService.getSpaceId(request);
-    } else {
-      return 'default';
-    }
+    return this.plugins.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
   }
 
   public async makeTSVBRequest(

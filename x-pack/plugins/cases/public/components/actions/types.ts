@@ -5,8 +5,21 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption, IconType } from '@elastic/eui';
+
 export interface UseActionProps {
   onAction: () => void;
   onActionSuccess: () => void;
   isDisabled: boolean;
 }
+
+export type UseCopyIDActionProps = Pick<UseActionProps, 'onActionSuccess'>;
+
+export interface ItemsSelectionState {
+  selectedItems: string[];
+  unSelectedItems: string[];
+}
+
+export type ItemSelectableOption<T extends {} = {}> = EuiSelectableOption<
+  T & { key: string; itemIcon: IconType; newItem?: boolean }
+>;

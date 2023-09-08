@@ -21,12 +21,24 @@ export const DELETE_CASE = (quantity: number = 1) =>
     defaultMessage: `Delete {quantity, plural, =1 {case} other {{quantity} cases}}`,
   });
 
+export const COPY_ID_ACTION_LABEL = i18n.translate('xpack.cases.caseView.copyID', {
+  defaultMessage: 'Copy Case ID',
+});
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate('xpack.cases.caseView.copyIDSuccess', {
+  defaultMessage: 'Copied Case ID to clipboard',
+});
+
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
 export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
   defaultMessage: 'Created on',
+});
+
+export const UPDATED_ON = i18n.translate('xpack.cases.caseView.updatedOn', {
+  defaultMessage: 'Updated on',
 });
 
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {
@@ -70,9 +82,12 @@ export const ARIA_KEYPAD_LEGEND = i18n.translate(
   }
 );
 
-export const COMMENT_REQUIRED = i18n.translate('xpack.cases.caseView.commentFieldRequiredError', {
-  defaultMessage: 'A comment is required.',
-});
+export const EMPTY_COMMENTS_NOT_ALLOWED = i18n.translate(
+  'xpack.cases.caseView.commentFieldRequiredError',
+  {
+    defaultMessage: 'Empty comments are not allowed.',
+  }
+);
 
 export const REQUIRED_FIELD = i18n.translate('xpack.cases.caseView.fieldRequiredError', {
   defaultMessage: 'Required field',
@@ -122,6 +137,14 @@ export const TAGS = i18n.translate('xpack.cases.caseView.tags', {
   defaultMessage: 'Tags',
 });
 
+export const CATEGORY = i18n.translate('xpack.cases.caseView.category', {
+  defaultMessage: 'Category',
+});
+
+export const CATEGORIES = i18n.translate('xpack.cases.caseView.categories', {
+  defaultMessage: 'Categories',
+});
+
 export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
   defaultMessage: 'Solution',
 });
@@ -137,6 +160,13 @@ export const NO_TAGS_AVAILABLE = i18n.translate('xpack.cases.allCases.noTagsAvai
 export const NO_REPORTERS_AVAILABLE = i18n.translate('xpack.cases.caseView.noReportersAvailable', {
   defaultMessage: 'No reporters available.',
 });
+
+export const NO_CATEGORIES_AVAILABLE = i18n.translate(
+  'xpack.cases.allCases.noCategoriesAvailable',
+  {
+    defaultMessage: 'No categories available',
+  }
+);
 
 export const COMMENTS = i18n.translate('xpack.cases.allCases.comments', {
   defaultMessage: 'Comments',
@@ -154,8 +184,12 @@ export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
   defaultMessage: 'No tags are added',
 });
 
+export const NO_CATEGORIES = i18n.translate('xpack.cases.caseView.noCategories', {
+  defaultMessage: 'No category is added',
+});
+
 export const TITLE_REQUIRED = i18n.translate('xpack.cases.createCase.titleFieldRequiredError', {
-  defaultMessage: 'A title is required.',
+  defaultMessage: 'A name is required.',
 });
 
 export const CONFIGURE_CASES_PAGE_TITLE = i18n.translate('xpack.cases.configureCases.headerTitle', {
@@ -195,6 +229,14 @@ export const UNKNOWN = i18n.translate('xpack.cases.caseView.unknown', {
 
 export const MARKED_CASE_AS = i18n.translate('xpack.cases.caseView.markedCaseAs', {
   defaultMessage: 'marked case as',
+});
+
+export const ADD_CATEGORY = i18n.translate('xpack.cases.caseView.addCategory', {
+  defaultMessage: 'added the category',
+});
+
+export const REMOVE_CATEGORY = i18n.translate('xpack.cases.caseView.userAction.removeCategory', {
+  defaultMessage: 'removed the category',
 });
 
 export const SET_SEVERITY_TO = i18n.translate('xpack.cases.caseView.setSeverityTo', {
@@ -250,7 +292,14 @@ export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.cas
 export const MAX_LENGTH_ERROR = (field: string, length: number) =>
   i18n.translate('xpack.cases.createCase.maxLengthError', {
     values: { field, length },
-    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+    defaultMessage:
+      'The length of the {field} is too long. The maximum length is {length} characters.',
+  });
+
+export const MAX_TAGS_ERROR = (length: number) =>
+  i18n.translate('xpack.cases.createCase.maxTagsError', {
+    values: { length },
+    defaultMessage: 'Too many tags. The maximum number of allowed tags is {length}',
   });
 
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
@@ -308,6 +357,19 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
     values: { searchValue },
   });
 
+export const ADD_CATEGORY_CUSTOM_OPTION_LABEL = (searchValue: string) =>
+  i18n.translate('xpack.cases.configure.addCategoryCustomOptionLabel', {
+    defaultMessage: 'Add {searchValue} as a category',
+    values: { searchValue },
+  });
+
+export const VERSION_CONFLICT_WARNING = (markdownId: string) =>
+  i18n.translate('xpack.cases.configure.commentVersionConflictWarning', {
+    defaultMessage:
+      'This {markdownId} has been updated by another user. Saving your {markdownId} will overwrite their update.',
+    values: { markdownId },
+  });
+
 /**
  * EUI checkbox replace {searchValue} with the current
  * search value. We need to put the template variable
@@ -315,3 +377,6 @@ export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
  * with i18n.
  */
 export const ADD_TAG_CUSTOM_OPTION_LABEL_COMBO_BOX = ADD_TAG_CUSTOM_OPTION_LABEL('{searchValue}');
+
+export const ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX =
+  ADD_CATEGORY_CUSTOM_OPTION_LABEL('{searchValue}');

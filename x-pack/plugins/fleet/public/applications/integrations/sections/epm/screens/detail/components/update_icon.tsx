@@ -16,7 +16,7 @@ export const UpdateIcon = ({ size = 'm' }: { size?: EuiIconProps['size'] }) => (
       defaultMessage: 'Update available',
     })}
     size={size}
-    type="alert"
+    type="warning"
     color="warning"
     content={i18n.translate('xpack.fleet.epm.updateAvailableTooltip', {
       defaultMessage: 'Update available',

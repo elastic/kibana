@@ -11,23 +11,25 @@ import type { AnomaliesByUser } from '../types';
 
 describe('convert_anomalies_to_users', () => {
   test('it returns expected anomalies from a user', () => {
-    const entities = convertAnomaliesToUsers(mockAnomalies);
+    const entities = convertAnomaliesToUsers(mockAnomalies, {});
 
     const expected: AnomaliesByUser[] = [
       {
         anomaly: mockAnomalies.anomalies[0],
         userName: 'root',
+        jobName: 'job-1',
       },
       {
         anomaly: mockAnomalies.anomalies[1],
         userName: 'root',
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
   });
 
   test('it returns empty anomalies if sent in a null', () => {
-    const entities = convertAnomaliesToUsers(null);
+    const entities = convertAnomaliesToUsers(null, {});
     const expected: AnomaliesByUser[] = [];
     expect(entities).toEqual(expected);
   });
@@ -50,11 +52,12 @@ describe('convert_anomalies_to_users', () => {
       ],
     };
 
-    const entities = convertAnomaliesToUsers(anomalies, 'root');
+    const entities = convertAnomaliesToUsers(anomalies, {}, 'root');
     const expected: AnomaliesByUser[] = [
       {
         anomaly: anomalies.anomalies[1],
         userName: 'root',
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
@@ -82,18 +85,19 @@ describe('convert_anomalies_to_users', () => {
       ],
     };
 
-    const entities = convertAnomaliesToUsers(anomalies, 'root');
+    const entities = convertAnomaliesToUsers(anomalies, {}, 'root');
     const expected: AnomaliesByUser[] = [
       {
         anomaly: anomalies.anomalies[1],
         userName: 'root',
+        jobName: 'job-2',
       },
     ];
     expect(entities).toEqual(expected);
   });
 
   test('it returns empty anomalies if sent in the name of one that does not exist', () => {
-    const entities = convertAnomaliesToUsers(mockAnomalies, 'some-made-up-name-here-for-you');
+    const entities = convertAnomaliesToUsers(mockAnomalies, {}, 'some-made-up-name-here-for-you');
     const expected: AnomaliesByUser[] = [];
     expect(entities).toEqual(expected);
   });

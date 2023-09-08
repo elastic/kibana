@@ -77,7 +77,13 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
   const clearHighlightTerm = useCallback(() => setHighlightTerm(''), [setHighlightTerm]);
 
   const button = (
-    <EuiButtonEmpty color="text" size="xs" iconType="brush" onClick={togglePopover}>
+    <EuiButtonEmpty
+      data-test-subj="infraLogHighlightsMenuButton"
+      color="text"
+      size="xs"
+      iconType="brush"
+      onClick={togglePopover}
+    >
       <FormattedMessage
         id="xpack.infra.logs.highlights.highlightsPopoverButtonLabel"
         defaultMessage="Highlights"
@@ -97,6 +103,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiFieldText
+              data-test-subj="infraLogHighlightsMenuFieldText"
               placeholder={termsFieldLabel}
               fullWidth={true}
               value={highlightTerm}
@@ -107,6 +114,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraLogHighlightsMenuButton"
               aria-label={goToPreviousHighlightLabel}
               iconType="arrowUp"
               onClick={goToPreviousHighlight}
@@ -116,6 +124,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraLogHighlightsMenuButton"
               aria-label={goToNextHighlightLabel}
               iconType="arrowDown"
               onClick={goToNextHighlight}
@@ -125,6 +134,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="infraLogHighlightsMenuButton"
               aria-label={clearTermsButtonLabel}
               color="danger"
               isDisabled={highlightTerm === ''}

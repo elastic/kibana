@@ -16,9 +16,7 @@ function getParsedParams(search: string) {
 
 export type GetUrlParams = () => SyntheticsUrlParams;
 export type UpdateUrlParams = (
-  updatedParams: {
-    [key: string]: string | number | boolean | undefined;
-  } | null,
+  updatedParams: Partial<SyntheticsUrlParams> | null,
   replaceState?: boolean
 ) => void;
 
@@ -42,10 +40,12 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
         ...updatedParams,
       };
 
+      const urlKeys = Object.keys(mergedParams) as Array<keyof SyntheticsUrlParams>;
+
       const updatedSearch = updatedParams
         ? stringify(
             // drop any parameters that have no value
-            Object.keys(mergedParams).reduce((params, key) => {
+            urlKeys.reduce((params, key) => {
               const value = mergedParams[key];
               if (value === undefined || value === '') {
                 return params;

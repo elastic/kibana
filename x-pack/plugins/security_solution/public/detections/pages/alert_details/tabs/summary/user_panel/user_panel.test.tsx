@@ -16,10 +16,10 @@ import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import { RiskSeverity } from '../../../../../../../common/search_strategy';
-import { useRiskScore } from '../../../../../../risk_score/containers';
+import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { find } from 'lodash/fp';
 
-jest.mock('../../../../../../risk_score/containers');
+jest.mock('../../../../../../explore/containers/risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
 
 describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
@@ -27,7 +27,7 @@ describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
     inspect: null,
     refetch: () => {},
     isModuleEnabled: true,
-    isLicenseValid: true,
+    isAuthorized: true,
     loading: false,
   };
   const UserPanelWithDefaultProps = (propOverrides: Partial<UserPanelProps>) => (
@@ -64,7 +64,7 @@ describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
     it('should not show risk if the license is not valid', () => {
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: false,
+        isAuthorized: false,
         data: null,
       });
       const { queryByTestId } = render(<UserPanelWithDefaultProps />);
@@ -77,7 +77,7 @@ describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
 
       mockUseRiskScore.mockReturnValue({
         ...defaultRiskReturnValues,
-        isLicenseValid: true,
+        isAuthorized: true,
         data: [
           {
             user: {

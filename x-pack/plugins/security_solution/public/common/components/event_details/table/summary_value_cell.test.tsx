@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import type { BrowserField } from '../../../containers/source';
@@ -17,6 +17,8 @@ import { TimelineId } from '../../../../../common/types';
 import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../../../lib/kibana');
+
+jest.mock('../../../hooks/use_get_field_spec');
 
 const eventId = 'TUWyf3wBFCFU0qRJTauW';
 const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'];
@@ -76,38 +78,43 @@ const enrichedAgentStatusData: AlertSummaryRow['description'] = {
 
 describe('SummaryValueCell', () => {
   test('it should render', async () => {
-    render(
-      <TestProviders>
-        <SummaryValueCell {...enrichedHostIpData} />
-      </TestProviders>
-    );
+    await act(async () => {
+      render(
+        <TestProviders>
+          <SummaryValueCell {...enrichedHostIpData} />
+        </TestProviders>
+      );
+    });
+
     hostIpValues.forEach((ipValue) => expect(screen.getByText(ipValue)).toBeInTheDocument());
-    expect(screen.getAllByTestId('test-filter-for')).toHaveLength(1);
-    expect(screen.getAllByTestId('test-filter-out')).toHaveLength(1);
+    expect(screen.getByTestId('inlineActions')).toBeInTheDocument();
   });
 
   describe('Without hover actions', () => {
     test('When in the timeline flyout with timelineId active', async () => {
-      render(
-        <TestProviders>
-          <SummaryValueCell {...enrichedHostIpData} scopeId={TimelineId.active} />
-        </TestProviders>
-      );
+      await act(async () => {
+        render(
+          <TestProviders>
+            <SummaryValueCell {...enrichedHostIpData} scopeId={TimelineId.active} />
+          </TestProviders>
+        );
+      });
+
       hostIpValues.forEach((ipValue) => expect(screen.getByText(ipValue)).toBeInTheDocument());
-      expect(screen.queryByTestId('test-filter-for')).toBeNull();
-      expect(screen.queryByTestId('test-filter-out')).toBeNull();
+      expect(screen.queryByTestId('inlineActions')).not.toBeInTheDocument();
     });
 
     test('When rendering the host status field', async () => {
-      render(
-        <TestProviders>
-          <SummaryValueCell {...enrichedAgentStatusData} />
-        </TestProviders>
-      );
+      await act(async () => {
+        render(
+          <TestProviders>
+            <SummaryValueCell {...enrichedAgentStatusData} />
+          </TestProviders>
+        );
+      });
 
       expect(screen.getByTestId('event-field-agent.status')).toBeInTheDocument();
-      expect(screen.queryByTestId('test-filter-for')).toBeNull();
-      expect(screen.queryByTestId('test-filter-out')).toBeNull();
+      expect(screen.queryByTestId('inlineActions')).not.toBeInTheDocument();
     });
   });
 });

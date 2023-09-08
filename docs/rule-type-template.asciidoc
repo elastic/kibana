@@ -6,7 +6,7 @@ Include a short description of the rule type.
 [float]
 ==== Create the rule
 
-Fill in the <<defining-rules-general-details, rule details>>, then select *<RULE TYPE>*.
+Fill in the name and optional tags, then select *<RULE TYPE>*.
 
 [float]
 ==== Define the conditions

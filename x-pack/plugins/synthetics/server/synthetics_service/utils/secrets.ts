@@ -10,12 +10,12 @@ import { secretKeys } from '../../../common/constants/monitor_management';
 import {
   ConfigKey,
   SyntheticsMonitor,
-  SyntheticsMonitorWithSecrets,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
-export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWithSecrets {
-  const monitorWithoutSecrets = omit(monitor, secretKeys) as SyntheticsMonitorWithSecrets;
+export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWithSecretsAttributes {
+  const monitorWithoutSecrets = omit(monitor, secretKeys) as SyntheticsMonitorWithSecretsAttributes;
   const secrets = pick(monitor, secretKeys);
 
   return {
@@ -25,17 +25,25 @@ export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWith
 }
 
 export function normalizeSecrets(
-  monitor: SavedObject<SyntheticsMonitorWithSecrets>
+  monitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>
 ): SavedObject<SyntheticsMonitor> {
-  const defaultFields = DEFAULT_FIELDS[monitor.attributes[ConfigKey.MONITOR_TYPE]];
+  const attributes = normalizeMonitorSecretAttributes(monitor.attributes);
   const normalizedMonitor = {
     ...monitor,
-    attributes: {
-      ...defaultFields,
-      ...monitor.attributes,
-      ...JSON.parse(monitor.attributes.secrets || ''),
-    },
+    attributes,
   };
-  delete normalizedMonitor.attributes.secrets;
   return normalizedMonitor;
+}
+
+export function normalizeMonitorSecretAttributes(
+  monitor: SyntheticsMonitorWithSecretsAttributes
+): SyntheticsMonitor {
+  const defaultFields = DEFAULT_FIELDS[monitor[ConfigKey.MONITOR_TYPE]];
+  const normalizedMonitorAttributes = {
+    ...defaultFields,
+    ...monitor,
+    ...JSON.parse(monitor.secrets || ''),
+  };
+  delete normalizedMonitorAttributes.secrets;
+  return normalizedMonitorAttributes;
 }

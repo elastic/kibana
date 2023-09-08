@@ -12,7 +12,9 @@ import type { APIKeys } from './api_keys';
 export const apiKeysMock = {
   create: (): jest.Mocked<PublicMethodsOf<APIKeys>> => ({
     areAPIKeysEnabled: jest.fn(),
+    areCrossClusterAPIKeysEnabled: jest.fn(),
     create: jest.fn(),
+    update: jest.fn(),
     grantAsInternalUser: jest.fn(),
     validate: jest.fn(),
     invalidate: jest.fn(),

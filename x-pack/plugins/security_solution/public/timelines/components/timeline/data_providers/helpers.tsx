@@ -6,11 +6,12 @@
  */
 
 import { omit } from 'lodash/fp';
-import type { DraggableLocation } from 'react-beautiful-dnd';
+import type { DraggableLocation } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 
 import { updateProviders } from '../../../store/timeline/actions';
-import { isStringOrNumberArray } from '../helpers';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
+import { isPrimitiveArray } from '../helpers';
 
 import type { DataProvider, DataProvidersAnd } from './data_provider';
 
@@ -63,7 +64,7 @@ export const move = ({
 };
 
 export const isValidDestination = (
-  destination: DraggableLocation | undefined
+  destination: DraggableLocation | null
 ): destination is DraggableLocation => destination != null;
 
 export const sourceAndDestinationAreSameDroppable = ({
@@ -231,7 +232,7 @@ export const reArrangeProviders = ({
   timelineId,
 }: {
   dataProviders: DataProvider[];
-  destination: DraggableLocation | undefined;
+  destination: DraggableLocation | null;
   dispatch: Dispatch;
   source: DraggableLocation;
   timelineId: string;
@@ -270,7 +271,7 @@ export const addProviderToGroup = ({
   timelineId,
 }: {
   dataProviders: DataProvider[];
-  destination: DraggableLocation | undefined;
+  destination: DraggableLocation | null;
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;
@@ -324,7 +325,7 @@ export const addContentToTimeline = ({
   timelineId,
 }: {
   dataProviders: DataProvider[];
-  destination: DraggableLocation | undefined;
+  destination: DraggableLocation | null;
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;
@@ -344,10 +345,8 @@ export const addContentToTimeline = ({
   }
 };
 
-export const getDisplayValue = (
-  value: string | number | Array<string | number>
-): string | number => {
-  if (isStringOrNumberArray(value)) {
+export const getDisplayValue = (value: PrimitiveOrArrayOfPrimitives): string | number | boolean => {
+  if (isPrimitiveArray(value)) {
     if (value.length) {
       return `( ${value.join(' OR ')} )`;
     }

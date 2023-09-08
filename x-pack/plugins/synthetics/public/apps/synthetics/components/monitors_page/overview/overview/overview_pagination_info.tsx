@@ -70,7 +70,7 @@ export const OverviewPaginationInfo = ({
       )}
     </EuiText>
   ) : (
-    <EuiText size="xs">
+    <EuiText size="xs" data-test-subj="syntheticsOverviewMonitorsLoading">
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="m" />

@@ -7,13 +7,36 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import RuleStatusPanelWithApi, { RuleStatusPanel } from './rule_status_panel';
+import { RuleStatusPanel, RuleStatusPanelWithApiProps } from './rule_status_panel';
 import { mockRule } from './test_helpers';
 
 jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
-  loadExecutionLogAggregations: () => ({ total: 400 }),
+  loadExecutionLogAggregations: jest.fn(),
 }));
+
+const { loadExecutionLogAggregations } = jest.requireMock(
+  '../../../lib/rule_api/load_execution_log_aggregations'
+);
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+
+const RuleStatusPanelWithProvider = (props: RuleStatusPanelWithApiProps) => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RuleStatusPanel {...props} />
+    </QueryClientProvider>
+  );
+};
+
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -28,19 +51,30 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 const mockAPIs = {
-  enableRule: jest.fn(),
-  disableRule: jest.fn(),
+  bulkEnableRules: jest.fn(),
+  bulkDisableRules: jest.fn(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
-  loadExecutionLogAggregations: jest.fn(),
 };
 const requestRefresh = jest.fn();
 
 describe('rule status panel', () => {
+  beforeEach(() => {
+    loadExecutionLogAggregations.mockResolvedValue({
+      total: 400,
+      data: [],
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('fetches and renders the number of executions in the last 24 hours', async () => {
     const rule = mockRule();
     const wrapper = mountWithIntl(
-      <RuleStatusPanelWithApi
+      <RuleStatusPanelWithProvider
+        {...mockAPIs}
         rule={rule}
         isEditable
         healthColor="primary"
@@ -48,27 +82,36 @@ describe('rule status panel', () => {
         requestRefresh={requestRefresh}
       />
     );
+
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
+
     const ruleExecutionsDescription = wrapper.find(
       '[data-test-subj="ruleStatus-numberOfExecutions"]'
     );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(ruleExecutionsDescription.first().text()).toBe('400 executions in the last 24 hr');
   });
+
   it('should disable the rule when picking disable in the dropdown', async () => {
     const rule = mockRule({ enabled: true });
-    const disableRule = jest.fn();
+    const bulkDisableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        disableRule={disableRule}
+        bulkDisableRules={bulkDisableRules}
       />
     );
     const actionsElem = wrapper
@@ -88,21 +131,21 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(disableRule).toHaveBeenCalledTimes(1);
+    expect(bulkDisableRules).toHaveBeenCalledTimes(1);
   });
 
   it('if rule is already disabled should do nothing when picking disable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
-    const disableRule = jest.fn();
+    const bulkDisableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        disableRule={disableRule}
+        bulkDisableRules={bulkDisableRules}
       />
     );
     const actionsElem = wrapper
@@ -122,21 +165,21 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(disableRule).toHaveBeenCalledTimes(0);
+    expect(bulkDisableRules).toHaveBeenCalledTimes(0);
   });
 
   it('should enable the rule when picking enable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
-    const enableRule = jest.fn();
+    const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        enableRule={enableRule}
+        bulkEnableRules={bulkEnableRules}
       />
     );
     const actionsElem = wrapper
@@ -156,21 +199,21 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(enableRule).toHaveBeenCalledTimes(1);
+    expect(bulkEnableRules).toHaveBeenCalledTimes(1);
   });
 
   it('if rule is already enabled should do nothing when picking enable in the dropdown', async () => {
     const rule = mockRule({ enabled: true });
-    const enableRule = jest.fn();
+    const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        enableRule={enableRule}
+        bulkEnableRules={bulkEnableRules}
       />
     );
     const actionsElem = wrapper
@@ -190,7 +233,7 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(enableRule).toHaveBeenCalledTimes(0);
+    expect(bulkEnableRules).toHaveBeenCalledTimes(0);
   });
 
   it('should show the loading spinner when the rule enabled switch was clicked and the server responded with some delay', async () => {
@@ -198,20 +241,19 @@ describe('rule status panel', () => {
       enabled: true,
     });
 
-    const disableRule = jest.fn(async () => {
+    const bulkDisableRules = jest.fn(async () => {
       await new Promise((resolve) => setTimeout(resolve, 6000));
-    });
-    const enableRule = jest.fn();
+    }) as any;
+
     const wrapper = mountWithIntl(
-      <RuleStatusPanel
+      <RuleStatusPanelWithProvider
         {...mockAPIs}
         rule={rule}
         isEditable
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        enableRule={enableRule}
-        disableRule={disableRule}
+        bulkDisableRules={bulkDisableRules}
       />
     );
 
@@ -237,7 +279,7 @@ describe('rule status panel', () => {
     });
 
     await act(async () => {
-      expect(disableRule).toHaveBeenCalled();
+      expect(bulkDisableRules).toHaveBeenCalled();
       expect(
         wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton .euiLoadingSpinner')
           .length

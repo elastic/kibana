@@ -12,7 +12,8 @@ import pipelineList from './fixtures/list.json';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  describe('list', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/151350
+  describe.skip('list', () => {
     const archive = 'x-pack/test/functional/es_archives/logstash/example_pipelines';
 
     before('load pipelines archive', () => {

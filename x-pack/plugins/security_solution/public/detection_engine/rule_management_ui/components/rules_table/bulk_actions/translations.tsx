@@ -71,21 +71,6 @@ export const bulkAddRuleActions = {
     }
   ),
 
-  THROTTLE_LABEL: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleLabel',
-    {
-      defaultMessage: 'Actions frequency',
-    }
-  ),
-
-  THROTTLE_HELP_TEXT: i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleHelpText',
-    {
-      defaultMessage:
-        'Select when automated actions should be performed if a rule evaluates as true.',
-    }
-  ),
-
   RULE_VARIABLES_DETAIL: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail',
     {
@@ -138,8 +123,8 @@ export const bulkSetSchedule = {
 export const bulkDuplicateRuleActions = {
   MODAL_TITLE: (rulesCount: number): JSX.Element => (
     <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalTitle"
-      defaultMessage="Duplicate {rulesCount, plural, one {the rule} other {rules}} with exceptions?"
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exception.confirmation.modalTitle"
+      defaultMessage="Duplicate {rulesCount, plural, one {the rule} other {rules}}?"
       values={{ rulesCount }}
     />
   ),
@@ -147,7 +132,7 @@ export const bulkDuplicateRuleActions = {
   MODAL_TEXT: (rulesCount: number): JSX.Element => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalBody"
-      defaultMessage="You are duplicating {rulesCount, plural, one {# selected rule} other {# selected rules}}, please select how you would like to duplicate the existing exceptions"
+      defaultMessage="You're duplicating {rulesCount, plural, one {# rule} other {# rules}}. Choose what to duplicate:"
       values={{ rulesCount }}
     />
   ),
@@ -155,7 +140,15 @@ export const bulkDuplicateRuleActions = {
   DUPLICATE_EXCEPTIONS_TEXT: (rulesCount: number) => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.with"
-      defaultMessage="Duplicate {rulesCount, plural, one {rule} other {rules}} and their exceptions"
+      defaultMessage="The {rulesCount, plural, one {rule} other {rules}} and {rulesCount, plural, one {its} other {their}} active exceptions"
+      values={{ rulesCount }}
+    />
+  ),
+
+  DUPLICATE_EXCEPTIONS_INCLUDE_EXPIRED_EXCEPTIONS_LABEL: (rulesCount: number) => (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.includeExpiredExceptionsCheckboxLabel"
+      defaultMessage="The {rulesCount, plural, one {rule} other {rules}} and {rulesCount, plural, one {its} other {their}} exceptions"
       values={{ rulesCount }}
     />
   ),
@@ -163,7 +156,7 @@ export const bulkDuplicateRuleActions = {
   DUPLICATE_WITHOUT_EXCEPTIONS_TEXT: (rulesCount: number) => (
     <FormattedMessage
       id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.without"
-      defaultMessage="Only duplicate {rulesCount, plural, one {the rule} other {rules}}"
+      defaultMessage="Only the {rulesCount, plural, one {rule} other {rules}}"
       values={{ rulesCount }}
     />
   ),
@@ -186,7 +179,7 @@ export const bulkDuplicateRuleActions = {
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.tooltip',
     {
       defaultMessage:
-        ' If you duplicate exceptions, then the shared exceptions list will be duplicated by reference and the default rule exception will be copied and created as a new one',
+        'Exception items associated with individual rules are duplicated. Exception items linked to shared exception lists are not. Instead, duplicated rules will reference the shared exception lists that contain the exception items.',
     }
   ),
 };

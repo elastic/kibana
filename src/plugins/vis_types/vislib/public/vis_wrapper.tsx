@@ -19,12 +19,11 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';
 import { VisTypeVislibCoreSetup } from './plugin';
-import { PieRenderValue } from './pie_fn';
 
 import './index.scss';
 import { getUsageCollectionStart } from './services';
 
-type VislibWrapperProps = (VislibRenderValue | PieRenderValue) & {
+type VislibWrapperProps = VislibRenderValue & {
   core: VisTypeVislibCoreSetup;
   charts: ChartsPluginSetup;
   handlers: IInterpreterRenderHandlers;

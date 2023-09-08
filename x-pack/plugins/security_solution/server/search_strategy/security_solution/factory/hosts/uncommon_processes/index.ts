@@ -9,9 +9,9 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import { processFieldsMap, userFieldsMap } from '@kbn/securitysolution-ecs';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
-import { processFieldsMap, userFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import type {
   HostsUncommonProcessesRequestOptions,
   HostsUncommonProcessesStrategyResponse,

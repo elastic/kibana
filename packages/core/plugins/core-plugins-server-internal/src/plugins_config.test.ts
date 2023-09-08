@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
@@ -30,5 +30,16 @@ describe('PluginsConfig', () => {
     };
     const config = new PluginsConfig(rawConfig, env);
     expect(config.additionalPluginPaths).toEqual(['some-path', 'another-path']);
+  });
+
+  it('retrieves shouldEnableAllPlugins', () => {
+    const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
+    const rawConfig: any = {
+      initialize: true,
+      paths: ['some-path', 'another-path'],
+      forceEnableAllPlugins: true,
+    };
+    const config = new PluginsConfig(rawConfig, env);
+    expect(config.shouldEnableAllPlugins).toBe(true);
   });
 });

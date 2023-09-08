@@ -205,10 +205,12 @@ it's notable and affects our users) and which section it appears in. For example
 - `release_node:plugin_api_changes`: Specifies a changes to the plugin API and adds the PR to the Plugin API changes page in the Developer Guide
 - `release_note:skip`: Omits the PR from release notes
 
-These labels related to backporting PRs:
+The following labels are related to backporting PRs:
 
 - `auto-backport`: Automatically backport this PR (to the branches related to
-   version labels) after it's merged
-- `backport`: This PR was backported
-- `backport:skip`: This PR does not require backporting
-
+   version labels) after it's merged. Requires adding desired target versions labels.
+- `backport:prev-minor`: Automatically backport to one lower minor version.
+- `backport:prev-major`: Automatically backport to the latest minor version of one lower major version.
+- `backport:all-open`: Automatically backport to all generally available versions. This functionally is equivalent to backport:prev-major at the time of writing.
+- `backport:skip`: This PR does not require backporting.
+- `backport`: This PR was backported (added by CI).

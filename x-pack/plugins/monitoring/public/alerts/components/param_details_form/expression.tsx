@@ -10,7 +10,7 @@ import { EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { CommonAlertParamDetails } from '../../../../common/types/alerts';
+import { CommonAlertParamDetails, ExpressionConfig } from '../../../../common/types/alerts';
 import { AlertParamDuration } from '../../flyout_expressions/alert_param_duration';
 import { AlertParamType } from '../../../../common/enums';
 import { AlertParamPercentage } from '../../flyout_expressions/alert_param_percentage';
@@ -31,6 +31,8 @@ export interface Props {
   paramDetails: CommonAlertParamDetails;
   dataViews: DataViewsPublicPluginStart;
   config?: MonitoringConfig;
+  defaults?: Record<string, unknown>;
+  expressionConfig?: ExpressionConfig;
 }
 
 export const Expression: React.FC<Props> = (props) => {

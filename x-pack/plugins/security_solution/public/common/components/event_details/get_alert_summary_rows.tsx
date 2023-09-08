@@ -8,6 +8,7 @@
 import { find, isEmpty, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
+import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
@@ -23,14 +24,16 @@ import {
   ALERT_NEW_TERMS,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
-import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import {
+  AGENT_STATUS_FIELD_NAME,
+  QUARANTINED_PATH_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 import type { AlertSummaryRow } from './helpers';
 import { getEnrichedFieldInfo } from './helpers';
 import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
-import { EventCode, EventCategory } from '../../../../common/ecs/event';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -44,6 +47,19 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: 'rule.name' },
+  { id: 'cloud.provider' },
+  { id: 'cloud.region' },
+  { id: 'cloud.provider' },
+  { id: 'cloud.region' },
+  { id: 'orchestrator.cluster.id' },
+  { id: 'orchestrator.cluster.name' },
+  { id: 'container.image.name' },
+  { id: 'container.image.tag' },
+  { id: 'orchestrator.namespace' },
+  { id: 'orchestrator.resource.parent.type' },
+  { id: 'orchestrator.resource.type' },
+  { id: 'process.executable' },
+  { id: 'file.path' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
 ];
 
@@ -130,6 +146,14 @@ function getFieldsByEventCode(
     case EventCode.MEMORY_SIGNATURE:
       // Resolve more fields based on the source event
       return getFieldsByCategory({ ...eventCategories, primaryEventCategory: undefined });
+    case EventCode.MALICIOUS_FILE:
+      return [
+        {
+          id: 'file.Ext.quarantine_path',
+          overrideField: QUARANTINED_PATH_FIELD_NAME,
+          label: i18n.QUARANTINED_FILE_PATH,
+        },
+      ];
     default:
       return [];
   }
@@ -192,18 +216,37 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+ * Gets the fields to display based on custom rules and configuration
+ * @param customs The list of custom-defined fields to display
+ * @returns The list of custom-defined fields to display
+ */
+function getHighlightedFieldsOverride(customs: string[]): EventSummaryField[] {
+  return customs.map((field) => ({ id: field }));
+}
+
+/**
+  This function is exported because it is used in the Exception Component to
+  populate the conditions with the Highlighted Fields. Additionally, the new
+  Alert Summary Flyout also requires access to these fields.
+  As the Alert Summary components will undergo changes soon we will go with
+  exporting the function only for now.
+ */
+/**
  * Assembles a list of fields to display based on the event
  */
-function getEventFieldsToDisplay({
+export function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
+  highlightedFieldsOverride,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
+  highlightedFieldsOverride: string[];
 }): EventSummaryField[] {
   const fields = [
+    ...getHighlightedFieldsOverride(highlightedFieldsOverride),
     ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
@@ -224,7 +267,7 @@ interface EventCategories {
  * @param data The event details
  * @returns The event's primary category and all other categories in case there is more than one
  */
-function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
+export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCategories {
   const eventCategoryField = find({ category: 'event', field: 'event.category' }, data);
 
   let primaryEventCategory: string | undefined;
@@ -250,11 +293,13 @@ export const getSummaryRows = ({
   eventId,
   isDraggable = false,
   isReadOnly = false,
+  investigationFields,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   scopeId: string;
   eventId: string;
+  investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
 }) => {
@@ -275,6 +320,7 @@ export const getSummaryRows = ({
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: investigationFields ?? [],
   });
 
   return data != null

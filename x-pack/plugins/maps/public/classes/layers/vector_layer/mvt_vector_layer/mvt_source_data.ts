@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { SOURCE_DATA_REQUEST_ID } from '../../../../../common/constants';
 import { Timeslice, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import { DataRequest } from '../../../util/data_request';
@@ -21,9 +21,11 @@ export interface MvtSourceData {
   tileUrl: string;
   refreshToken: string;
   hasLabels: boolean;
+  buffer: number;
 }
 
 export async function syncMvtSourceData({
+  buffer,
   hasLabels,
   layerId,
   layerName,
@@ -32,6 +34,7 @@ export async function syncMvtSourceData({
   source,
   syncContext,
 }: {
+  buffer: number;
   hasLabels: boolean;
   layerId: string;
   layerName: string;
@@ -62,7 +65,8 @@ export async function syncMvtSourceData({
       !syncContext.forceRefreshDueToDrawing &&
       noChangesInSourceState &&
       noChangesInSearchState &&
-      prevData.hasLabels === hasLabels;
+      prevData.hasLabels === hasLabels &&
+      prevData.buffer === buffer;
 
     if (canSkip) {
       return;
@@ -75,10 +79,10 @@ export async function syncMvtSourceData({
       !prevData ||
       syncContext.forceRefreshDueToDrawing ||
       (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
-        ? uuid()
+        ? uuidv4()
         : prevData.refreshToken;
 
-    const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels);
+    const tileUrl = await source.getTileUrl(requestMeta, refreshToken, hasLabels, buffer);
     if (source.isESSource()) {
       syncContext.inspectorAdapters.vectorTiles.addLayer(layerId, layerName, tileUrl);
     }
@@ -89,6 +93,7 @@ export async function syncMvtSourceData({
       tileMaxZoom: source.getMaxZoom(),
       refreshToken,
       hasLabels,
+      buffer,
     };
     syncContext.stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, sourceData, {});
   } catch (error) {

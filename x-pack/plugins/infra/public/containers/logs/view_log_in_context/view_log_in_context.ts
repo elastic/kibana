@@ -7,10 +7,10 @@
 
 import { useState } from 'react';
 import createContainer from 'constate';
-import { LogEntry } from '../../../../common/log_entry';
+import { LogEntry, LogViewReference } from '@kbn/logs-shared-plugin/common';
 
 interface ViewLogInContextProps {
-  sourceId: string;
+  logViewReference: LogViewReference;
   startTimestamp: number;
   endTimestamp: number;
 }
@@ -27,13 +27,13 @@ export const useViewLogInContext = (
   props: ViewLogInContextProps
 ): [ViewLogInContextState, ViewLogInContextCallbacks] => {
   const [contextEntry, setContextEntry] = useState<LogEntry | undefined>();
-  const { startTimestamp, endTimestamp, sourceId } = props;
+  const { startTimestamp, endTimestamp, logViewReference } = props;
 
   return [
     {
       startTimestamp,
       endTimestamp,
-      sourceId,
+      logViewReference,
       contextEntry,
     },
     {

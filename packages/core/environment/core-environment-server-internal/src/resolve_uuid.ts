@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { join } from 'path';
 import { PathConfigType } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
@@ -52,7 +52,7 @@ export async function resolveInstanceUuid({
     }
   }
   if (uuidFromFile === undefined) {
-    const newUuid = uuid.v4();
+    const newUuid = uuidv4();
     // no uuid either in config or file, we need to generate and write it.
     logger.debug(`Setting new Kibana instance UUID: ${newUuid}`);
     await writeUuidToFile(uuidFilePath, newUuid);
@@ -65,13 +65,16 @@ export async function resolveInstanceUuid({
 
 async function readUuidFromFile(filepath: string, logger: Logger): Promise<string | undefined> {
   const content = await readFileContent(filepath);
+  if (content === undefined) {
+    return undefined;
+  }
 
   if (content === UUID_7_6_0_BUG) {
     logger.debug(`UUID from 7.6.0 bug detected, ignoring file UUID`);
     return undefined;
   }
 
-  if (content && !content.match(uuidRegexp)) {
+  if (!content.match(uuidRegexp)) {
     throw new Error(`${filepath} contains an invalid UUID`);
   }
 

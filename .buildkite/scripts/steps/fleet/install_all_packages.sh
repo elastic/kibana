@@ -7,5 +7,6 @@ source .buildkite/scripts/steps/functional/common.sh
 echo '--- Installing all packages'
 
 node scripts/functional_tests \
-  --debug --bail \
+  --debug \
+  --bail \
   --config x-pack/test/fleet_packages/config.ts

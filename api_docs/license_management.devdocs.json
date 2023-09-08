@@ -28,6 +28,21 @@
           "path": "x-pack/plugins/license_management/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "licenseManagement",
+          "id": "def-public.LicenseManagementUIPluginSetup.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [],
+          "signature": [
+            "LicenseManagementLocator",
+            " | undefined"
+          ],
+          "path": "x-pack/plugins/license_management/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",

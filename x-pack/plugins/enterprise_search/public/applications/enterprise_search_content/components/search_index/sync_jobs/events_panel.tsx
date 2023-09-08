@@ -13,8 +13,9 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { TriggerMethod } from '../../../../../../common/types/connectors';
-import { dateToString } from '../../../utils/date_to_string';
+import { TriggerMethod } from '@kbn/search-connectors';
+
+import { FormattedDateTime } from '../../../../shared/formatted_date_time';
 
 import { FlyoutPanel } from './flyout_panel';
 
@@ -44,7 +45,7 @@ export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
 }) => {
   const events: SyncJobEvent[] = [
     {
-      date: dateToString(syncRequestedAt),
+      date: syncRequestedAt,
       title:
         triggerMethod === TriggerMethod.ON_DEMAND
           ? i18n.translate(
@@ -57,25 +58,25 @@ export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
             ),
     },
     {
-      date: dateToString(syncStarted),
+      date: syncStarted,
       title: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.events.syncStarted', {
         defaultMessage: 'Sync started',
       }),
     },
     {
-      date: dateToString(lastUpdated),
+      date: lastUpdated,
       title: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.events.lastUpdated', {
         defaultMessage: 'Last updated',
       }),
     },
     {
-      date: dateToString(completed),
+      date: completed,
       title: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.events.completed', {
         defaultMessage: 'Completed',
       }),
     },
     {
-      date: dateToString(cancelationRequestedAt),
+      date: cancelationRequestedAt,
       title: i18n.translate(
         'xpack.enterpriseSearch.content.index.syncJobs.events.cancelationRequested',
         {
@@ -84,7 +85,7 @@ export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
       ),
     },
     {
-      date: dateToString(canceledAt),
+      date: canceledAt,
       title: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.events.canceled', {
         defaultMessage: 'Canceled',
       }),
@@ -106,6 +107,7 @@ export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
       name: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.events.time', {
         defaultMessage: 'Time',
       }),
+      render: (date: string) => <FormattedDateTime date={new Date(date)} />,
       width: '50%',
     },
   ];

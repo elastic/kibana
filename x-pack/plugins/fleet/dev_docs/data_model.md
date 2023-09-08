@@ -29,6 +29,8 @@ In prior alpha versions of Fleet, this data was also stored in Saved Objects bec
 communicating directly with Kibana for policy updates. Once Fleet Server was introduced, that data was migrated to these
 Elasticsearch indices to be readable by Fleet Server.
 
+_Note: All of these system indices are plain indices, and not data streams._
+
 ### `.fleet-agents` index
 
 Each document in this index tracks an individual Elastic Agent's enrollment in the Fleet, which policy it is current
@@ -37,6 +39,8 @@ assigned to, its check in status, which packages are currently installed, and ot
 All of the code that interacts with this index is currently located in
 [`x-pack/plugins/fleet/server/services/agents/crud.ts`](../server/services/agents/crud.ts) and the schema of these
 documents is maintained by the `FleetServerAgent` TypeScript interface.
+
+- Cleanup model: N/A
 
 ### `.fleet-actions` index
 
@@ -47,17 +51,34 @@ list.
 
 The total schema for actions is represented by the `FleetServerAgentAction` type.
 
+- Cleanup model: Fleet Server considers actions expired after 30 days, and will remove them via an hourly process
+- [Source](https://github.com/elastic/fleet-server/blob/9af3b2176b42a0de34c5583b5430558c03792dd0/internal/pkg/gc/schedules.go#L29-L33)
+
 ### `.fleet-actions-results`
+
+- Cleanup model: N/A
 
 ### `.fleet-servers`
 
+- Cleanup model: N/A
+
 ### `.fleet-artifacts`
 
-### `.fleet-entrollment-api-keys`
+- Cleanup model: N/A
+
+### `.fleet-enrollment-api-keys`
+
+- Cleanup model: Deleteable via Fleet UI/API, deleted when an agent policy is deleted
+- [Source](https://github.com/elastic/kibana/blob/7a35748cb43f2c73623ffda6fa02b91c3cb4c689/x-pack/plugins/fleet/server/services/api_keys/enrollment_api_key.ts#L102)
 
 ### `.fleet-policies`
 
+- Cleanup model: Deleted when a corresponding agent policy is deleted in the Fleet UI or API
+- [Source](https://github.com/elastic/kibana/blob/976b1b2331371f4a1325f6947d38d1f4de7a7254/x-pack/plugins/fleet/server/services/agent_policy.ts#L699-L701)
+
 ### `.fleet-policies-leader`
+
+- Cleanup model: N/A
 
 ## Saved Object types
 

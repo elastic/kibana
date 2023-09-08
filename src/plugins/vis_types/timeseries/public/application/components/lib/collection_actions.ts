@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 interface DocType {
   id: string;
   type?: string;
 }
 
-const newFn = (): DocType => ({ id: uuid.v1() });
+const newFn = (): DocType => ({ id: uuidv1() });
 
 export interface CollectionActionsProps<T> {
   model: T;

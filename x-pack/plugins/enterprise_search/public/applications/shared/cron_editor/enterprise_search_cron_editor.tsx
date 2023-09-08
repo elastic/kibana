@@ -9,14 +9,14 @@ import React, { useState } from 'react';
 
 import { Frequency } from '@kbn/es-ui-shared-plugin/public/components/cron_editor/types';
 
-import { Connector } from '../../../../common/types/connectors';
+import { ConnectorScheduling } from '@kbn/search-connectors';
 
 import { CronEditor } from './cron_editor';
 
 interface Props {
   disabled?: boolean;
-  onChange(scheduling: Connector['scheduling']): void;
-  scheduling: Connector['scheduling'];
+  onChange(scheduling: ConnectorScheduling): void;
+  scheduling: ConnectorScheduling;
 }
 
 export const EnterpriseSearchCronEditor: React.FC<Props> = ({ disabled, onChange, scheduling }) => {
@@ -66,10 +66,10 @@ function cronToFrequency(cron: string): Frequency {
   if (fields[3] === '*') {
     return 'DAY';
   }
-  if (fields[4] === '?') {
+  if (fields[4] === '*') {
     return 'WEEK';
   }
-  if (fields[4] === '*') {
+  if (fields[4] === '?') {
     return 'MONTH';
   }
   return 'YEAR';

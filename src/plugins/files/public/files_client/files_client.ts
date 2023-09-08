@@ -7,8 +7,9 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
 import type { ScopedFilesClient, FilesClient } from '../types';
-import { getFileKindsRegistry } from '../../common/file_kinds_registry';
+import { FileKindsRegistryImpl } from '../../common/file_kinds_registry';
 import {
   API_BASE_PATH,
   FILES_API_BASE_PATH,
@@ -57,6 +58,11 @@ export const apiRoutes = {
  */
 export interface Args {
   /**
+   * Registry of file kinds.
+   */
+  registry: FileKindsRegistryImpl<FileKindBrowser>;
+
+  /**
    * The http start service from core.
    */
   http: HttpStart;
@@ -81,9 +87,11 @@ const commonBodyHeaders = {
 export function createFilesClient(args: Args): FilesClient;
 export function createFilesClient(scopedArgs: ScopedArgs): ScopedFilesClient;
 export function createFilesClient({
+  registry,
   http,
   fileKind: scopedFileKind,
 }: {
+  registry: FileKindsRegistryImpl<FileKindBrowser>;
   http: HttpStart;
   fileKind?: string;
 }): FilesClient | ScopedFilesClient {
@@ -172,7 +180,7 @@ export function createFilesClient({
       return http.get(apiRoutes.getPublicDownloadRoute(fileName), { query: { token } });
     },
     getFileKind(id: string) {
-      return getFileKindsRegistry().get(id);
+      return registry.get(id);
     },
   };
   return api;

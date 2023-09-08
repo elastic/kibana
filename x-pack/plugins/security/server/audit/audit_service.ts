@@ -16,11 +16,11 @@ import type {
 } from '@kbn/core/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
+import type { AuditEvent } from './audit_events';
+import { httpRequestEvent } from './audit_events';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
-import type { AuditEvent } from './audit_events';
-import { httpRequestEvent } from './audit_events';
 
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
@@ -162,6 +162,8 @@ export class AuditService {
         const spaceId = getSpaceId(request);
         const user = getCurrentUser(request);
         const sessionId = await getSID(request);
+        const forwardedFor = getForwardedFor(request);
+
         log({
           ...event,
           user:
@@ -177,6 +179,18 @@ export class AuditService {
             ...event.kibana,
           },
           trace: { id: request.id },
+          client: { ip: request.socket.remoteAddress },
+          http: forwardedFor
+            ? {
+                ...event.http,
+                request: {
+                  ...event.http?.request,
+                  headers: {
+                    'x-forwarded-for': forwardedFor,
+                  },
+                },
+              }
+            : event.http,
         });
       },
       enabled,
@@ -242,4 +256,17 @@ export function filterEvent(
     );
   }
   return true;
+}
+
+/**
+ * Extracts `X-Forwarded-For` header(s) from `KibanaRequest`.
+ */
+export function getForwardedFor(request: KibanaRequest) {
+  const forwardedFor = request.headers['x-forwarded-for'];
+
+  if (Array.isArray(forwardedFor)) {
+    return forwardedFor.join(', ');
+  }
+
+  return forwardedFor;
 }

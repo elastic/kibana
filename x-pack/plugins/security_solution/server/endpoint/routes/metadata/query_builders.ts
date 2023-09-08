@@ -7,14 +7,19 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { EndpointSortableField } from '../../../../common/endpoint/types';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { buildStatusesKuery } from './support/agent_status';
-import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
+import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 
 /**
  * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
@@ -53,83 +58,25 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
   },
 ];
 
-export async function kibanaRequestToMetadataListESQuery(
-  queryBuilderOptions: QueryBuilderOptions
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<Record<string, any>> {
-  return {
-    body: {
-      query: buildQueryBody(
-        queryBuilderOptions?.kuery,
-        IGNORED_ELASTIC_AGENT_IDS.concat(queryBuilderOptions?.unenrolledAgentIds ?? []),
-        queryBuilderOptions?.statusAgentIds
-      ),
-      track_total_hits: true,
-      sort: MetadataSortMethod,
-    },
-    from: queryBuilderOptions.page * queryBuilderOptions.pageSize,
-    size: queryBuilderOptions.pageSize,
-    index: metadataCurrentIndexPattern,
-  };
-}
+const getUnitedMetadataSortMethod = (
+  sortField: EndpointSortableField,
+  sortDirection: 'asc' | 'desc'
+): estypes.SortCombinations[] => {
+  const DATE_FIELDS = [EndpointSortableField.LAST_SEEN, EndpointSortableField.ENROLLED_AT];
 
-function buildQueryBody(
-  kuery: string = '',
-  unerolledAgentIds: string[] | undefined,
-  statusAgentIds: string[] | undefined
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Record<string, any> {
-  // the filtered properties may be preceded by 'HostDetails' under an older index mapping
-  const filterUnenrolledAgents =
-    unerolledAgentIds && unerolledAgentIds.length > 0
-      ? {
-          must_not: [
-            { terms: { 'elastic.agent.id': unerolledAgentIds } }, // OR
-            { terms: { 'HostDetails.elastic.agent.id': unerolledAgentIds } },
-          ],
-        }
-      : null;
-  const filterStatusAgents =
-    statusAgentIds && statusAgentIds.length
-      ? {
-          filter: [
-            {
-              bool: {
-                // OR's the two together
-                should: [
-                  { terms: { 'elastic.agent.id': statusAgentIds } },
-                  { terms: { 'HostDetails.elastic.agent.id': statusAgentIds } },
-                ],
-              },
-            },
-          ],
-        }
-      : null;
+  const mappedUnitedMetadataSortField =
+    sortField === EndpointSortableField.HOST_STATUS
+      ? 'status'
+      : sortField === EndpointSortableField.ENROLLED_AT
+      ? 'united.agent.enrolled_at'
+      : sortField.replace('metadata.', 'united.endpoint.');
 
-  const idFilter = {
-    bool: {
-      ...filterUnenrolledAgents,
-      ...filterStatusAgents,
-    },
-  };
-
-  if (kuery) {
-    const kqlQuery = toElasticsearchQuery(fromKueryExpression(kuery));
-    const q = [];
-    if (filterUnenrolledAgents || filterStatusAgents) {
-      q.push(idFilter);
-    }
-    q.push({ ...kqlQuery });
-    return {
-      bool: { must: q },
-    };
+  if (DATE_FIELDS.includes(sortField)) {
+    return [{ [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];
+  } else {
+    return [{ [mappedUnitedMetadataSortField]: sortDirection }];
   }
-  return filterUnenrolledAgents || filterStatusAgents
-    ? idFilter
-    : {
-        match_all: {},
-      };
-}
+};
 
 export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
   return {
@@ -200,11 +147,24 @@ export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
   };
 }
 
+const lastCheckinRuntimeField = {
+  last_checkin: {
+    type: 'date',
+    script: {
+      lang: 'painless',
+      source:
+        "emit(doc['united.agent.last_checkin'].size() > 0 ? doc['united.agent.last_checkin'].value.toInstant().toEpochMilli() : doc['united.endpoint.@timestamp'].value.toInstant().toEpochMilli());",
+    },
+  },
+};
+
 interface BuildUnitedIndexQueryResponse {
   body: {
     query: Record<string, unknown>;
     track_total_hits: boolean;
     sort: estypes.SortCombinations[];
+    runtime_mappings: Record<string, unknown>;
+    fields?: string[];
   };
   from: number;
   size: number;
@@ -212,6 +172,7 @@ interface BuildUnitedIndexQueryResponse {
 }
 
 export async function buildUnitedIndexQuery(
+  soClient: SavedObjectsClientContract,
   queryOptions: GetMetadataListRequestQuery,
   endpointPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
@@ -220,6 +181,8 @@ export async function buildUnitedIndexQuery(
     pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
     hostStatuses = [],
     kuery = '',
+    sortField = ENDPOINT_DEFAULT_SORT_FIELD,
+    sortDirection = ENDPOINT_DEFAULT_SORT_DIRECTION,
   } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
@@ -273,11 +236,17 @@ export async function buildUnitedIndexQuery(
     };
   }
 
+  const statusRuntimeField = await buildAgentStatusRuntimeField(soClient, 'united.agent.');
+  const runtimeMappings = { ...statusRuntimeField, ...lastCheckinRuntimeField };
+
+  const fields = Object.keys(runtimeMappings);
   return {
     body: {
       query,
       track_total_hits: true,
-      sort: MetadataSortMethod,
+      sort: getUnitedMetadataSortMethod(sortField as EndpointSortableField, sortDirection),
+      fields,
+      runtime_mappings: runtimeMappings,
     },
     from: page * pageSize,
     size: pageSize,

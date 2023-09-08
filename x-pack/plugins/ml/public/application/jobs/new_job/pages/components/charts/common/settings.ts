@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
+import { useCurrentThemeVars } from '../../../../../../contexts/kibana';
 import {
-  JobCreatorType,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
+  JobCreatorType,
 } from '../../../../common/job_creator';
 import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
-import { useUiSettings } from '../../../../../../contexts/kibana/use_ui_settings_context';
 
 export function useChartColors() {
-  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
-  const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
+  const { euiTheme } = useCurrentThemeVars();
   return {
-    LINE_COLOR: themeName.euiColorPrimary,
-    MODEL_COLOR: themeName.euiColorPrimary,
-    EVENT_RATE_COLOR: themeName.euiColorPrimary,
-    EVENT_RATE_COLOR_WITH_ANOMALIES: themeName.euiColorLightShade,
+    LINE_COLOR: euiTheme.euiColorPrimary,
+    MODEL_COLOR: euiTheme.euiColorPrimary,
+    EVENT_RATE_COLOR: euiTheme.euiColorPrimary,
+    EVENT_RATE_COLOR_WITH_ANOMALIES: euiTheme.euiColorLightShade,
   };
 }
 

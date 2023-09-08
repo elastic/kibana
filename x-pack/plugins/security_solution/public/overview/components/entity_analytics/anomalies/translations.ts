@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ANOMALIES_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.anomaliesTitle',
   {
-    defaultMessage: 'Notable Anomalies',
+    defaultMessage: 'Anomalies',
   }
 );
 
@@ -77,6 +77,13 @@ export const JOB_STATUS_FAILED = i18n.translate(
   }
 );
 
+export const JOB_STATUS_WAITING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.anomalies.jobStatusLoading',
+  {
+    defaultMessage: 'Waiting',
+  }
+);
+
 export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.anomalies.moduleNotCompatibleTitle', {
     values: { incompatibleJobCount },
@@ -88,5 +95,12 @@ export const ANOMALY_DETECTION_DOCS = i18n.translate(
   'xpack.securitySolution.entityAnalytics.anomalies.AnomalyDetectionDocsTitle',
   {
     defaultMessage: 'Anomaly Detection with Machine Learning',
+  }
+);
+
+export const ANOMALIES_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.anomalies.anomaliesTooltip',
+  {
+    defaultMessage: 'The anomalies table is not filterable via the SIEM global KQL search.',
   }
 );

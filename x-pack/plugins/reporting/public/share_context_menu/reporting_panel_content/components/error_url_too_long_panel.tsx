@@ -22,7 +22,7 @@ const i18nTexts = {
 };
 
 export const ErrorUrlTooLongPanel: FunctionComponent<Props> = ({ isUnsaved }) => (
-  <EuiCallOut title={i18nTexts.title} size="s" iconType="alert" color="danger">
+  <EuiCallOut title={i18nTexts.title} size="s" iconType="warning" color="danger">
     <EuiText size="s">
       <p>
         {isUnsaved ? (

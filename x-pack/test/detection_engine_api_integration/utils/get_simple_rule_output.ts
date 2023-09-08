@@ -8,7 +8,7 @@
 import type {
   RuleResponse,
   SharedResponseProps,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
 export const getMockSharedResponseSchema = (
@@ -40,9 +40,10 @@ export const getMockSharedResponseSchema = (
   tags: [],
   to: 'now',
   threat: [],
-  throttle: 'no_actions',
+  throttle: undefined,
   exceptions_list: [],
   version: 1,
+  revision: 0,
   id: 'id',
   updated_at: '2020-07-08T16:36:32.377Z',
   created_at: '2020-07-08T16:36:32.377Z',
@@ -59,6 +60,7 @@ export const getMockSharedResponseSchema = (
   timestamp_override: undefined,
   timestamp_override_fallback_disabled: undefined,
   namespace: undefined,
+  investigation_fields: undefined,
 });
 
 const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): RuleResponse => ({

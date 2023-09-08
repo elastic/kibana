@@ -18,6 +18,7 @@ import {
   getInitialState,
 } from './sidebar_reducer';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 describe('sidebar reducer', function () {
   it('should set an initial state', function () {
@@ -84,11 +85,12 @@ describe('sidebar reducer', function () {
       allFields: [
         ...stubDataViewWithoutTimeField.fields,
         // merging in unmapped fields
-        {
-          displayName: unmappedFieldName,
+        new DataViewField({
           name: unmappedFieldName,
           type: 'unknown',
-        } as DataViewField,
+          aggregatable: false,
+          searchable: false,
+        }),
       ],
       fieldCounts,
       status: DiscoverSidebarReducerStatus.COMPLETED,
@@ -99,33 +101,54 @@ describe('sidebar reducer', function () {
       payload: {
         isPlainRecord: true,
         dataView: stubDataViewWithoutTimeField,
-        fieldCounts,
+        fieldCounts: {},
+        textBasedQueryColumns: [
+          {
+            id: '1',
+            name: 'text1',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            id: '2',
+            name: 'text2',
+            meta: {
+              type: 'keyword',
+            },
+          },
+        ] as DatatableColumn[],
       },
     });
     expect(resultForTextBasedQuery).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
       allFields: [
-        stubDataViewWithoutTimeField.fields.find((field) => field.name === dataViewFieldName),
-        // merging in unmapped fields
-        {
-          displayName: 'field1',
-          name: 'field1',
-          type: 'unknown',
-        } as DataViewField,
+        new DataViewField({
+          name: 'text1',
+          type: 'number',
+          aggregatable: false,
+          searchable: false,
+        }),
+        new DataViewField({
+          name: 'text2',
+          type: 'keyword',
+          aggregatable: false,
+          searchable: false,
+        }),
       ],
-      fieldCounts,
+      fieldCounts: {},
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
-    const resultForTextBasedQueryWhileLoading = discoverSidebarReducer(state, {
+    const resultWhileLoading = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
-        isPlainRecord: true,
+        isPlainRecord: false,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: null,
       },
     });
-    expect(resultForTextBasedQueryWhileLoading).toStrictEqual({
+    expect(resultWhileLoading).toStrictEqual({
       dataView: stubDataViewWithoutTimeField,
       allFields: null,
       fieldCounts: null,

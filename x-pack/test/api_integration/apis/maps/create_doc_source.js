@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -13,8 +14,9 @@ export default function ({ getService }) {
   describe('doc source creation', () => {
     it('should create a new index and pattern but not clobber an existing one', async () => {
       const resp = await supertest
-        .post(`/api/maps/docSource`)
+        .post(`/internal/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'testing123',
           mappings: { properties: { coordinates: { type: 'geo_point' } } },
@@ -25,8 +27,9 @@ export default function ({ getService }) {
 
       // Repeated index fails. We don't want the user clobbering indexes
       await supertest
-        .post(`/api/maps/docSource`)
+        .post(`/internal/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'testing123',
           mappings: { properties: { coordinates: { type: 'geo_point' } } },
@@ -36,8 +39,9 @@ export default function ({ getService }) {
 
     it('should fail to create index and pattern with invalid index', async () => {
       await supertest
-        .post(`/api/maps/docSource`)
+        .post(`/internal/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: '_testing456',
           mappings: { properties: { coordinates: { type: 'geo_point' } } },

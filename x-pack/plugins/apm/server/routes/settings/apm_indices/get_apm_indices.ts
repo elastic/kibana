@@ -5,101 +5,30 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
-import {
-  APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-  APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
-} from '../../../../common/apm_saved_object_constants';
-import { APMConfig } from '../../..';
-import { APMRouteHandlerResources } from '../../typings';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import { APMIndices } from '../../../saved_objects/apm_indices';
+import { getApmIndicesSavedObject } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
 
-export type ApmIndicesConfig = Readonly<{
-  sourcemap: string;
-  error: string;
-  onboarding: string;
-  span: string;
-  transaction: string;
-  metric: string;
-  apmAgentConfigurationIndex: string;
-  apmCustomLinkIndex: string;
+export type ApmIndexSettingsResponse = Array<{
+  configurationName: 'transaction' | 'span' | 'error' | 'metric' | 'onboarding';
+  defaultValue: string; // value defined in kibana[.dev].yml
+  savedValue: string | undefined;
 }>;
 
-type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
+export async function getApmIndexSettings(
+  resources: APMRouteHandlerResources
+): Promise<ApmIndexSettingsResponse> {
+  const { apmIndicesFromConfigFile } = resources.plugins.apmDataAccess.setup;
 
-async function getApmIndicesSavedObject(
-  savedObjectsClient: ISavedObjectsClient
-) {
-  const apmIndicesSavedObject = await withApmSpan(
-    'get_apm_indices_saved_object',
-    () =>
-      savedObjectsClient.get<Partial<APMIndices>>(
-        APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-        APM_INDEX_SETTINGS_SAVED_OBJECT_ID
-      )
-  );
-  return apmIndicesSavedObject.attributes.apmIndices;
-}
+  const soClient = (await resources.context.core).savedObjects.client;
+  const apmIndicesSavedObject = await getApmIndicesSavedObject(soClient);
 
-export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
-  return {
-    sourcemap: config.indices.sourcemap,
-    error: config.indices.error,
-    onboarding: config.indices.onboarding,
-    span: config.indices.span,
-    transaction: config.indices.transaction,
-    metric: config.indices.metric,
-    // system indices, not configurable
-    apmAgentConfigurationIndex: '.apm-agent-configuration',
-    apmCustomLinkIndex: '.apm-custom-link',
-  };
-}
-
-export async function getApmIndices({
-  config,
-  savedObjectsClient,
-}: {
-  config: APMConfig;
-  savedObjectsClient: ISavedObjectsClient;
-}): Promise<ApmIndicesConfig> {
-  try {
-    const apmIndicesSavedObject = await getApmIndicesSavedObject(
-      savedObjectsClient
-    );
-    const apmIndicesConfig = getApmIndicesConfig(config);
-    return { ...apmIndicesConfig, ...apmIndicesSavedObject };
-  } catch (error) {
-    return getApmIndicesConfig(config);
-  }
-}
-
-export async function getApmIndexSettings({
-  context,
-  config,
-}: Pick<APMRouteHandlerResources, 'context' | 'config'>) {
-  let apmIndicesSavedObject: Awaited<
-    ReturnType<typeof getApmIndicesSavedObject>
-  >;
-  try {
-    const soClient = (await context.core).savedObjects.client;
-    apmIndicesSavedObject = await getApmIndicesSavedObject(soClient);
-  } catch (error: any) {
-    if (error.output && error.output.statusCode === 404) {
-      apmIndicesSavedObject = {};
-    } else {
-      throw error;
-    }
-  }
-  const apmIndicesConfig = getApmIndicesConfig(config);
-
-  const apmIndices = Object.keys(config.indices) as Array<
-    keyof typeof config.indices
+  const apmIndicesKeys = Object.keys(apmIndicesFromConfigFile) as Array<
+    keyof typeof apmIndicesFromConfigFile
   >;
 
-  return apmIndices.map((configurationName) => ({
+  return apmIndicesKeys.map((configurationName) => ({
     configurationName,
-    defaultValue: apmIndicesConfig[configurationName], // value defined in kibana[.dev].yml
+    defaultValue: apmIndicesFromConfigFile[configurationName], // value defined in kibana[.dev].yml
     savedValue: apmIndicesSavedObject?.[configurationName], // value saved via Saved Objects service
   }));
 }

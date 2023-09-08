@@ -6,12 +6,10 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { pick, omit } from 'lodash';
+import { omit } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { safeLoad } from 'js-yaml';
-import deepEqual from 'fast-deep-equal';
 import {
   EuiButtonEmpty,
   EuiBottomBar,
@@ -21,19 +19,14 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 
-import type { AgentPolicy, PackageInfo, UpdatePackagePolicy, PackagePolicy } from '../../../types';
+import type { PackageInfo } from '../../../types';
 import {
   useLink,
   useBreadcrumbs,
   useStartServices,
   useConfig,
   useUIExtension,
-  sendUpdatePackagePolicy,
   sendGetAgentStatus,
-  sendGetOneAgentPolicy,
-  sendGetOnePackagePolicy,
-  sendGetPackageInfoByKey,
-  sendUpgradePackagePolicyDryRun,
   useAuthz,
 } from '../../../hooks';
 import {
@@ -42,35 +35,26 @@ import {
 } from '../../../../integrations/hooks';
 import {
   Loading,
-  Error,
+  Error as ErrorComponent,
   ExtensionWrapper,
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
 } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
-import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
-import { validatePackagePolicy, validationHasErrors } from '../create_package_policy_page/services';
-import type {
-  PackagePolicyFormState,
-  EditPackagePolicyFrom,
-} from '../create_package_policy_page/types';
+import type { EditPackagePolicyFrom } from '../create_package_policy_page/types';
 import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
-import type {
-  GetOnePackagePolicyResponse,
-  UpgradePackagePolicyDryRunResponse,
-} from '../../../../../../common/types/rest_spec';
+
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../common/constants';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
-import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
-import { useHistoryBlock } from './hooks';
 import { UpgradeStatusCallout } from './components';
+import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -107,193 +91,33 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
 
-  // Agent policy, package info, and package policy states
-  const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
-  const [loadingError, setLoadingError] = useState<Error>();
-  const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>();
-  const [packageInfo, setPackageInfo] = useState<PackageInfo>();
-  const [packagePolicy, setPackagePolicy] = useState<UpdatePackagePolicy>({
-    name: '',
-    description: '',
-    namespace: '',
-    policy_id: '',
-    enabled: true,
-    inputs: [],
-    version: '',
+  const [] = useState<PackageInfo>();
+  const {
+    // data
+    agentPolicy,
+    isLoadingData,
+    loadingError,
+    packagePolicy,
+    originalPackagePolicy,
+    packageInfo,
+    upgradeDryRunData,
+    // form
+    formState,
+    setFormState,
+    isUpgrade,
+    isEdited,
+    setIsEdited,
+    savePackagePolicy,
+    hasErrors,
+    updatePackagePolicy,
+    validationResults,
+  } = usePackagePolicyWithRelatedData(packagePolicyId, {
+    forceUpgrade,
   });
-  const [originalPackagePolicy, setOriginalPackagePolicy] =
-    useState<GetOnePackagePolicyResponse['item']>();
-  const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
-
-  const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
-  useEffect(() => {
-    if (forceUpgrade) {
-      setIsUpgrade(true);
-    }
-  }, [forceUpgrade]);
-
   const policyId = agentPolicy?.id ?? '';
-
-  // Retrieve agent policy, package, and package policy info
-  useEffect(() => {
-    const getData = async () => {
-      setIsLoadingData(true);
-      setLoadingError(undefined);
-      try {
-        const { data: packagePolicyData, error: packagePolicyError } =
-          await sendGetOnePackagePolicy(packagePolicyId);
-
-        if (packagePolicyError) {
-          throw packagePolicyError;
-        }
-
-        const { data: agentPolicyData, error: agentPolicyError } = await sendGetOneAgentPolicy(
-          packagePolicyData!.item.policy_id
-        );
-
-        if (agentPolicyError) {
-          throw agentPolicyError;
-        }
-
-        if (agentPolicyData?.item) {
-          setAgentPolicy(agentPolicyData.item);
-        }
-
-        const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
-          await sendUpgradePackagePolicyDryRun([packagePolicyId]);
-
-        if (upgradePackagePolicyDryRunError) {
-          throw upgradePackagePolicyDryRunError;
-        }
-
-        const hasUpgrade = upgradePackagePolicyDryRunData
-          ? hasUpgradeAvailable(upgradePackagePolicyDryRunData)
-          : false;
-
-        // If the dry run data doesn't indicate a difference in version numbers, flip the form back
-        // to its non-upgrade state, even if we were initially set to the upgrade view
-        if (!hasUpgrade) {
-          setIsUpgrade(false);
-        }
-
-        if (upgradePackagePolicyDryRunData && hasUpgrade) {
-          setDryRunData(upgradePackagePolicyDryRunData);
-        }
-
-        const basePolicy: PackagePolicy | undefined = packagePolicyData?.item;
-        let baseInputs: any = basePolicy?.inputs;
-        let basePackage: any = basePolicy?.package;
-
-        const proposedUpgradePackagePolicy = upgradePackagePolicyDryRunData?.[0]?.diff?.[1];
-
-        // If we're upgrading the package, we need to "start from" the policy as it's returned from
-        // the dry run so we can allow the user to edit any new variables before saving + upgrading
-        if (isUpgrade && !!proposedUpgradePackagePolicy) {
-          baseInputs = proposedUpgradePackagePolicy.inputs;
-          basePackage = proposedUpgradePackagePolicy.package;
-        }
-
-        if (basePolicy) {
-          setOriginalPackagePolicy(basePolicy);
-
-          const {
-            id,
-            revision,
-            inputs,
-            /* eslint-disable @typescript-eslint/naming-convention */
-            created_by,
-            created_at,
-            updated_by,
-            updated_at,
-            /* eslint-enable @typescript-eslint/naming-convention */
-            ...restOfPackagePolicy
-          } = basePolicy as any;
-          // Remove `compiled_stream` from all stream info, we assign this after saving
-          const newPackagePolicy = {
-            ...restOfPackagePolicy,
-            inputs: baseInputs.map((input: any) => {
-              // Remove `compiled_input` from all input info, we assign this after saving
-              const { streams, compiled_input: compiledInput, vars, ...restOfInput } = input;
-              let basePolicyInputVars: any =
-                isUpgrade &&
-                basePolicy.inputs.find(
-                  (i) => i.type === input.type && i.policy_template === input.policy_template
-                )?.vars;
-              let newVars = vars;
-              if (basePolicyInputVars && vars) {
-                // merging vars from dry run with updated ones
-                basePolicyInputVars = Object.keys(vars).reduce(
-                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
-                  {}
-                );
-                newVars = {
-                  ...vars,
-                  ...basePolicyInputVars,
-                };
-              }
-              // Fix duration vars, if it's a migrated setting, and it's a plain old number with no suffix
-              if (basePackage.name === 'apm') {
-                newVars = fixApmDurationVars(newVars);
-              }
-              return {
-                ...restOfInput,
-                streams: streams.map((stream: any) => {
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
-                  const { compiled_stream, ...restOfStream } = stream;
-                  return restOfStream;
-                }),
-                vars: newVars,
-              };
-            }),
-            package: basePackage,
-          };
-
-          setPackagePolicy(newPackagePolicy);
-
-          if (basePolicy.package) {
-            let _packageInfo = basePolicy.package;
-
-            // When upgrading, we need to grab the `packageInfo` data from the new package version's
-            // proposed policy (comes from the dry run diff) to ensure we have the valid package key/version
-            // before saving
-            if (isUpgrade && !!upgradePackagePolicyDryRunData?.[0]?.diff?.[1]?.package) {
-              _packageInfo = upgradePackagePolicyDryRunData[0].diff?.[1]?.package;
-            }
-
-            const { data: packageData } = await sendGetPackageInfoByKey(
-              _packageInfo!.name,
-              _packageInfo!.version,
-              { prerelease: true, full: true }
-            );
-
-            if (packageData?.item) {
-              setPackageInfo(packageData.item);
-
-              const newValidationResults = validatePackagePolicy(
-                newPackagePolicy,
-                packageData.item,
-                safeLoad
-              );
-              setValidationResults(newValidationResults);
-
-              if (validationHasErrors(newValidationResults)) {
-                setFormState('INVALID');
-              } else {
-                setFormState('VALID');
-              }
-            }
-          }
-        }
-      } catch (e) {
-        setLoadingError(e);
-      }
-      setIsLoadingData(false);
-    };
-    getData();
-  }, [policyId, packagePolicyId, isUpgrade]);
 
   // Retrieve agent count
   const [agentCount, setAgentCount] = useState<number>(0);
@@ -310,61 +134,6 @@ export const EditPackagePolicyForm = memo<{
     }
   }, [policyId, isFleetEnabled]);
 
-  // Package policy validation state
-  const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
-  // Update package policy validation
-  const updatePackagePolicyValidation = useCallback(
-    (newPackagePolicy?: UpdatePackagePolicy) => {
-      if (packageInfo) {
-        const newValidationResult = validatePackagePolicy(
-          newPackagePolicy || packagePolicy,
-          packageInfo,
-          safeLoad
-        );
-        setValidationResults(newValidationResult);
-        // eslint-disable-next-line no-console
-        console.debug('Package policy validation results', newValidationResult);
-
-        return newValidationResult;
-      }
-    },
-    [packagePolicy, packageInfo]
-  );
-
-  // Update package policy method
-  const updatePackagePolicy = useCallback(
-    (updatedFields: Partial<UpdatePackagePolicy>) => {
-      const isDeepEqual = deepEqual(
-        JSON.parse(JSON.stringify(updatedFields)),
-        JSON.parse(JSON.stringify(pick(packagePolicy, Object.keys(updatedFields))))
-      );
-      if (!isDeepEqual) {
-        setIsEdited(true);
-      }
-
-      const newPackagePolicy = {
-        ...packagePolicy,
-        ...updatedFields,
-      };
-      setPackagePolicy(newPackagePolicy);
-
-      // eslint-disable-next-line no-console
-      console.debug('Package policy updated', newPackagePolicy);
-      const newValidationResults = updatePackagePolicyValidation(newPackagePolicy);
-      const hasValidationErrors = newValidationResults
-        ? validationHasErrors(newValidationResults)
-        : false;
-      if (!hasValidationErrors) {
-        setFormState('VALID');
-      } else {
-        setFormState('INVALID');
-      }
-    },
-    [packagePolicy, updatePackagePolicyValidation]
-  );
-
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
@@ -377,7 +146,7 @@ export const EditPackagePolicyForm = memo<{
         return prevState;
       });
     },
-    [updatePackagePolicy]
+    [updatePackagePolicy, setFormState]
   );
 
   // Cancel url + Success redirect Path:
@@ -393,7 +162,6 @@ export const EditPackagePolicyForm = memo<{
     }
     return '/';
   }, [from, getHref, packageInfo, policyId]);
-
   const successRedirectPath = useMemo(() => {
     if (packageInfo && policyId) {
       return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
@@ -404,17 +172,6 @@ export const EditPackagePolicyForm = memo<{
     }
     return '/';
   }, [from, getHref, packageInfo, policyId]);
-
-  // Save package policy
-  const [isEdited, setIsEdited] = useState(false);
-  const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
-  const savePackagePolicy = async () => {
-    setFormState('LOADING');
-    const { elasticsearch, ...restPackagePolicy } = packagePolicy; // ignore 'elasticsearch' property since it fails route validation
-    const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
-    setFormState('SUBMITTED');
-    return result;
-  };
 
   useHistoryBlock(isEdited);
 
@@ -481,10 +238,21 @@ export const EditPackagePolicyForm = memo<{
   };
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
   const extensionTabsView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-edit-tabs'
   );
+
+  if (replaceDefineStepView && extensionView) {
+    throw new Error(
+      "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
+    );
+  }
+
   const tabsViews = extensionTabsView?.tabs;
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -525,9 +293,9 @@ export const EditPackagePolicyForm = memo<{
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
+              validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
-              isUpdate={true}
+              isEditPage={true}
             />
           )}
 
@@ -537,8 +305,9 @@ export const EditPackagePolicyForm = memo<{
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
-              validationResults={validationResults!}
+              validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
+              isEditPage={true}
             />
           )}
 
@@ -579,6 +348,20 @@ export const EditPackagePolicyForm = memo<{
     ]
   );
 
+  const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
+    <ExtensionWrapper>
+      <replaceDefineStepView.Component
+        agentPolicy={agentPolicy}
+        packageInfo={packageInfo}
+        policy={originalPackagePolicy}
+        newPolicy={packagePolicy}
+        onChange={handleExtensionViewOnChange}
+        validationResults={validationResults}
+        isEditPage={true}
+      />
+    </ExtensionWrapper>
+  );
+
   const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
     ExperimentalFeaturesService.get();
 
@@ -601,7 +384,7 @@ export const EditPackagePolicyForm = memo<{
         {isLoadingData ? (
           <Loading />
         ) : loadingError || !agentPolicy || !packageInfo ? (
-          <Error
+          <ErrorComponent
             title={
               <FormattedMessage
                 id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
@@ -633,13 +416,13 @@ export const EditPackagePolicyForm = memo<{
                 onCancel={() => setFormState('VALID')}
               />
             )}
-            {isUpgrade && dryRunData && (
+            {isUpgrade && upgradeDryRunData && (
               <>
-                <UpgradeStatusCallout dryRunData={dryRunData} />
+                <UpgradeStatusCallout dryRunData={upgradeDryRunData} />
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {configurePackage}
+            {replaceConfigurePackage || configurePackage}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />

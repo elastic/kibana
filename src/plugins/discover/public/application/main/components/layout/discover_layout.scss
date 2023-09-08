@@ -1,4 +1,4 @@
-@import 'src/core/public/mixins';
+@import '../../../../../../../core/public/mixins';
 
 discover-app {
   flex-grow: 1;
@@ -31,10 +31,6 @@ discover-app {
   overflow: hidden;
 }
 
-.dscPageBody__sidebar {
-  position: relative;
-}
-
 .dscPageContent__wrapper {
   padding: $euiSizeS $euiSizeS $euiSizeS 0;
   overflow: hidden; // Ensures horizontal scroll of table
@@ -45,16 +41,19 @@ discover-app {
 }
 
 .dscPageContent {
+  position: relative;
+  overflow: hidden;
   border: $euiBorderThin;
-}
-
-.dscPageContent,
-.dscPageContent__inner {
   height: 100%;
 }
 
 .dscPageContent--centered {
+  width: auto;
   height: auto;
+  align-self: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  flex-grow: 0;
 }
 
 .dscTable {

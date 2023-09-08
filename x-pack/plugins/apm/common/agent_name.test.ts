@@ -12,7 +12,11 @@ import {
   isAndroidAgentName,
   isMobileAgentName,
   isServerlessAgent,
+  isAWSLambdaAgent,
+  isAzureFunctionsAgent,
 } from './agent_name';
+
+import { ServerlessType } from './serverless';
 
 describe('agent name helpers', () => {
   describe('isJavaAgentName', () => {
@@ -146,27 +150,63 @@ describe('agent name helpers', () => {
   });
 
   describe('isServerlessAgent', () => {
-    describe('when the runtime name is AWS_LAMBDA', () => {
+    describe('when the serverlessType is AWS_LAMBDA', () => {
       it('returns true', () => {
-        expect(isServerlessAgent('AWS_LAMBDA')).toEqual(true);
+        expect(isServerlessAgent(ServerlessType.AWS_LAMBDA)).toEqual(true);
       });
     });
 
-    describe('when the runtime name is aws_lambda', () => {
+    describe('when the serverlessType is AZURE_FUNCTIONS', () => {
       it('returns true', () => {
-        expect(isServerlessAgent('aws_lambda')).toEqual(true);
+        expect(isServerlessAgent(ServerlessType.AZURE_FUNCTIONS)).toEqual(true);
       });
     });
 
-    describe('when the runtime name is aws_lambda_test', () => {
-      it('returns true', () => {
-        expect(isServerlessAgent('aws_lambda_test')).toEqual(true);
-      });
-    });
-
-    describe('when the runtime name is something else', () => {
+    describe('when the serverlessType is undefined', () => {
       it('returns false', () => {
-        expect(isServerlessAgent('not_aws_lambda')).toEqual(false);
+        expect(isServerlessAgent(undefined)).toEqual(false);
+      });
+    });
+  });
+
+  describe('isAWSLambdaAgent', () => {
+    describe('when the serverlessType is AWS_LAMBDA', () => {
+      it('returns true', () => {
+        expect(isAWSLambdaAgent(ServerlessType.AWS_LAMBDA)).toEqual(true);
+      });
+    });
+
+    describe('when the serverlessType is AZURE_FUNCTIONS', () => {
+      it('returns true', () => {
+        expect(isAWSLambdaAgent(ServerlessType.AZURE_FUNCTIONS)).toEqual(false);
+      });
+    });
+
+    describe('when the serverlessType is undefined', () => {
+      it('returns false', () => {
+        expect(isAWSLambdaAgent(undefined)).toEqual(false);
+      });
+    });
+  });
+
+  describe('isAzureFunctionsAgent', () => {
+    describe('when the serverlessType is AZURE_FUNCTIONS', () => {
+      it('returns true', () => {
+        expect(isAzureFunctionsAgent(ServerlessType.AZURE_FUNCTIONS)).toEqual(
+          true
+        );
+      });
+    });
+
+    describe('when the serverlessType is AWS_LAMBDA', () => {
+      it('returns true', () => {
+        expect(isAzureFunctionsAgent(ServerlessType.AWS_LAMBDA)).toEqual(false);
+      });
+    });
+
+    describe('when the serverlessType is undefined', () => {
+      it('returns false', () => {
+        expect(isAzureFunctionsAgent(undefined)).toEqual(false);
       });
     });
   });

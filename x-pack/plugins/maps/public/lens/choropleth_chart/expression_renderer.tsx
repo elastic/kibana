@@ -99,9 +99,9 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
           uiSettings={coreStart.uiSettings}
           emsFileLayers={emsFileLayers}
           mapEmbeddableFactory={mapEmbeddableFactory}
+          onRenderComplete={renderComplete}
         />,
-        domNode,
-        renderComplete
+        domNode
       );
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },

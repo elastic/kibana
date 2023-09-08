@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
       expect(items!.length).to.be(3);
 
-      const integrations = await items!.at(0);
+      const integrations = await items!.at(2);
       await integrations!.click();
       await PageObjects.common.waitUntilUrlIncludes('app/integrations/browse');
     });
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const header = await find.byCssSelector('.euiPageHeaderContent');
       const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
 
-      const devTools = await items!.at(2);
+      const devTools = await items!.at(0);
       await devTools!.click();
       await PageObjects.common.waitUntilUrlIncludes('app/dev_tools');
     });

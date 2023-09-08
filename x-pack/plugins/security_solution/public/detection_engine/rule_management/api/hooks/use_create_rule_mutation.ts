@@ -10,12 +10,12 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { createRule } from '../api';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
-import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
+import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
+import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 
 export const CREATE_RULE_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_URL];
 
@@ -23,8 +23,8 @@ export const useCreateRuleMutation = (
   options?: UseMutationOptions<RuleResponse, Error, RuleCreateProps>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchTagsQuery = useInvalidateFetchTagsQuery();
-  const invalidateFetchPrePackagedRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
 
   return useMutation<RuleResponse, Error, RuleCreateProps>(
     (rule: RuleCreateProps) => createRule({ rule: transformOutput(rule) }),
@@ -32,9 +32,9 @@ export const useCreateRuleMutation = (
       ...options,
       mutationKey: CREATE_RULE_MUTATION_KEY,
       onSettled: (...args) => {
-        invalidateFetchPrePackagedRulesStatusQuery();
         invalidateFindRulesQuery();
-        invalidateFetchTagsQuery();
+        invalidateFetchRuleManagementFilters();
+        invalidateFetchCoverageOverviewQuery();
 
         if (options?.onSettled) {
           options.onSettled(...args);

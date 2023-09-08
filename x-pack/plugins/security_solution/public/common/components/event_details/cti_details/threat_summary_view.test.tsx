@@ -24,7 +24,10 @@ jest.mock('../../../lib/kibana', () => ({
   }),
 }));
 
-jest.mock('../table/action_cell', () => ({ ActionCell: () => <></> }));
+jest.mock('../../../../helper_hooks', () => ({
+  useHasSecurityCapability: () => true,
+}));
+
 jest.mock('../table/field_name_cell');
 
 const RISK_SCORE_DATA_ROWS = 2;
@@ -61,7 +64,7 @@ describe('ThreatSummaryView', () => {
       </TestProviders>
     );
 
-    expect(getByText('Enriched with Threat Intelligence')).toBeInTheDocument();
+    expect(getByText('Enriched with threat intelligence')).toBeInTheDocument();
 
     expect(getAllByTestId('EnrichedDataRow')).toHaveLength(
       enrichments.length + RISK_SCORE_DATA_ROWS

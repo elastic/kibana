@@ -79,6 +79,14 @@ async function getServerlessTransactionThroughput({
   return response.hits.total.value;
 }
 
+export interface ServerlessSummaryResponse {
+  memoryUsageAvgRate: number | undefined;
+  serverlessFunctionsTotal: number | undefined;
+  serverlessDurationAvg: number | null | undefined;
+  billedDurationAvg: number | null | undefined;
+  estimatedCost: number | undefined;
+}
+
 export async function getServerlessSummary({
   end,
   environment,
@@ -99,7 +107,7 @@ export async function getServerlessSummary({
   apmEventClient: APMEventClient;
   awsLambdaPriceFactor?: AWSLambdaPriceFactor;
   awsLambdaRequestCostPerMillion?: number;
-}) {
+}): Promise<ServerlessSummaryResponse> {
   const params = {
     apm: {
       events: [ProcessorEvent.metric],

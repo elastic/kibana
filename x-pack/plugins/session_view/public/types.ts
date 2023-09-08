@@ -5,13 +5,65 @@
  * 2.0.
  */
 import { ReactNode } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 
-export type SessionViewServices = CoreStart;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewPluginStart {}
+
+export interface SessionViewPluginStartDeps {
+  usageCollection?: UsageCollectionStart;
+}
+
+export interface SessionViewPluginSetupDeps {
+  usageCollection?: UsageCollectionSetup;
+}
+
+// the following are all the reportUiCounter click tracking events we send up.
+export type SessionViewTelemetryKey =
+  | 'loaded_from_cloud_defend_log'
+  | 'loaded_from_cloud_defend_alert'
+  | 'loaded_from_endpoint_log'
+  | 'loaded_from_endpoint_alert'
+  | 'loaded_from_unknown_log'
+  | 'loaded_from_unknown_alert'
+  | 'refresh_clicked'
+  | 'process_selected'
+  | 'collapse_tree'
+  | 'children_opened'
+  | 'children_closed'
+  | 'alerts_opened'
+  | 'alerts_closed'
+  | 'details_opened'
+  | 'details_closed'
+  | 'output_clicked'
+  | 'alert_details_loaded'
+  | 'disabled_tty_clicked' // tty button clicked when disabled (no data or not enabled)
+  | 'tty_loaded' // tty player succesfully loaded
+  | 'tty_playback_started'
+  | 'tty_playback_stopped'
+  | 'verbose_mode_enabled'
+  | 'verbose_mode_disabled'
+  | 'timestamp_enabled'
+  | 'timestamp_disabled'
+  | 'search_performed'
+  | 'search_next'
+  | 'search_previous';
 
 export interface SessionViewDeps {
+  // we pass in the index of the session leader that spawned session_view, this avoids having to query multiple cross cluster indices
+  index: string;
+
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
+
+  // start time is passed in order to scope session_view queries to the appropriate time range, and avoid querying data across all time.
+  sessionStartTime: string;
+
   height?: number;
   isFullScreen?: boolean;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
@@ -27,7 +79,7 @@ export interface SessionViewDeps {
     // Callback used when alert flyout panel is closed
     handleOnAlertDetailsClosed: () => void
   ) => void;
-  canAccessEndpointManagement?: boolean;
+  canReadPolicyManagement?: boolean;
 }
 
 export interface EuiTabProps {
@@ -44,7 +96,9 @@ export interface DetailPanelProcess {
   start: string;
   end: string;
   exitCode: string;
+  userId: string;
   userName: string;
+  groupId: string;
   groupName: string;
   args: string;
   executable: string[][];
@@ -63,7 +117,9 @@ export interface DetailPanelProcessLeader {
   start: string;
   end: string;
   exitCode: string;
+  userId: string;
   userName: string;
+  groupId: string;
   groupName: string;
   workingDirectory: string;
   interactive: string;
@@ -128,6 +184,7 @@ export interface DetailPanelCloud {
   };
   project: {
     id: string;
+    name: string;
   };
   provider: string;
   region: string;

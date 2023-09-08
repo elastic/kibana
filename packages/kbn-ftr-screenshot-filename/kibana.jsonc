@@ -1,8 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/ftr-screenshot-filename",
-  "owner": "@elastic/kibana-operations",
-  "devOnly": true,
-  "runtimeDeps": [],
-  "typeDeps": [],
+  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
+  "devOnly": true
 }

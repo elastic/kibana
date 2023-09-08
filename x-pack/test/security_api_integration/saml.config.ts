@@ -13,14 +13,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
+  const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
-  const testEndpointsPlugin = resolve(
-    __dirname,
-    '../security_functional/fixtures/common/test_endpoints'
-  );
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
-  const auditLogPath = resolve(__dirname, './fixtures/audit/saml.log');
+  const auditLogPath = resolve(__dirname, './packages/helpers/audit/saml.log');
 
   return {
     testFiles: [require.resolve('./tests/saml')],

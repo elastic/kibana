@@ -4,29 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CamelToSnake, RewriteRequestCase } from './rewrite_request_case';
+import { TypeOf } from '@kbn/config-schema/src/types/object_type';
+import { omit } from 'lodash';
+import { NormalizedAlertAction } from '../../rules_client';
 import { RuleAction } from '../../types';
+import { actionsSchema } from './actions_schema';
 
-type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency'> & {
-  frequency?: {
-    [K in keyof NonNullable<RuleAction['frequency']> as CamelToSnake<K>]: NonNullable<
-      RuleAction['frequency']
-    >[K];
-  };
-};
-export const rewriteActions: (
-  actions?: ReqRuleAction[]
-) => Array<Omit<RuleAction, 'actionTypeId'>> = (actions) => {
-  const rewriteFrequency: RewriteRequestCase<NonNullable<RuleAction['frequency']>> = ({
-    notify_when: notifyWhen,
-    ...rest
-  }) => ({ ...rest, notifyWhen });
+export const rewriteActionsReq = (
+  actions?: TypeOf<typeof actionsSchema>
+): NormalizedAlertAction[] => {
   if (!actions) return [];
-  return actions.map(
-    (action) =>
-      ({
-        ...action,
-        ...(action.frequency ? { frequency: rewriteFrequency(action.frequency) } : {}),
-      } as RuleAction)
-  );
+
+  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
+    return {
+      ...action,
+      ...(frequency
+        ? {
+            frequency: {
+              ...omit(frequency, 'notify_when'),
+              notifyWhen: frequency.notify_when,
+            },
+          }
+        : {}),
+      ...(alertsFilter ? { alertsFilter } : {}),
+    };
+  });
+};
+
+export const rewriteActionsRes = (actions?: RuleAction[]) => {
+  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) => ({
+    ...rest,
+    notify_when: notifyWhen,
+  });
+  if (!actions) return [];
+  return actions.map(({ actionTypeId, frequency, alertsFilter, ...action }) => ({
+    ...action,
+    connector_type_id: actionTypeId,
+    ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+    ...(alertsFilter
+      ? {
+          alerts_filter: alertsFilter,
+        }
+      : {}),
+  }));
 };

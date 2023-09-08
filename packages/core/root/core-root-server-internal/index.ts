@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Server, Root, bootstrap } from './src';
+export { Server, registerServiceConfig, Root, bootstrap } from './src';

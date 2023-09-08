@@ -12,6 +12,7 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { ElasticMark } from './elastic_mark';
@@ -83,24 +84,35 @@ interface Props {
   forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
   loadingCount$?: ReturnType<HttpStart['getLoadingCount$']>;
+  customBranding$: Observable<CustomBranding>;
 }
 
 export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables }: Props) {
   const forceNavigation = useObservable(observables.forceNavigation$, false);
   const navLinks = useObservable(observables.navLinks$, []);
-
+  const customBranding = useObservable(observables.customBranding$, {});
+  const { customizedLogo, logo } = customBranding;
   return (
     <a
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
-      className="euiHeaderLogo"
+      className="chrHeaderLogo"
       href={href}
       data-test-subj="logo"
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator loadingCount$={loadingCount$!} />
-      <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={logo} />
+      {customizedLogo ? (
+        <img
+          src={customizedLogo}
+          className="chrHeaderLogo__mark"
+          style={{ maxWidth: '200px', maxHeight: '84px' }}
+          alt="custom mark"
+        />
+      ) : (
+        <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
+      )}
     </a>
   );
 }

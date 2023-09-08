@@ -15,8 +15,15 @@ import {
   probabilityRt,
   rangeRt,
 } from '../default_api_types';
-import { getAgents } from './get_agents';
-import { getAgentInstances } from './get_agent_instances';
+import { AgentExplorerAgentsResponse, getAgents } from './get_agents';
+import {
+  AgentExplorerAgentInstancesResponse,
+  getAgentInstances,
+} from './get_agent_instances';
+import {
+  AgentLatestVersionsResponse,
+  fetchAgentsLatestVersion,
+} from './fetch_agents_latest_version';
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/get_agents_per_service',
@@ -33,16 +40,7 @@ const agentExplorerRoute = createApmServerRoute({
       }),
     ]),
   }),
-  async handler(resources): Promise<{
-    items: Array<{
-      serviceName: string;
-      environments: string[];
-      agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
-      agentVersion: string[];
-      agentDocsPageUrl?: string;
-      instances: number;
-    }>;
-  }> {
+  async handler(resources): Promise<AgentExplorerAgentsResponse> {
     const {
       params,
       request,
@@ -77,6 +75,16 @@ const agentExplorerRoute = createApmServerRoute({
   },
 });
 
+const latestAgentVersionsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/get_latest_agent_versions',
+  options: { tags: ['access:apm'] },
+  async handler(resources): Promise<AgentLatestVersionsResponse> {
+    const { logger, config } = resources;
+
+    return fetchAgentsLatestVersion(logger, config.latestAgentVersionsUrl);
+  },
+});
+
 const agentExplorerInstanceRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/agent_instances',
   options: { tags: ['access:apm'] },
@@ -85,12 +93,7 @@ const agentExplorerInstanceRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   async handler(resources): Promise<{
-    items: Array<{
-      serviceNode?: string;
-      environments: string[];
-      agentVersion: string;
-      lastReport: string;
-    }>;
+    items: AgentExplorerAgentInstancesResponse;
   }> {
     const { params } = resources;
 
@@ -115,5 +118,6 @@ const agentExplorerInstanceRoute = createApmServerRoute({
 
 export const agentExplorerRouteRepository = {
   ...agentExplorerRoute,
+  ...latestAgentVersionsRoute,
   ...agentExplorerInstanceRoute,
 };

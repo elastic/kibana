@@ -89,6 +89,7 @@ export const schema = Joi.object()
     rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
+    serverless: Joi.boolean().default(false),
 
     suiteFiles: Joi.object()
       .keys({
@@ -192,6 +193,7 @@ export const schema = Joi.object()
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
+        fleetserver: urlPartsSchema(),
       })
       .default(),
 
@@ -199,7 +201,7 @@ export const schema = Joi.object()
       .keys({
         license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array().items(Joi.string()),
+        serverArgs: Joi.array().items(Joi.string()).default([]),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
@@ -208,6 +210,7 @@ export const schema = Joi.object()
             scheme: /https?/,
           }),
         }),
+        files: Joi.array().items(Joi.string()),
       })
       .default(),
 

@@ -23,9 +23,7 @@ const mockClient = {
 
 describe('createMlInferencePipeline lib function', () => {
   const pipelineName = 'my-pipeline';
-  const modelId = 'my-model-id';
-  const sourceField = 'my-source-field';
-  const destinationField = 'my-dest-field';
+  const pipelineDefinition = { processors: [] };
   const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
 
   mockClient.ml.getTrainedModels.mockImplementation(() =>
@@ -58,9 +56,7 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = await createMlInferencePipeline(
       pipelineName,
-      modelId,
-      sourceField,
-      destinationField,
+      pipelineDefinition,
       mockClient as unknown as ElasticsearchClient
     );
 
@@ -71,41 +67,13 @@ describe('createMlInferencePipeline lib function', () => {
   it('should convert spaces to underscores in the pipeline name', async () => {
     await createMlInferencePipeline(
       'my pipeline with spaces  ',
-      modelId,
-      sourceField,
-      destinationField,
+      pipelineDefinition,
       mockClient as unknown as ElasticsearchClient
     );
 
     expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'ml-inference-my_pipeline_with_spaces',
-      })
-    );
-  });
-
-  it('should default the destination field to the pipeline name', async () => {
-    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
-    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-
-    await createMlInferencePipeline(
-      pipelineName,
-      modelId,
-      sourceField,
-      undefined, // Omitted destination field
-      mockClient as unknown as ElasticsearchClient
-    );
-
-    // Verify the object passed to pipeline creation contains the default target field name
-    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(
-      expect.objectContaining({
-        processors: expect.arrayContaining([
-          expect.objectContaining({
-            inference: expect.objectContaining({
-              target_field: `ml.inference.${pipelineName}`,
-            }),
-          }),
-        ]),
       })
     );
   });
@@ -119,9 +87,7 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = createMlInferencePipeline(
       pipelineName,
-      modelId,
-      sourceField,
-      destinationField,
+      pipelineDefinition,
       mockClient as unknown as ElasticsearchClient
     );
 

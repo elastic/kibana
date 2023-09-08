@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
+import { UptimeEsClient } from '../../../lib';
 import { NetworkEvent } from '../../../../common/runtime_types';
 
 export interface GetNetworkEventsParams {
@@ -18,15 +18,18 @@ export const secondsToMillis = (seconds: number) =>
   // -1 is a special case where a value was unavailable
   seconds === -1 ? -1 : seconds * 1000;
 
-export const getNetworkEvents: UMElasticsearchQueryFn<
-  GetNetworkEventsParams,
-  {
-    events: NetworkEvent[];
-    total: number;
-    isWaterfallSupported: boolean;
-    hasNavigationRequest: boolean;
-  }
-> = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
+export const getNetworkEvents = async ({
+  uptimeEsClient,
+  checkGroup,
+  stepIndex,
+}: GetNetworkEventsParams & {
+  uptimeEsClient: UptimeEsClient;
+}): Promise<{
+  events: NetworkEvent[];
+  total: number;
+  isWaterfallSupported: boolean;
+  hasNavigationRequest: boolean;
+}> => {
   const params = {
     track_total_hits: true,
     query: {

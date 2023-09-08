@@ -233,19 +233,30 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   const waitForFieldsToFinishValidating = useCallback(async () => {
     let areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
-    if (!areSomeFieldValidating) {
-      return;
-    }
 
     return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
-        if (areSomeFieldValidating) {
-          // Recursively wait for all the fields to finish validating.
-          return waitForFieldsToFinishValidating().then(resolve);
-        }
-        resolve();
-      }, 100);
+      if (areSomeFieldValidating) {
+        setTimeout(() => {
+          areSomeFieldValidating = fieldsToArray().some((field) => field.isValidating);
+          if (areSomeFieldValidating) {
+            // Recursively wait for all the fields to finish validating.
+            return waitForFieldsToFinishValidating().then(resolve);
+          }
+          resolve();
+        }, 100);
+      } else {
+        /*
+         * We need to use "setTimeout()" to ensure that the "validate()" method
+         * returns a Promise that is resolved on the next tick. This is important
+         * because the "validate()" method is often called in a "useEffect()" hook
+         * and we want the "useEffect()" to be triggered on the next tick. If we
+         * don't use "setTimeout()" the "useEffect()" would be triggered on the same
+         * tick and would not have access to the latest form state.
+         * This is also why we don't use "Promise.resolve()" here. It would resolve
+         * the Promise on the same tick.
+         */
+        setTimeout(resolve, 0);
+      }
     });
   }, [fieldsToArray]);
 

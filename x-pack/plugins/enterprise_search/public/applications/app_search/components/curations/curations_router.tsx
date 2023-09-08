@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   ENGINE_CURATIONS_PATH,
@@ -20,7 +21,7 @@ import { Curations, CurationCreation, CurationSuggestion } from './views';
 
 export const CurationsRouter: React.FC = () => {
   return (
-    <Switch>
+    <Routes>
       <Route exact path={ENGINE_CURATIONS_PATH}>
         <Curations />
       </Route>
@@ -33,6 +34,6 @@ export const CurationsRouter: React.FC = () => {
       <Route path={ENGINE_CURATION_PATH}>
         <Curation />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

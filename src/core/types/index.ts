@@ -23,6 +23,5 @@ export type {
   UiSettingsType,
   DeprecationSettings,
   UiSettingsParams,
-  PublicUiSettingsParams,
   UserProvidedValues,
 } from '@kbn/core-ui-settings-common';

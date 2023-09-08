@@ -7,6 +7,7 @@
 
 /* eslint-disable complexity */
 
+import type { Filter } from '@kbn/es-query';
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import { isArray, isEmpty, isString } from 'lodash/fp';
 import { useMemo } from 'react';
@@ -26,10 +27,10 @@ import {
 import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/renderers/bytes';
 import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
 import { getDisplayValue } from '../../../../timelines/components/timeline/data_providers/helpers';
-import { PORT_NAMES } from '../../../../network/components/port/helpers';
+import { PORT_NAMES } from '../../../../explore/network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
 import type { BrowserField } from '../../../containers/source';
-import type { DataProvider, QueryOperator } from '../../../../../common/types';
+import type { DataProvider, DataProvidersAnd, QueryOperator } from '../../../../../common/types';
 import { IS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
@@ -47,19 +48,21 @@ export interface UseActionCellDataProvider {
 export interface ActionCellValuesAndDataProvider {
   values: string[];
   dataProviders: DataProvider[];
+  filters: Filter[];
 }
 
 export const getDataProvider = (
   field: string,
   id: string,
   value: string | string[],
-  operator: QueryOperator = IS_OPERATOR
+  operator: QueryOperator = IS_OPERATOR,
+  excluded: boolean = false
 ): DataProvider => ({
   and: [],
   enabled: true,
   id: escapeDataProviderId(id),
   name: field,
-  excluded: false,
+  excluded,
   kqlQuery: '',
   queryMatch: {
     field,
@@ -68,6 +71,17 @@ export const getDataProvider = (
     displayValue: getDisplayValue(value),
   },
 });
+
+export const getDataProviderAnd = (
+  field: string,
+  id: string,
+  value: string | string[],
+  operator: QueryOperator = IS_OPERATOR,
+  excluded: boolean = false
+): DataProvidersAnd => {
+  const { and, ...dataProvider } = getDataProvider(field, id, value, operator, excluded);
+  return dataProvider;
+};
 
 export const useActionCellDataProvider = ({
   contextId,
@@ -83,6 +97,23 @@ export const useActionCellDataProvider = ({
   const cellData = useMemo(() => {
     if (values === null || values === undefined) return null;
     const arrayValues = Array.isArray(values) ? values : [values];
+
+    // For fields with multiple values we need add an extra filter that makes sure
+    // that only fields that match ALL the values are queried later on.
+    let filters: Filter[] = [];
+    if (arrayValues.length > 1) {
+      filters = [
+        {
+          meta: {},
+          query: {
+            bool: {
+              must: arrayValues.map((value) => ({ term: { [field]: value } })),
+            },
+          },
+        },
+      ];
+    }
+
     return arrayValues.reduce<ActionCellValuesAndDataProvider>(
       (memo, value, index) => {
         let id: string = '';
@@ -147,7 +178,7 @@ export const useActionCellDataProvider = ({
         memo.dataProviders.push(getDataProvider(field, id, value));
         return memo;
       },
-      { values: [], dataProviders: [] }
+      { values: [], dataProviders: [], filters }
     );
   }, [
     contextId,

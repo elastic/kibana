@@ -9,9 +9,9 @@
 import type {
   SortOrder,
   AggregationsAggregationContainer,
-  Id as EsId,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '../..';
 
 type KueryNode = any;
 
@@ -56,9 +56,25 @@ export interface SavedObjectsFindOptions {
   /** sort order, ascending or descending */
   sortOrder?: SortOrder;
   /**
-   * An array of fields to include in the results
+   * An array of attributes to fetch and include in the results. If unspecified, all attributes will be fetched.
+   *
+   * The main purpose of this option is to avoid fetching unnecessary heavy fields (e.g blobs) when searching for
+   * savedObjects, for performance purposes.
+   *
+   * Defaults to `undefined` (fetching all fields).
+   *
    * @example
-   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
+   * ```ts
+   * SavedObjects.find({type: 'dashboard', fields: ['name', 'description']})
+   * ```
+   *
+   * @remarks When this option is specified, the savedObjects returned from the API will not
+   *          go through the migration process (as we can't migrate partial documents).
+   *          For this reason, all fields provided to this option should already be present
+   *          in the prior model version of the document's SO type.
+   *          Otherwise, it may lead to inconsistencies during hybrid version cohabitation
+   *          (e.g during an upgrade in serverless) where newly introduced / backfilled fields
+   *          may not necessarily appear in the documents returned from the API when the option is used.
    */
   fields?: string[];
   /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
@@ -68,7 +84,7 @@ export interface SavedObjectsFindOptions {
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
-  searchAfter?: EsId[];
+  searchAfter?: SortResults;
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
@@ -136,6 +152,8 @@ export interface SavedObjectsFindOptions {
    * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
    */
   pit?: SavedObjectsPitParams;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 
 /**
@@ -176,7 +194,7 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * await savedObjectsClient.closePointInTime(page2.pit_id);
    * ```
    */
-  sort?: string[];
+  sort?: SortResults;
 }
 
 /**

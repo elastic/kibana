@@ -5,11 +5,28 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  SavedObject,
+  ElasticsearchClient,
+} from '@kbn/core/server';
+import { omit } from 'lodash';
+import pMap from 'p-map';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 import { FleetProxyUnauthorizedError } from '../errors';
-import type { FleetProxy, FleetProxySOAttributes, NewFleetProxy } from '../types';
+import type {
+  DownloadSource,
+  FleetProxy,
+  FleetProxySOAttributes,
+  FleetServerHost,
+  NewFleetProxy,
+  Output,
+} from '../types';
+
+import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
+import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 function savedObjectToFleetProxy(so: SavedObject<FleetProxySOAttributes>): FleetProxy {
   const { proxy_headers: proxyHeaders, ...rest } = so.attributes;
@@ -76,17 +93,33 @@ export async function getFleetProxy(
 
 export async function deleteFleetProxy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   id: string,
   options?: { fromPreconfiguration?: boolean }
 ) {
-  const fleetServerHost = await getFleetProxy(soClient, id);
+  const fleetProxy = await getFleetProxy(soClient, id);
 
-  if (fleetServerHost.is_preconfigured && !options?.fromPreconfiguration) {
+  if (fleetProxy.is_preconfigured && !options?.fromPreconfiguration) {
     throw new FleetProxyUnauthorizedError(`Cannot delete ${id} preconfigured proxy`);
   }
+  const { outputs, fleetServerHosts, downloadSources } = await getFleetProxyRelatedSavedObjects(
+    soClient,
+    id
+  );
 
-  // TODO remove from all outputs and fleet server
-  // await agentPolicyService.removeFleetServerHostFromAll(soClient, esClient, id);
+  if (
+    // download sources cannot be preconfigured
+    [...fleetServerHosts, ...outputs].some(
+      (fleetServerHostOrOutput) => fleetServerHostOrOutput.is_preconfigured
+    ) &&
+    !options?.fromPreconfiguration
+  ) {
+    throw new FleetProxyUnauthorizedError(
+      'Cannot delete a proxy used in a preconfigured fleet server hosts or output.'
+    );
+  }
+
+  await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs, downloadSources);
 
   return await soClient.delete(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
 }
@@ -146,4 +179,59 @@ export async function bulkGetFleetProxies(
       (fleetProxyOrUndefined): fleetProxyOrUndefined is FleetProxy =>
         typeof fleetProxyOrUndefined !== 'undefined'
     );
+}
+
+async function updateRelatedSavedObject(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  fleetServerHosts: FleetServerHost[],
+  outputs: Output[],
+  downloadSources: DownloadSource[]
+) {
+  await pMap(
+    fleetServerHosts,
+    (fleetServerHost) => {
+      updateFleetServerHost(soClient, fleetServerHost.id, {
+        ...omit(fleetServerHost, 'id'),
+        proxy_id: null,
+      });
+    },
+    { concurrency: 20 }
+  );
+
+  await pMap(
+    outputs,
+    (output) => {
+      outputService.update(soClient, esClient, output.id, {
+        ...omit(output, 'id'),
+        proxy_id: null,
+      });
+    },
+    { concurrency: 20 }
+  );
+
+  await pMap(downloadSources, (downloadSource) => {
+    downloadSourceService.update(soClient, downloadSource.id, {
+      ...omit(downloadSource, 'id'),
+      proxy_id: null,
+    });
+  });
+}
+
+export async function getFleetProxyRelatedSavedObjects(
+  soClient: SavedObjectsClientContract,
+  proxyId: string
+) {
+  const [{ items: fleetServerHosts }, { items: outputs }, { items: downloadSources }] =
+    await Promise.all([
+      listFleetServerHostsForProxyId(soClient, proxyId),
+      outputService.listAllForProxyId(soClient, proxyId),
+      downloadSourceService.listAllForProxyId(soClient, proxyId),
+    ]);
+
+  return {
+    fleetServerHosts,
+    outputs,
+    downloadSources,
+  };
 }

@@ -6,16 +6,13 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleObjectId } from '../../../../../../common/detection_engine/rule_schema';
-import type { IRuleExecutionLogForRoutes } from '../../../rule_monitoring';
+import type { RuleObjectId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface DeleteRuleOptions {
   ruleId: RuleObjectId;
   rulesClient: RulesClient;
-  ruleExecutionLog: IRuleExecutionLogForRoutes;
 }
 
-export const deleteRules = async ({ ruleId, rulesClient, ruleExecutionLog }: DeleteRuleOptions) => {
+export const deleteRules = async ({ ruleId, rulesClient }: DeleteRuleOptions) => {
   await rulesClient.delete({ id: ruleId });
-  await ruleExecutionLog.clearExecutionSummary(ruleId);
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
@@ -14,14 +14,14 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
 export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
-  excludePoliciesInFilterEnabled: false,
-  kubernetesEnabled: true,
-  disableIsolationUIPendingStatuses: false,
-  pendingActionResponsesWithAck: true,
-  policyListEnabled: true,
-  policyResponseInFleetEnabled: true,
-  chartEmbeddablesEnabled: false,
 
+  // FIXME:PT delete?
+  excludePoliciesInFilterEnabled: false,
+
+  kubernetesEnabled: true,
+  chartEmbeddablesEnabled: true,
+  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
+  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -31,11 +31,6 @@ export const allowedExperimentalValues = Object.freeze({
    * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
-
-  /**
-   * Enables the Endpoint response actions console in various areas of the app
-   */
-  responseActionsConsoleEnabled: true,
 
   /**
    * Enables the insights module for related alerts by process ancestry
@@ -57,35 +52,68 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the detection response actions in rule + alerts
+   * Enables the automated response actions in rule + alerts
    */
   responseActionsEnabled: true,
 
   /**
-   * Enables endpoint package level rbac
+   * Enables the automated endpoint response action in rule + alerts
    */
-  endpointRbacEnabled: false,
+  endpointResponseActionsEnabled: true,
 
-  /**
-   * Enables endpoint package level rbac for response actions only.
-   * if endpointRbacEnabled is enabled, it will take precedence.
-   */
-  endpointRbacV1Enabled: true,
   /**
    * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
   alertDetailsPageEnabled: false,
 
   /**
-   * Enables the `get-file` endpoint response action
+   * Enables the `upload` endpoint response action (v8.9)
    */
-  responseActionGetFileEnabled: false,
+  responseActionUploadEnabled: true,
+
+  /**
+   * Enables top charts on Alerts Page
+   */
+  alertsPageChartsEnabled: true,
+  alertTypeEnabled: false,
+
+  /*
+   * Enables new Set of filters on the Alerts page.
+   *
+   **/
+  alertsPageFiltersEnabled: true,
+
+  /*
+   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   *
+   **/
+  newUserDetailsFlyout: false,
+
+  /**
+   * Enable risk engine client and initialisation of datastream, component templates and mappings
+   */
+  riskScoringPersistence: false,
+
+  /**
+   * Enables experimental Entity Analytics HTTP endpoints
+   */
+  riskScoringRoutesEnabled: false,
+  /*
+   *
+   * Enables Discover embedded within timeline
+   *
+   * */
+  discoverInTimeline: false,
+
+  /**
+   * Enables Protection Updates tab in the Endpoint Policy Details page
+   */
+  protectionUpdatesEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
-const SecuritySolutionInvalidExperimentalValue = class extends Error {};
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
@@ -95,25 +123,27 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
  */
-export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
+export const parseExperimentalConfigValue = (
+  configValue: string[]
+): { features: ExperimentalFeatures; invalid: string[] } => {
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
+  const invalidKeys: string[] = [];
 
   for (const value of configValue) {
-    if (!isValidExperimentalValue(value)) {
-      throw new SecuritySolutionInvalidExperimentalValue(`[${value}] is not valid.`);
+    if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
+      invalidKeys.push(value);
+    } else {
+      enabledFeatures[value as keyof ExperimentalFeatures] = true;
     }
-
-    enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
   return {
-    ...allowedExperimentalValues,
-    ...enabledFeatures,
+    features: {
+      ...allowedExperimentalValues,
+      ...enabledFeatures,
+    },
+    invalid: invalidKeys,
   };
-};
-
-export const isValidExperimentalValue = (value: string): boolean => {
-  return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];

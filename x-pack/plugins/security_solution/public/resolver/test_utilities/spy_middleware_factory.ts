@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResolverAction } from '../store/actions';
+import type { AnyAction } from 'redux';
 import type { SpyMiddleware, SpyMiddlewareStateActionPair } from '../types';
 
 /**
@@ -25,7 +25,7 @@ export const spyMiddlewareFactory: () => SpyMiddleware = () => {
   };
 
   return {
-    middleware: (api) => (next) => (action: ResolverAction) => {
+    middleware: (api) => (next) => (action: AnyAction) => {
       // handle the action first so we get the state after the reducer
       next(action);
 

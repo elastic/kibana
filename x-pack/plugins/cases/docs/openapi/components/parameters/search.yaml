@@ -1,0 +1,5 @@
+in: query
+name: search
+description: An Elasticsearch simple_query_string query that filters the objects in the response.
+schema:
+  type: string

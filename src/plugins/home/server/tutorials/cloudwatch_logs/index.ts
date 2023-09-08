@@ -53,6 +53,6 @@ export function cloudwatchLogsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions([], context),
     elasticCloud: cloudInstructions(context),
     onPremElasticCloud: onPremCloudInstructions(context),
-    integrationBrowserCategories: ['aws', 'cloud', 'datastore', 'security', 'network'],
+    integrationBrowserCategories: ['aws', 'observability', 'monitoring'],
   };
 }

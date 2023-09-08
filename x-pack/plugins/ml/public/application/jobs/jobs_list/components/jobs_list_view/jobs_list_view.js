@@ -342,12 +342,6 @@ export class JobsListView extends Component {
         this.updateFunctions[j](fullJobsList[j]);
       });
 
-      jobs.forEach((job) => {
-        if (job.blocked !== undefined && this.state.itemIdToExpandedRowMap[job.id]) {
-          this.toggleRow(job.id);
-        }
-      });
-
       this.isDoneRefreshing();
       if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
         // if there are some jobs in a deleting state, start polling for
@@ -424,23 +418,33 @@ export class JobsListView extends Component {
               <EuiSpacer size="s" />
 
               <div>
-                <div className="actions-bar">
-                  <MultiJobActions
-                    selectedJobs={this.state.selectedJobs}
-                    allJobIds={jobIds}
-                    showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
-                    showStartDatafeedModal={this.showStartDatafeedModal}
-                    showDeleteJobModal={this.showDeleteJobModal}
-                    showResetJobModal={this.showResetJobModal}
-                    showCreateAlertFlyout={this.showCreateAlertFlyout}
-                    showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
-                    refreshJobs={() => this.refreshJobSummaryList()}
-                  />
-                  <JobFilterBar
-                    setFilters={this.setFilters}
-                    queryText={this.props.jobsViewState.queryText}
-                  />
-                </div>
+                <EuiFlexGroup
+                  css={{
+                    alignItems: 'center',
+                    minHeight: '60px',
+                  }}
+                  gutterSize="none"
+                >
+                  <EuiFlexItem grow={false}>
+                    <MultiJobActions
+                      selectedJobs={this.state.selectedJobs}
+                      allJobIds={jobIds}
+                      showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
+                      showStartDatafeedModal={this.showStartDatafeedModal}
+                      showDeleteJobModal={this.showDeleteJobModal}
+                      showResetJobModal={this.showResetJobModal}
+                      showCreateAlertFlyout={this.showCreateAlertFlyout}
+                      showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
+                      refreshJobs={() => this.refreshJobSummaryList()}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <JobFilterBar
+                      setFilters={this.setFilters}
+                      queryText={this.props.jobsViewState.queryText}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <JobsList
                   jobsSummaryList={this.state.filteredJobsSummaryList}
                   fullJobsList={this.state.fullJobsList}

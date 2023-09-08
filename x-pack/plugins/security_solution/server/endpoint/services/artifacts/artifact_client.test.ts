@@ -47,6 +47,21 @@ describe('artifact_client', () => {
       });
     });
 
+    test('can bulk create artifacts', async () => {
+      const artifact = await getInternalArtifactMock('linux', 'v1');
+      await artifactClient.bulkCreateArtifacts([artifact]);
+      expect(fleetArtifactClient.bulkCreateArtifacts).toHaveBeenCalledWith([
+        {
+          identifier: artifact.identifier,
+          type: 'exceptionlist',
+          content:
+            '{"entries":[{"type":"simple","entries":[{"entries":[{"field":"some.nested.field","operator":"included","type":"exact_cased","value":"some value"}],' +
+            '"field":"some.parentField","type":"nested"},{"field":"some.not.nested.field","operator":"included","type":"exact_cased","value":"some value"}]},' +
+            '{"type":"simple","entries":[{"field":"some.other.not.nested.field","operator":"included","type":"exact_cased","value":"some other value"}]}]}',
+        },
+      ]);
+    });
+
     test('can delete artifact', async () => {
       await artifactClient.deleteArtifact('endpoint-trustlist-linux-v1-sha26hash');
       expect(fleetArtifactClient.listArtifacts).toHaveBeenCalledWith({
@@ -54,6 +69,18 @@ describe('artifact_client', () => {
         perPage: 1,
       });
       expect(fleetArtifactClient.deleteArtifact).toHaveBeenCalledWith('123');
+    });
+
+    test('can bulk delete artifacts', async () => {
+      await artifactClient.bulkDeleteArtifacts([
+        'endpoint-trustlist-linux-v1-sha26hash',
+        'endpoint-trustlist-windows-v1-sha26hash',
+      ]);
+      expect(fleetArtifactClient.listArtifacts).toHaveBeenCalledTimes(0);
+      expect(fleetArtifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        'endpoint-trustlist-linux-v1-sha26hash',
+        'endpoint-trustlist-windows-v1-sha26hash',
+      ]);
     });
   });
 });

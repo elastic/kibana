@@ -7,7 +7,7 @@
  */
 
 import { SomeDevLog } from '@kbn/some-dev-log';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { YarnLock } from './yarn_lock';
 

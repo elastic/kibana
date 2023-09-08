@@ -393,7 +393,7 @@ exports[`Relationships should render invalid relations 1`] = `
   <EuiFlyoutBody>
     <EuiCallOut
       color="warning"
-      iconType="alert"
+      iconType="warning"
       title="This saved object has some invalid relations."
     />
     <EuiSpacer />

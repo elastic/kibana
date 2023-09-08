@@ -15,6 +15,7 @@ export type {
   ESSourceOptions,
   InferSearchResponseOf,
   AggregationResultOf,
+  AggregationResultOfMap,
   ESFilter,
   MaybeReadonlyArray,
 } from './src';

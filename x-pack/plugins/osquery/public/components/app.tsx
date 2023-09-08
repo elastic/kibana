@@ -8,33 +8,36 @@
 import React from 'react';
 import {
   EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
 } from '@elastic/eui';
 
-import { Container, Wrapper } from './layouts';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
+import { containerCss, wrapperCss } from './layouts/default';
 import { OsqueryAppRoutes } from '../routes';
 import { useOsqueryIntegrationStatus } from '../common/hooks';
 import { OsqueryAppEmptyState } from './empty_state';
 import { MainNavigation } from './main_navigation';
 
 const OsqueryAppComponent = () => {
+  const { customBranding } = useKibana().services;
   const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
-
+  const hasCustomBranding = useObservable(customBranding?.hasCustomBranding$ || of(false), false);
   if (!isFetched) {
     return (
       <EuiPage paddingSize="none">
         <EuiPageBody>
-          <EuiPageContent
-            verticalPosition="center"
-            horizontalPosition="center"
-            paddingSize="none"
-            color="subdued"
-            hasShadow={false}
-          >
-            <EuiLoadingElastic size="xxl" />
-          </EuiPageContent>
+          <EuiPageSection paddingSize="none" color="subdued">
+            {hasCustomBranding ? (
+              <EuiLoadingSpinner size="xxl" />
+            ) : (
+              <EuiLoadingElastic size="xxl" />
+            )}
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     );
@@ -45,12 +48,12 @@ const OsqueryAppComponent = () => {
   }
 
   return (
-    <Container id="osquery-app">
-      <Wrapper>
+    <div css={containerCss} id="osquery-app">
+      <div css={wrapperCss}>
         <MainNavigation />
         <OsqueryAppRoutes />
-      </Wrapper>
-    </Container>
+      </div>
+    </div>
   );
 };
 

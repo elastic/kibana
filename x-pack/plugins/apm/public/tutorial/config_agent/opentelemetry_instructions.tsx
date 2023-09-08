@@ -13,6 +13,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiBasicTableColumn,
+  EuiButtonIcon,
+  copyToClipboard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValuesType } from 'utility-types';
@@ -57,6 +59,7 @@ export function OpenTelemetryInstructions({
   const columns: Array<EuiBasicTableColumn<ValuesType<typeof items>>> = [
     {
       field: 'setting',
+      width: '23%',
       name: i18n.translate(
         'xpack.apm.tutorial.config_otel.column.configSettings',
         {
@@ -66,6 +69,7 @@ export function OpenTelemetryInstructions({
     },
     {
       field: 'value',
+      width: '55%',
       name: i18n.translate(
         'xpack.apm.tutorial.config_otel.column.configValue',
         {
@@ -73,9 +77,25 @@ export function OpenTelemetryInstructions({
         }
       ),
       render: (_, { value }) => (
-        <EuiText size="s" color="accent">
-          {value}
-        </EuiText>
+        <>
+          <EuiText size="s" color="accent">
+            {value}
+          </EuiText>
+          {value && (
+            <EuiButtonIcon
+              data-test-subj="apmColumnsButton"
+              aria-label={i18n.translate(
+                'xpack.apm.tutorial.config_otel.column.value.copyIconText',
+                {
+                  defaultMessage: 'Copy to clipboard',
+                }
+              )}
+              color="text"
+              iconType="copy"
+              onClick={() => copyToClipboard(value)}
+            />
+          )}
+        </>
       ),
     },
     {
@@ -101,6 +121,7 @@ export function OpenTelemetryInstructions({
           values={{
             otelExporterOtlpEndpoint: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpEndpointLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
@@ -109,6 +130,7 @@ export function OpenTelemetryInstructions({
             ),
             otelExporterOtlpHeaders: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpHeadersLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
               >
@@ -117,6 +139,7 @@ export function OpenTelemetryInstructions({
             ),
             otelResourceAttributes: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOtelResourceAttributesLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/resource/sdk.md"
               >
@@ -137,6 +160,7 @@ export function OpenTelemetryInstructions({
           values={{
             otelInstrumentationGuide: (
               <EuiLink
+                data-test-subj="apmOpenTelemetryInstructionsOpenTelemetryInstrumentationGuideLink"
                 target="_blank"
                 href="https://opentelemetry.io/docs/instrumentation"
               >

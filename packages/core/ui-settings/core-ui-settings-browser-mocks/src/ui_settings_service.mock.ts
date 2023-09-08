@@ -6,41 +6,15 @@
  * Side Public License, v 1.
  */
 
-import * as Rx from 'rxjs';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { clientMock } from './client.mock';
+import { serviceContractMock } from './service_contract.mock';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<IUiSettingsClient> = {
-    getAll: jest.fn(),
-    get: jest.fn(),
-    get$: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-    isDeclared: jest.fn(),
-    isDefault: jest.fn(),
-    isCustom: jest.fn(),
-    isOverridden: jest.fn(),
-    getUpdate$: jest.fn(),
-    getUpdateErrors$: jest.fn(),
-  };
-  setupContract.get$.mockReturnValue(new Rx.Subject<any>());
-  setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());
-  setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
-  setupContract.getAll.mockReturnValue({});
-
-  return setupContract;
+  return clientMock();
 };
 
-type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
 const createMock = () => {
-  const mocked: jest.Mocked<UiSettingsServiceContract> = {
-    setup: jest.fn(),
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-
+  const mocked = serviceContractMock();
   mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };

@@ -8,14 +8,17 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
+  LogEntryContext,
+  PersistedLogViewReference,
+  ResolvedLogView,
+} from '@kbn/logs-shared-plugin/common';
+import {
   CategoriesSort,
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
   jobCustomSettingsRT,
   logEntryCategoriesJobTypes,
 } from '../../../common/log_analysis';
-import { LogEntryContext } from '../../../common/log_entry';
-import { ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
@@ -47,7 +50,7 @@ export async function getTopLogEntryCategories(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number,
   categoryCount: number,
@@ -59,7 +62,7 @@ export async function getTopLogEntryCategories(
 
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
-    sourceId,
+    logView.logViewId,
     logEntryCategoriesJobTypes[0]
   );
 
@@ -119,13 +122,13 @@ export async function getLogEntryCategoryDatasets(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number
 ) {
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
-    sourceId,
+    logView.logViewId,
     logEntryCategoriesJobTypes[0]
   );
 
@@ -143,7 +146,7 @@ export async function getLogEntryCategoryExamples(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
   startTime: number,
   endTime: number,
   categoryId: number,
@@ -154,7 +157,7 @@ export async function getLogEntryCategoryExamples(
 
   const logEntryCategoriesCountJobId = getJobId(
     context.infra.spaceId,
-    sourceId,
+    logView.logViewId,
     logEntryCategoriesJobTypes[0]
   );
 

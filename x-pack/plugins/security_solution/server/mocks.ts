@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import type { AppClient } from './types';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
+import type { AppClient, SecuritySolutionPluginRouter } from './types';
+
+export type SecuritySolutionPluginRouterMock = jest.Mocked<SecuritySolutionPluginRouter> & {
+  versioned: MockedVersionedRouter;
+};
 
 type AppClientMock = jest.Mocked<AppClient>;
 const createAppClientMock = (): AppClientMock =>
   ({
+    getAlertsIndex: jest.fn(),
     getSignalsIndex: jest.fn(),
     getSourcererDataViewId: jest.fn().mockReturnValue('security-solution'),
   } as unknown as AppClientMock);

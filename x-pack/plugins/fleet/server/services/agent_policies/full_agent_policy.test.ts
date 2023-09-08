@@ -8,9 +8,11 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { AgentPolicy, Output, DownloadSource } from '../../types';
+import { createAppContextStartContractMock } from '../../mocks';
 
 import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
+import { appContextService } from '../app_context';
 
 import {
   generateFleetConfig,
@@ -37,6 +39,7 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
     name: 'Policy',
     updated_at: '2020-01-01',
     updated_by: 'qwerty',
+    is_protected: false,
     ...data,
   });
 }
@@ -388,6 +391,68 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
+  it('should add + transform agent features', async () => {
+    mockAgentPolicy({
+      namespace: 'default',
+      revision: 1,
+      monitoring_enabled: ['metrics'],
+      agent_features: [
+        { name: 'fqdn', enabled: true },
+        { name: 'feature2', enabled: true },
+      ],
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      outputs: {
+        default: {
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      },
+      inputs: [],
+      revision: 1,
+      fleet: {
+        hosts: ['http://fleetserver:8220'],
+      },
+      agent: {
+        monitoring: {
+          namespace: 'default',
+          use_output: 'default',
+          enabled: true,
+          logs: false,
+          metrics: true,
+        },
+        features: {
+          fqdn: {
+            enabled: true,
+          },
+          feature2: {
+            enabled: true,
+          },
+        },
+      },
+    });
+  });
+
+  it('should populate agent.protection and signed properties if encryption is available', async () => {
+    appContextService.start(createAppContextStartContractMock());
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy!.agent!.protection).toMatchObject({
+      enabled: false,
+      uninstall_token_hash: '',
+      signing_key: 'thisisapublickey',
+    });
+    expect(agentPolicy!.signed).toMatchObject({
+      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7ImZlYXR1cmVzIjp7fSwicHJvdGVjdGlvbiI6eyJlbmFibGVkIjpmYWxzZSwidW5pbnN0YWxsX3Rva2VuX2hhc2giOiIiLCJzaWduaW5nX2tleSI6InRoaXNpc2FwdWJsaWNrZXkifX0sImlucHV0cyI6W119',
+      signature: 'thisisasignature',
+    });
+  });
 });
 
 describe('transformOutputToFullPolicyOutput', () => {
@@ -598,4 +663,46 @@ describe('generateFleetConfig', () => {
       }
     `);
   });
+});
+
+it('should work with proxy with headers and certificate authorities and certificate and key', () => {
+  const res = generateFleetConfig(
+    {
+      host_urls: ['https://test.fr'],
+      proxy_id: 'proxy-1',
+    } as any,
+    [
+      {
+        id: 'proxy-1',
+        url: 'https://proxy.fr',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+        proxy_headers: { Authorization: 'xxx' },
+        certificate: 'my-cert',
+        certificate_key: 'my-key',
+      } as any,
+    ]
+  );
+
+  expect(res).toMatchInlineSnapshot(`
+    Object {
+      "hosts": Array [
+        "https://test.fr",
+      ],
+      "proxy_headers": Object {
+        "Authorization": "xxx",
+      },
+      "proxy_url": "https://proxy.fr",
+      "ssl": Object {
+        "certificate": "my-cert",
+        "certificate_authorities": Array [
+          Array [
+            "/tmp/ssl/ca.crt",
+          ],
+        ],
+        "key": "my-key",
+        "renegotiation": "never",
+        "verification_mode": "",
+      },
+    }
+  `);
 });

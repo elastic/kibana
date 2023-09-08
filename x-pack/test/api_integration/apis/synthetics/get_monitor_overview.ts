@@ -4,21 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
-import { SimpleSavedObject } from '@kbn/core/public';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ConfigKey,
-  SyntheticsMonitor,
   MonitorFields,
+  MonitorOverviewItem,
+  EncryptedSyntheticsSavedMonitor,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { SYNTHETICS_API_URLS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/146014
-  describe.skip('GetMonitorsOverview', function () {
+  describe('GetMonitorsOverview', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -28,8 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
     const username = 'admin';
     const roleName = `synthetics_admin`;
     const password = `${username}-password`;
-    const SPACE_ID = `test-space-${uuid.v4()}`;
-    const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+    const SPACE_ID = `test-space-${uuidv4()}`;
+    const SPACE_NAME = `test-space-name ${uuidv4()}`;
 
     let _monitors: MonitorFields[];
     let monitors: MonitorFields[];
@@ -37,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     const deleteMonitor = async (id: string) => {
       try {
         await supertest
-          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${id}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${id}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
       } catch (e) {
@@ -48,15 +47,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     const saveMonitor = async (monitor: MonitorFields) => {
       const res = await supertest
-        .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set('kbn-xsrf', 'true')
         .send(monitor);
 
-      return res.body as SimpleSavedObject<MonitorFields>;
+      return res.body as EncryptedSyntheticsSavedMonitor;
     };
 
     before(async () => {
-      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+      await supertest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
       await security.role.create(roleName, {
         kibana: [
@@ -74,11 +76,11 @@ export default function ({ getService }: FtrProviderContext) {
         full_name: 'a kibana user',
       });
       const { body } = await supertest
-        .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
       await Promise.all([
-        (body.monitors as Array<SimpleSavedObject<MonitorFields>>).map((monitor) => {
+        (body.monitors as EncryptedSyntheticsSavedMonitor[]).map((monitor) => {
           return deleteMonitor(monitor.id);
         }),
       ]);
@@ -102,151 +104,167 @@ export default function ({ getService }: FtrProviderContext) {
       await security.role.delete(roleName);
     });
 
-    describe('returns total number of monitor combinations', () => {
-      it('returns the correct response', async () => {
-        let savedMonitors: SimpleSavedObject[] = [];
-        try {
-          const savedResponse = await Promise.all(monitors.map(saveMonitor));
-          savedMonitors = savedResponse;
+    it('returns the correct response', async () => {
+      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
+      try {
+        savedMonitors = await Promise.all(monitors.map(saveMonitor));
 
-          const apiResponse = await supertest.get(
-            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
-          );
+        const apiResponse = await supertest.get(
+          `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
+        );
 
-          expect(apiResponse.body.total).eql(monitors.length * 2);
-          expect(apiResponse.body.allMonitorIds.sort()).eql(
-            savedMonitors.map((monitor) => monitor.id).sort()
-          );
-          expect(apiResponse.body.monitors.length).eql(40);
-        } finally {
-          await Promise.all(
-            savedMonitors.map((monitor) => {
-              return deleteMonitor(monitor.id);
-            })
-          );
-        }
-      });
-
-      it('accepts search queries', async () => {
-        let savedMonitors: Array<SimpleSavedObject<SyntheticsMonitor>> = [];
-        try {
-          const savedResponse = await Promise.all(monitors.map(saveMonitor));
-          savedMonitors = savedResponse;
-
-          const apiResponse = await supertest
-            .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
-            .query({
-              query: '19',
-            });
-
-          expect(apiResponse.body.total).eql(2);
-          expect(apiResponse.body.allMonitorIds.sort()).eql(
-            savedMonitors
-              .filter((monitor) => monitor.attributes.name.includes('19'))
-              .map((monitor) => monitor.id)
-          );
-          expect(apiResponse.body.monitors.length).eql(2);
-        } finally {
-          await Promise.all(
-            savedMonitors.map((monitor) => {
-              return deleteMonitor(monitor.id);
-            })
-          );
-        }
-      });
+        expect(apiResponse.body.total).eql(monitors.length * 2);
+        expect(apiResponse.body.allMonitorIds.sort()).eql(
+          savedMonitors.map((monitor) => monitor.id).sort()
+        );
+        expect(apiResponse.body.monitors.length).eql(40);
+      } finally {
+        await Promise.all(
+          savedMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id);
+          })
+        );
+      }
     });
 
-    describe('Overview Item', () => {
-      it('returns the correct response', async () => {
-        let savedMonitors: Array<SimpleSavedObject<SyntheticsMonitor>> = [];
-        const customHeartbeatId = 'example_custom_heartbeat_id';
-        try {
-          const savedResponse = await Promise.all(
-            [
-              monitors[0],
-              { ...monitors[1], custom_heartbeat_id: 'example_custom_heartbeat_id' },
-            ].map(saveMonitor)
-          );
-          savedMonitors = savedResponse;
+    it('accepts search queries', async () => {
+      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
+      try {
+        savedMonitors = await Promise.all(monitors.map(saveMonitor));
 
-          const apiResponse = await supertest.get(
-            `/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`
-          );
-          expect(apiResponse.body.monitors).eql([
+        const apiResponse = await supertest
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
+          .query({
+            query: '19',
+          });
+
+        expect(apiResponse.body.total).eql(2);
+        expect(apiResponse.body.allMonitorIds.sort()).eql(
+          savedMonitors
+            .filter((monitor) => monitor.name.includes('19'))
+            .map((monitor) => monitor.id)
+        );
+        expect(apiResponse.body.monitors.length).eql(2);
+      } finally {
+        await Promise.all(
+          savedMonitors.map((monitor) => {
+            return deleteMonitor(monitor.id);
+          })
+        );
+      }
+    });
+
+    it('returns the correct response for customHeartbeatId', async () => {
+      let savedMonitors: EncryptedSyntheticsSavedMonitor[] = [];
+      const customHeartbeatId = 'example_custom_heartbeat_id';
+      try {
+        savedMonitors = await Promise.all(
+          [
+            { ...monitors[0], name: 'test monitor a' },
             {
-              id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[0].id,
-              name: 'test-monitor-name 0',
-              location: {
-                id: 'eu-west-01',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
-                },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
-              },
-              isEnabled: true,
+              ...monitors[1],
+              custom_heartbeat_id: 'example_custom_heartbeat_id',
+              name: 'test monitor b',
             },
-            {
-              id: savedMonitors[0].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[0].id,
-              name: 'test-monitor-name 0',
-              location: {
-                id: 'eu-west-02',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
-                },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
+          ].map(saveMonitor)
+        );
+
+        const apiResponse = await supertest
+          .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW}`)
+          .query({ sortField: 'status' });
+
+        const expected: MonitorOverviewItem[] = [
+          {
+            id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
+            configId: savedMonitors[0].config_id,
+            name: 'test monitor a',
+            location: {
+              id: 'eu-west-01',
+              label: 'Europe East',
+              geo: {
+                lat: 33.2343132435,
+                lon: 73.2342343434,
               },
-              isEnabled: true,
+              url: 'https://example-url.com',
+              isServiceManaged: true,
             },
-            {
-              id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[1].id,
-              name: 'test-monitor-name 1',
-              location: {
-                id: 'eu-west-01',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
-                },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
+            isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
+            schedule: '5',
+          },
+          {
+            id: savedMonitors[0][ConfigKey.MONITOR_QUERY_ID],
+            configId: savedMonitors[0].config_id,
+            name: 'test monitor a',
+            location: {
+              id: 'eu-west-02',
+              label: 'Europe West',
+              geo: {
+                lat: 33.2343132435,
+                lon: 73.2342343434,
               },
-              isEnabled: true,
+              url: 'https://example-url.com',
+              isServiceManaged: true,
             },
-            {
-              id: savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID],
-              configId: savedMonitors[1].id,
-              name: 'test-monitor-name 1',
-              location: {
-                id: 'eu-west-02',
-                label: 'Europe West',
-                geo: {
-                  lat: 33.2343132435,
-                  lon: 73.2342343434,
-                },
-                url: 'https://example-url.com',
-                isServiceManaged: true,
+            isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
+            schedule: '5',
+          },
+          {
+            id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
+            configId: savedMonitors[1].config_id,
+            name: 'test monitor b',
+            location: {
+              id: 'eu-west-01',
+              label: 'Europe East',
+              geo: {
+                lat: 33.2343132435,
+                lon: 73.2342343434,
               },
-              isEnabled: true,
+              url: 'https://example-url.com',
+              isServiceManaged: true,
             },
-          ]);
-          expect(savedMonitors[1].attributes[ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
-        } finally {
-          await Promise.all(
-            savedMonitors.map((monitor) => {
-              return deleteMonitor(monitor.id);
-            })
-          );
-        }
-      });
+            isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
+            schedule: '5',
+          },
+          {
+            id: savedMonitors[1][ConfigKey.MONITOR_QUERY_ID],
+            configId: savedMonitors[1].config_id,
+            name: 'test monitor b',
+            location: {
+              id: 'eu-west-02',
+              label: 'Europe West',
+              geo: {
+                lat: 33.2343132435,
+                lon: 73.2342343434,
+              },
+              url: 'https://example-url.com',
+              isServiceManaged: true,
+            },
+            isEnabled: true,
+            isStatusAlertEnabled: true,
+            tags: ['tag1', 'tag2'],
+            type: 'http',
+            schedule: '5',
+          },
+        ];
+
+        expect(apiResponse.body.monitors).eql(expected);
+        expect(savedMonitors[1][ConfigKey.MONITOR_QUERY_ID]).eql(customHeartbeatId);
+      } finally {
+        await Promise.all(
+          savedMonitors.map((monitor) => {
+            return deleteMonitor(monitor.config_id);
+          })
+        );
+      }
     });
   });
 }

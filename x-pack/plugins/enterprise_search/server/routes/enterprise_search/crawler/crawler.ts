@@ -6,15 +6,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { i18n } from '@kbn/i18n';
+
+import { deleteConnectorById, fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
 import { ErrorCode } from '../../../../common/types/error_codes';
 import { addConnector } from '../../../lib/connectors/add_connector';
-import { deleteConnectorById } from '../../../lib/connectors/delete_connector';
-import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
+import { recreateConnectorDocument } from '../../../lib/crawler/post_connector';
+import { updateHtmlExtraction } from '../../../lib/crawler/put_html_extraction';
 import { deleteIndex } from '../../../lib/indices/delete_index';
 import { RouteDependencies } from '../../../plugin';
 import { createError } from '../../../utils/create_error';
@@ -22,6 +25,7 @@ import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_ha
 
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
 import { registerCrawlerEntryPointRoutes } from './crawler_entry_points';
+import { registerCrawlerMultipleSchedulesRoutes } from './crawler_multiple_schedules';
 import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
 
 export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
@@ -39,11 +43,11 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const connParams = {
-        delete_existing_connector: true,
-        index_name: request.body.index_name,
-        is_native: true,
+        deleteExistingConnector: true,
+        indexName: request.body.index_name,
+        isNative: true,
         language: request.body.language,
-        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+        serviceType: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
       };
       const { client } = (await context.core).elasticsearch;
 
@@ -79,7 +83,10 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         });
       }
 
-      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+      const connector = await fetchConnectorByIndexName(
+        client.asCurrentUser,
+        request.body.index_name
+      );
       if (connector) {
         return createError({
           errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
@@ -106,10 +113,15 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
         return res;
       } catch (error) {
         // clean up connector index if it was created
-        const createdConnector = await fetchConnectorByIndexName(client, request.body.index_name);
+        const createdConnector = await fetchConnectorByIndexName(
+          client.asCurrentUser,
+          request.body.index_name
+        );
         if (createdConnector) {
-          await deleteConnectorById(client, createdConnector.id);
-          await deleteIndex(client, createdConnector.index_name);
+          await deleteConnectorById(client.asCurrentUser, createdConnector.id);
+          if (createdConnector.index_name) {
+            await deleteIndex(client, createdConnector.index_name);
+          }
         }
 
         throw error;
@@ -389,7 +401,83 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     })
   );
 
+  router.put(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/html_extraction',
+      validate: {
+        body: schema.object({
+          extract_full_html: schema.boolean(),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
+      const connector = await fetchConnectorByIndexName(
+        client.asCurrentUser,
+        request.params.indexName
+      );
+      if (
+        connector &&
+        connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+      ) {
+        await updateHtmlExtraction(client, request.body.extract_full_html, connector);
+        return response.ok();
+      } else {
+        return createError({
+          errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.updateHtmlExtraction.noCrawlerFound',
+            {
+              defaultMessage: 'Could not find a crawler for this index',
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/connector',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const connector = await fetchConnectorByIndexName(
+        client.asCurrentUser,
+        request.params.indexName
+      );
+      if (connector) {
+        return createError({
+          errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.recreateConnector.connectorExistsError',
+            {
+              defaultMessage: 'A connector for this index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      const connectorId = await recreateConnectorDocument(client, request.params.indexName);
+      return response.ok({ body: { connector_id: connectorId } });
+    })
+  );
+
   registerCrawlerCrawlRulesRoutes(routeDependencies);
   registerCrawlerEntryPointRoutes(routeDependencies);
   registerCrawlerSitemapRoutes(routeDependencies);
+  registerCrawlerMultipleSchedulesRoutes(routeDependencies);
 }

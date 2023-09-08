@@ -6,6 +6,7 @@
  */
 
 import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+import type { PolicySecretReference } from './secret';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -30,10 +31,17 @@ export interface NewPackagePolicyInputStream {
     dataset: string;
     type: string;
     elasticsearch?: {
+      // TODO: these don't really need to be defined in the package policy schema and could be pulled directly from
+      // the package where needed.
+      dynamic_dataset?: boolean;
+      dynamic_namespace?: boolean;
       privileges?: {
         indices?: string[];
       };
+
+      // Package policy specific values
       index_mode?: string;
+      source_mode?: string;
     };
   };
   release?: RegistryRelease;
@@ -84,18 +92,19 @@ export interface UpdatePackagePolicy extends NewPackagePolicy {
   version?: string;
 }
 
+// SO definition for this type is declared in server/types/interfaces
 export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   id: string;
   inputs: PackagePolicyInput[];
   version?: string;
+  agents?: number;
   revision: number;
+  secret_references?: PolicySecretReference[];
   updated_at: string;
   updated_by: string;
   created_at: string;
   created_by: string;
 }
-
-export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
 
 export type DryRunPackagePolicy = NewPackagePolicy & {
   errors?: Array<{ key: string | undefined; message: string }>;

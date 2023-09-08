@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 
 import type {
@@ -19,67 +21,69 @@ import type {
   Direction,
 } from '../../../common/search_strategy';
 import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { findLiveQueryRequestQuerySchema } from '../../../common/api';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 
 export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: '/api/osquery/live_queries',
-      validate: {
-        query: schema.object(
-          {
-            filterQuery: schema.maybe(schema.string()),
-            page: schema.maybe(schema.number()),
-            pageSize: schema.maybe(schema.number()),
-            sort: schema.maybe(schema.string()),
-            sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+      options: { tags: ['api', `access:${PLUGIN_ID}-read`] },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            query: buildRouteValidation<
+              typeof findLiveQueryRequestQuerySchema,
+              FindLiveQueryRequestQuerySchema
+            >(findLiveQueryRequestQuerySchema),
           },
-          { unknowns: 'allow' }
-        ),
+        },
       },
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
-    },
-    async (context, request, response) => {
-      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+      async (context, request, response) => {
+        const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
-      try {
-        const search = await context.search;
-        const res = await lastValueFrom(
-          search.search<ActionsRequestOptions, ActionsStrategyResponse>(
-            {
-              factoryQueryType: OsqueryQueries.actions,
-              filterQuery: createFilter(request.query.filterQuery),
-              pagination: generateTablePaginationOptions(
-                request.query.page ?? 0,
-                request.query.pageSize ?? 100
-              ),
-              sort: {
-                direction: (request.query.sortOrder ?? 'desc') as Direction,
-                field: request.query.sort ?? 'created_at',
+        try {
+          const search = await context.search;
+          const res = await lastValueFrom(
+            search.search<ActionsRequestOptions, ActionsStrategyResponse>(
+              {
+                factoryQueryType: OsqueryQueries.actions,
+                kuery: request.query.kuery,
+                pagination: generateTablePaginationOptions(
+                  request.query.page ?? 0,
+                  request.query.pageSize ?? 100
+                ),
+                sort: {
+                  direction: (request.query.sortOrder ?? 'desc') as Direction,
+                  field: request.query.sort ?? 'created_at',
+                },
+              },
+              { abortSignal, strategy: 'osquerySearchStrategy' }
+            )
+          );
+
+          return response.ok({
+            body: {
+              data: {
+                ...omit(res, 'edges'),
+                items: res.edges,
               },
             },
-            { abortSignal, strategy: 'osquerySearchStrategy' }
-          )
-        );
-
-        return response.ok({
-          body: {
-            data: {
-              ...omit(res, 'edges'),
-              items: res.edges,
+          });
+        } catch (e) {
+          return response.customError({
+            statusCode: e.statusCode ?? 500,
+            body: {
+              message: e.message,
             },
-          },
-        });
-      } catch (e) {
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: e.message,
-          },
-        });
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 function getRequestAbortedSignal(aborted$: Observable<void>): AbortSignal {

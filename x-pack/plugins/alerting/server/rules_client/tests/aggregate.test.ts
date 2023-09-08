@@ -6,7 +6,11 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -16,7 +20,11 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
-import { RecoveredActionGroup } from '../../../common';
+import {
+  RecoveredActionGroup,
+  getDefaultRuleAggregation,
+  DefaultRuleAggregationResult,
+} from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 
@@ -28,12 +36,14 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
@@ -42,10 +52,13 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
 };
 
 beforeEach(() => {
@@ -68,6 +81,8 @@ describe('aggregate()', () => {
       name: 'myType',
       producer: 'myApp',
       enabledInLicense: true,
+      hasAlertsMappings: false,
+      hasFieldsForAAD: false,
     },
   ]);
   beforeEach(() => {
@@ -150,6 +165,8 @@ describe('aggregate()', () => {
             myApp: { read: true, all: true },
           },
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
         },
       ])
     );
@@ -157,38 +174,107 @@ describe('aggregate()', () => {
 
   test('calls saved objects client with given params to perform aggregation', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
-    const result = await rulesClient.aggregate({ options: {} });
+    const result = await rulesClient.aggregate<DefaultRuleAggregationResult>({
+      options: {},
+      aggs: getDefaultRuleAggregation(),
+    });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "alertExecutionStatus": Object {
-          "active": 8,
-          "error": 6,
-          "ok": 10,
-          "pending": 4,
-          "unknown": 2,
-          "warning": 1,
+        "enabled": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 2,
+              "key": 0,
+              "key_as_string": "0",
+            },
+            Object {
+              "doc_count": 28,
+              "key": 1,
+              "key_as_string": "1",
+            },
+          ],
         },
-        "ruleEnabledStatus": Object {
-          "disabled": 2,
-          "enabled": 28,
+        "muted": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 27,
+              "key": 0,
+              "key_as_string": "0",
+            },
+            Object {
+              "doc_count": 3,
+              "key": 1,
+              "key_as_string": "1",
+            },
+          ],
         },
-        "ruleLastRunOutcome": Object {
-          "failed": 4,
-          "succeeded": 2,
-          "warning": 6,
+        "outcome": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 2,
+              "key": "succeeded",
+            },
+            Object {
+              "doc_count": 4,
+              "key": "failed",
+            },
+            Object {
+              "doc_count": 6,
+              "key": "warning",
+            },
+          ],
         },
-        "ruleMutedStatus": Object {
-          "muted": 3,
-          "unmuted": 27,
+        "snoozed": Object {
+          "count": Object {
+            "doc_count": 0,
+          },
+          "doc_count": 0,
         },
-        "ruleSnoozedStatus": Object {
-          "snoozed": 0,
+        "status": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 8,
+              "key": "active",
+            },
+            Object {
+              "doc_count": 6,
+              "key": "error",
+            },
+            Object {
+              "doc_count": 10,
+              "key": "ok",
+            },
+            Object {
+              "doc_count": 4,
+              "key": "pending",
+            },
+            Object {
+              "doc_count": 2,
+              "key": "unknown",
+            },
+            Object {
+              "doc_count": 1,
+              "key": "warning",
+            },
+          ],
         },
-        "ruleTags": Array [
-          "a",
-          "b",
-          "c",
-        ],
+        "tags": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 10,
+              "key": "a",
+            },
+            Object {
+              "doc_count": 20,
+              "key": "b",
+            },
+            Object {
+              "doc_count": 30,
+              "key": "c",
+            },
+          ],
+        },
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -244,7 +330,10 @@ describe('aggregate()', () => {
     });
 
     const rulesClient = new RulesClient(rulesClientParams);
-    await rulesClient.aggregate({ options: { filter: 'foo: someTerm' } });
+    await rulesClient.aggregate({
+      options: { filter: 'foo: someTerm' },
+      aggs: getDefaultRuleAggregation(),
+    });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
@@ -296,7 +385,7 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
     authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
-    await expect(rulesClient.aggregate()).rejects.toThrow();
+    await expect(rulesClient.aggregate({ aggs: getDefaultRuleAggregation() })).rejects.toThrow();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -309,5 +398,41 @@ describe('aggregate()', () => {
         },
       })
     );
+  });
+
+  describe('tags number limit', () => {
+    test('sets to default (50) if it is not provided', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await rulesClient.aggregate({ aggs: getDefaultRuleAggregation() });
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
+        {
+          aggs: {
+            tags: {
+              terms: { size: 50 },
+            },
+          },
+        },
+      ]);
+    });
+
+    test('sets to the provided value', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await rulesClient.aggregate({
+        aggs: getDefaultRuleAggregation({ maxTags: 1000 }),
+      });
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
+        {
+          aggs: {
+            tags: {
+              terms: { size: 1000 },
+            },
+          },
+        },
+      ]);
+    });
   });
 });

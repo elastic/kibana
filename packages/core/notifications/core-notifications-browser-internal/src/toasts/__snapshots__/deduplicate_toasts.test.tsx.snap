@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TitleWithBadge component renders with string titles 1`] = `
+<Fragment>
+  Welcome!
+   
+  <EuiNotificationBadge
+    className="css-1f5ny76"
+    color="subdued"
+    size="m"
+  >
+    5
+  </EuiNotificationBadge>
+</Fragment>
+`;

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { EcsEventType } from '@kbn/core/server';
+import type { EcsEvent } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 /**
  * The tenses for describing the action performed by a API route
@@ -20,35 +21,35 @@ export interface Verbs {
 
 /**
  * Read operations for the cases APIs.
- *
- * NOTE: If you add a value here you'll likely also need to make changes here:
- * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
  */
 export enum ReadOperations {
   GetCase = 'getCase',
   ResolveCase = 'resolveCase',
   FindCases = 'findCases',
+  BulkGetCases = 'bulkGetCases',
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',
   GetComment = 'getComment',
+  BulkGetAttachments = 'bulkGetAttachments',
   GetAllComments = 'getAllComments',
   FindComments = 'findComments',
   GetTags = 'getTags',
+  GetCategories = 'getCategories',
   GetReporters = 'getReporters',
   FindConfigurations = 'findConfigurations',
+  FindUserActions = 'findUserActions',
   GetUserActions = 'getUserActions',
+  GetConnectors = 'getConnectors',
   GetAlertsAttachedToCase = 'getAlertsAttachedToCase',
   GetAttachmentMetrics = 'getAttachmentMetrics',
   GetCaseMetrics = 'getCaseMetrics',
   GetCasesMetrics = 'getCasesMetrics',
   GetUserActionMetrics = 'getUserActionMetrics',
+  GetUserActionUsers = 'getUserActionUsers',
 }
 
 /**
  * Write operations for the cases APIs.
- *
- * NOTE: If you add a value here you'll likely also need to make changes here:
- * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
  */
 export enum WriteOperations {
   CreateCase = 'createCase',
@@ -56,6 +57,7 @@ export enum WriteOperations {
   UpdateCase = 'updateCase',
   PushCase = 'pushCase',
   CreateComment = 'createComment',
+  BulkCreateAttachments = 'bulkCreateAttachments',
   DeleteAllComments = 'deleteAllComments',
   DeleteComment = 'deleteComment',
   UpdateComment = 'updateComment',
@@ -70,10 +72,13 @@ export interface OperationDetails {
   /**
    * The ECS event type that this operation should be audit logged as (creation, deletion, access, etc)
    */
-  ecsType: EcsEventType;
+  ecsType: ArrayElement<EcsEvent['type']>;
   /**
    * The name of the operation to authorize against for the privilege check.
    * These values need to match one of the operation strings defined here: x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   *
+   * To avoid the authorization strings getting too large, new operations should generally fit within one of the
+   * CasesSupportedOperations. In the situation where a new one is needed we'll have to add it to the security plugin.
    */
   name: CasesSupportedOperations;
   /**

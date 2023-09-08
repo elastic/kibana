@@ -38,24 +38,4 @@ describe('Title', () => {
 
     expect(wrapper.find('[data-test-subj="header-page-title"]').first().exists()).toBe(true);
   });
-
-  test('it renders as a draggable when arguments provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Title draggableArguments={{ field: 'neat', value: 'cool' }} title="Test title" />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="header-page-draggable"]').first().exists()).toBe(true);
-  });
-
-  test('it DOES NOT render as a draggable when arguments not provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Title title="Test title" />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="header-page-draggable"]').first().exists()).toBe(false);
-  });
 });

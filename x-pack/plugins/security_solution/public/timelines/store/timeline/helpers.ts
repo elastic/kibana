@@ -7,10 +7,11 @@
 
 import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
+import type { SessionViewConfig, ExpandedDetailTimeline } from '../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';
 import type {
@@ -26,15 +27,14 @@ import {
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
-  TimelineTypeLiteral,
-  RowRendererId,
   SerializedFilterQuery,
   TimelinePersistInput,
   ToggleDetailPanel,
-  TimelineExpandedDetail,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
+import type { RowRendererId, TimelineTypeLiteral } from '../../../../common/api/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -49,7 +49,6 @@ import {
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 import { getDisplayValue } from '../../components/timeline/data_providers/helpers';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -141,7 +140,7 @@ export const addTimelineToStore = ({
       ...timeline,
       filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
-      initialized: timelineById[id].initialized,
+      initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
@@ -174,7 +173,7 @@ export const addNewTimeline = ({
   const templateTimelineInfo =
     timelineType === TimelineType.template
       ? {
-          templateTimelineId: uuid.v4(),
+          templateTimelineId: uuidv4(),
           templateTimelineVersion: 1,
         }
       : {};
@@ -1233,7 +1232,7 @@ export const updateExcludedRowRenderersIds = ({
   };
 };
 
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): ExpandedDetailTimeline => {
   const { tabType, id, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
@@ -1241,7 +1240,7 @@ export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineE
   const newExpandDetails = {
     params: expandedDetails.params ? { ...expandedDetails.params } : {},
     panelView: expandedDetails.panelView,
-  } as TimelineExpandedDetail;
+  } as ExpandedDetailTimeline;
   return {
     [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
       ? newExpandDetails

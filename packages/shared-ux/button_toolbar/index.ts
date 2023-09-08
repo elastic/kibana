@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { PrimaryButton, IconButtonGroup, AddFromLibraryButton } from './src/buttons';
+export { ToolbarButton, IconButtonGroup, AddFromLibraryButton } from './src/buttons';
 export type {
   AddFromLibraryButtonProps,
   IconButtonGroupProps,
+  ToolbarButtonProps,
   IconButton,
-  PrimaryButtonProps,
 } from './src/buttons';
 
 export { ToolbarPopover } from './src/popover';
@@ -19,4 +19,4 @@ export type { ToolbarPopoverProps } from './src/popover';
 
 export { Toolbar } from './src/toolbar';
 export type { ToolbarProps } from './src/toolbar';
-export type { ToolbarButton } from './src/toolbar';
+export type { ToolbarButtonType } from './src/toolbar';

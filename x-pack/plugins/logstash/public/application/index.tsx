@@ -7,7 +7,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Switch, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -43,7 +44,7 @@ export const renderApp = async (
     <core.i18n.Context>
       <KibanaThemeProvider theme$={theme$}>
         <Router history={history}>
-          <Switch>
+          <Routes>
             <Route
               path={['/', '']}
               exact
@@ -98,7 +99,7 @@ export const renderApp = async (
                 />
               )}
             />
-          </Switch>
+          </Routes>
         </Router>
       </KibanaThemeProvider>
     </core.i18n.Context>,

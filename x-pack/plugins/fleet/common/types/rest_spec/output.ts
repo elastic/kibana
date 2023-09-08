@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Output } from '../models';
+import type { NewOutput, Output } from '../models';
 
 import type { ListResult } from './common';
 
@@ -27,41 +27,11 @@ export interface PutOutputRequest {
   params: {
     outputId: string;
   };
-  body: {
-    type?: 'elasticsearch' | 'logstash';
-    name?: string;
-    hosts?: string[];
-    ca_sha256?: string;
-    ca_trusted_fingerprint?: string;
-    config_yaml?: string;
-    is_default?: boolean;
-    is_default_monitoring?: boolean;
-    ssl?: {
-      certificate_authorities?: string[];
-      certificate?: string;
-      key?: string;
-    };
-  };
+  body: NewOutput;
 }
 
 export interface PostOutputRequest {
-  body: {
-    id?: string;
-    type: 'elasticsearch' | 'logstash';
-    name: string;
-    hosts?: string[];
-    ca_sha256?: string;
-    ca_trusted_fingerprint?: string;
-    is_default?: boolean;
-    is_default_monitoring?: boolean;
-    config_yaml?: string;
-    ssl?: {
-      certificate_authorities?: string[];
-      certificate?: string;
-      key?: string;
-    };
-    proxy_id?: string | null;
-  };
+  body: NewOutput;
 }
 
 export interface PutOutputResponse {

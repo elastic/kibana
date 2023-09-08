@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   ChartActionContext,
@@ -37,11 +36,7 @@ export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionCon
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps<Config>> = ({
-    config,
-    onConfig,
-    context,
-  }) => (
+  public readonly CollectConfig = ({ config, onConfig, context }: CollectConfigProps<Config>) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
         fullWidth
@@ -50,8 +45,6 @@ export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionCon
       />
     </EuiFormRow>
   );
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     name: '',

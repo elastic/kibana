@@ -7,15 +7,17 @@
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
-import { useEnablement, useGetUrlParams } from '../../../hooks';
+import { DisabledCallout } from '../management/disabled_callout';
+import { FilterGroup } from '../common/monitor_filters/filter_group';
+import { OverviewAlerts } from './overview/overview_alerts';
+import { useEnablement } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  setOverviewPageStateAction,
-  selectOverviewPageState,
+  selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
@@ -30,6 +32,7 @@ import { QuickFilters } from './overview/quick_filters';
 import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
+import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -39,10 +42,8 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { query } = useGetUrlParams();
   const { search } = useLocation();
 
-  const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
@@ -51,77 +52,88 @@ export const OverviewPage: React.FC = () => {
     }
   }, [dispatch, locationsLoaded, locationsLoading]);
 
-  // fetch overview for query state changes
-  useEffect(() => {
-    if (pageState.query !== query) {
-      dispatch(fetchMonitorOverviewAction.get({ ...pageState, query }));
-      dispatch(setOverviewPageStateAction({ query }));
-    }
-  }, [dispatch, pageState, query]);
-
-  // fetch overview for all other page state changes
-  useEffect(() => {
-    dispatch(fetchMonitorOverviewAction.get(pageState));
-  }, [dispatch, pageState]);
-
-  // fetch overview for refresh
-  useEffect(() => {
-    dispatch(quietFetchOverviewAction.get(pageState));
-  }, [dispatch, pageState, lastRefresh]);
-
   const {
     enablement: { isEnabled },
     loading: enablementLoading,
   } = useEnablement();
 
-  const { syntheticsMonitors, loading: monitorsLoading, loaded: monitorsLoaded } = useMonitorList();
+  const {
+    loaded: overviewLoaded,
+    data: { monitors },
+    pageState,
+  } = useSelector(selectOverviewState);
 
-  if (
-    !search &&
-    enablementLoading &&
-    isEnabled &&
-    !monitorsLoading &&
-    syntheticsMonitors.length === 0
-  ) {
+  const {
+    loading: monitorsLoading,
+    loaded: monitorsLoaded,
+    handleFilterChange,
+    absoluteTotal,
+  } = useMonitorList();
+
+  // fetch overview for all other page state changes
+  useEffect(() => {
+    if (!overviewLoaded) {
+      dispatch(fetchMonitorOverviewAction.get(pageState));
+    }
+    // change only needs to be triggered on pageState change
+  }, [dispatch, pageState, overviewLoaded]);
+
+  // fetch overview for refresh
+  useEffect(() => {
+    if (monitorsLoaded) {
+      dispatch(quietFetchOverviewAction.get(pageState));
+    }
+    // for page state change we don't want quite fetch, see above fetch ^^
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, lastRefresh]);
+
+  const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
+
+  if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
-  if (
-    !search &&
-    !enablementLoading &&
-    !isEnabled &&
-    monitorsLoaded &&
-    syntheticsMonitors.length === 0
-  ) {
+  if (!isEnabled && hasNoMonitors) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
+  const noMonitorFound = monitorsLoaded && overviewLoaded && monitors?.length === 0;
+
   return (
     <>
-      <EuiFlexGroup>
+      <DisabledCallout total={absoluteTotal} />
+      <AlertingCallout />
+      <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <QuickFilters />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FilterGroup handleFilterChange={handleFilterChange} />
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
+      {!noMonitorFound ? (
         <>
-          <EuiFlexGroup gutterSize="m">
+          <EuiFlexGroup gutterSize="m" wrap>
             <EuiFlexItem grow={false}>
               <OverviewStatus />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
               <OverviewErrors />
+            </EuiFlexItem>
+            <EuiFlexItem grow={3} style={{ minWidth: 300 }}>
+              <OverviewAlerts />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           <OverviewGrid />
         </>
+      ) : (
+        <NoMonitorsFound />
       )}
-      {monitorsLoaded && syntheticsMonitors?.length === 0 && <NoMonitorsFound />}
     </>
   );
 };

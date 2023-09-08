@@ -6,8 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import type { DropResult } from 'react-beautiful-dnd';
-import { getTimelineIdFromColumnDroppableId } from '@kbn/timelines-plugin/public';
+import type { DropResult } from '@hello-pangea/dnd';
 
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 
@@ -87,6 +86,7 @@ describe('helpers', () => {
           source: { index: 0, droppableId: getDroppableId('2119990039033485') },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(true);
     });
@@ -100,6 +100,7 @@ describe('helpers', () => {
           source: { index: 0, droppableId: `${droppableIdPrefix}.somethingElse.2119990039033485` },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -198,6 +199,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(true);
     });
@@ -217,6 +219,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -238,6 +241,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(true);
     });
@@ -245,7 +249,7 @@ describe('helpers', () => {
     test('it returns false when the destination is undefined', () => {
       expect(
         destinationIsTimelineProviders({
-          destination: undefined,
+          destination: null,
           draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
@@ -254,6 +258,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -273,6 +278,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -294,6 +300,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(true);
     });
@@ -301,7 +308,7 @@ describe('helpers', () => {
     test('it returns returns false when the destination is undefined', () => {
       expect(
         destinationIsTimelineColumns({
-          destination: undefined,
+          destination: null,
           draggableId: getDraggableFieldId({ contextId: 'test', fieldId: 'event.action' }),
           reason: 'DROP',
           source: {
@@ -310,6 +317,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -329,6 +337,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -350,6 +359,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(true);
     });
@@ -357,7 +367,7 @@ describe('helpers', () => {
     test('it returns false when the destination is undefined', () => {
       expect(
         destinationIsTimelineButton({
-          destination: undefined,
+          destination: null,
           draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
@@ -366,6 +376,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -385,6 +396,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -405,6 +417,7 @@ describe('helpers', () => {
         },
         type: 'DEFAULT',
         mode: 'FLUID',
+        combine: null,
       });
       const expected = '2119990039033485';
 
@@ -427,6 +440,7 @@ describe('helpers', () => {
         },
         type: 'DEFAULT',
         mode: 'FLUID',
+        combine: null,
       });
       const expected = 'event.action';
 
@@ -450,6 +464,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(true);
     });
@@ -469,6 +484,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -476,7 +492,7 @@ describe('helpers', () => {
     test('it returns false when the draggable is NOT content', () => {
       expect(
         providerWasDroppedOnTimeline({
-          destination: undefined,
+          destination: null,
           draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
           reason: 'DROP',
           source: {
@@ -485,6 +501,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -498,6 +515,7 @@ describe('helpers', () => {
           source: { index: 0, droppableId: `${droppableIdPrefix}.somethingElse.2119990039033485` },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -517,6 +535,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -538,6 +557,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(true);
     });
@@ -557,6 +577,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -576,6 +597,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -595,6 +617,7 @@ describe('helpers', () => {
           },
           type: 'DEFAULT',
           mode: 'FLUID',
+          combine: null,
         })
       ).toEqual(false);
     });
@@ -778,6 +801,7 @@ describe('helpers', () => {
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(true);
@@ -792,6 +816,7 @@ describe('helpers', () => {
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.1' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(true);
@@ -799,12 +824,14 @@ describe('helpers', () => {
 
     test('it returns false when destination is undefined', () => {
       const result: DropResult = {
+        destination: null,
         draggableId:
           'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
         mode: 'FLUID',
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.1' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
@@ -819,6 +846,7 @@ describe('helpers', () => {
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-2.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
@@ -833,6 +861,7 @@ describe('helpers', () => {
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
@@ -847,6 +876,7 @@ describe('helpers', () => {
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.otherProviders.timeline-1.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(sourceAndDestinationAreSameTimelineProviders(result)).toBe(false);
@@ -863,6 +893,7 @@ describe('helpers', () => {
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(userIsReArrangingProviders(result)).toBe(true);
@@ -877,6 +908,7 @@ describe('helpers', () => {
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(userIsReArrangingProviders(result)).toBe(false);
@@ -891,6 +923,7 @@ describe('helpers', () => {
         reason: 'CANCEL',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(userIsReArrangingProviders(result)).toBe(false);
@@ -905,6 +938,7 @@ describe('helpers', () => {
         reason: 'CANCEL',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.0' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(userIsReArrangingProviders(result)).toBe(false);
@@ -912,12 +946,14 @@ describe('helpers', () => {
 
     test('it returns false when reason IS DROP, but destination is undefined', () => {
       const result: DropResult = {
+        destination: null,
         draggableId:
           'draggableId.timelineProviders.timeline-1.group.0.port-default-draggable-netflow-renderer-timeline-1-Ib4zD3IBbNV0npT21btr-Ib4zD3IBbNV0npT21btr-source_port-57828',
         mode: 'FLUID',
         reason: 'DROP',
         source: { index: 0, droppableId: 'droppableId.timelineProviders.timeline-1.group.1' },
         type: 'DEFAULT',
+        combine: null,
       };
 
       expect(userIsReArrangingProviders(result)).toBe(false);
@@ -932,6 +968,7 @@ describe('helpers', () => {
       reason: 'DROP',
       source: { index: 0, droppableId: 'droppableId.content.hosts-table-hostName-ENDPOINT-W-0-01' },
       type: 'DEFAULT',
+      combine: null,
     };
 
     test('it dispatches the expected UPDATE_PROVIDERS action when the provider to add exists in the `dataProviders` collection of `id -> `DataProvider`', () => {
@@ -996,18 +1033,6 @@ describe('helpers', () => {
         },
         type: 'x-pack/security_solution/local/drag_and_drop/NO_PROVIDER_FOUND',
       });
-    });
-  });
-
-  describe('getTimelineIdFromColumnDroppableId', () => {
-    test('it returns the expected timelineId from a column droppableId', () => {
-      expect(getTimelineIdFromColumnDroppableId(DROPPABLE_ID_TIMELINE_COLUMNS)).toEqual(
-        'timeline-1'
-      );
-    });
-
-    test('it returns an empty string when the droppableId is an empty string', () => {
-      expect(getTimelineIdFromColumnDroppableId('')).toEqual('');
     });
   });
 });

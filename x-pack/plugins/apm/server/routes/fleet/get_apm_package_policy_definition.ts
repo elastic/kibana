@@ -76,19 +76,19 @@ function getApmPackageInputVars({
     ), // fixes issue where "*" needs to be wrapped in quotes to be parsed as a YAML string
   };
 
-  return policyTemplateInputVars.reduce((acc, registryVarsEntry) => {
+  return policyTemplateInputVars.reduce<
+    Record<string, { type: string; value: any }>
+  >((acc, registryVarsEntry) => {
     const { name, type, default: defaultValue } = registryVarsEntry;
-    return {
-      ...acc,
-      [name]: {
-        type,
-        value:
-          overrideValues[name] ??
-          apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH[name]] ??
-          defaultValue ??
-          '',
-      },
+    acc[name] = {
+      type,
+      value:
+        overrideValues[name] ??
+        apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH[name]] ??
+        defaultValue ??
+        '',
     };
+    return acc;
   }, {});
 }
 
@@ -98,6 +98,7 @@ function ensureValidMultiText(textMultiValue: string[] | undefined) {
   }
   return textMultiValue.map(escapeInvalidYamlString);
 }
+
 function escapeInvalidYamlString(yamlString: string) {
   try {
     yaml.load(yamlString);

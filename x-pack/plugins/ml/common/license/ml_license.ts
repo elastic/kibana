@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+import { isEqual } from 'lodash';
 import { PLUGIN_ID } from '../constants/app';
 
 export const MINIMUM_LICENSE = 'basic';
@@ -19,6 +21,16 @@ export interface LicenseStatus {
   message?: string;
 }
 
+export interface MlLicenseInfo {
+  license: ILicense | null;
+  isSecurityEnabled: boolean;
+  hasLicenseExpired: boolean;
+  isMlEnabled: boolean;
+  isMinimumLicense: boolean;
+  isFullLicense: boolean;
+  isTrialLicense: boolean;
+}
+
 export class MlLicense {
   private _licenseSubscription: Subscription | null = null;
   private _license: ILicense | null = null;
@@ -28,28 +40,58 @@ export class MlLicense {
   private _isMinimumLicense: boolean = false;
   private _isFullLicense: boolean = false;
   private _isTrialLicense: boolean = false;
-  private _initialized: boolean = false;
 
-  public setup(
-    license$: Observable<ILicense>,
-    postInitFunctions?: Array<(lic: MlLicense) => void>
-  ) {
-    this._licenseSubscription = license$.subscribe(async (license) => {
+  private _licenseInfo$ = new BehaviorSubject<MlLicenseInfo>({
+    license: this._license,
+    isSecurityEnabled: this._isSecurityEnabled,
+    hasLicenseExpired: this._hasLicenseExpired,
+    isMlEnabled: this._isMlEnabled,
+    isMinimumLicense: this._isMinimumLicense,
+    isFullLicense: this._isFullLicense,
+    isTrialLicense: this._isTrialLicense,
+  });
+
+  public licenseInfo$: Observable<MlLicenseInfo> = this._licenseInfo$.pipe(
+    distinctUntilChanged(isEqual)
+  );
+
+  public isLicenseReady$: Observable<boolean> = this._licenseInfo$.pipe(
+    map((v) => !!v.license),
+    distinctUntilChanged()
+  );
+
+  public setup(license$: Observable<ILicense>, callback?: (lic: MlLicense) => void) {
+    this._licenseSubscription = license$.subscribe((license) => {
       const { isEnabled: securityIsEnabled } = license.getFeature('security');
 
-      this._license = license;
-      this._isSecurityEnabled = securityIsEnabled;
-      this._hasLicenseExpired = this._license.status === 'expired';
-      this._isMlEnabled = this._license.getFeature(PLUGIN_ID).isEnabled;
-      this._isMinimumLicense = isMinimumLicense(this._license);
-      this._isFullLicense = isFullLicense(this._license);
-      this._isTrialLicense = isTrialLicense(this._license);
+      const mlLicenseUpdate = {
+        license,
+        isSecurityEnabled: securityIsEnabled,
+        hasLicenseExpired: license.status === 'expired',
+        isMlEnabled: license.getFeature(PLUGIN_ID).isEnabled,
+        isMinimumLicense: isMinimumLicense(license),
+        isFullLicense: isFullLicense(license),
+        isTrialLicense: isTrialLicense(license),
+      };
 
-      if (this._initialized === false && postInitFunctions !== undefined) {
-        postInitFunctions.forEach((f) => f(this));
+      this._licenseInfo$.next(mlLicenseUpdate);
+
+      this._license = license;
+      this._isSecurityEnabled = mlLicenseUpdate.isSecurityEnabled;
+      this._hasLicenseExpired = mlLicenseUpdate.hasLicenseExpired;
+      this._isMlEnabled = mlLicenseUpdate.isMlEnabled;
+      this._isMinimumLicense = mlLicenseUpdate.isMinimumLicense;
+      this._isFullLicense = mlLicenseUpdate.isFullLicense;
+      this._isTrialLicense = mlLicenseUpdate.isTrialLicense;
+
+      if (callback !== undefined) {
+        callback(this);
       }
-      this._initialized = true;
     });
+  }
+
+  public getLicenseInfo() {
+    return this._licenseInfo$.getValue();
   }
 
   public unsubscribe() {

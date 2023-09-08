@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   DeserializerOrUndefined,
@@ -52,7 +52,7 @@ export const createListItemsBulk = async ({
     (accum, singleValue, index) => {
       const createdAt = dateNow ?? new Date().toISOString();
       const tieBreakerId =
-        tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuid.v4();
+        tieBreaker != null && tieBreaker[index] != null ? tieBreaker[index] : uuidv4();
       const elasticQuery = transformListItemToElasticQuery({
         serializer,
         type,
@@ -60,6 +60,7 @@ export const createListItemsBulk = async ({
       });
       if (elasticQuery != null) {
         const elasticBody: IndexEsListItemSchema = {
+          '@timestamp': createdAt,
           created_at: createdAt,
           created_by: user,
           deserializer,

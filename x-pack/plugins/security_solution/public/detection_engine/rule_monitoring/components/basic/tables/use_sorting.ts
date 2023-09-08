@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import type { SortOrder } from '../../../../../../common/detection_engine/schemas/common';
+import type { SortOrder } from '../../../../../../common/api/detection_engine';
 
 type TableItem = Record<string, unknown>;
 

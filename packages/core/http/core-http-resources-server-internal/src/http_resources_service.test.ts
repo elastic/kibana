@@ -62,6 +62,20 @@ describe('HttpResources service', () => {
           register = await initializer();
         });
 
+        it('registration defaults to "public" access', () => {
+          register(routeConfig, async (ctx, req, res) => res.ok());
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.access).toBe('public');
+        });
+
+        it('registration can set access to "internal"', () => {
+          register({ ...routeConfig, options: { access: 'internal' } }, async (ctx, req, res) =>
+            res.ok()
+          );
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.access).toBe('internal');
+        });
+
         describe('renderCoreApp', () => {
           it('formats successful response', async () => {
             register(routeConfig, async (ctx, req, res) => {
@@ -73,7 +87,10 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              (await context.core).uiSettings.client,
+              {
+                client: (await context.core).uiSettings.client,
+                globalClient: (await context.core).uiSettings.globalClient,
+              },
               {
                 isAnonymousPage: false,
                 vars: {
@@ -95,7 +112,10 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              (await context.core).uiSettings.client,
+              {
+                client: (await context.core).uiSettings.client,
+                globalClient: (await context.core).uiSettings.globalClient,
+              },
               {
                 isAnonymousPage: true,
                 vars: {

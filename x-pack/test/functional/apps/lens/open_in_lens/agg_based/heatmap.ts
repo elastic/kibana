@@ -67,19 +67,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(debugState.legend!.items).to.eql([
         {
           color: '#006837',
-          key: '0 - 25',
-          name: '0 - 25',
+          key: '1,322 - 1,717.5',
+          name: '1,322 - 1,717.5',
         },
-        { color: '#86CB66', key: '25 - 50', name: '25 - 50' },
+        { color: '#86CB66', key: '1,717.5 - 2,113', name: '1,717.5 - 2,113' },
         {
           color: '#FEFEBD',
-          key: '50 - 75',
-          name: '50 - 75',
+          key: '2,113 - 2,508.5',
+          name: '2,113 - 2,508.5',
         },
         {
           color: '#F88D52',
-          key: '75 - 100',
-          name: '75 - 100',
+          key: '2,508.5 - 2,904',
+          name: '2,508.5 - 2,904',
         },
       ]);
     });
@@ -125,33 +125,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(debugState.legend!.items).to.eql([
         {
           color: '#006837',
-          key: '0 - 16.67',
-          name: '0 - 16.67',
+          key: '1,322 - 1,585.67',
+          name: '1,322 - 1,585.67',
         },
         {
           color: '#4CB15D',
-          key: '16.67 - 33.33',
-          name: '16.67 - 33.33',
+          key: '1,585.67 - 1,849.33',
+          name: '1,585.67 - 1,849.33',
         },
         {
           color: '#B7E075',
-          key: '33.33 - 50',
-          name: '33.33 - 50',
+          key: '1,849.33 - 2,113',
+          name: '1,849.33 - 2,113',
         },
         {
           color: '#FEFEBD',
-          key: '50 - 66.67',
-          name: '50 - 66.67',
+          key: '2,113 - 2,376.67',
+          name: '2,113 - 2,376.67',
         },
         {
           color: '#FDBF6F',
-          key: '66.67 - 83.33',
-          name: '66.67 - 83.33',
+          key: '2,376.67 - 2,640.33',
+          name: '2,376.67 - 2,640.33',
         },
         {
           color: '#EA5839',
-          key: '83.33 - 100',
-          name: '83.33 - 100',
+          key: '2,640.33 - 2,904',
+          name: '2,640.33 - 2,904',
         },
       ]);
     });

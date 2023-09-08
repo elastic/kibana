@@ -18,6 +18,9 @@ import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-
 import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -30,6 +33,7 @@ export interface RenderingMetadata {
   themeVersion: ThemeVersion;
   stylesheetPaths: string[];
   injectedMetadata: InjectedMetadata;
+  customBranding: CustomBranding;
 }
 
 /** @internal */
@@ -44,6 +48,8 @@ export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
+  customBranding: InternalCustomBrandingSetup;
+  userSettings: InternalUserSettingsServiceSetup;
 }
 
 /** @internal */
@@ -81,7 +87,10 @@ export interface InternalRenderingServiceSetup {
    */
   render(
     request: KibanaRequest,
-    uiSettings: IUiSettingsClient,
+    uiSettings: {
+      client: IUiSettingsClient;
+      globalClient: IUiSettingsClient;
+    },
     options?: IRenderOptions
   ): Promise<string>;
 }

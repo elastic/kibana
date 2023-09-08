@@ -4,7 +4,15 @@
 <titleabbrev>Bulk create saved objects</titleabbrev>
 ++++
 
-experimental[] Create multiple {kib} saved objects.
+deprecated::[8.7.0, To be removed in an upcoming version]
+
+Create multiple {kib} saved objects.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
 
 [[saved-objects-api-bulk-create-request]]
 ==== Request

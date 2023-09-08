@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiPanel, EuiComboBox } from '@elastic/eui';
 import styled from 'styled-components';
 import type { LegacyRef } from 'react';
@@ -52,11 +53,13 @@ export const KpiPanel = styled(EuiPanel)<{
 interface StackedBySelectProps {
   'aria-label'?: string;
   'data-test-subj'?: string;
+  dropDownoptions?: Array<EuiComboBoxOptionOption<string | number | string[] | undefined>>;
+  inputRef?: (inputRef: HTMLInputElement | null) => void;
   isDisabled?: boolean;
+  onSelect: (selected: string) => void;
   prepend?: string;
   selected: string;
-  inputRef?: (inputRef: HTMLInputElement | null) => void;
-  onSelect: (selected: string) => void;
+  useLensCompatibleFields?: boolean;
   width?: number;
 }
 
@@ -76,6 +79,8 @@ export const StackByComboBox = React.forwardRef(
       selected,
       inputRef,
       width = DEFAULT_WIDTH,
+      dropDownoptions,
+      useLensCompatibleFields,
     }: StackedBySelectProps,
     ref
   ) => {
@@ -92,7 +97,8 @@ export const StackByComboBox = React.forwardRef(
     const selectedOptions = useMemo(() => {
       return [{ label: selected, value: selected }];
     }, [selected]);
-    const stackOptions = useStackByFields();
+
+    const stackOptions = useStackByFields(useLensCompatibleFields);
     const singleSelection = useMemo(() => {
       return { asPlainText: true };
     }, []);
@@ -109,7 +115,7 @@ export const StackByComboBox = React.forwardRef(
           singleSelection={singleSelection}
           isClearable={false}
           sortMatchesBy="startsWith"
-          options={stackOptions}
+          options={dropDownoptions ?? stackOptions}
           selectedOptions={selectedOptions}
           compressed
           onChange={onChange}

@@ -36,6 +36,12 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.existOrFail('managementSettingsTitle');
   }
 
+  async clickKibanaGlobalSettings() {
+    await this.testSubjects.click('settings');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click('advancedSettingsTab-global-settings');
+  }
+
   async clickKibanaSavedObjects() {
     await this.testSubjects.click('objects');
     await this.savedObjects.waitTableIsLoaded();
@@ -130,6 +136,13 @@ export class SettingsPageObject extends FtrService {
       `advancedSetting-editField-${propertyName}-editor`,
       propertyValue
     );
+    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async setAdvancedSettingsImage(propertyName: string, path: string) {
+    const input = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
+    await input.type(path);
     await this.testSubjects.click(`advancedSetting-saveButton`);
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -275,6 +288,13 @@ export class SettingsPageObject extends FtrService {
     return await this.retry.try(async () => {
       const text = await this.testSubjects.getVisibleText('tab-relationships');
       return text.split(' ')[1].replace(/\((.*)\)/, '$1');
+    });
+  }
+
+  async getFieldFilterTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-sourceFilters');
+      return text.split(' ')[2].replace(/\((.*)\)/, '$1');
     });
   }
 
@@ -700,6 +720,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async addRuntimeField(name: string, type: string, script: string, doSaveField = true) {
+    const startingCount = parseInt(await this.getFieldsTabCount(), 10);
     await this.clickAddField();
     await this.setFieldName(name);
     await this.setFieldType(type);
@@ -709,6 +730,9 @@ export class SettingsPageObject extends FtrService {
 
     if (doSaveField) {
       await this.clickSaveField();
+      await this.retry.try(async () => {
+        expect(parseInt(await this.getFieldsTabCount(), 10)).to.be(startingCount + 1);
+      });
     }
   }
 
@@ -728,6 +752,23 @@ export class SettingsPageObject extends FtrService {
     if (doSaveField) {
       await this.clickSaveField();
     }
+  }
+
+  async editFieldFilter(name: string, newName: string) {
+    await this.testSubjects.click(`edit_filter-${name}`);
+    await this.testSubjects.setValue(`filter_input_${name}`, newName);
+    await this.testSubjects.click(`save_filter-${name}`);
+
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be changed', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
+      return fieldNames.includes(newName);
+    });
   }
 
   async addFieldFilter(name: string) {
@@ -778,6 +819,7 @@ export class SettingsPageObject extends FtrService {
   async clickSaveField() {
     this.log.debug('click Save');
     await this.testSubjects.click('fieldSaveButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async setFieldName(name: string) {

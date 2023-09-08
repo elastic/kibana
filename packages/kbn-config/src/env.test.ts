@@ -7,11 +7,13 @@
  */
 
 import { mockPackage } from './env.test.mocks';
+import type { Package } from '@kbn/repo-packages';
 
 import { Env, RawPackageInfo } from './env';
 import { getEnvOptions } from './internal_mocks';
 
 const REPO_ROOT = '/test/kibanaRoot';
+const BUILD_DATE = '2023-05-15T23:12:09+0000';
 
 const packageInfos: RawPackageInfo = {
   branch: 'master',
@@ -19,11 +21,21 @@ const packageInfos: RawPackageInfo = {
   build: {
     number: 42,
     sha: 'one',
+    date: new Date(BUILD_DATE).toISOString(),
   },
 };
 
+beforeAll(() => {
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date(BUILD_DATE));
+});
+
 beforeEach(() => {
   mockPackage.raw = {};
+});
+
+afterAll(() => {
+  jest.useRealTimers();
 });
 
 test('correctly creates default environment in dev mode.', () => {
@@ -50,6 +62,7 @@ test('correctly creates default environment in prod distributable mode.', () => 
       distributable: true,
       number: 100,
       sha: 'feature-v1-build-sha',
+      date: BUILD_DATE,
     },
   };
 
@@ -72,6 +85,7 @@ test('correctly creates default environment in prod non-distributable mode.', ()
       distributable: false,
       number: 100,
       sha: 'feature-v1-build-sha',
+      date: BUILD_DATE,
     },
   };
 
@@ -94,6 +108,7 @@ test('correctly creates default environment if `--env.name` is supplied.', () =>
       distributable: false,
       number: 100,
       sha: 'feature-v1-build-sha',
+      date: BUILD_DATE,
     },
   };
 
@@ -127,97 +142,109 @@ test('correctly creates environment with constructor.', () => {
         distributable: true,
         number: 100,
         sha: 'feature-v1-build-sha',
+        date: BUILD_DATE,
       },
     },
     getEnvOptions({
       cliArgs: { dev: false },
       configs: ['/some/other/path/some-kibana.yml'],
+      repoPackages: ['FakePackage1', 'FakePackage2'] as unknown as Package[],
     })
   );
 
   expect(env).toMatchSnapshot('env properties');
 });
 
-test('pluginSearchPaths contains x-pack plugins path if --oss flag is false', () => {
+test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters', () => {
   const env = new Env(
     '/some/home/dir',
     packageInfos,
     getEnvOptions({
-      cliArgs: { oss: false },
+      cliArgs: {
+        oss: false,
+        runExamples: false,
+      },
     })
   );
 
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/plugins');
+  expect(env.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
+
+  const env2 = new Env(
+    '/some/home/dir',
+    packageInfos,
+    getEnvOptions({
+      cliArgs: {
+        oss: true,
+        runExamples: true,
+      },
+    })
+  );
+
+  expect(env2.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
+
+  const env3 = new Env(
+    '/some/home/dir',
+    packageInfos,
+    getEnvOptions({
+      cliArgs: {
+        oss: true,
+        runExamples: false,
+      },
+    })
+  );
+
+  expect(env3.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
+
+  const env4 = new Env(
+    '/some/home/dir',
+    packageInfos,
+    getEnvOptions({
+      cliArgs: {
+        oss: false,
+        runExamples: true,
+      },
+    })
+  );
+
+  expect(env4.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 });
 
-test('pluginSearchPaths does not contains x-pack plugins path if --oss flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { oss: true },
-    })
-  );
+describe('packageInfo.buildFlavor', () => {
+  it('is set to `serverless` when the `serverless` cli flag is `true`', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
 
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/plugins');
-});
+    const env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        configs: ['/test/cwd/config/kibana.yml'],
+        cliArgs: {
+          serverless: true,
+        },
+      })
+    );
 
-test('pluginSearchPaths contains examples plugins path if --run-examples flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: true },
-    })
-  );
+    expect(env.packageInfo.buildFlavor).toEqual('serverless');
+  });
 
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/examples');
-});
+  it('is set to `traditional` when the `serverless` cli flag is `false`', () => {
+    mockPackage.raw = {
+      branch: 'some-branch',
+      version: 'some-version',
+    };
 
-test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: true },
-    })
-  );
+    const env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        configs: ['/test/cwd/config/kibana.yml'],
+        cliArgs: {
+          serverless: false,
+        },
+      })
+    );
 
-  expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/examples');
-});
-
-test('pluginSearchPaths does not contain x-pack/examples plugins path if --oss flag is true', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: true, oss: true },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/examples');
-});
-
-test('pluginSearchPaths does not contains examples plugins path if --run-examples flag is false', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: false },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/examples');
-});
-
-test('pluginSearchPaths does not contains x-pack/examples plugins path if --run-examples flag is false', () => {
-  const env = new Env(
-    '/some/home/dir',
-    packageInfos,
-    getEnvOptions({
-      cliArgs: { runExamples: false },
-    })
-  );
-
-  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/examples');
+    expect(env.packageInfo.buildFlavor).toEqual('traditional');
+  });
 });

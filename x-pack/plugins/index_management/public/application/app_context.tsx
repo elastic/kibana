@@ -21,10 +21,11 @@ import {
 } from '@kbn/core/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
 
-const AppContext = createContext<AppDependencies | undefined>(undefined);
+export const AppContext = createContext<AppDependencies | undefined>(undefined);
 
 export interface AppDependencies {
   core: {
@@ -43,9 +44,16 @@ export interface AppDependencies {
     httpService: HttpService;
     notificationService: NotificationService;
   };
+  config: {
+    enableIndexActions: boolean;
+    enableLegacyTemplates: boolean;
+    enableIndexDetailsPage: boolean;
+    enableIndexStats: boolean;
+  };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: IUiSettingsClient;
+  settings: SettingsStart;
   url: SharePluginStart['url'];
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;

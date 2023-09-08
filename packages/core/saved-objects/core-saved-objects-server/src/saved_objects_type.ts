@@ -14,8 +14,14 @@ import type { SavedObjectsTypeManagementDefinition } from './saved_objects_manag
 import type { SavedObjectsValidationMap } from './validation';
 import type { SavedObjectMigrationMap } from './migration';
 import type { SavedObjectsTypeMappingDefinition } from './mapping_definition';
+import type {
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapProvider,
+} from './model_version';
 
 /**
+ * Definition of a type of savedObject.
+ *
  * @public
  */
 export interface SavedObjectsType<Attributes = any> {
@@ -33,6 +39,14 @@ export interface SavedObjectsType<Attributes = any> {
    * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
    */
   hidden: boolean;
+  /**
+   * Is the type hidden from the http APIs. If `hiddenFromHttpApis:true`, repositories will have access to the type but the type is not exposed via the HTTP APIs.
+   * It is recommended to hide types registered with 'hidden=false' from the httpApis for backward compatibility in the HTTP layer.
+   *
+   * @remarks Setting this property for hidden types is not recommended and will fail validation if set to `false`.
+   * @internalRemarks Using 'hiddenFromHttpApis' is an alternative to registering types as `hidden:true` to hide a type from the HTTP APIs without effecting repositories access.
+   */
+  hiddenFromHttpApis?: boolean;
   /**
    * The {@link SavedObjectsNamespaceType | namespace type} for the type.
    */
@@ -113,12 +127,107 @@ export interface SavedObjectsType<Attributes = any> {
    * ```
    *
    * Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
+   * @deprecated Converting to multi-namespace clashes with the ZDT requirement for serverless
    */
   convertToMultiNamespaceTypeVersion?: string;
   /**
    * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
    */
   management?: SavedObjectsTypeManagementDefinition<Attributes>;
+
+  /**
+   * A map of model versions associated with this type.
+   *
+   * Model versions supersede the {@link SavedObjectsType.migrations | migrations} (and {@link SavedObjectsType.schemas | schemas}) APIs
+   * by exposing an unified way of describing the changes of shape or data of the type.
+   *
+   * Model versioning is decoupled from Kibana versioning, and isolated between types.
+   * Model versions are identified by a single numeric value, starting at `1` and without gaps.
+   *
+   * Please refer to {@link SavedObjectsModelVersion} for more details on the model version API.
+   *
+   * @example A **valid** versioning would be:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   // other mandatory attributes...
+   *   modelVersions: {
+   *     '1': modelVersion1,
+   *     '2': modelVersion2,
+   *     '3': modelVersion3,
+   *   }
+   * }
+   * ```
+   *
+   * @example An **invalid** versioning would be:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   // other mandatory attributes...
+   *   modelVersions: {
+   *     '1': modelVersion1,
+   *     '3': modelVersion3, // ERROR, no model version 2
+   *     '3.1': modelVersion31, // ERROR, model version is a single numeric value
+   *   }
+   * }
+   * ```
+   */
+  modelVersions?: SavedObjectsModelVersionMap | SavedObjectsModelVersionMapProvider;
+
+  /**
+   * Allows to opt-in to the new model version API.
+   *
+   * Must be a valid semver version (with the patch version being necessarily 0)
+   *
+   * When specified, the type will switch from using the {@link SavedObjectsType.migrations | legacy migration API}
+   * to use the {@link SavedObjectsType.modelVersions | modelVersion API} after the specified version.
+   *
+   * Once opted in, it will no longer be possible to use the legacy migration API after the specified version.
+   *
+   * @example A **valid** usage example would be:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   // other mandatory attributes...
+   *   switchToModelVersionAt: '8.8.0',
+   *   migrations: {
+   *     '8.1.0': migrateTo810,
+   *     '8.7.0': migrateTo870,
+   *   },
+   *   modelVersions: {
+   *     '1': modelVersion1
+   *   }
+   * }
+   * ```
+   *
+   * @example An **invalid** usage example would be:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   // other mandatory attributes...
+   *   switchToModelVersionAt: '8.9.0',
+   *   migrations: {
+   *     '8.1.0': migrateTo8_1,
+   *     '8.9.0': migrateTo8_9, // error: migration registered for the switch version
+   *     '8.10.0': migrateTo8_10, // error: migration registered for after the switch version
+   *   },
+   *   modelVersions: {
+   *     '1': modelVersion1
+   *   }
+   * }
+   * ```
+   *
+   * Please refer to the {@link SavedObjectsType.modelVersions | modelVersion API} for more documentation on
+   * the new API.
+   *
+   * @remarks All types will be forced to switch to use the new API during `8.10.0`. This switch is
+   *          allowing types owners to switch their types before the milestone (and for testing purposes).
+   */
+  switchToModelVersionAt?: string;
 }
 
 /**

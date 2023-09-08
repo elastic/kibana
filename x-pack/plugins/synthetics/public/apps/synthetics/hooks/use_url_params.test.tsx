@@ -10,7 +10,9 @@ import userEvent from '@testing-library/user-event';
 import { render } from '../utils/testing';
 import React, { useState, Fragment } from 'react';
 import { useUrlParams, SyntheticsUrlParamsHook } from './use_url_params';
-import { APP_DEFAULT_REFRESH_INTERVAL, SyntheticsRefreshContext } from '../contexts';
+import { SyntheticsRefreshContext } from '../contexts';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../common/constants/synthetics/client_defaults';
+const { AUTOREFRESH_INTERVAL_SECONDS } = CLIENT_DEFAULTS_SYNTHETICS;
 
 interface MockUrlParamsComponentProps {
   hook: SyntheticsUrlParamsHook;
@@ -30,7 +32,7 @@ const UseUrlParamsTestComponent = ({
       <button
         id="setUrlParams"
         onClick={() => {
-          updateUrlParams(updateParams);
+          updateUrlParams(updateParams as any);
         }}
       >
         Set url params
@@ -54,11 +56,13 @@ describe('useUrlParams', () => {
   it('accepts router props, updates URL params, and returns the current params', async () => {
     const { findByText, history } = render(
       <SyntheticsRefreshContext.Provider
-        value={{
-          lastRefresh: 123,
-          refreshApp: jest.fn(),
-          refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
-        }}
+        value={
+          {
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+          } as any
+        }
       >
         <UseUrlParamsTestComponent hook={useUrlParams} />
       </SyntheticsRefreshContext.Provider>
@@ -78,11 +82,13 @@ describe('useUrlParams', () => {
   it('clears search when null is passed to params', async () => {
     const { findByText, history } = render(
       <SyntheticsRefreshContext.Provider
-        value={{
-          lastRefresh: 123,
-          refreshApp: jest.fn(),
-          refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
-        }}
+        value={
+          {
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+            refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+          } as any
+        }
       >
         <UseUrlParamsTestComponent hook={useUrlParams} updateParams={null} />
       </SyntheticsRefreshContext.Provider>

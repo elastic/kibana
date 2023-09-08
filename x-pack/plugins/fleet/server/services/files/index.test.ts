@@ -11,6 +11,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
   FILE_STORAGE_METADATA_INDEX_PATTERN,
+  FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN,
+  FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN,
 } from '../../../common/constants/file_storage';
 
 import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common/services';
@@ -20,7 +22,10 @@ import { ES_SEARCH_LIMIT } from '../../../common/constants';
 import { fileIdsWithoutChunksByIndex, getFilesByStatus, updateFilesStatus } from '.';
 
 const ENDPOINT_FILE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
+const ENDPOINT_FILE_METADATA_BACKING_INDEX = `${ENDPOINT_FILE_METADATA_INDEX}-000001`;
+
 const ENDPOINT_FILE_INDEX = getFileDataIndexName('endpoint');
+const ENDPOINT_FILE_BACKING_INDEX = `${ENDPOINT_FILE_INDEX}-000001`;
 
 describe('files service', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -49,11 +54,11 @@ describe('files service', () => {
         hits: {
           hits: [
             {
-              _index: ENDPOINT_FILE_METADATA_INDEX,
+              _index: ENDPOINT_FILE_METADATA_BACKING_INDEX,
               _id: 'someid1',
             },
             {
-              _index: ENDPOINT_FILE_METADATA_INDEX,
+              _index: ENDPOINT_FILE_METADATA_BACKING_INDEX,
               _id: 'someid2',
             },
           ],
@@ -64,7 +69,7 @@ describe('files service', () => {
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_METADATA_INDEX_PATTERN,
+          index: [FILE_STORAGE_METADATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN],
           body: {
             size: ES_SEARCH_LIMIT,
             query: {
@@ -79,8 +84,8 @@ describe('files service', () => {
         { signal: abortController.signal }
       );
       expect(result).toEqual([
-        { _index: ENDPOINT_FILE_METADATA_INDEX, _id: 'someid1' },
-        { _index: ENDPOINT_FILE_METADATA_INDEX, _id: 'someid2' },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'someid1' },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'someid2' },
       ]);
     });
   });
@@ -91,22 +96,22 @@ describe('files service', () => {
         took: 5,
         timed_out: false,
         _shards: {
-          total: 1,
-          successful: 1,
+          total: 2,
+          successful: 2,
           skipped: 0,
           failed: 0,
         },
         hits: {
           hits: [
             {
-              _index: ENDPOINT_FILE_INDEX,
+              _index: ENDPOINT_FILE_BACKING_INDEX,
               _id: 'keep1',
               _source: {
                 bid: 'keep1',
               },
             },
             {
-              _index: ENDPOINT_FILE_INDEX,
+              _index: ENDPOINT_FILE_BACKING_INDEX,
               _id: 'keep2',
               _source: {
                 bid: 'keep2',
@@ -117,17 +122,18 @@ describe('files service', () => {
       });
 
       const files = [
-        { _index: ENDPOINT_FILE_METADATA_INDEX, _id: 'keep1' },
-        { _index: ENDPOINT_FILE_METADATA_INDEX, _id: 'keep2' },
-        { _index: ENDPOINT_FILE_METADATA_INDEX, _id: 'delete1' },
-        { _index: ENDPOINT_FILE_METADATA_INDEX, _id: 'delete2' },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep1' },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'keep2' },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete1' },
+        { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete2' },
       ];
       const { fileIdsByIndex: deletedFileIdsByIndex, allFileIds: allDeletedFileIds } =
         await fileIdsWithoutChunksByIndex(esClientMock, abortController, files);
 
       expect(esClientMock.search).toBeCalledWith(
         {
-          index: FILE_STORAGE_DATA_INDEX_PATTERN,
+          ignore_unavailable: true,
+          index: [FILE_STORAGE_DATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN],
           body: {
             size: ES_SEARCH_LIMIT,
             query: {

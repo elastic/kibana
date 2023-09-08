@@ -13,12 +13,14 @@ import {
   elasticsearchClientMock,
   type ClusterClientMock,
   type CustomClusterClientMock,
-  createAgentStoreMock,
+  createAgentStatsProviderMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import type {
   ElasticsearchClientConfig,
   ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
 import type {
   ElasticsearchConfig,
@@ -40,12 +42,14 @@ export type MockedElasticSearchServiceSetup = jest.Mocked<
   };
 };
 
-export interface MockedElasticSearchServiceStart {
+export type MockedElasticSearchServiceStart = jest.Mocked<
+  Omit<ElasticsearchServiceStart, 'client' | 'createClient'>
+> & {
   client: ClusterClientMock;
   createClient: jest.MockedFunction<
     (type: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
   >;
-}
+};
 
 const createPrebootContractMock = () => {
   const prebootContract: MockedElasticSearchServicePreboot = {
@@ -69,6 +73,7 @@ const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
     client: elasticsearchClientMock.createClusterClient(),
     createClient: jest.fn((type: string) => elasticsearchClientMock.createCustomClusterClient()),
+    getCapabilities: jest.fn().mockReturnValue(createCapabilities()),
   };
   return startContract;
 };
@@ -90,12 +95,13 @@ const createInternalSetupContractMock = () => {
       cluster_uuid: 'cluster-uuid',
       cluster_name: 'cluster-name',
       cluster_version: '8.0.0',
+      cluster_build_flavor: 'default',
     }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
       level: ServiceStatusLevels.available,
       summary: 'Elasticsearch is available',
     }),
-    agentStore: createAgentStoreMock(),
+    agentStatsProvider: createAgentStatsProviderMock(),
   };
   return internalSetupContract;
 };
@@ -117,6 +123,15 @@ const createMock = () => {
   return mocked;
 };
 
+const createCapabilities = (
+  parts: Partial<ElasticsearchCapabilities> = {}
+): ElasticsearchCapabilities => {
+  return {
+    serverless: false,
+    ...parts,
+  };
+};
+
 export const elasticsearchServiceMock = {
   create: createMock,
   createInternalPreboot: createInternalPrebootContractMock,
@@ -125,6 +140,7 @@ export const elasticsearchServiceMock = {
   createSetup: createSetupContractMock,
   createInternalStart: createInternalStartContractMock,
   createStart: createStartContractMock,
+  createCapabilities,
 
   ...elasticsearchClientMock,
 };

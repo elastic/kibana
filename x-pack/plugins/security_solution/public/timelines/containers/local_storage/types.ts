@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { TableIdLiteral } from '../../../../common/types';
-import type { TGridModel } from '../../../common/store/data_table/model';
+import type { TableIdLiteral, DataTableModel } from '@kbn/securitysolution-data-table';
 
 export interface DataTablesStorage {
-  getAllDataTables: () => Record<TableIdLiteral, TGridModel>;
-  getDataTablesById: (id: TableIdLiteral) => TGridModel | null;
-  addDataTable: (id: TableIdLiteral, table: TGridModel) => void;
+  getAllDataTables: () => Record<TableIdLiteral, DataTableModel>;
+  getDataTablesById: (id: TableIdLiteral) => DataTableModel | null;
+  addDataTable: (id: TableIdLiteral, table: DataTableModel) => void;
 }

@@ -6,93 +6,57 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { SearchResponseWarnings } from '@kbn/search-response-warnings';
 import { NoResultsSuggestions } from './no_results_suggestions';
+import type { DiscoverStateContainer } from '../../services/discover_state';
+import { useDataState } from '../../hooks/use_data_state';
 import './_no_results.scss';
-import { NoResultsIllustration } from './assets/no_results_illustration';
 
 export interface DiscoverNoResultsProps {
+  stateContainer: DiscoverStateContainer;
   isTimeBased?: boolean;
-  error?: Error;
-  data?: DataPublicPluginStart;
-  hasQuery?: boolean;
-  hasFilters?: boolean;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
+  dataView: DataView;
   onDisableFilters: () => void;
 }
 
 export function DiscoverNoResults({
+  stateContainer,
   isTimeBased,
-  error,
-  data,
-  hasFilters,
-  hasQuery,
+  query,
+  filters,
+  dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
-  const callOut = !error ? (
-    <EuiFlexItem grow={false} className="dscNoResults">
-      <EuiTitle className="dscNoResults__title">
-        <h2 data-test-subj="discoverNoResults">
-          <FormattedMessage
-            id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-            defaultMessage="No results match your search criteria"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
-        <EuiFlexItem className="dscNoResults__illustration" grow={1}>
-          <NoResultsIllustration />
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <NoResultsSuggestions
-            isTimeBased={isTimeBased}
-            hasFilters={hasFilters}
-            hasQuery={hasQuery}
-            onDisableFilters={onDisableFilters}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  ) : (
-    <EuiFlexItem grow={true} className="dscNoResults">
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="discover.noResults.searchExamples.noResultsBecauseOfError"
-            defaultMessage="We encountered an error retrieving search results"
-          />
-        }
-        color="danger"
-        iconType="alert"
-        data-test-subj="discoverNoResultsError"
-      >
-        <EuiButton
-          size="s"
-          color="danger"
-          onClick={() => (data ? data.search.showError(error) : void 0)}
-        >
-          <FormattedMessage
-            id="discover.showErrorMessageAgain"
-            defaultMessage="Show error message"
-          />
-        </EuiButton>
-      </EuiCallOut>
-    </EuiFlexItem>
-  );
+  const { documents$ } = stateContainer.dataState.data$;
+  const interceptedWarnings = useDataState(documents$).interceptedWarnings;
+
+  if (interceptedWarnings?.length) {
+    return (
+      <SearchResponseWarnings
+        variant="empty_prompt"
+        interceptedWarnings={interceptedWarnings}
+        data-test-subj="dscNoResultsInterceptedWarningsCallout"
+      />
+    );
+  }
 
   return (
-    <Fragment>
-      <EuiFlexGroup justifyContent="center">{callOut}</EuiFlexGroup>
-    </Fragment>
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <NoResultsSuggestions
+          isTimeBased={isTimeBased}
+          query={query}
+          filters={filters}
+          dataView={dataView}
+          onDisableFilters={onDisableFilters}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -18,11 +18,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getNormalizedInputs,
   isIntegrationPolicyTemplate,
+  getRegistryStreamWithDataStreamForInputType,
 } from '../../../../../../../../common/services';
 
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
 
@@ -33,9 +34,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   showOnlyIntegration?: string;
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
-  validationResults: PackagePolicyValidationResults;
+  validationResults: PackagePolicyValidationResults | undefined;
   submitAttempted: boolean;
   noTopRule?: boolean;
+  isEditPage?: boolean;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -44,6 +46,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   validationResults,
   submitAttempted,
   noTopRule = false,
+  isEditPage = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -69,7 +72,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   input.type === packageInput.type &&
                   (hasIntegrations ? input.policy_template === policyTemplate.name : true)
               );
-              const packageInputStreams = getStreamsForInputType(
+              const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
                 packageInput.type,
                 packageInfo,
                 hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
@@ -101,13 +104,14 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       });
                     }}
                     inputValidationResults={
-                      validationResults!.inputs![
+                      validationResults?.inputs?.[
                         hasIntegrations
                           ? `${policyTemplate.name}-${packagePolicyInput.type}`
                           : packagePolicyInput.type
-                      ]
+                      ] ?? {}
                     }
                     forceShowErrors={submitAttempted}
+                    isEditPage={isEditPage}
                   />
                   <EuiHorizontalRule margin="m" />
                 </EuiFlexItem>

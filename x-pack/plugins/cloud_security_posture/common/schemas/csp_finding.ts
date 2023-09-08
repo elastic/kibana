@@ -6,25 +6,37 @@
  */
 
 // TODO: this needs to be defined in a versioned schema
-import type { EcsEvent } from '@kbn/logging';
-import type { CspRuleMetadata } from './csp_rule_metadata';
+import type { EcsEvent } from '@kbn/ecs';
+import type { CspRuleTemplateMetadata } from './csp_rule_template_metadata';
 
 export interface CspFinding {
   '@timestamp': string;
   cluster_id: string;
-  orchestrator?: {
-    cluster?: {
-      name?: string;
-    };
-  };
+  orchestrator?: CspFindingOrchestrator;
+  cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
-  rule: CspRuleMetadata;
+  rule: CspRuleTemplateMetadata;
   host: CspFindingHost;
   event: EcsEvent;
   agent: CspFindingAgent;
   ecs: {
     version: string;
+  };
+}
+
+interface CspFindingOrchestrator {
+  cluster?: {
+    id?: string;
+    name?: string;
+  };
+}
+
+interface CspFindingCloud {
+  provider: 'aws';
+  account: {
+    name: string;
+    id: string;
   };
 }
 

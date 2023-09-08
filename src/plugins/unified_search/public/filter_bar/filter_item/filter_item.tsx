@@ -8,7 +8,14 @@
 
 import './filter_item.scss';
 
-import { EuiContextMenu, EuiContextMenuPanel, EuiPopover, EuiPopoverProps } from '@elastic/eui';
+import {
+  EuiContextMenu,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiPopoverProps,
+  euiShadowMedium,
+  useEuiTheme,
+} from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
   Filter,
@@ -18,20 +25,28 @@ import {
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
-
+import React, {
+  MouseEvent,
+  useState,
+  useEffect,
+  HTMLAttributes,
+  useMemo,
+  useCallback,
+} from 'react';
+import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  getIndexPatternFromFilter,
-  getDisplayValueFromFilter,
-  getFieldDisplayValueFromFilter,
-} from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
+import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import { FilterPanelOption } from '../../types';
+import {
+  withCloseFilterEditorConfirmModal,
+  WithCloseFilterEditorConfirmModalProps,
+} from '../filter_editor';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
-export interface FilterItemProps {
+export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
   filter: Filter;
   indexPatterns: DataView[];
@@ -40,9 +55,12 @@ export interface FilterItemProps {
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   readOnly?: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -62,12 +80,33 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 800;
+export const FILTER_EDITOR_WIDTH = 960;
 
-export function FilterItem(props: FilterItemProps) {
+function FilterItemComponent(props: FilterItemProps) {
+  const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
+
+  const closePopover = useCallback(() => {
+    onCloseFilterPopover([() => setIsPopoverOpen(false)]);
+  }, [onCloseFilterPopover]);
+
+  const euiTheme = useEuiTheme();
+
+  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
+  const popoverDragAndDropStyle = useMemo(
+    () =>
+      css`
+        // Always needed for popover with drag & drop in them
+        transform: none !important;
+        transition: none !important;
+        filter: none !important;
+        ${euiShadowMedium(euiTheme)}
+      `,
+    [euiTheme]
+  );
 
   useEffect(() => {
     if (isPopoverOpen) {
@@ -83,7 +122,7 @@ export function FilterItem(props: FilterItemProps) {
     }
   }
 
-  function handleIconClick(e: MouseEvent<HTMLInputElement>) {
+  function handleIconClick() {
     props.onRemove();
     setIsPopoverOpen(false);
   }
@@ -134,17 +173,19 @@ export function FilterItem(props: FilterItemProps) {
   function getDataTestSubj(labelConfig: LabelOptions) {
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const valueLabel = isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status;
-    const dataTestSubjValue = valueLabel ? `filter-value-${valueLabel}` : '';
+    const dataTestSubjValue = valueLabel ? `filter-value-${valueLabel.replace(/\s/g, '')}` : '';
     const dataTestSubjNegated = filter.meta.negate ? 'filter-negated' : '';
     const dataTestSubjDisabled = `filter-${isDisabled(labelConfig) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
+    const dataTestSubjId = `filter-id-${id}`;
     return classNames(
       'filter',
       dataTestSubjDisabled,
       dataTestSubjKey,
       dataTestSubjValue,
       dataTestSubjPinned,
-      dataTestSubjNegated
+      dataTestSubjNegated,
+      dataTestSubjId
     );
   }
 
@@ -314,10 +355,10 @@ export function FilterItem(props: FilterItemProps) {
     filter,
     readOnly,
     valueLabel: valueLabelConfig.title,
-    fieldLabel: getFieldDisplayValueFromFilter(filter, indexPatterns),
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),
+    dataViews: indexPatterns,
     iconOnClick: handleIconClick,
     onClick: handleBadgeClick,
     'data-test-subj': getDataTestSubj(valueLabelConfig),
@@ -328,11 +369,12 @@ export function FilterItem(props: FilterItemProps) {
     className: `globalFilterItem__popover`,
     anchorClassName: `globalFilterItem__popoverAnchor`,
     isOpen: isPopoverOpen,
-    closePopover: () => {
-      setIsPopoverOpen(false);
-    },
+    closePopover,
     button: <FilterView {...filterViewProps} />,
     panelPaddingSize: 'none',
+    panelProps: {
+      css: popoverDragAndDropStyle,
+    },
   };
 
   return readOnly ? (
@@ -344,15 +386,18 @@ export function FilterItem(props: FilterItemProps) {
       ) : (
         <EuiContextMenuPanel
           items={[
-            <div style={{ width: FILTER_EDITOR_WIDTH }}>
+            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }} key="filter-editor">
               <FilterEditor
                 filter={filter}
                 indexPatterns={indexPatterns}
                 onSubmit={onSubmit}
-                onCancel={() => {
-                  setIsPopoverOpen(false);
-                }}
+                onLocalFilterUpdate={onLocalFilterUpdate}
+                onLocalFilterCreate={onLocalFilterCreate}
+                onCancel={() => setIsPopoverOpen(false)}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                filtersForSuggestions={props.filtersForSuggestions}
+                suggestionsAbstraction={props.suggestionsAbstraction}
+                docLinks={docLinks}
               />
             </div>,
           ]}
@@ -361,6 +406,9 @@ export function FilterItem(props: FilterItemProps) {
     </EuiPopover>
   );
 }
+
+export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
+
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default FilterItem;

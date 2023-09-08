@@ -204,7 +204,8 @@
         "executable" : "/bin/zsh",
         "name" : "zsh",
         "args" : [
-          "-zsh"
+          "-zsh",
+          "unique"
         ],
         "entity_id" : "q6pltOhTWlQx3BCE",
         "entry_leader": {

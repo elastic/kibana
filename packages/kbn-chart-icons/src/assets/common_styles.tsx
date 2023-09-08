@@ -17,7 +17,3 @@ export const colors = {
     fill: ${euiThemeVars.euiColorVis0};
   `,
 };
-
-export const noFill = css`
-  fill: none;
-`;

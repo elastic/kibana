@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import type { Ecs } from '../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';
 import { plainRowRenderer } from './plain_row_renderer';
 

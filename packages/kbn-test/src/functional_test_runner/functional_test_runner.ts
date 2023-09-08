@@ -9,7 +9,7 @@
 import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Suite, Test } from './fake_mocha_types';
 import {
@@ -60,7 +60,8 @@ export class FunctionalTestRunner {
         : this.getStubProviderCollection(coreProviders);
 
       if (realServices) {
-        if (providers.hasService('es')) {
+        // Skip ES version validation for serverless project
+        if (!this.config.get('serverless') && providers.hasService('es')) {
           await this.validateEsVersion();
         }
         await providers.loadAll();

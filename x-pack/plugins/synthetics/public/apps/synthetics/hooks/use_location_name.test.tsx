@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useLocationName } from './use_location_name';
 import { WrappedHelper } from '../utils/testing';
 
-describe('useMonitorListFilters', () => {
+describe('useLocationName', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -51,7 +51,12 @@ describe('useMonitorListFilters', () => {
         }),
       { wrapper: WrapperWithState }
     );
-    expect(result.current).toEqual('US Central');
+    expect(result.current).toEqual({
+      id: 'us_central',
+      isServiceManaged: true,
+      label: 'US Central',
+      url: 'mockUrl',
+    });
   });
 
   it('returns the location id if matching location cannot be found', () => {
@@ -91,6 +96,6 @@ describe('useMonitorListFilters', () => {
         }),
       { wrapper: WrapperWithState }
     );
-    expect(result.current).toEqual('us_west');
+    expect(result.current).toEqual(undefined);
   });
 });

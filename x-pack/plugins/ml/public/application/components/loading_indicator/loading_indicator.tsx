@@ -7,23 +7,23 @@
 
 import React, { FC } from 'react';
 
-import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 
 export const LoadingIndicator: FC<{ height?: number; label?: string }> = ({ height, label }) => {
   height = height ? +height : 100;
   return (
-    <div
-      className="ml-loading-indicator"
-      style={{ height: `${height}px` }}
-      data-test-subj="mlLoadingIndicator"
-    >
-      <EuiLoadingChart size="xl" mono />
-      {label && (
-        <>
-          <EuiSpacer size="s" />
-          <div>{label}</div>
-        </>
-      )}
-    </div>
+    <EuiFlexGroup justifyContent="spaceEvenly">
+      <EuiFlexItem grow={false}>
+        <div style={{ height: `${height}px` }} data-test-subj="mlLoadingIndicator">
+          <EuiLoadingChart size="xl" mono />
+          {label && (
+            <>
+              <EuiSpacer size="s" />
+              <div>{label}</div>
+            </>
+          )}
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

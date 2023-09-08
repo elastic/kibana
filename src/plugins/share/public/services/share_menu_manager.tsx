@@ -28,6 +28,7 @@ export class ShareMenuManager {
     core: CoreStart,
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
+    disableEmbed: boolean,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
@@ -45,6 +46,7 @@ export class ShareMenuManager {
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
+          allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
           urlService,
@@ -69,6 +71,8 @@ export class ShareMenuManager {
     sharingData,
     menuItems,
     shareableUrl,
+    shareableUrlForSavedObject,
+    shareableUrlLocatorParams,
     embedUrlParamExtensions,
     theme,
     showPublicUrlSwitch,
@@ -76,6 +80,8 @@ export class ShareMenuManager {
     anonymousAccess,
     snapshotShareWarning,
     onClose,
+    objectTypeTitle,
+    disabledShareUrl,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
@@ -107,15 +113,19 @@ export class ShareMenuManager {
               allowShortUrl={allowShortUrl}
               objectId={objectId}
               objectType={objectType}
+              objectTypeTitle={objectTypeTitle}
               shareMenuItems={menuItems}
               sharingData={sharingData}
               shareableUrl={shareableUrl}
+              shareableUrlForSavedObject={shareableUrlForSavedObject}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
               onClose={onClose}
               embedUrlParamExtensions={embedUrlParamExtensions}
               anonymousAccess={anonymousAccess}
               showPublicUrlSwitch={showPublicUrlSwitch}
               urlService={urlService}
               snapshotShareWarning={snapshotShareWarning}
+              disabledShareUrl={disabledShareUrl}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>

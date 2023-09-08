@@ -127,7 +127,7 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" color="danger" />
+          <EuiIcon type="warning" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="danger" size="s" data-test-subj="featureError">

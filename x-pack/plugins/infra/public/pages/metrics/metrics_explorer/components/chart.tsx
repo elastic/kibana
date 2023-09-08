@@ -12,17 +12,18 @@ import {
   niceTimeFormatter,
   Position,
   Settings,
-  TooltipValue,
+  TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
-import { getChartTheme } from '../../../../utils/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import {
   MetricsExplorerChartOptions,
@@ -63,8 +64,13 @@ export const MetricsExplorerChart = ({
   timeRange,
   onTimeChange,
 }: Props) => {
-  const uiCapabilities = useKibana().services.application?.capabilities;
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const {
+    services: {
+      application: { capabilities: uiCapabilities },
+    },
+  } = useKibanaContextForPlugin();
+
+  const chartTheme = useTimelineChartTheme();
   const { metrics } = options;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const handleTimeChange: BrushEndListener = ({ x }) => {
@@ -81,9 +87,9 @@ export const MetricsExplorerChart = ({
       ? niceTimeFormatter([firstRow.timestamp, lastRow.timestamp])
       : (value: number) => `${value}`;
   }, [series.rows]);
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+      ({ value }) => moment(value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };
@@ -157,11 +163,8 @@ export const MetricsExplorerChart = ({
               tickFormat={yAxisFormater}
               domain={domain}
             />
-            <Settings
-              tooltip={tooltipProps}
-              onBrushEnd={handleTimeChange}
-              theme={getChartTheme(isDarkMode)}
-            />
+            <Tooltip {...tooltipProps} />
+            <Settings onBrushEnd={handleTimeChange} baseTheme={chartTheme.baseTheme} />
           </Chart>
         ) : options.metrics.length > 0 ? (
           <MetricsExplorerEmptyChart />

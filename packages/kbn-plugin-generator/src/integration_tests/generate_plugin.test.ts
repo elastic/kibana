@@ -10,7 +10,7 @@ import Path from 'path';
 
 import del from 'del';
 import execa from 'execa';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import globby from 'globby';
 
@@ -83,7 +83,6 @@ it('generates a plugin without UI', async () => {
     Array [
       <absolute path>/plugins/bar/.eslintrc.js,
       <absolute path>/plugins/bar/.gitignore,
-      <absolute path>/plugins/bar/.i18nrc.json,
       <absolute path>/plugins/bar/common/index.ts,
       <absolute path>/plugins/bar/kibana.json,
       <absolute path>/plugins/bar/package.json,

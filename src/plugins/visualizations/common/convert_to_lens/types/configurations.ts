@@ -99,7 +99,7 @@ export interface EventAnnotationConfig {
   label: string;
   color?: string;
   isHidden?: boolean;
-  icon?: string;
+  icon?: (() => JSX.Element) | string;
   type: 'query';
   key: {
     type: 'point_in_time';
@@ -333,10 +333,23 @@ export type HeatmapConfiguration = HeatmapLayerState & {
   palette?: Palette;
 };
 
+export interface TagcloudVisConfiguration {
+  layerId: string;
+  layerType: LayerType;
+  valueAccessor: string;
+  tagAccessor: string;
+  maxFontSize: number;
+  minFontSize: number;
+  orientation: string;
+  palette: PaletteOutput;
+  showLabel: boolean;
+}
+
 export type Configuration =
   | XYConfiguration
   | TableVisConfiguration
   | PartitionVisConfiguration
   | MetricVisConfiguration
   | GaugeVisConfiguration
-  | HeatmapConfiguration;
+  | HeatmapConfiguration
+  | TagcloudVisConfiguration;

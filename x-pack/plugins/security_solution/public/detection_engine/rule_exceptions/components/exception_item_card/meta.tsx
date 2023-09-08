@@ -25,9 +25,9 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/rule_exceptions';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 
 const StyledFlexItem = styled(EuiFlexItem)`
@@ -50,6 +50,11 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
     const onAffectedListsClick = () => setIsListsPopoverOpen((isOpen) => !isOpen);
     const onCloseRulesPopover = () => setIsRulesPopoverOpen(false);
     const onClosListsPopover = () => setIsListsPopoverOpen(false);
+
+    const isExpired = useMemo(
+      () => (item.expire_time ? new Date(item.expire_time) <= new Date() : false),
+      [item]
+    );
 
     const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
       if (listAndReferences == null) {
@@ -177,6 +182,20 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
         </StyledFlexItem>
+        {item.expire_time != null && (
+          <>
+            <StyledFlexItem grow={false}>
+              <MetaInfoDetails
+                fieldName="expire_time"
+                label={
+                  isExpired ? i18n.EXCEPTION_ITEM_EXPIRED_LABEL : i18n.EXCEPTION_ITEM_EXPIRES_LABEL
+                }
+                value1={<FormattedDate fieldName="expire_time" value={item.expire_time} />}
+                dataTestSubj={`${dataTestSubj}-expireTime`}
+              />
+            </StyledFlexItem>
+          </>
+        )}
         {listAndReferences != null && (
           <>
             {rulesAffected}
@@ -193,7 +212,7 @@ interface MetaInfoDetailsProps {
   fieldName: string;
   label: string;
   value1: JSX.Element | string;
-  value2: string;
+  value2?: string;
   dataTestSubj: string;
 }
 
@@ -210,20 +229,24 @@ const MetaInfoDetails = memo<MetaInfoDetailsProps>(({ label, value1, value2, dat
           {value1}
         </EuiBadge>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
-          {i18n.EXCEPTION_ITEM_META_BY}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value2`}>
-        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+      {value2 != null && (
+        <>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" style={{ fontFamily: 'Inter' }}>
-              {value2}
-            </EuiBadge>
+            <EuiText size="xs" style={{ fontFamily: 'Inter' }}>
+              {i18n.EXCEPTION_ITEM_META_BY}
+            </EuiText>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}-value2`}>
+            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" style={{ fontFamily: 'Inter' }}>
+                  {value2}
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 });

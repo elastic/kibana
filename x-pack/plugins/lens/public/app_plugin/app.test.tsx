@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import { LensAppProps, LensAppServices } from './types';
 import { EditorFrameInstance, EditorFrameProps } from '../types';
-import { Document } from '../persistence';
+import { Document, SavedObjectIndexStore } from '../persistence';
 import {
   visualizationMap,
   datasourceMap,
@@ -33,9 +33,11 @@ import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { LensByValueInput } from '../embeddable/embeddable';
 import { SavedObjectReference } from '@kbn/core/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { serverlessMock } from '@kbn/serverless/public/mocks';
 import moment from 'moment';
 
 import { setState, LensAppState } from '../state_management';
+import { coreMock } from '@kbn/core/public/mocks';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('@kbn/core/public');
 jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
@@ -85,6 +87,12 @@ describe('Lens App', () => {
       visualizationMap,
       topNavMenuEntryGenerators: [],
       theme$: new Observable(),
+      coreStart: coreMock.createStart(),
+      savedObjectStore: {
+        save: jest.fn(),
+        load: jest.fn(),
+        search: jest.fn(),
+      } as unknown as SavedObjectIndexStore,
     };
   }
 
@@ -144,6 +152,8 @@ describe('Lens App', () => {
     expect(frame.EditorFrameContainer).toHaveBeenLastCalledWith(
       {
         indexPatternService: expect.any(Object),
+        getUserMessages: expect.any(Function),
+        addUserMessages: expect.any(Function),
         lensInspector: {
           adapters: {
             expression: expect.any(Object),
@@ -355,6 +365,30 @@ describe('Lens App', () => {
         },
         { text: 'Daaaaaaadaumching!' },
       ]);
+    });
+
+    it('sets serverless breadcrumbs when the document title changes when serverless service is available', async () => {
+      const serverless = serverlessMock.createStart();
+      const { instance, services, lensStore } = await mountWith({
+        services: {
+          ...makeDefaultServices(),
+          serverless,
+        },
+      });
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+      expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Create' });
+
+      await act(async () => {
+        instance.setProps({ initialInput: { savedObjectId: breadcrumbDocSavedObjectId } });
+        lensStore.dispatch(
+          setState({
+            persistedDoc: breadcrumbDoc,
+          })
+        );
+      });
+
+      expect(services.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+      expect(serverless.setBreadcrumbs).toHaveBeenCalledWith({ text: 'Daaaaaaadaumching!' });
     });
   });
 
@@ -899,19 +933,19 @@ describe('Lens App', () => {
     });
   });
 
-  describe('download button', () => {
-    function getButton(inst: ReactWrapper): TopNavMenuData {
+  describe('share button', () => {
+    function getShareButton(inst: ReactWrapper): TopNavMenuData {
       return (
         inst.find('[data-test-subj="lnsApp_topNav"]').prop('config') as TopNavMenuData[]
-      ).find((button) => button.testId === 'lnsApp_downloadCSVButton')!;
+      ).find((button) => button.testId === 'lnsApp_shareButton')!;
     }
 
     it('should be disabled when no data is available', async () => {
       const { instance } = await mountWith({ preloadedState: { isSaveable: true } });
-      expect(getButton(instance).disableButton).toEqual(true);
+      expect(getShareButton(instance).disableButton).toEqual(true);
     });
 
-    it('should disable download when not saveable', async () => {
+    it('should not disable share when not saveable', async () => {
       const { instance } = await mountWith({
         preloadedState: {
           isSaveable: false,
@@ -919,7 +953,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(getButton(instance).disableButton).toEqual(true);
+      expect(getShareButton(instance).disableButton).toEqual(false);
     });
 
     it('should still be enabled even if the user is missing save permissions', async () => {
@@ -928,7 +962,7 @@ describe('Lens App', () => {
         ...services.application,
         capabilities: {
           ...services.application.capabilities,
-          visualize: { save: false, saveQuery: false, show: true },
+          visualize: { save: false, saveQuery: false, show: true, createShortUrl: true },
         },
       };
 
@@ -939,7 +973,47 @@ describe('Lens App', () => {
           activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
         },
       });
-      expect(getButton(instance).disableButton).toEqual(false);
+      expect(getShareButton(instance).disableButton).toEqual(false);
+    });
+
+    it('should still be enabled even if the user is missing shortUrl permissions', async () => {
+      const services = makeDefaultServicesForApp();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: true, saveQuery: false, show: true, createShortUrl: false },
+        },
+      };
+
+      const { instance } = await mountWith({
+        services,
+        preloadedState: {
+          isSaveable: true,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        },
+      });
+      expect(getShareButton(instance).disableButton).toEqual(false);
+    });
+
+    it('should be disabled if the user is missing shortUrl permissions and visualization is not saveable', async () => {
+      const services = makeDefaultServicesForApp();
+      services.application = {
+        ...services.application,
+        capabilities: {
+          ...services.application.capabilities,
+          visualize: { save: false, saveQuery: false, show: true, createShortUrl: false },
+        },
+      };
+
+      const { instance } = await mountWith({
+        services,
+        preloadedState: {
+          isSaveable: false,
+          activeData: { layer1: { type: 'datatable', columns: [], rows: [] } },
+        },
+      });
+      expect(getShareButton(instance).disableButton).toEqual(true);
     });
   });
 
@@ -1138,6 +1212,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
@@ -1149,6 +1224,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1165,6 +1241,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1176,6 +1253,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1188,6 +1266,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1205,6 +1284,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: 'abc:def', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1255,6 +1335,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1266,6 +1347,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1563,7 +1645,7 @@ describe('Lens App', () => {
         },
       },
     });
-    expect(services.spaces.ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+    expect(services.spaces?.ui.components.getLegacyUrlConflict).toHaveBeenCalledWith({
       currentObjectId: '1234',
       objectNoun: 'Lens visualization',
       otherObjectId: '2',

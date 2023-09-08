@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 import { chunk, omit } from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -26,10 +26,38 @@ const findTestUtils = (
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestRuleData())
+            .send(
+              getTestRuleData({
+                actions: [
+                  {
+                    group: 'default',
+                    id: createdAction.id,
+                    params: {},
+                    frequency: {
+                      summary: false,
+                      notify_when: 'onThrottleInterval',
+                      throttle: '1m',
+                    },
+                  },
+                ],
+                notify_when: undefined,
+                throttle: undefined,
+              })
+            )
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -68,21 +96,37 @@ const findTestUtils = (
                 name: 'abc',
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
+                running: match.running ?? false,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
-                actions: [],
+                actions: [
+                  {
+                    group: 'default',
+                    id: createdAction.id,
+                    connector_type_id: 'test.noop',
+                    params: {},
+                    uuid: match.actions[0].uuid,
+                    frequency: {
+                      summary: false,
+                      notify_when: 'onThrottleInterval',
+                      throttle: '1m',
+                    },
+                  },
+                ],
                 params: {},
                 created_by: 'elastic',
                 scheduled_task_id: match.scheduled_task_id,
                 created_at: match.created_at,
                 updated_at: match.updated_at,
-                throttle: '1m',
-                notify_when: 'onThrottleInterval',
+                throttle: null,
+                notify_when: null,
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
+                revision: 0,
                 execution_status: match.execution_status,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
@@ -271,6 +315,7 @@ const findTestUtils = (
                 name: 'abc',
                 tags: ['foo'],
                 rule_type_id: 'test.noop',
+                running: match.running ?? false,
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: false,
@@ -280,11 +325,13 @@ const findTestUtils = (
                     group: 'default',
                     connector_type_id: 'test.noop',
                     params: {},
+                    uuid: createdAlert.actions[0].uuid,
                   },
                 ],
                 params: {},
                 created_by: 'elastic',
                 throttle: '1m',
+                api_key_created_by_user: null,
                 updated_by: 'elastic',
                 api_key_owner: null,
                 mute_all: false,
@@ -293,6 +340,7 @@ const findTestUtils = (
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
+                revision: 0,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
                 ...(describeType === 'internal'
@@ -312,7 +360,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with fields appropriately', async () => {
-          const myTag = uuid.v4();
+          const myTag = uuidv4();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
@@ -395,7 +443,7 @@ const findTestUtils = (
         });
 
         it('should handle find alert request with executionStatus field appropriately', async () => {
-          const myTag = uuid.v4();
+          const myTag = uuidv4();
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')

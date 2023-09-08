@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import React from 'react';
 import { Meta, Story } from '@storybook/react';
 import mdx from '../README.mdx';
@@ -51,14 +51,18 @@ export const CustomActions: Story = (args) => {
     <EuiPageTemplate>
       <EuiPageTemplate.Section alignment="center">
         <NotFoundPrompt
-          actions={[
-            <EuiButton fill color="primary" onClick={args.onClick}>
-              Go home
-            </EuiButton>,
-            <EuiButtonEmpty iconType="search" onClick={args.onClick}>
-              Go to discover
-            </EuiButtonEmpty>,
-          ]}
+          actions={
+            <>
+              <EuiButton fill color="primary" onClick={args.onClick}>
+                Go home
+              </EuiButton>
+              <EuiButton iconType="search" onClick={args.onClick}>
+                Go to discover
+              </EuiButton>
+            </>
+          }
+          title="Customizable Title"
+          body="Customizable Body"
         />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

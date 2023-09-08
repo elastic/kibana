@@ -20,13 +20,15 @@ import {
 } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { PLUGIN_FEATURE } from '../common/constants';
 import type {
   AppPluginStartDependencies,
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
 } from './types';
 import { GuidePanel } from './components';
-import { ApiService, apiService } from './services/api';
+import { ApiService, apiService } from './services/api.service';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
@@ -42,11 +44,12 @@ export class GuidedOnboardingPlugin
   ): GuidedOnboardingPluginStart {
     const { chrome, http, theme, application, notifications } = core;
 
+    // Guided onboarding UI is only available on cloud and if the access to the Kibana feature is granted
+    const isEnabled = !!(cloud?.isCloudEnabled && application.capabilities[PLUGIN_FEATURE].enabled);
     // Initialize services
-    apiService.setup(http, !!cloud?.isCloudEnabled);
+    apiService.setup(http, isEnabled);
 
-    // Guided onboarding UI is only available on cloud
-    if (cloud?.isCloudEnabled) {
+    if (isEnabled) {
       chrome.navControls.registerExtension({
         order: 1000,
         mount: (target) =>
@@ -84,7 +87,12 @@ export class GuidedOnboardingPlugin
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <GuidePanel api={api} application={application} notifications={notifications} />
+          <GuidePanel
+            api={api}
+            application={application}
+            notifications={notifications}
+            theme$={theme$}
+          />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

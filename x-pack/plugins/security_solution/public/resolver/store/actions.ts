@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import type { CameraAction } from './camera';
-import type { DataAction } from './data/action';
+import actionCreatorFactory from 'typescript-fsa';
+
+const actionCreator = actionCreatorFactory('x-pack/security_solution/analyzer');
+
+export const createResolver = actionCreator<{ id: string }>('CREATE_RESOLVER');
+
+export const clearResolver = actionCreator<{ id: string }>('CLEAR_RESOLVER');
 
 /**
  * The action dispatched when the app requests related event data for one
  * subject (whose entity_id should be included as `payload`)
  */
-interface UserRequestedRelatedEventData {
-  readonly type: 'userRequestedRelatedEventData';
-  readonly payload: string;
-}
+export const userRequestedRelatedEventData = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  id: string;
+  readonly nodeID: string;
+}>('REQUEST_RELATED_EVENT');
 
 /**
  * When the user switches the "active descendant" of the Resolver.
@@ -24,20 +32,20 @@ interface UserRequestedRelatedEventData {
  * the element that is focused on by the user's interactions with the UI, but
  * not necessarily "selected" (see UserSelectedResolverNode below)
  */
-interface UserFocusedOnResolverNode {
-  readonly type: 'userFocusedOnResolverNode';
-
-  readonly payload: {
-    /**
-     * Used to identify the node that should be brought into view.
-     */
-    readonly nodeID: string;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
-  };
-}
+export const userFocusedOnResolverNode = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+  /**
+   * Used to identify the node that should be brought into view.
+   */
+  readonly nodeID: string;
+  /**
+   * The time (since epoch in milliseconds) when the action was dispatched.
+   */
+  readonly time: number;
+}>('FOCUS_ON_NODE');
 
 /**
  * When the user "selects" a node in the Resolver
@@ -45,62 +53,53 @@ interface UserFocusedOnResolverNode {
  * user most recently "picked" (by e.g. pressing a button corresponding
  * to the element in a list) as opposed to "active" or "current" (see UserFocusedOnResolverNode above).
  */
-interface UserSelectedResolverNode {
-  readonly type: 'userSelectedResolverNode';
-  readonly payload: {
-    /**
-     * Used to identify the node that should be brought into view.
-     */
-    readonly nodeID: string;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     */
-    readonly time: number;
-  };
-}
+export const userSelectedResolverNode = actionCreator<{
+  /**
+   * Id that identify the scope of analyzer
+   */
+  readonly id: string;
+  /**
+   * Used to identify the node that should be brought into view.
+   */
+  readonly nodeID: string;
+  /**
+   * The time (since epoch in milliseconds) when the action was dispatched.
+   */
+  readonly time: number;
+}>('SELECT_RESOLVER_NODE');
 
 /**
  * Used by `useStateSyncingActions` hook.
  * This is dispatched when external sources provide new parameters for Resolver.
  * When the component receives a new 'databaseDocumentID' prop, this is fired.
  */
-interface AppReceivedNewExternalProperties {
-  type: 'appReceivedNewExternalProperties';
+export const appReceivedNewExternalProperties = actionCreator<{
   /**
-   * Defines the externally provided properties that Resolver acknowledges.
+   * Id that identify the scope of analyzer
    */
-  payload: {
-    /**
-     * the `_id` of an ES document. This defines the origin of the Resolver graph.
-     */
-    databaseDocumentID: string;
-    /**
-     * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
-     */
-    resolverComponentInstanceID: string;
+  readonly id: string;
+  /**
+   * the `_id` of an ES document. This defines the origin of the Resolver graph.
+   */
+  readonly databaseDocumentID: string;
+  /**
+   * An ID that uniquely identifies this Resolver instance from other concurrent Resolvers.
+   */
+  readonly resolverComponentInstanceID: string;
 
-    /**
-     * The `search` part of the URL of this page.
-     */
-    locationSearch: string;
+  /**
+   * The `search` part of the URL of this page.
+   */
+  readonly locationSearch: string;
 
-    /**
-     * Indices that the backend will use to find the document.
-     */
-    indices: string[];
+  /**
+   * Indices that the backend will use to find the document.
+   */
+  readonly indices: string[];
 
-    shouldUpdate: boolean;
-    filters: {
-      from?: string;
-      to?: string;
-    };
+  readonly shouldUpdate: boolean;
+  readonly filters: {
+    from?: string;
+    to?: string;
   };
-}
-
-export type ResolverAction =
-  | CameraAction
-  | DataAction
-  | AppReceivedNewExternalProperties
-  | UserFocusedOnResolverNode
-  | UserSelectedResolverNode
-  | UserRequestedRelatedEventData;
+}>('APP_RECEIVED_NEW_EXTERNAL_PROPERTIES');

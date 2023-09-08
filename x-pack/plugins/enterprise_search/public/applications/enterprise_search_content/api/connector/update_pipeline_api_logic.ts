@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { IngestPipelineParams } from '../../../../../common/types/connectors';
+import { i18n } from '@kbn/i18n';
+
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -33,5 +36,11 @@ export const updatePipeline = async ({
 
 export const UpdatePipelineApiLogic = createApiLogic(
   ['content', 'update_pipeline_api_logic'],
-  updatePipeline
+  updatePipeline,
+  {
+    showSuccessFlashFn: () =>
+      i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.successToast.title', {
+        defaultMessage: 'Pipelines updated',
+      }),
+  }
 );

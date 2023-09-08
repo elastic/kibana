@@ -10,10 +10,17 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink, EuiButton } 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { isIntegrationPolicyTemplate } from '../../../../../../../../common/services';
+import {
+  isIntegrationPolicyTemplate,
+  isPackagePrerelease,
+} from '../../../../../../../../common/services';
 
-import { useFleetStatus, useLink, useStartServices } from '../../../../../../../hooks';
-import { isPackagePrerelease, isPackageUnverified } from '../../../../../../../services';
+import {
+  useGetPackageVerificationKeyId,
+  useLink,
+  useStartServices,
+} from '../../../../../../../hooks';
+import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
 import { Screenshots } from './screenshots';
@@ -42,7 +49,7 @@ const UnverifiedCallout: React.FC = () => {
         title={i18n.translate('xpack.fleet.epm.verificationWarningCalloutTitle', {
           defaultMessage: 'Integration not verified',
         })}
-        iconType="alert"
+        iconType="warning"
         color="warning"
       >
         <p>
@@ -112,7 +119,7 @@ export const OverviewPage: React.FC<Props> = memo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
     );
-    const { packageVerificationKeyId } = useFleetStatus();
+    const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     return (

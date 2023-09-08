@@ -292,7 +292,16 @@ describe('TagsAddRemove', () => {
 
     expect(mockBulkUpdateTags).toHaveBeenCalledWith(
       'query',
-      ['newTag2', 'newTag'],
+      ['newTag'],
+      [],
+      expect.anything(),
+      'Tag created',
+      'Tag creation failed'
+    );
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      'query',
+      ['newTag2'],
       [],
       expect.anything(),
       'Tag created',
@@ -316,7 +325,16 @@ describe('TagsAddRemove', () => {
     expect(mockBulkUpdateTags).toHaveBeenCalledWith(
       '',
       [],
-      ['tag2', 'tag1'],
+      ['tag1'],
+      expect.anything(),
+      undefined,
+      undefined
+    );
+
+    expect(mockBulkUpdateTags).toHaveBeenCalledWith(
+      '',
+      [],
+      ['tag2'],
       expect.anything(),
       undefined,
       undefined

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import sinon from 'sinon';
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -16,6 +16,7 @@ import { Params } from './rule_type_params';
 import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -59,7 +60,7 @@ describe('ruleType', () => {
             "name": "group",
           },
           Object {
-            "description": "The date the alert exceeded the threshold.",
+            "description": "The date the alert met the threshold conditions.",
             "name": "date",
           },
           Object {
@@ -67,57 +68,57 @@ describe('ruleType', () => {
             "name": "value",
           },
           Object {
-            "description": "A string describing the threshold comparator and threshold",
+            "description": "A string describing the threshold comparator and threshold.",
             "name": "conditions",
           },
         ],
         "params": Array [
           Object {
-            "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
+            "description": "An array of rule threshold values. For between and notBetween thresholds, there are two values.",
             "name": "threshold",
           },
           Object {
-            "description": "A comparison function to use to determine if the threshold as been met.",
+            "description": "The comparison function for the threshold.",
             "name": "thresholdComparator",
           },
           Object {
-            "description": "index",
+            "description": "The indices the rule queries.",
             "name": "index",
           },
           Object {
-            "description": "timeField",
+            "description": "The field that is used to calculate the time window.",
             "name": "timeField",
           },
           Object {
-            "description": "aggType",
+            "description": "The type of aggregation.",
             "name": "aggType",
           },
           Object {
-            "description": "aggField",
+            "description": "The field that is used in the aggregation.",
             "name": "aggField",
           },
           Object {
-            "description": "groupBy",
+            "description": "Indicates whether the aggregation is applied over all documents or split into groups.",
             "name": "groupBy",
           },
           Object {
-            "description": "termField",
+            "description": "The field that is used for grouping the aggregation.",
             "name": "termField",
           },
           Object {
-            "description": "filterKuery",
+            "description": "A KQL expression that limits the scope of alerts.",
             "name": "filterKuery",
           },
           Object {
-            "description": "termSize",
+            "description": "The number of groups that are checked against the threshold.",
             "name": "termSize",
           },
           Object {
-            "description": "timeWindowSize",
+            "description": "The size of the time window, which determines how far back to search for documents.",
             "name": "timeWindowSize",
           },
           Object {
-            "description": "timeWindowUnit",
+            "description": "The type of units for the time window: seconds, minutes, hours, or days.",
             "name": "timeWindowUnit",
           },
         ],
@@ -137,11 +138,11 @@ describe('ruleType', () => {
       threshold: [0],
     };
 
-    expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
+    expect(ruleType.validate.params.validate(params)).toBeTruthy();
   });
 
   it('validator fails with invalid params', async () => {
-    const paramsSchema = ruleType.validate?.params;
+    const paramsSchema = ruleType.validate.params;
     if (!paramsSchema) throw new Error('params validator not set');
 
     const params: Partial<Writable<Params>> = {
@@ -182,26 +183,29 @@ describe('ruleType', () => {
       threshold: [1],
     };
 
+    const ruleName = uuidv4();
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: ruleName,
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -215,11 +219,43 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
-    expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
+    expect(alertServices.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold met',
+      context: {
+        conditions: 'foo is less than 1',
+        date: '1970-01-01T00:00:00.000Z',
+        group: 'all documents',
+        message: `alert '${ruleName}' is active for group 'all documents':
+
+- Value: 0
+- Conditions Met: foo is less than 1 over 5m
+- Timestamp: 1970-01-01T00:00:00.000Z`,
+        title: `alert ${ruleName} group all documents met threshold`,
+        value: 0,
+      },
+      id: 'all documents',
+      payload: {
+        kibana: {
+          alert: {
+            evaluation: { conditions: 'foo is less than 1', value: 0 },
+            reason: `alert '${ruleName}' is active for group 'all documents':
+
+- Value: 0
+- Conditions Met: foo is less than 1 over 5m
+- Timestamp: 1970-01-01T00:00:00.000Z`,
+            title: `alert ${ruleName} group all documents met threshold`,
+          },
+        },
+      },
+      state: {},
+    });
   });
 
   it('should ensure a null result does not fire actions', async () => {
@@ -246,25 +282,27 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -278,8 +316,11 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -309,25 +350,27 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: customAlertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -341,8 +384,11 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -371,25 +417,27 @@ describe('ruleType', () => {
     };
 
     await ruleType.executor({
-      executionId: uuid.v4(),
+      executionId: uuidv4(),
       startedAt: new Date(),
       previousStartedAt: new Date(),
       services: alertServices as unknown as RuleExecutorServices<
         {},
         ActionContext,
-        typeof ActionGroupId
+        typeof ActionGroupId,
+        never
       >,
       params,
       state: {
         latestTimestamp: undefined,
       },
-      spaceId: uuid.v4(),
+      spaceId: uuidv4(),
       rule: {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         tags: [],
         consumer: '',
         producer: '',
+        revision: 0,
         ruleTypeId: '',
         ruleTypeName: '',
         enabled: true,
@@ -403,8 +451,11 @@ describe('ruleType', () => {
         updatedAt: new Date(),
         throttle: null,
         notifyWhen: null,
+        muteAll: false,
+        snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

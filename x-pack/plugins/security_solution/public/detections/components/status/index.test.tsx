@@ -12,7 +12,7 @@ import { Status } from '.';
 
 interface Expected {
   badgeColor: string;
-  iconType: 'check' | 'alert';
+  iconType: 'check' | 'warning';
   status: 'active' | 'recovered' | 'any-other-status';
 }
 
@@ -20,7 +20,7 @@ describe('Status', () => {
   const expected: Expected[] = [
     {
       badgeColor: 'danger',
-      iconType: 'alert',
+      iconType: 'warning',
       status: 'active',
     },
     {
@@ -30,7 +30,7 @@ describe('Status', () => {
     },
     {
       badgeColor: 'danger',
-      iconType: 'alert',
+      iconType: 'warning',
       status: 'any-other-status',
     },
   ];

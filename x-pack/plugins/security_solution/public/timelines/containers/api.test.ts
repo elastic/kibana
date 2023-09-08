@@ -7,7 +7,7 @@
 
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
-import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '../../../common/constants';
 import type { ImportDataProps } from '../../detection_engine/rule_management/logic/types';
 

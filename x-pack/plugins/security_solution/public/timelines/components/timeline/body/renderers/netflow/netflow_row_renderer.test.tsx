@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import '../../../../../../common/mock/match_media';
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';
 
 import {
@@ -17,7 +17,7 @@ import {
   eventCategoryMatches,
   netflowRowRenderer,
 } from './netflow_row_renderer';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 export const justIdAndTimestamp: Ecs = {
   _id: 'abcd',
@@ -25,8 +25,7 @@ export const justIdAndTimestamp: Ecs = {
 };
 
 jest.mock('../../../../../../common/lib/kibana');
-
-jest.mock('../../../../../../common/components/link_to');
+jest.mock('../../../../../../common/components/links/link_props');
 
 describe('netflowRowRenderer', () => {
   test('renders correctly against snapshot', () => {

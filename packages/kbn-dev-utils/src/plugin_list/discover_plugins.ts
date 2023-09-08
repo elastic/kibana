@@ -11,8 +11,8 @@ import Fs from 'fs';
 
 import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
-import { REPO_ROOT } from '@kbn/utils';
-import { simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 
 import { extractAsciidocInfo } from './extract_asciidoc_info';
 
@@ -34,9 +34,12 @@ const getReadmeName = (directory: string) =>
 const getReadmeAsciidocName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');
 
-export const discoverPlugins = (pluginsRootDir: string): Plugins =>
-  simpleKibanaPlatformPluginDiscovery([pluginsRootDir], []).map(
-    ({ directory, manifest: { id } }): Plugin => {
+export const discoverPlugins = (pluginDir: string): Plugins =>
+  getPackages(REPO_ROOT)
+    .filter(getPluginPackagesFilter())
+    .filter((pkg) => pkg.normalizedRepoRelativeDir.startsWith(pluginDir + '/'))
+    .map((pkg): Plugin => {
+      const directory = Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir);
       const readmeName = getReadmeName(directory);
       const readmeAsciidocName = getReadmeAsciidocName(directory);
 
@@ -68,11 +71,10 @@ export const discoverPlugins = (pluginsRootDir: string): Plugins =>
       }
 
       return {
-        id,
+        id: pkg.manifest.plugin.id,
         relativeReadmePath,
         relativeDir: relativeReadmePath || Path.relative(REPO_ROOT, directory),
         readmeSnippet,
         readmeAsciidocAnchor,
       };
-    }
-  );
+    });

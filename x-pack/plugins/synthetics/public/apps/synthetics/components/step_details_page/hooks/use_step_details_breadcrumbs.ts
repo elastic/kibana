@@ -4,25 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { MONITORS_ROUTE } from '../../../../../../common/constants';
+import { useParams, generatePath } from 'react-router-dom';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
+import { TEST_RUN_DETAILS_ROUTE } from '../../../../../../common/constants/ui';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { useTestRunDetailsBreadcrumbs } from '../../test_run_details/hooks/use_test_run_details_breadcrumbs';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
 
 export const useStepDetailsBreadcrumbs = (extraCrumbs?: Array<{ text: string; href?: string }>) => {
+  const { data, currentStep } = useJourneySteps();
   const kibana = useKibana();
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
 
-  useBreadcrumbs([
+  const params = useParams<{
+    checkGroupId: string;
+    monitorId: string;
+  }>();
+
+  const selectedLocation = useSelectedLocation();
+
+  useTestRunDetailsBreadcrumbs([
     {
-      text: MONITOR_MANAGEMENT_CRUMB,
-      href: `${appPath}/${MONITORS_ROUTE}`,
+      text: data ? moment(data.details?.timestamp).format('LLL') : '',
+      href: `${appPath}/${generatePath(TEST_RUN_DETAILS_ROUTE, params)}?locationId=${
+        selectedLocation?.id ?? ''
+      }`,
     },
-    ...(extraCrumbs ?? []),
+
+    { text: `${currentStep?.synthetics.step?.index}. ${currentStep?.synthetics.step?.name}` ?? '' },
   ]);
 };
-
-const MONITOR_MANAGEMENT_CRUMB = i18n.translate('xpack.synthetics.monitorsPage.monitorsMCrumb', {
-  defaultMessage: 'Monitors',
-});

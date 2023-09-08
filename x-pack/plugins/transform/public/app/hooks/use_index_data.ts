@@ -5,106 +5,145 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import {
-  isEsSearchResponse,
-  isFieldHistogramsResponseSchema,
-} from '../../../common/api_schemas/type_guards';
+  getFieldType,
+  getDataGridSchemaFromKibanaFieldType,
+  getDataGridSchemaFromESFieldType,
+  getFieldsFromKibanaIndexPattern,
+  showDataGridColumnChartErrorMessageToast,
+  useDataGrid,
+  useRenderCellValue,
+  getProcessedFields,
+  type EsSorting,
+  type UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+
 import {
   hasKeywordDuplicate,
   isKeywordDuplicate,
   removeKeywordPostfix,
 } from '../../../common/utils/field_utils';
-import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
-
 import { getErrorMessage } from '../../../common/utils/errors';
-import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
-import { SearchItems } from './use_search_items';
-import { useApi } from './use_api';
 
-import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
+import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
-import { isRuntimeMappings } from '../../../common/shared_imports';
+
+import { SearchItems } from './use_search_items';
+import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
+import { useDataSearch } from './use_data_search';
 
 export const useIndexData = (
   dataView: SearchItems['dataView'],
-  query: PivotQuery,
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
+  query: TransformConfigQuery,
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
+  timeRangeMs?: TimeRangeMs,
+  populatedFields?: string[]
 ): UseIndexDataReturnType => {
-  const api = useApi();
-  const toastNotifications = useToastNotifications();
-  const {
-    ml: {
-      getFieldType,
-      getDataGridSchemaFromKibanaFieldType,
-      getDataGridSchemaFromESFieldType,
-      getFieldsFromKibanaIndexPattern,
-      showDataGridColumnChartErrorMessageToast,
-      useDataGrid,
-      useRenderCellValue,
-      getProcessedFields,
-      INDEX_STATUS,
-    },
-  } = useAppDependencies();
+  const { analytics } = useAppDependencies();
 
-  const [dataViewFields, setDataViewFields] = useState<string[]>();
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
+  const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
+
+  const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
+  const toastNotifications = useToastNotifications();
+
+  const baseFilterCriteria = buildBaseFilterCriteria(
+    dataView.timeFieldName,
+    timeRangeMs?.from,
+    timeRangeMs?.to,
+    query
+  );
+
+  const defaultQuery = useMemo(
+    () => (timeRangeMs && dataView.timeFieldName ? baseFilterCriteria[0] : matchAllQuery),
+    [baseFilterCriteria, dataView, timeRangeMs]
+  );
+
+  const queryWithBaseFilterCriteria = {
+    bool: {
+      filter: baseFilterCriteria,
+    },
+  };
 
   // Fetch 500 random documents to determine populated fields.
   // This is a workaround to avoid passing potentially thousands of unpopulated fields
   // (for example, as part of filebeat/metricbeat/ECS based indices)
   // to the data grid component which would significantly slow down the page.
-  const fetchDataGridSampleDocuments = async function () {
-    setErrorMessage('');
-    setStatus(INDEX_STATUS.LOADING);
-
-    const esSearchRequest = {
-      index: dataView.title,
+  const {
+    error: dataViewFieldsError,
+    data: dataViewFieldsData,
+    isError: dataViewFieldsIsError,
+    isLoading: dataViewFieldsIsLoading,
+  } = useDataSearch(
+    {
+      index: indexPattern,
       body: {
         fields: ['*'],
         _source: false,
         query: {
           function_score: {
-            query: { match_all: {} },
+            query: defaultQuery,
             random_score: {},
           },
         },
         size: 500,
       },
-    };
-
-    const resp = await api.esSearch(esSearchRequest);
-
-    if (!isEsSearchResponse(resp)) {
-      setErrorMessage(getErrorMessage(resp));
-      setStatus(INDEX_STATUS.ERROR);
-      return;
-    }
-
-    const isCrossClusterSearch = dataView.title.includes(':');
-    const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
-
-    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-
-    // Get all field names for each returned doc and flatten it
-    // to a list of unique field names used across all docs.
-    const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
-    const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-      .filter((d) => allDataViewFields.includes(d))
-      .sort();
-
-    setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setStatus(INDEX_STATUS.LOADED);
-    setDataViewFields(populatedFields);
-  };
+    },
+    // Check whether fetching should be enabled
+    // If populatedFields are not provided, make own request to calculate
+    !Array.isArray(populatedFields) &&
+      !(dataView.timeFieldName !== undefined && timeRangeMs === undefined)
+  );
 
   useEffect(() => {
-    fetchDataGridSampleDocuments();
+    if (dataViewFieldsIsLoading && !dataViewFieldsIsError) {
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
+    } else if (dataViewFieldsError !== null) {
+      setErrorMessage(getErrorMessage(dataViewFieldsError));
+      setStatus(INDEX_STATUS.ERROR);
+    } else if (
+      !dataViewFieldsIsLoading &&
+      !dataViewFieldsIsError &&
+      dataViewFieldsData !== undefined
+    ) {
+      const isCrossClusterSearch = indexPattern.includes(':');
+      const isMissingFields = dataViewFieldsData.hits.hits.every(
+        (d) => typeof d.fields === 'undefined'
+      );
+
+      setCcsWarning(isCrossClusterSearch && isMissingFields);
+      setStatus(INDEX_STATUS.LOADED);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dataViewFieldsData, dataViewFieldsError, dataViewFieldsIsError, dataViewFieldsIsLoading]);
+
+  const dataViewFields = useMemo(() => {
+    let allPopulatedFields = Array.isArray(populatedFields) ? populatedFields : [];
+
+    if (populatedFields === undefined && dataViewFieldsData) {
+      // Get all field names for each returned doc and flatten it
+      // to a list of unique field names used across all docs.
+      const docs = dataViewFieldsData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+      allPopulatedFields = [...new Set(docs.map(Object.keys).flat(1))];
+    }
+
+    const allDataViewFields = getFieldsFromKibanaIndexPattern(dataView);
+    return allPopulatedFields.filter((d) => allDataViewFields.includes(d)).sort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataViewFieldsData, populatedFields]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     if (typeof dataViewFields === 'undefined') {
@@ -117,7 +156,6 @@ export const useIndexData = (
     if (combinedRuntimeMappings !== undefined) {
       result = Object.keys(combinedRuntimeMappings).map((fieldName) => {
         const field = combinedRuntimeMappings[fieldName];
-        // @ts-expect-error @elastic/elasticsearch does not support yet "composite" type for runtime fields
         const schema = getDataGridSchemaFromESFieldType(field.type);
         return { id: fieldName, schema };
       });
@@ -133,13 +171,7 @@ export const useIndexData = (
     });
 
     return result.sort((a, b) => a.id.localeCompare(b.id));
-  }, [
-    dataViewFields,
-    dataView.fields,
-    combinedRuntimeMappings,
-    getDataGridSchemaFromESFieldType,
-    getDataGridSchemaFromKibanaFieldType,
-  ]);
+  }, [dataViewFields, dataView.fields, combinedRuntimeMappings]);
 
   // EuiDataGrid State
 
@@ -152,8 +184,7 @@ export const useIndexData = (
     setColumnCharts,
     setCcsWarning,
     setErrorMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -164,24 +195,25 @@ export const useIndexData = (
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
+  }, [JSON.stringify([query, timeRangeMs])]);
 
-  const fetchDataGridData = async function () {
-    setErrorMessage('');
-    setStatus(INDEX_STATUS.LOADING);
+  const sort: EsSorting = sortingColumns.reduce((s, column) => {
+    s[column.id] = { order: column.direction };
+    return s;
+  }, {} as EsSorting);
 
-    const sort: EsSorting = sortingColumns.reduce((s, column) => {
-      s[column.id] = { order: column.direction };
-      return s;
-    }, {} as EsSorting);
-
-    const esSearchRequest = {
-      index: dataView.title,
+  const {
+    error: dataGridDataError,
+    data: dataGridData,
+    isError: dataGridDataIsError,
+    isLoading: dataGridDataIsLoading,
+  } = useDataSearch(
+    {
+      index: indexPattern,
       body: {
         fields: ['*'],
         _source: false,
-        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        query: isDefaultQuery(query) ? matchAllQuery : query,
+        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
@@ -189,35 +221,45 @@ export const useIndexData = (
           ? { runtime_mappings: combinedRuntimeMappings }
           : {}),
       },
-    };
-    const resp = await api.esSearch(esSearchRequest);
+    },
+    // Check whether fetching should be enabled
+    dataViewFields !== undefined
+  );
 
-    if (!isEsSearchResponse(resp)) {
-      setErrorMessage(getErrorMessage(resp));
+  useEffect(() => {
+    if (dataGridDataIsLoading && !dataGridDataIsError) {
+      setErrorMessage('');
+      setStatus(INDEX_STATUS.LOADING);
+    } else if (dataGridDataError !== null) {
+      setErrorMessage(getErrorMessage(dataGridDataError));
       setStatus(INDEX_STATUS.ERROR);
-      return;
+    } else if (!dataGridDataIsLoading && !dataGridDataIsError && dataGridData !== undefined) {
+      const isCrossClusterSearch = indexPattern.includes(':');
+      const isMissingFields = dataGridData.hits.hits.every((d) => typeof d.fields === 'undefined');
+
+      const docs = dataGridData.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+
+      setCcsWarning(isCrossClusterSearch && isMissingFields);
+      setRowCountInfo({
+        rowCount:
+          typeof dataGridData.hits.total === 'number'
+            ? dataGridData.hits.total
+            : dataGridData.hits.total!.value,
+        rowCountRelation:
+          typeof dataGridData.hits.total === 'number'
+            ? ('eq' as estypes.SearchTotalHitsRelation)
+            : dataGridData.hits.total!.relation,
+      });
+      setTableItems(docs);
+      setStatus(INDEX_STATUS.LOADED);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataGridDataError, dataGridDataIsError, dataGridDataIsLoading]);
 
-    const isCrossClusterSearch = dataView.title.includes(':');
-    const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
-
-    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-
-    setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-    setRowCountRelation(
-      typeof resp.hits.total === 'number'
-        ? ('eq' as estypes.SearchTotalHitsRelation)
-        : resp.hits.total!.relation
-    );
-    setTableItems(docs);
-    setStatus(INDEX_STATUS.LOADED);
-  };
-
-  const fetchColumnChartsData = async function () {
-    const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
-    const columnChartsData = await api.getHistogramsForFields(
-      dataView.title,
+  const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
+  const { error: histogramsForFieldsError, data: histogramsForFieldsData } =
+    useGetHistogramsForFields(
+      indexPattern,
       columns
         .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
         .map((cT) => {
@@ -234,50 +276,52 @@ export const useIndexData = (
                 type: getFieldType(cT.schema),
               };
         }),
-      isDefaultQuery(query) ? matchAllQuery : query,
-      combinedRuntimeMappings
+      isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+      combinedRuntimeMappings,
+      chartsVisible
     );
 
-    if (!isFieldHistogramsResponseSchema(columnChartsData)) {
-      showDataGridColumnChartErrorMessageToast(columnChartsData, toastNotifications);
-      return;
-    }
-
-    setColumnCharts(
-      // revert field names with `.keyword` used to do aggregations to their original column name
-      columnChartsData.map((d) => ({
-        ...d,
-        ...(isKeywordDuplicate(d.id, allDataViewFieldNames)
-          ? { id: removeKeywordPostfix(d.id) }
-          : {}),
-      }))
-    );
-  };
-
   useEffect(() => {
-    fetchDataGridData();
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    dataView.title,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, pagination, sortingColumns, dataViewFields, combinedRuntimeMappings]),
-  ]);
-
-  useEffect(() => {
-    if (chartsVisible) {
-      fetchColumnChartsData();
+    if (histogramsForFieldsError !== null) {
+      showDataGridColumnChartErrorMessageToast(histogramsForFieldsError, toastNotifications);
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    chartsVisible,
-    dataView.title,
+  }, [histogramsForFieldsError]);
+
+  useEffect(() => {
+    if (histogramsForFieldsData) {
+      setColumnCharts(
+        // revert field names with `.keyword` used to do aggregations to their original column name
+        histogramsForFieldsData.map((d) => ({
+          ...d,
+          ...(isKeywordDuplicate(d.id, allDataViewFieldNames)
+            ? { id: removeKeywordPostfix(d.id) }
+            : {}),
+        }))
+      );
+    }
+    // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings]),
-  ]);
+  }, [histogramsForFieldsData]);
 
   const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);
+
+  if (
+    dataGrid.status === INDEX_STATUS.LOADED &&
+    dataViewFields !== undefined &&
+    loadIndexDataStartTime.current !== undefined
+  ) {
+    const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+
+    // Set this to undefined so reporting the metric gets triggered only once.
+    loadIndexDataStartTime.current = undefined;
+
+    reportPerformanceMetricEvent(analytics, {
+      eventName: 'transformLoadIndexPreview',
+      duration: loadIndexDataDuration,
+    });
+  }
 
   return {
     ...dataGrid,

@@ -70,12 +70,13 @@ const getValuesFromFields = async (
     };
   }
   const formattedData = await getDataSafety(getDataFromFieldsHits, fieldToEval);
-  return formattedData.reduce(
-    (acc: TimelineNonEcsData[], { field, values }) =>
-      // nested fields return all field values, pick only the one we asked for
-      field.includes(fieldName) ? [...acc, { field, value: values }] : acc,
-    []
-  );
+  return formattedData.reduce((acc: TimelineNonEcsData[], { field, values }) => {
+    // nested fields return all field values, pick only the one we asked for
+    if (field.includes(fieldName)) {
+      acc.push({ field, value: values });
+    }
+    return acc;
+  }, []);
 };
 
 const mergeTimelineFieldsWithHit = async <T>(

@@ -7,16 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_BEAT_FIELDS = i18n.translate(
-  'xpack.securitySolution.beatFields.errorSearchDescription',
+export const ERROR_INDEX_FIELDS_SEARCH = i18n.translate(
+  'xpack.securitySolution.indexFieldsSearch.errorSearchDescription',
   {
-    defaultMessage: `An error has occurred on getting beat fields`,
+    defaultMessage: `An error has occurred creating the ad-hoc data view`,
   }
 );
 
-export const FAIL_BEAT_FIELDS = i18n.translate(
-  'xpack.securitySolution.beatFields.failSearchDescription',
+export const FETCH_FIELDS_WITH_UNMAPPED_DATA_ERROR = i18n.translate(
+  'xpack.securitySolution.dataView.fetchFields.warning',
   {
-    defaultMessage: `Failed to run search on beat fields`,
+    defaultMessage: 'Failed to fetch detailed fields information',
   }
 );

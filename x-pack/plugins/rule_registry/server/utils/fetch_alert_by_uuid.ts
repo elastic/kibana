@@ -30,5 +30,5 @@ export const fetchAlertByAlertUUID = async (ruleDataClient: RuleDataClient, aler
     allow_no_indices: true,
   };
   const { hits } = await ruleDataClient.getReader().search(request);
-  return hits?.hits;
+  return hits?.hits?.[0]?._source;
 };

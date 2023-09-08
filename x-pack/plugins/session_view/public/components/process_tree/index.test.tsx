@@ -11,7 +11,7 @@ import {
   nullMockData,
   deepNullMockData,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { Process } from '../../../common/types/process_tree';
+import type { Process } from '../../../common';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeDeps, ProcessTree } from '.';
 import { useDateFormat } from '../../hooks';
@@ -36,6 +36,7 @@ describe('ProcessTree component', () => {
     onJumpToOutput: jest.fn(),
     updatedAlertsStatus: {},
     onShowAlertDetails: jest.fn(),
+    trackEvent: jest.fn(),
   };
 
   beforeEach(() => {

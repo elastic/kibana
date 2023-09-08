@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-doc-links-server-mocks",
-        "id": "def-server.docLinksServiceMock",
+        "id": "def-common.docLinksServiceMock",
         "type": "Object",
         "tags": [],
         "label": "docLinksServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-server-mocks",
-            "id": "def-server.docLinksServiceMock.create",
+            "id": "def-common.docLinksServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server-mocks",
-            "id": "def-server.docLinksServiceMock.createSetupContract",
+            "id": "def-common.docLinksServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -53,9 +61,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-doc-links-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-server.DocLinksServiceSetup",
+                "section": "def-common.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               }
             ],
@@ -67,7 +75,7 @@
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server-mocks",
-            "id": "def-server.docLinksServiceMock.createStartContract",
+            "id": "def-common.docLinksServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -76,9 +84,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/core-doc-links-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreDocLinksServerPluginApi",
-                "section": "def-server.DocLinksServiceSetup",
+                "section": "def-common.DocLinksServiceSetup",
                 "text": "DocLinksServiceSetup"
               }
             ],
@@ -92,13 +100,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

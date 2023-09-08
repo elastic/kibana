@@ -48,7 +48,13 @@ export async function assignConfigFromPath(
   }
 
   for (const translations of additionalConfig.translations) {
-    config.translations.push(normalizePath(resolve(configPath, '..', translations)));
+    config.translations.push(
+      normalizePath(
+        translations.startsWith('@kbn/')
+          ? require.resolve(translations)
+          : resolve(configPath, '..', translations)
+      )
+    );
   }
 
   return config;

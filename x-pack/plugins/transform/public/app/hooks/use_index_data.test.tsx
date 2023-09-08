@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
+import React, { type FC } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@testing-library/jest-dom/extend-expect';
 import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
+import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { getMlSharedImports, UseIndexDataReturnType } from '../../shared_imports';
+import { getMlSharedImports } from '../../shared_imports';
 
 import { SimpleQuery } from '../common';
 
@@ -23,11 +25,8 @@ import { useIndexData } from './use_index_data';
 
 jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
-jest.mock('./use_api');
 
-import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 const query: SimpleQuery = {
   query_string: {
@@ -36,22 +35,26 @@ const query: SimpleQuery = {
   },
 };
 
-const runtimeMappings = {
+const runtimeMappings: RuntimeMappings = {
   rt_bytes_bigger: {
     type: 'double',
     script: {
       source: "emit(doc['bytes'].value * 2.0)",
     },
-  } as RuntimeField,
+  },
 };
+
+const queryClient = new QueryClient();
 
 describe('Transform: useIndexData()', () => {
   test('dataView set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
     const wrapper: FC = ({ children }) => (
-      <IntlProvider locale="en">
-        <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
-      </IntlProvider>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
+        </IntlProvider>
+      </QueryClientProvider>
     );
 
     const { result, waitForNextUpdate } = renderHook(
@@ -59,7 +62,7 @@ describe('Transform: useIndexData()', () => {
         useIndexData(
           {
             id: 'the-id',
-            title: 'the-title',
+            getIndexPattern: () => 'the-index-pattern',
             fields: [],
           } as unknown as SearchItems['dataView'],
           query,
@@ -82,16 +85,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
   test('Minimal initialization, no cross cluster search warning.', async () => {
     // Arrange
     const dataView = {
-      title: 'the-data-view-title',
+      getIndexPattern: () => 'the-data-view-index-pattern',
       fields: [] as any[],
     } as SearchItems['dataView'];
 
     const mlSharedImports = await getMlSharedImports();
 
     const Wrapper = () => {
-      const {
-        ml: { DataGrid },
-      } = useAppDependencies();
       const props = {
         ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
         copyToClipboard: 'the-copy-to-clipboard-code',
@@ -105,11 +105,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <MlSharedContext.Provider value={mlSharedImports}>
-          <Wrapper />
-        </MlSharedContext.Provider>
-      </IntlProvider>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <MlSharedContext.Provider value={mlSharedImports}>
+            <Wrapper />
+          </MlSharedContext.Provider>
+        </IntlProvider>
+      </QueryClientProvider>
     );
 
     // Act
@@ -125,16 +127,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
   test('Cross-cluster search warning', async () => {
     // Arrange
     const dataView = {
-      title: 'remote:the-index-pattern-title',
+      getIndexPattern: () => 'remote:the-index-pattern-title',
       fields: [] as any[],
     } as SearchItems['dataView'];
 
     const mlSharedImports = await getMlSharedImports();
 
     const Wrapper = () => {
-      const {
-        ml: { DataGrid },
-      } = useAppDependencies();
       const props = {
         ...useIndexData(dataView, { match_all: {} }, runtimeMappings),
         copyToClipboard: 'the-copy-to-clipboard-code',
@@ -148,11 +147,13 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
     };
 
     render(
-      <IntlProvider locale="en">
-        <MlSharedContext.Provider value={mlSharedImports}>
-          <Wrapper />
-        </MlSharedContext.Provider>
-      </IntlProvider>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <MlSharedContext.Provider value={mlSharedImports}>
+            <Wrapper />
+          </MlSharedContext.Provider>
+        </IntlProvider>
+      </QueryClientProvider>
     );
 
     // Act

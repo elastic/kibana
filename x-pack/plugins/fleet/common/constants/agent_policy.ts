@@ -17,6 +17,7 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.elastic_agent',
   'elastic_agent.apm_server',
   'elastic_agent.filebeat',
+  'elastic_agent.filebeat_input',
   'elastic_agent.fleet_server',
   'elastic_agent.metricbeat',
   'elastic_agent.osquerybeat',
@@ -25,6 +26,9 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.auditbeat',
   'elastic_agent.heartbeat',
   'elastic_agent.cloudbeat',
+  'elastic_agent.cloud_defend',
 ];
 
 export const LICENSE_FOR_SCHEDULE_UPGRADE = 'platinum';
+
+export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;

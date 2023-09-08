@@ -126,5 +126,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
     });
+
+    it('should bring the ignore global filters configured at series level over', async () => {
+      await visualBuilder.clickSeriesOption();
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('mtrVis');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('gauge');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('mtrVis');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
+    });
   });
 }

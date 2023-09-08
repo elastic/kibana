@@ -6,80 +6,43 @@
  * Side Public License, v 1.
  */
 
+import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-}
-
-export interface DiscoverGridSettings {
-  columns?: Record<string, DiscoverGridSettingsColumn>;
-}
-
-export interface DiscoverGridSettingsColumn {
-  width?: number;
-}
-
-/** @internal **/
-export interface SavedSearchAttributes {
-  title: string;
-  sort: Array<[string, string]>;
-  columns: string[];
-  description: string;
-  grid: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
-  hideChart: boolean;
-  isTextBasedQuery: boolean;
-  usesAdHocDataView?: boolean;
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
-  };
-  viewMode?: VIEW_MODE;
-  hideAggregatedPreview?: boolean;
-  rowHeight?: number;
-
-  timeRestore?: boolean;
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-
-  rowsPerPage?: number;
-}
-
-/** @internal **/
-export type SortOrder = [string, string];
+import type { Reference } from '@kbn/content-management-utils';
+import type { SortOrder } from '../..';
+import type { SavedSearchAttributes } from '../../../common';
+import type { SavedSearch as SavedSearchCommon } from '../../../common';
 
 /** @public **/
-export interface SavedSearch {
-  searchSource: ISearchSource;
-  id?: string;
-  title?: string;
-  sort?: SortOrder[];
-  columns?: string[];
-  description?: string;
-  tags?: string[] | undefined;
-  grid?: {
-    columns?: Record<string, DiscoverGridSettingsColumn>;
-  };
-  hideChart?: boolean;
+export interface SavedSearch extends SavedSearchCommon {
   sharingSavedObjectProps?: {
     outcome?: ResolvedSimpleSavedObject['outcome'];
     aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
     aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
     errorJSON?: string;
   };
-  viewMode?: VIEW_MODE;
-  hideAggregatedPreview?: boolean;
+}
+
+interface SearchBaseInput extends EmbeddableInput {
+  timeRange: TimeRange;
+  timeslice?: [number, number];
+  query?: Query;
+  filters?: Filter[];
+  hidePanelTitles?: boolean;
+  columns?: string[];
+  sort?: SortOrder[];
   rowHeight?: number;
-  isTextBasedQuery?: boolean;
-  usesAdHocDataView?: boolean;
-
-  // for restoring time range with a saved search
-  timeRestore?: boolean;
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-
   rowsPerPage?: number;
 }
+
+export type SavedSearchByValueAttributes = Omit<SavedSearchAttributes, 'description'> & {
+  description?: string;
+  references: Reference[];
+};
+
+export type SearchByValueInput = {
+  attributes: SavedSearchByValueAttributes;
+} & SearchBaseInput;
+
+export type SearchByReferenceInput = SavedObjectEmbeddableInput & SearchBaseInput;

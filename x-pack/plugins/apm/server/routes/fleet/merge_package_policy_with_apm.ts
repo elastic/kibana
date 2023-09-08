@@ -5,28 +5,40 @@
  * 2.0.
  */
 
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { APMPluginStartDependencies } from '../../types';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
 import {
   getPackagePolicyWithAgentConfigurations,
-  PackagePolicy,
-} from './register_fleet_policy_callbacks';
-import { getPackagePolicyWithSourceMap, listArtifacts } from './source_maps';
+  getPackagePolicyWithSourceMap,
+} from './get_package_policy_decorators';
+import { listSourceMapArtifacts } from './source_maps';
 
-export async function mergePackagePolicyWithApm({
+export async function decoratePackagePolicyWithAgentConfigAndSourceMap({
   packagePolicy,
   internalESClient,
   fleetPluginStart,
 }: {
-  packagePolicy: PackagePolicy;
+  packagePolicy: NewPackagePolicy;
   internalESClient: APMInternalESClient;
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
-  const agentConfigurations = await listConfigurations(internalESClient);
-  const artifacts = await listArtifacts({ fleetPluginStart });
-  return getPackagePolicyWithAgentConfigurations(
-    getPackagePolicyWithSourceMap({ packagePolicy, artifacts }),
-    agentConfigurations
-  );
+  const [agentConfigurations, { artifacts }] = await Promise.all([
+    listConfigurations(internalESClient),
+    listSourceMapArtifacts({ fleetPluginStart }),
+  ]);
+
+  const policyWithSourceMaps = getPackagePolicyWithSourceMap({
+    packagePolicy,
+    artifacts,
+  });
+
+  const policyWithAgentConfigAndSourceMaps =
+    getPackagePolicyWithAgentConfigurations(
+      policyWithSourceMaps,
+      agentConfigurations
+    );
+
+  return policyWithAgentConfigAndSourceMaps;
 }

@@ -11,9 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
-  createSignalsIndex,
-  deleteAllAlerts,
-  deleteSignalsIndex,
+  deleteAllRules,
   getComplexRule,
   getComplexRuleOutput,
   getSimpleRule,
@@ -28,18 +26,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('find_rules', () => {
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should return an empty find body correctly if no rules are loaded', async () => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 
@@ -58,6 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 
@@ -75,6 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(getComplexRule())
         .expect(200);
 
@@ -82,6 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body } = await supertest
         .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send()
         .expect(200);
 

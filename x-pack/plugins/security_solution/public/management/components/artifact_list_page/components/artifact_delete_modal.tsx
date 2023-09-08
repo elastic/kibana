@@ -116,7 +116,7 @@ export const ArtifactDeleteModal = memo<DeleteArtifactModalProps>(
               data-test-subj={getTestId('impactCallout')}
               title={labels.deleteModalImpactTitle}
               color="danger"
-              iconType="alert"
+              iconType="warning"
             >
               <p data-test-subj={getTestId('impactCalloutInfo')}>
                 {labels.deleteModalImpactInfo(item)}

@@ -36,7 +36,7 @@ export const loggedOutApp = Object.freeze({
         return renderLoggedOutPage(
           coreStart.i18n,
           { element, theme$ },
-          { basePath: coreStart.http.basePath }
+          { basePath: coreStart.http.basePath, customBranding: coreStart.customBranding }
         );
       },
     });

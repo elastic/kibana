@@ -12,29 +12,35 @@ const presetClone = { ...preset };
 
 delete presetClone.testEnvironment; // simply redefining as `testEnvironment: 'node'` has some weird side-effects (https://github.com/elastic/kibana/pull/138877)
 
-/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
-/** @type {JestConfig} */
+/** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
   ...presetClone,
   testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
+  // An array of regexp pattern strings that are matched against, matched files will skip transformation:
+  transformIgnorePatterns: [
+    // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/util/[/\\\\].+\\.js$',
+  ],
   setupFilesAfterEnv: [
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/after_env.integration.js',
+    '<rootDir>/packages/kbn-test/src/jest/setup/mocks.moment_timezone.js',
   ],
   reporters: [
     'default',
     [
-      '@kbn/test/target_node/src/jest/junit_reporter',
+      '<rootDir>/packages/kbn-test/src/jest/junit_reporter',
       {
         rootDirectory: '.',
         reportName: 'Jest Integration Tests',
       },
     ],
     [
-      '@kbn/test/target_node/src/jest/ci_stats_jest_reporter',
+      '<rootDir>/packages/kbn-test/src/jest/ci_stats_jest_reporter.ts',
       {
         testGroupType: 'Jest Integration Tests',
       },
@@ -45,7 +51,7 @@ module.exports = {
     : ['html', 'text'],
 
   snapshotSerializers: [],
-  setupFiles: ['<rootDir>/node_modules/@kbn/test/target_node/src/jest/setup/babel_polyfill.js'],
+  setupFiles: ['<rootDir>/src/setup_node_env/polyfill.ts'],
   haste: {
     ...preset.haste,
     throwOnModuleCollision: true,

@@ -34,8 +34,17 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
       await this.assertPopulationJobWizardOpen();
     },
 
+    async selectGeoJob() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkGeoJob');
+      await this.assertGeoJobWizardOpen();
+    },
+
     async assertPopulationJobWizardOpen() {
       await testSubjects.existOrFail('mlPageJobWizard population');
+    },
+
+    async assertGeoJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard geo');
     },
 
     async selectAdvancedJob() {
@@ -54,6 +63,15 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
 
     async assertCategorizationJobWizardOpen() {
       await testSubjects.existOrFail('mlPageJobWizard categorization');
+    },
+
+    async selectRecognizerJob(moduleId: string) {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`mlRecognizerCard ${moduleId}`);
+      await this.assertRecognizerJobWizardOpen();
+    },
+
+    async assertRecognizerJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard recognizer');
     },
   };
 }

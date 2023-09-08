@@ -66,6 +66,22 @@ describe('Text based languages utils', () => {
 
       expect(indexPattern).toBe('');
     });
+
+    it('should return the index pattern for es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        esql: 'from foo | keep bytes, memory ',
+      });
+
+      expect(indexPattern).toBe('foo');
+    });
+
+    it('should return empty index pattern for non es|ql query', () => {
+      const indexPattern = getIndexPatternFromTextBasedQuery({
+        lang1: 'from foo | keep bytes, memory ',
+      } as unknown as AggregateQuery);
+
+      expect(indexPattern).toBe('');
+    });
   });
 
   describe('loadIndexPatternRefs', () => {
@@ -144,6 +160,22 @@ describe('Text based languages utils', () => {
   });
 
   describe('getStateFromAggregateQuery', () => {
+    const textBasedQueryColumns = [
+      {
+        id: 'bytes',
+        name: 'bytes',
+        meta: {
+          type: 'number',
+        },
+      },
+      {
+        id: 'dest',
+        name: 'dest',
+        meta: {
+          type: 'string',
+        },
+      },
+    ] as DatatableColumn[];
     it('should return the correct state', async () => {
       const state = {
         layers: {
@@ -157,7 +189,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         fieldList: [],
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -189,6 +221,15 @@ describe('Text based languages utils', () => {
               timeFieldName: 'timeField',
             })
           ),
+          create: jest.fn().mockReturnValue(
+            Promise.resolve({
+              id: '4',
+              title: 'my-adhoc-index-pattern',
+              name: 'my-adhoc-index-pattern',
+              timeFieldName: 'timeField',
+              isPersisted: () => false,
+            })
+          ),
         },
         dataMock,
         expressionsMock
@@ -196,7 +237,7 @@ describe('Text based languages utils', () => {
 
       expect(updatedState).toStrictEqual({
         initialContext: {
-          contextualFields: ['bytes', 'dest'],
+          textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
           fieldName: '',
           dataViewSpec: {
@@ -244,6 +285,11 @@ describe('Text based languages utils', () => {
             timeField: 'timeField',
             title: 'my-fake-restricted-pattern',
           },
+          {
+            id: '4',
+            timeField: 'timeField',
+            title: 'my-adhoc-index-pattern',
+          },
         ],
         layers: {
           first: {
@@ -272,11 +318,168 @@ describe('Text based languages utils', () => {
             ],
             columns: [],
             errors: [],
-            index: '1',
+            index: '4',
             query: {
               sql: 'SELECT * FROM my-fake-index-pattern',
             },
             timeField: 'timeField',
+          },
+        },
+      });
+    });
+
+    it('should return the correct state for not existing dataview', async () => {
+      const state = {
+        layers: {
+          first: {
+            allColumns: [],
+            columns: [],
+            query: undefined,
+            index: '',
+          },
+        },
+        indexPatternRefs: [],
+        fieldList: [],
+        initialContext: {
+          textBasedColumns: textBasedQueryColumns,
+          query: { sql: 'SELECT * FROM "foo"' },
+          fieldName: '',
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+      };
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const dataMock = dataPluginMock.createStartContract();
+      const expressionsMock = expressionsPluginMock.createStartContract();
+      const updatedState = await getStateFromAggregateQuery(
+        state,
+        { sql: 'SELECT * FROM my-fake-index-*' },
+        {
+          ...dataViewsMock,
+          getIdsWithTitle: jest.fn().mockReturnValue(
+            Promise.resolve([
+              { id: '1', title: 'my-fake-index-pattern' },
+              { id: '2', title: 'my-fake-restricted-pattern' },
+              { id: '3', title: 'my-compatible-pattern' },
+            ])
+          ),
+          get: jest.fn().mockReturnValue(
+            Promise.resolve({
+              id: '1',
+              title: 'my-fake-index-pattern',
+              timeFieldName: 'timeField',
+            })
+          ),
+          create: jest.fn().mockReturnValue(
+            Promise.resolve({
+              id: 'adHoc-id',
+              title: 'my-fake-index-*',
+              name: 'my-fake-index-*',
+              timeFieldName: 'timeField',
+              isPersisted: () => false,
+              fields: {
+                getByName: jest.fn().mockReturnValue({
+                  type: 'date',
+                }),
+              },
+            })
+          ),
+        },
+        dataMock,
+        expressionsMock
+      );
+
+      expect(updatedState).toStrictEqual({
+        initialContext: {
+          textBasedColumns: textBasedQueryColumns,
+          query: { sql: 'SELECT * FROM "foo"' },
+          fieldName: '',
+          dataViewSpec: {
+            title: 'foo',
+            id: '1',
+            name: 'Foo',
+          },
+        },
+        fieldList: [
+          {
+            name: 'timestamp',
+            id: 'timestamp',
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            name: 'bytes',
+            id: 'bytes',
+            meta: {
+              type: 'number',
+            },
+          },
+          {
+            name: 'memory',
+            id: 'memory',
+            meta: {
+              type: 'number',
+            },
+          },
+        ],
+        indexPatternRefs: [
+          {
+            id: '3',
+            timeField: 'timeField',
+            title: 'my-compatible-pattern',
+          },
+          {
+            id: '1',
+            timeField: 'timeField',
+            title: 'my-fake-index-pattern',
+          },
+          {
+            id: '2',
+            timeField: 'timeField',
+            title: 'my-fake-restricted-pattern',
+          },
+          {
+            id: 'adHoc-id',
+            timeField: '@timestamp',
+            title: 'my-fake-index-*',
+          },
+        ],
+        layers: {
+          first: {
+            allColumns: [
+              {
+                fieldName: 'timestamp',
+                columnId: 'timestamp',
+                meta: {
+                  type: 'date',
+                },
+              },
+              {
+                fieldName: 'bytes',
+                columnId: 'bytes',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                fieldName: 'memory',
+                columnId: 'memory',
+                meta: {
+                  type: 'number',
+                },
+              },
+            ],
+            columns: [],
+            errors: [],
+            index: 'adHoc-id',
+            query: {
+              sql: 'SELECT * FROM my-fake-index-*',
+            },
+            timeField: '@timestamp',
           },
         },
       });

@@ -12,6 +12,8 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { debounce } from 'lodash';
 
+import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 import { IUnifiedSearchPluginServices } from '../../types';
 
 export interface PhraseSuggestorProps {
@@ -19,6 +21,8 @@ export interface PhraseSuggestorProps {
   indexPattern: DataView;
   field: DataViewField;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 export interface PhraseSuggestorState {
@@ -73,7 +77,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   protected updateSuggestions = debounce(async (query: string = '') => {
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
-    const { indexPattern, field, timeRangeForSuggestionsOverride } = this
+    const { indexPattern, field, timeRangeForSuggestionsOverride, filtersForSuggestions } = this
       .props as PhraseSuggestorProps;
     if (!field || !this.isSuggestingValues()) {
       return;
@@ -85,6 +89,9 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       query,
       signal: this.abortController.signal,
       useTimeRange: timeRangeForSuggestionsOverride,
+      boolFilter: buildQueryFromFilters(filtersForSuggestions, undefined).filter,
+      method: filtersForSuggestions?.length ? 'terms_agg' : undefined,
+      querySuggestionKey: this.props.suggestionsAbstraction?.type,
     });
 
     this.setState({ suggestions, isLoading: false });

@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 
 const create = () => {
@@ -31,6 +31,7 @@ const create = () => {
     removeReferencesTo: jest.fn(),
     collectMultiNamespaceReferences: jest.fn(),
     updateObjectsSpaces: jest.fn(),
+    getCurrentNamespace: jest.fn(),
   } as unknown as jest.Mocked<SavedObjectsClientContract>;
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({

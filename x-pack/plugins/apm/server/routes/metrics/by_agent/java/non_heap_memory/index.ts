@@ -11,6 +11,11 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_MAX,
   METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
+  VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
+  LABEL_TYPE,
   AGENT_NAME,
 } from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
@@ -59,6 +64,7 @@ export async function getNonHeapMemoryChart({
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -68,7 +74,27 @@ export async function getNonHeapMemoryChart({
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
+  const maxMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT
+    : METRIC_JAVA_NON_HEAP_MEMORY_MAX;
+
+  const committedMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED
+    : METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED;
+
+  const usedMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE
+    : METRIC_JAVA_NON_HEAP_MEMORY_USED;
+
+  const additionalFilters = isOpenTelemetry
+    ? [
+        { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
+        { term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP } },
+      ]
+    : [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }];
+
   return fetchAndTransformMetrics({
     environment,
     kuery,
@@ -80,15 +106,15 @@ export async function getNonHeapMemoryChart({
     end,
     chartBase,
     aggs: {
-      nonHeapMemoryMax: { avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_MAX } },
+      nonHeapMemoryMax: { avg: { field: maxMemoryField } },
       nonHeapMemoryCommitted: {
-        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED },
+        avg: { field: committedMemoryField },
       },
       nonHeapMemoryUsed: {
-        avg: { field: METRIC_JAVA_NON_HEAP_MEMORY_USED },
+        avg: { field: usedMemoryField },
       },
     },
-    additionalFilters: [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }],
+    additionalFilters,
     operationName: 'get_non_heap_memory_charts',
   });
 }

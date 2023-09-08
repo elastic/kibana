@@ -6,7 +6,7 @@
  */
 
 import fetch from 'node-fetch';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
 
@@ -14,11 +14,12 @@ import yargs from 'yargs/yargs';
 
 import type { PackageInfo } from '../../common';
 
-const REGISTRY_URL = 'https://epr-snapshot.elastic.co';
+const REGISTRY_URL = 'https://epr.elastic.co';
 const KIBANA_URL = 'http://localhost:5601';
 const KIBANA_USERNAME = 'elastic';
 const KIBANA_PASSWORD = 'changeme';
 const KIBANA_VERSION = kibanaPackageJson.version;
+const PUBLIC_VERSION_V1 = '2023-10-31';
 
 const { base = '', prerelease = false, batchSize = 1 } = yargs(process.argv).argv;
 
@@ -35,28 +36,33 @@ interface Result {
 }
 async function getPackage(name: string, version: string, full: boolean = false) {
   const start = Date.now();
-  const res = await fetch(
-    `${KIBANA_URL}${base}/api/fleet/epm/packages/${name}/${version}?prerelease=true${
-      full ? '&full=true' : ''
-    }`,
-    {
-      headers: {
-        accept: '*/*',
-        'content-type': 'application/json',
-        'kbn-xsrf': 'xyz',
-        Authorization:
-          'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
-      },
-      method: 'GET',
-    }
-  );
-  const end = Date.now();
-
   let body;
+  let end;
+  let res;
   try {
+    res = await fetch(
+      `${KIBANA_URL}${base}/api/fleet/epm/packages/${name}/${version}?prerelease=true${
+        full ? '&full=true' : ''
+      }`,
+      {
+        headers: {
+          accept: '*/*',
+          'content-type': 'application/json',
+          'kbn-xsrf': 'xyz',
+          Authorization:
+            'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
+          // Note: version can change in the future
+          'Elastic-Api-Version': PUBLIC_VERSION_V1,
+        },
+        method: 'GET',
+      }
+    );
+    end = Date.now();
+
     body = await res.json();
   } catch (e) {
-    logger.error(`Error parsing response: ${e}`);
+    logger.error(`Error reaching Kibana: ${e}`);
+    logger.info('If your kibana uses a base path, please set it with the --base /<your-base> flag');
     throw e;
   }
 

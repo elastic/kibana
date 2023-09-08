@@ -6,6 +6,7 @@ exports[`TooltipControl render should render hover tooltip 1`] = `
 <TooltipPopover
   addFilters={[Function]}
   closeTooltip={[Function]}
+  executionContext={Object {}}
   features={
     Array [
       Object {
@@ -42,6 +43,7 @@ exports[`TooltipControl render should render locked tooltip 1`] = `
 <TooltipPopover
   addFilters={[Function]}
   closeTooltip={[Function]}
+  executionContext={Object {}}
   features={
     Array [
       Object {

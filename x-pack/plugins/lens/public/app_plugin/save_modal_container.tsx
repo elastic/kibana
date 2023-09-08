@@ -8,16 +8,17 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
-
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
-import { Document, checkForDuplicateTitle } from '../persistence';
+import { Document, checkForDuplicateTitle, SavedObjectIndexStore } from '../persistence';
 import type { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
-import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
+import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { LensAppState } from '../state_management';
 import { getPersisted } from '../state_management/init_middleware/load_initial';
+import { VisualizeEditorContext } from '../types';
 
 type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
@@ -33,6 +34,7 @@ export type SaveModalContainerProps = {
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
   lensServices: LensAppServices;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -49,6 +51,7 @@ export function SaveModalContainer({
   isSaveable = true,
   lastKnownDoc: initLastKnownDoc,
   lensServices,
+  initialContext,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -58,6 +61,20 @@ export function SaveModalContainer({
     title = lastKnownDoc.title;
     description = lastKnownDoc.description;
     savedObjectId = lastKnownDoc.savedObjectId;
+  }
+
+  if (
+    !lastKnownDoc?.title &&
+    initialContext &&
+    'isEmbeddable' in initialContext &&
+    initialContext.isEmbeddable
+  ) {
+    title = i18n.translate('xpack.lens.app.convertedLabel', {
+      defaultMessage: '{title} (converted)',
+      values: {
+        title: initialContext.title || `${initialContext.visTypeTitle} visualization`,
+      },
+    });
   }
 
   const { attributeService, savedObjectsTagging, application, dashboardFeatureFlag } = lensServices;
@@ -104,6 +121,7 @@ export function SaveModalContainer({
           originatingApp,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
+          savedObjectStore: lensServices.savedObjectStore,
         },
         saveProps,
         options
@@ -192,6 +210,7 @@ export const runSaveLensVisualization = async (
     originatingApp?: string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
+    savedObjectStore: SavedObjectIndexStore;
   } & ExtraProps &
     LensAppServices,
   saveProps: SaveProps,
@@ -202,7 +221,6 @@ export const runSaveLensVisualization = async (
     initialInput,
     lastKnownDoc,
     persistedDoc,
-    savedObjectsClient,
     overlays,
     notifications,
     stateTransfer,
@@ -216,6 +234,7 @@ export const runSaveLensVisualization = async (
     textBasedLanguageSave,
     switchDatasource,
     application,
+    savedObjectStore,
   } = props;
 
   if (!lastKnownDoc) {
@@ -265,7 +284,7 @@ export const runSaveLensVisualization = async (
         },
         saveProps.onTitleDuplicate,
         {
-          savedObjectsClient,
+          client: savedObjectStore,
           overlays,
         }
       );
@@ -275,11 +294,17 @@ export const runSaveLensVisualization = async (
     }
   }
   try {
-    const newInput = (await attributeService.wrapAttributes(
+    let newInput = (await attributeService.wrapAttributes(
       docToSave,
       options.saveToLibrary,
       originalInput
     )) as LensEmbeddableInput;
+    if (saveProps.panelTimeRange) {
+      newInput = {
+        ...newInput,
+        timeRange: saveProps.panelTimeRange,
+      };
+    }
 
     if (saveProps.returnToOrigin && redirectToOrigin) {
       // disabling the validation on app leave because the document has been saved.

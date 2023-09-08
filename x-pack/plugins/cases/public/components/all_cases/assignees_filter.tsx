@@ -9,6 +9,7 @@ import { EuiFilterButton } from '@elastic/eui';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useIsUserTyping } from '../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -18,6 +19,7 @@ import { NoMatches } from '../user_profiles/no_matches';
 import { bringCurrentUserToFrontAndSort, orderAssigneesIncludingNone } from '../user_profiles/sort';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import * as i18n from './translations';
+import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 
 export const NO_ASSIGNEES_VALUE = null;
 
@@ -39,6 +41,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   const availableOwners = useAvailableCasesOwners(['read']);
   const [searchTerm, setSearchTerm] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
 
   const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
@@ -56,23 +59,24 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     []
   );
 
-  const onSearchChange = useCallback((term: string) => {
-    setSearchTerm(term);
-
-    if (!isEmpty(term)) {
-      setIsUserTyping(true);
-    }
-  }, []);
-
-  const [isUserTyping, setIsUserTyping] = useState(false);
-
-  const onDebounce = useCallback(() => setIsUserTyping(false), []);
+  const onSearchChange = useCallback(
+    (term: string) => {
+      setSearchTerm(term);
+      onContentChange(term);
+    },
+    [onContentChange]
+  );
 
   const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
     name: searchTerm,
     owners: hasOwners ? owners : availableOwners,
     onDebounce,
   });
+
+  const limitReachedMessage = useCallback(
+    (limit: number) => i18n.MAX_SELECTED_FILTER(limit, 'assignees'),
+    []
+  );
 
   const searchResultProfiles = useMemo(() => {
     const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
@@ -119,6 +123,8 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         clearButtonLabel: i18n.CLEAR_FILTERS,
         emptyMessage: <EmptyMessage />,
         noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
+        limit: MAX_ASSIGNEES_FILTER_LENGTH,
+        limitReachedMessage,
         singleSelection: false,
         nullOptionLabel: i18n.NO_ASSIGNEES,
       }}

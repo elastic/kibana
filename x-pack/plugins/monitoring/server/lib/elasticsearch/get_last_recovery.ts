@@ -12,6 +12,7 @@ import { ElasticsearchMetric } from '../metrics';
 import {
   ElasticsearchResponse,
   ElasticsearchIndexRecoveryShard,
+  ElasticsearchMetricbeatIndexRecoveryShard,
   ElasticsearchResponseHit,
 } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
@@ -30,12 +31,22 @@ import { Globals } from '../../static_globals';
  * @returns {boolean} true to keep
  */
 export function filterOldShardActivity(startMs: number) {
-  return (activity?: ElasticsearchIndexRecoveryShard) => {
+  return (
+    activity?: ElasticsearchIndexRecoveryShard | ElasticsearchMetricbeatIndexRecoveryShard
+  ) => {
+    if (!activity) {
+      return false;
+    }
+
+    let stopTime = null;
+    if ((activity as ElasticsearchMetricbeatIndexRecoveryShard).stop_time) {
+      stopTime = (activity as ElasticsearchMetricbeatIndexRecoveryShard).stop_time?.ms;
+    } else {
+      stopTime = (activity as ElasticsearchIndexRecoveryShard).stop_time_in_millis;
+    }
+
     // either it's still going and there is no stop time, or the stop time happened after we started looking for one
-    return (
-      activity &&
-      (!_.isNumber(activity.stop_time_in_millis) || activity.stop_time_in_millis >= startMs)
-    );
+    return !_.isNumber(stopTime) || stopTime >= startMs;
   };
 }
 
@@ -78,9 +89,16 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
     (hit) => hit._source.elasticsearch?.index?.recovery
   );
   const filtered = mapped.filter(filterOldShardActivity(moment.utc(start).valueOf()));
-  filtered.sort((a, b) =>
-    a && b ? (b.start_time_in_millis ?? 0) - (a.start_time_in_millis ?? 0) : 0
-  );
+  filtered.sort((a, b) => {
+    if (!a || !b) {
+      return 0;
+    }
+
+    const startTimeA = a.start_time?.ms || 0;
+    const startTimeB = b.start_time?.ms || 0;
+
+    return startTimeB - startTimeA;
+  });
   return filtered;
 }
 

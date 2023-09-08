@@ -39,7 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.dashboardEmbeddables.selectDiscoverIndexPattern('ft_farequote');
       await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
-      await filterBar.addFilter(PINNED_FILTER.key, 'is', PINNED_FILTER.value);
+      await filterBar.addFilter({
+        field: PINNED_FILTER.key,
+        operation: 'is',
+        value: PINNED_FILTER.value,
+      });
       await filterBar.toggleFilterPinned(PINNED_FILTER.key);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -103,7 +107,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} adds a pinned filter`);
-      await filterBar.addFilter(PINNED_FILTER.key, 'is', PINNED_FILTER.value);
+      await filterBar.addFilter({
+        field: PINNED_FILTER.key,
+        operation: 'is',
+        value: PINNED_FILTER.value,
+      });
       await filterBar.toggleFilterPinned(PINNED_FILTER.key);
       await PageObjects.header.waitUntilLoadingHasFinished();
 

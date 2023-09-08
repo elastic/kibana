@@ -18,7 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const docTable = getService('docTable');
   const queryBar = getService('queryBar');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     hideAnnouncements: true,
@@ -229,19 +235,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         afterEach(async function () {
           for (const column of extraColumns) {
-            await PageObjects.discover.clickFieldListItemRemove(column);
+            await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
           }
         });
 
         it('should add more columns to the table', async function () {
           for (const column of extraColumns) {
-            await PageObjects.discover.clearFieldSearchInput();
-            await PageObjects.discover.findFieldByName(column);
+            await PageObjects.unifiedFieldList.clearFieldSearchInput();
+            await PageObjects.unifiedFieldList.findFieldByName(column);
             await retry.waitFor('field to appear', async function () {
               return await testSubjects.exists(`field-${column}`);
             });
-            await PageObjects.discover.clickFieldListItemAdd(column);
+            await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
             // test the header now
             const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
@@ -252,16 +258,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should remove columns from the table', async function () {
           for (const column of extraColumns) {
-            await PageObjects.discover.clearFieldSearchInput();
-            await PageObjects.discover.findFieldByName(column);
+            await PageObjects.unifiedFieldList.clearFieldSearchInput();
+            await PageObjects.unifiedFieldList.findFieldByName(column);
             await retry.waitFor('field to appear', async function () {
               return await testSubjects.exists(`field-${column}`);
             });
-            await PageObjects.discover.clickFieldListItemAdd(column);
+            await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
           }
           // remove the second column
-          await PageObjects.discover.clickFieldListItemRemove(extraColumns[1]);
+          await PageObjects.unifiedFieldList.clickFieldListItemRemove(extraColumns[1]);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test that the second column is no longer there
           const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
@@ -270,9 +276,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should make the document table scrollable', async function () {
-        await PageObjects.discover.clearFieldSearchInput();
+        await PageObjects.unifiedFieldList.clearFieldSearchInput();
         const dscTableWrapper = await find.byCssSelector('.kbnDocTableWrapper');
-        const fieldNames = await PageObjects.discover.getAllFieldNames();
+        const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
         const clientHeight = await dscTableWrapper.getAttribute('clientHeight');
         let fieldCounter = 0;
         const checkScrollable = async () => {
@@ -282,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return Number(scrollWidth) > Number(clientWidth);
         };
         const addColumn = async () => {
-          await PageObjects.discover.clickFieldListItemAdd(fieldNames[fieldCounter++]);
+          await PageObjects.unifiedFieldList.clickFieldListItemAdd(fieldNames[fieldCounter++]);
         };
 
         await addColumn();

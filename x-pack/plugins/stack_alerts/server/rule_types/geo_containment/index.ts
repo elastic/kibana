@@ -5,31 +5,12 @@
  * 2.0.
  */
 
-import { AlertingSetup } from '../../types';
-import {
-  GeoContainmentState,
-  GeoContainmentInstanceState,
-  GeoContainmentInstanceContext,
-  getAlertType,
-  ActionGroupId,
-  RecoveryActionGroupId,
-} from './alert_type';
+import type { RegisterRuleTypesParams } from '../types';
+import { getRuleType } from './rule_type';
 
-import { GeoContainmentExtractedParams, GeoContainmentParams } from './alert_type';
+export { GEO_CONTAINMENT_ID } from './constants';
 
-interface RegisterParams {
-  alerting: AlertingSetup;
-}
-
-export function register(params: RegisterParams) {
+export function register(params: RegisterRuleTypesParams) {
   const { alerting } = params;
-  alerting.registerType<
-    GeoContainmentParams,
-    GeoContainmentExtractedParams,
-    GeoContainmentState,
-    GeoContainmentInstanceState,
-    GeoContainmentInstanceContext,
-    typeof ActionGroupId,
-    typeof RecoveryActionGroupId
-  >(getAlertType());
+  alerting.registerType(getRuleType());
 }

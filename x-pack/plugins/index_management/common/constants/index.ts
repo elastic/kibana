@@ -6,7 +6,7 @@
  */
 
 export { BASE_PATH } from './base_path';
-export { API_BASE_PATH } from './api_base_path';
+export { API_BASE_PATH, INTERNAL_API_BASE_PATH } from './api_base_path';
 export { INVALID_INDEX_PATTERN_CHARS, INVALID_TEMPLATE_NAME_CHARS } from './invalid_characters';
 export * from './index_statuses';
 

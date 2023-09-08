@@ -30,22 +30,39 @@ type SummaryRecord = {
   total: number;
 } & Record<keyof typeof STATE_NAMES, number>;
 
+const NOT_AVAILABLE_LABEL = i18n.translate('xpack.infra.notAvailableLabel', {
+  defaultMessage: 'N/A',
+});
+
+const processSummaryNotAvailable = {
+  total: NOT_AVAILABLE_LABEL,
+  running: NOT_AVAILABLE_LABEL,
+  sleeping: NOT_AVAILABLE_LABEL,
+  dead: NOT_AVAILABLE_LABEL,
+  stopped: NOT_AVAILABLE_LABEL,
+  idle: NOT_AVAILABLE_LABEL,
+  zombie: NOT_AVAILABLE_LABEL,
+  unknown: NOT_AVAILABLE_LABEL,
+};
+
 export const SummaryTable = ({ processSummary, isLoading }: Props) => {
+  const summary = !processSummary?.total ? processSummaryNotAvailable : processSummary;
+
   const processCount = useMemo(
     () =>
       ({
-        total: isLoading ? -1 : processSummary.total,
+        total: isLoading ? -1 : summary.total,
         ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
-        ...(isLoading ? {} : processSummary),
+        ...(isLoading ? {} : summary),
       } as SummaryRecord),
-    [processSummary, isLoading]
+    [summary, isLoading]
   );
   return (
     <>
       <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
         {Object.entries(processCount).map(([field, value]) => (
-          <EuiFlexItem>
-            <EuiDescriptionList compressed={true}>
+          <EuiFlexItem key={field}>
+            <EuiDescriptionList data-test-subj="infraProcessesSummaryTableItem" compressed>
               <ColumnTitle>{columnTitles[field as keyof SummaryRecord]}</ColumnTitle>
               <EuiDescriptionListDescription>
                 {value === -1 ? <LoadingSpinner /> : value}

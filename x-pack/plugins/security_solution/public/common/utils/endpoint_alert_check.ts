@@ -7,7 +7,7 @@
 
 import { find, getOr, some } from 'lodash/fp';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { Ecs } from '../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 /**
  * Check to see if a timeline event item is an Alert (vs an event)

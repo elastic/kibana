@@ -17,6 +17,7 @@ import type { InternalMetricsServiceStart } from '@kbn/core-metrics-server-inter
 import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
 import type { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 
 /**
  * @internal
@@ -33,4 +34,5 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
+  customBranding: CustomBrandingStart;
 }

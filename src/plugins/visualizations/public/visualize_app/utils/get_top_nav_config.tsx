@@ -15,7 +15,6 @@ import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -37,7 +36,7 @@ import {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
-import { getEditBreadcrumbs } from './breadcrumbs';
+import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
@@ -118,8 +117,7 @@ export const getTopNavConfig = (
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
-    savedObjects,
-    theme,
+    serverless,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -146,7 +144,6 @@ export const getTopNavConfig = (
 
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: savedObjects.client,
         overlays,
         savedObjectsTagging,
       });
@@ -206,7 +203,11 @@ export const getTopNavConfig = (
             stateTransfer.clearEditorState(VisualizeConstants.APP_ID);
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
-          chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+          if (serverless?.setBreadcrumbs) {
+            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, savedVis.lastSavedTitle));
+          } else {
+            chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+          }
 
           if (id !== visualizationIdFromUrl) {
             history.replace({
@@ -310,10 +311,14 @@ export const getTopNavConfig = (
               );
               const updatedWithMeta = {
                 ...navigateToLensConfig,
-                savedObjectId: visInstance.vis.id,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
+                title: visInstance?.panelTitle || vis.title,
+                visTypeTitle: vis.type.title,
+                description: visInstance?.panelDescription || vis.description,
+                panelTimeRange: visInstance?.panelTimeRange,
+                isEmbeddable: Boolean(originatingApp),
               };
               if (navigateToLensConfig) {
                 hideLensBadge();
@@ -544,6 +549,7 @@ export const getTopNavConfig = (
                     onTagsSelected={(newSelection) => {
                       selectedTags = newSelection;
                     }}
+                    markOptional
                   />
                 );
               }
@@ -599,18 +605,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              const WrapperComponent = ({ children }: { children?: React.ReactNode }) => {
-                const ContextProvider = !originatingApp
-                  ? presentationUtil.ContextProvider
-                  : React.Fragment;
-                return (
-                  <KibanaThemeProvider theme$={theme.theme$}>
-                    <ContextProvider>{children}</ContextProvider>
-                  </KibanaThemeProvider>
-                );
-              };
-
-              showSaveModal(saveModal, I18nContext, WrapperComponent);
+              showSaveModal(saveModal, presentationUtil.ContextProvider);
             },
           },
         ]

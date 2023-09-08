@@ -14,7 +14,7 @@ import { TakeActionDropdown } from '.';
 import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
 import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -22,10 +22,10 @@ import { useKibana, useGetUserCasesPermissions, useHttp } from '../../../common/
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
-  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  LOADING_ENDPOINT_DATA_TOOLTIP,
+  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../endpoint_responder/translations';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import type { HttpSetup } from '@kbn/core/public';
@@ -37,6 +37,7 @@ import { getUserPrivilegesMockDefaultValue } from '../../../common/components/us
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
+import { ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE } from '../../../common/components/toolbar/bulk_actions/translations';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -100,7 +101,6 @@ describe('take action dropdown', () => {
       detailsData: generateAlertDetailsDataMock() as TimelineEventsDetailsItem[],
       ecsData: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
-      indexName: 'index',
       isHostIsolationPanelOpen: false,
       loadingEventDetails: false,
       onAddEventFilterClick: jest.fn(),
@@ -240,6 +240,13 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="endpointResponseActions-action-item"]').first().text()
         ).toEqual('Respond');
+      });
+    });
+    test('should render "Apply alert tags"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').first().text()
+        ).toEqual(ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE);
       });
     });
   });
@@ -454,27 +461,6 @@ describe('take action dropdown', () => {
         apiMocks = endpointMetadataHttpMocks(mockStartServicesMock.http as jest.Mocked<HttpSetup>);
       });
 
-      describe('when the `responseActionsConsoleEnabled` feature flag is false', () => {
-        beforeAll(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((featureKey) => {
-            if (featureKey === 'responseActionsConsoleEnabled') {
-              return false;
-            }
-            return true;
-          });
-        });
-
-        afterAll(() => {
-          (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => true);
-        });
-
-        it('should hide the button if feature flag if off', async () => {
-          render();
-
-          expect(findLaunchResponderButton()).toHaveLength(0);
-        });
-      });
-
       it('should not display the button if user is not allowed to write event filters', async () => {
         (useUserPrivileges as jest.Mock).mockReturnValue({
           ...mockInitialUserPrivilegesState(),
@@ -492,17 +478,45 @@ describe('take action dropdown', () => {
         expect(findLaunchResponderButton()).toHaveLength(0);
       });
 
-      it('should disable the button if alert NOT from a host running endpoint', async () => {
+      it('should enable button for non endpoint event type when defend integration present', async () => {
         setTypeOnEcsDataWithAgentType('filebeat');
         if (defaultProps.detailsData) {
           defaultProps.detailsData = generateAlertDetailsDataMock() as TimelineEventsDetailsItem[];
         }
         render();
 
-        const consoleButton = findLaunchResponderButton().first();
+        expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+        expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+          LOADING_ENDPOINT_DATA_TOOLTIP
+        );
 
-        expect(consoleButton.prop('disabled')).toBe(true);
-        expect(consoleButton.prop('toolTipContent')).toEqual(NOT_FROM_ENDPOINT_HOST_TOOLTIP);
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.metadataDetails).toHaveBeenCalled();
+          wrapper.update();
+
+          expect(findLaunchResponderButton().first().prop('disabled')).toBe(false);
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(undefined);
+        });
+      });
+
+      it('should disable the button for non endpoint event type when defend integration not present', async () => {
+        setAlertDetailsDataMockToEndpointAgent();
+        apiMocks.responseProvider.metadataDetails.mockImplementation(() => {
+          const error: Error & { body?: { statusCode: number } } = new Error();
+          error.body = { statusCode: 404 };
+          throw error;
+        });
+        render();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.metadataDetails).toThrow();
+          wrapper.update();
+
+          expect(findLaunchResponderButton().first().prop('disabled')).toBe(true);
+          expect(findLaunchResponderButton().first().prop('toolTipContent')).toEqual(
+            NOT_FROM_ENDPOINT_HOST_TOOLTIP
+          );
+        });
       });
 
       it('should disable the button if host status is unenrolled', async () => {

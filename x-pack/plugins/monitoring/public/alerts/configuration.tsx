@@ -85,7 +85,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
   const flyoutUi = useMemo(
     () =>
       showFlyout &&
-      Legacy.shims.triggersActionsUi.getEditAlertFlyout({
+      Legacy.shims.triggersActionsUi.getEditRuleFlyout({
         initialRule: {
           ...alert,
           ruleTypeId: alert.alertTypeId,

@@ -21,6 +21,7 @@ export interface ServiceNode extends NodeBase {
   serviceName: string;
   agentName: AgentName;
   environment: string;
+  dependencyName?: string;
 }
 
 export interface DependencyNode extends NodeBase {
@@ -32,26 +33,28 @@ export interface DependencyNode extends NodeBase {
 
 export type Node = ServiceNode | DependencyNode;
 
+export interface ConnectionStats {
+  latency: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+  throughput: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+  errorRate: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+  totalTime: {
+    value: number | null;
+    timeseries: Coordinate[];
+  };
+}
+
 export interface ConnectionStatsItem {
   location: Node;
-  stats: {
-    latency: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-    throughput: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-    errorRate: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-    totalTime: {
-      value: number | null;
-      timeseries: Coordinate[];
-    };
-  };
+  stats: ConnectionStats;
 }
 
 export interface ConnectionStatsItemWithImpact extends ConnectionStatsItem {

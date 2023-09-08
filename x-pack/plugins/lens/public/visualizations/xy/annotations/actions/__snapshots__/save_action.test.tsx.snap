@@ -1,0 +1,215 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`annotation group save action save routine saving an existing group as new 1`] = `
+Array [
+  Array [
+    Object {
+      "layers": Array [
+        Object {
+          "__lastSaved": Object {
+            "annotations": Array [
+              Object {
+                "id": "some-annotation-id",
+                "key": Object {
+                  "timestamp": "timestamp",
+                  "type": "point_in_time",
+                },
+                "type": "manual",
+              },
+            ],
+            "dataViewSpec": undefined,
+            "description": "my description",
+            "ignoreGlobalFilters": false,
+            "indexPatternId": "some-index-pattern",
+            "tags": Array [
+              "my-tag",
+            ],
+            "title": "my title",
+          },
+          "annotationGroupId": "saved-id-123",
+          "annotations": Array [
+            Object {
+              "id": "some-annotation-id",
+              "key": Object {
+                "timestamp": "timestamp",
+                "type": "point_in_time",
+              },
+              "type": "manual",
+            },
+          ],
+          "ignoreGlobalFilters": false,
+          "indexPatternId": "some-index-pattern",
+          "layerId": "mylayerid",
+          "layerType": "annotations",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "bottom",
+      },
+      "preferredSeriesType": "area",
+    },
+  ],
+]
+`;
+
+exports[`annotation group save action save routine successful initial save 1`] = `
+Array [
+  Array [
+    Object {
+      "layers": Array [
+        Object {
+          "__lastSaved": Object {
+            "annotations": Array [
+              Object {
+                "id": "some-annotation-id",
+                "key": Object {
+                  "timestamp": "timestamp",
+                  "type": "point_in_time",
+                },
+                "type": "manual",
+              },
+            ],
+            "dataViewSpec": undefined,
+            "description": "my description",
+            "ignoreGlobalFilters": false,
+            "indexPatternId": "some-index-pattern",
+            "tags": Array [
+              "my-tag",
+            ],
+            "title": "my title",
+          },
+          "annotationGroupId": "saved-id-123",
+          "annotations": Array [
+            Object {
+              "id": "some-annotation-id",
+              "key": Object {
+                "timestamp": "timestamp",
+                "type": "point_in_time",
+              },
+              "type": "manual",
+            },
+          ],
+          "ignoreGlobalFilters": false,
+          "indexPatternId": "some-index-pattern",
+          "layerId": "mylayerid",
+          "layerType": "annotations",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "bottom",
+      },
+      "preferredSeriesType": "area",
+    },
+  ],
+]
+`;
+
+exports[`annotation group save action save routine successful initial save with ad-hoc data view 1`] = `
+Array [
+  Array [
+    Object {
+      "layers": Array [
+        Object {
+          "__lastSaved": Object {
+            "annotations": Array [
+              Object {
+                "id": "some-annotation-id",
+                "key": Object {
+                  "timestamp": "timestamp",
+                  "type": "point_in_time",
+                },
+                "type": "manual",
+              },
+            ],
+            "dataViewSpec": Object {
+              "id": "some-adhoc-data-view-id",
+            },
+            "description": "my description",
+            "ignoreGlobalFilters": false,
+            "indexPatternId": "some-index-pattern",
+            "tags": Array [
+              "my-tag",
+            ],
+            "title": "my title",
+          },
+          "annotationGroupId": "saved-id-123",
+          "annotations": Array [
+            Object {
+              "id": "some-annotation-id",
+              "key": Object {
+                "timestamp": "timestamp",
+                "type": "point_in_time",
+              },
+              "type": "manual",
+            },
+          ],
+          "ignoreGlobalFilters": false,
+          "indexPatternId": "some-index-pattern",
+          "layerId": "mylayerid",
+          "layerType": "annotations",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "bottom",
+      },
+      "preferredSeriesType": "area",
+    },
+  ],
+]
+`;
+
+exports[`annotation group save action save routine updating an existing group 1`] = `
+Array [
+  Array [
+    Object {
+      "layers": Array [
+        Object {
+          "__lastSaved": Object {
+            "annotations": Array [
+              Object {
+                "id": "some-annotation-id",
+                "key": Object {
+                  "timestamp": "timestamp",
+                  "type": "point_in_time",
+                },
+                "type": "manual",
+              },
+            ],
+            "dataViewSpec": undefined,
+            "description": "my description",
+            "ignoreGlobalFilters": false,
+            "indexPatternId": "some-index-pattern",
+            "tags": Array [
+              "my-tag",
+            ],
+            "title": "my title",
+          },
+          "annotationGroupId": "my-group-id",
+          "annotations": Array [
+            Object {
+              "id": "some-annotation-id",
+              "key": Object {
+                "timestamp": "timestamp",
+                "type": "point_in_time",
+              },
+              "type": "manual",
+            },
+          ],
+          "ignoreGlobalFilters": false,
+          "indexPatternId": "some-index-pattern",
+          "layerId": "mylayerid",
+          "layerType": "annotations",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "bottom",
+      },
+      "preferredSeriesType": "area",
+    },
+  ],
+]
+`;

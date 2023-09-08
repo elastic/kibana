@@ -10,21 +10,19 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
-import { Providers } from './read_provider_spec';
+import { Providers, ProviderFn, isProviderConstructor } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
-import { GenericFtrService } from '../../public_types';
 
 export class ProviderCollection {
-  static callProviderFn(providerFn: any, ctx: any) {
-    if (providerFn.prototype instanceof GenericFtrService) {
-      const Constructor = providerFn as any as new (ctx: any) => any;
-      return new Constructor(ctx);
+  static callProviderFn(providerFn: ProviderFn, ctx: any) {
+    if (isProviderConstructor(providerFn)) {
+      return new providerFn(ctx);
     }
 
     return providerFn(ctx);
   }
 
-  private readonly instances = new Map();
+  private readonly instances = new Map<ProviderFn, any>();
 
   constructor(private readonly log: ToolingLog, private readonly providers: Providers) {}
 
@@ -67,7 +65,7 @@ export class ProviderCollection {
     }
   }
 
-  public invokeProviderFn(provider: (args: any) => any) {
+  public invokeProviderFn(provider: ProviderFn) {
     return ProviderCollection.callProviderFn(provider, {
       getService: this.getService,
       hasService: this.hasService,

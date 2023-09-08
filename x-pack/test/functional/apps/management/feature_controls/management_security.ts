@@ -64,7 +64,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
-          sectionLinks: ['triggersActions', 'cases', 'triggersActionsConnectors', 'jobsListLink'],
+          sectionLinks: [
+            'triggersActions',
+            'cases',
+            'triggersActionsConnectors',
+            'jobsListLink',
+            'maintenanceWindows',
+          ],
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',

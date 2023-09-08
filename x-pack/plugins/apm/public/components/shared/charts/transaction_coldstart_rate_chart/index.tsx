@@ -18,7 +18,7 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -71,7 +71,8 @@ export function TransactionColdstartRateChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { serviceName, transactionType } = useApmServiceContext();
+  const { serviceName, transactionType, transactionTypeStatus } =
+    useApmServiceContext();
   const comparisonChartTheme = getComparisonChartTheme();
 
   const endpoint = transactionName
@@ -80,6 +81,10 @@ export function TransactionColdstartRateChart({
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(INITIAL_STATE);
+      }
+
       if (transactionType && serviceName && start && end) {
         return callApmApi(endpoint, {
           params: {
@@ -109,6 +114,7 @@ export function TransactionColdstartRateChart({
       start,
       end,
       transactionType,
+      transactionTypeStatus,
       transactionName,
       offset,
       endpoint,
@@ -119,7 +125,7 @@ export function TransactionColdstartRateChart({
 
   const timeseries = [
     {
-      data: data.currentPeriod.transactionColdstartRate,
+      data: data?.currentPeriod?.transactionColdstartRate ?? [],
       type: 'linemark',
       color: theme.eui.euiColorVis5,
       title: i18n.translate('xpack.apm.coldstartRate.chart.coldstartRate', {
@@ -129,7 +135,7 @@ export function TransactionColdstartRateChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod.transactionColdstartRate,
+            data: data?.previousPeriod?.transactionColdstartRate ?? [],
             type: 'area',
             color: theme.eui.euiColorMediumShade,
             title: previousPeriodLabel,

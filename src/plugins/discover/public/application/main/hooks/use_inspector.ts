@@ -12,30 +12,39 @@ import {
   RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DataTableRecord } from '../../../types';
+import { DiscoverStateContainer } from '../services/discover_state';
+import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
+
+export interface InspectorAdapters {
+  requests: RequestAdapter;
+  lensRequests?: RequestAdapter;
+}
 
 export function useInspector({
-  setExpandedDoc,
   inspector,
-  inspectorAdapters,
-  savedSearch,
+  stateContainer,
 }: {
-  inspectorAdapters: { requests: RequestAdapter };
-  savedSearch: SavedSearch;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
   inspector: InspectorPublicPluginStart;
+  stateContainer: DiscoverStateContainer;
 }) {
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    setExpandedDoc(undefined);
-    const session = inspector.open(inspectorAdapters, {
-      title: savedSearch.title,
-    });
+    stateContainer.internalState.transitions.setExpandedDoc(undefined);
+    const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
+
+    const requestAdapters = inspectorAdapters.lensRequests
+      ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
+      : [inspectorAdapters.requests];
+
+    const session = inspector.open(
+      { requests: new AggregateRequestAdapter(requestAdapters) },
+      { title: stateContainer.savedSearchState.getTitle() }
+    );
+
     setInspectorSession(session);
-  }, [setExpandedDoc, inspectorAdapters, savedSearch, inspector]);
+  }, [stateContainer, inspector]);
 
   useEffect(() => {
     return () => {

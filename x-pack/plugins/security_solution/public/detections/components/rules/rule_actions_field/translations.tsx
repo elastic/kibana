@@ -13,3 +13,39 @@ export const FORM_ERRORS_TITLE = i18n.translate(
     defaultMessage: 'Please fix issues listed below',
   }
 );
+
+export const FORM_ON_ACTIVE_ALERT_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleNotifyWhen.onActiveAlert.display',
+  {
+    defaultMessage: 'Per rule run',
+  }
+);
+
+export const FORM_CUSTOM_FREQUENCY_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleNotifyWhen.onThrottleInterval.display',
+  {
+    defaultMessage: 'Custom frequency',
+  }
+);
+
+export const FORM_SUMMARY_BODY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.body.summary.message',
+  {
+    defaultMessage: 'Rule {ruleName} generated {signalsCount} alerts',
+    values: {
+      ruleName: '{{context.rule.name}}',
+      signalsCount: '{{state.signals_count}}',
+    },
+  }
+);
+
+export const FORM_FOR_EACH_ALERT_BODY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.body.forEachAlert.message',
+  {
+    defaultMessage: 'Rule {ruleName} generated alert {alertId}',
+    values: {
+      ruleName: '{{context.rule.name}}',
+      alertId: '{{alert.id}}',
+    },
+  }
+);

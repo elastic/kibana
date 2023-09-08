@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 import { getElasticsearchCaCertificate } from '../../interactive_setup_api_integration/fixtures/tls_tools';

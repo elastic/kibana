@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 // This data was generated using the endpoint test alert generator
 export const getMockAlertDetailsFieldsResponse = () => ({

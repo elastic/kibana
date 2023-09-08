@@ -57,4 +57,6 @@ export interface KibanaNoDataPageProps {
   noDataConfig: NoDataPageProps;
   /** if set to true allows creation of an ad-hoc dataview from data view editor */
   allowAdHocDataView?: boolean;
+  /** Set to true if the kibana is customly branded */
+  showPlainSpinner: boolean;
 }

@@ -48,6 +48,12 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
         }
       );
     },
+    async navToSnapshots(emptyList: boolean = true) {
+      await testSubjects.click('snapshots_tab');
+      await retry.waitForWithTimeout('Wait for snapshot list to be on page', 10000, async () => {
+        return await testSubjects.isDisplayed(emptyList ? 'snapshotListEmpty' : 'snapshotList');
+      });
+    },
 
     async fillCreateNewPolicyPageOne(policyName: string, snapshotName: string) {
       await testSubjects.click('createPolicyButton');
@@ -85,6 +91,19 @@ export function SnapshotRestorePageProvider({ getService }: FtrProviderContext) 
       await retry.waitFor('policy table to be visible', async () => {
         return await testSubjects.isDisplayed('policyLink');
       });
+    },
+    async getSnapshotList() {
+      const table = await testSubjects.find('snapshotTable');
+      const rows = await table.findAllByTestSubject('row');
+      return await Promise.all(
+        rows.map(async (row) => {
+          return {
+            snapshotLink: await row.findByTestSubject('snapshotLink'),
+            repoLink: await row.findByTestSubject('repositoryLink'),
+            snapshotRestore: row.findByTestSubject('srsnapshotListRestoreActionButton'),
+          };
+        })
+      );
     },
     async getRepoList() {
       const table = await testSubjects.find('repositoryTable');

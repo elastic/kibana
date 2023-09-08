@@ -13,6 +13,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 
 import type { ExitFullScreenButtonProps as Props } from '@kbn/shared-ux-button-exit-full-screen-types';
 
+import useObservable from 'react-use/lib/useObservable';
 import { ExitFullScreenButton as Component } from './exit_full_screen_button.component';
 import { useServices } from './services';
 
@@ -22,8 +23,10 @@ import { useServices } from './services';
  */
 export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const { setIsFullscreen } = useServices();
+  const { setIsFullscreen, customBranding$ } = useServices();
   const isMounted = useMountedState();
+  const customBranding = useObservable(customBranding$);
+  const customLogo = customBranding?.logo;
 
   const onClick = useCallback(() => {
     if (toggleChrome) {
@@ -70,5 +73,5 @@ export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = true }:
     z-index: 5;
   `;
 
-  return <Component css={buttonCSS} {...{ onClick }} />;
+  return <Component css={buttonCSS} customLogo={customLogo} {...{ onClick }} />;
 };

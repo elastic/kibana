@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CaseUserActionService methods createUserAction create case comment logs a comment user action of action: create 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "case_user_action_create_comment",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "creation",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "test-id",
+        "type": "cases-comments",
+      },
+    },
+    "message": "User created comment id: test-id for case id: 123 - user action id: created_user_action_id",
+  },
+]
+`;
+
+exports[`CaseUserActionService methods createUserAction create case comment logs a comment user action of action: delete 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "case_user_action_delete_comment",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "deletion",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "test-id",
+        "type": "cases-comments",
+      },
+    },
+    "message": "User deleted comment id: test-id for case id: 123 - user action id: created_user_action_id",
+  },
+]
+`;
+
+exports[`CaseUserActionService methods createUserAction create case comment logs a comment user action of action: update 1`] = `
+Array [
+  Object {
+    "event": Object {
+      "action": "case_user_action_update_comment",
+      "category": Array [
+        "database",
+      ],
+      "outcome": "success",
+      "type": Array [
+        "change",
+      ],
+    },
+    "kibana": Object {
+      "saved_object": Object {
+        "id": "test-id",
+        "type": "cases-comments",
+      },
+    },
+    "message": "User changed comment id: test-id for case id: 123 - user action id: created_user_action_id",
+  },
+]
+`;

@@ -8,7 +8,7 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
@@ -28,8 +28,11 @@ import { cleanEventFilterToUpdate } from '../../../../event_filters/service/serv
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
+const apiVersion = '2023-10-31';
+
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   path: '/api/exception_lists/items/_find',
+  version: apiVersion,
   query: {
     filter: customFilter,
     list_id: ['endpoint_event_filters'],
@@ -178,8 +181,8 @@ describe('Policy details artifacts flyout', () => {
   });
 
   describe('when submitting the form', () => {
-    const FIRST_ONE_NAME = uuid.v4();
-    const SECOND_ONE_NAME = uuid.v4();
+    const FIRST_ONE_NAME = uuidv4();
+    const SECOND_ONE_NAME = uuidv4();
     const testTags = ['policy:1234', 'non-policy-tag', 'policy:4321'];
     let exceptions: FoundExceptionListItemSchema;
 
@@ -190,12 +193,12 @@ describe('Policy details artifacts flyout', () => {
         data: [
           getExceptionListItemSchemaMock({
             name: FIRST_ONE_NAME,
-            id: uuid.v4(),
+            id: uuidv4(),
             tags: testTags,
           }),
           getExceptionListItemSchemaMock({
             name: SECOND_ONE_NAME,
-            id: uuid.v4(),
+            id: uuidv4(),
             tags: testTags,
           }),
         ],
@@ -217,6 +220,7 @@ describe('Policy details artifacts flyout', () => {
       // verify the request with the new tag
       await waitFor(() => {
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: apiVersion,
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),
@@ -244,6 +248,7 @@ describe('Policy details artifacts flyout', () => {
       await waitFor(() => {
         // first exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: apiVersion,
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),
@@ -251,6 +256,7 @@ describe('Policy details artifacts flyout', () => {
         });
         // second exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
+          version: apiVersion,
           body: JSON.stringify(
             getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
           ),

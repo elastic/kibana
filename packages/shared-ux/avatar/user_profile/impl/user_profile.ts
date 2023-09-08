@@ -84,7 +84,7 @@ export interface UserProfileAvatarData {
   /**
    * Base64 data URL for the user avatar image.
    */
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
 
 export const USER_AVATAR_FALLBACK_CODE_POINT = 97; // code point for lowercase "a"

@@ -65,7 +65,7 @@ were successful.
 . Click *Add layer*.
 
 . In *Layer settings*, adjust settings and <<maps-vector-style-properties, properties>> as needed.
-. Click *Save & close*.
+. Click *Keep changes*.
 . Once you've added all of the sample files,
 <<maps-save, save your map>>.
 +
@@ -106,7 +106,7 @@ settings that you might want to change.
 Again the default looks good, but feel free to choose a
 different color range.
 
-. When you're finished modifying settings, click *Save & close*.
+. When you're finished modifying settings, click *Keep changes*.
 +
 With your new lightning heat map layer, your map should look
 like this:

@@ -34,7 +34,7 @@ export const registerCreateRoute = ({
       const pipeline = req.body as Pipeline;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, processors, version, on_failure } = pipeline;
+      const { name, description, processors, version, on_failure, _meta } = pipeline;
 
       try {
         // Check that a pipeline with the same name doesn't already exist
@@ -66,6 +66,7 @@ export const registerCreateRoute = ({
             processors,
             version,
             on_failure,
+            _meta,
           },
         });
 

@@ -10,32 +10,31 @@ import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
-import { finished, Writable } from 'stream';
-import { promisify } from 'util';
+import { Writable } from 'stream';
+import { finished } from 'stream/promises';
+import { setTimeout } from 'timers/promises';
 import type {
   RunContext,
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import { getContentStream } from '..';
-import type { ReportingCore } from '../..';
-import { CancellationToken } from '../../../common/cancellation_token';
+import {
+  CancellationToken,
+  ReportingError,
+  QueueTimeoutError,
+  KibanaShuttingDownError,
+  TaskRunResult,
+} from '@kbn/reporting-common';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
+import { ExportTypesRegistry, getContentStream } from '..';
+import type { ReportingCore } from '../..';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
-import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
-import {
-  ReportingTask,
-  ReportingTaskStatus,
-  REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
-  TaskRunResult,
-} from '.';
+import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
@@ -47,10 +46,6 @@ interface ReportingExecuteTaskInstance {
   runAt?: Date;
 }
 
-interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
-  jobExecutor: RunTaskFn<BasePayload>;
-}
-
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
   return (output as CompletedReportOutput).size != null;
 }
@@ -59,15 +54,31 @@ function reportFromTask(task: ReportTaskParams) {
   return new Report({ ...task, _id: task.id, _index: task.index });
 }
 
+async function finishedWithNoPendingCallbacks(stream: Writable) {
+  await finished(stream, { readable: false });
+
+  // Race condition workaround:
+  // `finished(...)` will resolve while there's still pending callbacks in the writable part of the `stream`.
+  // This introduces a race condition where the code continues before the writable part has completely finished.
+  // The `pendingCallbacks` function is a hack to ensure that all pending callbacks have been called before continuing.
+  // For more information, see: https://github.com/nodejs/node/issues/46170
+  await (async function pendingCallbacks(delay = 1) {
+    if ((stream as any)._writableState.pendingcb > 0) {
+      await setTimeout(delay);
+      await pendingCallbacks(delay < 32 ? delay * 2 : delay);
+    }
+  })();
+}
+
 export class ExecuteReportTask implements ReportingTask {
   public TYPE = REPORTING_EXECUTE_TYPE;
 
   private logger: Logger;
   private taskManagerStart?: TaskManagerStartContract;
-  private taskExecutors?: Map<string, TaskExecutor>;
   private kibanaId?: string;
   private kibanaName?: string;
   private store?: ReportingStore;
+  private exportTypesRegistry: ExportTypesRegistry;
 
   constructor(
     private reporting: ReportingCore,
@@ -75,6 +86,7 @@ export class ExecuteReportTask implements ReportingTask {
     logger: Logger
   ) {
     this.logger = logger.get('runTask');
+    this.exportTypesRegistry = this.reporting.getExportTypesRegistry();
   }
 
   /*
@@ -84,25 +96,9 @@ export class ExecuteReportTask implements ReportingTask {
     this.taskManagerStart = taskManager;
 
     const { reporting } = this;
-
-    const exportTypesRegistry = reporting.getExportTypesRegistry();
-    const executors = new Map<string, TaskExecutor>();
-    for (const exportType of exportTypesRegistry.getAll()) {
-      const exportTypeLogger = this.logger.get(exportType.jobType);
-      const jobExecutor = exportType.runTaskFnFactory(reporting, exportTypeLogger);
-      // The task will run the function with the job type as a param.
-      // This allows us to retrieve the specific export type runFn when called to run an export
-      executors.set(exportType.jobType, {
-        jobExecutor,
-        jobContentEncoding: exportType.jobContentEncoding,
-      });
-    }
-
-    this.taskExecutors = executors;
-
-    const config = reporting.getConfig();
-    this.kibanaId = config.kbnConfig.get('server', 'uuid');
-    this.kibanaName = config.kbnConfig.get('server', 'name');
+    const { uuid, name } = reporting.getServerInfo();
+    this.kibanaId = uuid;
+    this.kibanaName = name;
   }
 
   /*
@@ -125,7 +121,8 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private getJobContentEncoding(jobType: string) {
-    return this.taskExecutors?.get(jobType)?.jobContentEncoding;
+    const exportType = this.exportTypesRegistry.getByJobType(jobType);
+    return exportType.jobContentEncoding;
   }
 
   public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
@@ -177,12 +174,12 @@ export class ExecuteReportTask implements ReportingTask {
       ...doc,
     });
 
-    this.logger.debug(
+    this.logger.info(
       `Claiming ${claimedReport.jobtype} ${report._id} ` +
-        `[_index: ${report._index}]  ` +
-        `[_seq_no: ${report._seq_no}]  ` +
-        `[_primary_term: ${report._primary_term}]  ` +
-        `[attempts: ${report.attempts}]  ` +
+        `[_index: ${report._index}] ` +
+        `[_seq_no: ${report._seq_no}] ` +
+        `[_primary_term: ${report._primary_term}] ` +
+        `[attempts: ${report.attempts}] ` +
         `[process_expiration: ${expirationTime}]`
     );
 
@@ -246,21 +243,16 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    if (!this.taskExecutors) {
-      throw new Error(`Task run function factories have not been called yet!`);
-    }
+    const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
 
-    // get the run_task function
-    const runner = this.taskExecutors.get(task.jobtype);
-    if (!runner) {
-      throw new Error(`No defined task runner function for ${task.jobtype}!`);
+    if (!exportType) {
+      throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
-
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+      Rx.from(exportType.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
         timeout(queueTimeout)
       ) // throw an error if a value is not emitted before timeout
     );
@@ -285,6 +277,7 @@ export class ExecuteReportTask implements ReportingTask {
     docId = `/${report._index}/_doc/${report._id}`;
 
     const resp = await store.setReportCompleted(report, doc);
+
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
@@ -367,7 +360,6 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
-
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
@@ -377,7 +369,7 @@ export class ExecuteReportTask implements ReportingTask {
 
             stream.end();
 
-            await promisify(finished)(stream, { readable: false });
+            await finishedWithNoPendingCallbacks(stream);
 
             report._seq_no = stream.getSeqNo()!;
             report._primary_term = stream.getPrimaryTerm()!;

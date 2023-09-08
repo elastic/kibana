@@ -14,11 +14,15 @@ jest.mock('fs');
 
 const SPEC: BundleSpec = {
   contextDir: '/foo/bar',
-  publicDirNames: ['public'],
   id: 'bar',
   outputDir: '/foo/bar/target',
   sourceRoot: '/foo',
   type: 'plugin',
+  remoteInfo: {
+    pkgId: '@kbn/foo-bundle',
+    targets: ['public'],
+  },
+  ignoreMetrics: false,
 };
 
 it('creates cache keys', () => {
@@ -61,11 +65,15 @@ it('creates cache keys', () => {
         "banner": undefined,
         "contextDir": "/foo/bar",
         "id": "bar",
+        "ignoreMetrics": false,
         "manifestPath": undefined,
         "outputDir": "/foo/bar/target",
-        "publicDirNames": Array [
-          "public",
-        ],
+        "remoteInfo": Object {
+          "pkgId": "@kbn/foo-bundle",
+          "targets": Array [
+            "public",
+          ],
+        },
         "sourceRoot": "/foo",
         "type": "plugin",
       },
@@ -98,12 +106,16 @@ it('parses bundles from JSON specs', () => {
         },
         "contextDir": "/foo/bar",
         "id": "bar",
+        "ignoreMetrics": false,
         "manifestPath": undefined,
         "outputDir": "/foo/bar/target",
         "pageLoadAssetSizeLimit": undefined,
-        "publicDirNames": Array [
-          "public",
-        ],
+        "remoteInfo": Object {
+          "pkgId": "@kbn/foo-bundle",
+          "targets": Array [
+            "public",
+          ],
+        },
         "sourceRoot": "/foo",
         "type": "plugin",
       },

@@ -11,19 +11,23 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
 import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
+import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
 import { FilterPopover } from '../filter_popover';
+import { SolutionFilter } from './solution_filter';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCategories } from '../../containers/use_get_categories';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
+import type { Solution } from './types';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -32,8 +36,8 @@ interface CasesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   initial: FilterOptions;
   hiddenStatuses?: CaseStatusWithAllStatus[];
-  availableSolutions: string[];
-  displayCreateCaseButton?: boolean;
+  availableSolutions: Solution[];
+  isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
@@ -60,16 +64,18 @@ const CasesTableFiltersComponent = ({
   initial = DEFAULT_FILTER_OPTIONS,
   hiddenStatuses,
   availableSolutions,
-  displayCreateCaseButton,
+  isSelectorView = false,
   onCreateCasePressed,
   isLoading,
   currentUserProfile,
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
+  const [selectedCategories, setSelectedCategories] = useState(initial.category);
   const [selectedOwner, setSelectedOwner] = useState([]);
   const [selectedAssignees, setSelectedAssignees] = useState<AssigneesFilteringSelection[]>([]);
   const { data: tags = [] } = useGetTags();
+  const { data: categories = [] } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
   const handleSelectedAssignees = useCallback(
@@ -102,6 +108,16 @@ const CasesTableFiltersComponent = ({
       }
     },
     [onFilterChanged, selectedOwner]
+  );
+
+  const handleSelectedCategories = useCallback(
+    (newCategories) => {
+      if (!isEqual(newCategories, selectedCategories)) {
+        setSelectedCategories(newCategories);
+        onFilterChanged({ category: newCategories });
+      }
+    },
+    [onFilterChanged, selectedCategories]
   );
 
   useEffect(() => {
@@ -156,6 +172,18 @@ const CasesTableFiltersComponent = ({
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s">
+          {isSelectorView && onCreateCasePressed ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleOnCreateCasePressed}
+                iconType="plusInCircle"
+                data-test-subj="cases-table-add-case-filter-bar"
+              >
+                {i18n.CREATE_CASE_TITLE}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem>
             <EuiFieldSearch
               aria-label={i18n.SEARCH_CASES}
@@ -186,7 +214,7 @@ const CasesTableFiltersComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          {caseAssignmentAuthorized ? (
+          {caseAssignmentAuthorized && !isSelectorView ? (
             <AssigneesFilterPopover
               selectedAssignees={selectedAssignees}
               currentUserProfile={currentUserProfile}
@@ -200,10 +228,20 @@ const CasesTableFiltersComponent = ({
             selectedOptions={selectedTags}
             options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
+            limit={MAX_TAGS_FILTER_LENGTH}
+            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
+          />
+          <FilterPopover
+            buttonLabel={i18n.CATEGORIES}
+            onSelectedOptionsChanged={handleSelectedCategories}
+            selectedOptions={selectedCategories}
+            options={categories}
+            optionsEmptyLabel={i18n.NO_CATEGORIES_AVAILABLE}
+            limit={MAX_CATEGORY_FILTER_LENGTH}
+            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
           />
           {availableSolutions.length > 1 && (
-            <FilterPopover
-              buttonLabel={i18n.SOLUTION}
+            <SolutionFilter
               onSelectedOptionsChanged={handleSelectedSolution}
               selectedOptions={selectedOwner}
               options={availableSolutions}
@@ -211,18 +249,6 @@ const CasesTableFiltersComponent = ({
           )}
         </EuiFilterGroup>
       </EuiFlexItem>
-      {displayCreateCaseButton && onCreateCasePressed ? (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleOnCreateCasePressed}
-            iconType="plusInCircle"
-            data-test-subj="cases-table-add-case-filter-bar"
-          >
-            {i18n.CREATE_CASE_TITLE}
-          </EuiButton>
-        </EuiFlexItem>
-      ) : null}
     </EuiFlexGroup>
   );
 };

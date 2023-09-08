@@ -107,4 +107,18 @@ describe('SavedObjectsUtils', () => {
       expect(mockUuidv5).toHaveBeenCalledWith('namespace:type:oldId', 'DNSUUID');
     });
   });
+
+  describe('#getMigrationFunction', () => {
+    it('should return the migration function when it is a function', () => {
+      const migration = jest.fn();
+
+      expect(SavedObjectsUtils.getMigrationFunction(migration)).toBe(migration);
+    });
+
+    it('should return the migration function when it is a migration object', () => {
+      const migration = { transform: jest.fn() };
+
+      expect(SavedObjectsUtils.getMigrationFunction(migration)).toBe(migration.transform);
+    });
+  });
 });

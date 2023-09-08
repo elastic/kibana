@@ -11,7 +11,7 @@ import path from 'path';
 import type { RegistryDataStream } from '../../../../types';
 
 import {
-  addCustomPipelineProcessor,
+  addCustomPipelineAndLocalRoutingRulesProcessor,
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
 } from './helpers';
@@ -142,9 +142,9 @@ test('getPipelineNameForInstallation gets correct name', () => {
   );
 });
 
-describe('addCustomPipelineProcessor', () => {
+describe('addCustomPipelineAndLocalRoutingRulesProcessor', () => {
   it('add custom pipeline processor at the end of the pipeline for yaml pipeline', () => {
-    const pipelineInstall = addCustomPipelineProcessor({
+    const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
       contentForInstallation: `
 processors:
   - set:
@@ -170,7 +170,7 @@ processors:
   });
 
   it('add custom pipeline processor at the end of the pipeline for json pipeline', () => {
-    const pipelineInstall = addCustomPipelineProcessor({
+    const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
       contentForInstallation: `{
         "processors": [
           {
@@ -189,5 +189,90 @@ processors:
     expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
       `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}}]}"`
     );
+  });
+
+  describe('with local routing rules', () => {
+    it('add reroute processor after custom pipeline processor for yaml pipeline', () => {
+      const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
+        contentForInstallation: `
+processors:
+  - set:
+      field: test
+      value: toto
+      `,
+        extension: 'yml',
+        nameForInstallation: 'logs-test-1.0.0',
+        customIngestPipelineNameForInstallation: 'logs-test@custom',
+        dataStream: {
+          dataset: 'test',
+          routing_rules: [
+            {
+              source_dataset: 'test',
+              rules: [
+                {
+                  target_dataset: 'test.reroute',
+                  if: 'true == true',
+                  namespace: 'default',
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(`
+              "---
+              processors:
+                - set:
+                    field: test
+                    value: toto
+                - pipeline:
+                    name: logs-test@custom
+                    ignore_missing_pipeline: true
+                - reroute:
+                    tag: test
+                    dataset: test.reroute
+                    namespace: default
+                    if: true == true
+              "
+          `);
+    });
+
+    it('add reroute processor after custom pipeline processor for json pipeline', () => {
+      const pipelineInstall = addCustomPipelineAndLocalRoutingRulesProcessor({
+        contentForInstallation: `{
+        "processors": [
+          {
+            "set": {
+              "field": "test",
+              "value": "toto"
+            }
+          }
+        ]
+      }`,
+        extension: 'json',
+        nameForInstallation: 'logs-test-1.0.0',
+        customIngestPipelineNameForInstallation: 'logs-test@custom',
+        dataStream: {
+          dataset: 'test',
+          routing_rules: [
+            {
+              source_dataset: 'test',
+              rules: [
+                {
+                  target_dataset: 'test.reroute',
+                  if: 'true == true',
+                  namespace: 'default',
+                },
+              ],
+            },
+          ],
+        } as any,
+      });
+
+      expect(pipelineInstall.contentForInstallation).toMatchInlineSnapshot(
+        `"{\\"processors\\":[{\\"set\\":{\\"field\\":\\"test\\",\\"value\\":\\"toto\\"}},{\\"pipeline\\":{\\"name\\":\\"logs-test@custom\\",\\"ignore_missing_pipeline\\":true}},{\\"reroute\\":{\\"tag\\":\\"test\\",\\"dataset\\":\\"test.reroute\\",\\"namespace\\":\\"default\\",\\"if\\":\\"true == true\\"}}]}"`
+      );
+    });
   });
 });

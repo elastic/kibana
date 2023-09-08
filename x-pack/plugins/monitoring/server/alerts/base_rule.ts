@@ -9,6 +9,7 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   RuleType,
+  RuleNotifyWhen,
   RuleExecutorOptions,
   Alert,
   RulesClient,
@@ -102,6 +103,13 @@ export class BaseRule {
       actionVariables: {
         context: actionVariables,
       },
+      // As there is "[key: string]: unknown;" in CommonAlertParams,
+      // we couldn't figure out a schema for validation and created a follow on issue:
+      // https://github.com/elastic/kibana/issues/153754
+      // Below validate function should be overwritten in each monitoring rule type
+      validate: {
+        params: { validate: (params) => params },
+      },
     };
   }
 
@@ -124,6 +132,14 @@ export class BaseRule {
       return existingRuleData.data[0] as Rule;
     }
 
+    const {
+      defaultParams: params = {},
+      name,
+      id: alertTypeId,
+      throttle = '1d',
+      interval = '1m',
+    } = this.ruleOptions;
+
     const ruleActions = [];
     for (const actionData of actions) {
       const action = await actionsClient.get({ id: actionData.id });
@@ -137,16 +153,14 @@ export class BaseRule {
           message: '{{context.internalShortMessage}}',
           ...actionData.config,
         },
+        frequency: {
+          summary: false,
+          notifyWhen: RuleNotifyWhen.THROTTLE,
+          throttle,
+        },
       });
     }
 
-    const {
-      defaultParams: params = {},
-      name,
-      id: alertTypeId,
-      throttle = '1d',
-      interval = '1m',
-    } = this.ruleOptions;
     return await rulesClient.create<RuleTypeParams>({
       data: {
         enabled: true,
@@ -155,8 +169,6 @@ export class BaseRule {
         consumer: 'monitoring',
         name,
         alertTypeId,
-        throttle,
-        notifyWhen: null,
         schedule: { interval },
         actions: ruleActions,
       },
@@ -179,14 +191,16 @@ export class BaseRule {
           return accum;
         }
         const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
-        const filteredAlertInstance = this.filterAlertInstance(alertInstance, filters);
+        const { state, ...filteredAlertInstance } = this.filterAlertInstance(
+          alertInstance,
+          filters
+        );
         if (filteredAlertInstance) {
-          accum[instanceId] = filteredAlertInstance as RawAlertInstance;
-          if (filteredAlertInstance.state) {
-            accum[instanceId].state = {
-              alertStates: (filteredAlertInstance.state as AlertInstanceState).alertStates,
-            };
-          }
+          accum[instanceId] = {
+            ...filteredAlertInstance,
+            // Only keep "alertStates" within the state
+            ...(state ? { state: { alertStates: state.alertStates } } : {}),
+          } as RawAlertInstance;
         }
         return accum;
       },

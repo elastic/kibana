@@ -14,13 +14,13 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
-          class="euiModal euiModal--maxWidth-default"
+          class="euiModal emotion-euiModal-defaultMaxWidth"
           data-test-subj="EditModal"
           tabindex="0"
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -31,22 +31,20 @@ Object {
             />
           </button>
           <div
-            class="euiModalHeader"
+            class="euiModalHeader emotion-euiModalHeader"
           >
-            <div
-              class="euiModalHeader__title"
+            <h1
+              class="euiTitle euiModalHeader__title emotion-euiTitle-m"
               data-test-subj="editModalTitle"
             >
-              <h1>
-                Edit list name
-              </h1>
-            </div>
+              Edit list name
+            </h1>
           </div>
           <div
-            class="euiModalBody"
+            class="euiModalBody emotion-euiModalBody"
           >
             <div
-              class="euiModalBody__overflow"
+              class="euiModalBody__overflow emotion-euiModalBody__overflow"
             >
               <form
                 class="euiForm"
@@ -79,7 +77,6 @@ Object {
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          aria-invalid="false"
                           class="euiFieldText euiFieldText--fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
@@ -109,40 +106,48 @@ Object {
                   <div
                     class="euiFormRow__fieldWrapper"
                   >
-                    <textarea
-                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
-                      data-test-subj="editModalDescriptionTextField"
-                      id="generated-id"
-                      name="description"
-                      rows="6"
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea"
                     >
-                      list description
-                    </textarea>
+                      <div
+                        class="euiFormControlLayout__childrenWrapper"
+                      >
+                        <textarea
+                          class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                          data-test-subj="editModalDescriptionTextField"
+                          id="generated-id"
+                          name="description"
+                          rows="6"
+                        >
+                          list description
+                        </textarea>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </form>
             </div>
           </div>
           <div
-            class="euiModalFooter"
+            class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="editModalCancelBtn"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
               data-test-subj="editModalSaveBtn"
               form="modalForm_generated-id"
               type="submit"

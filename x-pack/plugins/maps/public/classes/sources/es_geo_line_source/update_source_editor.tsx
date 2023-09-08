@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, Component } from 'react';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField, DataView } from '@kbn/data-plugin/common';
@@ -14,11 +13,14 @@ import { indexPatterns } from '@kbn/data-plugin/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
-import { AggDescriptor } from '../../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../source';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
+  bucketsName: string;
   indexPatternId: string;
+  groupByTimeseries: boolean;
+  lineSimplificationSize: number;
   splitField: string;
   sortField: string;
   metrics: AggDescriptor[];
@@ -69,12 +71,20 @@ export class UpdateSourceEditor extends Component<Props, State> {
     this.props.onChange({ propName: 'metrics', value: metrics });
   };
 
-  _onSplitFieldChange = (fieldName: string) => {
-    this.props.onChange({ propName: 'splitField', value: fieldName });
+  _onGroupByTimeseriesChange = (value: boolean) => {
+    this.props.onChange({ propName: 'groupByTimeseries', value });
   };
 
-  _onSortFieldChange = (fieldName: string) => {
-    this.props.onChange({ propName: 'sortField', value: fieldName });
+  _onLineSimplificationSizeChange = (value: number) => {
+    this.props.onChange({ propName: 'lineSimplificationSize', value });
+  };
+
+  _onSplitFieldChange = (value: string) => {
+    this.props.onChange({ propName: 'splitField', value });
+  };
+
+  _onSortFieldChange = (value: string) => {
+    this.props.onChange({ propName: 'sortField', value });
   };
 
   render() {
@@ -96,6 +106,8 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
           <MetricsEditor
             allowMultipleMetrics={true}
+            bucketsName={this.props.bucketsName}
+            isJoin={false}
             fields={this.state.fields}
             metrics={this.props.metrics}
             onChange={this._onMetricsChange}
@@ -114,9 +126,14 @@ export class UpdateSourceEditor extends Component<Props, State> {
           </EuiTitle>
           <EuiSpacer size="m" />
           <GeoLineForm
+            isColumnCompressed={true}
             indexPattern={this.state.indexPattern}
+            onGroupByTimeseriesChange={this._onGroupByTimeseriesChange}
+            onLineSimplificationSizeChange={this._onLineSimplificationSizeChange}
             onSortFieldChange={this._onSortFieldChange}
             onSplitFieldChange={this._onSplitFieldChange}
+            groupByTimeseries={this.props.groupByTimeseries}
+            lineSimplificationSize={this.props.lineSimplificationSize}
             sortField={this.props.sortField}
             splitField={this.props.splitField}
           />

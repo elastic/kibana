@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Metricbeat filesystem: Detect unusual increases in disk utilization (ECS)",
   "groups": [
     "metricbeat"

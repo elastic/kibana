@@ -28,7 +28,9 @@ export class KqlTelemetryService implements Plugin<void> {
 
     if (usageCollection) {
       try {
-        makeKQLUsageCollector(usageCollection, savedObjects.getKibanaIndex());
+        const getIndexForType = (type: string) =>
+          getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+        makeKQLUsageCollector(usageCollection, getIndexForType);
       } catch (e) {
         this.initializerContext.logger
           .get('kql-telemetry')

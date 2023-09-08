@@ -15,9 +15,12 @@ describe('Cloud Chat Plugin', () => {
   describe('#setup', () => {
     describe('setupChat', () => {
       let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
+      let newTrialEndDate: Date;
 
       beforeEach(() => {
         consoleMock = jest.spyOn(console, 'debug').mockImplementation(() => {});
+        newTrialEndDate = new Date();
+        newTrialEndDate.setDate(new Date().getDate() + 14);
       });
 
       afterEach(() => {
@@ -30,12 +33,14 @@ describe('Cloud Chat Plugin', () => {
         currentUserProps = {},
         isCloudEnabled = true,
         failHttp = false,
+        trialEndDate = newTrialEndDate,
       }: {
         config?: Partial<CloudChatConfigType>;
         securityEnabled?: boolean;
         currentUserProps?: Record<string, any>;
         isCloudEnabled?: boolean;
         failHttp?: boolean;
+        trialEndDate?: Date;
       }) => {
         const initContext = coreMock.createPluginInitializerContext(config);
 
@@ -59,12 +64,17 @@ describe('Cloud Chat Plugin', () => {
 
         const cloud = cloudMock.createSetup();
 
+        const cloudChatProvider = {
+          registerChatProvider: jest.fn(),
+        };
+
         plugin.setup(coreSetup, {
-          cloud: { ...cloud, isCloudEnabled },
+          cloud: { ...cloud, isCloudEnabled, trialEndDate },
           ...(securityEnabled ? { security: securitySetup } : {}),
+          cloudChatProvider,
         });
 
-        return { initContext, plugin, coreSetup };
+        return { initContext, plugin, coreSetup, cloudChatProvider };
       };
 
       it('chatConfig is not retrieved if cloud is not enabled', async () => {
@@ -85,18 +95,34 @@ describe('Cloud Chat Plugin', () => {
 
       it('chatConfig is not retrieved if internal API fails', async () => {
         const { coreSetup } = await setupPlugin({
-          config: { chatURL: 'http://chat.elastic.co' },
+          config: { chatURL: 'http://chat.elastic.co', trialBuffer: 30 },
           failHttp: true,
         });
         expect(coreSetup.http.get).toHaveBeenCalled();
         expect(consoleMock).toHaveBeenCalled();
       });
 
-      it('chatConfig is retrieved if chat is enabled and url is provided', async () => {
+      it('chatConfig is not retrieved if chat is enabled and url is provided but trial has expired', async () => {
+        const date = new Date();
+        date.setDate(new Date().getDate() - 44);
         const { coreSetup } = await setupPlugin({
-          config: { chatURL: 'http://chat.elastic.co' },
+          config: { chatURL: 'http://chat.elastic.co', trialBuffer: 30 },
+          trialEndDate: date,
+        });
+        expect(coreSetup.http.get).not.toHaveBeenCalled();
+      });
+
+      it('chatConfig is retrieved if chat is enabled and url is provided and trial is active', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { chatURL: 'http://chat.elastic.co', trialBuffer: 30 },
+          trialEndDate: new Date(),
         });
         expect(coreSetup.http.get).toHaveBeenCalled();
+      });
+
+      it('Chat component is registered with chatProvider plugin', async () => {
+        const { cloudChatProvider } = await setupPlugin({});
+        expect(cloudChatProvider.registerChatProvider).toBeCalled();
       });
     });
   });

@@ -10,13 +10,10 @@ import type { Observable } from 'rxjs';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { TableById } from '@kbn/timelines-plugin/public/types';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type {
-  ColumnHeaderOptions,
-  RowRendererId,
-  SortColumnTimeline,
-} from '../../../../common/types';
+import type { TableById } from '@kbn/securitysolution-data-table';
+import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../../common/types';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import type { NotesById } from '../../../common/store/app/model';
 

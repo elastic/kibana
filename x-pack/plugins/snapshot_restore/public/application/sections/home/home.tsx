@@ -7,7 +7,8 @@
 
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
@@ -130,7 +131,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
 
       <EuiSpacer size="l" />
 
-      <Switch>
+      <Routes>
         <Route
           exact
           path={`${BASE_PATH}/repositories/:repositoryName*`}
@@ -147,7 +148,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
         />
         <Route exact path={`${BASE_PATH}/restore_status`} component={RestoreList} />
         <Route exact path={`${BASE_PATH}/policies/:policyName*`} component={PolicyList} />
-      </Switch>
+      </Routes>
     </>
   );
 };

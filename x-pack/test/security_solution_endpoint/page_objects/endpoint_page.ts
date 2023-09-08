@@ -53,8 +53,8 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
       });
     },
 
-    async waitForTableToNotHaveData(dataTestSubj: string) {
-      await retry.waitForWithTimeout('table to not have data', 2000, async () => {
+    async waitForTableToNotHaveData(dataTestSubj: string, timeout = 2000) {
+      await retry.waitForWithTimeout('table to not have data', timeout, async () => {
         const tableData = await pageObjects.endpointPageUtils.tableData(dataTestSubj);
         if (tableData[1][0] === 'No items found') {
           return true;
@@ -144,11 +144,21 @@ export function EndpointPageProvider({ getService, getPageObjects }: FtrProvider
      * will be opened. If not, then the first endpoint on the list will be used.
      */
     async showResponderFromEndpointList(endpointAgentId?: string) {
-      const endpointRow = await this.getEndpointTableRow(endpointAgentId);
+      testSubjects.retry.waitFor(
+        `opening table row action menu ${
+          endpointAgentId ? `for endpoint id: ${endpointAgentId}` : 'for first row in the table'
+        }`,
+        async () => {
+          const endpointRow = await this.getEndpointTableRow(endpointAgentId);
 
-      // Click the row menu
-      await (await testSubjects.findDescendant('endpointTableRowActions', endpointRow)).click();
-      await testSubjects.existOrFail('tableRowActionsMenuPanel');
+          // Click the row menu
+          await (await testSubjects.findDescendant('endpointTableRowActions', endpointRow)).click();
+          await testSubjects.existOrFail('tableRowActionsMenuPanel');
+
+          return true;
+        }
+      );
+
       const rowMenuPanel = await testSubjects.findDescendant(
         'console',
         await testSubjects.find('tableRowActionsMenuPanel')

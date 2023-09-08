@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
+export type {
+  ApiKey,
+  RestApiKey,
+  CrossClusterApiKey,
+  ApiKeyToInvalidate,
+  ApiKeyRoleDescriptors,
+  CrossClusterApiKeyAccess,
+} from './api_key';
 export type { User, EditUser, GetUserDisplayNameParams } from './user';
 export type {
   GetUserProfileResponse,
@@ -15,7 +22,6 @@ export type {
   UserProfileData,
   UserProfileLabels,
   UserProfileUserInfoWithSecurity,
-  UserProfileAvatarData,
 } from './user_profile';
 export {
   getUserAvatarColor,
@@ -35,7 +41,12 @@ export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';
 export type { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
 export type { FeaturesPrivileges } from './features_privileges';
-export type { Role, RoleIndexPrivilege, RoleKibanaPrivilege } from './role';
+export type {
+  Role,
+  RoleIndexPrivilege,
+  RoleRemoteIndexPrivilege,
+  RoleKibanaPrivilege,
+} from './role';
 export {
   copyRole,
   isRoleDeprecated,

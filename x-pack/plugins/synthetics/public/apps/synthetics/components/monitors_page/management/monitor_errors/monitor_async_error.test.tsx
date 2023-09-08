@@ -82,6 +82,7 @@ describe('<MonitorAsyncError />', () => {
         sortOrder: 'asc',
         sortField: `${ConfigKey.NAME}.keyword`,
       },
+      monitorFilterOptions: null,
     } as MonitorListState,
   };
 

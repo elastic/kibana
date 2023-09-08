@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
-
 import path from 'path';
-import fs from 'fs';
+
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -58,42 +58,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    // Find all folders in ./fixtures/plugins
-    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
-    const plugins = allFiles.filter((file) =>
-      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
-    );
-
-    // This is needed so that we can correctly use the alerting test frameworks mock implementation for the connectors.
-    const alertingAllFiles = fs.readdirSync(
-      path.resolve(
-        __dirname,
-        '..',
-        '..',
-        'alerting_api_integration',
-        'common',
-        'fixtures',
-        'plugins'
-      )
-    );
-
-    const alertingPlugins = alertingAllFiles.filter((file) =>
-      fs
-        .statSync(
-          path.resolve(
-            __dirname,
-            '..',
-            '..',
-            'alerting_api_integration',
-            'common',
-            'fixtures',
-            'plugins',
-            file
-          )
-        )
-        .isDirectory()
-    );
-
     return {
       testFiles,
       servers,
@@ -123,24 +87,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          // Actions simulators plugin. Needed for testing push to external services.
-          ...alertingPlugins.map(
-            (pluginDir) =>
-              `--plugin-path=${path.resolve(
-                __dirname,
-                '..',
-                '..',
-                'alerting_api_integration',
-                'common',
-                'fixtures',
-                'plugins',
-                pluginDir
-              )}`
-          ),
-          ...plugins.map(
-            (pluginDir) =>
-              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
-          ),
+          ...findTestPluginPaths([
+            path.resolve(__dirname, 'plugins'),
+            path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
+          ]),
           `--xpack.actions.preconfigured=${JSON.stringify({
             'preconfigured-servicenow': {
               name: 'preconfigured-servicenow',

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorSyncJob } from '../../../../../common/types/connectors';
+import { ConnectorSyncJob } from '@kbn/search-connectors';
+
 import { Paginate } from '../../../../../common/types/pagination';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
@@ -13,15 +14,21 @@ import { HttpLogic } from '../../../shared/http';
 
 export interface FetchSyncJobsArgs {
   connectorId: string;
-  page?: number;
+  from?: number;
   size?: number;
+  type?: 'content' | 'access_control';
 }
 
 export type FetchSyncJobsResponse = Paginate<ConnectorSyncJob>;
 
-export const fetchSyncJobs = async ({ connectorId, page = 0, size = 10 }: FetchSyncJobsArgs) => {
+export const fetchSyncJobs = async ({
+  connectorId,
+  from = 0,
+  size = 10,
+  type,
+}: FetchSyncJobsArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/sync_jobs`;
-  const query = { page, size };
+  const query = { from, size, type };
   return await HttpLogic.values.http.get<Paginate<ConnectorSyncJob>>(route, { query });
 };
 

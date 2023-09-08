@@ -9,11 +9,17 @@
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
 import { Reference } from '../references';
-import { Type, TypeOptions } from './type';
+import { ExtendsDeepOptions, Type, TypeOptions } from './type';
 
 export type ConditionalTypeValue = string | number | boolean | object | null;
 
 export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<B | C> {
+  private readonly leftOperand: Reference<A>;
+  private readonly rightOperand: Reference<A> | A | Type<unknown>;
+  private readonly equalType: Type<B>;
+  private readonly notEqualType: Type<C>;
+  private readonly options?: TypeOptions<B | C>;
+
   constructor(
     leftOperand: Reference<A>,
     rightOperand: Reference<A> | A | Type<unknown>,
@@ -31,6 +37,21 @@ export class ConditionalType<A extends ConditionalTypeValue, B, C> extends Type<
     });
 
     super(schema, options);
+    this.leftOperand = leftOperand;
+    this.rightOperand = rightOperand;
+    this.equalType = equalType;
+    this.notEqualType = notEqualType;
+    this.options = options;
+  }
+
+  public extendsDeep(options: ExtendsDeepOptions) {
+    return new ConditionalType(
+      this.leftOperand,
+      this.rightOperand,
+      this.equalType.extendsDeep(options),
+      this.notEqualType.extendsDeep(options),
+      this.options
+    );
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {

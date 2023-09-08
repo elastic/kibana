@@ -6,16 +6,15 @@
  */
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 
-import type { SavedTimeline } from '../../../../../../common/types/timeline';
+import type { SavedTimeline, Note } from '../../../../../../common/api/timeline';
 import type { TimelineStatusActions } from '../../../utils/common';
-import type { NoteResult } from '../../../../../../common/types/timeline/note';
 
 export type ImportedTimeline = SavedTimeline & {
   savedObjectId: string | null;
   version: string | null;
   pinnedEventIds: string[];
-  globalNotes: NoteResult[];
-  eventNotes: NoteResult[];
+  globalNotes: Note[];
+  eventNotes: Note[];
 };
 
 export type PromiseFromStreams = ImportedTimeline;

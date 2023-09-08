@@ -78,7 +78,7 @@ describe('Layer Data Panel', () => {
     expect(instance.find(ChangeIndexPattern).prop('trigger')).toStrictEqual({
       fontWeight: 'normal',
       isDisabled: true,
-      label: 'My fake index pattern',
+      label: 'my-fake-index-pattern',
       size: 's',
       title: 'my-fake-index-pattern',
     });

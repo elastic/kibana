@@ -98,6 +98,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
   const minVersion = useMemo(() => {
     if (!Array.isArray(agents)) {
+      // when agent is a query, don't set minVersion, so the versions are available to select
+      if (typeof agents === 'string') {
+        return undefined;
+      }
       return getMinVersion(availableVersions);
     }
     const versions = (agents as Agent[]).map(
@@ -368,20 +372,20 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           label={
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableLabel', {
-                  defaultMessage: 'Maintenance window available',
+                {i18n.translate('xpack.fleet.upgradeAgents.rolloutPeriodLabel', {
+                  defaultMessage: 'Rollout period',
                 })}
               </EuiFlexItem>
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
-                  content={i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableTooltip', {
+                  content={i18n.translate('xpack.fleet.upgradeAgents.rolloutPeriodTooltip', {
                     defaultMessage:
-                      'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
+                      'Define the rollout period for upgrades to your Elastic Agents. Any agents that are offline during this period will be upgraded when they come back online.',
                   })}
                 >
-                  <EuiIcon type="iInCircle" title="TooltipIcon" />
+                  <EuiIcon type="iInCircle" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>

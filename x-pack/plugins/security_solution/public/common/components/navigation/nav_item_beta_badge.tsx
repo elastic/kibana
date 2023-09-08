@@ -20,6 +20,8 @@ export const NavItemBetaBadge = ({ text, className }: { text?: string; className
       css={css`
         margin-left: ${euiTheme.size.s};
         color: ${euiTheme.colors.text};
+        vertical-align: middle;
+        margin-bottom: ${euiTheme.size.xxs};
       `}
       className={className}
     />

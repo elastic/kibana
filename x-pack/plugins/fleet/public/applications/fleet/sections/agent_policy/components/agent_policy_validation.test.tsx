@@ -39,4 +39,12 @@ describe('Agent Policy form validation', () => {
     });
     expect(result.unenroll_timeout).toBeDefined();
   });
+  it('should return error when agentPolicy has negative inactivity timeout', () => {
+    const result = agentPolicyFormValidation({
+      namespace: 'Default',
+      name: 'policy',
+      inactivity_timeout: -1,
+    });
+    expect(result.inactivity_timeout).toBeDefined();
+  });
 });

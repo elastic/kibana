@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import { take, bufferCount, skip, map } from 'rxjs/operators';
@@ -26,7 +26,7 @@ import {
   SummarizedEphemeralTaskStat,
   EphemeralTaskStat,
 } from './ephemeral_task_statistics';
-import { AggregatedStat } from './runtime_statistics_aggregator';
+import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { ephemeralTaskLifecycleMock } from '../ephemeral_task_lifecycle.mock';
 import { times, takeRight, take as takeLeft } from 'lodash';
 
@@ -366,7 +366,7 @@ const mockTaskRunEvent = (
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
-  id: uuid.v4(),
+  id: uuidv4(),
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',

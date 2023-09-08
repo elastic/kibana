@@ -25,9 +25,10 @@ export interface JobServiceProvider {
 export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider {
   return {
     jobServiceProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         jobsSummary: async (...args) => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(({ scopedClient, mlClient }) => {
@@ -36,7 +37,7 @@ export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider 
             });
         },
         forceStartDatafeeds: async (...args) => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canStartStopDatafeed'])
             .ok(({ scopedClient, mlClient }) => {
@@ -45,7 +46,7 @@ export function getJobServiceProvider(getGuards: GetGuards): JobServiceProvider 
             });
         },
         stopDatafeeds: async (...args) => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canStartStopDatafeed'])
             .ok(({ scopedClient, mlClient }) => {

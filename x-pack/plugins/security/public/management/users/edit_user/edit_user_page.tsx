@@ -29,15 +29,15 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { getUserDisplayName } from '../../../../common/model';
-import { useCapabilities } from '../../../components/use_capabilities';
-import { UserAPIClient } from '../user_api_client';
-import { isUserDeprecated, isUserReserved } from '../user_utils';
 import { ChangePasswordModal } from './change_password_modal';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
 import { ConfirmDisableUsers } from './confirm_disable_users';
 import { ConfirmEnableUsers } from './confirm_enable_users';
 import { UserForm } from './user_form';
+import { getUserDisplayName } from '../../../../common/model';
+import { useCapabilities } from '../../../components/use_capabilities';
+import { UserAPIClient } from '../user_api_client';
+import { isUserDeprecated, isUserReserved } from '../user_utils';
 
 export interface EditUserPageProps {
   username: string;
@@ -111,7 +111,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 defaultMessage="This user is deprecated."
               />
             }
-            iconType="alert"
+            iconType="warning"
             color="warning"
           >
             {user.metadata?._deprecated_reason?.replace(/\[(.+)\]/, "'$1'")}

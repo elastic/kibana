@@ -1,0 +1,13 @@
+in: query
+name: assignees
+description: >
+  Filters the returned cases by assignees.
+  Valid values are `none` or unique identifiers for the user profiles.
+  These identifiers can be found by using the suggest user profile API.
+schema:
+  oneOf:
+    - type: string
+    - type: array
+      items:
+        type: string
+      maxItems: 100

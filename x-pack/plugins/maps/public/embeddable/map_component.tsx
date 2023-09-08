@@ -6,26 +6,21 @@
  */
 
 import React, { Component, RefObject } from 'react';
-import uuid from 'uuid/v4';
-import { EuiLoadingChart } from '@elastic/eui';
+import { first } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 import type { MapEmbeddableType } from './types';
-import type { LazyLoadedMapModules } from '../lazy_load_bundle';
-import { lazyLoadMapModules } from '../lazy_load_bundle';
+import { MapEmbeddable } from './map_embeddable';
+import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 
 interface Props {
   title: string;
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
-  getLayerDescriptors: (
-    mapModules: Pick<
-      LazyLoadedMapModules,
-      'createTileMapLayerDescriptor' | 'createRegionMapLayerDescriptor'
-    >
-  ) => LayerDescriptor[];
+  getLayerDescriptors: () => LayerDescriptor[];
   mapCenter?: MapCenterAndZoom;
   onInitialRenderComplete?: () => void;
   /*
@@ -34,80 +29,64 @@ interface Props {
   isSharable?: boolean;
 }
 
-interface State {
-  isLoaded: boolean;
-}
-
-export class MapComponent extends Component<Props, State> {
-  private _isMounted = false;
-  private _mapEmbeddable?: MapEmbeddableType | undefined;
+export class MapComponent extends Component<Props> {
+  private _mapEmbeddable: MapEmbeddableType;
   private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
 
-  state: State = { isLoaded: false };
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._load();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-    if (this._mapEmbeddable) {
-      this._mapEmbeddable.destroy();
-    }
-  }
-
-  componentDidUpdate() {
-    if (this._mapEmbeddable) {
-      this._mapEmbeddable.updateInput({
-        filters: this.props.filters,
-        query: this.props.query,
-        timeRange: this.props.timeRange,
-      });
-    }
-  }
-
-  async _load() {
-    const mapModules = await lazyLoadMapModules();
-    if (!this._isMounted) {
-      return;
-    }
-
-    this.setState({ isLoaded: true });
-
-    this._mapEmbeddable = new mapModules.MapEmbeddable(
+  constructor(props: Props) {
+    super(props);
+    this._mapEmbeddable = new MapEmbeddable(
       {
         editable: false,
       },
       {
-        id: uuid(),
+        id: uuidv4(),
         attributes: {
           title: this.props.title,
           layerListJSON: JSON.stringify([
-            mapModules.createBasemapLayerDescriptor(),
-            ...this.props.getLayerDescriptors({
-              createRegionMapLayerDescriptor: mapModules.createRegionMapLayerDescriptor,
-              createTileMapLayerDescriptor: mapModules.createTileMapLayerDescriptor,
-            }),
+            createBasemapLayerDescriptor(),
+            ...this.props.getLayerDescriptors(),
           ]),
         },
         mapCenter: this.props.mapCenter,
       }
     );
-    this._mapEmbeddable.setOnInitialRenderComplete(this.props.onInitialRenderComplete);
+
+    if (this.props.onInitialRenderComplete) {
+      this._mapEmbeddable
+        .getOnRenderComplete$()
+        .pipe(first())
+        .subscribe(() => {
+          if (this.props.onInitialRenderComplete) {
+            this.props.onInitialRenderComplete();
+          }
+        });
+    }
+
     if (this.props.isSharable !== undefined) {
       this._mapEmbeddable.setIsSharable(this.props.isSharable);
     }
+  }
+
+  componentDidMount() {
     if (this._embeddableRef.current) {
       this._mapEmbeddable.render(this._embeddableRef.current);
     }
   }
 
-  render() {
-    if (!this.state.isLoaded) {
-      return <EuiLoadingChart mono size="l" />;
-    }
+  componentWillUnmount() {
+    this._mapEmbeddable.destroy();
+  }
 
+  componentDidUpdate() {
+    this._mapEmbeddable.updateInput({
+      filters: this.props.filters,
+      query: this.props.query,
+      timeRange: this.props.timeRange,
+    });
+  }
+
+  render() {
     return <div className="mapEmbeddableContainer" ref={this._embeddableRef} />;
   }
 }

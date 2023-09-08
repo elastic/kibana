@@ -18,20 +18,30 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
 export interface PluginsDependencies {
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   management: ManagementSetup;
   home: HomePublicPluginSetup;
   savedObjects: SavedObjectsStart;
+  savedSearch: SavedSearchPublicPluginStart;
   share: SharePluginStart;
   spaces?: SpacesApi;
   alerting?: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export class TransformUiPlugin {

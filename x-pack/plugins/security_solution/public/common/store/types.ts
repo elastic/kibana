@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import type { Dispatch, Action, Middleware, CombinedState } from 'redux';
+import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
 
 import type { CoreStart } from '@kbn/core/public';
+import type { DataTableState } from '@kbn/securitysolution-data-table';
 import type { StartPlugins } from '../../types';
 import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { AppState } from './app/reducer';
 import type { InputsState } from './inputs/reducer';
 import type { SourcererState } from './sourcerer/reducer';
-import type { HostsPluginState } from '../../hosts/store';
+import type { HostsPluginState } from '../../explore/hosts/store';
 import type { DragAndDropState } from './drag_and_drop/reducer';
 import type { TimelinePluginState } from '../../timelines/store/timeline';
-import type { NetworkPluginState } from '../../network/store';
+import type { NetworkPluginState } from '../../explore/network/store';
 import type { ManagementPluginState } from '../../management';
-import type { UsersPluginState } from '../../users/store';
+import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
-import type { DataTableState } from './data_table/types';
+import type { GroupState } from './grouping/types';
+import type { SecuritySolutionDiscoverState } from './discover/model';
+import type { AnalyzerState } from '../../resolver/types';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -34,7 +37,14 @@ export type State = HostsPluginState &
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
-  } & DataTableState;
+    discover: SecuritySolutionDiscoverState;
+  } & DataTableState &
+  GroupState &
+  AnalyzerState;
+/**
+ * The Redux store type for the Security app.
+ */
+export type SecurityAppStore = Store<State, Action>;
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of

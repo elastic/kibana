@@ -274,9 +274,9 @@ export const getConfiguration = (
       ? Boolean(vis.params.addTimeMarker ?? vis.type.visConfig.defaults.addTimeMarker)
       : undefined,
     curveType: getCurveType(
-      series[0].interpolate === InterpolationMode.StepAfter
+      series[0]?.interpolate === InterpolationMode.StepAfter
         ? InterpolationMode.Linear
-        : series[0].interpolate
+        : series[0]?.interpolate
     ),
   };
 };

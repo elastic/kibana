@@ -14,6 +14,7 @@ export type StaticPage =
   | 'policies'
   | 'policies_list'
   | 'enrollment_tokens'
+  | 'uninstall_tokens'
   | 'data_streams'
   | 'settings'
   | 'settings_create_outputs'
@@ -72,6 +73,7 @@ export const FLEET_ROUTING_PATHS = {
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
   upgrade_package_policy: '/policies/:policyId/upgrade-package-policy/:packagePolicyId',
   enrollment_tokens: '/enrollment-tokens',
+  uninstall_tokens: '/uninstall-tokens',
   data_streams: '/data-streams',
   settings: '/settings',
   settings_create_fleet_server_hosts: '/settings/create-fleet-server-hosts',
@@ -91,7 +93,7 @@ export const FLEET_ROUTING_PATHS = {
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
-  integrations_all: '/browse/:category?',
+  integrations_all: '/browse/:category?/:subcategory?',
   integrations_installed: '/installed/:category?',
   integrations_installed_updates_available: '/installed/updates_available/:category?',
   integration_details: '/detail/:pkgkey/:panel?',
@@ -114,8 +116,21 @@ export const pagePathGetters: {
   base: () => [FLEET_BASE_PATH, '/'],
   overview: () => [FLEET_BASE_PATH, '/'],
   integrations: () => [INTEGRATIONS_BASE_PATH, '/'],
-  integrations_all: ({ searchTerm, category }: { searchTerm?: string; category?: string }) => {
-    const categoryPath = category ? `/${category}` : ``;
+  integrations_all: ({
+    searchTerm,
+    category,
+    subCategory,
+  }: {
+    searchTerm?: string;
+    category?: string;
+    subCategory?: string;
+  }) => {
+    const categoryPath =
+      category && subCategory
+        ? `/${category}/${subCategory} `
+        : category && !subCategory
+        ? `/${category}`
+        : ``;
     const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
   },
@@ -207,6 +222,7 @@ export const pagePathGetters: {
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
+  uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
   settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
   settings_edit_fleet_server_hosts: ({ itemId }) => [

@@ -283,14 +283,16 @@ describe('Event filter form', () => {
       userEvent.click(renderResult.getByTestId('perPolicy'));
       rerenderWithLatestProps();
       // policy selector should show up
-      expect(renderResult.getByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      expect(
+        renderResult.getByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeTruthy();
     });
 
     it('should call onChange when a policy is selected from the policy selection', async () => {
       formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
       render();
       const policyId = formProps.policies[0].id;
-      userEvent.click(renderResult.getByTestId('effectedPolicies-select-perPolicy'));
+      userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
       userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
       formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
       rerender();
@@ -319,7 +321,9 @@ describe('Event filter form', () => {
       userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
       formProps.item.tags = formProps.onChange.mock.calls[0][0].item.tags;
       rerender();
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      expect(
+        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeTruthy();
       expect(formProps.item.tags).toEqual([`policy:${policyId}`]);
 
       // move back to global
@@ -327,7 +331,9 @@ describe('Event filter form', () => {
       formProps.item.tags = ['policy:all'];
       rerenderWithLatestProps();
       expect(formProps.item.tags).toEqual(['policy:all']);
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
+      expect(
+        renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
+      ).toBeFalsy();
 
       // move back to per-policy
       userEvent.click(renderResult.getByTestId('perPolicy'));
@@ -357,14 +363,14 @@ describe('Event filter form', () => {
       render();
       formProps.item.tags = ['policy:all'];
       rerender();
-      expect(renderResult.queryByTestId('effectedPolicies-select')).toBeNull();
+      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
     });
 
     it('should hide assignment section when create mode and no license even with by policy', () => {
       render();
       formProps.mode = 'create';
       rerender();
-      expect(renderResult.queryByTestId('effectedPolicies-select')).toBeNull();
+      expect(renderResult.queryByTestId(`${formPrefix}-effectedPolicies`)).toBeNull();
     });
 
     it('should show disabled assignment section when edit mode and no license with by policy', async () => {

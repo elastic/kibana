@@ -8,12 +8,17 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
-import { type AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+} from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
+import type { DataViewsState } from '../../state_management';
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
@@ -64,9 +69,12 @@ export async function getStateFromAggregateQuery(
   query: AggregateQuery,
   dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
-  expressions: ExpressionsStart
+  expressions: ExpressionsStart,
+  frameDataViews?: DataViewsState
 ) {
-  const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
+  let indexPatternRefs: IndexPatternRef[] = frameDataViews?.indexPatternRefs.length
+    ? frameDataViews.indexPatternRefs
+    : await loadIndexPatternRefs(dataViews);
   const errors: Error[] = [];
   const layerIds = Object.keys(state.layers);
   const context = state.initialContext;
@@ -74,14 +82,30 @@ export async function getStateFromAggregateQuery(
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromTextBasedQuery(query);
   // get the id of the dataview
-  const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
+  let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
   let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
-    const table = await fetchDataFromAggregateQuery(query, dataViews, data, expressions);
-    const dataView = await dataViews.get(index);
+    const dataView = await dataViews.create({
+      title: indexPattern,
+    });
+    if (dataView && dataView.id) {
+      if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {
+        dataView.timeFieldName = '@timestamp';
+      }
+      dataViewId = dataView?.id;
+      indexPatternRefs = [
+        ...indexPatternRefs,
+        {
+          id: dataView.id,
+          title: dataView.name,
+          timeField: dataView.timeFieldName,
+        },
+      ];
+    }
     timeFieldName = dataView.timeFieldName;
+    const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
     allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
@@ -91,7 +115,7 @@ export async function getStateFromAggregateQuery(
   const tempState = {
     layers: {
       [newLayerId]: {
-        index,
+        index: dataViewId,
         query,
         columns: state.layers[newLayerId].columns ?? [],
         allColumns,
@@ -114,6 +138,9 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   // sql queries
   if ('sql' in query) {
     indexPattern = getIndexPatternFromSQLQuery(query.sql);
+  }
+  if ('esql' in query) {
+    indexPattern = getIndexPatternFromESQLQuery(query.esql);
   }
   // other textbased queries....
 

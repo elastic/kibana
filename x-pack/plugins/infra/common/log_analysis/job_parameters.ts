@@ -16,11 +16,11 @@ export const partitionField = 'event.dataset';
 export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
   `kibana-logs-ui-${spaceId}-${sourceId}-`;
 
-export const getJobId = (spaceId: string, sourceId: string, jobType: string) =>
-  `${getJobIdPrefix(spaceId, sourceId)}${jobType}`;
+export const getJobId = (spaceId: string, logViewId: string, jobType: string) =>
+  `${getJobIdPrefix(spaceId, logViewId)}${jobType}`;
 
-export const getDatafeedId = (spaceId: string, sourceId: string, jobType: string) =>
-  `datafeed-${getJobId(spaceId, sourceId, jobType)}`;
+export const getDatafeedId = (spaceId: string, logViewId: string, jobType: string) =>
+  `datafeed-${getJobId(spaceId, logViewId, jobType)}`;
 
 export const datasetFilterRT = rt.union([
   rt.strict({

@@ -13,6 +13,10 @@ import { OverviewGrid } from './overview_grid';
 import * as hooks from '../../../../hooks/use_last_50_duration_chart';
 
 describe('Overview Grid', () => {
+  const locationIdToName: Record<string, string> = {
+    us_central: 'Us Central',
+    us_east: 'US East',
+  };
   const getMockData = (): MonitorOverviewItem[] => {
     const data: MonitorOverviewItem[] = [];
     for (let i = 0; i < 20; i++) {
@@ -25,6 +29,10 @@ describe('Overview Grid', () => {
         },
         name: `Monitor ${i}`,
         isEnabled: true,
+        isStatusAlertEnabled: true,
+        type: 'browser',
+        tags: [],
+        schedule: '60',
       });
       data.push({
         id: `${i}`,
@@ -35,6 +43,10 @@ describe('Overview Grid', () => {
         },
         name: `Monitor ${i}`,
         isEnabled: true,
+        isStatusAlertEnabled: true,
+        type: 'browser',
+        tags: [],
+        schedule: '60',
       });
     }
     return data;
@@ -54,9 +66,14 @@ describe('Overview Grid', () => {
   const perPage = 20;
 
   it('renders correctly', async () => {
-    jest
-      .spyOn(hooks, 'useLast50DurationChart')
-      .mockReturnValue({ data: getMockChart(), averageDuration: 30000, loading: false });
+    jest.spyOn(hooks, 'useLast50DurationChart').mockReturnValue({
+      data: getMockChart(),
+      avgDuration: 30000,
+      minDuration: 0,
+      maxDuration: 50000,
+      medianDuration: 15000,
+      loading: false,
+    });
 
     const { getByText, getAllByTestId, queryByText } = render(<OverviewGrid />, {
       state: {
@@ -71,9 +88,20 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+        },
+        overviewStatus: {
           status: {
-            downConfigs: [],
-            upConfigs: [],
+            downConfigs: {},
+            upConfigs: {},
+            allConfigs: getMockData().reduce((acc, cur) => {
+              acc[`${cur.id}-${locationIdToName[cur.location.id]}`] = {
+                configId: cur.configId,
+                monitorQueryId: cur.id,
+                location: locationIdToName[cur.location.id],
+                status: 'down',
+              };
+              return acc;
+            }, {} as Record<string, any>),
           },
         },
         serviceLocations: {
@@ -103,9 +131,14 @@ describe('Overview Grid', () => {
   });
 
   it('displays showing all monitors label when reaching the end of the list', async () => {
-    jest
-      .spyOn(hooks, 'useLast50DurationChart')
-      .mockReturnValue({ data: getMockChart(), averageDuration: 30000, loading: false });
+    jest.spyOn(hooks, 'useLast50DurationChart').mockReturnValue({
+      data: getMockChart(),
+      avgDuration: 30000,
+      minDuration: 0,
+      maxDuration: 50000,
+      medianDuration: 15000,
+      loading: false,
+    });
 
     const { getByText } = render(<OverviewGrid />, {
       state: {
@@ -120,9 +153,20 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+        },
+        overviewStatus: {
           status: {
-            downConfigs: [],
-            upConfigs: [],
+            downConfigs: {},
+            upConfigs: {},
+            allConfigs: getMockData().reduce((acc, cur) => {
+              acc[`${cur.id}-${locationIdToName[cur.location.id]}`] = {
+                configId: cur.configId,
+                monitorQueryId: cur.id,
+                location: locationIdToName[cur.location.id],
+                status: 'down',
+              };
+              return acc;
+            }, {} as Record<string, any>),
           },
         },
         serviceLocations: {

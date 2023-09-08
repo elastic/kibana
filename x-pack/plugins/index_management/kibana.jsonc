@@ -1,0 +1,30 @@
+{
+  "type": "plugin",
+  "id": "@kbn/index-management-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "indexManagement",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "index_management"
+    ],
+    "requiredPlugins": [
+      "home",
+      "management",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "security",
+      "usageCollection",
+      "fleet"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared",
+      "runtimeFields"
+    ]
+  }
+}

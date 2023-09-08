@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RuleParams } from '../../../rule_schema';
 import { duplicateRule } from './duplicate_rule';
@@ -62,6 +62,7 @@ describe('duplicateRule', () => {
       timestampOverrideFallbackDisabled: undefined,
       dataViewId: undefined,
       alertSuppression: undefined,
+      investigationFields: undefined,
     },
     schedule: {
       interval: '5m',
@@ -76,6 +77,7 @@ describe('duplicateRule', () => {
     mutedInstanceIds: [],
     updatedAt: new Date(2021, 0),
     createdAt: new Date(2021, 0),
+    revision: 0,
     scheduledTaskId: undefined,
     executionStatus: {
       lastExecutionDate: new Date(2021, 0),
@@ -84,7 +86,7 @@ describe('duplicateRule', () => {
   });
 
   beforeAll(() => {
-    (uuid.v4 as jest.Mock).mockReturnValue('new ruleId');
+    (uuidv4 as jest.Mock).mockReturnValue('new ruleId');
   });
 
   afterAll(() => {
@@ -108,8 +110,6 @@ describe('duplicateRule', () => {
       consumer: rule.consumer,
       schedule: rule.schedule,
       actions: rule.actions,
-      throttle: null, // TODO: fix?
-      notifyWhen: null, // TODO: fix?
       enabled: false, // covered in a separate test
     });
   });

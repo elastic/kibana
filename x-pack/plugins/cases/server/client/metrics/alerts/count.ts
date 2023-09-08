@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsResponse } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { Operations } from '../../../authorization';
 import { createCaseError } from '../../../common/error';
 import { SingleCaseBaseHandler } from '../single_case_base_handler';
@@ -13,12 +14,11 @@ import type { SingleCaseBaseHandlerCommonOptions } from '../types';
 
 export class AlertsCount extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {
-    super(options, ['alerts.count']);
+    super(options, [CaseMetricsFeature.ALERTS_COUNT]);
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      unsecuredSavedObjectsClient,
       authorization,
       services: { attachmentService },
       logger,
@@ -38,7 +38,6 @@ export class AlertsCount extends SingleCaseBaseHandler {
       );
 
       const alertsCount = await attachmentService.countAlertsAttachedToCase({
-        unsecuredSavedObjectsClient,
         caseId: theCase.id,
         filter: authorizationFilter,
       });

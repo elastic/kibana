@@ -48,8 +48,13 @@ const setup = async () => {
     versionQualifier: '-SNAPSHOT',
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   const run = createRunner({

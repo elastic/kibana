@@ -18,6 +18,8 @@ import {
   requestDiagnosticsBatch,
 } from './request_diagnostics_action_runner';
 
+const REQUEST_DIAGNOSTICS_TIMEOUT_MS = 3 * 60 * 1000; // 3 hours;
+
 export async function requestDiagnostics(
   esClient: ElasticsearchClient,
   agentId: string
@@ -26,6 +28,7 @@ export async function requestDiagnostics(
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'REQUEST_DIAGNOSTICS',
+    expiration: new Date(Date.now() + REQUEST_DIAGNOSTICS_TIMEOUT_MS).toISOString(),
   });
   return { actionId: response.id };
 }
@@ -38,19 +41,19 @@ export async function bulkRequestDiagnostics(
   }
 ): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {});
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-  const res = await getAgentsByKuery(esClient, {
+  const res = await getAgentsByKuery(esClient, soClient, {
     kuery: options.kuery,
     showInactive: false,
     page: 1,
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await requestDiagnosticsBatch(esClient, givenAgents, {});
   } else {
     return await new RequestDiagnosticsActionRunner(

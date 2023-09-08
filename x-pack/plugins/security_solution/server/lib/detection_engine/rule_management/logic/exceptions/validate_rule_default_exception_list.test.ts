@@ -39,6 +39,7 @@ describe('validateRuleDefaultExceptionList', () => {
   it('is valid if there no exceptionsList', async () => {
     const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
+      ruleRuleId: undefined,
       exceptionsList: undefined,
       rulesClient: clients.rulesClient,
     });
@@ -48,6 +49,7 @@ describe('validateRuleDefaultExceptionList', () => {
   it('is valid if there default exceptions list', async () => {
     const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
+      ruleRuleId: undefined,
       exceptionsList: [notDefaultExceptionList],
       rulesClient: clients.rulesClient,
     });
@@ -58,6 +60,7 @@ describe('validateRuleDefaultExceptionList', () => {
     await expect(
       validateRuleDefaultExceptionList({
         ruleId: '1',
+        ruleRuleId: undefined,
         exceptionsList: [defaultExceptionList, defaultExceptionList],
         rulesClient: clients.rulesClient,
       })
@@ -67,6 +70,7 @@ describe('validateRuleDefaultExceptionList', () => {
   it('is valid if there no rules with this exceptions', async () => {
     const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
+      ruleRuleId: undefined,
       exceptionsList: [defaultExceptionList],
       rulesClient: clients.rulesClient,
     });
@@ -93,6 +97,7 @@ describe('validateRuleDefaultExceptionList', () => {
     await expect(
       validateRuleDefaultExceptionList({
         ruleId: '1',
+        ruleRuleId: undefined,
         exceptionsList: [defaultExceptionList],
         rulesClient: clients.rulesClient,
       })
@@ -116,6 +121,7 @@ describe('validateRuleDefaultExceptionList', () => {
 
     const result = await validateRuleDefaultExceptionList({
       ruleId: '1',
+      ruleRuleId: undefined,
       exceptionsList: [defaultExceptionList],
       rulesClient: clients.rulesClient,
     });
@@ -137,6 +143,7 @@ describe('validateRuleDefaultExceptionList', () => {
     await expect(
       validateRuleDefaultExceptionList({
         ruleId: '1',
+        ruleRuleId: undefined,
         exceptionsList: [defaultExceptionList],
         rulesClient: clients.rulesClient,
       })
@@ -160,11 +167,36 @@ describe('validateRuleDefaultExceptionList', () => {
     await expect(
       validateRuleDefaultExceptionList({
         ruleId: undefined,
+        ruleRuleId: undefined,
         exceptionsList: [defaultExceptionList],
         rulesClient: clients.rulesClient,
       })
     ).rejects.toThrow(
       'default exception list already exists in rule(s): 04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+    );
+  });
+
+  it('throw error if there rule default list in other rule and ruleID undefined but ruleRuleId defined', async () => {
+    clients.rulesClient.find.mockResolvedValue({
+      ...getFindResultWithSingleHit(),
+      data: [
+        {
+          ...getRuleMock({
+            ...getQueryRuleParams(),
+          }),
+        },
+      ],
+    });
+
+    await expect(
+      validateRuleDefaultExceptionList({
+        ruleId: undefined,
+        ruleRuleId: '2',
+        exceptionsList: [defaultExceptionList],
+        rulesClient: clients.rulesClient,
+      })
+    ).rejects.toThrow(
+      'default exception list for rule: 2 already exists in rule(s): 04128c15-0d1b-4716-a4c5-46997ac7f3bd'
     );
   });
 });

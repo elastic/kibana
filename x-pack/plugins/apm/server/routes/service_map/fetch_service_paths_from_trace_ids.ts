@@ -15,12 +15,19 @@ import {
 } from '../../../common/service_map';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function fetchServicePathsFromTraceIds(
-  apmEventClient: APMEventClient,
-  traceIds: string[],
-  start: number,
-  end: number
-) {
+export async function fetchServicePathsFromTraceIds({
+  apmEventClient,
+  traceIds,
+  start,
+  end,
+  terminateAfter,
+}: {
+  apmEventClient: APMEventClient;
+  traceIds: string[];
+  start: number;
+  end: number;
+  terminateAfter: number;
+}) {
   // make sure there's a range so ES can skip shards
   const dayInMs = 24 * 60 * 60 * 1000;
   const startRange = start - dayInMs;
@@ -30,6 +37,7 @@ export async function fetchServicePathsFromTraceIds(
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
+    terminate_after: terminateAfter,
     body: {
       track_total_hits: false,
       size: 0,

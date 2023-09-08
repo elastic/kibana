@@ -6,28 +6,29 @@
  * Side Public License, v 1.
  */
 
+import type { ApmBase } from '@elastic/apm-rum';
 import type {
   Plugin,
   CoreStart,
   CoreSetup,
   HttpStart,
   PluginInitializerContext,
-  SavedObjectsClientContract,
-  SavedObjectsBatchResponse,
   ApplicationStart,
   DocLinksStart,
+  HttpSetup,
 } from '@kbn/core/public';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type {
+  ScreenshotModePluginSetup,
+  ScreenshotModePluginStart,
+} from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
-import { of } from 'rxjs';
+import { BehaviorSubject, map, tap } from 'rxjs';
+import type { TelemetryConfigLabels } from '../server/config';
+import { FetchTelemetryConfigRoute, INTERNAL_VERSION } from '../common/routes';
+import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
-import type {
-  TelemetrySavedObjectAttributes,
-  TelemetrySavedObject,
-} from '../common/telemetry_config/types';
-import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
@@ -85,6 +86,16 @@ interface TelemetryPluginSetupDependencies {
   home?: HomePublicPluginSetup;
 }
 
+interface TelemetryPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
+
+declare global {
+  interface Window {
+    elasticApm?: ApmBase;
+  }
+}
+
 /**
  * Public-exposed configuration
  */
@@ -107,6 +118,8 @@ export interface TelemetryPluginConfig {
   hidePrivacyStatement?: boolean;
   /** Extra labels to add to the telemetry context */
   labels: Record<string, unknown>;
+  /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
+  appendServerlessChannelsSuffix: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -115,18 +128,27 @@ function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
   };
 }
 
-export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
+export class TelemetryPlugin
+  implements
+    Plugin<
+      TelemetryPluginSetup,
+      TelemetryPluginStart,
+      TelemetryPluginSetupDependencies,
+      TelemetryPluginStartDependencies
+    >
+{
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
+  private readonly telemetryLabels$: BehaviorSubject<TelemetryConfigLabels>;
   private telemetrySender?: TelemetrySender;
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
   private canUserChangeSettings: boolean = true;
-  private savedObjectsClient?: SavedObjectsClientContract;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config = initializerContext.config.get();
+    this.telemetryLabels$ = new BehaviorSubject<TelemetryConfigLabels>(this.config.labels);
   }
 
   public setup(
@@ -151,7 +173,14 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     analytics.registerContextProvider({
       name: 'telemetry labels',
-      context$: of({ labels: this.config.labels }),
+      context$: this.telemetryLabels$.pipe(
+        tap((labels) => {
+          // Hack to update the APM agent's labels.
+          // In the future we might want to expose APM as a core service to make reporting metrics much easier.
+          window.elasticApm?.addLabels(labels);
+        }),
+        map((labels) => ({ labels }))
+      ),
       schema: {
         labels: {
           type: 'pass_through',
@@ -169,14 +198,16 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
-      await this.refreshConfig();
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+      await this.refreshConfig(http);
+      analytics.optIn({
+        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+      });
     });
 
     if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
         if (this.telemetryService?.userCanChangeSettings) {
-          this.telemetryNotifications?.setOptedInNoticeSeen();
+          this.telemetryNotifications?.setOptInStatusNoticeSeen();
         }
       });
 
@@ -194,15 +225,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  public start({
-    analytics,
-    http,
-    overlays,
-    theme,
-    application,
-    savedObjects,
-    docLinks,
-  }: CoreStart): TelemetryPluginStart {
+  public start(
+    { analytics, http, overlays, theme, application, docLinks }: CoreStart,
+    { screenshotMode }: TelemetryPluginStartDependencies
+  ): TelemetryPluginStart {
     if (!this.telemetryService) {
       throw Error('Telemetry plugin failed to initialize properly.');
     }
@@ -220,32 +246,31 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
     this.telemetryNotifications = telemetryNotifications;
 
-    this.savedObjectsClient = savedObjects.client;
-
     application.currentAppId$.subscribe(async () => {
+      // Refresh and get telemetry config
+      const updatedConfig = await this.refreshConfig(http);
+
+      analytics.optIn({
+        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+      });
+
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {
         return;
       }
-
-      // Refresh and get telemetry config
-      const updatedConfig = await this.refreshConfig();
-
-      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
 
       const telemetryBanner = updatedConfig?.banner;
 
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
         this.maybeShowOptedInNotificationBanner();
-        this.maybeShowOptInBanner();
       }
     });
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),
       telemetryNotifications: {
-        setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
+        setOptedInNoticeSeen: () => telemetryNotifications.setOptInStatusNoticeSeen(),
       },
       telemetryConstants,
     };
@@ -267,14 +292,20 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  private async refreshConfig(): Promise<TelemetryPluginConfig | undefined> {
-    if (this.savedObjectsClient && this.telemetryService) {
-      // Update the telemetry config based as a mix of the config files and saved objects
-      const telemetrySavedObject = await this.getTelemetrySavedObject(this.savedObjectsClient);
-      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+  /**
+   * Retrieve the up-to-date configuration
+   * @param http HTTP helper to make requests to the server
+   * @private
+   */
+  private async refreshConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
+    const updatedConfig = await this.fetchUpdatedConfig(http);
+    if (this.telemetryService) {
       this.telemetryService.config = updatedConfig;
-      return updatedConfig;
     }
+
+    this.telemetryLabels$.next(updatedConfig.labels);
+
+    return updatedConfig;
   }
 
   /**
@@ -305,90 +336,37 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (!this.telemetryNotifications) {
       return;
     }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptedInNoticeBanner();
+    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInStatusNoticeBanner();
     if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptedInNoticeBanner();
+      this.telemetryNotifications.renderOptInStatusNoticeBanner();
     }
   }
 
-  private maybeShowOptInBanner() {
-    if (!this.telemetryNotifications) {
-      return;
-    }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInBanner();
-    if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptInBanner();
-    }
-  }
-
-  private async updateConfigsBasedOnSavedObjects(
-    telemetrySavedObject: TelemetrySavedObject
-  ): Promise<TelemetryPluginConfig> {
-    const configTelemetrySendUsageFrom = this.config.sendUsageFrom;
-    const configTelemetryOptIn = this.config.optIn as boolean;
-    const configTelemetryAllowChangingOptInStatus = this.config.allowChangingOptInStatus;
-
-    const currentKibanaVersion = this.currentKibanaVersion;
-
-    const { getTelemetryAllowChangingOptInStatus, getTelemetryOptIn, getTelemetrySendUsageFrom } =
-      await import('../common/telemetry_config');
-
-    const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
-      configTelemetryAllowChangingOptInStatus,
-      telemetrySavedObject,
-    });
-
-    const optIn = getTelemetryOptIn({
-      configTelemetryOptIn,
+  /**
+   * Fetch configuration from the server and merge it with the one the browser already knows
+   * @param http The HTTP helper to make the requests
+   * @private
+   */
+  private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
+    const {
       allowChangingOptInStatus,
-      telemetrySavedObject,
-      currentKibanaVersion,
-    });
-
-    const sendUsageFrom = getTelemetrySendUsageFrom({
-      configTelemetrySendUsageFrom,
-      telemetrySavedObject,
-    });
-
-    const telemetryNotifyUserAboutOptInDefault = getNotifyUserAboutOptInDefault({
-      telemetrySavedObject,
-      allowChangingOptInStatus,
-      configTelemetryOptIn,
-      telemetryOptedIn: optIn,
-    });
-
-    return {
-      ...this.config,
       optIn,
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
+      labels,
+    } = await http.get<v2.FetchTelemetryConfigResponse>(
+      FetchTelemetryConfigRoute,
+      INTERNAL_VERSION
+    );
+
+    return {
+      ...this.config,
+      allowChangingOptInStatus,
+      optIn,
+      sendUsageFrom,
+      telemetryNotifyUserAboutOptInDefault,
+      labels,
       userCanChangeSettings: this.canUserChangeSettings,
     };
-  }
-
-  private async getTelemetrySavedObject(savedObjectsClient: SavedObjectsClientContract) {
-    try {
-      // Use bulk get API here to avoid the queue. This could fail independent requests if we don't have rights to access the telemetry object otherwise
-      const {
-        savedObjects: [{ attributes }],
-      } = (await savedObjectsClient.bulkGet([
-        {
-          id: 'telemetry',
-          type: 'telemetry',
-        },
-      ])) as SavedObjectsBatchResponse<TelemetrySavedObjectAttributes>;
-      return attributes;
-    } catch (error) {
-      const errorCode = error[Symbol('SavedObjectsClientErrorCode')];
-      if (errorCode === 'SavedObjectsClient/notFound') {
-        return null;
-      }
-
-      if (errorCode === 'SavedObjectsClient/forbidden') {
-        return false;
-      }
-
-      throw error;
-    }
   }
 }

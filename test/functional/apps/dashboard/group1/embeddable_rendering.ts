@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -74,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const expectNoDataRenders = async () => {
     await pieChart.expectEmptyPieChart();
-    await dashboardExpect.seriesElementCount(0);
+    await dashboardExpect.heatMapNoResults();
     await dashboardExpect.dataTableNoResult();
     await dashboardExpect.savedSearchNoResult();
     await dashboardExpect.inputControlItemCount(5);
@@ -99,7 +100,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/158529
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+    const from = 'Jan 1, 2018 @ 00:00:00.000';
+    const to = 'Apr 13, 2018 @ 00:00:00.000';
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -109,14 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+      await PageObjects.common.setTime({ from, to });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
       await elasticChart.setNewChartUiDebugFlag(true);
-
-      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
-      const toTime = 'Apr 13, 2018 @ 00:00:00.000';
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async () => {
@@ -125,12 +126,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newUrl = currentUrl.replace(/\?.*$/, '');
       await browser.get(newUrl, false);
       await security.testUser.restoreDefaults();
+      await PageObjects.common.unsetTime();
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('adding visualizations', async () => {
-      await elasticChart.setNewChartUiDebugFlag(true);
-
       visNames = await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
       expect(visNames.length).to.be.equal(24);
       await dashboardExpect.visualizationsArePresent(visNames);
@@ -161,7 +161,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('initial render test', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      await elasticChart.setNewChartUiDebugFlag();
       await expectAllDataRenders();
     });
 
@@ -180,8 +179,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const alert = await browser.getAlert();
       await alert?.accept();
 
+      // setNewChartUiDebugFlag required because window._echDebugStateFlag flag is reset after refresh
+      await elasticChart.setNewChartUiDebugFlag(true);
+
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await elasticChart.setNewChartUiDebugFlag();
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      // call query refresh to guarantee all panels are rendered after window._echDebugStateFlag is set
+      await queryBar.clickQuerySubmitButton();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });

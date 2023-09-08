@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -72,7 +72,7 @@ export function createRegionMapLayerDescriptor({
   }
 
   const metricsDescriptor = createAggDescriptor(metricAgg, metricFieldName);
-  const joinId = uuid();
+  const joinId = uuidv4();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
     aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',

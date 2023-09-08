@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   ) {
     const { body, status } = await supertest
       .get(
-        `/s/${space}/api/ml/data_frame/analytics${jobId ? `/${jobId}` : ''}${
+        `/s/${space}/internal/ml/data_frame/analytics${jobId ? `/${jobId}` : ''}${
           requestStats ? '/_stats' : ''
         }`
       )
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -47,12 +47,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runMapRequest(space: string, expectedStatusCode: number, jobId: string) {
     const { body, status } = await supertest
-      .get(`/s/${space}/api/ml/data_frame/analytics/map/${jobId}`)
+      .get(`/s/${space}/internal/ml/data_frame/analytics/map/${jobId}`)
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;

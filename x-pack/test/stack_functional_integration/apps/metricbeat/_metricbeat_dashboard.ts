@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-ignore we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
@@ -54,7 +55,7 @@ export default function ({
       await PageObjects.common.dismissBanner();
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.common.sleep(2000);
-      await browser.setScreenshotSize(1000, 1337);
+      await browser.setScreenshotSize(1000, 1937);
       await PageObjects.common.sleep(2000);
     });
 

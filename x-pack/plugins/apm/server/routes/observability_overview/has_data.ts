@@ -6,16 +6,27 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+
+export interface HasDataResponse {
+  hasData: boolean;
+  indices: Readonly<{
+    error: string;
+    onboarding: string;
+    span: string;
+    transaction: string;
+    metric: string;
+  }>;
+}
 
 export async function getHasData({
   indices,
   apmEventClient,
 }: {
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   apmEventClient: APMEventClient;
-}) {
+}): Promise<HasDataResponse> {
   try {
     const params = {
       apm: {

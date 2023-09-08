@@ -19,7 +19,7 @@ import {
   NumericChartData,
   OrdinalChartData,
   UnsupportedChartData,
-} from './field_histograms';
+} from '@kbn/ml-data-grid';
 
 import { getFieldType, getLegendText, getXScaleType, useColumnChart } from './use_column_chart';
 

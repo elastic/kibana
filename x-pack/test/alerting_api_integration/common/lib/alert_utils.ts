@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
 import { Space, User } from '../types';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
-import { ES_TEST_INDEX_NAME } from './es_test_index_tool';
 import { getTestRuleData } from './get_test_rule_data';
 
 export interface AlertUtilsOpts {
@@ -24,6 +25,11 @@ export interface CreateAlertWithActionOpts {
   objectRemover?: ObjectRemover;
   overwrites?: Record<string, any>;
   reference: string;
+  notifyWhen?: string;
+  summary?: boolean;
+  throttle?: string | null;
+  alertsFilter?: AlertsFilter;
+  messageTemplate?: string;
 }
 export interface CreateNoopAlertOpts {
   objectRemover?: ObjectRemover;
@@ -37,6 +43,15 @@ interface UpdateAlwaysFiringAction {
   user: User;
   overwrites: Record<string, any>;
 }
+
+const SNOOZE_SCHEDULE = {
+  rRule: {
+    dtstart: '2021-03-07T00:00:00.000Z',
+    tzid: 'UTC',
+    count: 1,
+  },
+  duration: 864000000,
+};
 
 export class AlertUtils {
   private referenceCounter = 1;
@@ -100,7 +115,11 @@ export class AlertUtils {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_snooze`)
       .set('kbn-xsrf', 'foo')
-      .set('content-type', 'application/json');
+      .set('content-type', 'application/json')
+      .send({
+        snooze_schedule: SNOOZE_SCHEDULE,
+      });
+
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }
@@ -111,7 +130,10 @@ export class AlertUtils {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_unsnooze`)
       .set('kbn-xsrf', 'foo')
-      .set('content-type', 'application/json');
+      .set('content-type', 'application/json')
+      .send({
+        schedule_ids: [alertId],
+      });
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }
@@ -162,7 +184,7 @@ export class AlertUtils {
 
   public getUpdateApiKeyRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_update_api_key`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_update_api_key`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -203,6 +225,9 @@ export class AlertUtils {
     overwrites = {},
     indexRecordActionId,
     reference,
+    notifyWhen,
+    summary,
+    throttle,
   }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
@@ -220,8 +245,106 @@ export class AlertUtils {
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
     }
-    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
+    let alertBody;
+    if (summary !== undefined) {
+      alertBody = getAlwaysFiringAlertWithThrottledActionData(
+        reference,
+        actionId,
+        notifyWhen,
+        throttle,
+        summary
+      );
+    } else {
+      alertBody = getDefaultAlwaysFiringAlertData(reference, actionId, notifyWhen);
+    }
+
     const response = await request.send({ ...alertBody, ...overwrites });
+    if (response.statusCode === 200) {
+      objRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
+    }
+    return response;
+  }
+
+  public async createAlwaysFiringRuleWithSummaryAction({
+    objectRemover,
+    overwrites = {},
+    indexRecordActionId,
+    reference,
+    notifyWhen,
+    throttle,
+    alertsFilter,
+    messageTemplate,
+  }: CreateAlertWithActionOpts) {
+    const objRemover = objectRemover || this.objectRemover;
+    const actionId = indexRecordActionId || this.indexRecordActionId;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+    if (!actionId) {
+      throw new Error('indexRecordActionId is required ');
+    }
+
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    const rule = getAlwaysFiringRuleWithSummaryAction(
+      reference,
+      actionId,
+      notifyWhen,
+      throttle,
+      alertsFilter,
+      messageTemplate
+    );
+
+    const response = await request.send({ ...rule, ...overwrites });
+    if (response.statusCode === 200) {
+      objRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
+    }
+    return response;
+  }
+
+  public async createPatternFiringRuleWithSummaryAction({
+    objectRemover,
+    overwrites = {},
+    indexRecordActionId,
+    reference,
+    notifyWhen,
+    throttle,
+    alertsFilter,
+    messageTemplate,
+    pattern,
+  }: CreateAlertWithActionOpts & { pattern: object }) {
+    const objRemover = objectRemover || this.objectRemover;
+    const actionId = indexRecordActionId || this.indexRecordActionId;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+    if (!actionId) {
+      throw new Error('indexRecordActionId is required ');
+    }
+
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    const rule = getPatternFiringRuleWithSummaryAction(
+      reference,
+      pattern,
+      actionId,
+      notifyWhen,
+      throttle,
+      alertsFilter,
+      messageTemplate
+    );
+
+    const response = await request.send({ ...rule, ...overwrites });
     if (response.statusCode === 200) {
       objRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
     }
@@ -333,6 +456,17 @@ export class AlertUtils {
     }
     return response;
   }
+
+  public async runSoon(ruleId: string) {
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+      .set('kbn-xsrf', 'foo');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    return await request.send();
+  }
 }
 
 export function getConsumerUnauthorizedErrorMessage(
@@ -351,14 +485,18 @@ export function getProducerUnauthorizedErrorMessage(
   return `Unauthorized to ${operation} a "${alertType}" rule by "${producer}"`;
 }
 
-function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
+function getDefaultAlwaysFiringAlertData(
+  reference: string,
+  actionId: string,
+  notifyWhen = 'onActiveAlert'
+) {
   const messageTemplate = `
-alertId: {{alertId}},
-alertName: {{alertName}},
-spaceId: {{spaceId}},
-tags: {{tags}},
-alertInstanceId: {{alertInstanceId}},
-alertActionGroup: {{alertActionGroup}},
+ruleId: {{rule.id}},
+ruleName: {{rule.name}},
+spaceId: {{rule.spaceId}},
+tags: {{rule.tags}},
+alertId: {{alert.id}},
+alertActionGroup: {{alert.actionGroup}},
 instanceContextValue: {{context.instanceContextValue}},
 instanceStateValue: {{state.instanceStateValue}}
 `.trim();
@@ -374,7 +512,7 @@ instanceStateValue: {{state.instanceStateValue}}
       index: ES_TEST_INDEX_NAME,
       reference,
     },
-    notify_when: 'onActiveAlert',
+    notify_when: notifyWhen,
     actions: [
       {
         group: 'default',
@@ -384,6 +522,147 @@ instanceStateValue: {{state.instanceStateValue}}
           reference,
           message: messageTemplate,
         },
+      },
+    ],
+  };
+}
+
+function getAlwaysFiringAlertWithThrottledActionData(
+  reference: string,
+  actionId: string,
+  notifyWhen = 'onActiveAlert',
+  throttle: string | null = '1m',
+  summary = false
+) {
+  const messageTemplate = `
+ruleId: {{rule.id}},
+ruleName: {{rule.name}},
+spaceId: {{rule.spaceId}},
+tags: {{rule.tags}},
+alertId: {{alert.id}},
+alertActionGroup: {{alert.actionGroup}},
+instanceContextValue: {{context.instanceContextValue}},
+instanceStateValue: {{state.instanceStateValue}}
+`.trim();
+  return {
+    enabled: true,
+    name: 'abc',
+    schedule: { interval: '1m' },
+    tags: ['tag-A', 'tag-B'],
+    rule_type_id: 'test.always-firing',
+    consumer: 'alertsFixture',
+    params: {
+      index: ES_TEST_INDEX_NAME,
+      reference,
+    },
+    actions: [
+      {
+        group: 'default',
+        id: actionId,
+        params: {
+          index: ES_TEST_INDEX_NAME,
+          reference,
+          message: messageTemplate,
+        },
+        frequency: {
+          summary,
+          notify_when: notifyWhen,
+          throttle,
+        },
+      },
+    ],
+  };
+}
+
+function getAlwaysFiringRuleWithSummaryAction(
+  reference: string,
+  actionId: string,
+  notifyWhen = 'onActiveAlert',
+  throttle: string | null = '1m',
+  alertsFilter?: AlertsFilter,
+  messageTemplate?: string
+) {
+  const message =
+    messageTemplate ??
+    `Alerts, ` +
+      `all:{{alerts.all.count}}, ` +
+      `new:{{alerts.new.count}} IDs:[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}], ` +
+      `ongoing:{{alerts.ongoing.count}} IDs:[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}], ` +
+      `recovered:{{alerts.recovered.count}} IDs:[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]`.trim();
+
+  return {
+    enabled: true,
+    name: 'abc',
+    schedule: { interval: '1m' },
+    tags: ['tag-A', 'tag-B'],
+    rule_type_id: 'test.always-firing-alert-as-data',
+    consumer: 'alertsFixture',
+    params: {
+      index: ES_TEST_INDEX_NAME,
+      reference,
+    },
+    actions: [
+      {
+        group: 'default',
+        id: actionId,
+        params: {
+          index: ES_TEST_INDEX_NAME,
+          reference,
+          message,
+        },
+        frequency: {
+          summary: true,
+          notify_when: notifyWhen,
+          throttle,
+        },
+        ...(alertsFilter && { alerts_filter: alertsFilter }),
+      },
+    ],
+  };
+}
+
+function getPatternFiringRuleWithSummaryAction(
+  reference: string,
+  pattern: object,
+  actionId: string,
+  notifyWhen = 'onActiveAlert',
+  throttle: string | null = null,
+  alertsFilter?: AlertsFilter,
+  messageTemplate?: string
+) {
+  const message =
+    messageTemplate ??
+    `Alerts, ` +
+      `all:{{alerts.all.count}}, ` +
+      `new:{{alerts.new.count}} IDs:[{{#alerts.new.data}}{{kibana.alert.instance.id}},{{/alerts.new.data}}], ` +
+      `ongoing:{{alerts.ongoing.count}} IDs:[{{#alerts.ongoing.data}}{{kibana.alert.instance.id}},{{/alerts.ongoing.data}}], ` +
+      `recovered:{{alerts.recovered.count}} IDs:[{{#alerts.recovered.data}}{{kibana.alert.instance.id}},{{/alerts.recovered.data}}]`.trim();
+
+  return {
+    enabled: true,
+    name: 'pattern-firing-rule-aad',
+    schedule: { interval: '1m' },
+    tags: ['tag-A', 'tag-B'],
+    rule_type_id: 'test.patternFiringAad',
+    consumer: 'alertsFixture',
+    params: {
+      pattern,
+    },
+    actions: [
+      {
+        group: 'default',
+        id: actionId,
+        params: {
+          index: ES_TEST_INDEX_NAME,
+          reference,
+          message,
+        },
+        frequency: {
+          summary: true,
+          notify_when: notifyWhen,
+          throttle,
+        },
+        ...(alertsFilter && { alerts_filter: alertsFilter }),
       },
     ],
   };

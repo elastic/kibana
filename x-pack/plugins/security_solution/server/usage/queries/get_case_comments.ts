@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 
 import { CASE_COMMENT_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
+import type { AttachmentAttributes } from '@kbn/cases-plugin/common';
 
 export interface GetCasesOptions {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,7 +27,7 @@ export const getCaseComments = async ({
   maxSize,
   maxPerPage,
   logger,
-}: GetCasesOptions): Promise<Array<SavedObjectsFindResult<CommentAttributes>>> => {
+}: GetCasesOptions): Promise<Array<SavedObjectsFindResult<AttachmentAttributes>>> => {
   const query: SavedObjectsCreatePointInTimeFinderOptions = {
     type: CASE_COMMENT_SAVED_OBJECT,
     perPage: maxPerPage,
@@ -35,8 +35,8 @@ export const getCaseComments = async ({
     filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,
   };
   logger.debug(`Getting cases with point in time (PIT) query:', ${JSON.stringify(query)}`);
-  const finder = savedObjectsClient.createPointInTimeFinder<CommentAttributes>(query);
-  let responses: Array<SavedObjectsFindResult<CommentAttributes>> = [];
+  const finder = savedObjectsClient.createPointInTimeFinder<AttachmentAttributes>(query);
+  let responses: Array<SavedObjectsFindResult<AttachmentAttributes>> = [];
   for await (const response of finder.find()) {
     const extra = responses.length + response.saved_objects.length - maxSize;
     if (extra > 0) {

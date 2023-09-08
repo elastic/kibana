@@ -9,15 +9,11 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 
-import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
 import type { HttpSetup } from '@kbn/core/public';
+import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 
-import type {
-  GetAllSpacesOptions,
-  GetSpaceResult,
-  LegacyUrlAliasTarget,
-  Space,
-} from '../../common';
+import type { GetAllSpacesOptions, GetSpaceResult, Space } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {

@@ -23,11 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  FilteringPolicy,
-  FilteringRule,
-  FilteringRuleRule,
-} from '../../../../../../../common/types/connectors';
+import { FilteringPolicy, FilteringRule, FilteringRuleRule } from '@kbn/search-connectors';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table/inline_editable_table';
@@ -79,7 +76,7 @@ export const SyncRulesTable: React.FC = () => {
     <EuiText size="s" color="default">
       {i18n.translate('xpack.enterpriseSearch.content.index.connector.syncRules.description', {
         defaultMessage:
-          'Add a sync rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of indexing rules starting from the top listed down.',
+          'Add a sync rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of sync rules in the listed order.',
         values: { indexName },
       })}
       <EuiSpacer />

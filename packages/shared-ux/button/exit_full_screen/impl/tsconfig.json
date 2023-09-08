@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -14,5 +12,13 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/shared-ux-button-exit-full-screen-types",
+    "@kbn/shared-ux-button-exit-full-screen-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

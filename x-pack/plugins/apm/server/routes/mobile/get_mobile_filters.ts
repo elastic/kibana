@@ -5,33 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  DEVICE_MODEL_NAME,
-  HOST_OS_VERSION,
-  NETWORK_CONNECTION_TYPE,
-  SERVICE_NAME,
-  SERVICE_VERSION,
-  TRANSACTION_TYPE,
-} from '../../../common/es_fields/apm';
-import { environmentQuery } from '../../../common/utils/environment_query';
+  MobileProperty,
+  MobilePropertyType,
+} from '../../../common/mobile_types';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getDeviceOSApp } from './get_device_os_app';
+import { getNCT } from './get_nct';
 
-type MobileFiltersTypes =
-  | 'device'
-  | 'appVersion'
-  | 'osVersion'
-  | 'netConnectionType';
-type MobileFilters = Array<{
-  key: MobileFiltersTypes;
+export type MobileFiltersResponse = Array<{
+  key: MobilePropertyType;
   options: string[];
-  label: string;
 }>;
 
 export async function getMobileFilters({
@@ -50,96 +34,50 @@ export async function getMobileFilters({
   environment: string;
   start: number;
   end: number;
-}): Promise<MobileFilters> {
-  const response = await apmEventClient.search('get_mobile_filters', {
-    apm: {
-      events: [
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-        ProcessorEvent.transaction,
-      ],
-    },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
-      },
-      aggs: {
-        devices: {
-          terms: {
-            field: DEVICE_MODEL_NAME,
-            size: 10,
-          },
-        },
-        osVersions: {
-          terms: {
-            field: HOST_OS_VERSION,
-            size: 10,
-          },
-        },
-        appVersions: {
-          terms: {
-            field: SERVICE_VERSION,
-            size: 10,
-          },
-        },
-        netConnectionTypes: {
-          terms: {
-            field: NETWORK_CONNECTION_TYPE,
-            size: 10,
-          },
-        },
-      },
-    },
-  });
+}): Promise<MobileFiltersResponse> {
+  const MAX_ITEMS = 10;
+  const commonProps = {
+    kuery,
+    apmEventClient,
+    serviceName,
+    transactionType,
+    environment,
+    start,
+    end,
+    size: MAX_ITEMS,
+  };
+
+  const [
+    mobileTransactionEventsFiltersResponse,
+    mobileNetworkConnectionTypeFiltersResponse,
+  ] = await Promise.all([getDeviceOSApp(commonProps), getNCT(commonProps)]);
 
   return [
     {
-      key: 'device',
-      label: i18n.translate('xpack.apm.mobile.filters.device', {
-        defaultMessage: 'Device',
-      }),
+      key: MobileProperty.Device,
       options:
-        response.aggregations?.devices?.buckets?.map(
+        mobileTransactionEventsFiltersResponse.aggregations?.devices?.buckets?.map(
           ({ key }) => key as string
         ) || [],
     },
     {
-      key: 'osVersion',
-      label: i18n.translate('xpack.apm.mobile.filters.osVersion', {
-        defaultMessage: 'OS version',
-      }),
+      key: MobileProperty.OsVersion,
       options:
-        response.aggregations?.osVersions?.buckets?.map(
+        mobileTransactionEventsFiltersResponse.aggregations?.osVersions?.buckets?.map(
           ({ key }) => key as string
         ) || [],
     },
     {
-      key: 'appVersion',
-      label: i18n.translate('xpack.apm.mobile.filters.appVersion', {
-        defaultMessage: 'App version',
-      }),
+      key: MobileProperty.AppVersion,
       options:
-        response.aggregations?.appVersions?.buckets?.map(
+        mobileTransactionEventsFiltersResponse.aggregations?.appVersions?.buckets?.map(
           ({ key }) => key as string
         ) || [],
     },
     {
-      key: 'netConnectionType',
-      label: i18n.translate('xpack.apm.mobile.filters.nct', {
-        defaultMessage: 'NCT',
-      }),
+      key: MobileProperty.NetworkConnectionType,
       options:
-        response.aggregations?.netConnectionTypes?.buckets?.map(
+        mobileNetworkConnectionTypeFiltersResponse.aggregations?.netConnectionTypes?.buckets?.map(
           ({ key }) => key as string
         ) || [],
     },

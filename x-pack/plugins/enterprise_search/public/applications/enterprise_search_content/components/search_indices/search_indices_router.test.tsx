@@ -8,11 +8,12 @@
 import '../../../__mocks__/react_router';
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { NewIndex } from '../new_index';
+import { Routes } from '@kbn/shared-ux-router';
+
+import { NewIndexRouter } from '../new_index/new_index_router';
 import { SearchIndexRouter } from '../search_index/search_index_router';
 
 import { SearchIndices } from './search_indices';
@@ -23,9 +24,9 @@ describe('SearchIndicesRouter', () => {
   it('renders Search index routes', () => {
     const wrapper = shallow(<SearchIndicesRouter />);
 
-    const routeSwitch = wrapper.find(Switch);
+    const routeSwitch = wrapper.find(Routes);
 
-    expect(routeSwitch.find(NewIndex)).toHaveLength(1);
+    expect(routeSwitch.find(NewIndexRouter)).toHaveLength(1);
     expect(routeSwitch.find(SearchIndices)).toHaveLength(1);
     expect(routeSwitch.find(SearchIndexRouter)).toHaveLength(1);
   });

@@ -37,7 +37,6 @@ const MyEuiModal = styled(EuiModal)`
     height: auto !important;
     max-width: 718px;
   }
-  z-index: 99999999;
 `;
 
 export const UpdateDefaultDataViewModal = React.memo<Props>(
@@ -45,9 +44,7 @@ export const UpdateDefaultDataViewModal = React.memo<Props>(
     isShowing ? (
       <MyEuiModal onClose={onDismissModal} data-test-subj="sourcerer-update-data-view-modal">
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h1>{i18n.UPDATE_SECURITY_DATA_VIEW}</h1>
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{i18n.UPDATE_SECURITY_DATA_VIEW}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiText size="s">

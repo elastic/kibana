@@ -131,6 +131,7 @@ export class Table extends Component<TableProps, TableState> {
                 value={this.state.editingFilterValue}
                 onChange={this.onEditingFilterChange}
                 onKeyDown={this.onEditFieldKeyDown}
+                data-test-subj={`filter_input_${value}`}
               />
             );
           }
@@ -187,6 +188,7 @@ export class Table extends Component<TableProps, TableState> {
                   }}
                   iconType="checkInCircleFilled"
                   aria-label={saveAria}
+                  data-test-subj={`save_filter-${filter.value}`}
                 />
                 <EuiButtonIcon
                   size="s"
@@ -207,6 +209,7 @@ export class Table extends Component<TableProps, TableState> {
                 onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
                 iconType="pencil"
                 aria-label={editAria}
+                data-test-subj={`edit_filter-${filter.value}`}
               />
               <EuiButtonIcon
                 size="s"

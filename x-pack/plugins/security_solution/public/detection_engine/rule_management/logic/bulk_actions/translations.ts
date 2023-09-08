@@ -6,11 +6,11 @@
  */
 
 import type { HTTPError } from '../../../../../common/detection_engine/types';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import {
   BulkActionEditType,
   BulkActionType,
-} from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 
@@ -62,6 +62,8 @@ export function explainBulkEditSuccess(
   editPayload: BulkActionEditPayload[],
   summary: BulkActionSummary
 ): string {
+  const dataViewSkipDetail =
+    summary.skipped > 0 ? ` ${i18n.RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL}` : null;
   if (
     editPayload.some(
       (x) =>
@@ -70,12 +72,13 @@ export function explainBulkEditSuccess(
         x.type === BulkActionEditType.delete_index_patterns
     )
   ) {
-    return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded)}. ${
-      i18n.RULES_BULK_EDIT_SUCCESS_INDEX_EDIT_DESCRIPTION
-    }`;
+    return `${i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(
+      summary.succeeded,
+      summary.skipped
+    )}${dataViewSkipDetail}`;
   }
 
-  return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded);
+  return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped);
 }
 
 export function summarizeBulkError(action: BulkActionType): string {
@@ -125,7 +128,7 @@ export function explainBulkError(action: BulkActionType, error: HTTPError): stri
       return i18n.RULES_BULK_DISABLE_FAILURE_DESCRIPTION(summary.failed);
 
     case BulkActionType.edit:
-      return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed);
+      return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed, summary.skipped);
   }
 }
 

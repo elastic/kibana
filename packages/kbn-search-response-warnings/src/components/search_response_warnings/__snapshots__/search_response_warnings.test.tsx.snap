@@ -1,0 +1,508 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SearchResponseWarnings renders "badge" correctly 1`] = `
+<div
+  class="euiPopover emotion-euiPopover"
+>
+  <div
+    class="euiPopover__anchor css-16vtueo-render"
+  >
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-s-EuiButton"
+        data-test-subj="test2_trigger"
+        title="4 warnings"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="emotion-EuiIcon"
+            data-euiicon-type="warning"
+          />
+          4
+        </span>
+      </button>
+    </span>
+  </div>
+</div>
+`;
+
+exports[`SearchResponseWarnings renders "callout" correctly 1`] = `
+<div>
+  <ul
+    class="eui-yScroll"
+    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  >
+    <li>
+      <div
+        class="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning"
+        data-test-subj="test1"
+      >
+        <p
+          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
+        >
+          <span
+            aria-hidden="true"
+            class="emotion-euiCallOut__icon"
+            color="inherit"
+            data-euiicon-type="warning"
+          />
+        </p>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-xs-flexStart-center-row"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                  data-test-subj="test1_warningTitle"
+                >
+                  Data might be incomplete because your request timed out
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              aria-label="Close"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cross"
+              />
+            </button>
+          </div>
+        </div>
+        <p />
+      </div>
+    </li>
+    <li>
+      <div
+        class="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning"
+        data-test-subj="test1"
+      >
+        <p
+          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
+        >
+          <span
+            aria-hidden="true"
+            class="emotion-euiCallOut__icon"
+            color="inherit"
+            data-euiicon-type="warning"
+          />
+        </p>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-xs-flexStart-center-row"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                  data-test-subj="test1_warningTitle"
+                >
+                  <strong>
+                    3 of 4 shards failed
+                  </strong>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                  data-test-subj="test1_warningMessage"
+                >
+                  <p>
+                    The data might be incomplete or wrong.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <button>
+                  test1
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              aria-label="Close"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cross"
+              />
+            </button>
+          </div>
+        </div>
+        <p />
+      </div>
+    </li>
+    <li>
+      <div
+        class="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning"
+        data-test-subj="test1"
+      >
+        <p
+          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
+        >
+          <span
+            aria-hidden="true"
+            class="emotion-euiCallOut__icon"
+            color="inherit"
+            data-euiicon-type="warning"
+          />
+        </p>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-xs-flexStart-center-row"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                  data-test-subj="test1_warningTitle"
+                >
+                  <strong>
+                    3 of 4 shards failed
+                  </strong>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                  data-test-subj="test1_warningMessage"
+                >
+                  <p>
+                    The data might be incomplete or wrong.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <button>
+                  test2
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              aria-label="Close"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cross"
+              />
+            </button>
+          </div>
+        </div>
+        <p />
+      </div>
+    </li>
+    <li>
+      <div
+        class="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning"
+        data-test-subj="test1"
+      >
+        <p
+          class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
+        >
+          <span
+            aria-hidden="true"
+            class="emotion-euiCallOut__icon"
+            color="inherit"
+            data-euiicon-type="warning"
+          />
+        </p>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-xs-flexStart-center-row"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                  data-test-subj="test1_warningTitle"
+                >
+                  <strong>
+                    1 of 4 shards failed
+                  </strong>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <div
+                  class="euiText emotion-euiText-s"
+                  data-test-subj="test1_warningMessage"
+                >
+                  <p>
+                    The data might be incomplete or wrong.
+                  </p>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <button>
+                  test3
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <button
+              aria-label="Close"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="cross"
+              />
+            </button>
+          </div>
+        </div>
+        <p />
+      </div>
+    </li>
+  </ul>
+</div>
+`;
+
+exports[`SearchResponseWarnings renders "empty_prompt" correctly 1`] = `
+<div
+  class="euiPanel euiPanel--warning euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-warning"
+>
+  <div
+    class="euiEmptyPrompt__main"
+  >
+    <div
+      class="euiEmptyPrompt__icon"
+    >
+      <span
+        color="warning"
+        data-euiicon-type="warning"
+      />
+    </div>
+    <div
+      class="euiEmptyPrompt__content"
+    >
+      <div
+        class="euiEmptyPrompt__contentInner"
+      >
+        <h2
+          class="euiTitle emotion-euiTitle-m"
+        >
+          No results found
+        </h2>
+        <div
+          class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+        />
+        <div
+          class="euiText emotion-euiText-m-euiTextColor-subdued"
+        >
+          <ul
+            class="eui-yScrollWithShadows"
+            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          >
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    Data might be incomplete because your request timed out
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    <strong>
+                      3 of 4 shards failed
+                    </strong>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningMessage"
+                  >
+                    <p>
+                      The data might be incomplete or wrong.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button>
+                    test1
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    <strong>
+                      3 of 4 shards failed
+                    </strong>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningMessage"
+                  >
+                    <p>
+                      The data might be incomplete or wrong.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button>
+                    test2
+                  </button>
+                </div>
+              </div>
+            </li>
+            <li
+              css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-xs-flexStart-stretch-column"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningTitle"
+                  >
+                    <strong>
+                      1 of 4 shards failed
+                    </strong>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                    data-test-subj="test3_warningMessage"
+                  >
+                    <p>
+                      The data might be incomplete or wrong.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <button>
+                    test3
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

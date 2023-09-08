@@ -34,10 +34,14 @@ const StyledPanelContent = styled.div`
 
 export const UserDetailsSidePanel = ({
   contextID,
+  scopeId,
   userName,
   isDraggable,
   handleOnClose,
-}: Pick<UserDetailsProps, 'contextID' | 'userName' | 'isDraggable' | 'handleOnClose'>) => (
+}: Pick<
+  UserDetailsProps,
+  'scopeId' | 'contextID' | 'userName' | 'isDraggable' | 'handleOnClose'
+>) => (
   <>
     <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={false}>
       <EuiFlexItem grow={false}>
@@ -62,7 +66,12 @@ export const UserDetailsSidePanel = ({
     </StyledEuiFlexButtonWrapper>
     <EuiSpacer size="m" />
     <StyledPanelContent>
-      <ExpandableUserDetails contextID={contextID} userName={userName} isDraggable={isDraggable} />
+      <ExpandableUserDetails
+        contextID={contextID}
+        scopeId={scopeId}
+        userName={userName}
+        isDraggable={isDraggable}
+      />
     </StyledPanelContent>
   </>
 );

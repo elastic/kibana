@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '../..';
+import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { ApmFields } from '../lib/apm/apm_fields';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
+    generate: ({ range }) => {
       const timestamps = range.ratePerMinute(180);
 
       const cloudFields: ApmFields = {
@@ -32,6 +30,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'python',
           functionName: 'fn-python-1',
+          serverlessType: 'aws.lambda',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
@@ -41,6 +40,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'nodejs',
           functionName: 'fn-node-1',
+          serverlessType: 'aws.lambda',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 
@@ -49,6 +49,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           environment: ENVIRONMENT,
           agentName: 'nodejs',
           functionName: 'fn-node-2',
+          serverlessType: 'aws.lambda',
         })
         .instance({ instanceName: 'instance_A', ...cloudFields });
 

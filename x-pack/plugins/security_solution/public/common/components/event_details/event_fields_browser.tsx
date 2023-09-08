@@ -8,7 +8,6 @@
 import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
 import {
@@ -19,9 +18,8 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
 
-import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
-import { tableDefaults } from '../../store/data_table/defaults';
-import { dataTableSelectors } from '../../store/data_table';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
+import { isInTableScope, isTimelineScope } from '../../../helpers';
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import type { BrowserFields } from '../../containers/source';
@@ -32,7 +30,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import type { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
@@ -92,30 +90,22 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     font: ${({ theme }) => theme.eui.euiFont};
   } */
 
+  .inlineActions {
+    opacity: 0;
+  }
+
   .eventFieldsTable__tableRow {
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
     font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
+    .inlineActions-popoverOpen {
+      opacity: 1;
     }
 
     &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
+      .inlineActions {
         opacity: 1;
       }
-    }
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      // TODO: Using this logic from discover
-      /* @include euiBreakpoint('m', 'l', 'xl') {
-        opacity: 0;
-      } */
-      opacity: 0;
     }
   }
 
@@ -171,7 +161,6 @@ const useFieldBrowserPagination = () => {
 export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, data, eventId, isDraggable, timelineTabType, scopeId, isReadOnly }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const dispatch = useDispatch();
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
         return timelineSelectors.getTimelineByIdSelector();
@@ -209,31 +198,6 @@ export const EventFieldsBrowser = React.memo<Props>(
       },
       [data, columnHeaders]
     );
-    const scopedActions = getScopedActions(scopeId);
-    const toggleColumn = useCallback(
-      (column: ColumnHeaderOptions) => {
-        if (!scopedActions) {
-          return;
-        }
-        if (columnHeaders.some((c) => c.id === column.id)) {
-          dispatch(
-            scopedActions.removeColumn({
-              columnId: column.id,
-              id: scopeId,
-            })
-          );
-        } else {
-          dispatch(
-            scopedActions.upsertColumn({
-              column,
-              id: scopeId,
-              index: 1,
-            })
-          );
-        }
-      },
-      [columnHeaders, dispatch, scopeId, scopedActions]
-    );
 
     const onSetRowProps = useCallback(({ ariaRowindex, field }: TimelineEventsDetailsItem) => {
       const rowIndex = ariaRowindex != null ? { 'data-rowindex': ariaRowindex } : {};
@@ -244,41 +208,18 @@ export const EventFieldsBrowser = React.memo<Props>(
       };
     }, []);
 
-    const onUpdateColumns = useCallback(
-      (columns) => {
-        if (scopedActions) {
-          dispatch(scopedActions.updateColumns({ id: scopeId, columns }));
-        }
-      },
-      [dispatch, scopeId, scopedActions]
-    );
-
     const columns = useMemo(
       () =>
         getColumns({
           browserFields,
-          columnHeaders,
           eventId,
-          onUpdateColumns,
           contextId: `event-fields-browser-for-${scopeId}-${timelineTabType}`,
           scopeId,
-          toggleColumn,
           getLinkValue,
           isDraggable,
           isReadOnly,
         }),
-      [
-        browserFields,
-        columnHeaders,
-        eventId,
-        onUpdateColumns,
-        scopeId,
-        timelineTabType,
-        toggleColumn,
-        getLinkValue,
-        isDraggable,
-        isReadOnly,
-      ]
+      [browserFields, eventId, scopeId, timelineTabType, getLinkValue, isDraggable, isReadOnly]
     );
 
     const focusSearchInput = useCallback(() => {

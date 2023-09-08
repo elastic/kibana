@@ -51,7 +51,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     this._chartsPaletteServiceGetColor = chartsPaletteServiceGetColor;
   }
 
-  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
@@ -67,25 +67,25 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     mbMap.setPaintProperty(mbLayerId, 'icon-halo-color', color);
   }
 
-  syncCircleStrokeWithMb(pointLayerId: string, mbMap: MbMap, alpha: number) {
+  syncCircleStrokeWithMb(pointLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
     mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
   }
 
-  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncFillColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'fill-color', color);
     mbMap.setPaintProperty(mbLayerId, 'fill-opacity', alpha);
   }
 
-  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncLineColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'line-color', color);
     mbMap.setPaintProperty(mbLayerId, 'line-opacity', alpha);
   }
 
-  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
+  syncLabelColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: unknown) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'text-color', color);
     mbMap.setPaintProperty(mbLayerId, 'text-opacity', alpha);

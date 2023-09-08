@@ -6,14 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
-import { FILE_SO_TYPE } from '../../common';
+import { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
 import type { FileMetadata } from '../../common';
+import { BaseFileMetadata, FILE_SO_TYPE } from '../../common';
 
 type Properties = Record<
-  keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize' | 'hash'>,
+  keyof Omit<FileMetadata, 'Alt' | 'Compression' | 'ChunkSize'>,
   SavedObjectsFieldMapping
 >;
+
+export type SupportedFileHashAlgorithm = keyof Pick<
+  Required<Required<BaseFileMetadata>['hash']>,
+  'md5' | 'sha1' | 'sha256' | 'sha512'
+>;
+
+export type FileHashObj = Partial<Record<SupportedFileHashAlgorithm, string>>;
 
 const properties: Properties = {
   created: {
@@ -46,12 +53,16 @@ const properties: Properties = {
   FileKind: {
     type: 'keyword',
   },
+  hash: {
+    dynamic: false,
+    properties: {},
+  },
 };
 
 export const fileObjectType: SavedObjectsType<FileMetadata> = {
   name: FILE_SO_TYPE,
   hidden: true,
-  namespaceType: 'agnostic',
+  namespaceType: 'multiple-isolated',
   management: {
     importableAndExportable: false,
   },

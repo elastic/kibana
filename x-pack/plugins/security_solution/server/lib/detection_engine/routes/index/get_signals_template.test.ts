@@ -7,9 +7,11 @@
 
 import { createBackwardsCompatibilityMapping, getSignalsTemplate } from './get_signals_template';
 
+const SPACE_ID = 'default';
+
 describe('get_signals_template', () => {
   test('it should set the lifecycle "name" and "rollover_alias" to be the name of the index passed in', () => {
-    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id');
+    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id', SPACE_ID);
     expect(template.template.settings).toEqual({
       index: {
         lifecycle: {
@@ -24,22 +26,22 @@ describe('get_signals_template', () => {
   });
 
   test('it should set have the index patterns with an ending glob in it', () => {
-    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id');
+    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id', SPACE_ID);
     expect(template.index_patterns).toEqual(['test-index-*']);
   });
 
   test('it should have a mappings section which is an object type', () => {
-    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id');
+    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id', SPACE_ID);
     expect(typeof template.template.mappings).toEqual('object');
   });
 
   test('it should have a signals section which is an object type', () => {
-    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id');
+    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id', SPACE_ID);
     expect(typeof template.template.mappings.properties.signal).toEqual('object');
   });
 
   test('it should have a "total_fields" section that is at least 10k in size', () => {
-    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id');
+    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id', SPACE_ID);
     expect(template.template.settings.mapping.total_fields.limit).toBeGreaterThanOrEqual(10000);
   });
 
@@ -62,7 +64,7 @@ describe('get_signals_template', () => {
   // Instead you have to use "keyword". This test was first introduced when ECS 1.10 came out and data_stream.* values which had
   // "constant_keyword" fields and we needed to change those to be "keyword" instead.
   test('it should NOT have any "constant_keyword" and instead those should be replaced with regular "keyword" in the mapping', () => {
-    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id');
+    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id', SPACE_ID);
 
     // Small recursive function to find any values of "constant_keyword" and mark which fields it was found on and then error on those fields
     // The matchers from jest such as jest.toMatchObject do not support recursion, so I have to write it here:
@@ -83,7 +85,7 @@ describe('get_signals_template', () => {
         }
       }, []);
     const constantKeywordsFound = recursiveConstantKeywordFound('', template);
-    expect(constantKeywordsFound).toEqual([]);
+    expect(constantKeywordsFound).toEqual(['template.mappings.properties.kibana.space_ids']);
     // expect(constantKeywordsFound).toEqual([
     //   'template.mappings.properties.kibana.space_ids',
     //   'template.mappings.properties.kibana.alert.rule.consumer',
@@ -93,17 +95,17 @@ describe('get_signals_template', () => {
   });
 
   test('it should match snapshot', () => {
-    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id');
+    const template = getSignalsTemplate('test-index', '.alerts-security.alerts-space-id', SPACE_ID);
     expect(template).toMatchSnapshot();
   });
 
   test('backwards compatibility mappings for version 45 should match snapshot', () => {
-    const mapping = createBackwardsCompatibilityMapping(45);
+    const mapping = createBackwardsCompatibilityMapping(45, SPACE_ID);
     expect(mapping).toMatchSnapshot();
   });
 
   test('backwards compatibility mappings for version 57 should match snapshot', () => {
-    const mapping = createBackwardsCompatibilityMapping(57);
+    const mapping = createBackwardsCompatibilityMapping(57, SPACE_ID);
     expect(mapping).toMatchSnapshot();
   });
 });

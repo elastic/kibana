@@ -16,7 +16,7 @@ import {
   buildIsOneOfQueryMatch,
   buildIsQueryMatch,
   handleIsOperator,
-  isStringOrNumberArray,
+  isPrimitiveArray,
   showGlobalFilters,
 } from './helpers';
 
@@ -274,27 +274,27 @@ describe('Build KQL Query', () => {
 
 describe('isStringOrNumberArray', () => {
   test('it returns false when value is not an array', () => {
-    expect(isStringOrNumberArray('just a string')).toBe(false);
+    expect(isPrimitiveArray('just a string')).toBe(false);
   });
 
   test('it returns false when value is an array of mixed types', () => {
-    expect(isStringOrNumberArray(['mixed', 123, 'types'])).toBe(false);
+    expect(isPrimitiveArray(['mixed', 123, 'types'])).toBe(false);
   });
   test('it returns false when value is an array of bad types', () => {
     const badValues = [undefined, null, {}] as unknown as string[];
-    expect(isStringOrNumberArray(badValues)).toBe(false);
+    expect(isPrimitiveArray(badValues)).toBe(false);
   });
 
   test('it returns true when value is an empty array', () => {
-    expect(isStringOrNumberArray([])).toBe(true);
+    expect(isPrimitiveArray([])).toBe(true);
   });
 
   test('it returns true when value is an array of all strings', () => {
-    expect(isStringOrNumberArray(['all', 'string', 'values'])).toBe(true);
+    expect(isPrimitiveArray(['all', 'string', 'values'])).toBe(true);
   });
 
   test('it returns true when value is an array of all numbers', () => {
-    expect(isStringOrNumberArray([123, 456, 789])).toBe(true);
+    expect(isPrimitiveArray([123, 456, 789])).toBe(true);
   });
 
   describe('queryHandlerFunctions', () => {

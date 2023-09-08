@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/cell-actions",
+  "version": "1.0.0",
+  "description": "Uniform components for displaying UI actions in data cells",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "private": true
+}

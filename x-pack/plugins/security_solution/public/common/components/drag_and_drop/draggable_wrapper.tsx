@@ -13,12 +13,12 @@ import type {
   DraggableStateSnapshot,
   DraggingStyle,
   NotDraggingStyle,
-} from 'react-beautiful-dnd';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+} from '@hello-pangea/dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
@@ -30,8 +30,8 @@ import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
 
 import * as i18n from './translations';
-import { useKibana } from '../../lib/kibana';
 import { useHoverActions } from '../hover_actions/use_hover_actions';
+import { useDraggableKeyboardWrapper } from './draggable_keyboard_wrapper_hook';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
@@ -39,7 +39,7 @@ export const DragEffects = styled.div``;
 DragEffects.displayName = 'DragEffects';
 
 /**
- * Wraps the `react-beautiful-dnd` error boundary. See also:
+ * Wraps the `@hello-pangea/dnd` error boundary. See also:
  * https://github.com/atlassian/react-beautiful-dnd/blob/v12.0.0/docs/guides/setup-problem-detection-and-error-recovery.md
  *
  * NOTE: This extends from `PureComponent` because, at the time of this
@@ -144,7 +144,6 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   const [providerRegistered, setProviderRegistered] = useState(false);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
   const dispatch = useDispatch();
-  const { timelines } = useKibana().services;
   const {
     closePopOverTrigger,
     handleClosePopOverTrigger,
@@ -248,7 +247,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     [dataProvider, registerProvider, render, setContainerRef, truncate]
   );
 
-  const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
+  const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
     closePopover: handleClosePopOverTrigger,
     draggableId: getDraggableId(dataProvider.id),
     fieldName: dataProvider.queryMatch.field,
@@ -356,13 +355,31 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       >
         {truncate ? (
           <TruncatableText data-test-subj="render-truncatable-content">
-            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+            {render(dataProvider, null, {
+              isDragging: false,
+              isDropAnimating: false,
+              isClone: false,
+              dropAnimation: null,
+              draggingOver: null,
+              combineWith: null,
+              combineTargetFor: null,
+              mode: null,
+            })}
           </TruncatableText>
         ) : (
           <ProviderContentWrapper
             data-test-subj={`render-content-${dataProvider.queryMatch.field}`}
           >
-            {render(dataProvider, null, { isDragging: false, isDropAnimating: false })}
+            {render(dataProvider, null, {
+              isDragging: false,
+              isDropAnimating: false,
+              isClone: false,
+              dropAnimation: null,
+              draggingOver: null,
+              combineWith: null,
+              combineTargetFor: null,
+              mode: null,
+            })}
           </ProviderContentWrapper>
         )}
       </div>

@@ -7,9 +7,14 @@
  */
 
 import { compact, flattenDeep, isString } from 'lodash';
+import { Observable, ReplaySubject, distinctUntilChanged } from 'rxjs';
 import type { ChromeDocTitle } from '@kbn/core-chrome-browser';
 
-interface StartDeps {
+export interface InternalChromeDocTitleSetup {
+  title$: Observable<string>;
+}
+
+interface SetupDeps {
   document: { title: string };
 }
 
@@ -18,12 +23,24 @@ const titleSeparator = ' - ';
 
 /** @internal */
 export class DocTitleService {
-  private document = { title: '' };
-  private baseTitle = '';
+  private document?: { title: string };
+  private baseTitle?: string;
+  private titleSubject = new ReplaySubject<string>(1);
 
-  public start({ document }: StartDeps): ChromeDocTitle {
+  public setup({ document }: SetupDeps): InternalChromeDocTitleSetup {
     this.document = document;
     this.baseTitle = document.title;
+    this.titleSubject.next(this.baseTitle);
+
+    return {
+      title$: this.titleSubject.asObservable().pipe(distinctUntilChanged()),
+    };
+  }
+
+  public start(): ChromeDocTitle {
+    if (this.document === undefined || this.baseTitle === undefined) {
+      throw new Error('DocTitleService#setup must be called before DocTitleService#start');
+    }
 
     return {
       change: (title: string | string[]) => {
@@ -36,7 +53,9 @@ export class DocTitleService {
   }
 
   private applyTitle(title: string | string[]) {
-    this.document.title = this.render(title);
+    const rendered = this.render(title);
+    this.document!.title = rendered;
+    this.titleSubject.next(rendered);
   }
 
   private render(title: string | string[]) {

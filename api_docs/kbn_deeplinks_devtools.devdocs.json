@@ -1,0 +1,110 @@
+{
+  "id": "@kbn/deeplinks-devtools",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-devtools",
+        "id": "def-common.AppId",
+        "type": "Type",
+        "tags": [],
+        "label": "AppId",
+        "description": [],
+        "signature": [
+          "\"dev_tools\""
+        ],
+        "path": "packages/deeplinks/devtools/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-devtools",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\""
+        ],
+        "path": "packages/deeplinks/devtools/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-devtools",
+        "id": "def-common.deepLinkIds",
+        "type": "Array",
+        "tags": [],
+        "label": "deepLinkIds",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-devtools",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksDevtoolsPluginApi",
+            "section": "def-common.LinkId",
+            "text": "LinkId"
+          },
+          "[]"
+        ],
+        "path": "packages/deeplinks/devtools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-devtools",
+        "id": "def-common.DEV_TOOLS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEV_TOOLS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"dev_tools\""
+        ],
+        "path": "packages/deeplinks/devtools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-devtools",
+        "id": "def-common.LinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "LinkId",
+        "description": [],
+        "signature": [
+          "\"console\" | \"searchprofiler\" | \"painless_lab\" | \"grokdebugger\""
+        ],
+        "path": "packages/deeplinks/devtools/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

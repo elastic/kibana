@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/analytics-plugin-a-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "analyticsPluginA",
+    "server": true,
+    "browser": true
+  }
+}

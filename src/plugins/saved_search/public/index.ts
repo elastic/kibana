@@ -6,24 +6,23 @@
  * Side Public License, v 1.
  */
 
-export type { SavedSearch, SaveSavedSearchOptions, SortOrder } from './services/saved_searches';
-export {
-  getSavedSearch,
-  getSavedSearchFullPathUrl,
-  getSavedSearchUrl,
-  getSavedSearchUrlConflictMessage,
-  throwErrorOnSavedSearchUrlConflict,
-  saveSavedSearch,
-} from './services/saved_searches';
+import { SavedSearchPublicPlugin } from './plugin';
+
+export type { SortOrder } from '../common/types';
 export type {
-  DiscoverGridSettings,
-  DiscoverGridSettingsColumn,
-} from './services/saved_searches/types';
-export { VIEW_MODE } from './services/saved_searches/types';
+  SavedSearch,
+  SaveSavedSearchOptions,
+  SearchByReferenceInput,
+  SearchByValueInput,
+  SavedSearchByValueAttributes,
+  SavedSearchAttributeService,
+  SavedSearchUnwrapMetaInfo,
+  SavedSearchUnwrapResult,
+} from './services/saved_searches';
+export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
+export { VIEW_MODE } from '../common';
+export type { SavedSearchPublicPluginStart } from './plugin';
 
 export function plugin() {
-  return {
-    setup: () => {},
-    start: () => {},
-  };
+  return new SavedSearchPublicPlugin();
 }

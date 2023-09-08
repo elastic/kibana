@@ -6,15 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, EditSwimlanePanelContext } from '../embeddables';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
-export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<EditSwimlanePanelContext>({
+export function createEditSwimlanePanelAction(
+  getStartServices: MlCoreSetup['getStartServices']
+): UiActionsActionDefinition<EditSwimlanePanelContext> {
+  return {
     id: 'edit-anomaly-swimlane',
     type: EDIT_SWIMLANE_PANEL_ACTION,
     getIconType(context): string {
@@ -48,5 +50,5 @@ export function createEditSwimlanePanelAction(getStartServices: MlCoreSetup['get
         embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },
-  });
+  };
 }

@@ -12,14 +12,14 @@ import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs'
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
-  dataViewsContract: DataViewsContract,
+  dataViewsService: DataViewsContract,
   basePath: string,
   navigateToUrl: ApplicationStart['navigateToUrl']
 ) {
   const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
 
   if (job && datafeed) {
-    const dataViewId = await getDataViewIdFromName(datafeed, dataViewsContract);
+    const dataViewId = await getDataViewIdFromName(datafeed, dataViewsService);
     if (dataViewId === null) {
       return Promise.resolve();
     }
@@ -60,6 +60,9 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
     case CREATED_BY_LABEL.RARE:
       page = JOB_TYPE.RARE;
       break;
+    case CREATED_BY_LABEL.GEO:
+      page = JOB_TYPE.GEO;
+      break;
     default:
       page = JOB_TYPE.ADVANCED;
       break;
@@ -70,13 +73,13 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
 
 async function getDataViewIdFromName(
   datafeed: Datafeed,
-  dataViewsContract: DataViewsContract
+  dataViewsService: DataViewsContract
 ): Promise<string | null> {
-  if (dataViewsContract === null) {
+  if (dataViewsService === null) {
     throw new Error('Data views are not initialized!');
   }
 
-  const [dv] = await dataViewsContract?.find(datafeed.indices.join(','));
+  const [dv] = await dataViewsService?.find(datafeed.indices.join(','));
   if (!dv) {
     return null;
   }

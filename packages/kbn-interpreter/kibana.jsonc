@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/interpreter",
-  "owner": "@elastic/kibana-visualizations",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-visualizations"
 }

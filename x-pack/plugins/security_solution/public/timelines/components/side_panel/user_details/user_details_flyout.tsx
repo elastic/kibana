@@ -33,8 +33,9 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
 export const UserDetailsFlyout = ({
   contextID,
+  scopeId,
   userName,
-}: Pick<UserDetailsProps, 'contextID' | 'userName'>) => (
+}: Pick<UserDetailsProps, 'scopeId' | 'contextID' | 'userName'>) => (
   <>
     <EuiFlyoutHeader hasBorder>
       <ExpandableUserDetailsTitle userName={userName} />
@@ -43,7 +44,7 @@ export const UserDetailsFlyout = ({
       <EuiSpacer size="m" />
       <ExpandableUserDetailsPageLink userName={userName} />
       <EuiSpacer size="m" />
-      <ExpandableUserDetails contextID={contextID} userName={userName} />
+      <ExpandableUserDetails contextID={contextID} scopeId={scopeId} userName={userName} />
     </StyledEuiFlyoutBody>
   </>
 );

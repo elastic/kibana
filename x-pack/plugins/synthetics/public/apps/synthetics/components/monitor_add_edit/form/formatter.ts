@@ -4,32 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get, isEqual } from 'lodash';
+import { get, pick } from 'lodash';
 import { ConfigKey, DataStream, FormMonitorType, MonitorFields } from '../types';
-import { DEFAULT_FIELDS, DEFAULT_TLS_FIELDS } from '../constants';
+import { DEFAULT_FIELDS } from '../constants';
 
-export const formatter = (fields: Record<string, any>) => {
+export const serializeNestedFormField = (fields: Record<string, any>) => {
   const monitorType = fields[ConfigKey.MONITOR_TYPE] as DataStream;
   const monitorFields: Record<string, any> = {};
   const defaults = DEFAULT_FIELDS[monitorType] as MonitorFields;
   Object.keys(defaults).map((key) => {
     /* split key names on dot to handle dot notation fields,
      * which are changed to nested fields by react-hook-form */
-    monitorFields[key] = get(fields, key.split('.')) ?? defaults[key as ConfigKey];
+    monitorFields[key] = get(fields, key.split('.')) ?? fields[key] ?? defaults[key as ConfigKey];
   });
   return monitorFields as MonitorFields;
 };
 
-export const format = (fields: Record<string, unknown>) => {
-  const formattedFields = formatter(fields) as MonitorFields;
+export const ALLOWED_FIELDS = [ConfigKey.ENABLED, ConfigKey.ALERT_CONFIG];
+
+export const format = (fields: Record<string, unknown>, readOnly: boolean = false) => {
+  const formattedFields = serializeNestedFormField(fields) as MonitorFields;
+  const textAssertion = formattedFields[ConfigKey.TEXT_ASSERTION]
+    ? `
+          await page.getByText('${formattedFields[ConfigKey.TEXT_ASSERTION]}').first().waitFor();`
+    : ``;
   const formattedMap = {
     [FormMonitorType.SINGLE]: {
       ...formattedFields,
       [ConfigKey.SOURCE_INLINE]: `step('Go to ${formattedFields[ConfigKey.URLS]}', async () => {
-          await page.goto('${formattedFields[ConfigKey.URLS]}');
-          expect(await page.isVisible('text=${
-            formattedFields[ConfigKey.TEXT_ASSERTION]
-          }')).toBeTruthy();
+          await page.goto('${formattedFields[ConfigKey.URLS]}');${textAssertion}
         });`,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
     },
@@ -38,7 +41,7 @@ export const format = (fields: Record<string, unknown>) => {
       [ConfigKey.METADATA]: {
         script_source: {
           is_generated_script: get(fields, 'source.inline.type') === 'recorder' ? true : false,
-          file_name: get(fields, 'source.inline.fileName'),
+          file_name: get(fields, 'source.inline.fileName') || '',
         },
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
@@ -46,14 +49,14 @@ export const format = (fields: Record<string, unknown>) => {
     [FormMonitorType.HTTP]: {
       ...formattedFields,
       [ConfigKey.METADATA]: {
-        is_tls_enabled: isCustomTLSEnabled(formattedFields),
+        is_tls_enabled: fields.isTLSEnabled,
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     },
     [FormMonitorType.TCP]: {
       ...formattedFields,
       [ConfigKey.METADATA]: {
-        is_tls_enabled: isCustomTLSEnabled(formattedFields),
+        is_tls_enabled: fields.isTLSEnabled,
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
     },
@@ -62,13 +65,6 @@ export const format = (fields: Record<string, unknown>) => {
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
     },
   };
-  return formattedMap[fields[ConfigKey.FORM_MONITOR_TYPE] as FormMonitorType];
-};
-
-const isCustomTLSEnabled = (fields: MonitorFields) => {
-  const tlsFields: Record<string, unknown> = {};
-  Object.keys(DEFAULT_TLS_FIELDS).map((key) => {
-    tlsFields[key] = fields[key as keyof MonitorFields];
-  });
-  return !isEqual(tlsFields, DEFAULT_TLS_FIELDS);
+  const formFields = formattedMap[fields[ConfigKey.FORM_MONITOR_TYPE] as FormMonitorType];
+  return readOnly ? pick(formFields, ALLOWED_FIELDS) : formFields;
 };

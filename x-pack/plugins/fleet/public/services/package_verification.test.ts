@@ -30,23 +30,16 @@ const createPackage = ({
   policy_templates: [],
   // @ts-ignore
   assets: {},
-  savedObject: {
-    id: '1234',
+  installationInfo: {
     type: 'epm-package',
-    references: [],
-    attributes: {
-      installed_kibana: [],
-      installed_es: [],
-      es_index_patterns: {},
-      name: 'test-package',
-      version: '0.0.1',
-      install_status: 'installed',
-      install_version: '0.0.1',
-      install_started_at: new Date().toString(),
-      install_source: 'registry',
-      verification_status: verificationStatus,
-      ...(verificationKeyId && { verification_key_id: verificationKeyId }),
-    },
+    installed_kibana: [],
+    installed_es: [],
+    name: 'test-package',
+    version: '0.0.1',
+    install_status: 'installed',
+    install_source: 'registry',
+    verification_status: verificationStatus,
+    ...(verificationKeyId && { verification_key_id: verificationKeyId }),
   },
 });
 
@@ -61,8 +54,8 @@ describe('isPackageUnverified', () => {
 
     it('Should return false for a package with no saved object', () => {
       const noSoPkg = createPackage();
-      // @ts-ignore we know pkg has savedObject but ts doesn't
-      delete noSoPkg.savedObject;
+      // @ts-ignore we know pkg has installationInfo but ts doesn't
+      delete noSoPkg.installationInfo;
       expect(isPackageUnverified(noSoPkg)).toEqual(false);
     });
     it('Should return false for an unverified package', () => {
@@ -100,8 +93,8 @@ describe('isPackageUnverified', () => {
     });
     it('Should return false for a package with no saved object', () => {
       const noSoPkg = createPackage();
-      // @ts-ignore we know pkg has savedObject but ts doesn't
-      delete noSoPkg.savedObject;
+      // @ts-ignore we know pkg has installationInfo but ts doesn't
+      delete noSoPkg.installationInfo;
       expect(isPackageUnverified(noSoPkg)).toEqual(false);
     });
     it('Should return false for a verified package', () => {

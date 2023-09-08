@@ -60,18 +60,14 @@ import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
-import { RulesListNotifyBadge } from './rules_list_notify_badge';
+import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import {
-  RulesListColumns,
-  RulesListVisibleColumns,
-  useRulesListColumnSelector,
-} from './rules_list_column_selector';
+import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
 
 interface RuleTypeState {
   isLoading: boolean;
-  isInitialized: boolean;
+  initialLoad: boolean;
   data: RuleTypeIndex;
 }
 
@@ -143,7 +139,7 @@ export interface RulesListTableProps {
     onLoading: (isLoading: boolean) => void
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
-  visibleColumns?: RulesListVisibleColumns[];
+  visibleColumns?: string[];
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -165,7 +161,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
       actionsCount: rule.actions.length,
       ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
       isEditable:
-        hasAllPrivilege(rule, ruleTypeIndex.get(rule.ruleTypeId)) &&
+        hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
@@ -212,7 +208,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
   } = props;
 
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
-  const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
 
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
@@ -282,7 +277,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
   );
 
   const renderRuleStatusDropdown = useCallback(
-    (ruleEnabled: boolean | undefined, rule: RuleTableItem) => {
+    (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
@@ -346,7 +341,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         ),
         sortable: true,
         truncateText: true,
-        width: '25%',
+        width: '22%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
@@ -489,12 +484,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
           return (
             <RulesListNotifyBadge
               showOnHover
-              rule={rule}
-              isLoading={!!isLoadingMap[rule.id]}
-              onLoading={(newIsLoading) => onLoading(rule.id, newIsLoading)}
-              isOpen={currentlyOpenNotify === rule.id}
-              onClick={() => setCurrentlyOpenNotify(rule.id)}
-              onClose={() => setCurrentlyOpenNotify('')}
+              snoozeSettings={rule}
+              loading={!!isLoadingMap[rule.id]}
+              disabled={!rule.isEditable}
               onRuleChanged={onRuleChanged}
               snoozeRule={async (snoozeSchedule) => {
                 await onSnoozeRule(rule, snoozeSchedule);
@@ -699,7 +691,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '10%',
         'data-test-subj': 'rulesTableCell-status',
         render: (_enabled: boolean | undefined, rule: RuleTableItem) => {
-          return renderRuleStatusDropdown(rule.enabled, rule);
+          return renderRuleStatusDropdown(rule);
         },
       },
       {
@@ -773,7 +765,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     ];
   }, [
     config.minimumScheduleInterval,
-    currentlyOpenNotify,
     isLoadingMap,
     isRuleTypeEditableInContext,
     onRuleChanged,
@@ -893,7 +884,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.isInitialized === false ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

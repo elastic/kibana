@@ -9,7 +9,11 @@
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
+import {
+  LegendDisplay,
+  type PartitionChartProps,
+  type PartitionVisParams,
+} from '../types/expression_renderers';
 import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -178,6 +182,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
         params: {
           listenOnChange: true,
         },
+        overrides: handlers.variables?.overrides as PartitionChartProps['overrides'],
       },
     };
   },

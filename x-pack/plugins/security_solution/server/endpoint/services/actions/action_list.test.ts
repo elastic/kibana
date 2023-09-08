@@ -91,7 +91,7 @@ describe('When using `getActionList()', () => {
         {
           agents: ['agent-a'],
           hosts: { 'agent-a': { name: 'Host-agent-a' } },
-          command: 'unisolate',
+          command: 'kill-process',
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
           errors: undefined,
@@ -100,6 +100,87 @@ describe('When using `getActionList()', () => {
           isExpired: false,
           startedAt: '2022-04-27T16:08:47.449Z',
           status: 'successful',
+          comment: doc?.EndpointActions.data.comment,
+          createdBy: doc?.user.id,
+          parameters: doc?.EndpointActions.data.parameters,
+          agentState: {
+            'agent-a': {
+              completedAt: '2022-04-30T16:08:47.449Z',
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+          },
+        },
+      ],
+      total: 1,
+    });
+  });
+
+  it('should return expected `output` for given actions', async () => {
+    const doc = actionRequests.hits.hits[0]._source;
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
+          {
+            agent: {
+              id: 'agent-a',
+            },
+            host: {
+              hostname: 'Host-agent-a',
+            },
+          },
+        ]),
+      });
+    await expect(
+      getActionList({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+        page: 1,
+        pageSize: 10,
+        withOutputs: ['123'],
+      })
+    ).resolves.toEqual({
+      page: 1,
+      pageSize: 10,
+      commands: undefined,
+      userIds: undefined,
+      startDate: undefined,
+      elasticAgentIds: undefined,
+      endDate: undefined,
+      data: [
+        {
+          agents: ['agent-a'],
+          hosts: { 'agent-a': { name: 'Host-agent-a' } },
+          command: 'kill-process',
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
+          errors: undefined,
+          id: '123',
+          isCompleted: true,
+          isExpired: false,
+          startedAt: '2022-04-27T16:08:47.449Z',
+          status: 'successful',
+          outputs: {
+            'agent-a': {
+              content: {
+                code: 'ra_get-file_success_done',
+                contents: [
+                  {
+                    file_name: 'bad_file.txt',
+                    path: '/some/path/bad_file.txt',
+                    sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+                    size: 1234,
+                    type: 'file',
+                  },
+                ],
+                zip_size: 123,
+              },
+              type: 'json',
+            },
+          },
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
@@ -171,7 +252,7 @@ describe('When using `getActionList()', () => {
             'agent-b': { name: 'Host-agent-b' },
             'agent-x': { name: '' },
           },
-          command: 'unisolate',
+          command: 'kill-process',
           completedAt: undefined,
           wasSuccessful: false,
           errors: undefined,

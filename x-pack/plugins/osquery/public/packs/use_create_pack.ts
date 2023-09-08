@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
@@ -35,6 +36,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   >(
     (payload) =>
       http.post('/api/osquery/packs', {
+        version: API_VERSIONS.public.v1,
         body: JSON.stringify(payload),
       }),
     {
@@ -51,7 +53,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
           i18n.translate('xpack.osquery.newPack.successToastMessageText', {
             defaultMessage: 'Successfully created "{packName}" pack',
             values: {
-              packName: payload.data.attributes?.name ?? '',
+              packName: payload.data?.name ?? '',
             },
           })
         );

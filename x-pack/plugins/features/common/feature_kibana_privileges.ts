@@ -22,8 +22,6 @@ export interface FeatureKibanaPrivileges {
 
   /**
    * Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
-   * @deprecated
-   * @removeBy 8.8.0
    */
   disabled?: boolean;
 

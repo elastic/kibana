@@ -7,11 +7,15 @@
  */
 
 import * as path from 'path';
+import fs from 'fs';
 import type { StorybookConfig } from '@storybook/core-common';
-import { Configuration } from 'webpack';
+import webpack, { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
+
+const MOCKS_DIRECTORY = '__storybook_mocks__';
+const EXTENSIONS = ['.ts', '.js'];
 
 export type { StorybookConfig };
 
@@ -51,6 +55,48 @@ export const defaultConfig: StorybookConfig = {
       config.parallelism = 4;
       config.cache = true;
     }
+
+    // This will go over every component which is imported and check its import statements.
+    // For every import which starts with ./ it will do a check to see if a file with the same name
+    // exists in the __storybook_mocks__ folder. If it does, use that import instead.
+    // This allows you to mock hooks and functions when rendering components in Storybook.
+    // It is akin to Jest's manual mocks (__mocks__).
+    config.plugins?.push(
+      new webpack.NormalModuleReplacementPlugin(/^\.\//, async (resource: any) => {
+        if (!resource.contextInfo.issuer?.includes('node_modules')) {
+          const mockedPath = path.resolve(resource.context, MOCKS_DIRECTORY, resource.request);
+
+          EXTENSIONS.forEach((ext) => {
+            const isReplacementPathExists = fs.existsSync(mockedPath + ext);
+
+            if (isReplacementPathExists) {
+              const newImportPath = './' + path.join(MOCKS_DIRECTORY, resource.request);
+              resource.request = newImportPath;
+            }
+          });
+        }
+      })
+    );
+
+    // Same, but for imports statements which import modules outside of the directory (../)
+    config.plugins?.push(
+      new webpack.NormalModuleReplacementPlugin(/^\.\.\//, async (resource: any) => {
+        if (!resource.contextInfo.issuer?.includes('node_modules')) {
+          const prs = path.parse(resource.request);
+
+          const mockedPath = path.resolve(resource.context, prs.dir, MOCKS_DIRECTORY, prs.base);
+
+          EXTENSIONS.forEach((ext) => {
+            const isReplacementPathExists = fs.existsSync(mockedPath + ext);
+
+            if (isReplacementPathExists) {
+              const newImportPath = prs.dir + '/' + path.join(MOCKS_DIRECTORY, prs.base);
+              resource.request = newImportPath;
+            }
+          });
+        }
+      })
+    );
 
     config.node = { fs: 'empty' };
     config.watch = true;

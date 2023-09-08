@@ -104,7 +104,7 @@ export const inputFormats = {
   M: 'months',
   Y: 'years',
 };
-type InputFormat = keyof typeof inputFormats;
+export type InputFormat = keyof typeof inputFormats;
 
 export const outputFormats = {
   humanize: 'humanize',
@@ -117,14 +117,16 @@ export const outputFormats = {
   M: 'asMonths',
   Y: 'asYears',
 };
-type OutputFormat = keyof typeof outputFormats;
+export type OutputFormat = keyof typeof outputFormats;
 
-export const getDurationParams = (format: string) => {
+export const getDurationParams = (
+  format: string
+): { from: InputFormat; to: OutputFormat; decimals: string } => {
   const [from, to, decimals] = format.split(',');
 
   return {
-    from,
-    to,
+    from: from as InputFormat,
+    to: to as OutputFormat,
     decimals,
   };
 };

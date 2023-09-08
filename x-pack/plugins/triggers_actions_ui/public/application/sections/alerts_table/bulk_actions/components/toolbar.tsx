@@ -5,20 +5,32 @@
  * 2.0.
  */
 
-import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useState, useCallback, useMemo, useContext, useEffect } from 'react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { BulkActionsConfig, BulkActionsVerbs } from '../../../../../types';
+import {
+  ALERT_CASE_IDS,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
+  ALERT_WORKFLOW_TAGS,
+} from '@kbn/rule-data-utils';
+import {
+  Alerts,
+  BulkActionsPanelConfig,
+  BulkActionsVerbs,
+  RowSelection,
+} from '../../../../../types';
 import * as i18n from '../translations';
 import { BulkActionsContext } from '../context';
 
 interface BulkActionsProps {
   totalItems: number;
-  items: BulkActionsConfig[];
-  alerts: EcsFieldsResponse[];
+  panels: BulkActionsPanelConfig[];
+  alerts: Alerts;
+  setIsBulkActionsLoading: (loading: boolean) => void;
+  clearSelection: () => void;
+  refresh: () => void;
 }
 
 // Duplicated just for legacy reasons. Timelines plugin will be removed but
@@ -39,10 +51,10 @@ const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
 const containerStyles = { display: 'inline-block', position: 'relative' } as const;
 
 const selectedIdsToTimelineItemMapper = (
-  alerts: EcsFieldsResponse[],
-  rowSelection: Set<number>
+  alerts: Alerts,
+  rowSelection: RowSelection
 ): TimelineItem[] => {
-  return Array.from(rowSelection.values()).map((rowIndex: number) => {
+  return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
     return {
       _id: alert._id,
@@ -50,6 +62,8 @@ const selectedIdsToTimelineItemMapper = (
       data: [
         { field: ALERT_RULE_NAME, value: alert[ALERT_RULE_NAME] },
         { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] },
+        { field: ALERT_CASE_IDS, value: alert[ALERT_CASE_IDS] ?? [] },
+        { field: ALERT_WORKFLOW_TAGS, value: alert[ALERT_WORKFLOW_TAGS] ?? [] },
       ],
       ecs: {
         _id: alert._id,
@@ -59,42 +73,87 @@ const selectedIdsToTimelineItemMapper = (
   });
 };
 
-const useBulkActionsToMenuItemMapper = (
-  items: BulkActionsConfig[],
-  alerts: EcsFieldsResponse[]
+const useBulkActionsToMenuPanelMapper = (
+  panels: BulkActionsPanelConfig[],
+  // in case the action takes time, client can set the alerts to a loading
+  // state and back when done
+  setIsBulkActionsLoading: BulkActionsProps['setIsBulkActionsLoading'],
+  // Once the bulk action has been completed, it can set the selection to false.
+  clearSelection: BulkActionsProps['clearSelection'],
+  // In case bulk item action changes the alert data and need to refresh table page.
+  refresh: BulkActionsProps['refresh'],
+  alerts: Alerts,
+  closeIfPopoverIsOpen: () => void
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
 
-  const bulkActionsItems = useMemo(
-    () =>
-      items.map((item) => {
-        const isDisabled = isAllSelected && item.disableOnQuery;
-        return (
-          <EuiContextMenuItem
-            key={item.key}
-            data-test-subj={item['data-test-subj']}
-            disabled={isDisabled}
-            onClick={() => {
-              const selectedAlertIds = selectedIdsToTimelineItemMapper(alerts, rowSelection);
-              item.onClick(selectedAlertIds, isAllSelected);
-            }}
-          >
-            {isDisabled && item.disabledLabel ? item.disabledLabel : item.label}
-          </EuiContextMenuItem>
-        );
-      }),
-    [alerts, isAllSelected, items, rowSelection]
-  );
+  const bulkActionsPanels = useMemo(() => {
+    const bulkActionPanelsToReturn = [];
+    for (const panel of panels) {
+      const selectedAlertItems = selectedIdsToTimelineItemMapper(alerts, rowSelection);
+      if (panel.items) {
+        const newItems = panel.items.map((item) => {
+          const isDisabled = isAllSelected && item.disableOnQuery;
+          return {
+            key: item.key,
+            'data-test-subj': item['data-test-subj'],
+            disabled: isDisabled,
+            onClick: item.onClick
+              ? () => {
+                  closeIfPopoverIsOpen();
+                  item.onClick?.(
+                    selectedAlertItems,
+                    isAllSelected,
+                    setIsBulkActionsLoading,
+                    clearSelection,
+                    refresh
+                  );
+                }
+              : undefined,
+            name: isDisabled && item.disabledLabel ? item.disabledLabel : item.label,
+            panel: item.panel,
+          };
+        });
+        bulkActionPanelsToReturn.push({ ...panel, items: newItems });
+      } else {
+        const ContentPanel = panel.renderContent({
+          alertItems: selectedAlertItems,
+          isAllSelected,
+          setIsBulkActionsLoading,
+          clearSelection,
+          refresh,
+          closePopoverMenu: closeIfPopoverIsOpen,
+        });
+        bulkActionPanelsToReturn.push({ ...panel, content: ContentPanel });
+      }
+    }
+    return bulkActionPanelsToReturn;
+  }, [
+    alerts,
+    clearSelection,
+    isAllSelected,
+    panels,
+    refresh,
+    rowSelection,
+    setIsBulkActionsLoading,
+    closeIfPopoverIsOpen,
+  ]);
 
-  return bulkActionsItems;
+  return bulkActionsPanels;
 };
 
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, alerts }) => {
+const BulkActionsComponent: React.FC<BulkActionsProps> = ({
+  totalItems,
+  panels,
+  alerts,
+  setIsBulkActionsLoading,
+  clearSelection,
+  refresh,
+}) => {
   const [{ rowSelection, isAllSelected }, updateSelectedRows] = useContext(BulkActionsContext);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const [showClearSelection, setShowClearSelectiong] = useState(false);
-  const bulkActionItems = useBulkActionsToMenuItemMapper(items, alerts);
 
   useEffect(() => {
     setShowClearSelectiong(isAllSelected);
@@ -124,6 +183,15 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, a
       setIsActionsPopoverOpen(false);
     }
   }, [isActionsPopoverOpen]);
+
+  const bulkActionPanels = useBulkActionsToMenuPanelMapper(
+    panels,
+    setIsBulkActionsLoading,
+    clearSelection,
+    refresh,
+    alerts,
+    closeIfPopoverIsOpen
+  );
 
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
@@ -156,12 +224,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, a
   );
 
   return (
-    <div
-      style={containerStyles}
-      onClick={closeIfPopoverIsOpen}
-      data-test-subj="bulk-actions-button-container"
-      aria-hidden
-    >
+    <div style={containerStyles} data-test-subj="bulk-actions-button-container" aria-hidden>
       <EuiPopover
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
@@ -181,7 +244,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({ totalItems, items, a
         }
         closePopover={closeActionPopover}
       >
-        <EuiContextMenuPanel size="s" items={bulkActionItems} />
+        <EuiContextMenu size="s" initialPanelId={0} panels={bulkActionPanels} />
       </EuiPopover>
       <EuiButtonEmpty
         size="xs"

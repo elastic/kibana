@@ -5,35 +5,18 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiBadgeGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { LocationStatusBadges } from '../../common/components/location_status_badges';
+import { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
 import { useStatusByLocation } from '../../../hooks/use_status_by_location';
 
-export const LocationsStatus = () => {
-  const { locations, loading } = useStatusByLocation();
+export const LocationsStatus = ({
+  configId,
+  monitorLocations,
+}: {
+  configId: string;
+  monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
+}) => {
+  const { locations, loading } = useStatusByLocation({ configId, monitorLocations });
 
-  const theme = useTheme();
-
-  if (loading) {
-    return <EuiLoadingSpinner />;
-  }
-
-  return (
-    <EuiBadgeGroup>
-      {locations.map((loc) => (
-        <EuiBadge
-          iconType={() => (
-            <EuiIcon
-              size="s"
-              type="dot"
-              color={(loc.summary?.down ?? 0) > 0 ? theme.eui.euiColorVis9 : theme.eui.euiColorVis0}
-            />
-          )}
-          color="hollow"
-        >
-          {loc.observer?.geo?.name}
-        </EuiBadge>
-      ))}
-    </EuiBadgeGroup>
-  );
+  return <LocationStatusBadges configId={configId} locations={locations} loading={loading} />;
 };

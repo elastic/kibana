@@ -7,7 +7,7 @@
 
 import http from 'http';
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -17,12 +17,12 @@ import {
   getConfigurationOutput,
   deleteConfiguration,
   createConfiguration,
-  createConnector,
-  getServiceNowConnector,
   getAuthWithSuperUser,
   getActionsSpace,
+  getServiceNowConnector,
+  createConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

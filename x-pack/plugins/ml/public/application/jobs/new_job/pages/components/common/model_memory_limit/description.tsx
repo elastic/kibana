@@ -28,11 +28,11 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.modelMemoryLimit.description"
-          defaultMessage="Set an approximate upper limit for the amount of memory that can be used by the analytical models."
+          defaultMessage="An approximate upper limit for the amount of memory that can be used by the analytical models."
         />
       }
     >
-      <EuiFormRow label={title} error={validation.message} isInvalid={validation.valid === false}>
+      <EuiFormRow error={validation.message} isInvalid={validation.valid === false}>
         <>{children}</>
       </EuiFormRow>
     </EuiDescribedFormGroup>

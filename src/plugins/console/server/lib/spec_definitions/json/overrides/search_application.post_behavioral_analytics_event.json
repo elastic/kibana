@@ -1,0 +1,44 @@
+{
+  "search_application.post_behavioral_analytics_event": {
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/post-analytics-collection-event.html",
+    "patterns": [
+      "_application/analytics/{collection_name}/event/click",
+      "_application/analytics/{collection_name}/event/page_view",
+      "_application/analytics/{collection_name}/event/search"
+    ],
+    "data_autocomplete_rules": {
+      "document": {
+        "id": "",
+        "index": ""
+      },
+      "page": {
+        "referrer": "",
+        "url": "",
+        "title": ""
+      },
+      "search": {
+        "query": "",
+        "filters": [""],
+        "search_application": "",
+        "page": {
+          "current": 1,
+          "size": 1
+        },
+        "sort": [
+          {
+            "name": "",
+            "direction": { "__one_of": ["asc", "desc"] }
+          }
+        ],
+        "results": {
+          "items": [
+            { "document": { "index": "", "id": "" }, "page": { "url": "" } }
+          ],
+          "total_results": 0
+        }
+      },
+      "session": { "id": "" },
+      "user": { "id": "" }
+    }
+  }
+}

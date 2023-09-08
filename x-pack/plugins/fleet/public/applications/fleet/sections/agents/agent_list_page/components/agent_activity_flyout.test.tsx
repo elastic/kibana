@@ -26,12 +26,16 @@ describe('AgentActivityFlyout', () => {
   const mockOnClose = jest.fn();
   const mockOnAbortSuccess = jest.fn();
   const mockAbortUpgrade = jest.fn();
+  const mockSetSearch = jest.fn();
+  const mockSetSelectedStatus = jest.fn();
 
   beforeEach(() => {
     mockOnClose.mockReset();
     mockOnAbortSuccess.mockReset();
     mockAbortUpgrade.mockReset();
     mockUseActionStatus.mockReset();
+    mockSetSearch.mockReset();
+    mockSetSelectedStatus.mockReset();
     mockUseGetAgentPolicies.mockReturnValue({
       data: {
         items: [
@@ -60,6 +64,8 @@ describe('AgentActivityFlyout', () => {
           onClose={mockOnClose}
           onAbortSuccess={mockOnAbortSuccess}
           refreshAgentActivity={false}
+          setSearch={mockSetSearch}
+          setSelectedStatus={mockSetSelectedStatus}
         />
       </IntlProvider>
     );
@@ -79,6 +85,7 @@ describe('AgentActivityFlyout', () => {
         expiration: '2099-09-16T10:00:00.000Z',
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 0,
+        hasRolloutPeriod: true,
       },
     ];
     mockUseActionStatus.mockReturnValue({
@@ -101,10 +108,49 @@ describe('AgentActivityFlyout', () => {
     ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
 
     act(() => {
-      fireEvent.click(result.getByText('Abort upgrade'));
+      fireEvent.click(result.getByText('Cancel'));
     });
 
     expect(mockAbortUpgrade).toHaveBeenCalled();
+  });
+
+  it('should not render cancel button if the upgrade is set to happen immediately', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action2',
+        nbAgentsActionCreated: 5,
+        nbAgentsAck: 0,
+        version: '8.5.0',
+        startTime: '2022-09-15T10:00:00.000Z',
+        type: 'UPGRADE',
+        nbAgentsActioned: 5,
+        status: 'IN_PROGRESS',
+        expiration: '2099-09-16T10:00:00.000Z',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        hasRolloutPeriod: false,
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.getByText('Agent activity')).toBeInTheDocument();
+
+    expect(
+      result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
+    ).toEqual('Upgrading 5 agents to version 8.5.0');
+    // compare without whitespace, &nbsp; doesn't match
+    expect(
+      result.container
+        .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+
+    expect(result.queryByText('Cancel')).not.toBeInTheDocument();
   });
 
   it('should render agent activity for scheduled upgrade', () => {
@@ -142,7 +188,7 @@ describe('AgentActivityFlyout', () => {
     ).toContain('Scheduled for Sep 16, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
 
     act(() => {
-      fireEvent.click(result.getByText('Abort upgrade'));
+      fireEvent.click(result.getByText('Cancel'));
     });
 
     expect(mockAbortUpgrade).toHaveBeenCalled();
@@ -178,6 +224,73 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for rollout passed upgrade', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action3',
+        nbAgentsActionCreated: 2,
+        nbAgentsAck: 1,
+        type: 'UPGRADE',
+        nbAgentsActioned: 2,
+        status: 'ROLLOUT_PASSED',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T12:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for rollout passed upgrade with failed', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action3',
+        nbAgentsActionCreated: 2,
+        nbAgentsAck: 1,
+        type: 'UPGRADE',
+        nbAgentsActioned: 2,
+        status: 'ROLLOUT_PASSED',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 1,
+        completionTime: '2022-09-15T12:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain(
+      'A problem occurred during this operation. Started on Sep 15, 2022 10:00 AM.'.replace(
+        /\s/g,
+        ''
+      )
+    );
   });
 
   it('should render agent activity for expired unenroll', () => {
@@ -312,5 +425,73 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain('Completed Sep 15, 2022 12:00 PM'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for policy change no agents', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action8',
+        nbAgentsActionCreated: 0,
+        nbAgentsAck: 0,
+        type: 'POLICY_CHANGE',
+        nbAgentsActioned: 0,
+        status: 'COMPLETE',
+        expiration: '2099-09-16T10:00:00.000Z',
+        policyId: 'policy1',
+        revision: 2,
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T11:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      'Policy changed'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for policy change with agents', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action8',
+        nbAgentsActionCreated: 3,
+        nbAgentsAck: 3,
+        type: 'POLICY_CHANGE',
+        nbAgentsActioned: 3,
+        status: 'COMPLETE',
+        expiration: '2099-09-16T10:00:00.000Z',
+        policyId: 'policy1',
+        revision: 2,
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T11:00:00.000Z',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      '3 agents applied policy change'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
   });
 });

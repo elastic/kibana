@@ -23,6 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { BetaBadge } from '../../../../../shared/beta/beta_badge';
+
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { FilteringRulesTable } from '../../../shared/filtering_rules_table/filtering_rules_table';
@@ -67,20 +69,27 @@ export const ConnectorSyncRules: React.FC = () => {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
-                    defaultMessage: 'Sync rules ',
-                  })}
-                </h3>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>
+                      {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
+                        defaultMessage: 'Sync rules ',
+                      })}
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <BetaBadge />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer />
               <EuiText size="s">
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.description', {
                     defaultMessage: `Include or exclude high level items, file types and (file or folder) paths to
                     synchronize from {indexName}. Everything is included by default. Each document is
-                    tested against the reules below and the first rule that matches will be applied.`,
+                    tested against the rules below and the first rule that matches will be applied.`,
                     values: {
                       indexName,
                     },
@@ -142,7 +151,8 @@ export const ConnectorSyncRules: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription',
                         {
-                          defaultMessage: 'These filters apply to documents in post-processing.',
+                          defaultMessage:
+                            'These rules apply to documents during the integration filtering phase.',
                         }
                       )}
                     </p>
@@ -174,7 +184,8 @@ export const ConnectorSyncRules: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersDescription',
                         {
-                          defaultMessage: 'These filters apply to documents at the data source.',
+                          defaultMessage:
+                            'These rules apply before the data is obtained from the data source.',
                         }
                       )}
                     </p>

@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import {
-  IndicatorsFiltersContext,
-  IndicatorsFiltersContextValue,
-} from '../containers/filters/context';
+import { createContext, useContext } from 'react';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
+
+export interface IndicatorsFiltersContextValue {
+  timeRange: TimeRange;
+  filters: Filter[];
+  filterQuery: Query;
+  filterManager: FilterManager;
+}
+
+export const IndicatorsFiltersContext = createContext<IndicatorsFiltersContextValue | undefined>(
+  undefined
+);
 
 /**
  * Hook to retrieve {@link IndicatorsFiltersContext} (contains FilterManager)

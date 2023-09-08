@@ -9,6 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { FleetPlugin } from './plugin';
 
+export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,
   AgentClient,
@@ -19,6 +20,7 @@ export type {
   ArtifactsClientInterface,
   Artifact,
   ListArtifactsProps,
+  MessageSigningServiceInterface,
 } from './services';
 export { getRegistryUrl } from './services';
 
@@ -27,6 +29,7 @@ export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
   PostPackagePolicyPostCreateCallback,
@@ -38,6 +41,14 @@ export type { FleetConfigType } from './config';
 export type { PackagePolicyClient } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
+
+export type {
+  FleetFromHostFileClientInterface,
+  FleetToHostFileClientInterface,
+  FleetFile,
+  HapiReadableStream,
+  FleetFileUpdatableFields,
+} from './services/files/types';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);

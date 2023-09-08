@@ -21,15 +21,24 @@ describe('FetchIndicesApiLogic', () => {
       const promise = Promise.resolve({ result: 'result' });
       http.get.mockReturnValue(promise);
       const result = fetchIndices({
-        meta: { page: { current: 1, size: 20, total_pages: 10, total_results: 10 } },
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
         returnHiddenIndices: false,
+        size: 20,
       });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices', {
-        query: { page: 1, return_hidden_indices: false, search_query: null, size: 20 },
+        query: {
+          from: 0,
+          only_show_search_optimized_indices: false,
+          return_hidden_indices: false,
+          search_query: null,
+          size: 20,
+        },
       });
       await expect(result).resolves.toEqual({
         isInitialRequest: true,
+        onlyShowSearchOptimizedIndices: false,
         result: 'result',
         returnHiddenIndices: false,
         searchQuery: undefined,
@@ -39,15 +48,24 @@ describe('FetchIndicesApiLogic', () => {
       const promise = Promise.resolve({ result: 'result' });
       http.get.mockReturnValue(promise);
       const result = fetchIndices({
-        meta: { page: { current: 2, size: 20, total_pages: 10, total_results: 10 } },
+        from: 1,
+        onlyShowSearchOptimizedIndices: false,
         returnHiddenIndices: false,
+        size: 20,
       });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices', {
-        query: { page: 2, return_hidden_indices: false, search_query: null, size: 20 },
+        query: {
+          from: 1,
+          only_show_search_optimized_indices: false,
+          return_hidden_indices: false,
+          search_query: null,
+          size: 20,
+        },
       });
       await expect(result).resolves.toEqual({
         isInitialRequest: false,
+        onlyShowSearchOptimizedIndices: false,
         result: 'result',
         returnHiddenIndices: false,
         searchQuery: undefined,
@@ -57,16 +75,25 @@ describe('FetchIndicesApiLogic', () => {
       const promise = Promise.resolve({ result: 'result' });
       http.get.mockReturnValue(promise);
       const result = fetchIndices({
-        meta: { page: { current: 1, size: 20, total_pages: 10, total_results: 10 } },
+        from: 0,
+        onlyShowSearchOptimizedIndices: false,
         returnHiddenIndices: false,
         searchQuery: 'a',
+        size: 20,
       });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices', {
-        query: { page: 1, return_hidden_indices: false, search_query: 'a', size: 20 },
+        query: {
+          from: 0,
+          only_show_search_optimized_indices: false,
+          return_hidden_indices: false,
+          search_query: 'a',
+          size: 20,
+        },
       });
       await expect(result).resolves.toEqual({
         isInitialRequest: false,
+        onlyShowSearchOptimizedIndices: false,
         result: 'result',
         returnHiddenIndices: false,
         searchQuery: 'a',

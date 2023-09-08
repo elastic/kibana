@@ -6,10 +6,12 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
+
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { AppLogic } from '../../app_logic';
 import {
@@ -66,7 +68,7 @@ export const SourcesRouter: React.FC = () => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={PRIVATE_SOURCES_PATH}>
         <PrivateSources />
       </Route>
@@ -151,6 +153,6 @@ export const SourcesRouter: React.FC = () => {
       <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}>
         <SourceRouter />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

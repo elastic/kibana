@@ -16,6 +16,7 @@ describe('importQuerySchema', () => {
       as_new_list: false,
       overwrite: true,
       overwrite_exceptions: true,
+      overwrite_action_connectors: true,
     };
     const decoded = importQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -30,6 +31,7 @@ describe('importQuerySchema', () => {
       as_new_list: false,
       overwrite: 'wrong',
       overwrite_exceptions: true,
+      overwrite_action_connectors: true,
     };
     const decoded = importQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -48,6 +50,7 @@ describe('importQuerySchema', () => {
       as_new_list: false,
       overwrite: true,
       overwrite_exceptions: 'wrong',
+      overwrite_action_connectors: true,
     };
     const decoded = importQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -55,6 +58,24 @@ describe('importQuerySchema', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "wrong" supplied to "overwrite_exceptions"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+  test('it should NOT validate a non boolean value for "overwrite_action_connectors"', () => {
+    const payload: Omit<ImportQuerySchema, 'overwrite_action_connectors'> & {
+      overwrite_action_connectors: string;
+    } = {
+      as_new_list: false,
+      overwrite: true,
+      overwrite_exceptions: true,
+      overwrite_action_connectors: 'wrong',
+    };
+    const decoded = importQuerySchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = foldLeftRight(checked);
+
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "wrong" supplied to "overwrite_action_connectors"',
     ]);
     expect(message.schema).toEqual({});
   });

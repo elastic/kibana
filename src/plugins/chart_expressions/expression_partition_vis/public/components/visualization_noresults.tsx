@@ -35,7 +35,7 @@ export const VisualizationNoResults: FC<Props> = ({
     return (
       <EmptyPlaceholder
         dataTestSubj="partitionVisNegativeValues"
-        icon="alert"
+        icon="warning"
         iconColor="warning"
         message={message}
         renderComplete={renderComplete}

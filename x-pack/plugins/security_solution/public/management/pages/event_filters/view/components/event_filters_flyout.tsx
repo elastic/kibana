@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { lastValueFrom } from 'rxjs';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { EuiOverlayMaskProps } from '@elastic/eui/src/components/overlay_mask';
 import { useWithArtifactSubmitData } from '../../../../components/artifact_list_page/hooks/use_with_artifact_submit_data';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -30,7 +32,6 @@ import type {
 import { EventFiltersForm } from './form';
 
 import { getInitialExceptionFromEvent } from '../utils';
-import type { Ecs } from '../../../../../../common/ecs';
 import { useHttp, useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../../common/translations';
@@ -40,9 +41,7 @@ import { getCreationSuccessMessage, getCreationErrorMessage } from '../translati
 export interface EventFiltersFlyoutProps {
   data?: Ecs;
   onCancel(): void;
-  maskProps?: {
-    style?: string;
-  };
+  maskProps?: EuiOverlayMaskProps;
 }
 
 export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(

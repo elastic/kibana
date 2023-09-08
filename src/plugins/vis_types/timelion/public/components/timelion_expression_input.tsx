@@ -86,7 +86,9 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
     const abortController = new AbortController();
     if (kibana.services.http) {
       kibana.services.http
-        .get<ITimelionFunction[]>('../api/timelion/functions', { signal: abortController.signal })
+        .get<ITimelionFunction[]>('../internal/timelion/functions', {
+          signal: abortController.signal,
+        })
         .then((data) => {
           functionList.current = data;
         });

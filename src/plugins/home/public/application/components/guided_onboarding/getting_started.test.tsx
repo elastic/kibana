@@ -9,20 +9,20 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { findTestSubject, registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { findTestSubject, registerTestBed, TestBed, mountWithIntl } from '@kbn/test-jest-helpers';
+import { MemoryRouter } from 'react-router-dom';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { chromeServiceMock, applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api';
+import { ApiService } from '@kbn/guided-onboarding-plugin/public/services/api.service';
 
 import { GettingStarted } from './getting_started';
 import { KEY_ENABLE_WELCOME } from '../home';
+import { GuideFiltersProps } from '@kbn/guided-onboarding/src/components/landing_page/guide_filters';
+import { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
 
 const mockCloud = cloudMock.createSetup();
 const mockChrome = chromeServiceMock.createStartContract();
 const mockApplication = applicationServiceMock.createStartContract();
-const mockSettingsUI = uiSettingsServiceMock.createSetupContract();
-mockSettingsUI.get.mockReturnValue(false);
 const mockHttp = httpServiceMock.createStartContract();
 const mockApiService = new ApiService();
 mockApiService.setup(mockHttp, true);
@@ -33,8 +33,6 @@ jest.mock('../../kibana_services', () => ({
     chrome: mockChrome,
     application: mockApplication,
     trackUiMetric: jest.fn(),
-    uiSettings: mockSettingsUI,
-    http: mockHttp,
     guidedOnboardingService: mockApiService,
   }),
 }));
@@ -53,9 +51,13 @@ describe('getting started', () => {
   });
 
   test('should render getting started component', async () => {
-    const component = await shallow(<GettingStarted />);
+    const component = await shallow(
+      <MemoryRouter>
+        <GettingStarted />
+      </MemoryRouter>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(component.find('GettingStarted').exists()).toBe(true);
   });
 
   test('displays loading indicator', async () => {
@@ -103,5 +105,38 @@ describe('getting started', () => {
     testBed!.component.update();
 
     expect(localStorage.getItem(KEY_ENABLE_WELCOME)).toBe('false');
+  });
+
+  test('should set default guide filter value if querystring parameter does NOT exist', async () => {
+    let component: ReactWrapper;
+
+    await act(async () => {
+      component = mountWithIntl(
+        <MemoryRouter>
+          <GettingStarted />
+        </MemoryRouter>
+      );
+    });
+
+    const guideFilters = component!.find('[data-test-subj="onboarding--guideFilters"]');
+    expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe('all');
+  });
+
+  test('should auto-select guide filter value based on querystring parameter', async () => {
+    const cloudDiscoveryUseCase = 'observability';
+    let component: ReactWrapper;
+
+    await act(async () => {
+      component = mountWithIntl(
+        <MemoryRouter
+          initialEntries={[{ pathname: '/', search: `?useCase=${cloudDiscoveryUseCase}` }]}
+        >
+          <GettingStarted />
+        </MemoryRouter>
+      );
+    });
+
+    const guideFilters = component!.find('[data-test-subj="onboarding--guideFilters"]');
+    expect((guideFilters.props() as GuideFiltersProps).activeFilter).toBe(cloudDiscoveryUseCase);
   });
 });

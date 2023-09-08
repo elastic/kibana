@@ -12,6 +12,7 @@ import type { Observable, Subscription } from 'rxjs';
 
 import type {
   CapabilitiesSetup,
+  CustomBrandingSetup,
   HttpServiceSetup,
   IClusterClient,
   KibanaRequest,
@@ -24,12 +25,6 @@ import type {
   PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 
-import { APPLICATION_PREFIX } from '../../common/constants';
-import type { SecurityLicense } from '../../common/licensing';
-import type { AuthenticatedUser } from '../../common/model';
-import { canRedirectRequest } from '../authentication';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
-import type { SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
@@ -48,6 +43,12 @@ import { ResetSessionPage } from './reset_session_page';
 import type { CheckPrivilegesWithRequest, CheckUserProfilesPrivileges } from './types';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
+import { APPLICATION_PREFIX } from '../../common/constants';
+import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticatedUser } from '../../common/model';
+import { canRedirectRequest } from '../authentication';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { SpacesService } from '../plugin';
 
 export { Actions } from './actions';
 export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
@@ -64,6 +65,7 @@ interface AuthorizationServiceSetupParams {
   kibanaIndexName: string;
   getSpacesService(): SpacesService | undefined;
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
+  customBranding: CustomBrandingSetup;
 }
 
 interface AuthorizationServiceStartParams {
@@ -117,12 +119,13 @@ export class AuthorizationService {
     kibanaIndexName,
     getSpacesService,
     getCurrentUser,
+    customBranding,
   }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
     const mode = authorizationModeFactory(license);
-    const actions = new Actions(packageVersion);
+    const actions = new Actions();
     this.privileges = privilegesFactory(actions, features, license);
 
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
@@ -153,7 +156,7 @@ export class AuthorizationService {
         // If we have a license which doesn't enable security, or we're a legacy user we shouldn't
         // disable any ui capabilities
         if (!mode.useRbacForRequest(request)) {
-          return uiCapabilities;
+          return {};
         }
 
         const disableUICapabilities = disableUICapabilitiesFactory(
@@ -176,8 +179,11 @@ export class AuthorizationService {
     initAPIAuthorization(http, authz, loggers.get('api-authorization'));
     initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
-    http.registerOnPreResponse((request, preResponse, toolkit) => {
+    http.registerOnPreResponse(async (request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
+        const customBrandingValue = await customBranding.getBrandingFor(request, {
+          unauthenticated: false,
+        });
         const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
         const body = renderToString(
           <ResetSessionPage
@@ -186,6 +192,7 @@ export class AuthorizationService {
             logoutUrl={http.basePath.prepend(
               `/api/security/logout?${querystring.stringify({ next })}`
             )}
+            customBranding={customBrandingValue}
           />
         );
 

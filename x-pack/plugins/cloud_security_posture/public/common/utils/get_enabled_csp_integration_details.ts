@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { cloudPostureIntegrations, CloudPostureIntegrations } from '../constants';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PostureInput } from '../../../common/types';
+import { SUPPORTED_CLOUDBEAT_INPUTS } from '../../../common/constants';
+import { cloudPostureIntegrations, type CloudPostureIntegrations } from '../constants';
 
 const isPolicyTemplate = (name: unknown): name is keyof CloudPostureIntegrations =>
   typeof name === 'string' && name in cloudPostureIntegrations;
 
 export const getEnabledCspIntegrationDetails = (packageInfo?: PackagePolicy) => {
   const enabledInput = packageInfo?.inputs.find((input) => input.enabled);
-  if (!enabledInput || !isPolicyTemplate(enabledInput.policy_template)) return null;
+
+  // Check for valid and support input
+  if (
+    !enabledInput ||
+    !isPolicyTemplate(enabledInput.policy_template) ||
+    !SUPPORTED_CLOUDBEAT_INPUTS.includes(enabledInput.type as PostureInput)
+  )
+    return null;
 
   const integration = cloudPostureIntegrations[enabledInput.policy_template];
   const enabledIntegrationOption = integration.options.find(

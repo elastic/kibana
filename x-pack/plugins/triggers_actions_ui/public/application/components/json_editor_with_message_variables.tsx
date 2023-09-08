@@ -11,12 +11,11 @@ import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 
-import './add_message_variables.scss';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from './add_message_variables';
+import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(
@@ -37,7 +36,7 @@ interface Props {
   buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  inputTargetValue?: string;
+  inputTargetValue?: string | null;
   label: string;
   errors?: string[];
   areaLabel?: string;
@@ -74,6 +73,13 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   const [showErrorMessage, setShowErrorMessage] = useState(false);
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
+
+  useEffect(() => {
+    if (!xJson && inputTargetValue) {
+      setXJson(inputTargetValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputTargetValue]);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const editor = editorRef.current;
@@ -133,7 +139,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiCallOut size="s" color="danger" iconType="alert" title={NO_EDITOR_ERROR_TITLE}>
+        <EuiCallOut size="s" color="danger" iconType="warning" title={NO_EDITOR_ERROR_TITLE}>
           <p>{NO_EDITOR_ERROR_MESSAGE}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />

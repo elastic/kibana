@@ -8,77 +8,44 @@ import expect from '@kbn/expect';
 import { ApmApiError } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { expectToReject } from '../../common/utils/expect_to_reject';
+import {
+  createServiceGroupApi,
+  deleteAllServiceGroups,
+  getServiceGroupsApi,
+} from './service_groups_api_methods';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const supertest = getService('supertest');
-
-  async function callApi({
-    serviceGroupId,
-    groupName,
-    kuery,
-    description,
-    color,
-  }: {
-    serviceGroupId?: string;
-    groupName: string;
-    kuery: string;
-    description?: string;
-    color?: string;
-  }) {
-    const response = await apmApiClient.writeUser({
-      endpoint: 'POST /internal/apm/service-group',
-      params: {
-        query: {
-          serviceGroupId,
-        },
-        body: {
-          groupName,
-          kuery,
-          description,
-          color,
-        },
-      },
-    });
-    return response;
-  }
-
-  type SavedObjectsFindResults = Array<{
-    id: string;
-    type: string;
-  }>;
-
-  async function deleteServiceGroups() {
-    const response = await supertest
-      .get('/api/saved_objects/_find?type=apm-service-group')
-      .set('kbn-xsrf', 'true');
-    const savedObjects: SavedObjectsFindResults = response.body.saved_objects;
-    const bulkDeleteBody = savedObjects.map(({ id, type }) => ({ id, type }));
-    return supertest
-      .post(`/api/saved_objects/_bulk_delete?force=true`)
-      .set('kbn-xsrf', 'foo')
-      .send(bulkDeleteBody);
-  }
 
   registry.when('Service group create', { config: 'basic', archives: [] }, () => {
-    afterEach(deleteServiceGroups);
+    afterEach(async () => {
+      await deleteAllServiceGroups(apmApiClient);
+    });
 
     it('creates a new service group', async () => {
-      const response = await callApi({
+      const serviceGroup = {
         groupName: 'synthbeans',
         kuery: 'service.name: synth*',
-      });
-      expect(response.status).to.be(200);
-      expect(Object.keys(response.body).length).to.be(0);
+      };
+      const createResponse = await createServiceGroupApi({ apmApiClient, ...serviceGroup });
+      expect(createResponse.status).to.be(200);
+      expect(createResponse.body).to.have.property('id');
+      expect(createResponse.body).to.have.property('groupName', serviceGroup.groupName);
+      expect(createResponse.body).to.have.property('kuery', serviceGroup.kuery);
+      expect(createResponse.body).to.have.property('updatedAt');
+      const serviceGroupsResponse = await getServiceGroupsApi(apmApiClient);
+      expect(serviceGroupsResponse.body.serviceGroups.length).to.be(1);
     });
 
     it('handles invalid fields with error response', async () => {
-      const err = await expectToReject<ApmApiError>(() =>
-        callApi({
-          groupName: 'synthbeans',
-          kuery: 'service.name: synth* or transaction.type: request',
-        })
+      const err = await expectToReject<ApmApiError>(
+        async () =>
+          await createServiceGroupApi({
+            apmApiClient,
+            groupName: 'synthbeans',
+            kuery: 'service.name: synth* or transaction.type: request',
+          })
       );
 
       expect(err.res.status).to.be(400);

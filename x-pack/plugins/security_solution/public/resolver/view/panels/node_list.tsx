@@ -8,9 +8,6 @@
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import { useDispatch, useSelector } from 'react-redux';
-
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo, useCallback, useContext } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
@@ -28,12 +25,12 @@ import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
 import { LimitWarning } from '../limit_warnings';
-import type { ResolverState } from '../../types';
 import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
-import type { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
 import { CopyablePanelField } from './copyable_panel_field';
+import { userSelectedResolverNode } from '../../store/actions';
+import type { State } from '../../../common/store/types';
 
 interface ProcessTableView {
   name?: string;
@@ -44,7 +41,8 @@ interface ProcessTableView {
 /**
  * The "default" view for the panel: A list of all the processes currently in the graph.
  */
-export const NodeList = memo(() => {
+// eslint-disable-next-line react/display-name
+export const NodeList = memo(({ id }: { id: string }) => {
   const columns = useMemo<Array<EuiBasicTableColumn<ProcessTableView>>>(
     () => [
       {
@@ -58,7 +56,7 @@ export const NodeList = memo(() => {
         sortable: true,
         truncateText: true,
         render(name: string | undefined, item: ProcessTableView) {
-          return <NodeDetailLink name={name} nodeID={item.nodeID} />;
+          return <NodeDetailLink id={id} name={name} nodeID={item.nodeID} />;
         },
       },
       {
@@ -76,26 +74,29 @@ export const NodeList = memo(() => {
         },
       },
     ],
-    []
+    [id]
   );
 
   const processTableView: ProcessTableView[] = useSelector(
-    useCallback((state: ResolverState) => {
-      const { processNodePositions } = selectors.layout(state);
-      const view: ProcessTableView[] = [];
-      for (const treeNode of processNodePositions.keys()) {
-        const name = nodeModel.nodeName(treeNode);
-        const nodeID = nodeModel.nodeID(treeNode);
-        if (nodeID !== undefined) {
-          view.push({
-            name,
-            timestamp: nodeModel.timestampAsDate(treeNode),
-            nodeID,
-          });
+    useCallback(
+      (state: State) => {
+        const { processNodePositions } = selectors.layout(state.analyzer[id]);
+        const view: ProcessTableView[] = [];
+        for (const treeNode of processNodePositions.keys()) {
+          const name = nodeModel.nodeName(treeNode);
+          const nodeID = nodeModel.nodeID(treeNode);
+          if (nodeID !== undefined) {
+            view.push({
+              name,
+              timestamp: nodeModel.timestampAsDate(treeNode),
+              nodeID,
+            });
+          }
         }
-      }
-      return view;
-    }, [])
+        return view;
+      },
+      [id]
+    )
   );
 
   const numberOfProcesses = processTableView.length;
@@ -110,9 +111,11 @@ export const NodeList = memo(() => {
     ];
   }, []);
 
-  const children = useSelector(selectors.hasMoreChildren);
-  const ancestors = useSelector(selectors.hasMoreAncestors);
-  const generations = useSelector(selectors.hasMoreGenerations);
+  const children = useSelector((state: State) => selectors.hasMoreChildren(state.analyzer[id]));
+  const ancestors = useSelector((state: State) => selectors.hasMoreAncestors(state.analyzer[id]));
+  const generations = useSelector((state: State) =>
+    selectors.hasMoreGenerations(state.analyzer[id])
+  );
   const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
@@ -131,27 +134,29 @@ export const NodeList = memo(() => {
   );
 });
 
-function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
-  const isOrigin = useSelector((state: ResolverState) => {
-    return selectors.originID(state) === nodeID;
+function NodeDetailLink({ id, name, nodeID }: { id: string; name?: string; nodeID: string }) {
+  const isOrigin = useSelector((state: State) => {
+    return selectors.originID(state.analyzer[id]) === nodeID;
   });
-  const nodeState = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
+  const nodeState = useSelector((state: State) =>
+    selectors.nodeDataStatus(state.analyzer[id])(nodeID)
+  );
   const { descriptionText } = useColors();
-  const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });
-  const dispatch: (action: ResolverAction) => void = useDispatch();
+  const linkProps = useLinkProps(id, { panelView: 'nodeDetail', panelParameters: { nodeID } });
+  const dispatch = useDispatch();
   const { timestamp } = useContext(SideEffectContext);
   const handleOnClick = useCallback(
     (mouseEvent: React.MouseEvent<HTMLAnchorElement>) => {
       linkProps.onClick(mouseEvent);
-      dispatch({
-        type: 'userSelectedResolverNode',
-        payload: {
+      dispatch(
+        userSelectedResolverNode({
+          id,
           nodeID,
           time: timestamp(),
-        },
-      });
+        })
+      );
     },
-    [timestamp, linkProps, dispatch, nodeID]
+    [timestamp, linkProps, dispatch, nodeID, id]
   );
   return (
     <EuiButtonEmpty
@@ -172,6 +177,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
       ) : (
         <StyledButtonTextContainer>
           <CubeForProcess
+            id={id}
             state={nodeState}
             isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
@@ -197,6 +203,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
   );
 }
 
+// eslint-disable-next-line react/display-name
 const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }) => {
   const formattedDate = useFormattedDate(eventDate);
 

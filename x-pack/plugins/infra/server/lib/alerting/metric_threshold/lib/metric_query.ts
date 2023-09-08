@@ -6,7 +6,9 @@
  */
 
 import moment from 'moment';
+import { isCustom, isNotCountOrCustom } from './metric_expression_params';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
 import {
   hasAdditionalContext,
   KUBERNETES_POD_UID,
@@ -45,7 +47,6 @@ export const createBaseFilters = (
   timeframe: { start: number; end: number },
   filterQuery?: string
 ) => {
-  const { metric } = metricParams;
   const rangeFilters = [
     {
       range: {
@@ -57,15 +58,16 @@ export const createBaseFilters = (
     },
   ];
 
-  const metricFieldFilters = metric
-    ? [
-        {
-          exists: {
-            field: metric,
+  const metricFieldFilters =
+    isNotCountOrCustom(metricParams) && metricParams.metric
+      ? [
+          {
+            exists: {
+              field: metricParams.metric,
+            },
           },
-        },
-      ]
-    : [];
+        ]
+      : [];
 
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
@@ -83,12 +85,11 @@ export const getElasticsearchMetricQuery = (
   afterKey?: Record<string, string>,
   fieldsExisted?: Record<string, boolean> | null
 ) => {
-  const { metric, aggType } = metricParams;
-  if (aggType === Aggregators.COUNT && metric) {
-    throw new Error('Cannot aggregate document count with a metric');
-  }
-  if (aggType !== Aggregators.COUNT && !metric) {
-    throw new Error('Can only aggregate without a metric if using the document count aggregator');
+  const { aggType } = metricParams;
+  if (isNotCountOrCustom(metricParams) && !metricParams.metric) {
+    throw new Error(
+      'Can only aggregate without a metric if using the document count or custom aggregator'
+    );
   }
 
   // We need to make a timeframe that represents the current timeframe as oppose
@@ -99,13 +100,19 @@ export const getElasticsearchMetricQuery = (
     aggType === Aggregators.COUNT
       ? {}
       : aggType === Aggregators.RATE
-      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metric)
+      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
       : aggType === Aggregators.P95 || aggType === Aggregators.P99
-      ? createPercentileAggregation(aggType, metric)
+      ? createPercentileAggregation(aggType, metricParams.metric)
+      : isCustom(metricParams)
+      ? createCustomMetricsAggregations(
+          'aggregatedValue',
+          metricParams.customMetrics,
+          metricParams.equation
+        )
       : {
           aggregatedValue: {
             [aggType]: {
-              field: metric,
+              field: metricParams.metric,
             },
           },
         };

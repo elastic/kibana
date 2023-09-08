@@ -6,72 +6,79 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import { MlClient } from '../../../lib/helpers/get_ml_client';
-import { getHealthStatuses } from './get_health_statuses';
-import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
-import { getServiceTransactionStats } from './get_service_transaction_stats';
-import { getServiceAggregatedTransactionStats } from './get_service_aggregated_transaction_stats';
-import { mergeServiceStats } from './merge_service_stats';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import { MlClient } from '../../../lib/helpers/get_ml_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { getHealthStatuses } from './get_health_statuses';
+import { getServicesWithoutTransactions } from './get_services_without_transactions';
+import { getServicesAlerts } from './get_service_alerts';
+import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { MergedServiceStat, mergeServiceStats } from './merge_service_stats';
 
-export const MAX_NUMBER_OF_SERVICES = 500;
+export const MAX_NUMBER_OF_SERVICES = 1_000;
+
+export interface ServicesItemsResponse {
+  items: MergedServiceStat[];
+  maxServiceCountExceeded: boolean;
+  serviceOverflowCount: number;
+}
 
 export async function getServicesItems({
   environment,
   kuery,
   mlClient,
   apmEventClient,
-  searchAggregatedTransactions,
-  searchAggregatedServiceMetrics,
+  apmAlertsClient,
   logger,
   start,
   end,
   serviceGroup,
   randomSampler,
+  documentType,
+  rollupInterval,
 }: {
   environment: string;
   kuery: string;
   mlClient?: MlClient;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
-  searchAggregatedServiceMetrics: boolean;
+  apmAlertsClient: ApmAlertsClient;
   logger: Logger;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
-}) {
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+}): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
       environment,
       kuery,
-      searchAggregatedTransactions,
-      searchAggregatedServiceMetrics,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
       serviceGroup,
       randomSampler,
+      documentType,
+      rollupInterval,
     };
 
     const [
-      transactionStats,
-      servicesFromErrorAndMetricDocuments,
+      { serviceStats, serviceOverflowCount },
+      { services: servicesWithoutTransactions, maxServiceCountExceeded },
       healthStatuses,
+      alertCounts,
     ] = await Promise.all([
-      searchAggregatedServiceMetrics
-        ? getServiceAggregatedTransactionStats({
-            ...commonParams,
-            apmEventClient,
-          })
-        : getServiceTransactionStats({
-            ...commonParams,
-            apmEventClient,
-          }),
-      getServicesFromErrorAndMetricDocuments({
+      getServiceTransactionStats({
+        ...commonParams,
+        apmEventClient,
+      }),
+      getServicesWithoutTransactions({
         ...commonParams,
         apmEventClient,
       }),
@@ -79,12 +86,22 @@ export async function getServicesItems({
         logger.error(err);
         return [];
       }),
+      getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
+        logger.error(err);
+        return [];
+      }),
     ]);
 
-    return mergeServiceStats({
-      transactionStats,
-      servicesFromErrorAndMetricDocuments,
-      healthStatuses,
-    });
+    return {
+      items:
+        mergeServiceStats({
+          serviceStats,
+          servicesWithoutTransactions,
+          healthStatuses,
+          alertCounts,
+        }) ?? [],
+      maxServiceCountExceeded,
+      serviceOverflowCount,
+    };
   });
 }

@@ -7,17 +7,17 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import uuid from 'uuid';
 import type { FieldErrors } from 'react-hook-form';
+import { useFieldArray } from 'react-hook-form';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { map, omit } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { usePack } from '../../packs/use_pack';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
-import { usePack } from '../../packs/use_pack';
 
 interface OsqueryResponseActionsValues {
   savedQueryId?: string | null;
@@ -34,7 +34,6 @@ interface OsqueryResponseActionsValues {
 
 interface OsqueryResponseActionsParamsFormFields {
   savedQueryId: string | null;
-  id: string;
   ecs_mapping: ECSMapping;
   query: string;
   packId?: string[];
@@ -57,7 +56,6 @@ const OsqueryResponseActionParamsFormComponent = ({
   onError,
   onChange,
 }: OsqueryResponseActionsParamsFormProps) => {
-  const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
     mode: 'all',
     defaultValues: defaultValues
@@ -69,18 +67,33 @@ const OsqueryResponseActionParamsFormComponent = ({
         }
       : {
           ecs_mapping: {},
-          id: uniqueId,
           queryType: 'query',
         },
   });
 
-  const { watch, register, formState } = hooksForm;
+  const { watch, register, formState, control } = hooksForm;
 
-  const [packId, queryType, queries, id] = watch(['packId', 'queryType', 'queries', 'id']);
+  const [packId, queryType, queries] = watch(['packId', 'queryType', 'queries']);
   const { data: packData } = usePack({
     packId: packId?.[0],
     skip: !packId?.[0],
   });
+
+  const { replace } = useFieldArray({
+    name: 'queries',
+    control,
+  });
+
+  useEffect(() => {
+    if (packData?.queries) {
+      const queriesArray = map(packData?.queries, (query, queryId: string) => ({
+        ...query,
+        id: queryId,
+      }));
+
+      replace(queriesArray);
+    }
+  }, [packData, replace]);
 
   useEffect(() => {
     onError(formState.errors);
@@ -88,7 +101,6 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   useEffect(() => {
     register('savedQueryId');
-    register('id');
   }, [register]);
 
   useEffect(() => {
@@ -97,17 +109,10 @@ const OsqueryResponseActionParamsFormComponent = ({
         // @ts-expect-error update types
         formData.queryType === 'pack'
           ? {
-              id: formData.id,
               packId: formData?.packId?.length ? formData?.packId[0] : undefined,
-              queries: packData
-                ? map(packData.queries, (query, queryId: string) => ({
-                    ...query,
-                    id: queryId,
-                  }))
-                : formData.queries,
+              queries: formData.queries,
             }
           : {
-              id: formData.id,
               savedQueryId: formData.savedQueryId,
               query: formData.query,
               ecsMapping: formData.ecs_mapping,
@@ -138,10 +143,9 @@ const OsqueryResponseActionParamsFormComponent = ({
   const queryDetails = useMemo(
     () => ({
       queries,
-      action_id: id,
       agents: [],
     }),
-    [id, queries]
+    [queries]
   );
 
   return (

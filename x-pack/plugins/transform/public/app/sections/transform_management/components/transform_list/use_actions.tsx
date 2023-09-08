@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiTableActionsColumnType } from '@elastic/eui';
 
+import { ReauthorizeActionModal, useReauthorizeAction } from '../action_reauthorize';
 import { TransformListRow } from '../../../../common';
 
 import { useCloneAction } from '../action_clone';
@@ -17,6 +18,7 @@ import { useDiscoverAction } from '../action_discover';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
 import { useResetAction, ResetActionModal } from '../action_reset';
+import { useScheduleNowAction } from '../action_schedule_now';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
 import { useCreateAlertRuleAction } from '../action_create_alert';
@@ -36,7 +38,9 @@ export const useActions = ({
   const deleteAction = useDeleteAction(forceDisable);
   const discoverAction = useDiscoverAction(forceDisable);
   const editAction = useEditAction(forceDisable, transformNodes);
+  const reauthorizeAction = useReauthorizeAction(forceDisable, transformNodes);
   const resetAction = useResetAction(forceDisable);
+  const scheduleNowAction = useScheduleNowAction(forceDisable, transformNodes);
   const startAction = useStartAction(forceDisable, transformNodes);
   const stopAction = useStopAction(forceDisable);
   const createAlertRuleAction = useCreateAlertRuleAction(forceDisable);
@@ -47,25 +51,21 @@ export const useActions = ({
         {resetAction.isModalVisible && <ResetActionModal {...resetAction} />}
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
-
-        {editAction.config && editAction.isFlyoutVisible && (
-          <EditTransformFlyout
-            closeFlyout={editAction.closeFlyout}
-            config={editAction.config}
-            dataViewId={editAction.dataViewId}
-          />
-        )}
+        {reauthorizeAction.isModalVisible && <ReauthorizeActionModal {...reauthorizeAction} />}
+        <EditTransformFlyout {...editAction} />
         {deleteAction.isModalVisible && <DeleteActionModal {...deleteAction} />}
       </>
     ),
     actions: [
       discoverAction.action,
       createAlertRuleAction.action,
+      scheduleNowAction.action,
       startAction.action,
       stopAction.action,
       editAction.action,
       cloneAction.action,
       deleteAction.action,
+      reauthorizeAction.action,
       resetAction.action,
     ],
   };

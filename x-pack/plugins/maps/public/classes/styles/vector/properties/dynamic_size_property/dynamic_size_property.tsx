@@ -8,8 +8,7 @@
 import React from 'react';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from '../dynamic_style_property';
-import { OrdinalLegend } from '../../components/legend/ordinal_legend';
-import { MarkerSizeLegend } from '../../components/legend/marker_size_legend';
+import { MarkerSizeLegend, OrdinalLegend } from '../../components/legend/size';
 import { makeMbClampedNumberExpression } from '../../style_util';
 import {
   FieldFormatter,

@@ -156,7 +156,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                   />
                 }
                 color="danger"
-                iconType="alert"
+                iconType="warning"
               >
                 {saveError.data && saveError.data.message ? <p>{saveError.data.message}</p> : null}
               </EuiCallOut>

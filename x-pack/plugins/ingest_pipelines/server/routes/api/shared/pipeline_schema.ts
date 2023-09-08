@@ -12,4 +12,5 @@ export const pipelineSchema = {
   processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   version: schema.maybe(schema.number()),
   on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
+  _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };

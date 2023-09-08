@@ -7,13 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
-import type { SeverityUserAction } from '../../../common/api/cases/user_actions/severity';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { SeverityUserAction } from '../../../common/types/domain';
 import { SET_SEVERITY_TO } from '../create/translations';
 import { createCommonUpdateUserActionBuilder } from './common';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { UserActionBuilder } from './types';
 import { severities } from '../severity/config';
 
-const getLabelTitle = (userAction: UserActionResponse<SeverityUserAction>) => {
+const getLabelTitle = (userAction: SnakeToCamelCase<SeverityUserAction>) => {
   const severity = userAction.payload.severity;
   const severityData = severities[severity];
   if (severityData === undefined) {
@@ -23,11 +24,11 @@ const getLabelTitle = (userAction: UserActionResponse<SeverityUserAction>) => {
     <EuiFlexGroup
       gutterSize="s"
       alignItems="center"
-      data-test-subj={`${userAction.actionId}-user-action-severity-title`}
+      data-test-subj={`${userAction.id}-user-action-severity-title`}
       responsive={false}
     >
       <EuiFlexItem grow={false}>{SET_SEVERITY_TO}</EuiFlexItem>
-      <EuiFlexItem data-test-subj={`${userAction.actionId}-user-action-severity-title-${severity}`}>
+      <EuiFlexItem data-test-subj={`${userAction.id}-user-action-severity-title-${severity}`}>
         <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -40,7 +41,7 @@ export const createSeverityUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const severityUserAction = userAction as UserActionResponse<SeverityUserAction>;
+    const severityUserAction = userAction as SnakeToCamelCase<SeverityUserAction>;
     const label = getLabelTitle(severityUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userProfiles,

@@ -22,13 +22,14 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -37,7 +38,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -72,7 +73,7 @@ Object {
                     >
                       <button
                         aria-label="Edit Text List Header"
-                        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                         data-test-subj="TitleEditIcon"
                         type="button"
                       >
@@ -114,7 +115,7 @@ Object {
                         >
                           <button
                             aria-label="Edit Text List Header"
-                            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                             data-test-subj="DescriptionEditIcon"
                             type="button"
                           >
@@ -151,7 +152,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -174,8 +175,8 @@ Object {
                         class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -184,7 +185,7 @@ Object {
                             <span
                               class="eui-textTruncate"
                             >
-                              Manage rules
+                              Link rules
                             </span>
                           </span>
                         </button>
@@ -204,7 +205,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -237,13 +238,13 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
-          class="euiModal euiModal--maxWidth-default"
+          class="euiModal emotion-euiModal-defaultMaxWidth"
           data-test-subj="EditModal"
           tabindex="0"
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -254,22 +255,20 @@ Object {
             />
           </button>
           <div
-            class="euiModalHeader"
+            class="euiModalHeader emotion-euiModalHeader"
           >
-            <div
-              class="euiModalHeader__title"
+            <h1
+              class="euiTitle euiModalHeader__title emotion-euiTitle-m"
               data-test-subj="editModalTitle"
             >
-              <h1>
-                Edit List Name
-              </h1>
-            </div>
+              Edit List Name
+            </h1>
           </div>
           <div
-            class="euiModalBody"
+            class="euiModalBody emotion-euiModalBody"
           >
             <div
-              class="euiModalBody__overflow"
+              class="euiModalBody__overflow emotion-euiModalBody__overflow"
             >
               <form
                 class="euiForm"
@@ -302,7 +301,6 @@ Object {
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          aria-invalid="false"
                           class="euiFieldText euiFieldText--fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
@@ -332,40 +330,48 @@ Object {
                   <div
                     class="euiFormRow__fieldWrapper"
                   >
-                    <textarea
-                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
-                      data-test-subj="editModalDescriptionTextField"
-                      id="generated-id"
-                      name="description"
-                      rows="6"
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea"
                     >
-                      List description
-                    </textarea>
+                      <div
+                        class="euiFormControlLayout__childrenWrapper"
+                      >
+                        <textarea
+                          class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                          data-test-subj="editModalDescriptionTextField"
+                          id="generated-id"
+                          name="description"
+                          rows="6"
+                        >
+                          List description
+                        </textarea>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </form>
             </div>
           </div>
           <div
-            class="euiModalFooter"
+            class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="editModalCancelBtn"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
               data-test-subj="editModalSaveBtn"
               form="modalForm_generated-id"
               type="submit"
@@ -403,13 +409,14 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -418,7 +425,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>
@@ -453,7 +460,7 @@ Object {
                   >
                     <button
                       aria-label="Edit Text List Header"
-                      class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                       data-test-subj="TitleEditIcon"
                       type="button"
                     >
@@ -495,7 +502,7 @@ Object {
                       >
                         <button
                           aria-label="Edit Text List Header"
-                          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                           data-test-subj="DescriptionEditIcon"
                           type="button"
                         >
@@ -532,7 +539,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -555,8 +562,8 @@ Object {
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -565,7 +572,7 @@ Object {
                           <span
                             class="eui-textTruncate"
                           >
-                            Manage rules
+                            Link rules
                           </span>
                         </span>
                       </button>
@@ -585,7 +592,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >
@@ -685,13 +692,14 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -700,7 +708,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -735,7 +743,7 @@ Object {
                     >
                       <button
                         aria-label="Edit Text List Header"
-                        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                         data-test-subj="TitleEditIcon"
                         type="button"
                       >
@@ -777,7 +785,7 @@ Object {
                         >
                           <button
                             aria-label="Edit Text List Header"
-                            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                             data-test-subj="DescriptionEditIcon"
                             type="button"
                           >
@@ -814,7 +822,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -837,8 +845,8 @@ Object {
                         class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -847,7 +855,7 @@ Object {
                             <span
                               class="eui-textTruncate"
                             >
-                              Manage rules
+                              Link rules
                             </span>
                           </span>
                         </button>
@@ -867,7 +875,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -910,13 +918,14 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -925,7 +934,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>
@@ -960,7 +969,7 @@ Object {
                   >
                     <button
                       aria-label="Edit Text List Header"
-                      class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                       data-test-subj="TitleEditIcon"
                       type="button"
                     >
@@ -1002,7 +1011,7 @@ Object {
                       >
                         <button
                           aria-label="Edit Text List Header"
-                          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                           data-test-subj="DescriptionEditIcon"
                           type="button"
                         >
@@ -1039,7 +1048,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1062,8 +1071,8 @@ Object {
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -1072,7 +1081,7 @@ Object {
                           <span
                             class="eui-textTruncate"
                           >
-                            Manage rules
+                            Link rules
                           </span>
                         </span>
                       </button>
@@ -1092,7 +1101,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >
@@ -1192,13 +1201,14 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1207,7 +1217,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -1293,7 +1303,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1316,8 +1326,8 @@ Object {
                         class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <button
-                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                          data-test-subj="RightSideMenuItemsLinkRulesButton"
                           type="button"
                         >
                           <span
@@ -1326,7 +1336,7 @@ Object {
                             <span
                               class="eui-textTruncate"
                             >
-                              Manage rules
+                              Link rules
                             </span>
                           </span>
                         </button>
@@ -1346,7 +1356,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 disabled=""
                                 type="button"
@@ -1390,13 +1400,14 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1405,7 +1416,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>
@@ -1491,7 +1502,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1514,8 +1525,8 @@ Object {
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <button
-                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
-                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                        data-test-subj="RightSideMenuItemsLinkRulesButton"
                         type="button"
                       >
                         <span
@@ -1524,7 +1535,7 @@ Object {
                           <span
                             class="eui-textTruncate"
                           >
-                            Manage rules
+                            Link rules
                           </span>
                         </span>
                       </button>
@@ -1544,7 +1555,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-disabled-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               disabled=""
                               type="button"
@@ -1645,13 +1656,14 @@ Object {
               >
                 <li
                   class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                  data-test-subj="euiBreadcrumb"
                 >
                   <a
                     aria-current="false"
                     class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                     href=""
                     rel="noreferrer"
-                    title="Rule exceptions"
+                    title="Shared Exception Lists"
                   >
                     <div
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1660,7 +1672,7 @@ Object {
                       <span
                         data-euiicon-type="arrowLeft"
                       />
-                      Rule exceptions
+                      Shared Exception Lists
                     </div>
                   </a>
                 </li>
@@ -1746,7 +1758,7 @@ Object {
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <div
-                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                  class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1780,7 +1792,7 @@ Object {
                             >
                               <button
                                 aria-label="Header menu Button Icon"
-                                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                                 data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                                 type="button"
                               >
@@ -1829,11 +1841,11 @@ Object {
             class="emotion-euiScreenReaderOnly"
             id="generated-id"
           >
-            You are in a dialog. To close this dialog, hit escape.
+            You are in a dialog. Press Escape, or tap/click outside the dialog to close.
           </p>
           <div>
             <div
-              class="euiContextMenuPanel"
+              class="euiContextMenuPanel eui-scrollBar css-zos0rl"
               data-test-subj="RightSideMenuItemsMenuActionsMenuPanel"
               tabindex="-1"
             >
@@ -1861,6 +1873,27 @@ Object {
                 <button
                   class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
                   data-test-subj="RightSideMenuItemsMenuActionsActionItem2"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="euiContextMenu__itemLayout"
+                  >
+                    <span
+                      class="euiContextMenu__icon"
+                      color="inherit"
+                      data-euiicon-type="copy"
+                    />
+                    <span
+                      class="euiContextMenuItem__text"
+                    >
+                      Duplicate exception list
+                    </span>
+                  </span>
+                </button>
+                <button
+                  class="euiContextMenuItem euiContextMenuItem--small euiContextMenuItem-isDisabled"
+                  data-test-subj="RightSideMenuItemsMenuActionsActionItem3"
                   disabled=""
                   type="button"
                 >
@@ -1904,13 +1937,14 @@ Object {
             >
               <li
                 class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                data-test-subj="euiBreadcrumb"
               >
                 <a
                   aria-current="false"
                   class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
                   href=""
                   rel="noreferrer"
-                  title="Rule exceptions"
+                  title="Shared Exception Lists"
                 >
                   <div
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
@@ -1919,7 +1953,7 @@ Object {
                     <span
                       data-euiicon-type="arrowLeft"
                     />
-                    Rule exceptions
+                    Shared Exception Lists
                   </div>
                 </a>
               </li>
@@ -2005,7 +2039,7 @@ Object {
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -2039,7 +2073,7 @@ Object {
                           >
                             <button
                               aria-label="Header menu Button Icon"
-                              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                               data-test-subj="RightSideMenuItemsMenuActionsButtonIcon"
                               type="button"
                             >

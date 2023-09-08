@@ -8,13 +8,13 @@
 import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   logIndexNameReferenceRT,
   LogDataViewReference,
   logDataViewReferenceRT,
   LogIndexReference,
-} from '../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
 import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';

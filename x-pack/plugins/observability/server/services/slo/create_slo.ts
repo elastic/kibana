@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-
+import { ElasticsearchClient } from '@kbn/core/server';
+import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { v1 as uuidv1 } from 'uuid';
+import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../assets/constants';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
-import { ResourceInstaller } from './resource_installer';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
-import { CreateSLOParams, CreateSLOResponse } from '../../types/rest_specs';
 import { validateSLO } from '../../domain/services';
+import { SLORepository } from './slo_repository';
+import { createTempSummaryDocument } from './summary_transform/helpers/create_temp_summary';
+import { TransformManager } from './transform_manager';
 
 export class CreateSLO {
   constructor(
-    private resourceInstaller: ResourceInstaller,
+    private esClient: ElasticsearchClient,
     private repository: SLORepository,
     private transformManager: TransformManager
   ) {}
@@ -25,9 +26,7 @@ export class CreateSLO {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
-    await this.resourceInstaller.ensureCommonResourcesInstalled();
-    await this.repository.save(slo);
-
+    await this.repository.save(slo, { throwOnConflict: true });
     let sloTransformId;
     try {
       sloTransformId = await this.transformManager.install(slo);
@@ -47,6 +46,12 @@ export class CreateSLO {
       throw err;
     }
 
+    await this.esClient.index({
+      index: SLO_SUMMARY_TEMP_INDEX_NAME,
+      id: `slo-${slo.id}`,
+      document: createTempSummaryDocument(slo),
+    });
+
     return this.toResponse(slo);
   }
 
@@ -54,15 +59,17 @@ export class CreateSLO {
     const now = new Date();
     return {
       ...params,
-      id: uuid.v1(),
+      id: params.id ?? uuidv1(),
       settings: {
-        timestamp_field: params.settings?.timestamp_field ?? '@timestamp',
-        sync_delay: params.settings?.sync_delay ?? new Duration(1, DurationUnit.Minute),
+        syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
       revision: 1,
-      created_at: now,
-      updated_at: now,
+      enabled: true,
+      tags: params.tags ?? [],
+      createdAt: now,
+      updatedAt: now,
+      groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
     };
   }
 

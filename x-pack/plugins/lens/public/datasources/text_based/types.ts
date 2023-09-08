@@ -31,16 +31,17 @@ export interface TextBasedLayer {
 
 export interface TextBasedPersistedState {
   layers: Record<string, TextBasedLayer>;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  fieldList?: DatatableColumn[];
 }
 
 export type TextBasedPrivateState = TextBasedPersistedState & {
   indexPatternRefs: IndexPatternRef[];
-  fieldList: DatatableColumn[];
-  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 };
 
 export interface IndexPatternRef {
   id: string;
   title: string;
   timeField?: string;
+  name?: string;
 }

@@ -7,7 +7,7 @@
  */
 
 import semver from 'semver';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 export class EsVersion {
   static getDefault() {

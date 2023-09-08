@@ -1,0 +1,10 @@
+steps:
+  - command: .buildkite/scripts/steps/next_docs/build_and_validate_docs.sh
+    label: 'Build and Validate Next Docs'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

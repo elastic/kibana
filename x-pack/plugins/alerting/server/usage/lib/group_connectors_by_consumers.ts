@@ -17,11 +17,10 @@ export function groupConnectorsByConsumers(
   consumers: AggregationsBuckets<ConnectorsByConsumersBucket>
 ) {
   return (consumers as ConnectorsByConsumersBucket[]).reduce((acc, consumer) => {
-    return {
-      ...acc,
-      [consumer.key]: consumer.actions.connector_types.buckets.reduce((accBucket, bucket) => {
-        return { ...accBucket, [replaceDotSymbols(bucket.key)]: bucket.doc_count };
-      }, {}),
-    };
-  }, {});
+    acc[consumer.key] = consumer.actions.connector_types.buckets.reduce((accBucket, bucket) => {
+      accBucket[replaceDotSymbols(bucket.key)] = bucket.doc_count;
+      return accBucket;
+    }, {} as Record<string, number>);
+    return acc;
+  }, {} as Record<string, Record<string, number>>);
 }

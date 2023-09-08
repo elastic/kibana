@@ -11,7 +11,7 @@ import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,

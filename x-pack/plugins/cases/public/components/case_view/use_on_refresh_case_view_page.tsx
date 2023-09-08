@@ -23,5 +23,6 @@ export const useRefreshCaseViewPage = () => {
   return useCallback(() => {
     queryClient.invalidateQueries(casesQueriesKeys.caseView());
     queryClient.invalidateQueries(casesQueriesKeys.tags());
+    queryClient.invalidateQueries(casesQueriesKeys.categories());
   }, [queryClient]);
 };

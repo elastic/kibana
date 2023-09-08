@@ -13,17 +13,19 @@ import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from 
 import { ConfigSchema } from '../config';
 import { setIndexPatterns, setTheme, setOverlays } from './services';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
-import { createSearchBar } from './search_bar';
+import { createSearchBar } from './search_bar/create_search_bar';
 import { createIndexPatternSelect } from './index_pattern_select';
 import type {
   UnifiedSearchStartDependencies,
   UnifiedSearchSetupDependencies,
   UnifiedSearchPluginSetup,
   UnifiedSearchPublicPluginStart,
+  UnifiedSearchPublicPluginStartUi,
 } from './types';
 import { createFilterAction } from './actions/apply_filter_action';
 import { createUpdateFilterReferencesAction } from './actions/update_filter_references_action';
 import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions';
+import { FiltersBuilderLazy } from './filters_builder';
 
 import './index.scss';
 
@@ -72,32 +74,40 @@ export class UnifiedSearchPublicPlugin
     setIndexPatterns(dataViews);
     const autocompleteStart = this.autocomplete.start();
 
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      storage: this.storage,
-      usageCollection: this.usageCollection,
-      isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
-      unifiedSearch: {
-        autocomplete: autocompleteStart,
-      },
-    });
+    /*
+     *
+     *  unifiedsearch uses global data service to create stateful search bar.
+     *  This function helps in creating a search bar with different instances of data service
+     *  so that it can be easy to use multiple stateful searchbars in the single applications
+     *
+     * */
+    const getCustomSearchBar: UnifiedSearchPublicPluginStartUi['getCustomSearchBar'] = (
+      customDataService
+    ) =>
+      createSearchBar({
+        core,
+        data: customDataService ?? data,
+        storage: this.storage,
+        usageCollection: this.usageCollection,
+        isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
+        unifiedSearch: {
+          autocomplete: autocompleteStart,
+        },
+      });
 
-    uiActions.addTriggerAction(
-      APPLY_FILTER_TRIGGER,
-      uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
-    );
+    const SearchBar = getCustomSearchBar();
 
-    uiActions.addTriggerAction(
-      UPDATE_FILTER_REFERENCES_TRIGGER,
-      uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION)
-    );
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, ACTION_GLOBAL_APPLY_FILTER);
+
+    uiActions.attachAction(UPDATE_FILTER_REFERENCES_TRIGGER, UPDATE_FILTER_REFERENCES_ACTION);
 
     return {
       ui: {
         IndexPatternSelect: createIndexPatternSelect(dataViews),
         SearchBar,
+        getCustomSearchBar,
         AggregateQuerySearchBar: SearchBar,
+        FiltersBuilderLazy,
       },
       autocomplete: autocompleteStart,
     };

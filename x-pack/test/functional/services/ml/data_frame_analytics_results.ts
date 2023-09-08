@@ -20,6 +20,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
   const headerPage = getPageObject('header');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async assertRegressionEvaluatePanelElementsExists() {
@@ -56,6 +57,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await testSubjects.existOrFail('mlExplorationDataGrid loaded', { timeout: 5000 });
     },
 
+    async selectResultsTablePage(page: number) {
+      await commonDataGrid.selectPage('mlExplorationDataGrid loaded', page);
+    },
+
     async assertResultsTableTrainingFiltersExist() {
       await testSubjects.existOrFail('mlDFAnalyticsExplorationQueryBarFilterButtons', {
         timeout: 5000,
@@ -72,6 +77,26 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
         expectedCheckState,
         `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async getViewContainer() {
+      return find.byCssSelector('div.vgaVis__view');
+    },
+
+    async assertOpensExploreInCustomVisualization() {
+      await testSubjects.existOrFail('mlSplomExploreInCustomVisualizationLink', {
+        timeout: 5000,
+      });
+      await testSubjects.click('mlSplomExploreInCustomVisualizationLink');
+      await testSubjects.existOrFail('visualizationLoader');
+
+      const view = await this.getViewContainer();
+      expect(view).to.be.ok();
+      const size = await view.getSize();
+      expect(size).to.have.property('width');
+      expect(size).to.have.property('height');
+      expect(size.width).to.be.above(0);
+      expect(size.height).to.be.above(0);
     },
 
     async enableResultsTablePreviewHistogramCharts(expectedButtonState: boolean) {

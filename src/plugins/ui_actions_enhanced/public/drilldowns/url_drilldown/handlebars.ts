@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Handlebars from '@kbn/handlebars';
+import Handlebars, { type HelperOptions, type HelperDelegate } from '@kbn/handlebars';
 import { encode } from '@kbn/rison';
 import dateMath from '@kbn/datemath';
 import moment, { Moment } from 'moment';
@@ -18,9 +18,9 @@ const handlebars = Handlebars.create();
 function createSerializationHelper(
   fnName: string,
   serializeFn: (value: unknown) => string
-): Handlebars.HelperDelegate {
+): HelperDelegate {
   return (...args) => {
-    const { hash } = args.slice(-1)[0] as Handlebars.HelperOptions;
+    const { hash } = args.slice(-1)[0] as HelperOptions;
     const hasHash = Object.keys(hash).length > 0;
     const hasValues = args.length > 1;
     if (hasHash && hasValues) {
@@ -49,7 +49,7 @@ handlebars.registerHelper(
 
 handlebars.registerHelper('date', (...args) => {
   const values = args.slice(0, -1) as [string | Date, string | undefined];
-  const { hash } = args.slice(-1)[0] as Handlebars.HelperOptions;
+  const { hash } = args.slice(-1)[0] as HelperOptions;
   // eslint-disable-next-line prefer-const
   let [date, format] = values;
   if (typeof date === 'undefined') throw new Error(`[date]: unknown variable`);

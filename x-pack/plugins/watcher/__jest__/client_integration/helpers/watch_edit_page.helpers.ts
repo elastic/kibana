@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
@@ -25,7 +26,7 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface WatchEditTestBed extends TestBed<WatchEditSubjects> {
   actions: {
-    clickSubmitButton: () => void;
+    clickSubmitButton: () => Promise<void>;
   };
 }
 
@@ -37,8 +38,12 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchEditTestBed> => 
    * User Actions
    */
 
-  const clickSubmitButton = () => {
-    testBed.find('saveWatchButton').simulate('click');
+  const clickSubmitButton = async () => {
+    await act(async () => {
+      testBed.find('saveWatchButton').simulate('click');
+    });
+
+    testBed.component.update();
   };
 
   return {
@@ -56,5 +61,6 @@ export type TestSubjects =
   | 'jsonWatchForm'
   | 'nameInput'
   | 'pageTitle'
+  | 'jsonEditor'
   | 'thresholdWatchForm'
   | 'watchTimeFieldSelect';

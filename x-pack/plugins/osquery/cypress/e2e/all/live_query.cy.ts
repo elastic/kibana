@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -16,29 +14,14 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import {
-  LIVE_QUERY_EDITOR,
-  RESULTS_TABLE,
-  RESULTS_TABLE_BUTTON,
-  RESULTS_TABLE_CELL_WRRAPER,
-} from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLES } from '../../test';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Live Query', () => {
-  before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
-  });
-
+describe('ALL - Live Query', { tags: ['@serverless', '@ess'] }, () => {
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    cy.login(ServerlessRoleName.SOC_MANAGER);
     navigateTo('/app/osquery');
-  });
-
-  after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
   });
 
   it('should validate the form', () => {
@@ -47,7 +30,7 @@ describe('ALL - Live Query', () => {
     cy.contains('Agents is a required field');
     cy.contains('Query is a required field');
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     submitQuery();
     cy.contains('Agents is a required field').should('not.exist');
     cy.contains('Query is a required field').should('not.exist');
@@ -61,83 +44,48 @@ describe('ALL - Live Query', () => {
     cy.contains('ECS field is required.').should('not.exist');
 
     checkResults();
-  });
-
-  it('should run query and enable ecs mapping', () => {
-    const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
-    cy.contains('New live query').click();
-    selectAllAgents();
-    inputQuery('select * from uptime; ');
-    cy.wait(500);
-    // checking submit by clicking cmd+enter
-    inputQuery(cmd);
-    checkResults();
-    cy.contains('View in Discover').should('exist');
-    cy.contains('View in Lens').should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.hours.number', index: 2 },
-    }).should('exist');
-
-    getAdvancedButton().click();
-    typeInECSFieldInput('message{downArrow}{enter}');
-    typeInOsqueryFieldInput('days{downArrow}{enter}');
-    submitQuery();
-
-    checkResults();
-    cy.getBySel(RESULTS_TABLE).within(() => {
-      cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
-    });
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'message', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 2 },
-    })
-      .react('EuiIconTip', { props: { type: 'indexMapping' } })
-      .should('exist');
-  });
-
-  it('should run customized saved query', () => {
-    cy.contains('New live query').click();
-    selectAllAgents();
-    cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
-    // cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1); // TODO do we need it?
-    inputQuery('{selectall}{backspace}select * from users;');
-    cy.wait(1000);
-    submitQuery();
-    checkResults();
-    navigateTo('/app/osquery');
-    cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
-      .eq(0)
-      .should('be.visible')
+    cy.react('Cell', { props: { colIndex: 0 } })
+      .should('exist')
+      .first()
       .click();
-
-    cy.react('ReactAce', { props: { value: 'select * from users;' } }).should('exist');
+    cy.url().should('include', 'app/fleet/agents/');
   });
 
-  it('should run live pack', () => {
+  it('should run multiline query', () => {
+    const multilineQuery =
+      'select u.username, {shift+enter}' +
+      '       p.pid, {shift+enter}' +
+      '       p.name, {shift+enter}' +
+      '       pos.local_address, {shift+enter}' +
+      '       pos.local_port, {shift+enter}' +
+      '       p.path, {shift+enter}' +
+      '       p.cmdline, {shift+enter}' +
+      '       pos.remote_address, {shift+enter}' +
+      '       pos.remote_port {shift+enter}' +
+      'from processes as p{esc}{shift+enter}' +
+      'join users as u{esc}{shift+enter}' +
+      '    on u.uid=p.uid{esc}{shift+enter}' +
+      'join process_open_sockets as pos{esc}{shift+enter}' +
+      '    on pos.pid=p.pid{esc}{shift+enter}' +
+      "where pos.remote_port !='0' {shift+enter}" +
+      'limit 1000;';
     cy.contains('New live query').click();
-    cy.contains('Run a set of queries in a pack.').click();
-    cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.getBySel('select-live-pack').click().type('Example{downArrow}{enter}');
-    cy.contains('This table contains 3 rows.');
-    cy.contains('system_memory_linux_elastic');
-    cy.contains('system_info_elastic');
-    cy.contains('failingQuery');
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
+    cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
+
+    inputQuery(multilineQuery);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
-    cy.getBySel('live-query-loading').should('exist');
-    cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
-    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    checkResults();
-    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
-    cy.getBySel('toggleIcon-failingQuery').click();
-    cy.contains('Status').click();
-    cy.contains('query failed, code: 1, message: no such table: opera_extensions');
-    navigateTo('/app/osquery');
-    cy.contains('Example');
+    cy.getBySel('osqueryResultsPanel');
+
+    // check if it get's bigger when we add more lines
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
+    inputQuery(multilineQuery);
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 550);
+
+    inputQuery('{selectall}{backspace}{selectall}{backspace}');
+    // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
+    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 380);
   });
 });

@@ -285,9 +285,9 @@ export class TestSubjects extends FtrService {
     return await element.isEnabled();
   }
 
-  public async isDisplayed(selector: string): Promise<boolean> {
+  public async isDisplayed(selector: string, timeout?: number): Promise<boolean> {
     this.log.debug(`TestSubjects.isDisplayed(${selector})`);
-    const element = await this.find(selector);
+    const element = await this.find(selector, timeout);
     return await element.isDisplayed();
   }
 
@@ -360,11 +360,12 @@ export class TestSubjects extends FtrService {
     await this.findService.waitForElementHidden(element, timeout);
   }
 
-  public async waitForEnabled(selector: string, timeout: number = this.TRY_TIME): Promise<void> {
-    await this.retry.tryForTime(timeout, async () => {
+  public async waitForEnabled(selector: string, timeout: number = this.TRY_TIME): Promise<boolean> {
+    const success = await this.retry.tryForTime(timeout, async () => {
       const element = await this.find(selector);
       return (await element.isDisplayed()) && (await element.isEnabled());
     });
+    return success;
   }
 
   public getCssSelector(selector: string): string {

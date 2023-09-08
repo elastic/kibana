@@ -21,25 +21,20 @@ export const useDeleteCases = () => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 
-  return useMutation(
-    ({ caseIds }: MutationArgs) => {
-      const abortCtrlRef = new AbortController();
-      return deleteCases(caseIds, abortCtrlRef.signal);
-    },
-    {
-      mutationKey: casesMutationsKeys.deleteCases,
-      onSuccess: (_, { successToasterTitle }) => {
-        queryClient.invalidateQueries(casesQueriesKeys.casesList());
-        queryClient.invalidateQueries(casesQueriesKeys.tags());
-        queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
+  return useMutation(({ caseIds }: MutationArgs) => deleteCases({ caseIds }), {
+    mutationKey: casesMutationsKeys.deleteCases,
+    onSuccess: (_, { successToasterTitle }) => {
+      queryClient.invalidateQueries(casesQueriesKeys.casesList());
+      queryClient.invalidateQueries(casesQueriesKeys.tags());
+      queryClient.invalidateQueries(casesQueriesKeys.categories());
+      queryClient.invalidateQueries(casesQueriesKeys.userProfiles());
 
-        showSuccessToast(successToasterTitle);
-      },
-      onError: (error: ServerError) => {
-        showErrorToast(error, { title: i18n.ERROR_DELETING });
-      },
-    }
-  );
+      showSuccessToast(successToasterTitle);
+    },
+    onError: (error: ServerError) => {
+      showErrorToast(error, { title: i18n.ERROR_DELETING });
+    },
+  });
 };
 
 export type UseDeleteCases = ReturnType<typeof useDeleteCases>;
