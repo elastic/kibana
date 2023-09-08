@@ -10,7 +10,6 @@ import { getNewRule } from '../../../objects/rule';
 
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
@@ -37,7 +36,7 @@ import {
   submitEditedExceptionItem,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
@@ -67,35 +66,25 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@brokenInServ
   before(() => {
     cy.task('esArchiverResetKibana');
     cy.task('esArchiverLoad', { archiveName: 'exceptions' });
-    login();
   });
 
   after(() => {
     cy.task('esArchiverUnload', 'exceptions');
   });
 
+  beforeEach(() => {
+    login();
+    deleteAlertsAndRules();
+
+    const exceptionList = getExceptionList();
+    deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
+  });
+
   describe('existing list and items', () => {
     const exceptionList = getExceptionList();
     beforeEach(() => {
-      deleteAlertsAndRules();
-      deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) => {
-        createRule(
-          getNewRule({
-            query: 'agent.name:*',
-            index: ['exceptions*'],
-            exceptions_list: [
-              {
-                id: response.body.id,
-                list_id: exceptionList.list_id,
-                type: exceptionList.type,
-                namespace_type: exceptionList.namespace_type,
-              },
-            ],
-            rule_id: '2',
-          })
-        );
         createExceptionListItem(exceptionList.list_id, {
           list_id: exceptionList.list_id,
           item_id: 'simple_list_item',
@@ -113,12 +102,23 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@brokenInServ
             },
           ],
         });
-      });
 
-      login();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
-      goToExceptionsTab();
+        createRule(
+          getNewRule({
+            query: 'agent.name:*',
+            index: ['exceptions*'],
+            exceptions_list: [
+              {
+                id: response.body.id,
+                list_id: exceptionList.list_id,
+                type: exceptionList.type,
+                namespace_type: exceptionList.namespace_type,
+              },
+            ],
+            rule_id: '2',
+          })
+        ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+      });
     });
 
     it('Edits an exception item', () => {
@@ -245,7 +245,6 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@brokenInServ
 
   describe('rule without existing exceptions', () => {
     beforeEach(() => {
-      deleteAlertsAndRules();
       createRule(
         getNewRule({
           query: 'agent.name:*',
@@ -253,11 +252,7 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@brokenInServ
           interval: '10s',
           rule_id: 'rule_testing',
         })
-      );
-      login();
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
-      goToExceptionsTab();
+      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
     });
 
     afterEach(() => {

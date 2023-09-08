@@ -15,10 +15,9 @@ import {
 } from '../../../tasks/alerts';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../urls/navigation';
 import {
   addExceptionEntryFieldValueAndSelectSuggestion,
   addExceptionEntryFieldValueValue,
@@ -51,10 +50,12 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
+
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule());
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-      goToRuleDetails();
+      createRule(getEndpointRule()).then((rule) =>
+        visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+      );
+
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
     });
