@@ -16,7 +16,7 @@ export const aggregateOptionsSchema = schema.object({
       id: schema.string(),
     })
   ),
-  // type if string | KueryNode, but KueryNode has no schema to import yet
+  // filter type is `string | KueryNode`, but `KueryNode` has no schema to import yet
   filter: schema.maybe(
     schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())])
   ),

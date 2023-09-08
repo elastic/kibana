@@ -6,10 +6,10 @@
  */
 
 import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getRuleTagsAggregation } from '../../../../../../../common';
-import { defaultRuleAggregationFactory } from '../..';
+import { getRuleTagsAggregation } from '../../../../../../common';
+import { defaultRuleAggregationFactory } from '..';
 
-import { validateRuleAggregationFields } from './v1';
+import { validateRuleAggregationFields } from './validate_rule_aggregation_fields';
 
 describe('validateAggregationTerms', () => {
   it('should allow for simple valid aggregations', () => {

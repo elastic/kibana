@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { validateRuleAggregationFields } from './validate_rule_aggregation_fields/latest';
-export { validateRuleAggregationFields as validateRuleAggregationFieldsV1 } from './validate_rule_aggregation_fields/v1';
+export { validateRuleAggregationFields } from './validate_rule_aggregation_fields';

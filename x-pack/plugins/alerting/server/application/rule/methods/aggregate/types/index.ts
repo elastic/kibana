@@ -7,11 +7,18 @@
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TypeOf } from '@kbn/config-schema';
 import { KueryNode } from '@kbn/es-query';
-import { aggregateOptionsSchema } from '..';
+import { aggregateOptionsSchema } from '../schemas';
 
-// Adding filter as in schema it's defined as any instead of KueryNode
+type AggregateOptionsSchemaTypes = TypeOf<typeof aggregateOptionsSchema>;
 export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {
+  search?: AggregateOptionsSchemaTypes['search'];
+  defaultSearchOperator?: AggregateOptionsSchemaTypes['defaultSearchOperator'];
+  searchFields?: AggregateOptionsSchemaTypes['searchFields'];
+  hasReference?: AggregateOptionsSchemaTypes['hasReference'];
+  // Adding filter as in schema it's defined as any instead of KueryNode
   filter?: string | KueryNode;
+  page?: AggregateOptionsSchemaTypes['page'];
+  perPage?: AggregateOptionsSchemaTypes['perPage'];
 };
 
 export interface AggregateParams<AggregationResult> {
@@ -19,6 +26,6 @@ export interface AggregateParams<AggregationResult> {
   aggs: Record<keyof AggregationResult, AggregationsAggregationContainer>;
 }
 
-export interface GetDefaultRuleAggregationParams {
+export interface DefaultRuleAggregationParams {
   maxTags?: number;
 }
