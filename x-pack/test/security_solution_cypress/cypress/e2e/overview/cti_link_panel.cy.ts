@@ -15,7 +15,8 @@ import {
 import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
 
-describe('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165709
+describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -30,8 +31,9 @@ describe('CTI Link Panel', { tags: ['@ess', '@serverless'] }, () => {
       .and('match', /app\/integrations\/browse\/threat_intel/);
   });
 
-  describe('enabled threat intel module', () => {
+  describe('enabled threat intel module', { tags: ['@brokenInServerless'] }, () => {
     before(() => {
+      // illegal_argument_exception: unknown setting [index.lifecycle.name]
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     });
 

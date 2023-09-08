@@ -6,7 +6,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
-import type { RegisterFunctionDefinition } from '../../common/types';
+import { MessageRole, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
 
 export function registerRecallFunction({
@@ -20,24 +20,19 @@ export function registerRecallFunction({
     {
       name: 'recall',
       contexts: ['core'],
-      description: `Use this function to recall earlier learnings. Anything you will summarise can be retrieved again later via this function. This is semantic/vector search so there's no need for an exact match.
+      description: `Use this function to recall earlier learnings. Anything you will summarize can be retrieved again later via this function.
       
       Make sure the query covers the following aspects:
-      - The user's prompt, verbatim
       - Anything you've inferred from the user's request, but is not mentioned in the user's request
       - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.  
+
+      DO NOT include the user's request. It will be added internally.
       
-      Q: "can you visualise the average request duration for opbeans-go over the last 7 days?"
-      A: -"can you visualise the average request duration for opbeans-go over the last 7 days?"
+      The user asks: "can you visualise the average request duration for opbeans-go over the last 7 days?"
+      You recall:
       - "APM service"
       - "lens function usage"
-      - "get_apm_timeseries function usage"
-      
-      Q: "what alerts are active?"
-      A: - "what alerts are active?"
-      - "alerts function usage"
-      
-      `,
+      - "get_apm_timeseries function usage"`,
       descriptionForUser: 'This function allows the assistant to recall previous learnings.',
       parameters: {
         type: 'object',
@@ -53,15 +48,21 @@ export function registerRecallFunction({
             },
           },
         },
-        required: ['queries' as const],
-      },
+        required: ['queries'],
+      } as const,
     },
-    ({ arguments: { queries } }, signal) => {
+    ({ arguments: { queries }, messages }, signal) => {
+      const userMessages = messages.filter((message) => message.message.role === MessageRole.User);
+
+      const userPrompt = userMessages[userMessages.length - 1]?.message.content;
+
+      const queriesWithUserPrompt = userPrompt ? [userPrompt, ...queries] : queries;
+
       return service
         .callApi('POST /internal/observability_ai_assistant/functions/recall', {
           params: {
             body: {
-              queries,
+              queries: queriesWithUserPrompt,
             },
           },
           signal,

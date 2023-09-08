@@ -10,8 +10,8 @@ import {
   INTERNAL_DETECTION_ENGINE_URL as INTERNAL_URL,
 } from '../../../constants';
 
-const INTERNAL_RULES_URL = `${INTERNAL_URL}/rules`;
+const INTERNAL_RULES_URL = `${INTERNAL_URL}/rules` as const;
 
-export const CREATE_RULE_EXCEPTIONS_URL = `${PUBLIC_RULES_URL}/{id}/exceptions`;
+export const CREATE_RULE_EXCEPTIONS_URL = `${PUBLIC_RULES_URL}/{id}/exceptions` as const;
 export const DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL =
   `${INTERNAL_RULES_URL}/exceptions/_find_references` as const;

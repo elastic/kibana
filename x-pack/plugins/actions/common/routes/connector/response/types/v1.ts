@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { connectorResponseSchemaV1 } from '..';
+import { connectorResponseSchemaV1, connectorTypesResponseSchemaV1 } from '..';
 
 export type ActionTypeConfig = Record<string, unknown>;
 type ConnectorResponseSchemaType = TypeOf<typeof connectorResponseSchemaV1>;
@@ -21,4 +21,16 @@ export interface ConnectorResponse<Config extends ActionTypeConfig = ActionTypeC
   is_deprecated: ConnectorResponseSchemaType['is_deprecated'];
   is_system_action: ConnectorResponseSchemaType['is_system_action'];
   referenced_by_count: ConnectorResponseSchemaType['referenced_by_count'];
+}
+
+type ConnectorTypesResponseSchemaType = TypeOf<typeof connectorTypesResponseSchemaV1>;
+export interface ConnectorTypesResponse {
+  id: ConnectorTypesResponseSchemaType['id'];
+  name: ConnectorTypesResponseSchemaType['name'];
+  enabled: ConnectorTypesResponseSchemaType['enabled'];
+  enabled_in_config: ConnectorTypesResponseSchemaType['enabled_in_config'];
+  enabled_in_license: ConnectorTypesResponseSchemaType['enabled_in_license'];
+  minimum_license_required: ConnectorTypesResponseSchemaType['minimum_license_required'];
+  supported_feature_ids: ConnectorTypesResponseSchemaType['supported_feature_ids'];
+  is_system_action_type: ConnectorTypesResponseSchemaType['is_system_action_type'];
 }

@@ -22,8 +22,9 @@ import { selectDataView } from '../../tasks/sourcerer';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
+describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
+    // illegal_argument_exception: unknown setting [index.lifecycle.name]
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });
     cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
 

@@ -6,6 +6,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   API_BASE_PATH,
   UIM_UPDATE_SETTINGS,
@@ -33,7 +34,13 @@ import {
   UIM_TEMPLATE_SIMULATE,
   INTERNAL_API_BASE_PATH,
 } from '../../../common/constants';
-import { TemplateDeserialized, TemplateListItem, DataStream, Index } from '../../../common';
+import {
+  TemplateDeserialized,
+  TemplateListItem,
+  DataStream,
+  Index,
+  IndexSettingsResponse,
+} from '../../../common';
 import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
@@ -324,5 +331,29 @@ export function useLoadIndexMappings(indexName: string) {
   return useRequest({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'get',
+  });
+}
+
+export function loadIndexStatistics(indexName: string) {
+  return sendRequest<IndicesStatsResponse>({
+    path: `${API_BASE_PATH}/stats/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
+}
+
+export function useLoadIndexSettings(indexName: string) {
+  return useRequest<IndexSettingsResponse>({
+    path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
+}
+
+export function createIndex(indexName: string) {
+  return sendRequest({
+    path: `${INTERNAL_API_BASE_PATH}/indices/create`,
+    method: 'put',
+    body: JSON.stringify({
+      indexName,
+    }),
   });
 }

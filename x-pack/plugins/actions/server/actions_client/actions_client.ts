@@ -25,9 +25,10 @@ import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { FindConnectorResult } from '../application/connector/types';
+import { ConnectorType } from '../application/connector/types';
 import { getAll } from '../application/connector/methods/get_all';
+import { listTypes } from '../application/connector/methods/list_types';
 import {
-  ActionType,
   GetGlobalExecutionKPIParams,
   GetGlobalExecutionLogParams,
   IExecutionLogResult,
@@ -48,13 +49,13 @@ import {
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
 } from '../types';
-
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import { ExecuteOptions } from '../lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
   BulkExecutionEnqueuer,
+  ExecutionResponse,
 } from '../create_execute_function';
 import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
@@ -88,6 +89,7 @@ import {
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../application/connector/lib';
+import { ListTypesParams } from '../application/connector/methods/list_types/types';
 
 interface ActionUpdate {
   name: string;
@@ -104,7 +106,7 @@ export interface CreateOptions {
   options?: { id?: string };
 }
 
-interface ConstructorOptions {
+export interface ConstructorOptions {
   logger: Logger;
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
@@ -112,9 +114,8 @@ interface ConstructorOptions {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
-  executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
@@ -128,11 +129,6 @@ export interface UpdateOptions {
   action: ActionUpdate;
 }
 
-interface ListTypesOptions {
-  featureId?: string;
-  includeSystemActionTypes?: boolean;
-}
-
 export interface ActionsClientContext {
   logger: Logger;
   kibanaIndices: string[];
@@ -143,9 +139,8 @@ export interface ActionsClientContext {
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
-  executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
-  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
@@ -163,7 +158,6 @@ export class ActionsClient {
     unsecuredSavedObjectsClient,
     inMemoryConnectors,
     actionExecutor,
-    executionEnqueuer,
     ephemeralExecutionEnqueuer,
     bulkExecutionEnqueuer,
     request,
@@ -181,7 +175,6 @@ export class ActionsClient {
       kibanaIndices,
       inMemoryConnectors,
       actionExecutor,
-      executionEnqueuer,
       ephemeralExecutionEnqueuer,
       bulkExecutionEnqueuer,
       request,
@@ -774,26 +767,9 @@ export class ActionsClient {
     });
   }
 
-  public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
-    const { source } = options;
-    if (
-      (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
-      AuthorizationMode.RBAC
-    ) {
-      /**
-       * For scheduled executions the additional authorization check
-       * for system actions (kibana privileges) will be performed
-       * inside the ActionExecutor at execution time
-       */
-
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
-    } else {
-      trackLegacyRBACExemption('enqueueExecution', this.context.usageCounter);
-    }
-    return this.context.executionEnqueuer(this.context.unsecuredSavedObjectsClient, options);
-  }
-
-  public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
+  public async bulkEnqueueExecution(
+    options: EnqueueExecutionOptions[]
+  ): Promise<ExecutionResponse> {
     const sources: Array<ActionExecutionSource<unknown>> = [];
     options.forEach((option) => {
       if (option.source) {
@@ -839,21 +815,11 @@ export class ActionsClient {
     );
   }
 
-  /**
-   * Return all available action types
-   * expect system action types
-   */
   public async listTypes({
     featureId,
     includeSystemActionTypes = false,
-  }: ListTypesOptions = {}): Promise<ActionType[]> {
-    const actionTypes = this.context.actionTypeRegistry.list(featureId);
-
-    const filteredActionTypes = includeSystemActionTypes
-      ? actionTypes
-      : actionTypes.filter((actionType) => !Boolean(actionType.isSystemActionType));
-
-    return filteredActionTypes;
+  }: ListTypesParams = {}): Promise<ConnectorType[]> {
+    return listTypes(this.context, { featureId, includeSystemActionTypes });
   }
 
   public isActionTypeEnabled(
