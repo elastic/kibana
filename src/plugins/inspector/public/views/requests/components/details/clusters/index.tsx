@@ -7,15 +7,16 @@
  */
 
 import React, { Component } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { RequestDetailsProps } from '../../types';
 import { getLocalClusterDetails } from './utils';
+import { ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
 
 export class Clusters extends Component<RequestDetailsProps> {
   static shouldShow = (request: Request) => Boolean(request.response?.json);
 
   render() {
-    console.log(this.props);
     const rawResponse = this.props.request.response?.json?.rawResponse;
     if (!rawResponse) {
       return null;
@@ -30,10 +31,11 @@ export class Clusters extends Component<RequestDetailsProps> {
       : {
           local: getLocalClusterDetails(rawResponse),
         };
-    console.log(clusters);
 
     return this.props.request.response?.json ? (
       <>
+        <EuiSpacer size="m" />
+        <ClustersHealth clusters={clusters} />
         <ClustersTable clusters={clusters} />
       </>
     ) : null;

@@ -9,8 +9,9 @@
 import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 import { ClusterDescriptionList } from './cluster_description_list';
+import { ClusterHealth } from './cluster_health';
 
 function getInitialExpandedRow(clusters) {
   const clusterNames = Object.keys(clusters);
@@ -71,26 +72,7 @@ export function ClustersTable({ clusters }: Props) {
         defaultMessage: 'Status',
       }),
       render: (status: estypes.ClusterSearchStatus) => {
-        let color = 'subdued';
-        let label = status;
-        if (status === 'successful') {
-          color = 'success';
-          label = i18n.translate('inspector.requests.clustersTable.successfulLabel', {
-            defaultMessage: 'Successful',
-          });
-        } else if (status === 'partial') {
-          color = 'warning';
-          label = i18n.translate('inspector.requests.clustersTable.partialLabel', {
-            defaultMessage: 'Partial',
-          });
-        } else if (status === 'failed') {
-          color = 'danger';
-          label = i18n.translate('inspector.requests.clustersTable.failedLabel', {
-            defaultMessage: 'Failed',
-          });
-        }
-
-        return <EuiHealth color={color}>{label}</EuiHealth>;
+        return <ClusterHealth status={status}/>;
       },
     },
     {
