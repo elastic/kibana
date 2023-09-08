@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(url).to.contain(`/settings`);
     });
 
-    describe('renders common settings', () => {
+    describe('renders observability settings', () => {
       for (const settingId of OBSERVABILITY_PROJECT_SETTINGS) {
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'advancedSetting-editField-' + settingId;
