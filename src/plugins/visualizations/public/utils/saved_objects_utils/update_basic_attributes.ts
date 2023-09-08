@@ -34,6 +34,19 @@ function getClientForType(
   );
 }
 
+function getAdditionalOptionsForUpdate(
+  type: string,
+  typesService: TypesStart,
+  method: 'update' | 'create'
+) {
+  const visAliases = typesService.getAliases();
+  const aliasType = visAliases.find((v) => v.appExtensions?.visualizations.docTypes.includes(type));
+  if (!aliasType) {
+    return { overwrite: true };
+  }
+  return aliasType?.appExtensions?.visualizations?.clientOptions?.[method];
+}
+
 export const updateBasicSoAttributes = async (
   soId: string,
   type: string,
@@ -73,8 +86,8 @@ export const updateBasicSoAttributes = async (
       ...attributes,
     },
     options: {
-      overwrite: true,
       references,
+      ...getAdditionalOptionsForUpdate(type, dependencies.typesService, 'update'),
     },
   });
 };

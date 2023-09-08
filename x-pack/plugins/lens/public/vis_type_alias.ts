@@ -31,6 +31,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
     visualizations: {
       docTypes: ['lens'],
       searchFields: ['title^3'],
+      clientOptions: { update: { overwrite: true } },
       client: getLensClient,
       toListItem(savedObject) {
         const { id, type, updatedAt, attributes } = savedObject;

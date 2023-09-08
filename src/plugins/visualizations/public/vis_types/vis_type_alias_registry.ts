@@ -76,6 +76,11 @@ export interface VisualizationClient<
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
+  /** let each visualization client pass its own custom options if required */
+  clientOptions?: {
+    update?: { overwrite?: boolean; [otherOption: string]: unknown };
+    create?: { [otherOption: string]: unknown };
+  };
   client: (contentManagement: ContentManagementPublicStart) => VisualizationClient;
   toListItem: (savedObject: SimpleSavedObject<any>) => VisualizationListItem;
 }
