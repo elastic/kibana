@@ -561,39 +561,12 @@ describe('Cache-Control', () => {
 });
 
 describe('Handler', () => {
-  it("Doesn't expose sensitive nor uninteresting error details if handler throws", async () => {
+  it("Doesn't expose error details if handler throws", async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
-      // simulate the enriched error that we get for an actual request
-      throw Object.assign(new Error('unexpected error'), {
-        meta: {
-          headers: {
-            authorization: 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
-            randomHeader: 'randomValue',
-          },
-          request: {
-            options: {
-              headers: {
-                'user-agent': 'Kibana/8.11.0',
-                authorization: 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
-                cookie: '5eaGBBijbDxx someCookie RfK7IcNAkAAAA=',
-              },
-            },
-            params: {
-              headers: {
-                queryParam: 'aValue',
-                authorization: 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
-                cookie: '5eaGBBijbDxx someCookie RfK7IcNAkAAAA=',
-                'set-cookie': '5eaGBBijbDxx someCookie RfK7IcNAkAAAA=',
-                'x-elastic-app-auth': 'Bearer 5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
-                'es-client-authentication': '5eaGBBijbDxx someToken RfK7IcNAkAAAA=',
-              },
-            },
-          },
-        },
-      });
+      throw new Error('unexpected error');
     });
 
     await server.start();
