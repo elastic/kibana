@@ -118,6 +118,11 @@ export interface UnifiedFieldListSidebarContainerCreationOptions {
   originatingApp: string;
 
   /**
+   * Pass `true` to enable the compressed view
+   */
+  compressed?: boolean;
+
+  /**
    * Your app name: "discover", "lens", etc. If not provided, sections and sidebar toggle states would not be persisted.
    */
   localStorageKeyPrefix?: string;

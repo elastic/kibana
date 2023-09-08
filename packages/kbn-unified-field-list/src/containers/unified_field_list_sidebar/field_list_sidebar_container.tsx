@@ -246,6 +246,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     isAffectedByGlobalFilter,
     onEditField: editField,
     onDeleteField: deleteField,
+    compressed: stateService.creationOptions.compressed ?? false,
     buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
   };
 

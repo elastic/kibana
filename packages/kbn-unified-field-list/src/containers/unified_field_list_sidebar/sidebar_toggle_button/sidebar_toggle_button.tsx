@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
+import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 
 /**
  * Toggle button props
@@ -16,6 +16,7 @@ import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 export interface SidebarToggleButtonProps {
   'data-test-subj'?: string;
   isSidebarCollapsed: boolean;
+  buttonSize: IconButtonGroupProps['buttonSize'];
   onChange: (isSidebarCollapsed: boolean) => void;
 }
 
@@ -29,6 +30,7 @@ export interface SidebarToggleButtonProps {
 export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
   'data-test-subj': dataTestSubj = 'unifiedFieldListSidebar__toggle',
   isSidebarCollapsed,
+  buttonSize,
   onChange,
 }) => {
   // TODO: replace with new Eui icons once available
@@ -38,7 +40,7 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
         legend={i18n.translate('unifiedFieldList.fieldListSidebar.toggleSidebarLegend', {
           defaultMessage: 'Toggle sidebar',
         })}
-        buttonSize="s"
+        buttonSize={buttonSize}
         buttons={[
           ...(isSidebarCollapsed
             ? [

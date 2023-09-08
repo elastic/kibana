@@ -61,6 +61,11 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   showFieldList?: boolean;
 
   /**
+   * Compressed view
+   */
+  compressed?: boolean;
+
+  /**
    * Custom logic for determining which field is selected
    */
   onSelectedFieldFilter?: GroupedFieldsParams<DataViewField>['onSelectedFieldFilter'];
@@ -140,6 +145,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   dataView,
   trackUiMetric,
   showFieldList = true,
+  compressed = true,
   isAffectedByGlobalFilter,
   prepend,
   onAddFieldToWorkspace,
@@ -243,6 +249,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           services={services}
           alwaysShowActionButton={alwaysShowActionButton}
           field={field}
+          size={compressed ? 'xs' : 's'}
           highlight={fieldSearchHighlight}
           dataView={dataView!}
           onAddFieldToWorkspace={onAddFieldToWorkspace}
@@ -268,6 +275,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       searchMode,
       services,
       alwaysShowActionButton,
+      compressed,
       dataView,
       onAddFieldToWorkspace,
       onRemoveFieldFromWorkspace,
@@ -288,6 +296,15 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     return null;
   }
 
+  const sidebarToggleButton =
+    typeof isSidebarCollapsed === 'boolean' && onToggleSidebar ? (
+      <SidebarToggleButton
+        buttonSize={compressed ? 's' : 'm'}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onChange={onToggleSidebar}
+      />
+    ) : null;
+
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
     className: classnames('unifiedFieldListSidebar', {
       'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
@@ -306,12 +323,10 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       'unifiedFieldListSidebarId',
   };
 
-  if (isSidebarCollapsed && onToggleSidebar) {
+  if (isSidebarCollapsed && sidebarToggleButton) {
     return (
       <EuiHideFor sizes={['xs', 's']}>
-        <div {...pageSidebarProps}>
-          <SidebarToggleButton isSidebarCollapsed={isSidebarCollapsed} onChange={onToggleSidebar} />
-        </div>
+        <div {...pageSidebarProps}>{sidebarToggleButton}</div>
       </EuiHideFor>
     );
   }
@@ -355,16 +370,11 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
             isProcessing={isProcessing}
             prepend={
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                {typeof isSidebarCollapsed === 'boolean' && onToggleSidebar && (
-                  <EuiFlexItem grow={false}>
-                    <SidebarToggleButton
-                      isSidebarCollapsed={isSidebarCollapsed}
-                      onChange={onToggleSidebar}
-                    />
-                  </EuiFlexItem>
+                {sidebarToggleButton && (
+                  <EuiFlexItem grow={false}>{sidebarToggleButton}</EuiFlexItem>
                 )}
                 <EuiFlexItem>
-                  <FieldListFilters {...fieldListFiltersProps} />
+                  <FieldListFilters {...fieldListFiltersProps} compressed={compressed} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
