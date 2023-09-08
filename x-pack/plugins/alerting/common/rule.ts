@@ -108,6 +108,19 @@ export interface AlertsFilter extends SavedObjectAttributes {
 
 export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
 
+/**
+ * The RuleActionTypes is being used in versioned
+ * routes and rule client's schemas. Renaming
+ * or removing a type will introduce a
+ * breaking change
+ */
+export const RuleActionTypes = {
+  DEFAULT: 'default' as const,
+  SYSTEM: 'system' as const,
+} as const;
+
+export type RuleActionTypes = typeof RuleActionTypes[keyof typeof RuleActionTypes];
+
 export interface RuleAction {
   uuid?: string;
   group: string;
@@ -116,6 +129,7 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
+  type?: typeof RuleActionTypes.DEFAULT;
 }
 
 export interface AggregateOptions {
