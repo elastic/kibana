@@ -54,7 +54,8 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless', '@skipInServe
     cy.task('esArchiverUnload', 'exceptions');
   });
 
-  it('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
+  // TODO: https://github.com/elastic/kibana/issues/161539
+  it.skip('Should create a Rule exception item from alert actions overflow menu and close all matching alerts', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 
