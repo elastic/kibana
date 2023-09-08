@@ -26,7 +26,7 @@ export interface SampleDataInstallerOptions {
   soClient: SavedObjectsClientContract;
   soImporter: ISavedObjectsImporter;
   sampleDatasets: SampleDatasetSchema[];
-  spaceId: string;
+  spaceId?: string;
   logger: Logger;
 }
 
@@ -119,7 +119,8 @@ export class SampleDataInstaller {
   private async uninstallDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     let index = createIndexName(dataset.id, dataIndex.id);
 
-    if (dataIndex.deleteAliasWhenRemoved === true) {
+    // some sample data indices are pointing to the actual alias. In that case, we cannot delete the alias when installing or removing it.
+    if (dataIndex.deleteAliasWhenRemoved == null || dataIndex.deleteAliasWhenRemoved === true) {
       try {
         // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
         // index. In that case, we need to get rid of the alias and to delete the underlying index
@@ -192,7 +193,7 @@ export class SampleDataInstaller {
           name: index,
         });
         if (aliases) {
-          const res = await this.esClient.asCurrentUser.indices.updateAliases({
+          await this.esClient.asCurrentUser.indices.updateAliases({
             actions: Object.entries(aliases).map(([alias]) => ({
               add: { index, alias },
             })),
@@ -201,17 +202,15 @@ export class SampleDataInstaller {
       } else {
         await this.esClient.asCurrentUser.indices.create({
           index,
-          body: {
-            settings: {
-              index: {
-                ...dataIndex.indexSettings,
-                number_of_shards: 1,
-                auto_expand_replicas: '0-1',
-              },
+          settings: {
+            index: {
+              ...dataIndex.indexSettings,
+              number_of_shards: 1,
+              auto_expand_replicas: '0-1',
             },
-            mappings: { properties: dataIndex.fields },
-            aliases,
           },
+          mappings: { properties: dataIndex.fields },
+          aliases,
         });
       }
     } catch (err) {

@@ -19,11 +19,13 @@ export const getSampleDataInstaller = async ({
   context,
   sampleDatasets,
   logger,
+  spaceId,
 }: {
   datasetId: string;
   context: RequestHandlerContext;
   sampleDatasets: SampleDatasetSchema[];
   logger: Logger;
+  spaceId: string;
 }) => {
   const core = await context.core;
   const sampleDataset = sampleDatasets.find(({ id }) => id === datasetId)!;
@@ -38,6 +40,7 @@ export const getSampleDataInstaller = async ({
     soClient,
     logger,
     sampleDatasets,
+    spaceId,
   });
 };
 

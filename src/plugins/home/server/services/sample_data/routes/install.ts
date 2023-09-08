@@ -50,6 +50,7 @@ export function createInstallRoute(
         sampleDatasets,
         logger,
         context,
+        spaceId,
       });
 
       try {

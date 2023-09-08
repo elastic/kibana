@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
@@ -20,7 +20,8 @@ export function createUninstallRoute(
   sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
   usageTracker: SampleDataUsageTracker,
-  analytics: AnalyticsServiceSetup
+  analytics: AnalyticsServiceSetup,
+  getSpaceId: (req: KibanaRequest) => Promise<string>
 ): void {
   router.delete(
     {
@@ -35,12 +36,14 @@ export function createUninstallRoute(
       if (!sampleDataset) {
         return response.notFound();
       }
+      const spaceId = await getSpaceId(request);
 
       const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
         sampleDatasets,
         logger,
         context,
+        spaceId,
       });
 
       try {

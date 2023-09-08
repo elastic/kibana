@@ -102,7 +102,14 @@ export class SampleDataRegistry {
       core.analytics,
       this.getSpaceId
     );
-    createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
+    createUninstallRoute(
+      router,
+      this.sampleDatasets,
+      logger,
+      usageTracker,
+      core.analytics,
+      this.getSpaceId
+    );
 
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);

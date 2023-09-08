@@ -30,8 +30,7 @@ export const securitySolutionSpecProvider = function (): SampleDatasetSchema {
     name: securitysolutionName,
     description: securitysolutionDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
-    // darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard_dark.webp',
-    // overviewDashboard: '',
+    overviewDashboard: '6b348ca0-4e45-11ee-8ec1-71bbd0b34722',
     defaultIndex: 'c89b196d-d0cd-4cfb-8d95-787e4ce51551',
     savedObjects: getSavedObjects(),
     dataIndices: [
@@ -56,11 +55,9 @@ export const securitySolutionSpecProvider = function (): SampleDatasetSchema {
         aliases: {
           [`.alerts-security.alerts-{{spaceId}}`]: {},
         },
-        isDataStream: false,
         deleteAliasWhenRemoved: false,
       },
     ],
     status: 'not_installed',
-    // iconPath: '/plugins/home/assets/sample_data_resources/flights/icon.svg',
   };
 };

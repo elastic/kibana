@@ -18,6 +18,7 @@ import {
 import type { SampleDatasetSchema } from './lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from './sample_data_installer';
 import { SampleDataInstallError } from './errors';
+import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 const testDatasets: SampleDatasetSchema[] = [
   {
@@ -95,6 +96,46 @@ const testDatasets: SampleDatasetSchema[] = [
       },
     ],
   },
+  {
+    id: 'test_securitysolution_data_index',
+    name: 'Test data for security solution',
+    description: 'See name',
+    previewImagePath: 'previewImagePath',
+    darkPreviewImagePath: 'darkPreviewImagePath',
+    defaultIndex: 'defaultIndex',
+    savedObjects: [
+      {
+        id: 'some-dashboard',
+        type: 'dashboard',
+        attributes: {
+          hello: 'dolly',
+        },
+        references: [],
+      },
+      {
+        id: 'another-dashboard',
+        type: 'dashboard',
+        attributes: {
+          foo: 'bar',
+        },
+        references: [],
+      },
+    ],
+    dataIndices: [
+      {
+        id: 'test_alerts_data_index',
+        dataPath: '/dataPath',
+        fields: { someField: { type: 'keyword' } },
+        currentTimeMarker: '2018-01-09T00:00:00',
+        timeFields: ['@timestamp'],
+        preserveDayOfWeekTimeOfDay: true,
+        aliases: {
+          [`.alerts-security.alerts-{{spaceId}}`]: {},
+        },
+        deleteAliasWhenRemoved: false,
+      },
+    ],
+  },
 ];
 
 describe('SampleDataInstaller', () => {
@@ -158,10 +199,8 @@ describe('SampleDataInstaller', () => {
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledTimes(1);
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: 'kibana_sample_data_test_single_data_index',
-        body: {
-          settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
-          mappings: { properties: { someField: { type: 'keyword' } } },
-        },
+        settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
+        mappings: { properties: { someField: { type: 'keyword' } } },
       });
     });
 
@@ -273,6 +312,30 @@ describe('SampleDataInstaller', () => {
         expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
         expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
           index: indexName,
+        });
+      });
+
+      it('should NOT to delete the alias when deleteAliasWhenRemoved is false', async () => {
+        const indexName =
+          'kibana_sample_data_test_securitysolution_data_index_test_alerts_data_index';
+
+        await installer.install('test_securitysolution_data_index');
+
+        expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledTimes(0);
+
+        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
+        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
+          index: indexName,
+        });
+      });
+
+      it('should replace {{spaceId}} in the alias name with the current space id', async () => {
+        await installer.install('test_securitysolution_data_index');
+
+        expect(
+          (esClient.asCurrentUser.indices.create.mock.calls[0][0] as IndicesCreateRequest).aliases
+        ).toEqual({
+          '.alerts-security.alerts-default': {},
         });
       });
     });
