@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const archivePath = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['settings', 'common', 'header', 'home']);
+  const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
