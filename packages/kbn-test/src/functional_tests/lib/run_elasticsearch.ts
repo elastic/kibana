@@ -16,6 +16,7 @@ import { createTestEsCluster } from '../../es';
 interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
+  essImage?: string;
   config: Config;
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
@@ -31,6 +32,7 @@ type EsConfig = ReturnType<typeof getEsConfig>;
 function getEsConfig({
   config,
   esFrom = config.get('esTestCluster.from'),
+  essImage = config.get('esTestCluster.essImage'),
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
   const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
@@ -49,6 +51,19 @@ function getEsConfig({
   const serverless: boolean = config.get('serverless');
   const files: string[] | undefined = config.get('esTestCluster.files');
 
+  let essOptions: { image?: string; tag?: string } | undefined;
+  if (essImage) {
+    if (essImage.includes(':')) {
+      essOptions = {
+        image: essImage,
+      };
+    } else {
+      essOptions = {
+        tag: essImage,
+      };
+    }
+  }
+
   return {
     ssl,
     license,
@@ -56,6 +71,7 @@ function getEsConfig({
     esJavaOpts,
     isSecurityEnabled,
     esFrom,
+    essOptions,
     port,
     password,
     dataArchive,
@@ -129,6 +145,7 @@ async function startEsNode({
     esArgs: config.esArgs,
     esFrom: config.esFrom,
     esJavaOpts: config.esJavaOpts,
+    essOptions: config.essOptions,
     license: config.license,
     password: config.password,
     port: config.port,

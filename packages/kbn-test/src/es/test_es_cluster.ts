@@ -70,6 +70,10 @@ export interface CreateTestEsClusterOptions {
    */
   esArgs?: string[];
   esFrom?: string;
+  essOptions?: {
+    image?: string;
+    tag?: string;
+  };
   esJavaOpts?: string;
   /**
    * License to run your cluster under. Keep in mind that a `trial` license
@@ -153,9 +157,7 @@ export interface CreateTestEsClusterOptions {
   files?: string[];
 }
 
-export function createTestEsCluster<
-  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
->(options: Options): EsTestCluster<Options> {
+export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTestCluster {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
@@ -164,6 +166,7 @@ export function createTestEsCluster<
     writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
+    essOptions,
     dataArchive,
     nodes = [{ name: 'node-01' }],
     esArgs: customEsArgs = [],
@@ -226,11 +229,14 @@ export function createTestEsCluster<
       if (esFrom === 'source') {
         installPath = (await firstNode.installSource(config)).installPath;
       } else if (esFrom === 'snapshot') {
-        installPath = (await firstNode.installSnapshot(config)).installPath;
+        // TODO: there's a mismatch here between the provided (config.license) and the expected ones
+        installPath = (await firstNode.installSnapshot(config as any)).installPath;
       } else if (esFrom === 'serverless') {
-        return await firstNode.runServerless({
+        await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
+          image: essOptions?.image,
+          tag: essOptions?.tag,
           port,
           clean: true,
           teardown: true,
@@ -240,6 +246,7 @@ export function createTestEsCluster<
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,
         });
+        return;
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
       } else {
@@ -268,9 +275,9 @@ export function createTestEsCluster<
           });
         }
 
-        nodeStartPromises.push(async () => {
+        nodeStartPromises.push(() => {
           log.info(`[es] starting node ${node.name} on port ${nodePort}`);
-          return await this.nodes[i].start(installPath, {
+          return this.nodes[i].start(installPath, {
             password: config.password,
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
@@ -285,7 +292,7 @@ export function createTestEsCluster<
         });
       }
 
-      await Promise.all(extractDirectoryPromises.map(async (extract) => await extract()));
+      await Promise.all(extractDirectoryPromises.map((extract) => extract()));
       for (const start of nodeStartPromises) {
         await start();
       }
@@ -410,7 +417,7 @@ export function createTestEsCluster<
     getHostUrls(): string[] {
       return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p }));
     }
-  })() as EsTestCluster<Options>;
+  })() as EsTestCluster;
 }
 
 /**

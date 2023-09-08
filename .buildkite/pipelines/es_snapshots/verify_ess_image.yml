@@ -1,0 +1,21 @@
+steps:
+  - block: 'Verify'
+    prompt: "Enter a tag or full image URL for the ESS docker image you'd like to verify and promote"
+    if: "build.env('ESS_IMAGE_URL_OR_TAG') == null"
+    # Later, this could be a dropdown dynamically filled with recent builds
+    fields:
+      - text: 'ESS_IMAGE_URL_OR_TAG'
+        key: 'ESS_IMAGE_URL_OR_TAG'
+        hint: 'Enter a full image url (with tag) or a tag of an ESS image in the default image repo'
+        required: true
+
+  - label: ":pipeline: (:kibana: x :elastic:) Trigger Kibana Serverless suite with ESS image: ${ESS_IMAGE_URL_OR_TAG}"
+    trigger: "kibana-serverless"
+    build:
+      env:
+        TEST_ESS_IMAGE_TAG: ${ESS_IMAGE_URL_OR_TAG}
+
+  - wait: ~
+
+  - label: ":arrow_up::elastic::arrow_up: Promote docker image"
+    command: echo "Thereby, you're promoted, ${ESS_IMAGE_URL_OR_TAG}. You're now Sir ${ESS_IMAGE_URL_OR_TAG}"

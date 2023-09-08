@@ -23,6 +23,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     'config',
     'journey',
     'esFrom',
+    'essImage',
     'kibana-install-dir',
     'grep',
     'include-tag',
@@ -37,6 +38,7 @@ export const FLAG_OPTIONS: FlagOptions = {
     --config             Define a FTR config that should be executed. Can be specified multiple times
     --journey            Define a Journey that should be executed. Can be specified multiple times
     --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
+    --essImage           If 'esFrom' is set to "serverless", 'essImage' is interpreted as the ES Serverless image path OR tag. Default: latest
     --include-tag        Tags that suites must include to be run, can be included multiple times
     --exclude-tag        Tags that suites must NOT include to be run, can be included multiple times
     --include            Files that must included to be run, can be included multiple times
@@ -75,6 +77,7 @@ export function parseFlags(flags: FlagsReader) {
       ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
       : undefined,
     esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
+    essImage: flags.string('essImage') || 'latest', // TODO: change this to the latest stable ESS image
     installDir: flags.path('kibana-install-dir'),
     grep: flags.string('grep'),
     suiteTags: {
