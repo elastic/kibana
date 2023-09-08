@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeComputed, euiCanAnimate } from '@elastic/eui';
+import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 import add from '../assets/add.svg';
