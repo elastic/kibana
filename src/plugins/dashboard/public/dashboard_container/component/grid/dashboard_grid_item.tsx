@@ -23,7 +23,6 @@ export interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
-  focusedPanelId?: string;
   expandedPanelId?: string;
   key: string;
   isRenderable?: boolean;
@@ -34,7 +33,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       expandedPanelId,
-      focusedPanelId,
       id,
       index,
       type,
@@ -44,7 +42,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
       children,
       className,
-      style,
       ...rest
     },
     ref
@@ -62,7 +59,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
       'dshDashboardGrid__item--focused': focusPanel,
-      'dshDashboardGrid__item--blurred': focusPanel,
+      'dshDashboardGrid__item--blurred': blurPanel,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: container.getInput().viewMode === ViewMode.PRINT,
     });
@@ -81,16 +78,13 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const focusStyles =
       focusPanelId && focusPanelId !== id
         ? css`
-            // pointer-events: none;
+            pointer-events: none;
             opacity: 0.25;
           `
         : css``;
 
     return (
       <div
-        style={{
-          ...style,
-        }}
         css={focusStyles}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"

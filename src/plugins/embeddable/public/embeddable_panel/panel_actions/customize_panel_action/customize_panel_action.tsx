@@ -142,6 +142,7 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
         },
         maxWidth: true,
         type: 'push',
+        ownFocus: false,
       }
     );
     overlayTracker?.openOverlay(handle, { focusPanelId: embeddable.id });
