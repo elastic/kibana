@@ -19,7 +19,6 @@ import {
   EuiHideFor,
   EuiPageSidebar,
   EuiPageSidebarProps,
-  useEuiBackgroundColor,
   useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
@@ -290,7 +289,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   );
 
   const { euiTheme } = useEuiTheme();
-  const buttonBackgroundColor = useEuiBackgroundColor('plain');
 
   if (!dataView) {
     return null;
@@ -398,7 +396,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
               hasButtonAddFieldToolbarStyle
                 ? css`
                     padding: ${euiTheme.size.s};
-                    background-color: ${buttonBackgroundColor};
                     border-top: ${euiTheme.border.thin};
                   `
                 : undefined
