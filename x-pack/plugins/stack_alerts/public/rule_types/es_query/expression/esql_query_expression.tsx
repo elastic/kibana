@@ -150,7 +150,7 @@ export const EsqlQueryExpression: React.FC<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt"
-            defaultMessage="Define your query using ESQL"
+            defaultMessage="Define your query using ES|QL"
           />
         </h5>
       </EuiTitle>
