@@ -73,4 +73,7 @@ export type TestSubjects =
   | 'policyMatchFieldValue'
   | 'policyEnrichFieldsValue'
   | 'queryEditor'
-  | 'detailPanelTabSelected';
+  | 'createIndexButton'
+  | 'createIndexNameFieldText'
+  | 'createIndexCancelButton'
+  | 'createIndexSaveButton';

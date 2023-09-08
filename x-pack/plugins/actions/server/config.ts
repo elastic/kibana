@@ -19,6 +19,9 @@ export enum EnabledActionTypes {
 const MAX_MAX_ATTEMPTS = 10;
 const MIN_MAX_ATTEMPTS = 1;
 
+const MIN_QUEUED_MAX = 1;
+export const DEFAULT_QUEUED_MAX = 1000000;
+
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
   actionTypeId: schema.string({ minLength: 1 }),
@@ -130,6 +133,11 @@ export const configSchema = schema.object({
     })
   ),
   enableFooterInEmail: schema.boolean({ defaultValue: true }),
+  queued: schema.maybe(
+    schema.object({
+      max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
