@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('regression creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/142096
+  describe.skip('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression');
