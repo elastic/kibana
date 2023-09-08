@@ -185,12 +185,13 @@ export default function ({ getService }: FtrProviderContext) {
         await request.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo').expect(204);
       });
 
-      it('should increment task run success/total counters', async () => {
+      it('should increment task run success/on_time/total counters', async () => {
         const initialMetrics = (
           await getMetrics(
             false,
             (metrics) =>
               metrics?.metrics?.task_run?.value.by_type.alerting?.total === 1 &&
+              metrics?.metrics?.task_run?.value.by_type.alerting?.on_time === 1 &&
               metrics?.metrics?.task_run?.value.by_type.alerting?.success === 1
           )
         ).metrics;
@@ -210,6 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
             false,
             (metrics) =>
               metrics?.metrics?.task_run?.value.by_type.alerting?.total === i + 2 &&
+              metrics?.metrics?.task_run?.value.by_type.alerting?.on_time === i + 2 &&
               metrics?.metrics?.task_run?.value.by_type.alerting?.success === i + 2
           );
         }
@@ -219,6 +221,7 @@ export default function ({ getService }: FtrProviderContext) {
           false,
           (metrics) =>
             metrics?.metrics?.task_run?.value.by_type.alerting?.total === 0 &&
+            metrics?.metrics?.task_run?.value.by_type.alerting?.on_time === 0 &&
             metrics?.metrics?.task_run?.value.by_type.alerting?.success === 0
         );
       });
