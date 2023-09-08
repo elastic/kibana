@@ -6,6 +6,7 @@
  */
 
 import type { Serializable } from '@kbn/utility-types';
+import { omit } from 'lodash';
 import { MessageRole, RegisterFunctionDefinition } from '../../common/types';
 import type { ObservabilityAIAssistantService } from '../types';
 
@@ -22,7 +23,9 @@ export function registerRecallFunction({
       contexts: ['core'],
       description: `Use this function to recall earlier learnings. Anything you will summarize can be retrieved again later via this function.
       
-      Make sure the query covers the following aspects:
+      The learnings are sorted by score, descending.
+      
+      Make sure the query covers ONLY the following aspects:
       - Anything you've inferred from the user's request, but is not mentioned in the user's request
       - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.  
 
@@ -67,7 +70,11 @@ export function registerRecallFunction({
           },
           signal,
         })
-        .then((response) => ({ content: response as unknown as Serializable }));
+        .then((response): { content: Serializable } => ({
+          content: response.entries.map((entry) =>
+            omit(entry, 'labels', 'score', 'is_correction')
+          ) as unknown as Serializable,
+        }));
     }
   );
 }

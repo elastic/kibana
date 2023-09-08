@@ -1,0 +1,24 @@
+EVAL 
+ES|QL ›ES|QL processing
+commands
+EVAL
+EVAL enables you to append new columns:
+    FROM employees
+    | SORT emp_no
+    | KEEP first_name, last_name, height
+    | EVAL height_feet = height * 3.281, height_cm = height * 100
+  first_name:keyword   last_name:keyword   height:double   height_feet:double   height_cm:double
+  -------------------- ------------------- --------------- -------------------- --------------------
+  Georgi               Facello             2.03            6.66043              202.99999999999997
+If the specified column already exists, the existing column will be
+dropped, and the new column will be appended to the table:
+    FROM employees
+    | SORT emp_no
+    | KEEP first_name, last_name, height
+    | EVAL height = height * 3.281
+  first_name:keyword   last_name:keyword   height:double
+  -------------------- ------------------- ---------------
+  Georgi               Facello             6.66043
+Functions
+EVAL supports various functions for calculating values. Refer to
+Functions for more information.

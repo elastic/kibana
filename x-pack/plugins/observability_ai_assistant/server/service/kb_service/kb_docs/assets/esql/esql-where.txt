@@ -1,0 +1,21 @@
+WHERE 
+ES|QL ›ES|QL processing
+commands
+WHERE
+Use WHERE to produce a table that contains all the rows from the input
+table for which the provided condition evaluates to true:
+    FROM employees
+    | KEEP first_name, last_name, still_hired
+    | WHERE still_hired == true
+Which, if still_hired is a boolean field, can be simplified to:
+    FROM employees
+    | KEEP first_name, last_name, still_hired
+    | WHERE still_hired
+Operators
+Refer to Operators for an overview of the supported operators.
+Functions
+WHERE supports various functions for calculating values. Refer to
+Functions for more information.
+    FROM employees
+    | KEEP first_name, last_name, height
+    | WHERE length(first_name) < 4

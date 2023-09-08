@@ -28,7 +28,7 @@ import {
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import type { KnowledgeBaseService } from '../kb_service';
+import type { KnowledgeBaseService, RecalledEntry } from '../kb_service';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 
@@ -134,6 +134,16 @@ export class ObservabilityAIAssistantClient {
           };
         })
     );
+
+    const recallMessages = messagesForOpenAI.filter((message) => message.name === 'recall');
+
+    const systemMessage = messagesForOpenAI.find((message) => message.role === MessageRole.System);
+
+    // add recalled information to system message, so the LLM considers it more important
+    recallMessages.forEach((message, index) => {
+      systemMessage!.content += `Results for recall #${index}:\n ${message.content}`;
+      message.content = `Result was added to your system message under #${index}`;
+    });
 
     const functionsForOpenAI: ChatCompletionFunctions[] | undefined = functions;
 
@@ -323,9 +333,7 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
-  recall = async (
-    queries: string[]
-  ): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
+  recall = async (queries: string[]): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,

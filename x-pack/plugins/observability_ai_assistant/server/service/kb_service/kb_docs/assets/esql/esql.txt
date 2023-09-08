@@ -1,0 +1,46 @@
+ES|QL 
+
+The Elasticsearch Query Language (ES|QL) is a query language that
+enables the iterative exploration of data.
+An ES|QL query consists of a series of commands, separated by pipes.
+Each query starts with a source command. A source command produces a
+table, typically with data from Elasticsearch.
+[A source command producing a table from Elasticsearch]
+A source command can be followed by one or more processing commands.
+Processing commands change an input table by adding, removing, or
+changing rows and columns.
+[A processing command changing an input table]
+You can chain processing commands, separated by a pipe character: |.
+Each processing command works on the output table of the previous
+command.
+[Processing commands can be chained]
+The result of a query is the table produced by the final processing
+command.
+Run an ES|QL query
+The ES|QL API
+Use the _query endpoint to run an ES|QL query:
+    POST /_query
+    {
+      "query": """
+        FROM library
+        | EVAL year = DATE_TRUNC(1 YEARS, release_date)
+        | STATS MAX(page_count) BY year
+        | SORT year
+        | LIMIT 5
+      """
+    }
+
+Limitations
+ES|QL currently supports the following field types:
+-   alias
+-   boolean
+-   date
+-   double (float, half_float, scaled_float are represented as double)
+-   ip
+-   keyword family including keyword, constant_keyword, and wildcard
+-   int (short and byte are represented as int)
+-   long
+-   null
+-   text
+-   unsigned_long
+-   version

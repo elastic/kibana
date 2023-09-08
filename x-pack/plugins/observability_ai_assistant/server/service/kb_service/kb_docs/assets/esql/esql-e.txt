@@ -1,0 +1,9 @@
+E 
+ES|QL ›ES|QL functions
+E
+[]
+Euler’s number.
+    ROW E()
+  E():double
+  -------------------
+  2.718281828459045

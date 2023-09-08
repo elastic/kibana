@@ -1,0 +1,11 @@
+AVG 
+ES|QL ›ES|QL aggregation
+functions
+AVG
+The average of a numeric field.
+    FROM employees
+    | STATS AVG(height)
+  AVG(height):double
+  --------------------
+  1.7682
+The result is always a double not matter the input type.

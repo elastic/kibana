@@ -10,13 +10,13 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { KnowledgeBaseEntry } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import type { RecalledEntry } from '../../service/kb_service';
 
 const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/elasticsearch',
@@ -166,7 +166,9 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
+  ): Promise<{
+    entries: RecalledEntry[];
+  }> => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
