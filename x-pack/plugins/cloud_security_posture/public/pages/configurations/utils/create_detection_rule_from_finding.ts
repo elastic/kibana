@@ -21,12 +21,9 @@ const DEFAULT_RULE_LICENSE = 'Elastic License v2';
 const DEFAULT_MAX_ALERTS_PER_RULE = 100;
 const ALERT_SUPPRESSION_FIELD = 'resource.id';
 const ALERT_TIMESTAMP_FIELD = 'event.ingested';
-const DEFAULT_INVESTIGATION_FIELDS = [
-  'resource.name',
-  'resource.id',
-  'resource.type',
-  'resource.sub_type',
-];
+const DEFAULT_INVESTIGATION_FIELDS = {
+  field_names: ['resource.name', 'resource.id', 'resource.type', 'resource.sub_type'],
+};
 
 enum AlertSuppressionMissingFieldsStrategy {
   // per each document a separate alert will be created
