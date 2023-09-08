@@ -592,7 +592,7 @@ describe('Handler', () => {
     const [message, meta] = loggingSystemMock.collect(logger).error[0];
     expect(message).toEqual('500 Server Error - /');
 
-    // unwrap all Error's properties (assert PII has been redacted)
+    // unwrap all error properties
     expect(Object.assign({}, meta!.error)).toMatchInlineSnapshot(`
       Object {
         "meta": Object {

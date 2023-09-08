@@ -273,8 +273,7 @@ type RequestHandlerEnhanced<P, Q, B, Method extends RouteMethod> = WithoutHeadAr
   RequestHandler<P, Q, B, RequestHandlerContextBase, Method>
 >;
 
-// headers that may contain PII
-const SENSITIVE_HEADERS = [
+const FORBIDDEN_HEADERS = [
   'authorization',
   'cookie',
   'set-cookie',
@@ -286,11 +285,11 @@ const REDACTED_HEADER_TEXT = '[REDACTED]';
 
 const redactSensitiveHeaders = (data: any) => {
   // keep the original Error object, but deep clone all its properties
-  // this allows redacting PII without modifying the original objects,
+  // this allows redacting some fields without modifying the original objects,
   // and at the same time preserving the original Error object
   Object.entries(data).forEach(([key, value]) => {
     data[key] = cloneDeepWith(value, (v, k) =>
-      typeof k === 'string' && SENSITIVE_HEADERS.includes(k) ? REDACTED_HEADER_TEXT : undefined
+      typeof k === 'string' && FORBIDDEN_HEADERS.includes(k) ? REDACTED_HEADER_TEXT : undefined
     );
   });
   return data;
