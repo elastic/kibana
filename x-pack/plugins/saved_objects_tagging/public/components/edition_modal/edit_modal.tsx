@@ -6,6 +6,8 @@
  */
 
 import React, { FC, useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '@kbn/core/public';
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { isServerValidationError } from '../../services/tags';
 import { CreateOrEditModal } from './create_or_edit_modal';
@@ -17,6 +19,7 @@ interface EditTagModalProps {
   onClose: () => void;
   onSave: (tag: Tag) => void;
   tagClient: ITagsClient;
+  notifications: NotificationsStart;
 }
 
 const getAttributes = (tag: Tag): TagAttributes => {
@@ -24,7 +27,13 @@ const getAttributes = (tag: Tag): TagAttributes => {
   return attributes;
 };
 
-export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagClient }) => {
+export const EditTagModal: FC<EditTagModalProps> = ({
+  tag,
+  onSave,
+  onClose,
+  tagClient,
+  notifications,
+}) => {
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
   const { validation, setValidation, onNameChange, isValidating, hasDuplicateNameError } =
     useValidation({
@@ -62,9 +71,24 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
       // if e is IHttpFetchError, actual server error payload is in e.body
       if (isServerValidationError(e.body)) {
         setValidation(e.body.attributes);
+      } else {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.savedObjectsTagging.editTagErrorTitle', {
+            defaultMessage: 'An error occurred editing tag',
+          }),
+          text: e.body.message,
+        });
       }
     }
-  }, [hasDuplicateNameError, tagAttributes, setValidation, tagClient, tag.id, onSave]);
+  }, [
+    hasDuplicateNameError,
+    tagAttributes,
+    setValidation,
+    tagClient,
+    tag.id,
+    onSave,
+    notifications.toasts,
+  ]);
 
   return (
     <CreateOrEditModal

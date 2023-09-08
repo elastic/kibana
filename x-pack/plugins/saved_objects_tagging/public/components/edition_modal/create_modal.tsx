@@ -6,6 +6,9 @@
  */
 
 import React, { FC, useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { NotificationsStart } from '@kbn/core/public';
+
 import { ITagsClient, Tag, TagAttributes } from '../../../common/types';
 import { isServerValidationError } from '../../services/tags';
 import { getRandomColor, validateTag } from './utils';
@@ -17,6 +20,7 @@ interface CreateTagModalProps {
   onClose: () => void;
   onSave: (tag: Tag) => void;
   tagClient: ITagsClient;
+  notifications: NotificationsStart;
 }
 
 const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAttributes => ({
@@ -29,6 +33,7 @@ const getDefaultAttributes = (providedDefaults?: Partial<TagAttributes>): TagAtt
 export const CreateTagModal: FC<CreateTagModalProps> = ({
   defaultValues,
   tagClient,
+  notifications,
   onClose,
   onSave,
 }) => {
@@ -71,9 +76,23 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
       // if e is IHttpFetchError, actual server error payload is in e.body
       if (isServerValidationError(e.body)) {
         setValidation(e.body.attributes);
+      } else {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.savedObjectsTagging.saveTagErrorTitle', {
+            defaultMessage: 'An error occurred creating tag',
+          }),
+          text: e.body.message,
+        });
       }
     }
-  }, [tagAttributes, hasDuplicateNameError, setValidation, tagClient, onSave]);
+  }, [
+    hasDuplicateNameError,
+    tagAttributes,
+    setValidation,
+    tagClient,
+    onSave,
+    notifications.toasts,
+  ]);
 
   return (
     <CreateOrEditModal
