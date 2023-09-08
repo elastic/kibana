@@ -8,4 +8,5 @@
 export const LOG_EXPLORER_PROFILE_ID = 'log-explorer';
 
 // Fields constants
+export const TIMESTAMP_FIELD = '@timestamp';
 export const MESSAGE_FIELD = 'message';
