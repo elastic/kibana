@@ -98,7 +98,8 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/apm-data-access-plugin",
     "@kbn/profiling-data-access-plugin",
-    "@kbn/profiling-utils"
+    "@kbn/profiling-utils",
+    "@kbn/monaco"
   ],
   "exclude": ["target/**/*"]
 }
