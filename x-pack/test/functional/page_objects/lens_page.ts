@@ -691,7 +691,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async getNumericFieldReady(testSubj: string) {
       const numericInput = await find.byCssSelector(
-        `input[data-test-subj=${testSubj}][type='number']`
+        `input[data-test-subj="${testSubj}"][type='number']`
       );
       await numericInput.click();
       await numericInput.clearValue();

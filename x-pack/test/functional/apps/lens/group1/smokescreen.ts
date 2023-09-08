@@ -789,7 +789,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.lens.closeDimensionEditor();
       }
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
     });
   });

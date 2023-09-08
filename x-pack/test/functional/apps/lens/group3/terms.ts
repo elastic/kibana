@@ -125,7 +125,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const percentileValue = await percentileInput.getAttribute('value');
             if (percentileValue !== value) {
-              throw new Error(`layerPanelTopHitsSize not set to ${value}`);
+              throw new Error(
+                `[date-test-subj="lns-indexPattern-percentile-input"] not set to ${value}`
+              );
             }
           });
 
@@ -148,7 +150,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const percentileRankValue = await percentileRankInput.getAttribute('value');
             if (percentileRankValue !== value) {
-              throw new Error(`layerPanelTopHitsSize not set to ${value}`);
+              throw new Error(
+                `[date-test-subj="lns-indexPattern-percentile_ranks-input"] not set to ${value}`
+              );
             }
           });
           // note: this has also the side effect to close the dimension editor

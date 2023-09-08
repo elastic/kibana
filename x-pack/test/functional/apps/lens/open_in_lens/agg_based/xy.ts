@@ -367,7 +367,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
+      expect(await lens.getWorkspaceErrorCount()).to.eql(0);
     });
   });
 }
