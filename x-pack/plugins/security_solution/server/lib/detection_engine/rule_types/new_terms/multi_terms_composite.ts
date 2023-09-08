@@ -194,7 +194,7 @@ const multiTermsCompositeNonRetryable = async ({
  * We will try to reduce it in twice per each request, three times, up until 125
  * Per ES documentation, max_clause_count min value is 1,000 - so with 125 we should be able execute query below max_clause_count value
  */
-export const multiTermsComposite = async (args: MultiTermsCompositeArgs): Promise<void> => {
+export const multiTermsComposite = async (args: MultiTermsCompositeArgsBase): Promise<void> => {
   let retryBatchSize = BATCH_SIZE;
   const ruleExecutionLogger = args.runOpts.ruleExecutionLogger;
   await pRetry(
@@ -217,7 +217,7 @@ export const multiTermsComposite = async (args: MultiTermsCompositeArgs): Promis
 
         retryBatchSize = retryBatchSize / 2;
         ruleExecutionLogger.warn(
-          `New terms query for multiple fields failed due to too many clauses in query: ${e.message}. Retrying #{retryCount} with ${retryBatchSize} for composite aggregation`
+          `New terms query for multiple fields failed due to too many clauses in query: ${e.message}. Retrying #${retryCount} with ${retryBatchSize} for composite aggregation`
         );
         throw e;
       }
