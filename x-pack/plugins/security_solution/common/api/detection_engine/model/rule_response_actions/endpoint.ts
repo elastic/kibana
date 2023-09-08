@@ -15,7 +15,7 @@ function keyObject<T extends readonly string[]>(arr: T): { [K in T[number]]: nul
 
 const EndpointParamsConfig = t.type({
   field: t.string,
-  overwrite: t.boolean,
+  overwrite: t.union([t.boolean, t.string]),
 });
 
 export type EndpointParamsConfig = t.TypeOf<typeof EndpointParamsConfig>;

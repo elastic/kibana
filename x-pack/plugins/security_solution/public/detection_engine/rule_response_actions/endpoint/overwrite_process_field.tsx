@@ -33,12 +33,9 @@ const OverwriteFieldComponent = ({
   disabled,
   readDefaultValueOnForm,
 }: OverwriteFieldProps) => {
-  const optionalDefaultValue = !readDefaultValueOnForm ? { defaultValue: false } : {};
-
   return (
     <UseField
       component={ToggleField}
-      {...optionalDefaultValue}
       path={path}
       readDefaultValueOnForm={readDefaultValueOnForm}
       config={CONFIG}

@@ -106,6 +106,8 @@ const getProcessAlerts = (
     return {};
   }
   const fieldValue = config.field;
+
+  // overwrite can be an empty string - strange behaviour in frontend form however even then it ends up as falsy value
   const pid = config.overwrite ? alert[fieldValue] : alert.process?.pid;
 
   const { _id, agent } = alert;
