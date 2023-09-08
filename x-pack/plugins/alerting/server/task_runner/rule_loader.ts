@@ -48,7 +48,7 @@ interface ValidateRuleParams<Params extends RuleTypeParams> {
   context: TaskRunnerContext;
   ruleTypeRegistry: RuleTypeRegistry;
   ruleData: RuleDataResult<RuleData<Params>>;
-  isAdHocRuleRun: boolean;
+  isAdHocRuleRun?: boolean;
 }
 
 export function validateRule<Params extends RuleTypeParams>(

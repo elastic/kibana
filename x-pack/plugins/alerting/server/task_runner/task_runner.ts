@@ -624,7 +624,6 @@ export class TaskRunner<
     const {
       params: { alertId: ruleId, spaceId, consumer, adHocOptions },
     } = this.taskInstance;
-    const isAdHocRuleRun = !!adHocOptions;
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
@@ -668,7 +667,7 @@ export class TaskRunner<
       spaceId,
       context: this.context,
       ruleTypeRegistry: this.ruleTypeRegistry,
-      isAdHocRuleRun,
+      isAdHocRuleRun: !!adHocOptions,
     });
   }
 
