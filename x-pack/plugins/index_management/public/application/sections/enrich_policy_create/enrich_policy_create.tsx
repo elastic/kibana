@@ -32,12 +32,12 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
             />
           </span>
         }
-        description={(
+        description={
           <FormattedMessage
             id="xpack.idxMgmt.enrichPolicyCreate.appDescription"
             defaultMessage="Specify how to retrieve and enrich your incoming data."
           />
-        )}
+        }
         bottomBorder
         rightSideItems={[
           <EuiButtonEmpty
