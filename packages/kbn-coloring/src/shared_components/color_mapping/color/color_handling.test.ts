@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
+import {
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_NEUTRAL_PALETTE_INDEX,
+} from '../config/default_color_mapping';
 import { getColorFactory } from './color_handling';
 import { getPalette } from '../palette';
 import { AVAILABLE_PALETTES } from '../palettes/available_palettes';
-import {
-  DEFAULT_NEUTRAL_PALETTE_INDEX,
-  EUIPalette,
-  NeutralPalette,
-} from '../palettes/default_palettes';
+import { EUIPalette, NeutralPalette } from '../palettes/default_palettes';
 import { EUI_PALETTE_COLORS_DARK, EUI_PALETTE_COLORS_LIGHT } from '../palettes/eui';
 import { NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT } from '../palettes/neutral';
 import { toHex } from './color_math';
