@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>D3 Security</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can send requests to D3 Security.
+:frontmatter-tags-products: [alerting]
+:frontmatter-tags-content-type: [how-to]
+:frontmatter-tags-user-goals: [configure]
 
 The D3 Security connector uses https://github.com/axios/axios[axios] to send a POST request to a D3 Security endpoint. The connector uses the <<execute-connector-api,run connector API>> to send the request. You can use the connector for rule actions.
 
@@ -36,35 +40,7 @@ D3 Security connectors have the following configuration properties:
 
 Name::      The name of the connector.
 URL::   The D3 Security API request URL.
-Token::   The D3 Security token
-
-[float]
-[[preconfigured-d3security-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-d3security:
-    name: preconfigured-d3security-connector-type
-    actionTypeId: .d3security
-    config:
-      url: https://testurl.com/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents
-    secrets:
-      token: superlongtoken
---
-
-Config defines information for the connector type.
-
-`url`:: A URL string that corresponds to the *D3 Security API URL*.
-
-Secrets defines sensitive information for the connector type.
-
-`token`:: A string that corresponds to *D3 Security API Token*.
+Token::   The D3 Security token.
 
 [float]
 [[d3security-action-configuration]]

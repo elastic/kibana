@@ -106,6 +106,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 [float]
 === Examples
 
+* <<preconfigured-d3security-configuration>>
 * <<preconfigured-index-configuration>>
 * <<preconfigured-jira-configuration>>
 * <<preconfigured-opsgenie-configuration>>
@@ -114,6 +115,26 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
+
+[float]
+[[preconfigured-d3security-configuration]]
+==== D3 Security connectors
+
+The following example creates a <<d3security-action-type,D3 Security connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-d3security:
+    name: preconfigured-d3security-connector-type
+    actionTypeId: .d3security
+    config:
+      url: https://testurl.com/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents <1>
+    secrets:
+      token: superlongtoken <2>
+--
+<1> The D3 Security API request URL.
+<2> The D3 Security token.
 
 [float]
 [[preconfigured-index-configuration]]

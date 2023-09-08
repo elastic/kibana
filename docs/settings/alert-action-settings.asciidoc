@@ -339,6 +339,15 @@ For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST A
 +
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
 
+`xpack.actions.preconfigured.<connector-id>.config.url`::
+A configuration URL that varies by connector:
++
+--
+* For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security API request URL.
+
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
+--
+
 `xpack.actions.preconfigured.<connector-id>.config.usesBasic`::
 For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HTTP basic authentication. Defaults to `true`.
 
@@ -383,6 +392,13 @@ It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasi
 +
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
 
+`xpack.actions.preconfigured.<connector-id>.secrets.token`::
+A token secret that varies by connector:
++
+--
+* For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security token.
+--
+
 `xpack.actions.preconfigured.<connector-id>.secrets.user`::
 A user name secret that varies by connector:
 +
@@ -394,7 +410,6 @@ A user name secret that varies by connector:
 For a <<teams-action-type,Microsoft Teams>>, specifies the URL of the incoming webhook.
 +
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
-
 
 [float]
 [[alert-settings]]
