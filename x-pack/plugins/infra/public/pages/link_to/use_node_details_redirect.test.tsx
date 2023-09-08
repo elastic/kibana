@@ -45,6 +45,7 @@ describe('useNodeDetailsRedirect', () => {
       app: 'metrics',
       pathname: 'link-to/pod-detail/example-01',
       search: { from: '1546340400000', to: '1546344000000' },
+      state: {},
     });
   });
 
@@ -72,6 +73,7 @@ describe('useNodeDetailsRedirect', () => {
         to: '1546344000000',
         assetDetails: '(name:example-01)',
       },
+      state: {},
     });
   });
 });

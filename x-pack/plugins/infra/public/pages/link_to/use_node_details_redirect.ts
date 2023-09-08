@@ -66,7 +66,7 @@ export const useNodeDetailsRedirect = () => {
           ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: `${to}` } : undefined),
         },
         state: {
-          ...(location.pathname
+          ...(location.key
             ? ({
                 originAppId: appId,
                 originSearch: location.search,
@@ -76,7 +76,7 @@ export const useNodeDetailsRedirect = () => {
         },
       };
     },
-    [location.pathname, appId, location.search]
+    [location.key, location.search, location.pathname, appId]
   );
 
   return { getNodeDetailUrl };
