@@ -9,12 +9,13 @@ import { each, flatMap, flatten, map, reduce } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { EndpointParamsConfig } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
+
 import type {
   Alert,
   AlertAgent,
   EndpointResponseActionAlerts,
   ResponseActionAlerts,
-  RuleResponseEndpointAction,
 } from './types';
 
 export const endpointResponseAction = (
@@ -99,13 +100,14 @@ export const endpointResponseAction = (
 const getProcessAlerts = (
   acc: EndpointResponseActionAlerts,
   alert: Alert,
-  config?: EndpointParamsConfig
+  config: EndpointParamsConfig
 ) => {
-  console.log({ config });
-  const fieldValue = config.field[0];
-  const pid = config.overwrite ? (alert[fieldValue] as string) : alert.process?.pid;
+  if (!config) {
+    return {};
+  }
+  const fieldValue = config.field;
+  const pid = config.overwrite ? alert[fieldValue] : alert.process?.pid;
 
-  console.log({ pid });
   const { _id, agent } = alert;
   const { id: agentId, name } = agent as AlertAgent;
 

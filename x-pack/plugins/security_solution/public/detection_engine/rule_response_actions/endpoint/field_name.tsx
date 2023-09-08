@@ -9,8 +9,9 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { get } from 'lodash';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import ECSSchema from './v.8.10.0-pid.json';
 
 interface FieldNameFieldProps {
@@ -46,7 +47,7 @@ const FieldNameFieldComponent = ({
   const fieldValue = get(data, path);
 
   const renderEntityIdNote = useMemo(() => {
-    const contains = fieldValue?.[0]?.includes('entity_id');
+    const contains = fieldValue?.includes('entity_id');
     if (contains) {
       return (
         <span>
@@ -58,34 +59,43 @@ const FieldNameFieldComponent = ({
     return null;
   }, [fieldValue]);
 
-  // ComboBoxField operated on arrays, so we want to default it to [] if it's a new action
-  const optionalDefaultValue = useMemo(() => {
-    return !readDefaultValueOnForm ? { defaultValue: [] } : {};
-  }, [readDefaultValueOnForm]);
-
   return (
     <>
-      <UseField
+      <UseField<EuiComboBoxOptionOption<string>>
         path={path}
-        {...optionalDefaultValue}
         readDefaultValueOnForm={readDefaultValueOnForm}
         config={CONFIG}
-        component={ComboBoxField}
-        componentProps={{
-          euiFieldProps: {
-            isDisabled: disabled,
-            placeholder: i18n.translate(
-              'xpack.securitySolution.responseActions.endpoint.validations.customField',
-              {
-                defaultMessage: 'Select custom field',
-              }
-            ),
-            singleSelection: SINGLE_SELECTION,
-            noSuggestions: false,
-            options: ECSSchemaOptions,
-          },
+      >
+        {(field) => {
+          const { label, value, setValue } = field;
+          const valueInList = !!ECSSchemaOptions.find((option) => option.label === value);
+          return (
+            <EuiFormRow label={label} fullWidth>
+              <EuiComboBox
+                isDisabled={disabled}
+                placeholder={i18n.translate(
+                  'xpack.securitySolution.responseActions.endpoint.validations.customField',
+                  {
+                    defaultMessage: 'Select custom field',
+                  }
+                )}
+                singleSelection={SINGLE_SELECTION}
+                noSuggestions={false}
+                options={ECSSchemaOptions}
+                fullWidth
+                selectedOptions={value && valueInList ? [{ value, label: value }] : undefined}
+                onChange={(newValue) => {
+                  if (newValue.length === 0) {
+                    // Don't allow clearing the type. One must always be selected
+                    return;
+                  }
+                  setValue(newValue[0].label);
+                }}
+              />
+            </EuiFormRow>
+          );
         }}
-      />
+      </UseField>
       {/* TODO: Still waiting for mock ups regarding this*/}
       {renderEntityIdNote}
     </>
