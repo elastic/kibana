@@ -30,7 +30,6 @@ import {
   AlertActiveTimeRangeAnnotation,
 } from '@kbn/observability-alert-details';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useLocation } from 'react-router-dom';
 import type { TimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/threshold_rule/metric_value_formatter';
@@ -52,8 +51,6 @@ const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
 const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 const OVERVIEW_TAB_ID = 'overview';
 const RELATED_EVENTS_TAB_ID = 'relatedEvents';
-const TAB_ID_URL_PARAM = 'tabId';
-type TabId = typeof OVERVIEW_TAB_ID | typeof RELATED_EVENTS_TAB_ID;
 
 interface AppSectionProps {
   alert: MetricThresholdAlert;
@@ -72,7 +69,6 @@ export default function AlertDetailsAppSection({
   const { uiSettings, charts, aiops, data } = useKibana().services;
   const { EmbeddableChangePointChart } = aiops;
   const { euiTheme } = useEuiTheme();
-  const { search } = useLocation();
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
@@ -138,18 +134,6 @@ export default function AlertDetailsAppSection({
     initDataView();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource]);
-
-  const [selectedTabId, setSelectedTabId] = useState(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(TAB_ID_URL_PARAM);
-    return urlTabId && [OVERVIEW_TAB_ID, RELATED_EVENTS_TAB_ID].includes(urlTabId)
-      ? (urlTabId as TabId)
-      : OVERVIEW_TAB_ID;
-  });
-
-  const handleSelectedTab = (newTabId: TabId) => {
-    setSelectedTabId(newTabId);
-  };
 
   const relatedEventsTimeRange = (criterion: MetricExpression): TimeRange => {
     return {
@@ -266,12 +250,5 @@ export default function AlertDetailsAppSection({
     },
   ];
 
-  return (
-    <EuiTabbedContent
-      data-test-subj="thresholdAlertDetailsTabbedContent"
-      tabs={tabs}
-      selectedTab={tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]}
-      onTabClick={(tab) => handleSelectedTab(tab.id as TabId)}
-    />
-  );
+  return <EuiTabbedContent data-test-subj="thresholdAlertDetailsTabbedContent" tabs={tabs} />;
 }

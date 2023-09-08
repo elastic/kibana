@@ -34,12 +34,6 @@ jest.mock('./expression_chart', () => ({
   ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
 }));
 
-const mockGetLocation = jest.fn();
-
-jest.mock('react-router-dom', () => ({
-  useLocation: () => mockGetLocation(),
-}));
-
 jest.mock('../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
@@ -59,8 +53,6 @@ describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
   const mockedSetAlertSummaryFields = jest.fn();
   const ruleLink = 'ruleLink';
-  const location = { state: undefined };
-  mockGetLocation.mockReturnValue(location);
 
   const renderComponent = () => {
     return render(
