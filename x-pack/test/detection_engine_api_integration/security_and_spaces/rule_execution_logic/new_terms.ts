@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
     return testId;
   };
 
-  describe.only('New terms type rules', () => {
+  describe('New terms type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
