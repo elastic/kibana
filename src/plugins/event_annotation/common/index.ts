@@ -27,6 +27,8 @@ export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types'
 export type { EventAnnotationArgs, EventAnnotationOutput } from './types';
 
 export type {
+  EventAnnotationGroupGetIn,
+  EventAnnotationGroupGetOut,
   EventAnnotationGroupSavedObjectAttributes,
   EventAnnotationGroupCreateIn,
   EventAnnotationGroupUpdateIn,
