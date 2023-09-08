@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import ECSSchema from './v.8.10.0-pid.json';
+import ECSSchema from './v.8.10.0_process.json';
 
 interface FieldNameFieldProps {
   path: string;

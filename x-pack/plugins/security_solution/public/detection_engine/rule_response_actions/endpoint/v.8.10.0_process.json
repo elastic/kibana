@@ -1,219 +1,126 @@
 [
   {
     "field": "host.pid_ns_ino",
-    "type": "keyword",
-    "normalization": "",
-    "example": 256383,
     "description": "Pid namespace inode"
   },
   {
     "field": "process.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.entry_leader.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.entry_leader.parent.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.entry_leader.parent.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.entry_leader.parent.session_leader.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.entry_leader.parent.session_leader.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.entry_leader.parent.session_leader.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.entry_leader.parent.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.entry_leader.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.entry_leader.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.group_leader.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.group_leader.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.group_leader.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.parent.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.parent.group_leader.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.parent.group_leader.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.parent.group_leader.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.parent.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.parent.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.session_leader.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.session_leader.parent.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.session_leader.parent.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.session_leader.parent.session_leader.entity_id",
-    "type": "keyword",
-    "normalization": "",
-    "example": "c2c455d9f99375d",
     "description": "Unique identifier for the process."
   },
   {
     "field": "process.session_leader.parent.session_leader.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.session_leader.parent.session_leader.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.session_leader.parent.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.session_leader.pid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Process id."
   },
   {
     "field": "process.session_leader.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   },
   {
     "field": "process.vpid",
-    "type": "long",
-    "normalization": "",
-    "example": 4242,
     "description": "Virtual process id."
   }
 ]

@@ -100,25 +100,24 @@ export const endpointResponseAction = (
 const getProcessAlerts = (
   acc: EndpointResponseActionAlerts,
   alert: Alert,
-  config: EndpointParamsConfig
+  config?: EndpointParamsConfig
 ) => {
   if (!config) {
     return {};
   }
-  const fieldValue = config.field;
+  const { overwrite, field } = config;
+  const valueFromAlert = overwrite ? alert[field] : alert.process?.pid;
+  const isEntityId = field.includes('entity_id');
+  const key = isEntityId ? 'entity_id' : 'pid';
 
-  // overwrite can be an empty string - strange behaviour in frontend form however even then it ends up as falsy value
-  const pid = config.overwrite ? alert[fieldValue] : alert.process?.pid;
-
-  const { _id, agent } = alert;
-  const { id: agentId, name } = agent as AlertAgent;
-
-  if (pid) {
+  if (valueFromAlert) {
+    const { _id, agent } = alert;
+    const { id: agentId, name } = agent as AlertAgent;
     return {
-      [pid]: {
-        alertIds: [...(acc?.[agentId]?.pids?.[pid]?.alertIds || []), _id],
+      [valueFromAlert]: {
+        alertIds: [...(acc?.[agentId]?.pids?.[valueFromAlert]?.alertIds || []), _id],
         parameters: {
-          pid,
+          [key]: valueFromAlert,
         },
         agentId,
         hosts: {
