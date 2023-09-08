@@ -16,12 +16,12 @@ export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}
 
   public reportSearchQuerySubmitted = ({
-    kuery_fields,
+    kueryFields,
     timerange,
     action,
   }: SearchQuerySubmittedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.SEARCH_QUERY_SUBMITTED, {
-      kuery_fields,
+      kueryFields,
       timerange,
       action,
     });

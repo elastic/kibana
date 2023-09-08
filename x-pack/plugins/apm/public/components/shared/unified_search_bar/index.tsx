@@ -285,7 +285,7 @@ export function UnifiedSearchBar({
         onRefresh();
       }
       telemetry.reportSearchQuerySubmitted({
-        kuery_fields: kueryFields,
+        kueryFields,
         action,
         timerange: `${rangeFrom} - ${rangeTo}`,
       });

@@ -9,12 +9,12 @@ import { TelemetryEventTypes, TelemetryEvent } from './types';
 const searchQuerySubmittedEventType: TelemetryEvent = {
   eventType: TelemetryEventTypes.SEARCH_QUERY_SUBMITTED,
   schema: {
-    kuery_fields: {
+    kueryFields: {
       type: 'array',
       items: {
         type: 'text',
         _meta: {
-          description: '',
+          description: 'The kuery fields used in the search',
         },
       },
     },

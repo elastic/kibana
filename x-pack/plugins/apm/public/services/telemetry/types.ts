@@ -17,7 +17,7 @@ export enum SearchQueryActions {
   Refresh = 'refresh',
 }
 export interface SearchQuerySubmittedParams {
-  kuery_fields: string[];
+  kueryFields: string[];
   timerange: string;
   action: SearchQueryActions;
 }
