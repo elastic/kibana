@@ -1056,6 +1056,12 @@ export default function ({
       return context;
     }
 
+    const t = editor.getTokenAt(pos);
+    if (t && t.type === 'punctuation.end_triple_quote' && pos.column !== t.position.column + 3) {
+      // skip to populate context as the current position is not on the edge of end_triple_quote
+      return context;
+    }
+
     // needed for scope linking + global term resolving
     context.endpointComponentResolver = getEndpointBodyCompleteComponents;
     context.globalComponentResolver = getGlobalAutocompleteComponents;
@@ -1077,11 +1083,7 @@ export default function ({
     tracer('has started evaluating current token', currentToken);
 
     if (!currentToken) {
-      if (pos.lineNumber === 1) {
-        lastEvaluatedToken = null;
-        tracer('not starting autocomplete due to invalid current token at line 1');
-        return;
-      }
+      lastEvaluatedToken = null;
       currentToken = { position: { column: 0, lineNumber: 0 }, value: '', type: '' }; // empty row
     }
 

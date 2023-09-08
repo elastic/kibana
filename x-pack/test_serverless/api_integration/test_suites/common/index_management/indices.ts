@@ -17,7 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Indices', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165565
+  describe.skip('Indices', function () {
     const indexName = `index-${Math.random()}`;
 
     before(async () => {
@@ -77,6 +78,51 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('x-elastic-internal-origin', 'xxx')
           .expect(404);
+      });
+    });
+
+    describe('create index', () => {
+      const createIndexName = 'a-test-index';
+      after(async () => {
+        // Cleanup index created for testing purposes
+        try {
+          await es.indices.delete({
+            index: createIndexName,
+          });
+        } catch (err) {
+          log.debug('[Cleanup error] Error deleting "a-test-index" index');
+          throw err;
+        }
+      });
+
+      it('can create a new index', async () => {
+        await supertest
+          .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            indexName: createIndexName,
+          })
+          .expect(200);
+
+        const { body: index } = await supertest
+          .get(`${INTERNAL_API_BASE_PATH}/indices/${createIndexName}`)
+          .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
+          .expect(200);
+
+        expect(index).toBeTruthy();
+
+        expect(Object.keys(index).sort()).toEqual(expectedKeys);
+      });
+
+      it('fails to re-create the same index', async () => {
+        await supertest
+          .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            indexName: createIndexName,
+          })
+          .expect(400);
       });
     });
   });

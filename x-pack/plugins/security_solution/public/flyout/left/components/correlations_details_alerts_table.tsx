@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React, { type FC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -74,6 +75,10 @@ export interface CorrelationsDetailsAlertsTableProps {
    */
   eventId: string;
   /**
+   * No data message to render if the table is empty
+   */
+  noItemsMessage?: ReactNode;
+  /**
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
@@ -88,6 +93,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
   alertIds,
   scopeId,
   eventId,
+  noItemsMessage,
   'data-test-subj': dataTestSubj,
 }) => {
   const {
@@ -142,18 +148,19 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
       header={{
         title,
         iconType: 'warning',
-        headerContent: (
-          <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
-            <InvestigateInTimelineButton
-              dataProviders={dataProviders}
-              filters={filters}
-              asEmptyButton
-              iconType="timeline"
-            >
-              {ACTION_INVESTIGATE_IN_TIMELINE}
-            </InvestigateInTimelineButton>
-          </div>
-        ),
+        headerContent:
+          alertIds && alertIds.length && alertIds.length > 0 ? (
+            <div data-test-subj={`${dataTestSubj}InvestigateInTimeline`}>
+              <InvestigateInTimelineButton
+                dataProviders={dataProviders}
+                filters={filters}
+                asEmptyButton
+                iconType="timeline"
+              >
+                {ACTION_INVESTIGATE_IN_TIMELINE}
+              </InvestigateInTimelineButton>
+            </div>
+          ) : null,
       }}
       content={{ error }}
       expand={{
@@ -170,6 +177,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         pagination={paginationConfig}
         sorting={sorting}
         onChange={onTableChange}
+        noItemsMessage={noItemsMessage}
       />
     </ExpandablePanel>
   );
