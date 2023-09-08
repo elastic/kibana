@@ -1097,6 +1097,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#secrets_properties_slack_api"><code>secrets_properties_slack_api</code> - Connector secrets properties for a Web API Slack connector</a></li>
     <li><a href="#secrets_properties_slack_webhook"><code>secrets_properties_slack_webhook</code> - Connector secrets properties for a Webhook Slack connector</a></li>
     <li><a href="#secrets_properties_swimlane"><code>secrets_properties_swimlane</code> - Connector secrets properties for a Swimlane connector</a></li>
+    <li><a href="#secrets_properties_teams"><code>secrets_properties_teams</code> - Connector secrets properties for a Microsoft Teams connector</a></li>
     <li><a href="#secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a></li>
     <li><a href="#secrets_properties_xmatters"><code>secrets_properties_xmatters</code> - Connector secrets properties for an xMatters connector</a></li>
     <li><a href="#updateConnector_400_response"><code>updateConnector_400_response</code> - </a></li>
@@ -1112,6 +1113,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_connector_request_slack_api"><code>update_connector_request_slack_api</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_slack_webhook"><code>update_connector_request_slack_webhook</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a></li>
+    <li><a href="#update_connector_request_teams"><code>update_connector_request_teams</code> - Update Microsoft Teams connector request</a></li>
     <li><a href="#update_connector_request_xmatters"><code>update_connector_request_xmatters</code> - Update xMatters connector request</a></li>
   </ol>
 
@@ -1737,7 +1739,8 @@ Any modifications made to this file will be overwritten.
     <h3><a name="connector_response_properties_teams"><code>connector_response_properties_teams</code> - Connector response properties for a Microsoft Teams connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
+      <div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.teams</div>
 <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector. </div>
@@ -1985,7 +1988,7 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.teams</div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
-<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> Defines secrets for connectors when type is <code>.teams</code>. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_teams">secrets_properties_teams</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2445,6 +2448,13 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="secrets_properties_teams"><code>secrets_properties_teams</code> - Connector secrets properties for a Microsoft Teams connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines secrets for connectors when type is <code>.teams</code>.</div>
+    <div class="field-items">
+      <div class="param">webhookUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The URL of the incoming webhook. If you are using the <code>xpack.actions.allowedHosts</code> setting, add the hostname to the allowed hosts. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="secrets_properties_webhook"><code>secrets_properties_webhook</code> - Connector secrets properties for a Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>Defines secrets for connectors when type is <code>.webhook</code>.</div>
     <div class="field-items">
@@ -2574,6 +2584,14 @@ Any modifications made to this file will be overwritten.
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_swimlane">config_properties_swimlane</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_swimlane">secrets_properties_swimlane</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_teams"><code>update_connector_request_teams</code> - Update Microsoft Teams connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_teams">secrets_properties_teams</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
