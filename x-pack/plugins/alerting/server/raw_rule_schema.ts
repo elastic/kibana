@@ -12,6 +12,7 @@ import { rawSystemActionSchema } from '../common/system_actions/latest';
 const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
   schema.literal('maxAlerts'),
+  schema.literal('maxQueuedActions'),
 ]);
 
 const executionStatusErrorReason = schema.oneOf([

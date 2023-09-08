@@ -10,7 +10,11 @@ import { Logger } from '@kbn/core/server';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
-import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
+import {
+  ExecuteOptions as EnqueueExecutionOptions,
+  ExecutionResponseItem,
+  ExecutionResponseType,
+} from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
@@ -88,7 +92,7 @@ interface RunSystemActionArgs<Params extends RuleTypeParams> {
 
 interface RunActionReturnValue {
   actionsToEnqueueForExecution: EnqueueExecutionOptions[];
-  actionsToLog: EventLogAction[];
+  actionsToLog: Record<string, EventLogAction>;
 }
 
 export interface RuleUrl {
@@ -216,7 +220,7 @@ export class ExecutionHandler<
       },
     } = this;
 
-    const logActions: EventLogAction[] = [];
+    const logActions: Record<string, EventLogAction> = {};
     const enqueueActions: EnqueueExecutionOptions[] = [];
 
     this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
@@ -278,7 +282,7 @@ export class ExecutionHandler<
         });
 
         enqueueActions.push(...actionsToEnqueueForExecution);
-        logActions.push(...actionsToLog);
+        Object.assign(logActions, actionsToLog);
 
         if (isActionOnInterval(action)) {
           throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
@@ -314,7 +318,7 @@ export class ExecutionHandler<
         });
 
         enqueueActions.push(...actionsToEnqueueForExecution);
-        logActions.push(...actionsToLog);
+        Object.assign(logActions, actionsToLog);
       } else if (!isSystemAction(action) && alert) {
         const { actionsToEnqueueForExecution, actionsToLog } = await this.runAction({
           action,
@@ -324,7 +328,7 @@ export class ExecutionHandler<
         });
 
         enqueueActions.push(...actionsToEnqueueForExecution);
-        logActions.push(...actionsToLog);
+        Object.assign(logActions, actionsToLog);
 
         if (!this.isRecoveredAlert(action.group)) {
           if (isActionOnInterval(action)) {
@@ -341,8 +345,8 @@ export class ExecutionHandler<
       }
     }
 
-    await this.bulkEnqueueForExecution(enqueueActions);
-    this.bulkLogActions(logActions);
+    const errorActionIds = await this.bulkEnqueueForExecution(enqueueActions);
+    this.bulkLogActions(logActions, errorActionIds);
 
     return { throttledSummaryActions };
   }
@@ -384,8 +388,8 @@ export class ExecutionHandler<
 
     return {
       actionsToEnqueueForExecution,
-      actionsToLog: [
-        {
+      actionsToLog: {
+        [action.id]: {
           id: action.id,
           typeId: action.actionTypeId,
           alertSummary: {
@@ -394,7 +398,7 @@ export class ExecutionHandler<
             recovered: summarizedAlerts.recovered.count,
           },
         },
-      ],
+      },
     };
   }
 
@@ -445,14 +449,14 @@ export class ExecutionHandler<
 
     return {
       actionsToEnqueueForExecution,
-      actionsToLog: [
-        {
+      actionsToLog: {
+        [action.id]: {
           id: action.id,
           typeId: action.actionTypeId,
           alertId: alert.getId(),
           alertGroup: action.group,
         },
-      ],
+      },
     };
   }
 
@@ -487,8 +491,8 @@ export class ExecutionHandler<
 
     return {
       actionsToEnqueueForExecution,
-      actionsToLog: [
-        {
+      actionsToLog: {
+        [action.id]: {
           id: action.id,
           typeId: action.actionTypeId,
           alertSummary: {
@@ -497,22 +501,66 @@ export class ExecutionHandler<
             recovered: summarizedAlerts.recovered.count,
           },
         },
-      ],
+      },
     };
   }
 
-  private async bulkEnqueueForExecution(actions: EnqueueExecutionOptions[]) {
+  private async bulkEnqueueForExecution(actions: EnqueueExecutionOptions[]): Promise<Set<string>> {
+    const errorResponses: ExecutionResponseItem[] = [];
+    const errorResponseActionIds = new Set<string>();
+
     if (!!actions.length) {
       for (const c of chunk(actions, this.CHUNK_SIZE)) {
-        await this.actionsClient!.bulkEnqueueExecution(c);
+        const res = await this.actionsClient!.bulkEnqueueExecution(c);
+
+        if (res.errors) {
+          const queuedActionsLimitErrors = res.items.filter(
+            (resItem) => resItem.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
+          );
+
+          errorResponses.push(...queuedActionsLimitErrors);
+        }
       }
     }
+
+    if (!!errorResponses.length) {
+      for (const errorResponse of errorResponses) {
+        if (errorResponse.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
+          this.ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
+          this.ruleRunMetricsStore.decrementNumberOfTriggeredActions();
+
+          this.ruleRunMetricsStore.decrementNumberOfTriggeredActionsByConnectorType(
+            errorResponse.actionTypeId
+          );
+
+          this.ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+            actionTypeId: errorResponse.actionTypeId,
+            status: ActionsCompletion.PARTIAL,
+          });
+
+          this.logger.debug(
+            `Rule "${this.rule.id}" skipped scheduling action "${errorResponse.id}" because the maximum number of queued actions has been reached.`
+          );
+
+          errorResponseActionIds.add(errorResponse.id);
+        }
+      }
+    }
+
+    return errorResponseActionIds;
   }
 
-  private async bulkLogActions(actions: EventLogAction[]) {
-    if (!!actions.length) {
-      for (const actionToBeLogged of actions) {
-        this.alertingEventLogger.logAction(actionToBeLogged);
+  private async bulkLogActions(
+    logActions: Record<string, EventLogAction>,
+    errorActionIds: Set<string>
+  ) {
+    const logActionsEntries = Object.entries(logActions);
+
+    if (!!logActionsEntries.length) {
+      for (const [id, actionToBeLogged] of logActionsEntries) {
+        if (!errorActionIds.has(id)) {
+          this.alertingEventLogger.logAction(actionToBeLogged);
+        }
       }
     }
   }
@@ -682,6 +730,7 @@ export class ExecutionHandler<
           typeId: this.ruleType.id,
         },
       ],
+      actionTypeId: action.actionTypeId,
     };
   }
 

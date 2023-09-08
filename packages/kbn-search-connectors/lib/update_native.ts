@@ -9,7 +9,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { CONNECTORS_INDEX } from '..';
-import { Connector } from '../types/connectors';
+import { Connector, ConnectorStatus } from '../types/connectors';
 
 export const putUpdateNative = async (
   client: ElasticsearchClient,
@@ -19,6 +19,7 @@ export const putUpdateNative = async (
   const result = await client.update<Connector>({
     doc: {
       is_native: isNative,
+      status: ConnectorStatus.CONFIGURED,
     },
     id: connectorId,
     index: CONNECTORS_INDEX,
