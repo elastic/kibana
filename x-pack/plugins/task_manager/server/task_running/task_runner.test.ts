@@ -1423,6 +1423,49 @@ describe('TaskManagerRunner', () => {
         );
       });
 
+      test('emits TaskEvent when a recurring task returns a success result with hasError=true but completes after timeout', async () => {
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        const id = _.random(1, 20).toString();
+        const runAt = minutesFromNow(_.random(5));
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+            schedule: { interval: '1m' },
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `1s`,
+              createTaskRunner: () => ({
+                async run() {
+                  return { runAt, state: {}, hasError: true };
+                },
+              }),
+            },
+          },
+        });
+
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                task: instance,
+                persistence: TaskPersistence.Recurring,
+                result: TaskRunResult.Success,
+                isExpired: true,
+                error: new Error(`Alerting task failed to run.`),
+              })
+            )
+          )
+        );
+      });
+
       test('emits TaskEvent when a task run throws an error', async () => {
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
@@ -1455,6 +1498,48 @@ describe('TaskManagerRunner', () => {
                 persistence: TaskPersistence.NonRecurring,
                 result: TaskRunResult.RetryScheduled,
                 isExpired: false,
+              })
+            )
+          )
+        );
+        expect(onTaskEvent).toHaveBeenCalledTimes(1);
+      });
+
+      test('emits TaskEvent when a task run throws an error and has timed out', async () => {
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        const id = _.random(1, 20).toString();
+        const error = new Error('Dangit!');
+        const onTaskEvent = jest.fn();
+        const { runner, instance } = await readyToRunStageSetup({
+          onTaskEvent,
+          instance: {
+            id,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              timeout: `1s`,
+              createTaskRunner: () => ({
+                async run() {
+                  throw error;
+                },
+              }),
+            },
+          },
+        });
+        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        await runner.run();
+
+        expect(onTaskEvent).toHaveBeenCalledWith(
+          withAnyTiming(
+            asTaskRunEvent(
+              id,
+              asErr({
+                error,
+                task: instance,
+                persistence: TaskPersistence.NonRecurring,
+                result: TaskRunResult.Failed,
+                isExpired: true,
               })
             )
           )
