@@ -32,6 +32,7 @@ const DEFAULT_FONT = '14px Inter';
 
 class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
   comboBoxWrapperRef = React.createRef<HTMLDivElement>();
+  inputRef: HTMLInputElement | null = null;
 
   public render() {
     return (
@@ -66,6 +67,9 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
     return (
       <div ref={this.comboBoxWrapperRef}>
         <StringComboBox
+          inputRef={(ref) => {
+            this.inputRef = ref
+          }}
           isDisabled={this.props.disabled}
           fullWidth={fullWidth}
           compressed={this.props.compressed}
@@ -80,7 +84,13 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
           options={options}
           getLabel={(option) => option}
           selectedOptions={value ? [valueAsStr] : []}
-          onChange={([newValue = '']) => onChange(newValue)}
+          onChange={([newValue = '']) => {
+            onChange(newValue)
+            setTimeout(() => {
+              // Note: requires a tick skip to correctly blur element focus
+              this.inputRef?.blur();
+            })
+          }}
           onSearchChange={this.onSearchChange}
           singleSelection={{ asPlainText: true }}
           onCreateOption={onChange}
