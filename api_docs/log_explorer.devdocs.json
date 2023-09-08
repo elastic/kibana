@@ -3,7 +3,69 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "logExplorer",
+        "id": "def-public.LogExplorerStateContainer",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogExplorerStateContainer",
+        "description": [],
+        "path": "x-pack/plugins/log_explorer/public/components/log_explorer/log_explorer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logExplorer",
+            "id": "def-public.LogExplorerStateContainer.appState",
+            "type": "Object",
+            "tags": [],
+            "label": "appState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverAppState",
+                "text": "DiscoverAppState"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/log_explorer/public/components/log_explorer/log_explorer.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logExplorer",
+            "id": "def-public.LogExplorerStateContainer.logExplorerState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "logExplorerState",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "WithDatasetSelection",
+              " | (",
+              "WithDatasetSelection",
+              " & ",
+              "WithControlPanels",
+              ") | (",
+              "WithDatasetSelection",
+              " & ",
+              "WithControlPanelGroupAPI",
+              " & ",
+              "WithControlPanels",
+              ")> | undefined"
+            ],
+            "path": "x-pack/plugins/log_explorer/public/components/log_explorer/log_explorer.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
