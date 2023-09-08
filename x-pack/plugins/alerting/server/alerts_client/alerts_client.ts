@@ -48,6 +48,7 @@ import {
   getLifecycleAlertsQueries,
   getContinualAlertsQuery,
 } from './lib';
+import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -411,6 +412,12 @@ export class AlertsClient<
               alertsToIndex.length
             } alerts - ${JSON.stringify(errorsInResponse)}`
           );
+
+          //resolveAlertConflicts({
+          //  bulkRequest: bulkBody,
+          //  bulkResponse: response,
+          //  esClient,
+          //});
         }
       } catch (err) {
         this.options.logger.error(
