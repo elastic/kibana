@@ -60,13 +60,6 @@ export function ChatPromptEditor({
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-  const recalculateFunctionEditorLineCount = useCallback(() => {
-    const newLineCount = model?.getLineCount() || 0;
-    if (newLineCount !== functionEditorLineCount) {
-      setFunctionEditorLineCount(newLineCount);
-    }
-  }, [functionEditorLineCount, model]);
-
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(event.currentTarget.value);
   };
@@ -90,10 +83,23 @@ export function ChatPromptEditor({
 
   const handleResizeTextArea = () => {
     if (textAreaRef.current) {
-      textAreaRef.current.style.height = 'auto';
-      textAreaRef.current.style.height = textAreaRef.current?.scrollHeight + 'px';
+      textAreaRef.current.style.minHeight = 'auto';
+      textAreaRef.current.style.minHeight = textAreaRef.current?.scrollHeight + 'px';
     }
   };
+
+  const handleResetTextArea = () => {
+    if (textAreaRef.current) {
+      textAreaRef.current.style.minHeight = 'auto';
+    }
+  };
+
+  const recalculateFunctionEditorLineCount = useCallback(() => {
+    const newLineCount = model?.getLineCount() || 0;
+    if (newLineCount !== functionEditorLineCount) {
+      setFunctionEditorLineCount(newLineCount);
+    }
+  }, [functionEditorLineCount, model]);
 
   const handleSubmit = useCallback(async () => {
     if (loading || !prompt?.trim()) {
@@ -104,7 +110,7 @@ export function ChatPromptEditor({
 
     setPrompt('');
     setFunctionPayload(undefined);
-    handleResizeTextArea();
+    handleResetTextArea();
 
     try {
       if (selectedFunctionName) {
@@ -169,6 +175,10 @@ export function ChatPromptEditor({
       textarea?.removeEventListener('input', handleResizeTextArea, false);
     };
   });
+
+  useEffect(() => {
+    handleResizeTextArea();
+  }, []);
 
   return (
     <EuiFocusTrap disabled={!isFocusTrapEnabled}>

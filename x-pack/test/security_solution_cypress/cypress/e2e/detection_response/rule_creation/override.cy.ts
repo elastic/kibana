@@ -47,8 +47,8 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -90,7 +90,7 @@ describe('Detection rules, override', { tags: ['@ess', '@brokenInServerless'] },
     cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToRuleDetailsOf(rule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
