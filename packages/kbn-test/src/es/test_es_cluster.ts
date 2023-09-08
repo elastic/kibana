@@ -157,7 +157,9 @@ export interface CreateTestEsClusterOptions {
   files?: string[];
 }
 
-export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTestCluster {
+export function createTestEsCluster<
+  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
+>(options: Options): EsTestCluster<Options> {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
@@ -417,7 +419,7 @@ export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTest
     getHostUrls(): string[] {
       return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p }));
     }
-  })() as EsTestCluster;
+  })() as EsTestCluster<Options>;
 }
 
 /**
