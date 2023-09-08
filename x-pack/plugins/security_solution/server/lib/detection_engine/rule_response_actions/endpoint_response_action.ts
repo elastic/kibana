@@ -7,6 +7,7 @@
 
 import { each, flatMap, flatten, map, reduce } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { EndpointParamsConfig } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type {
   Alert,
@@ -60,7 +61,7 @@ export const endpointResponseAction = (
     rule_name: alerts[0][ALERT_RULE_NAME],
   };
 
-  if (command === 'isolate' || command === 'running-processes') {
+  if (command === 'isolate') {
     return Promise.all(
       map(uniqueAlerts, async (alertPerAgent) =>
         endpointAppContextService.getActionCreateService().createActionFromAlert(
@@ -100,8 +101,11 @@ const getProcessAlerts = (
   alert: Alert,
   config?: EndpointParamsConfig
 ) => {
-  const pidField = (config?.parent && alert.process?.parent?.pid) ?? alert.process?.pid;
-  const pid = (config?.field ? alert[config.field] : pidField) as string;
+  console.log({ config });
+  const fieldValue = config.field[0];
+  const pid = config.overwrite ? (alert[fieldValue] as string) : alert.process?.pid;
+
+  console.log({ pid });
   const { _id, agent } = alert;
   const { id: agentId, name } = agent as AlertAgent;
 

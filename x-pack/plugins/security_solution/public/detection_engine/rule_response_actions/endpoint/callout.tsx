@@ -71,6 +71,31 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
       </>
     );
   }
+  if (currentCommand === 'kill-process' || currentCommand === 'suspend-process') {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiCallOut
+          color="warning"
+          iconType="warning"
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.cautionTitle"
+              defaultMessage="Proceed with caution"
+            />
+          }
+        >
+          <EuiText size={'xs'}>
+            <FormattedMessage
+              id="xpack.securitySolution.responseActionsList.endpoint.processesCautionDescription"
+              defaultMessage="Only select this option if you’re certain that you want to terminate the process running on this host."
+            />
+          </EuiText>
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </>
+    );
+  }
   return <></>;
 };
 

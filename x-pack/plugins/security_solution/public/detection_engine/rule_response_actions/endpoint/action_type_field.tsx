@@ -50,7 +50,8 @@ const ActionTypeFieldComponent = ({
           privileges: endpointPrivileges,
         });
         const commandAlreadyExists = map(data.responseActions, 'params.command').includes(name);
-        const isDisabled = commandAlreadyExists || missingRbac;
+        // we enable one isolate command per rule
+        const isDisabled = (name === 'isolate' && commandAlreadyExists) || missingRbac;
 
         return {
           value: name,

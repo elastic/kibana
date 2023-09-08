@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+
 import { get } from 'lodash';
-import { ParentProcessField } from './parent_process_field';
+import { OverwriteField } from './overwrite_process_field';
 import { FieldNameField } from './field_name';
 
 interface AdditionalConfigFieldProps {
@@ -22,20 +23,23 @@ export const ConfigFieldsComponent = ({
   disabled,
   readDefaultValueOnForm,
 }: AdditionalConfigFieldProps) => {
-  const [data] = useFormData();
-  const currentCommand = get(data, `${basePath}.command`);
+  const commandPath = `${basePath}.command`;
+  const overWritePath = `${basePath}.config.overwrite`;
+  const [data] = useFormData({ watch: [commandPath, overWritePath] });
+  const currentCommand = get(data, commandPath);
+  const currentOverwrite = get(data, overWritePath);
 
   if (currentCommand === 'kill-process' || currentCommand === 'suspend-process') {
     return (
       <>
-        <ParentProcessField
-          path={`${basePath}.config.parent`}
+        <OverwriteField
+          path={`${basePath}.config.overwrite`}
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
         />
         <FieldNameField
           path={`${basePath}.config.field`}
-          disabled={disabled}
+          disabled={!currentOverwrite || disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
         />
       </>
