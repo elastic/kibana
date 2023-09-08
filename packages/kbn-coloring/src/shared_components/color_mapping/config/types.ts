@@ -6,39 +6,59 @@
  * Side Public License, v 1.
  */
 
-export type Color = string;
-
+/**
+ * A color specified as a CSS color datatype (rgb/a,hex,keywords,lab,lch etc)
+ */
 export interface ColorCode {
   type: 'colorCode';
-  colorCode: Color;
+  colorCode: string;
 }
 
+/**
+ * An index specified categorical color, coming from paletteId
+ */
 export interface CategoricalColor {
   type: 'categorical';
   paletteId: string;
   colorIndex: number;
 }
 
+/**
+ * Specify that the Color in an Assignment needs to be taken from a gradient defined in the `Config.colorMode`
+ */
 export interface GradientColor {
   type: 'gradient';
 }
 
+/**
+ * A special rule that match automatically, in order, all the categories that are not matching a specified rule
+ */
 export interface RuleAuto {
   /* tag */
   type: 'auto';
 }
+/**
+ * A rule that match exactly, case sensitive, with the provided strings
+ */
 export interface RuleMatchExactly {
   /* tag */
   type: 'matchExactly';
   values: Array<string | string[]>;
 }
 
+/**
+ * A Match rule to match the values case insensitive
+ * @ignore not used yet
+ */
 export interface RuleMatchExactlyCI {
   /* tag */
   type: 'matchExactlyCI';
   values: string[];
 }
 
+/**
+ * A range rule, not used yet, but can be used for numerical data assignments
+ */
 export interface RuleRange {
   /* tag */
   type: 'range';
@@ -61,6 +81,10 @@ export interface RuleRange {
    */
   maxInclusive: boolean;
 }
+/**
+ * Regex rule.
+ * @ignore not used yet
+ */
 export interface RuleRegExp {
   /* tag */
   type: 'regex';
@@ -70,12 +94,17 @@ export interface RuleRegExp {
   values: string;
 }
 
-// TODO: add RulerForSomeOtherFormOfObject
+/**
+ * A specific catch-everything-else rule
+ */
 export interface RuleOthers {
   /* tag */
   type: 'other';
 }
 
+/**
+ * An assignment is the connection link between a rule and a color
+ */
 export interface Assignment<R, C> {
   /**
    * Describe the rule used to assign the color.
@@ -117,5 +146,5 @@ export interface CategoricalPalette {
   name: string;
   type: 'categorical';
   colorCount: number;
-  getColor: (valueInRange: number, isDarkMode: boolean) => Color;
+  getColor: (valueInRange: number, isDarkMode: boolean) => string;
 }

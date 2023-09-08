@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Assignment } from '../assignment/assignment';
 import { SpecialAssignment } from '../assignment/special_assignment';
 import { PaletteSelector } from '../palette_selector/palette_selector';
@@ -88,7 +89,9 @@ export function Container(props: {
       <EuiFlexItem>
         <EuiSwitch
           data-test-subj="lns-colorMapping-autoAssignSwitch"
-          label="Auto assign categories to colors"
+          label={i18n.translate('kbnColorMapping.container.autoAssignLabel', {
+            defaultMessage: 'Auto assign categories to colors',
+          })}
           checked={autoAssignmentMode}
           compressed
           onChange={() => {
@@ -184,7 +187,9 @@ export function Container(props: {
           }}
           disabled={!canAddNewAssignment}
         >
-          Add assignment
+          {i18n.translate('kbnColorMapping.container.addAssignmentButtonLabel', {
+            defaultMessage: 'Add assignment',
+          })}
         </EuiButtonEmpty>
         {colorMode.type === 'gradient' && (
           <EuiButtonEmpty
@@ -195,7 +200,9 @@ export function Container(props: {
               dispatch(changeGradientSortOrder(colorMode.sort === 'asc' ? 'desc' : 'asc'));
             }}
           >
-            Invert gradient
+            {i18n.translate('kbnColorMapping.container.invertGradientButtonLabel', {
+              defaultMessage: 'Invert gradient',
+            })}
           </EuiButtonEmpty>
         )}
       </EuiFlexItem>

@@ -9,6 +9,7 @@
 import { EuiColorPickerSwatch, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import { ColorPicker } from './color_picker';
 import { getAssignmentColor } from '../../color/color_handling';
 import { ColorMapping } from '../../config';
@@ -68,7 +69,9 @@ export const ColorSwatch = ({
       button={
         <EuiColorPickerSwatch
           color={colorHex}
-          aria-label="Change the color"
+          aria-label={i18n.translate('kbnColorMapping.colorPicker.pickAColorAriaLabel', {
+            defaultMessage: 'Pick a color',
+          })}
           onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
           style={{
             ...(swatchShape === 'round' ? { borderRadius: '50%', width: 15, height: 15 } : {}),
@@ -109,7 +112,9 @@ export const ColorSwatch = ({
   ) : (
     <EuiColorPickerSwatch
       color={colorHex}
-      aria-label="Select a new color"
+      aria-label={i18n.translate('kbnColorMapping.colorPicker.newColorAriaLabel', {
+        defaultMessage: 'Select a new color',
+      })}
       style={{
         ...(swatchShape === 'round' ? { borderRadius: '50%', width: 15, height: 15 } : {}),
         // the color swatch doesn't work here...

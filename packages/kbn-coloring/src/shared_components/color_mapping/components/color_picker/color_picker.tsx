@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import { EuiButton, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 import { NeutralPalette } from '../../palettes/default_palettes';
 import { getPalette } from '../../palette';
@@ -42,10 +43,14 @@ export function ColorPicker({
     <div style={{ width: 200 }}>
       <EuiTabs size="s" expand>
         <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
-          Palette
+          {i18n.translate('kbnColorMapping.colorPicker.paletteTabLabel', {
+            defaultMessage: 'Palette',
+          })}
         </EuiTab>
         <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
-          Custom
+          {i18n.translate('kbnColorMapping.colorPicker.customTabLabel', {
+            defaultMessage: 'Custom',
+          })}
         </EuiTab>
       </EuiTabs>
       <EuiSpacer size="m" />
@@ -76,9 +81,10 @@ export function ColorPicker({
               close();
               deleteStep();
             }}
-            aria-label="Delete color"
           >
-            Remove from gradient
+            {i18n.translate('kbnColorMapping.colorPicker.removeGradientColorButtonLabel', {
+              defaultMessage: 'Remove from gradient',
+            })}
           </EuiButton>
         </>
       ) : null}

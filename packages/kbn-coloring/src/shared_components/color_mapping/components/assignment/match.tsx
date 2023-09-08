@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 // TODO: move this outside or configurable
 export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';
@@ -53,8 +54,13 @@ export const Match: React.FC<{
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
         isDisabled={!editable}
         fullWidth={true}
-        aria-label="Accessible screen reader label"
-        placeholder="auto assigned term"
+        aria-label={i18n.translate('kbnColorMapping.assignments.autoAssignedTermAriaLabel', {
+          defaultMessage:
+            "This color will be automatically assigned to the first term that doesn't match with all the other assignments",
+        })}
+        placeholder={i18n.translate('kbnColorMapping.assignments.autoAssignedTermPlaceholder', {
+          defaultMessage: 'Auto assigned',
+        })}
         options={convertedOptions}
         selectedOptions={selectedOptions}
         onChange={(changedOptions) => {

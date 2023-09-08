@@ -14,8 +14,6 @@ import { NEUTRAL_COLOR_DARK, NEUTRAL_COLOR_LIGHT } from './neutral';
 
 import { ColorMapping } from '../config';
 
-export const DEFAULT_MISSING_COLOR = 'red';
-
 export const EUIPalette: ColorMapping.CategoricalPalette = {
   id: 'eui',
   name: 'EUI',
@@ -67,8 +65,6 @@ export const NeutralPalette: ColorMapping.CategoricalPalette = {
     return isDarkMode ? NEUTRAL_COLOR_DARK[valueInRange] : NEUTRAL_COLOR_LIGHT[valueInRange];
   },
 };
-
-export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 
 export function getPalette(
   palettes: Map<string, ColorMapping.CategoricalPalette>,

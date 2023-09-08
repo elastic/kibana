@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { EuiColorPickerSwatch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 import { NeutralPalette } from '../../palettes/default_palettes';
 import { isSameColor } from '../../color/color_math';
@@ -41,7 +42,11 @@ export function PaletteColors({
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiText size="s">
-          <strong>Palette</strong>
+          <strong>
+            {i18n.translate('kbnColorMapping.colorPicker.paletteColorsLabel', {
+              defaultMessage: 'Palette',
+            })}
+          </strong>
         </EuiText>
         <EuiFlexGroup
           direction="row"
@@ -68,7 +73,11 @@ export function PaletteColors({
 
       <EuiFlexItem>
         <EuiText size="s">
-          <strong>Greys (theme aware)</strong>
+          <strong>
+            {i18n.translate('kbnColorMapping.colorPicker.themeAwareColorsLabel', {
+              defaultMessage: 'Contrast-aware greys',
+            })}
+          </strong>
         </EuiText>
         <EuiFlexGroup
           direction="row"

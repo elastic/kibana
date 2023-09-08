@@ -8,13 +8,13 @@
 
 import { ColorMapping } from '.';
 import { AVAILABLE_PALETTES } from '../palettes/available_palettes';
-import {
-  NeutralPalette,
-  getPalette,
-  DEFAULT_NEUTRAL_PALETTE_INDEX,
-  EUIPalette,
-} from '../palettes/default_palettes';
+import { NeutralPalette, getPalette, EUIPalette } from '../palettes/default_palettes';
 
+export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
+
+/**
+ * The default color mapping used in Kibana, starts with the EUI color palette
+ */
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignmentMode: 'auto',
   assignments: [],

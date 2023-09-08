@@ -9,6 +9,7 @@
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palette';
 import { ColorSwatch } from '../color_picker/color_swatch';
@@ -58,8 +59,13 @@ export function SpecialAssignment({
           compressed
           fullWidth
           disabled={true}
-          placeholder={'all others'}
-          aria-label="Use aria labels when no actual label is in use"
+          placeholder={i18n.translate('kbnColorMapping.assignments.allOtherPlaceholder', {
+            defaultMessage: 'All other terms',
+          })}
+          aria-label={i18n.translate('kbnColorMapping.assignments.allOtherAriaLabel', {
+            defaultMessage:
+              'Assign this color to all other terms not described in the assignment list',
+          })}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

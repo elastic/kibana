@@ -15,6 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 
 import { getColorContrast } from '../../color/color_math';
@@ -55,18 +56,11 @@ export function RGBPicker({
             color={lightContrast.contrast ? 'success' : 'danger'}
           />
           <br />
-          <strong>APCA:</strong>
-          {lightContrast.value}
-          <br />
           <strong>Dark Theme Contrast:</strong>{' '}
           <EuiIcon
             type={darkContrast.contrast ? 'checkInCircleFilled' : 'error'}
             color={darkContrast.contrast ? 'success' : 'danger'}
           />
-          <br />
-          <strong>APCA:</strong>
-          {darkContrast.value}
-          <br />
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -95,7 +89,9 @@ export function RGBPicker({
             }
           }}
         >
-          Apply this color
+          {i18n.translate('kbnColorMapping.colorPicker.useColorButtonLabel', {
+            defaultMessage: 'Use this color',
+          })}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
@@ -105,7 +101,9 @@ export function RGBPicker({
             close();
           }}
         >
-          Close
+          {i18n.translate('kbnColorMapping.colorPicker.closePickerButtonLabel', {
+            defaultMessage: 'Close',
+          })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

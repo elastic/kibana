@@ -9,6 +9,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   removeAssignment,
   updateAssignmentColor,
@@ -110,7 +111,9 @@ export function Assignment({
           size="xs"
           disabled={disableDelete}
           onClick={() => dispatch(removeAssignment(index))}
-          aria-label="Delete assignment"
+          aria-label={i18n.translate('kbnColorMapping.assignments.deleteAssignmentButtonLabel', {
+            defaultMessage: 'Delete this assignment',
+          })}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
