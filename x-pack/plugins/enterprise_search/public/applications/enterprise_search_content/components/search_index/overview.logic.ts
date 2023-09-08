@@ -7,9 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
-import { IngestPipelineParams } from '../../../../../common/types/connectors';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
