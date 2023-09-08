@@ -53,6 +53,11 @@ export interface FetchRuleExecutionEventsArgs extends RuleMonitoringApiCallArgs 
   ruleId: string;
 
   /**
+   * Filter by event message. If set, result will include only events matching the search term.
+   */
+  searchTerm?: string;
+
+  /**
    * Filter by event type. If set, result will include only events matching any of these.
    */
   eventTypes?: RuleExecutionEventType[];

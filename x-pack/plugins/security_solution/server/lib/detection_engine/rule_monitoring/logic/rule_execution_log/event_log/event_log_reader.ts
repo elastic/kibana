@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEventLogClient, IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
+import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -53,20 +54,18 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
     async getExecutionEvents(
       args: GetExecutionEventsArgs
     ): Promise<GetRuleExecutionEventsResponse> {
-      const { ruleId, eventTypes, logLevels, sortOrder, page, perPage } = args;
+      const { ruleId, searchTerm, eventTypes, logLevels, sortOrder, page, perPage } = args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
 
-      // TODO: include Framework events
-      const kqlFilter = kqlAnd([
-        `${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`,
-        eventTypes.length > 0 ? `${f.EVENT_ACTION}:(${kqlOr(eventTypes)})` : '',
-        logLevels.length > 0 ? `${f.LOG_LEVEL}:(${kqlOr(logLevels)})` : '',
-      ]);
-
       const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
         return eventLog.findEventsBySavedObjectIds(soType, soIds, {
-          filter: kqlFilter,
+          // TODO: include Framework events
+          filter: buildEventLogKqlFilter({
+            searchTerm,
+            eventTypes,
+            logLevels,
+          }),
           sort: [
             { sort_field: f.TIMESTAMP, sort_order: sortOrder },
             { sort_field: f.EVENT_SEQUENCE, sort_order: sortOrder },
@@ -235,4 +234,26 @@ const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): s
 
   assertUnreachable(type);
   return '';
+};
+
+const buildEventLogKqlFilter = ({
+  searchTerm,
+  eventTypes,
+  logLevels,
+}: Pick<GetExecutionEventsArgs, 'searchTerm' | 'eventTypes' | 'logLevels'>) => {
+  const filters = [`${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`];
+
+  if (searchTerm?.length) {
+    filters.push(`${f.MESSAGE}:${prepareKQLStringParam(searchTerm)}`);
+  }
+
+  if (eventTypes?.length) {
+    filters.push(`${f.EVENT_ACTION}:(${kqlOr(eventTypes)})`);
+  }
+
+  if (logLevels?.length) {
+    filters.push(`${f.LOG_LEVEL}:(${kqlOr(logLevels)})`);
+  }
+
+  return kqlAnd(filters);
 };

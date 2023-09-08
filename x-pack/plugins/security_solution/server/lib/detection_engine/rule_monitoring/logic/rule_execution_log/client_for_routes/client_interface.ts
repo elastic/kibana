@@ -39,11 +39,14 @@ export interface GetExecutionEventsArgs {
   /** Saved object id of the rule (`rule.id`). */
   ruleId: RuleObjectId;
 
-  /** Include events of the specified types. If empty, all types of events will be included. */
-  eventTypes: RuleExecutionEventType[];
+  /** Include events of matching the search term. If omitted, all events will be included. */
+  searchTerm?: string;
 
-  /** Include events having these log levels. If empty, events of all levels will be included. */
-  logLevels: LogLevel[];
+  /** Include events of the specified types. If omitted, all types of events will be included. */
+  eventTypes?: RuleExecutionEventType[];
+
+  /** Include events having these log levels. If omitted, events of all levels will be included. */
+  logLevels?: LogLevel[];
 
   /** What order to sort by (e.g. `asc` or `desc`). */
   sortOrder: SortOrder;

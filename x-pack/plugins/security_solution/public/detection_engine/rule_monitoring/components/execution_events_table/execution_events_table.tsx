@@ -22,6 +22,7 @@ import { usePagination } from '../basic/tables/use_pagination';
 import { useColumns } from './use_columns';
 import { useExpandableRows } from '../basic/tables/use_expandable_rows';
 import { useExecutionEvents } from './use_execution_events';
+import { EventMessageFilter } from './event_message_filter';
 
 import * as i18n from './translations';
 
@@ -56,6 +57,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
 
   const executionEvents = useExecutionEvents({
     ruleId,
+    searchTerm: filters.state.searchTerm,
     eventTypes: filters.state.eventTypes,
     logLevels: filters.state.logLevels,
     sortOrder: sorting.state.sort.direction,
@@ -85,6 +87,9 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
           <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EventMessageFilter value={filters.state.searchTerm} onChange={filters.setSearchTerm} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogLevelFilter selectedItems={filters.state.logLevels} onChange={filters.setLogLevels} />

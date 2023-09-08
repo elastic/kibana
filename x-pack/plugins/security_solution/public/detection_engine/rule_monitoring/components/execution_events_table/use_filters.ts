@@ -13,13 +13,22 @@ import type {
 } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 export const useFilters = () => {
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [logLevels, setLogLevels] = useState<LogLevel[]>([]);
   const [eventTypes, setEventTypes] = useState<RuleExecutionEventType[]>([]);
 
-  const state = useMemo(() => ({ logLevels, eventTypes }), [logLevels, eventTypes]);
+  const state = useMemo(
+    () => ({ searchTerm, logLevels, eventTypes }),
+    [searchTerm, logLevels, eventTypes]
+  );
 
   return useMemo(
-    () => ({ state, setLogLevels, setEventTypes }),
-    [state, setLogLevels, setEventTypes]
+    () => ({
+      state,
+      setSearchTerm,
+      setLogLevels,
+      setEventTypes,
+    }),
+    [state, setSearchTerm, setLogLevels, setEventTypes]
   );
 };

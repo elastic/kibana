@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import dateMath from '@kbn/datemath';
 
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -36,20 +37,24 @@ export const api: IRuleMonitoringApiClient = {
   fetchRuleExecutionEvents: (
     args: FetchRuleExecutionEventsArgs
   ): Promise<GetRuleExecutionEventsResponse> => {
-    const { ruleId, eventTypes, logLevels, sortOrder, page, perPage, signal } = args;
+    const { ruleId, searchTerm, eventTypes, logLevels, sortOrder, page, perPage, signal } = args;
 
     const url = getRuleExecutionEventsUrl(ruleId);
 
     return http().fetch<GetRuleExecutionEventsResponse>(url, {
       method: 'GET',
       version: '1',
-      query: {
-        event_types: eventTypes?.join(','),
-        log_levels: logLevels?.join(','),
-        sort_order: sortOrder,
-        page,
-        per_page: perPage,
-      },
+      query: _.omitBy(
+        {
+          search_term: searchTerm?.length ? searchTerm : undefined,
+          event_types: eventTypes?.length ? eventTypes.join(',') : undefined,
+          log_levels: logLevels?.length ? logLevels?.join(',') : undefined,
+          sort_order: sortOrder,
+          page,
+          per_page: perPage,
+        },
+        _.isUndefined
+      ),
       signal,
     });
   },

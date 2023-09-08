@@ -54,6 +54,7 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
           const executionLog = ctx.securitySolution.getRuleExecutionLog();
           const executionEventsResponse = await executionLog.getExecutionEvents({
             ruleId: params.ruleId,
+            searchTerm: query.search_term,
             eventTypes: query.event_types,
             logLevels: query.log_levels,
             sortOrder: query.sort_order,

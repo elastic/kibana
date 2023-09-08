@@ -32,13 +32,18 @@ export type GetRuleExecutionEventsRequestQuery = t.TypeOf<
   typeof GetRuleExecutionEventsRequestQuery
 >;
 export const GetRuleExecutionEventsRequestQuery = t.exact(
-  t.type({
-    event_types: defaultCsvArray(TRuleExecutionEventType),
-    log_levels: defaultCsvArray(TLogLevel),
-    sort_order: DefaultSortOrderDesc, // defaults to 'desc'
-    page: DefaultPage, // defaults to 1
-    per_page: DefaultPerPage, // defaults to 20
-  })
+  t.intersection([
+    t.partial({
+      search_term: NonEmptyString,
+      event_types: defaultCsvArray(TRuleExecutionEventType),
+      log_levels: defaultCsvArray(TLogLevel),
+    }),
+    t.type({
+      sort_order: DefaultSortOrderDesc, // defaults to 'desc'
+      page: DefaultPage, // defaults to 1
+      per_page: DefaultPerPage, // defaults to 20
+    }),
+  ])
 );
 
 /**
