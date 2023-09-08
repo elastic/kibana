@@ -25,22 +25,17 @@ export interface FindingsEvaluationsQueryResult {
 }
 
 export const findingsEvaluationAggsQuery = {
-  failed_findings: {
-    filter: { term: { 'result.evaluation': 'failed' } },
-    aggs: {
-      event_code: {
-        cardinality: {
-          field: 'event.code',
-        },
-      },
+  unique_event_code: {
+    terms: {
+      field: 'event.code',
+      size: 65000,
     },
-  },
-  passed_findings: {
-    filter: { term: { 'result.evaluation': 'passed' } },
     aggs: {
-      event_code: {
-        cardinality: {
-          field: 'event.code',
+      latest_result_evaluation: {
+        top_hits: {
+          _source: ['result.evaluation'],
+          size: 1,
+          sort: [{ '@timestamp': 'desc' }],
         },
       },
     },
@@ -87,17 +82,25 @@ export const getEvaluationsQuery = (
   pit: {
     id: pitId,
   },
-  collapse: {
-    field: 'event.code',
-  },
 });
 
 export const getStatsFromFindingsEvaluationsAggs = (
   findingsEvaluationsAggs: FindingsEvaluationsQueryResult
 ): ComplianceDashboardData['stats'] => {
   const resourcesEvaluated = findingsEvaluationsAggs.resources_evaluated?.value;
-  const failedFindings = findingsEvaluationsAggs.failed_findings.event_code.value;
-  const passedFindings = findingsEvaluationsAggs.passed_findings.event_code.value;
+
+  let passedFindings = 0;
+  let failedFindings = 0;
+  let findingsBucketsLength = findingsEvaluationsAggs.unique_event_code.buckets.length;
+
+  for (let i = 0; i < findingsBucketsLength; i++) {
+    const bucket = findingsEvaluationsAggs.unique_event_code.buckets[i];
+    const latestResultEvaluation =
+      bucket.latest_result_evaluation.hits.hits[0]._source.result.evaluation;
+    passedFindings += latestResultEvaluation === 'passed' ? 1 : 0;
+    failedFindings += latestResultEvaluation === 'failed' ? 1 : 0;
+  }
+
   const totalFindings = failedFindings + passedFindings;
   const postureScore = calculatePostureScore(passedFindings, failedFindings) || 0;
 

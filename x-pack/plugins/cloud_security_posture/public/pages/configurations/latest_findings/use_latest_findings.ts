@@ -44,9 +44,14 @@ export const getFindingsQuery = ({ query, sort }: UseFindingsOptions) => ({
   size: MAX_FINDINGS_TO_LOAD,
   aggs: getFindingsCountAggQuery(),
   ignore_unavailable: false,
-  collapse: {
-    field: 'event.code',
-  },
+  // collapse: {
+  //   field: 'event.code',
+  //   inner_hits: {
+  //     name: 'latest_result_evaluation',
+  //     size: 1,
+  //     sort: [{ '@timestamp': 'desc' }],
+  //   },
+  // },
 });
 
 /**
@@ -96,12 +101,24 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
 
+      let totalPassed = 0;
+      let totalFailed = 0;
+      let findingsBucketsLength = aggregations.unique_event_code.buckets.length;
+
+      for (let i = 0; i < findingsBucketsLength; i++) {
+        const evaluationBucket = aggregations.unique_event_code.buckets[i];
+        const latestResultEvaluation =
+          evaluationBucket.latest_result_evaluation.hits.hits[0]._source.result.evaluation;
+        totalPassed += latestResultEvaluation === 'passed' ? 1 : 0;
+        totalFailed += latestResultEvaluation === 'failed' ? 1 : 0;
+      }
+
       return {
         page: hits.hits.map((hit) => hit._source!),
-        total: number.is(aggregations.total.value) ? aggregations.total.value : 0,
+        total: totalFailed + totalPassed,
         count: {
-          failed: aggregations.failed_findings.event_code.value,
-          passed: aggregations.passed_findings.event_code.value,
+          failed: totalFailed,
+          passed: totalPassed,
         },
       };
     },

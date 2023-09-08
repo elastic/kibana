@@ -32,7 +32,8 @@ interface Props {
   type: string;
 }
 
-const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
+// const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
+const formatNumber = (value: number) => value;
 
 export const FindingsDistributionBar = (props: Props) => (
   <div>

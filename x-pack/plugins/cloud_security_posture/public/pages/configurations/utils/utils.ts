@@ -37,29 +37,19 @@ export const getFindingsTimeRangeQuery = (query) => ({
 });
 
 export const getFindingsCountAggQuery = () => ({
-  failed_findings: {
-    filter: { term: { 'result.evaluation': 'failed' } },
-    aggs: {
-      event_code: {
-        cardinality: {
-          field: 'event.code',
-        },
-      },
-    },
-  },
-  passed_findings: {
-    filter: { term: { 'result.evaluation': 'passed' } },
-    aggs: {
-      event_code: {
-        cardinality: {
-          field: 'event.code',
-        },
-      },
-    },
-  },
-  total: {
-    cardinality: {
+  unique_event_code: {
+    terms: {
       field: 'event.code',
+      size: 65000,
+    },
+    aggs: {
+      latest_result_evaluation: {
+        top_hits: {
+          _source: ['result.evaluation'],
+          size: 1,
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      },
     },
   },
 });
