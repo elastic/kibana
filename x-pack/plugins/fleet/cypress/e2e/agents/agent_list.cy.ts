@@ -85,8 +85,8 @@ function assertTableIsEmpty() {
 
 describe('View agents list', () => {
   before(() => {
-    deleteFleetServerDocs();
-    deleteAgentDocs();
+    deleteFleetServerDocs(true);
+    deleteAgentDocs(true);
     cleanupAgentPolicies();
     setupFleetServer();
     setUISettings('hideAgentActivityTour', true);
