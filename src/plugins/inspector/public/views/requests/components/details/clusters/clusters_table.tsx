@@ -10,16 +10,24 @@ import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiButtonIcon, EuiHealth } from '@elastic/eui';
+import { ClusterDescriptionList } from './cluster_description_list';
+
+function getInitialExpandedRow(clusters) {
+  const clusterNames = Object.keys(clusters);
+  return clusterNames.length === 1
+    ? { [clusterNames[0]]: <ClusterDescriptionList clusterDetails={clusters[clusterNames[0]]}/> }
+    : {};
+}
 
 interface Props {
-  clusters: ClusterDetails;
+  clusters: Record<string, ClusterDetails>;
 }
 
 export function ClustersTable({ clusters }: Props) {
 
   const [expandedRows, setExpandedRows] = useState<
     Record<string, ReactNode>
-  >(Object.keys(clusters).length ? { [Object.keys(clusters)[0]]: <div>cluster details</div> } : {});
+  >(getInitialExpandedRow(clusters));
 
   const toggleDetails = (name: string) => {
     const nextExpandedRows = { ...expandedRows };
@@ -27,7 +35,7 @@ export function ClustersTable({ clusters }: Props) {
       delete nextExpandedRows[name];
     } else {
       nextExpandedRows[name] = (
-        <div>cluster details</div>
+        <ClusterDescriptionList clusterDetails={clusters[name]}/>
       );
     }
     setExpandedRows(nextExpandedRows);
