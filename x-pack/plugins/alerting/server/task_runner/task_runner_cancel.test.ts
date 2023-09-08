@@ -58,6 +58,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
+import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -150,6 +151,7 @@ describe('Task Runner Cancel', () => {
     getMaintenanceWindowClientWithRequest: jest
       .fn()
       .mockReturnValue(maintenanceWindowClientMock.create()),
+    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   };
 
   beforeEach(() => {

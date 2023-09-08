@@ -21,6 +21,7 @@ import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString } from '../tests/lib';
 import { createNewAPIKeySet } from './create_new_api_key_set';
 import { RulesClientContext } from '../types';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -52,6 +53,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   fieldsToExcludeFromPublicApi: [],
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 const username = 'test';

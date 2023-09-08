@@ -25,6 +25,7 @@ import { SavedObject } from '@kbn/core/server';
 import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
 import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -57,6 +58,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 beforeEach(() => {
