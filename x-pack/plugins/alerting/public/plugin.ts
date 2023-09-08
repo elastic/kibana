@@ -136,16 +136,15 @@ export class AlertingPublicPlugin
           return;
         }
 
-        if (rule.viewInAppRelativeUrl) {
-          return rule.viewInAppRelativeUrl;
-        }
-
         if (this.alertNavigationRegistry!.has(rule.consumer, ruleType)) {
           const navigationHandler = this.alertNavigationRegistry!.get(rule.consumer, ruleType);
           const navUrl = navigationHandler(rule);
           if (navUrl) return navUrl;
         }
-        return;
+
+        if (rule.viewInAppRelativeUrl) {
+          return rule.viewInAppRelativeUrl;
+        }
       },
     };
   }
