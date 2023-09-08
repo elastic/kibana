@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
@@ -49,6 +50,7 @@ import {
   getContinualAlertsQuery,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
+import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -406,6 +408,13 @@ export class AlertsClient<
         ])
       );
 
+      const bulkRequest: BulkRequest = {
+        refresh: 'wait_for',
+        index: this.indexTemplateAndPattern.alias,
+        require_alias: !this.isUsingDataStreams(),
+        operations: bulkBody,
+      };
+
       try {
         const response = await esClient.bulk({
           refresh: 'wait_for',
@@ -416,15 +425,12 @@ export class AlertsClient<
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
-          const errorsInResponse = (response.items ?? [])
-            .map((item) => item?.index?.error || item?.create?.error)
-            .filter((item) => item != null);
-
-          this.options.logger.error(
-            `Error writing ${errorsInResponse.length} out of ${
-              alertsToIndex.length
-            } alerts - ${JSON.stringify(errorsInResponse)}`
-          );
+          await resolveAlertConflicts({
+            logger: this.options.logger,
+            esClient,
+            bulkRequest,
+            bulkResponse: response,
+          });
         }
       } catch (err) {
         this.options.logger.error(
