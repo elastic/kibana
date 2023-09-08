@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
   describe('Header menu', () => {
@@ -43,6 +44,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
         // Set timerange to specific values to match data and retrieve config
         await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+
+        await retry.try(async () => {
+          await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
+          await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
+        });
+
         const timeConfig = await PageObjects.timePicker.getTimeConfig();
 
         // Set query bar value
