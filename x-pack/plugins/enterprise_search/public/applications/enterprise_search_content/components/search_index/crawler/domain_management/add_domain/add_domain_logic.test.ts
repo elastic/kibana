@@ -21,6 +21,14 @@ jest.mock('../../crawler_logic', () => ({
   },
 }));
 
+jest.mock('../domain_management_logic', () => ({
+  DomainManagementLogic: {
+    actions: {
+      getDomains: jest.fn(),
+    },
+  },
+}));
+
 jest.mock('./utils', () => ({
   ...(jest.requireActual('./utils') as object),
   getDomainWithProtocol: jest.fn().mockImplementation((domain) => domain),
