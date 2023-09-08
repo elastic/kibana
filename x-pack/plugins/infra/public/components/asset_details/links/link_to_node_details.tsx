@@ -8,10 +8,10 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { parse } from '@kbn/datemath';
 import { useNodeDetailsRedirect } from '../../../pages/link_to';
 import { Asset } from '../types';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
-import { toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export interface LinkToNodeDetailsProps {
@@ -32,7 +32,8 @@ export const LinkToNodeDetails = ({ asset, assetType }: LinkToNodeDetailsProps) 
       search: {
         name: asset.name,
         ...assetDetails,
-        ...(dateRange ? toTimestampRange({ from: dateRange.from, to: dateRange.to }) : undefined),
+        from: parse(dateRange?.from ?? '')?.valueOf(),
+        to: parse(dateRange?.to ?? '')?.valueOf(),
       },
     }),
   });

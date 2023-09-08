@@ -28,7 +28,7 @@ export function useDateRangeProvider({
   useEffectOnce(() => {
     const { from, to } = getParsedDateRange();
 
-    // forces the date picker to initiallize with absolute dates.
+    // forces the date picker to initialize with absolute dates.
     setUrlState({ dateRange: { from, to } });
   });
 
