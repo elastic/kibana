@@ -48,6 +48,12 @@ export interface GetExecutionEventsArgs {
   /** Include events having these log levels. If omitted, events of all levels will be included. */
   logLevels?: LogLevel[];
 
+  /** Include events recorded starting from the specified moment. If omitted, all events will be included. */
+  dateStart?: string;
+
+  /** Include events recorded till the specified moment. If omitted, all events will be included. */
+  dateEnd?: string;
+
   /** What order to sort by (e.g. `asc` or `desc`). */
   sortOrder: SortOrder;
 

@@ -23,6 +23,7 @@ import { useColumns } from './use_columns';
 import { useExpandableRows } from '../basic/tables/use_expandable_rows';
 import { useExecutionEvents } from './use_execution_events';
 import { EventMessageFilter } from './event_message_filter';
+import { EventDateRangeFilter } from './event_date_range_filter';
 
 import * as i18n from './translations';
 
@@ -60,6 +61,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
     searchTerm: filters.state.searchTerm,
     eventTypes: filters.state.eventTypes,
     logLevels: filters.state.logLevels,
+    dateRange: filters.state.dateRange,
     sortOrder: sorting.state.sort.direction,
     page: pagination.state.pageNumber,
     perPage: pagination.state.pageSize,
@@ -99,6 +101,9 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
             selectedItems={filters.state.eventTypes}
             onChange={filters.setEventTypes}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EventDateRangeFilter value={filters.state.dateRange} onChange={filters.setDateRange} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Moment } from 'moment';
 import type { SortOrder } from '../../../../common/api/detection_engine';
 import type {
   GetRuleExecutionEventsResponse,
@@ -46,6 +47,11 @@ export interface RuleMonitoringApiCallArgs {
   signal?: AbortSignal;
 }
 
+export interface DateRange {
+  start?: Moment;
+  end?: Moment;
+}
+
 export interface FetchRuleExecutionEventsArgs extends RuleMonitoringApiCallArgs {
   /**
    * Saved Object ID of the rule (`rule.id`, not static `rule.rule_id`).
@@ -66,6 +72,11 @@ export interface FetchRuleExecutionEventsArgs extends RuleMonitoringApiCallArgs 
    * Filter by log level. If set, result will include only events matching any of these.
    */
   logLevels?: LogLevel[];
+
+  /**
+   * Filter by date range. If set, result will include only events recorded in the specified date range.
+   */
+  dateRange?: DateRange;
 
   /**
    * What order to sort by (e.g. `asc` or `desc`).

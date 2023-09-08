@@ -54,7 +54,17 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
     async getExecutionEvents(
       args: GetExecutionEventsArgs
     ): Promise<GetRuleExecutionEventsResponse> {
-      const { ruleId, searchTerm, eventTypes, logLevels, sortOrder, page, perPage } = args;
+      const {
+        ruleId,
+        searchTerm,
+        eventTypes,
+        logLevels,
+        dateStart,
+        dateEnd,
+        sortOrder,
+        page,
+        perPage,
+      } = args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
 
@@ -65,6 +75,8 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
             searchTerm,
             eventTypes,
             logLevels,
+            dateStart,
+            dateEnd,
           }),
           sort: [
             { sort_field: f.TIMESTAMP, sort_order: sortOrder },
@@ -240,7 +252,12 @@ const buildEventLogKqlFilter = ({
   searchTerm,
   eventTypes,
   logLevels,
-}: Pick<GetExecutionEventsArgs, 'searchTerm' | 'eventTypes' | 'logLevels'>) => {
+  dateStart,
+  dateEnd,
+}: Pick<
+  GetExecutionEventsArgs,
+  'searchTerm' | 'eventTypes' | 'logLevels' | 'dateStart' | 'dateEnd'
+>) => {
   const filters = [`${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`];
 
   if (searchTerm?.length) {
@@ -253,6 +270,20 @@ const buildEventLogKqlFilter = ({
 
   if (logLevels?.length) {
     filters.push(`${f.LOG_LEVEL}:(${kqlOr(logLevels)})`);
+  }
+
+  const dateRangeFilter: string[] = [];
+
+  if (dateStart) {
+    dateRangeFilter.push(`${f.TIMESTAMP} >= ${prepareKQLStringParam(dateStart)}`);
+  }
+
+  if (dateEnd) {
+    dateRangeFilter.push(`${f.TIMESTAMP} <= ${prepareKQLStringParam(dateEnd)}`);
+  }
+
+  if (dateRangeFilter.length) {
+    filters.push(kqlAnd(dateRangeFilter));
   }
 
   return kqlAnd(filters);

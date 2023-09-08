@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
-import { defaultCsvArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { defaultCsvArray, IsoDateString, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import { DefaultSortOrderDesc, PaginationResult } from '../../../model';
 import { RuleExecutionEvent, TRuleExecutionEventType, TLogLevel } from '../../model';
@@ -37,6 +37,8 @@ export const GetRuleExecutionEventsRequestQuery = t.exact(
       search_term: NonEmptyString,
       event_types: defaultCsvArray(TRuleExecutionEventType),
       log_levels: defaultCsvArray(TLogLevel),
+      date_start: IsoDateString,
+      date_end: IsoDateString,
     }),
     t.type({
       sort_order: DefaultSortOrderDesc, // defaults to 'desc'

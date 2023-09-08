@@ -37,7 +37,17 @@ export const api: IRuleMonitoringApiClient = {
   fetchRuleExecutionEvents: (
     args: FetchRuleExecutionEventsArgs
   ): Promise<GetRuleExecutionEventsResponse> => {
-    const { ruleId, searchTerm, eventTypes, logLevels, sortOrder, page, perPage, signal } = args;
+    const {
+      ruleId,
+      searchTerm,
+      eventTypes,
+      logLevels,
+      dateRange,
+      sortOrder,
+      page,
+      perPage,
+      signal,
+    } = args;
 
     const url = getRuleExecutionEventsUrl(ruleId);
 
@@ -49,6 +59,8 @@ export const api: IRuleMonitoringApiClient = {
           search_term: searchTerm?.length ? searchTerm : undefined,
           event_types: eventTypes?.length ? eventTypes.join(',') : undefined,
           log_levels: logLevels?.length ? logLevels?.join(',') : undefined,
+          date_start: dateRange?.start?.toISOString(),
+          date_end: dateRange?.end?.toISOString(),
           sort_order: sortOrder,
           page,
           per_page: perPage,

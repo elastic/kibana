@@ -57,6 +57,8 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
             searchTerm: query.search_term,
             eventTypes: query.event_types,
             logLevels: query.log_levels,
+            dateStart: query.date_start,
+            dateEnd: query.date_end,
             sortOrder: query.sort_order,
             page: query.page,
             perPage: query.per_page,
