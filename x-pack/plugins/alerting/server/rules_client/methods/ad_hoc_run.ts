@@ -17,7 +17,13 @@ import { resetMonitoringLastRun, getNextRun } from '../../lib';
 
 export async function adHocRun(
   context: RulesClientContext,
-  { id, from, to, actions }: { id: string; from: string; to: string; actions?: RuleAction[] }
+  {
+    id,
+    from,
+    to,
+    actions,
+    maxSignals,
+  }: { id: string; from: string; to: string; maxSignals: number; actions?: RuleAction[] }
 ) {
   const decryptedAlert =
     await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
@@ -133,9 +139,12 @@ export async function adHocRun(
       ruleTypeId: attributes.alertTypeId,
       schedule: attributes.schedule as IntervalSchedule,
       throwOnConflict: false,
-      from,
-      to,
-      actions,
+      adHocOptions: {
+        from,
+        to,
+        actions,
+        maxSignals,
+      },
     });
   } catch (err) {
     return i18n.translate('xpack.alerting.rulesClient.adHocRun.adHocRunError', {

@@ -263,6 +263,7 @@ export interface AdHocRunProps {
   id: string;
   from: string;
   to: string;
+  maxSignals: number;
   actions?: RuleAction[];
   signal?: AbortSignal;
 }

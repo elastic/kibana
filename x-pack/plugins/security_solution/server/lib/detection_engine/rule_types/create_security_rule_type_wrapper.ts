@@ -126,16 +126,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             spaceId,
             state,
             rule,
-            adHocIntervalFrom,
-            adHocIntervalTo,
+            adHocOptions,
           } = options;
           let { startedAt } = options;
           let runState = state;
           let inputIndex: string[] = [];
           let inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
-          let { from, to } = params;
-          const { maxSignals, timestampOverride, timestampOverrideFallbackDisabled } = params;
+          let { from, to, maxSignals } = params;
+          const { timestampOverride, timestampOverrideFallbackDisabled } = params;
           const {
             alertWithPersistence,
             alertWithSuppression,
@@ -145,7 +144,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ruleMonitoringService,
             ruleResultService,
           } = services;
-          const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const esClient = scopedClusterClient.asCurrentUser;
 
@@ -175,16 +173,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             schedule: { interval },
           } = completeRule.ruleConfig;
 
-          const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
-          if (isAdHocRuleRun) {
-            from = adHocIntervalFrom;
-            to = adHocIntervalTo;
+          if (adHocOptions) {
+            from = adHocOptions.from;
+            to = adHocOptions.to;
             interval = '1s';
-            startedAt = new Date(adHocIntervalTo);
+            startedAt = new Date(adHocOptions.to);
+            maxSignals = adHocOptions.maxSignals;
           }
-          ruleExecutionLogger.debug(
-            `[AD-HOC] adHocIntervalFrom: ${adHocIntervalFrom}, adHocIntervalTo: ${adHocIntervalTo}`
-          );
+          ruleExecutionLogger.debug(`[AD-HOC] adHocOptions: ${JSON.stringify(adHocOptions)}`);
+          const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const refresh = actions.length ? 'wait_for' : false;
 

@@ -115,6 +115,12 @@ export interface ScheduleTaskOptions {
   ruleTypeId: string;
   schedule: IntervalSchedule;
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
+  adHocOptions?: {
+    from: string;
+    to: string;
+    maxSignals: number;
+    actions?: RuleAction[];
+  };
   from?: string;
   to?: string;
   actions?: RuleAction[];

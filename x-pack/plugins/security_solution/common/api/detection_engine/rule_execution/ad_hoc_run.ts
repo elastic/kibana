@@ -18,6 +18,7 @@ export const adHocRunSchema = t.exact(
       id: RuleObjectId,
       from: t.string,
       to: t.string,
+      maxSignals: t.number,
     }),
     t.partial({
       actions: RuleActionArrayCamel,

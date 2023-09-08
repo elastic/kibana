@@ -13,6 +13,7 @@ import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiCheckbox,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -21,9 +22,11 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import { useAdHocRun } from '../../../../detection_engine/rule_management/logic/use_ad_hoc_run';
 import { getAllActionMessageParams } from '../../../pages/detection_engine/rules/helpers';
 import * as i18n from './translations';
@@ -42,6 +45,7 @@ const timeRanges = [
 
 export interface AdHocRunFlyoutProps {
   ruleId: string;
+  ruleMaxSignals?: number;
   closeFlyout: () => void;
 }
 
@@ -52,7 +56,20 @@ const refreshedTimeframe = (startDate: string, endDate: string) => {
   };
 };
 
-const AdHocRunFlyoutComponent: React.FC<AdHocRunFlyoutProps> = ({ ruleId, closeFlyout }) => {
+const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
+  const number = parseInt(input, 10);
+  if (Number.isNaN(number)) {
+    return minimumValue;
+  } else {
+    return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
+  }
+};
+
+const AdHocRunFlyoutComponent: React.FC<AdHocRunFlyoutProps> = ({
+  ruleId,
+  ruleMaxSignals,
+  closeFlyout,
+}) => {
   // Raw timeframe as a string
   const [startDate, setStartDate] = useState('now-1h');
   const [endDate, setEndDate] = useState('now');
@@ -67,11 +84,22 @@ const AdHocRunFlyoutComponent: React.FC<AdHocRunFlyoutProps> = ({ ruleId, closeF
   const [actions, setActions] = useState<RuleAction[]>([]);
   const messageVariables = useMemo(() => getAllActionMessageParams(), []);
 
+  const minimumMaxSignals = useMemo(() => ruleMaxSignals ?? DEFAULT_MAX_SIGNALS, [ruleMaxSignals]);
+  const [maxSignals, setMaxSignals] = useState(minimumMaxSignals);
+  const onChangeMaxSignalsVal = useCallback(
+    (e) => {
+      const sanitizedValue = getNumberFromUserInput(e.target.value, minimumMaxSignals);
+      setMaxSignals(sanitizedValue);
+    },
+    [minimumMaxSignals]
+  );
+
   const { adHocRun: ruleAdHocRun } = useAdHocRun({
     id: ruleId,
     timeframeStart,
     timeframeEnd,
     actions: isAdHocActionsEnabled ? actions : undefined,
+    maxSignals,
   });
 
   const updateAndHocActionsCheckbox = useCallback(() => {
@@ -120,8 +148,8 @@ const AdHocRunFlyoutComponent: React.FC<AdHocRunFlyoutProps> = ({ ruleId, closeF
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {i18n.AD_HOC_RUN_DESCRIPTION}
-        <EuiSpacer />
+        <EuiText size="s">{i18n.AD_HOC_RUN_DESCRIPTION}</EuiText>
+        <EuiSpacer size="xs" />
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiSuperDatePicker
             start={startDate}
@@ -133,6 +161,17 @@ const AdHocRunFlyoutComponent: React.FC<AdHocRunFlyoutProps> = ({ ruleId, closeF
             data-test-subj="ad-hoc-run-time-frame"
           />
         </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiText size="s">{i18n.AD_HOC_MAX_SIGNALS_TITLE}</EuiText>
+        <EuiSpacer size="xs" />
+        <EuiFieldNumber
+          fullWidth
+          min={minimumMaxSignals}
+          max={Number.MAX_SAFE_INTEGER}
+          onChange={onChangeMaxSignalsVal}
+          value={maxSignals}
+          data-test-subj="maxSignals"
+        />
         <EuiSpacer />
         <EuiFlexGroup alignItems="center" gutterSize="s" onClick={updateAndHocActionsCheckbox}>
           <EuiFlexItem grow={false}>

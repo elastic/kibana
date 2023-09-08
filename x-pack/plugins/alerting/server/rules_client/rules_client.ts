@@ -165,8 +165,13 @@ export class RulesClient {
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
-  public adHocRun = (options: { id: string; from: string; to: string; actions?: RuleAction[] }) =>
-    adHocRun(this.context, options);
+  public adHocRun = (options: {
+    id: string;
+    from: string;
+    to: string;
+    maxSignals: number;
+    actions?: RuleAction[];
+  }) => adHocRun(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 

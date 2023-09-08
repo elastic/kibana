@@ -160,11 +160,18 @@ export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<
     signal,
   });
 
-export const adHocRun = async ({ id, from, to, actions, signal }: AdHocRunProps): Promise<void> =>
+export const adHocRun = async ({
+  id,
+  from,
+  to,
+  actions,
+  maxSignals,
+  signal,
+}: AdHocRunProps): Promise<void> =>
   KibanaServices.get().http.fetch<void>(DETECTION_ENGINE_RULES_AD_HOC_RUN, {
     method: 'POST',
     version: '2023-10-31',
-    body: JSON.stringify({ id, from, to, actions }),
+    body: JSON.stringify({ id, from, to, actions, maxSignals }),
     signal,
   });
 

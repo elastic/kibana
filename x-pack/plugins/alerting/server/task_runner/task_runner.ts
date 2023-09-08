@@ -305,7 +305,7 @@ export class TaskRunner<
       snoozeSchedule,
     } = rule;
     const {
-      params: { alertId: ruleId, spaceId, adHocIntervalFrom, adHocIntervalTo },
+      params: { alertId: ruleId, spaceId, adHocOptions },
       state: {
         alertInstances: alertRawInstances = {},
         alertRecoveredInstances: alertRecoveredRawInstances = {},
@@ -475,8 +475,7 @@ export class TaskRunner<
               state: ruleTypeState as RuleState,
               startedAt: this.taskInstance.startedAt!,
               previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-              adHocIntervalFrom,
-              adHocIntervalTo,
+              adHocOptions,
               spaceId,
               namespace,
               rule: {
@@ -623,9 +622,9 @@ export class TaskRunner<
     }
 
     const {
-      params: { alertId: ruleId, spaceId, consumer, adHocIntervalFrom, adHocIntervalTo },
+      params: { alertId: ruleId, spaceId, consumer, adHocOptions },
     } = this.taskInstance;
-    const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
+    const isAdHocRuleRun = !!adHocOptions;
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
@@ -792,12 +791,12 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     const {
-      params: { alertId: ruleId, spaceId, adHocIntervalFrom, adHocIntervalTo },
+      params: { alertId: ruleId, spaceId, adHocOptions },
       startedAt,
       state: originalState,
       schedule: taskSchedule,
     } = this.taskInstance;
-    const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
+    const isAdHocRuleRun = !!adHocOptions;
 
     this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
 

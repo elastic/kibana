@@ -39,7 +39,6 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import { AdHocRunFlyout } from '../../../../detections/components/rules/ad_hoc_run_flyout';
-import { AdHocRunModal } from '../../../../detections/components/rules/ad_hoc_run';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -242,25 +241,23 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     isExistingRule,
   } = useRuleWithFallback(ruleId);
 
+  const { pollForSignalIndex } = useSignalHelpers();
+  const [rule, setRule] = useState<Rule | null>(null);
+  const isLoading = ruleLoading && rule == null;
+
   const [isAdHocFlyoutVisible, setIsAdHocFlyoutVisible] = useState(false);
   const closeAdHocFlyout = () => setIsAdHocFlyoutVisible(false);
   const showAdHocFlyout = () => setIsAdHocFlyoutVisible(true);
   let adHocFlyout;
   if (isAdHocFlyoutVisible) {
-    adHocFlyout = <AdHocRunFlyout ruleId={ruleId} closeFlyout={closeAdHocFlyout} />;
+    adHocFlyout = (
+      <AdHocRunFlyout
+        ruleId={ruleId}
+        closeFlyout={closeAdHocFlyout}
+        ruleMaxSignals={rule?.max_signals}
+      />
+    );
   }
-
-  const [isAdHocModalVisible, setIsAdHocModalVisible] = useState(false);
-  const closeAdHocRunModal = () => setIsAdHocModalVisible(false);
-  const showAdHocRunModal = () => setIsAdHocModalVisible(true);
-  let adHocRunModal;
-  if (isAdHocModalVisible) {
-    adHocRunModal = <AdHocRunModal ruleId={ruleId} closeModal={closeAdHocRunModal} />;
-  }
-
-  const { pollForSignalIndex } = useSignalHelpers();
-  const [rule, setRule] = useState<Rule | null>(null);
-  const isLoading = ruleLoading && rule == null;
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
@@ -584,7 +581,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           {i18n.DELETE_CONFIRMATION_BODY}
         </EuiConfirmModal>
       )}
-      {adHocRunModal}
       {adHocFlyout}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />

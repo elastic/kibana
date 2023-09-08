@@ -15,10 +15,12 @@ export const useAdHocRun = ({
   timeframeStart,
   timeframeEnd,
   actions,
+  maxSignals,
 }: {
   id: string;
   timeframeStart: moment.Moment;
   timeframeEnd: moment.Moment;
+  maxSignals: number;
   actions?: RuleAction[];
 }) => {
   const from = useMemo(() => timeframeStart.toISOString(), [timeframeStart]);
@@ -26,8 +28,8 @@ export const useAdHocRun = ({
 
   const ruleRun = useCallback(async () => {
     const abortCtrl = new AbortController();
-    await adHocRun({ signal: abortCtrl.signal, id, from, to, actions });
-  }, [from, id, to, actions]);
+    await adHocRun({ signal: abortCtrl.signal, id, from, to, actions, maxSignals });
+  }, [id, from, to, actions, maxSignals]);
 
   return { adHocRun: ruleRun };
 };

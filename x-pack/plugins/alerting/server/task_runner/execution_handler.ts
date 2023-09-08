@@ -174,11 +174,9 @@ export class ExecutionHandler<
   public async run(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
-    const { adHocIntervalFrom, adHocIntervalTo, adHocRuleActions } = this.taskInstance.params;
-    const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
-
+    const { adHocOptions } = this.taskInstance.params;
     const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
-      actions: isAdHocRuleRun && adHocRuleActions ? adHocRuleActions : this.rule.actions,
+      actions: adHocOptions?.actions ? adHocOptions.actions : this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
     const executables = await this.generateExecutables(alerts, throttledSummaryActions);
@@ -567,9 +565,8 @@ export class ExecutionHandler<
   ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
 
-    const { adHocIntervalFrom, adHocIntervalTo, adHocRuleActions } = this.taskInstance.params;
-    const isAdHocRuleRun = !!adHocIntervalFrom && !!adHocIntervalTo;
-    const actions = isAdHocRuleRun && adHocRuleActions ? adHocRuleActions : this.rule.actions;
+    const { adHocOptions } = this.taskInstance.params;
+    const actions = adHocOptions?.actions ? adHocOptions.actions : this.rule.actions;
 
     for (const action of actions) {
       const alertsArray = Object.entries(alerts);
