@@ -50,7 +50,7 @@ interface RuleActionsOverflowComponentProps {
   canDuplicateRuleWithActions: boolean;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
   confirmDeletion: () => Promise<boolean>;
-  showAdHocRunModal: () => void;
+  showAdHocRunModal?: () => void;
 }
 
 /**
@@ -174,7 +174,7 @@ const RuleActionsOverflowComponent = ({
               data-test-subj="rules-details-ad-hoc-run"
               onClick={async () => {
                 closePopover();
-                showAdHocRunModal();
+                showAdHocRunModal?.();
               }}
             >
               {i18nActions.AD_HOC_RUN}
