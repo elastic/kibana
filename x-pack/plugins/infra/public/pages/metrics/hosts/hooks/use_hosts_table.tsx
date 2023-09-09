@@ -31,7 +31,6 @@ import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
-import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
  * Columns and items types
@@ -127,7 +126,7 @@ const sortTableData =
 export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
     services: {
@@ -234,11 +233,7 @@ export const useHostsTable = () => {
         truncateText: true,
         'data-test-subj': 'hostsView-tableRow-title',
         render: (title: HostNodeRow['title']) => (
-          <EntryTitle
-            title={title}
-            dateRangeTs={getDateRangeAsTimestamp()}
-            onClick={() => reportHostEntryClick(title)}
-          />
+          <EntryTitle title={title} onClick={() => reportHostEntryClick(title)} />
         ),
         width: '20%',
       },
@@ -303,7 +298,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskSpaceUsage.value}
+            formula={hostLensFormulas.diskUsage.value}
           />
         ),
         field: 'diskSpaceUsage',
@@ -343,7 +338,7 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [detailsItemId, getDateRangeAsTimestamp, reportHostEntryClick, setProperties]
+    [detailsItemId, reportHostEntryClick, setProperties]
   );
 
   const selection: EuiTableSelectionType<HostNodeRow> = {
