@@ -10,8 +10,6 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-    artifact_paths:
-      - "target/kibana-osquery/**/*"
 
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
     label: 'Osquery Cypress Tests, burning changed specs'
@@ -22,8 +20,6 @@ steps:
     soft_fail: true
     retry:
       automatic: false
-    artifact_paths:
-      - "target/kibana-osquery/**/*"
 
   # Error: self-signed certificate in certificate chain
   # - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
@@ -37,5 +33,3 @@ steps:
   #     automatic:
   #       - exit_status: '*'
   #         limit: 1
-  #   artifact_paths:
-  #     - "target/kibana-osquery/**/*"
