@@ -335,6 +335,7 @@ function UnifiedFieldListItemComponent({
       button={
         <DragDrop
           draggable
+          dragClassName="unifiedFieldListItemButton__dragging"
           order={order}
           value={value}
           onDragStart={closePopover}

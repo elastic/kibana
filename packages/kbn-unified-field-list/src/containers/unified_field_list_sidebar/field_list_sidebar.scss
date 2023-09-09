@@ -53,7 +53,8 @@
     box-shadow: none;
   }
 
-  &.domDragDrop-isDraggable:not(:active) {
+  &:not(.unifiedFieldListItemButton__dragging) {
+    padding: 0;
     background: none;
   }
 }
