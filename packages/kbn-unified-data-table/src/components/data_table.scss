@@ -44,12 +44,10 @@
     border-bottom: $euiBorderThin;
   }
 
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
-    padding: $euiSizeS+2 0 0 $euiSizeXS;
-  }
-
-  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'] {
-    padding: $euiSizeXS+1 0 0 0;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
@@ -107,6 +105,25 @@
 
 .unifiedDataTableFormatSource {
   @include euiTextTruncate;
+}
+
+.unifiedDataTable__rowControl {
+  // fine-tuning the vertical alignment with the text for any row height setting
+  margin-top: -3px;
+  .euiDataGridRowCell__truncate & { // "Single line" row height setting
+    margin-top: 0;
+  }
+}
+
+.unifiedDataTable__descriptionList {
+  // force the content truncation when "Single line" row height setting is active
+  .euiDataGridRowCell__truncate & {
+    -webkit-line-clamp: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    height: 100%;
+    overflow: hidden;
+  }
 }
 
 .unifiedDataTable__descriptionListTitle {
