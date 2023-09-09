@@ -96,8 +96,10 @@
     "@kbn/discover-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/apm-data-access-plugin",
-    "@kbn/monaco",
     "@kbn/metrics-data-access-plugin"
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client",
+    "@kbn/monaco"
   ],
   "exclude": ["target/**/*"]
 }
