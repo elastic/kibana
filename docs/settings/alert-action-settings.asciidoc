@@ -272,8 +272,52 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 `xpack.actions.preconfigured.<connector-id>.config.configUrl`::
 For an <<xmatters-action-type,xMatters connector>> with basic authentication, specifies the request URL for the Elastic Alerts trigger in xMatters.
 
+`xpack.actions.preconfigured.<connector-id>.config.createCommentJson`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment. The required variable is `case.description`.
++
+NOTE: The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
+
+`xpack.actions.preconfigured.<connector-id>.config.createCommentMethod`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to create a case comment in the third-party system.
+For example: `post`, `put`(default), or `patch`.
+
+`xpack.actions.preconfigured.<connector-id>.config.createCommentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string to create a case comment by ID in the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentJson`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the create case URL to create a case. Required variables are `case.title` and `case.description`.
++
+NOTE: The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentMethod`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to create a case in the third-party system, either `post`(default), `put`, or `patch`.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string to create a case in the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+
+`xpack.actions.preconfigured.<connector-id>.config.createIncidentResponseKey`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the create case method that corresponds to the external service identifier.
+
 `xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
 For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
+
+`xpack.actions.preconfigured.<connector-id>.config.getIncidentResponseExternalTitleKey`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the get case method that corresponds to the external service title.
+
+`xpack.actions.preconfigured.<connector-id>.config.getIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API URL string with an external service ID Mustache variable to get the case from the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts. 
+
+`xpack.actions.preconfigured.<connector-id>.config.hasAuth`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies whether a user and password are required inside the secrets configuration. Defaults to `true`.
+
+`xpack.actions.preconfigured.<connector-id>.config.headers`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a set of key-value pairs sent as headers with the request.
 
 `xpack.actions.preconfigured.<connector-id>.config.index`::
 For an <<index-action-type,index connector>>, specifies the {es} index.
@@ -281,8 +325,25 @@ For an <<index-action-type,index connector>>, specifies the {es} index.
 `xpack.actions.preconfigured.<connector-id>.config.projectKey`::
 For a <<jira-action-type,Jira connector>>, specifies the Jira project key.
 
+`xpack.actions.preconfigured.<connector-id>.config.updateIncidentJson`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the update case URL to update a case. Required variables are `case.title` and `case.description`.
++
+NOTE: The JSON is validated after the Mustache variables have been placed when the REST method runs. You should manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
+
+`xpack.actions.preconfigured.<connector-id>.config.updateIncidentMethod`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API HTTP request method to update the case in the third-party system.
+For example: `post`, `put`(default), or `patch`.
+
+`xpack.actions.preconfigured.<connector-id>.config.updateIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies the REST API URL to update the case by ID in the third-party system.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+
 `xpack.actions.preconfigured.<connector-id>.config.usesBasic`::
 For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HTTP basic authentication. Defaults to `true`.
+
+`xpack.actions.preconfigured.<connector-id>.config.viewIncidentUrl`::
+For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a URL string with either the external service ID or external service title Mustache variable to view a case in the external system.
 
 `xpack.actions.preconfigured.<connector-id>.name`::
 The name of the preconfigured connector.
@@ -309,6 +370,7 @@ For a <<jira-action-type,Jira connector>>, specifies the account email for HTTP 
 A password secret that varies by connector:
 +
 --
+* For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
 * For an <<xmatters-action-type,xMatters connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
 
@@ -325,6 +387,7 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this 
 A user name secret that varies by connector:
 +
 --
+* For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
 * For an <<xmatters-action-type,xMatters connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
 
