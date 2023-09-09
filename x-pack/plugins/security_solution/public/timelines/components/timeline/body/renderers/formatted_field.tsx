@@ -7,17 +7,14 @@
 
 /* eslint-disable complexity */
 
-import type {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridColumnCellActionProps,
-} from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { head, getOr, get, isEmpty, isNumber } from 'lodash/fp';
 import React, { useMemo } from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
+import type { ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
+import {} from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
@@ -52,12 +49,6 @@ import {
   EmptyComponent,
   getLinkColumnDefinition,
 } from '../../../../../common/lib/cell_actions/helpers';
-import {
-  ColumnHeaderOptions,
-  TimelineItem,
-  TimelineNonEcsData,
-} from '@kbn/timelines-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils/types';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { parseValue } from './parse_value';
 import { getField, getFieldKey } from '../../../../../helpers';
@@ -136,7 +127,7 @@ export const getFormattedFields = ({
   scopeId: string;
   closeCellPopover?: () => void;
 }) => {
-  console.log(headers)
+  console.log(headers);
 
   return [
     ...PORT_NAMES,
