@@ -79,16 +79,23 @@ interface FunctionResponse {
   data?: any;
 }
 
+export enum FunctionVisibility {
+  System = 'system',
+  User = 'user',
+  All = 'all',
+}
+
 interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
   name: string;
   description: string;
-  descriptionForUser: string;
+  visibility?: FunctionVisibility;
+  descriptionForUser?: string;
   parameters: TParameters;
   contexts: string[];
 }
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
-  options: { arguments: TArguments; messages: Message[] },
+  options: { arguments: TArguments; messages: Message[]; connectorId: string },
   signal: AbortSignal
 ) => Promise<TResponse>;
 
@@ -100,7 +107,7 @@ type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: 
 export interface FunctionDefinition {
   options: FunctionOptions;
   respond: (
-    options: { arguments: any; messages: Message[] },
+    options: { arguments: any; messages: Message[]; connectorId: string },
     signal: AbortSignal
   ) => Promise<FunctionResponse>;
   render?: RenderFunction<any, any>;

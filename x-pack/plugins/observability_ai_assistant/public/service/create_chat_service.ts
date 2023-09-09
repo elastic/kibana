@@ -27,6 +27,7 @@ import {
 import {
   ContextRegistry,
   FunctionRegistry,
+  FunctionVisibility,
   Message,
   MessageRole,
   type RegisterContextDefinition,
@@ -112,7 +113,7 @@ export async function createChatService({
   }
 
   return {
-    executeFunction: async ({ name, args, signal, messages }) => {
+    executeFunction: async ({ name, args, signal, messages, connectorId }) => {
       const fn = functionRegistry.get(name);
 
       if (!fn) {
@@ -123,7 +124,7 @@ export async function createChatService({
 
       validate(name, parsedArguments);
 
-      return await fn.respond({ arguments: parsedArguments, messages }, signal);
+      return await fn.respond({ arguments: parsedArguments, messages, connectorId }, signal);
     },
     renderFunction: (name, args, response) => {
       const fn = functionRegistry.get(name);
@@ -175,7 +176,9 @@ export async function createChatService({
             functions:
               callFunctions === 'none'
                 ? []
-                : functions.map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
+                : functions
+                    .filter((fn) => fn.options.visibility !== FunctionVisibility.User)
+                    .map((fn) => pick(fn.options, 'name', 'description', 'parameters')),
           },
         },
         signal: controller.signal,

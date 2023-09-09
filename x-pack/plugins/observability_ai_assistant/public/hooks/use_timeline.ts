@@ -49,7 +49,7 @@ export function createNewConversation({
 
 export type UseTimelineResult = Pick<
   ChatTimelineProps,
-  'onEdit' | 'onFeedback' | 'onRegenerate' | 'onStopGenerating' | 'items'
+  'onEdit' | 'onFeedback' | 'onRegenerate' | 'onStopGenerating' | 'onRunQuery' | 'items'
 > &
   Pick<ChatPromptEditorProps, 'onSubmit'>;
 
@@ -97,6 +97,8 @@ export function useTimeline({
   const controllerRef = useRef(new AbortController());
 
   const [pendingMessage, setPendingMessage] = useState<PendingMessage>();
+
+  const [isFunctionLoading, setIsFunctionLoading] = useState(false);
 
   const prevConversationId = usePrevious(conversationId);
   useEffect(() => {
@@ -181,12 +183,15 @@ export function useTimeline({
       if (lastMessage?.message.function_call?.name) {
         const name = lastMessage.message.function_call.name;
 
+        setIsFunctionLoading(true);
+
         try {
           const message = await chatService!.executeFunction({
             name,
             args: lastMessage.message.function_call.arguments,
             messages: messagesAfterChat.slice(0, -1),
             signal: controller.signal,
+            connectorId: connectorId!,
           });
 
           return await chat(
@@ -214,6 +219,8 @@ export function useTimeline({
               },
             })
           );
+        } finally {
+          setIsFunctionLoading(false);
         }
       }
 
@@ -247,8 +254,20 @@ export function useTimeline({
       return nextItems;
     }
 
-    return conversationItems;
-  }, [conversationItems, pendingMessage, currentUser]);
+    if (!isFunctionLoading) {
+      return conversationItems;
+    }
+
+    return conversationItems.map((item, index) => {
+      if (index < conversationItems.length - 1) {
+        return item;
+      }
+      return {
+        ...item,
+        loading: true,
+      };
+    });
+  }, [conversationItems, pendingMessage, currentUser, isFunctionLoading]);
 
   useEffect(() => {
     return () => {
@@ -283,6 +302,25 @@ export function useTimeline({
     },
     onSubmit: async (message) => {
       const nextMessages = await chat(messages.concat(message));
+      onChatComplete(nextMessages);
+    },
+    onRunQuery: async (query) => {
+      const nextMessages = await chat(
+        messages.concat({
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.Assistant,
+            content: '',
+            function_call: {
+              name: 'execute_query',
+              arguments: JSON.stringify({
+                query,
+              }),
+              trigger: MessageRole.User,
+            },
+          },
+        })
+      );
       onChatComplete(nextMessages);
     },
   };

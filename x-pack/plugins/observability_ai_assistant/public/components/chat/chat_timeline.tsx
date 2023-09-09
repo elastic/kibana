@@ -43,6 +43,7 @@ export interface ChatTimelineProps {
   onFeedback: (item: ChatTimelineItem, feedback: Feedback) => void;
   onRegenerate: (item: ChatTimelineItem) => void;
   onStopGenerating: () => void;
+  onRunQuery: (query: string) => Promise<void>;
 }
 
 export function ChatTimeline({
@@ -52,6 +53,7 @@ export function ChatTimeline({
   onFeedback,
   onRegenerate,
   onStopGenerating,
+  onRunQuery,
 }: ChatTimelineProps) {
   const filteredItems = items.filter((item) => !item.display.hide);
 
@@ -77,6 +79,7 @@ export function ChatTimeline({
               return onEdit(item, message);
             }}
             onStopGeneratingClick={onStopGenerating}
+            onRunQueryClick={onRunQuery}
           />
         ))
       )}

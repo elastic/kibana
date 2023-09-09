@@ -16,7 +16,7 @@ import { registerLensFunction } from './lens';
 import { registerRecallFunction } from './recall';
 import { registerSummarizationFunction } from './summarize';
 import { registerAlertsFunction } from './alerts';
-// import { registerQueryFunction } from './query';
+import { registerQueryFunction } from './query';
 
 export async function registerFunctions({
   registerFunction,
@@ -65,16 +65,20 @@ export async function registerFunctions({
 
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
-        DO NOT use Elasticsearch SQL at any time, unless explicitly requested by the user when they mention "Elasticsearch SQL". Additionally, DO NOT assume SQL statements are supported by ES|QL. Use only the context of the conversation to construct a query. Pay special attention to syntax, escaping and arguments.
+        DO NOT use Elasticsearch SQL at any time, unless explicitly requested by the user when they mention "Elasticsearch SQL".
 
-        Example:
+        Right: the user asks to show or execute a query. you call an external service by using the "show_query" function.
+        Wrong: the user asks to show or execute a query. You attempt to answer it yourself
+
+        After executing the "show_query" function, do NOT embed the returned query in your response, it will be displayed to the user.
+
+        When using the "recall" function for an ES|QL query, use the following approach: 
+
         Input: "For service.name, what are the top 5 values by doc count in \`metrics-apm*\`
         Output: \`ES|QL query, COUNT, FROM, SORT, LIMIT, STATS\`
         
         Input: "How many unique values do I have for \`labels.userId\` in \`user-sessions\`?
-        Output: \`ES|QL query, UNIQUE, FROM\`
-    
-        `;
+        Output: \`ES|QL query, UNIQUE, FROM\``;
 
         description += `Here are principles you MUST adhere to, in order:
 
@@ -84,8 +88,7 @@ export async function registerFunctions({
         registerSummarizationFunction({ service, registerFunction });
         registerRecallFunction({ service, registerFunction });
         registerLensFunction({ service, pluginsStart, registerFunction });
-        // Don't register it yet until we can run it on staging against ES 8.11
-        // registerQueryFunction({ service, registerFunction });
+        registerQueryFunction({ service, registerFunction });
       } else {
         description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
       }

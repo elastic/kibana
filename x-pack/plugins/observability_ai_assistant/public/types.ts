@@ -70,6 +70,7 @@ export interface ObservabilityAIAssistantChatService {
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
+    connectorId: string;
   }) => Promise<{ content?: Serializable; data?: Serializable }>;
   renderFunction: (
     name: string,

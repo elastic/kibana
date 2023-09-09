@@ -132,6 +132,7 @@ const defaultProps: ComponentProps<typeof Component> = {
   onFeedback: () => {},
   onRegenerate: () => {},
   onStopGenerating: () => {},
+  onRunQuery: async () => {},
 };
 
 export const ChatTimeline = Template.bind({});

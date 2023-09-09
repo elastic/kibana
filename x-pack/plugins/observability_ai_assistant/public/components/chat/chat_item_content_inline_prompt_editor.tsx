@@ -22,6 +22,7 @@ interface Props {
   loading: boolean;
   editing: boolean;
   onSubmit: (message: Message) => Promise<void>;
+  onRunQueryClick: (query: string) => Promise<void>;
 }
 export function ChatItemContentInlinePromptEditor({
   content,
@@ -29,9 +30,10 @@ export function ChatItemContentInlinePromptEditor({
   editing,
   loading,
   onSubmit,
+  onRunQueryClick,
 }: Props) {
   return !editing ? (
-    <MessageText content={content || ''} loading={loading} />
+    <MessageText content={content || ''} loading={loading} onRunQueryClick={onRunQueryClick} />
   ) : (
     <ChatPromptEditor
       disabled={false}

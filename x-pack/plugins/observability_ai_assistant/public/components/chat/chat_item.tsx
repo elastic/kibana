@@ -30,6 +30,7 @@ export interface ChatItemProps extends ChatTimelineItem {
   onFeedbackClick: (feedback: Feedback) => void;
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
+  onRunQueryClick: (query: string) => Promise<void>;
 }
 
 const normalMessageClassName = css`
@@ -82,6 +83,7 @@ export function ChatItem({
   onFeedbackClick,
   onRegenerateClick,
   onStopGeneratingClick,
+  onRunQueryClick,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -134,6 +136,7 @@ export function ChatItem({
         functionCall={functionCall}
         loading={loading}
         onSubmit={handleInlineEditSubmit}
+        onRunQueryClick={onRunQueryClick}
       />
     ) : null;
 
@@ -153,9 +156,7 @@ export function ChatItem({
 
   return (
     <EuiComment
-      timelineAvatar={
-        <ChatItemAvatar loading={loading && !content} currentUser={currentUser} role={role} />
-      }
+      timelineAvatar={<ChatItemAvatar loading={loading} currentUser={currentUser} role={role} />}
       username={getRoleTranslation(role)}
       event={title}
       actions={
