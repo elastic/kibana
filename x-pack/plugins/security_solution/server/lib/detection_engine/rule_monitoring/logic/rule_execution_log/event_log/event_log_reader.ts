@@ -184,9 +184,10 @@ const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {
   const sequence = normalizeEventSequence(rawEvent);
   const level = normalizeLogLevel(rawEvent);
   const type = normalizeEventType(rawEvent);
+  const execution = normalizeExecutionId(rawEvent);
   const message = normalizeEventMessage(rawEvent, type);
 
-  return { timestamp, sequence, level, type, message };
+  return { timestamp, sequence, level, type, message, execution };
 };
 
 type RawEvent = NonNullable<IValidatedEvent>;
@@ -251,6 +252,15 @@ const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): s
 
   assertUnreachable(type);
   return '';
+};
+
+const normalizeExecutionId = (event: RawEvent): string => {
+  invariant(
+    event.kibana?.alert?.rule?.execution?.uuid,
+    'Required "kibana.alert.rule.execution.uuid" field is not found'
+  );
+
+  return event.kibana.alert.rule.execution.uuid;
 };
 
 const buildEventLogKqlFilter = ({
