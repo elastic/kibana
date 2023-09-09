@@ -241,7 +241,12 @@ const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): s
   }
 
   if (type === RuleExecutionEventType['execution-metrics']) {
-    return '';
+    invariant(
+      event.kibana?.alert?.rule?.execution?.metrics,
+      'Required "kibana.alert.rule.execution.metrics" field is not found'
+    );
+
+    return JSON.stringify(event.kibana.alert.rule.execution.metrics);
   }
 
   assertUnreachable(type);
