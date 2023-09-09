@@ -117,8 +117,7 @@ export const searchAfterAndBulkCreate = async ({
             ruleExecutionLogger.debug(
               `[${cycleNum}] Found 0 events ${
                 sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-              }`,
-              JSON.stringify(toReturn)
+              }`
             );
             break;
           } else {
@@ -127,8 +126,7 @@ export const searchAfterAndBulkCreate = async ({
                 mergedSearchResults.hits.hits.length
               } of total ${totalHits} events${
                 sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-              }, last cursor ${JSON.stringify(lastSortIds)}`,
-              JSON.stringify(toReturn)
+              }, last cursor ${JSON.stringify(lastSortIds)}`
             );
           }
 
