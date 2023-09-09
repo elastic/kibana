@@ -145,7 +145,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('severity filtering', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/166127
+    describe.skip('severity filtering', () => {
       before(async () => {
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
 
