@@ -5,34 +5,11 @@
  * 2.0.
  */
 
-import { RefreshInterval } from '@kbn/data-plugin/common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { LogExplorerNavigationParams } from '@kbn/log-explorer-plugin/common/locators/log_explorer/types';
 import type { IDatasetsClient } from '@kbn/log-explorer-plugin/public/services/datasets';
-import { SerializableRecord } from '@kbn/utility-types';
 
-export interface DatasetLocatorParams extends SerializableRecord {
-  timeRange?: TimeRange;
-  /**
-   * Optionally set the refresh interval.
-   */
-  refreshInterval?: RefreshInterval;
-  /**
-   * Optionally apply filters.
-   */
-  filters?: Filter[];
-  /**
-   * Optionally set a query.
-   */
-  query?: Query | AggregateQuery;
-  /**
-   * Columns displayed in the table
-   */
-  columns?: string[];
-  /**
-   * Array of the used sorting [[field,direction],...]
-   */
-  sort?: string[][];
-}
+export type DatasetLocatorParams = LogExplorerNavigationParams;
 
 export interface AppState {
   index?: string;

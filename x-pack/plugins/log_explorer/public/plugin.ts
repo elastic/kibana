@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
 import { createLogExplorer } from './components/log_explorer';
 import { DatasetsService, IDatasetsClient } from './services/datasets';
 import {
@@ -18,18 +19,33 @@ import {
 export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExplorerPluginStart> {
   private datasetsService: DatasetsService;
   private datasetsClient?: IDatasetsClient;
+  private locators?: LogExplorerLocators;
 
   constructor(context: PluginInitializerContext) {
     this.datasetsService = new DatasetsService();
   }
 
   public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {
+    const { share, discover } = plugins;
+
     this.datasetsClient = this.datasetsService.setup({
       http: core.http,
     }).client;
 
+    // Register Locators
+    const logExplorerLocator = share.url.locators.create(
+      new LogExplorerLocatorDefinition({
+        discover,
+      })
+    );
+
+    this.locators = {
+      logExplorerLocator,
+    };
+
     return {
       datasetsService: this.datasetsClient,
+      locators: this.locators,
     };
   }
 

@@ -19,7 +19,8 @@
       "kibanaReact",
       "kibanaUtils",
       "controls",
-      "embeddable"
+      "embeddable",
+      "share",
     ],
     "optionalPlugins": [],
     "requiredBundles": []
