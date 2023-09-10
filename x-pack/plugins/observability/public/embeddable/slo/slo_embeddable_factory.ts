@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CoreSetup } from '@kbn/core/public';
 import {
   IContainer,
   EmbeddableInput,
@@ -13,10 +14,19 @@ import {
   EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
+import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../..';
+// import { resolveSloEmbeddableUserInput } from './handle_explicit_input';
 
 export type SloListFactory = EmbeddableFactory;
 export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = SLO_EMBEDDABLE;
+
+  constructor(
+    private getStartServices: CoreSetup<
+      ObservabilityPublicPluginsStart,
+      ObservabilityPublicStart
+    >['getStartServices']
+  ) {}
 
   /**
    * In our simple example, we let everyone have permissions to edit this. Most
@@ -25,6 +35,16 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
    */
   public async isEditable() {
     return true;
+  }
+
+  public async getExplicitInput() {
+    const [coreStart, pluginStart] = await this.getStartServices();
+    try {
+      const { resolveEmbeddableSloUserInput } = await import('./handle_explicit_input');
+      return await resolveEmbeddableSloUserInput(coreStart, pluginStart);
+    } catch (e) {
+      return Promise.reject();
+    }
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {

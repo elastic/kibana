@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
@@ -32,8 +35,19 @@ export class SLOEmbeddable extends Embeddable {
    * @param node
    */
   public render(node: HTMLElement) {
-    node.innerHTML =
-      '<div data-test-subj="SLOEmbeddable" data-render-complete="true">SLO List HO HO HO!</div>';
+    //
+    ReactDOM.render(
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
+        <EuiFlexItem grow>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {[1, 2, 3].map((slo) => (
+              <EuiFlexItem key={slo}>{slo}</EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>,
+      node
+    );
   }
 
   /**

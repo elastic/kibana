@@ -288,7 +288,7 @@ export class Plugin
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
 
-    const factory = new SloListFactoryDefinition();
+    const factory = new SloListFactoryDefinition(coreSetup.getStartServices);
     pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
 
     if (pluginsSetup.home) {
