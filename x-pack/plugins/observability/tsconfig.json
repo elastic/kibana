@@ -85,6 +85,7 @@
     "@kbn/deeplinks-analytics",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/osquery-plugin",
+    "@kbn/aiops-plugin",
     "@kbn/content-management-plugin"
   ],
   "exclude": [
