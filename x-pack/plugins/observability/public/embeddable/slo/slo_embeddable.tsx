@@ -8,7 +8,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
