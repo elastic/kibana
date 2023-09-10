@@ -29,6 +29,9 @@ import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 export const DataDriftIndexOrSearchRedirect: FC = () => {
   const navigateToPath = useNavigateToPath();
   const { contentManagement, uiSettings } = useMlKibana().services;
+  const {
+    services: { dataViewEditor },
+  } = useMlKibana();
 
   const nextStepPath = '/data_drift';
   const onObjectSelection = (id: string, type: string) => {
@@ -39,9 +42,8 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
     );
   };
 
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
+  const canEditDataView = dataViewEditor?.userPermissions.editDataView();
+
   return (
     <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
@@ -97,9 +99,10 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
             >
               <EuiButton
                 size="m"
-                color="primary"
+                fill
                 iconType="plusInCircleFilled"
                 onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
+                disabled={!canEditDataView}
               >
                 <FormattedMessage
                   id="xpack.ml.dataDrift.createDataViewButton"
