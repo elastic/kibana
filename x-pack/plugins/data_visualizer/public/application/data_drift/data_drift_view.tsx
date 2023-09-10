@@ -172,8 +172,7 @@ export const DataDriftView = ({
         <p>
           <FormattedMessage
             id="xpack.dataVisualizer.dataDrift.emptyPromptBody"
-            defaultMessage="The Data Comparison View compares the statistical properties of features in the 'reference' and 'comparison' data sets.
-"
+            defaultMessage="The Data Drift Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues."
           />
         </p>
       }

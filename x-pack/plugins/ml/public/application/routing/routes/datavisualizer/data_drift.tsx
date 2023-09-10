@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import {
   DataDriftIndexOrSearchRedirect,
   DataDriftIndexPatternsPicker,
-} from '../../../datavisualizer/data_comparison/index_patterns_picker';
+} from '../../../datavisualizer/data_drift/index_patterns_picker';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { MlRoute } from '../..';
 import { createPath, PageLoader, PageProps } from '../../router';

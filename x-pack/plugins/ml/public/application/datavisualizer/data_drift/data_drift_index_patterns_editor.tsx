@@ -217,7 +217,13 @@ export function DataDriftIndexPatternsEditor({
             label={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.referenceData"
-                defaultMessage="Index pattern for reference data"
+                defaultMessage="Select an index pattern to specify the reference data."
+              />
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.ml.dataDrift.indexPatternsEditor.requireSameTimeFieldHelpText"
+                defaultMessage="To view the changes in the data over time, reference and comparison data can have different index patterns, but they must have the same time field."
               />
             }
             dataViewEditorService={referenceDataViewEditorService}
@@ -237,7 +243,13 @@ export function DataDriftIndexPatternsEditor({
             label={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.comparisonData"
-                defaultMessage="Index pattern for comparison data"
+                defaultMessage="Select an index pattern to specify the comparison data"
+              />
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.ml.dataDrift.indexPatternsEditor.requireSameTimeFieldHelpText"
+                defaultMessage="To view the changes in the data over time, reference and comparison data can have different index patterns, but they must have the same time field."
               />
             }
             dataViewEditorService={productionDataViewEditorService}

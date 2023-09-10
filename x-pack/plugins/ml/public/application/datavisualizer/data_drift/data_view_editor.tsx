@@ -31,6 +31,7 @@ interface DataViewEditorProps {
   indexPattern: string;
   setIndexPattern: (ip: string) => void;
   onError: (errorMsg?: string) => void;
+  helpText?: ReactNode;
 }
 
 const mustMatchError = i18n.translate(
@@ -46,6 +47,7 @@ export function DataViewEditor({
   indexPattern,
   setIndexPattern,
   onError,
+  helpText,
 }: DataViewEditorProps) {
   useDebounce(
     () => {
@@ -128,6 +130,7 @@ export function DataViewEditor({
           error={errorMessage}
           isInvalid={errorMessage !== undefined}
           fullWidth
+          helpText={helpText}
         >
           <EuiFieldText
             value={indexPattern}
