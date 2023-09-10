@@ -23,12 +23,14 @@ export const InstallCloudFormationManagedAgentStep = ({
   enrollToken,
   isComplete,
   cloudSecurityIntegration,
+  agentPolicyId,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
   enrollToken?: string;
   isComplete?: boolean;
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
+  agentPolicyId?: string;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -43,6 +45,7 @@ export const InstallCloudFormationManagedAgentStep = ({
         <CloudFormationInstructions
           cloudSecurityIntegration={cloudSecurityIntegration}
           enrollmentAPIKey={enrollToken}
+          agentPolicyId={agentPolicyId}
         />
       ) : (
         <React.Fragment />

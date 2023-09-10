@@ -254,6 +254,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           enrollToken,
           cloudSecurityIntegration,
+          agentPolicyId: agentPolicy?.id,
         })
       );
     } else if (cloudSecurityIntegration?.cloudShellUrl) {
