@@ -39,6 +39,9 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
     );
   };
 
+  // @ts-ignore
+  // @ts-ignore
+  // @ts-ignore
   return (
     <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
@@ -55,19 +58,6 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
           </MlPageHeader>
           <EuiPanel hasShadow={false} hasBorder>
             <SavedObjectFinder
-              leftChildren={
-                <EuiButton
-                  size="m"
-                  color="primary"
-                  iconType="plusInCircleFilled"
-                  onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.dataDrift.customizeIndexPatternsButton"
-                    defaultMessage="Create a data view"
-                  />
-                </EuiButton>
-              }
               key="searchSavedObjectFinder"
               onChoose={onObjectSelection}
               showFilter
@@ -104,7 +94,19 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
                 contentClient: contentManagement.client,
                 uiSettings,
               }}
-            />
+            >
+              <EuiButton
+                size="m"
+                color="primary"
+                iconType="plusInCircleFilled"
+                onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
+              >
+                <FormattedMessage
+                  id="xpack.ml.dataDrift.createDataViewButton"
+                  defaultMessage="Create a data view"
+                />
+              </EuiButton>
+            </SavedObjectFinder>
           </EuiPanel>
         </>
       </EuiPageBody>
