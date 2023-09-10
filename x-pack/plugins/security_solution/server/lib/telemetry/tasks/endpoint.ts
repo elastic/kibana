@@ -363,7 +363,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           ]);
           return telemetryPayloads.length;
         } catch (err) {
-          logger.warn(`could not complete endpoint alert telemetry task due to ${err?.message}`);
+          logger.warn(`Could not complete endpoint alert telemetry task due to ${err?.message}`);
           await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
             createTaskMetric(taskName, false, startTime, err.message),
           ]);
