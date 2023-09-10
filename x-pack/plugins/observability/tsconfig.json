@@ -87,6 +87,7 @@
     "@kbn/osquery-plugin",
     "@kbn/content-management-plugin",
     "@kbn/embeddable-plugin",
+    "@kbn/react-kibana-mount",
 
   ],
   "exclude": [
