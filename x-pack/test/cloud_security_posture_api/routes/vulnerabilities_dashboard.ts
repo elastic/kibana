@@ -96,6 +96,10 @@ const removeRealtimeCalculatedFields = (
     return rest;
   });
 
+  const { vulnTrends, ...rest } = responseBody;
+
+  return rest;
+
   return {
     ...responseBody,
     vulnTrends: cleanedVulnTrends,
@@ -214,26 +218,26 @@ export default function ({ getService }: FtrProviderContext) {
           resourcesScanned: 2,
           cloudRegions: 1,
         },
-        vulnTrends: [
-          // {
-          //   high: 1,
-          //   policy_template: 'vuln_mgmt',
-          //   // '@timestamp': '2023-09-03T12:57:04.925186Z',
-          //   critical: 0,
-          //   low: 0,
-          //   vulnerabilities_stats_by_cloud_account: {
-          //     '704479110758': {
-          //       cloudAccountName: 'elastic-security-cloud-security-dev',
-          //       high: 1,
-          //       critical: 0,
-          //       low: 0,
-          //       cloudAccountId: '704479110758',
-          //       medium: 1,
-          //     },
-          //   },
-          //   medium: 1,
-          // },
-        ],
+        // vulnTrends: [
+        // {
+        //   high: 1,
+        //   policy_template: 'vuln_mgmt',
+        //   // '@timestamp': '2023-09-03T12:57:04.925186Z',
+        //   critical: 0,
+        //   low: 0,
+        //   vulnerabilities_stats_by_cloud_account: {
+        //     '704479110758': {
+        //       cloudAccountName: 'elastic-security-cloud-security-dev',
+        //       high: 1,
+        //       critical: 0,
+        //       low: 0,
+        //       cloudAccountId: '704479110758',
+        //       medium: 1,
+        //     },
+        //   },
+        //   medium: 1,
+        // },
+        // ],
         topVulnerableResources: [
           {
             resource: {
