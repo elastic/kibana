@@ -57,7 +57,10 @@ export const DISCOVER_WITH_FILTER_URL =
 export const DISCOVER_WITH_PINNED_FILTER_URL =
   "/app/discover#/?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:security-solution-default,key:host.name,negate:!f,params:(query:test-host),type:phrase),query:(match_phrase:(host.name:test-host)))),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(),filters:!(),index:security-solution-default,interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))";
 
-export const ruleDetailsUrl = (ruleId: string) => `app/security/rules/id/${ruleId}`;
+export const ruleDetailsUrl = (
+  ruleId: string,
+  section?: 'alerts' | 'rule_exceptions' | 'endpoint_exceptions' | 'execution_results'
+) => `app/security/rules/id/${ruleId}${section ? `/${section}` : ''}`;
 export const detectionsRuleDetailsUrl = (ruleId: string) =>
   `app/security/detections/rules/id/${ruleId}`;
 

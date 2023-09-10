@@ -109,6 +109,7 @@ let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
 let currentCursorContent = '';
+let lines = 1;
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -130,7 +131,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
   const { dataViews, expressions, indexManagementApiService } = kibana.services;
-  const [lines, setLines] = useState(1);
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   const [editorHeight, setEditorHeight] = useState(
@@ -205,22 +205,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [editorHeight]
   );
 
-  const updateHeight = () => {
-    if (editor1.current) {
-      const linesCount = editorModel.current?.getLineCount() || 1;
-      if (linesCount === 1 || clickedOutside || initialRender) return;
-      const editorElement = editor1.current.getDomNode();
-      const contentHeight = Math.min(MAX_COMPACT_VIEW_LENGTH, editor1.current.getContentHeight());
-
-      if (editorElement) {
-        editorElement.style.height = `${contentHeight}px`;
-      }
-      const contentWidth = Number(editorElement?.style.width.replace('px', ''));
-      editor1.current.layout({ width: contentWidth, height: contentHeight });
-      setEditorHeight(contentHeight);
-    }
-  };
-
   const restoreInitialMode = () => {
     setIsCodeEditorExpandedFocused(false);
     if (isCodeEditorExpanded) return;
@@ -240,43 +224,32 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   };
 
+  const updateHeight = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    if (lines === 1 || clickedOutside || initialRender) return;
+    const editorElement = editor.getDomNode();
+    const contentHeight = Math.min(MAX_COMPACT_VIEW_LENGTH, editor.getContentHeight());
+
+    if (editorElement) {
+      editorElement.style.height = `${contentHeight}px`;
+    }
+    const contentWidth = Number(editorElement?.style.width.replace('px', ''));
+    editor.layout({ width: contentWidth, height: contentHeight });
+    setEditorHeight(contentHeight);
+  }, []);
+
+  const onEditorFocus = useCallback(() => {
+    setIsCompactFocused(true);
+    setIsCodeEditorExpandedFocused(true);
+    setShowLineNumbers(true);
+    setCodeOneLiner('');
+    clickedOutside = false;
+    initialRender = false;
+    updateLinesFromModel = true;
+  }, []);
+
   useDebounceWithOptions(
     () => {
       if (!editorModel.current) return;
-      editor1.current?.onDidChangeModelContent((e) => {
-        if (updateLinesFromModel) {
-          setLines(editorModel.current?.getLineCount() || 1);
-        }
-        if (editor1?.current) {
-          const currentPosition = editor1.current?.getPosition();
-          const content = editorModel.current?.getValueInRange({
-            startLineNumber: 0,
-            startColumn: 0,
-            endLineNumber: currentPosition?.lineNumber ?? 1,
-            endColumn: currentPosition?.column ?? 1,
-          });
-          if (content) {
-            currentCursorContent = content || editor1.current?.getValue();
-          }
-        }
-      });
-      editor1.current?.onDidFocusEditorText(() => {
-        setIsCompactFocused(true);
-        setIsCodeEditorExpandedFocused(true);
-        setShowLineNumbers(true);
-        setCodeOneLiner('');
-        clickedOutside = false;
-        initialRender = false;
-        updateLinesFromModel = true;
-      });
-      // on CMD/CTRL + Enter submit the query
-      // eslint-disable-next-line no-bitwise
-      editor1.current?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function () {
-        onTextLangQuerySubmit();
-      });
-      if (!isCodeEditorExpanded) {
-        editor1.current?.onDidContentSizeChange(updateHeight);
-      }
       if (warning && (!errors || !errors.length)) {
         const parsedWarning = parseWarning(warning);
         setEditorWarning(parsedWarning);
@@ -326,7 +299,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       if (containerWidth && (!isCompactFocused || force)) {
         const hasLines = /\r|\n/.exec(queryString);
         if (hasLines && !updateLinesFromModel) {
-          setLines(queryString.split(/\r|\n/).length);
+          lines = queryString.split(/\r|\n/).length;
         }
         const text = getInlineEditorText(queryString, Boolean(hasLines));
         const queryLength = text.length;
@@ -701,7 +674,45 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           editorModel.current = model;
                         }
                         if (isCodeEditorExpanded) {
-                          setLines(model?.getLineCount() || 1);
+                          lines = model?.getLineCount() || 1;
+                        }
+
+                        editor.onDidChangeModelContent((e) => {
+                          if (updateLinesFromModel) {
+                            lines = model?.getLineCount() || 1;
+                          }
+                          const currentPosition = editor.getPosition();
+                          const content = editorModel.current?.getValueInRange({
+                            startLineNumber: 0,
+                            startColumn: 0,
+                            endLineNumber: currentPosition?.lineNumber ?? 1,
+                            endColumn: currentPosition?.column ?? 1,
+                          });
+                          if (content) {
+                            currentCursorContent = content || editor.getValue();
+                          }
+                        });
+
+                        editor.onDidFocusEditorText(() => {
+                          onEditorFocus();
+                        });
+
+                        editor.onKeyDown(() => {
+                          onEditorFocus();
+                        });
+
+                        // on CMD/CTRL + Enter submit the query
+                        editor.addCommand(
+                          // eslint-disable-next-line no-bitwise
+                          monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                          function () {
+                            onTextLangQuerySubmit();
+                          }
+                        );
+                        if (!isCodeEditorExpanded) {
+                          editor.onDidContentSizeChange((e) => {
+                            updateHeight(editor);
+                          });
                         }
                       }}
                     />
