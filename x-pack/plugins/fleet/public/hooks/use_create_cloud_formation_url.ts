@@ -20,19 +20,18 @@ const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
 export const useCreateCloudFormationUrl = ({
   enrollmentAPIKey,
   cloudFormationProps,
+  fleetServerHost,
 }: {
   enrollmentAPIKey: string | undefined;
   cloudFormationProps: CloudFormationProps | undefined;
+  fleetServerHost: string | undefined;
 }) => {
-  const { data, isLoading } = useGetSettings();
+  const { isLoading } = useGetSettings();
 
   const kibanaVersion = useKibanaVersion();
 
   let isError = false;
   let error: string | undefined;
-
-  // Default fleet server host
-  const fleetServerHost = data?.item.fleet_server_hosts?.[0];
 
   if (!fleetServerHost && !isLoading) {
     isError = true;

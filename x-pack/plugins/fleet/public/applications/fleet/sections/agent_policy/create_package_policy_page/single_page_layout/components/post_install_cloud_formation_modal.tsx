@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,7 +21,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { sendGetEnrollmentAPIKeys, useCreateCloudFormationUrl } from '../../../../../hooks';
+import {
+  sendGetEnrollmentAPIKeys,
+  useCreateCloudFormationUrl,
+  useGetFleetServerHosts,
+} from '../../../../../hooks';
 import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
 import { CloudFormationGuide } from '../../../../../components';
 
@@ -41,9 +45,19 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
 
   const cloudFormationProps = getCloudFormationPropsFromPackagePolicy(packagePolicy);
 
+  const fleetServerHostId = agentPolicy?.fleet_server_host_id;
+  const { data } = useGetFleetServerHosts();
+
+  const fleetServerHosts = useMemo(() => data?.items ?? [], [data?.items]);
+
+  const selectedHost = fleetServerHosts.find((host) => host.id === fleetServerHostId);
+
+  const fleetServerUrl = selectedHost?.host_urls?.[0];
+
   const { cloudFormationUrl, error, isError, isLoading } = useCreateCloudFormationUrl({
     enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
     cloudFormationProps,
+    fleetServerHost: fleetServerUrl,
   });
 
   return (
