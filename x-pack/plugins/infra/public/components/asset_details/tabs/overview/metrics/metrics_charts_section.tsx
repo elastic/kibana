@@ -18,14 +18,10 @@ import { METRIC_CHART_HEIGHT } from '../../../constants';
 import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
 import type { DataViewOrigin } from '../../../types';
-import {
-  calculateChartRowsTimeInterval,
-  extractTableEntryFromChartClickContextData,
-  isChartClickContextData,
-} from './chart_utils';
+import type { OnFilterEvent } from './chart_utils';
+import { extractRangeFromChartFilterEvent } from './chart_utils';
 
 type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
-type FilterArgs = Parameters<NonNullable<LensEmbeddableInput['onFilter']>>[0];
 
 interface ChartGridProps {
   assetName: string;
@@ -73,24 +69,15 @@ export const ChartGrid = React.memo(
     );
 
     const handleFilter = useCallback(
-      ({ data, preventDefault }: FilterArgs) => {
-        if (!isChartClickContextData(data)) {
+      (event: OnFilterEvent) => {
+        const range = extractRangeFromChartFilterEvent(event);
+
+        if (range === null) {
           return;
         }
 
-        const { column, row } = extractTableEntryFromChartClickContextData(data);
-
-        if (!column || !row || column.meta.type !== 'date') {
-          return;
-        }
-
-        const timestamp = row[column.id];
-        const rowInterval = calculateChartRowsTimeInterval(data[0].table.rows, column.id);
-        const from = new Date(timestamp).toISOString();
-        const to = new Date(timestamp + rowInterval).toISOString();
-
-        setDateRange({ from, to });
-        preventDefault();
+        setDateRange(range);
+        event.preventDefault();
       },
       [setDateRange]
     );

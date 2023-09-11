@@ -8,6 +8,7 @@
 import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common/expression_types';
 import {
   calculateChartRowsTimeInterval,
+  extractRangeFromChartFilterEvent,
   extractTableEntryFromChartClickContextData,
   isChartClickContextData,
 } from './chart_utils';
@@ -118,6 +119,69 @@ describe('Asset details chart utils', () => {
           },
         ])
       ).toEqual({ row, column });
+    });
+  });
+
+  describe('extractRangeFromChartFilterEvent()', () => {
+    it('returns null if event does not have the time filter data', () => {
+      expect(
+        extractRangeFromChartFilterEvent({
+          data: [{ cells: [], table: { rows: [], columns: [] } }],
+          preventDefault: () => {},
+        })
+      ).toEqual(null);
+    });
+
+    it('returns TimeRange with `from` equal to the date user is filtering by', () => {
+      const timestamp = 1694178026935;
+      const row: DatatableRow = { timeColumn: timestamp };
+      const column: DatatableColumn = {
+        id: 'timeColumn',
+        name: '@timestamp',
+        meta: { type: 'date' },
+      };
+
+      const range = extractRangeFromChartFilterEvent({
+        data: [
+          {
+            cells: [{ row: 0, column: 0 }],
+            table: {
+              rows: [row],
+              columns: [column],
+            },
+          },
+        ],
+        preventDefault: () => {},
+      });
+
+      expect(range?.from).toEqual(new Date(timestamp).toISOString());
+    });
+
+    it('returns TimeRange with `to` equal to the date user is filtering by plus the time to next data point', () => {
+      const timestamp0 = 1694178000000;
+      const timestamp1 = 1694178100000;
+      const interval = timestamp1 - timestamp0;
+
+      const range = extractRangeFromChartFilterEvent({
+        data: [
+          {
+            cells: [{ row: 0, column: 0 }],
+            table: {
+              rows: [{ timeColumn: timestamp0 }, { timeColumn: timestamp1 }],
+              columns: [
+                {
+                  id: 'timeColumn',
+                  name: '@timestamp',
+                  meta: { type: 'date' },
+                },
+              ],
+            },
+          },
+        ],
+        preventDefault: () => {},
+      });
+
+      expect(range?.to).toEqual(new Date(timestamp0 + interval).toISOString());
     });
   });
 });

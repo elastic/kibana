@@ -6,17 +6,16 @@
  */
 
 import { MultiValueClickContext } from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/es-query';
 import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common/expression_types';
+import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 
 type ChartClickContextData = MultiValueClickContext['data']['data'];
 
+export type OnFilterEvent = Parameters<NonNullable<LensEmbeddableInput['onFilter']>>[0];
+
 export function isChartClickContextData(data: unknown): data is ChartClickContextData {
-  return (
-    Array.isArray(data) &&
-    data.length > 0 &&
-    Array.isArray(data[0].cells) &&
-    data[0].cells.length > 0
-  );
+  return Array.isArray(data) && Array.isArray(data[0]?.cells) && data[0].cells.length > 0;
 }
 
 export function calculateChartRowsTimeInterval(
@@ -40,4 +39,23 @@ export function extractTableEntryFromChartClickContextData(data: ChartClickConte
   const row = table.rows[cell.row] ?? null;
 
   return { column, row };
+}
+
+export function extractRangeFromChartFilterEvent({ data }: OnFilterEvent): TimeRange | null {
+  if (!isChartClickContextData(data)) {
+    return null;
+  }
+
+  const { column, row } = extractTableEntryFromChartClickContextData(data);
+
+  if (!column || !row || column.meta.type !== 'date') {
+    return null;
+  }
+
+  const timestamp = row[column.id];
+  const rowInterval = calculateChartRowsTimeInterval(data[0].table.rows, column.id);
+  const from = new Date(timestamp).toISOString();
+  const to = new Date(timestamp + rowInterval).toISOString();
+
+  return { from, to };
 }
