@@ -118,6 +118,7 @@ const getServerlessDefault = () => {
     },
     elasticsearch: {
       hosts: [`http://localhost:${esTestConfig.getPort()}`],
+      serviceAccountToken: kibanaDevServiceAccount.token,
     },
     migrations: {
       algorithm: 'zdt',
@@ -142,9 +143,6 @@ const getServerlessDefault = () => {
         deprecation: { type: 'console', layout: { type: 'json' } },
         console: { type: 'console', layout: { type: 'pattern' } },
       },
-    },
-    elasticsearch: {
-      serviceAccountToken: kibanaDevServiceAccount.token,
     },
   };
 };
