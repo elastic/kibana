@@ -7,7 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { ArtifactLicense } from '../artifact';
+import type { ArtifactLicense } from '../artifact';
 
 export interface InstallSourceOptions {
   sourcePath: string;

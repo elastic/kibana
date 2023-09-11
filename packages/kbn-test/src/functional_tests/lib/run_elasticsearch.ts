@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ArtifactLicense } from '@kbn/es/src/artifact';
+import type { ArtifactLicense } from '@kbn/es';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster } from '../../es';
 
