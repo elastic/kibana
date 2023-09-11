@@ -44,7 +44,7 @@ export function formatValueByKey(value: unknown, key: string): string | JSX.Elem
       </EuiCodeBlock>
     );
   }
-  
+
   return String(value);
 }
 
