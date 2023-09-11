@@ -37,10 +37,11 @@ import {
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165795
 describe(
   'Add, edit and delete exception',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       cy.task('esArchiverResetKibana');
