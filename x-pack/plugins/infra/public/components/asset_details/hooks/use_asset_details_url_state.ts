@@ -9,15 +9,15 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { FlyoutTabIds } from '../types';
+import { ContentTabIds } from '../types';
 import { useUrlState } from '../../../utils/use_url_state';
+import { ASSET_DETAILS_URL_STATE_KEY } from '../constants';
+import { getDefaultDateRange } from '../utils';
 
-export const DEFAULT_STATE: AssetDetailsState = {
-  tabId: FlyoutTabIds.OVERVIEW,
-  processSearch: undefined,
-  metadataSearch: undefined,
+export const DEFAULT_STATE: AssetDetailsUrlState = {
+  tabId: ContentTabIds.OVERVIEW,
+  dateRange: getDefaultDateRange(),
 };
-const ASSET_DETAILS_URL_STATE_KEY = 'asset_details';
 
 type SetAssetDetailsState = (newProp: Payload | null) => void;
 
@@ -44,34 +44,35 @@ export const useAssetDetailsUrlState = (): [AssetDetailsUrl, SetAssetDetailsStat
 };
 
 const TabIdRT = rt.union([
-  rt.literal(FlyoutTabIds.OVERVIEW),
-  rt.literal(FlyoutTabIds.METADATA),
-  rt.literal(FlyoutTabIds.PROCESSES),
-  rt.literal(FlyoutTabIds.LOGS),
-  rt.literal(FlyoutTabIds.ANOMALIES),
-  rt.literal(FlyoutTabIds.OSQUERY),
+  rt.literal(ContentTabIds.OVERVIEW),
+  rt.literal(ContentTabIds.METADATA),
+  rt.literal(ContentTabIds.PROCESSES),
+  rt.literal(ContentTabIds.LOGS),
+  rt.literal(ContentTabIds.ANOMALIES),
+  rt.literal(ContentTabIds.OSQUERY),
 ]);
 
-const AssetDetailsStateRT = rt.intersection([
+const AssetDetailsUrlStateRT = rt.intersection([
   rt.type({
-    tabId: TabIdRT,
-  }),
-  rt.partial({
     dateRange: rt.type({
       from: rt.string,
       to: rt.string,
     }),
+  }),
+  rt.partial({
+    tabId: TabIdRT,
+    name: rt.string,
     processSearch: rt.string,
     metadataSearch: rt.string,
     logsSearch: rt.string,
   }),
 ]);
 
-const AssetDetailsUrlRT = rt.union([AssetDetailsStateRT, rt.null]);
+const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
 
-export type AssetDetailsState = rt.TypeOf<typeof AssetDetailsStateRT>;
+export type AssetDetailsUrlState = rt.TypeOf<typeof AssetDetailsUrlStateRT>;
 type AssetDetailsUrl = rt.TypeOf<typeof AssetDetailsUrlRT>;
-type Payload = Partial<AssetDetailsState>;
+type Payload = Partial<AssetDetailsUrlState>;
 
 const encodeUrlState = AssetDetailsUrlRT.encode;
 const decodeUrlState = (value: unknown) => {
