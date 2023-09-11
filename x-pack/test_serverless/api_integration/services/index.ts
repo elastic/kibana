@@ -13,6 +13,7 @@ import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { AlertingApiProvider } from './alerting_api';
 import { SamlToolsProvider } from './saml_tools';
 import { DataViewApiProvider } from './data_view_api';
+import { SvlCasesServiceProvider } from './svl_cases';
 
 export const services = {
   // deployment agnostic FTR services
@@ -24,6 +25,7 @@ export const services = {
   alertingApi: AlertingApiProvider,
   samlTools: SamlToolsProvider,
   dataViewApi: DataViewApiProvider,
+  svlCases: SvlCasesServiceProvider,
 };
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
