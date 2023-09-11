@@ -12,6 +12,7 @@ import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warn
 import {
   DataLoadingState as DiscoverGridLoadingState,
   UnifiedDataTable,
+  type DataTableColumnTypes,
 } from '@kbn/unified-data-table';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import './saved_search_grid.scss';
@@ -36,13 +37,19 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
   const renderDocumentView = useCallback(
-    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnTypes?: DataTableColumnTypes
+    ) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
+        columnTypes={customColumnTypes}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
@@ -79,6 +86,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}
         componentsTourSteps={{ expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument }}
+        // TODO: pass columnTypes for embeddables
       />
     </SavedSearchEmbeddableBase>
   );

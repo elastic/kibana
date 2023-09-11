@@ -29,6 +29,7 @@ export interface DocViewRenderProps {
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
+  columnTypes?: Record<string, string>;
   query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
   filter?: DocViewFilterFn;
