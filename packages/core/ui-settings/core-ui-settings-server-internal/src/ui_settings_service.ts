@@ -105,7 +105,10 @@ export class UiSettingsService
 
   public async start(): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
-      this.validateAllowlist();
+      // If we are in development mode, check if all settings in the allowlist are registered
+      if (process.env.NODE_ENV !== 'production'){
+        this.validateAllowlist();
+      }
       this.applyAllowlist(this.uiSettingsDefaults, false);
       this.applyAllowlist(this.uiSettingsGlobalDefaults, true);
     }
