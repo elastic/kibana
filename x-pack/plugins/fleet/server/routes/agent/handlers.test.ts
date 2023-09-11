@@ -6,6 +6,7 @@
  */
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+
 import { getAvailableVersionsHandler } from './handlers';
 
 jest.mock('../../services/agents/versions', () => {

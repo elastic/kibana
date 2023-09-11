@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+
 import { useKibanaVersion } from './use_kibana_version';
 import { sendGetAgentsAvailableVersions } from './use_request';
 
