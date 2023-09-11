@@ -117,16 +117,13 @@ export class ReportingStore {
     const client = await this.getClient();
     const exists = await client.indices.exists({ index: indexName });
 
-    if (this.config.disableStatefulSettings.enabled) return;
-
     if (exists) {
       return exists;
     }
 
-    try {
-      await client.indices.create({
-        index: indexName,
-        body: {
+    const indexSettings = this.config.disableStatefulSettings.enabled
+      ? {}
+      : {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
@@ -134,6 +131,13 @@ export class ReportingStore {
               name: ILM_POLICY_NAME,
             },
           },
+        };
+
+    try {
+      await client.indices.create({
+        index: indexName,
+        body: {
+          ...indexSettings,
           mappings: {
             properties: mapping,
           },
@@ -169,6 +173,7 @@ export class ReportingStore {
         }),
       },
     };
+    console.log('\n\n\n\n\ does it reach here')
     const client = await this.getClient();
     return await client.index(doc);
   }
@@ -213,6 +218,7 @@ export class ReportingStore {
       report._index = index;
     }
     await this.createIndex(index);
+    console.log('\n\n\n\n\ creates the index')
 
     try {
       report.updateWithEsDoc(await this.indexReport(report));
