@@ -80,13 +80,12 @@ export default function ({ getService }: FtrProviderContext) {
             matchField: 'email',
             enrichFields: ['firstName'],
             sourceIndices: [INDEX_A_NAME],
-          }
+          },
         })
         .expect(200);
 
       expect(body).toStrictEqual({ acknowledged: true });
     });
-
 
     it('Can retrieve fields from indices', async () => {
       const { body } = await supertest
@@ -127,6 +126,5 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body).toStrictEqual({ indices: [INDEX_A_NAME, INDEX_B_NAME] });
     });
-
   });
 }
