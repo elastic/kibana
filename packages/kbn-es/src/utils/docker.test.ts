@@ -476,15 +476,18 @@ describe('runServerlessCluster()', () => {
         [baseEsPath]: {},
       });
       execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
-      const info = jest.fn();
-      jest.requireMock('@elastic/elasticsearch').Client.mockImplementation(() => ({ info }));
+      const health = jest.fn();
+      jest
+        .requireMock('@elastic/elasticsearch')
+        .Client.mockImplementation(() => ({ cluster: { health } }));
 
-      info.mockImplementationOnce(() => Promise.reject()); // first call fails
-      info.mockImplementationOnce(() => Promise.resolve()); // then succeeds
+      health.mockImplementationOnce(() => Promise.reject()); // first call fails
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'red' })); // second call return wrong status
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'green' })); // then succeeds
 
       await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
-      expect(info).toHaveBeenCalledTimes(2);
-    });
+      expect(health).toHaveBeenCalledTimes(3);
+    }, 10000);
   });
 });
 
