@@ -206,7 +206,9 @@ describe('TelemetryService', () => {
         }
       );
     });
+  });
 
+  describe('#reportAssetDetailsPageViewed', () => {
     it('should report asset details viewed in full page with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);
