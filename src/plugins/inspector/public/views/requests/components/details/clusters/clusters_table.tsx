@@ -9,7 +9,7 @@
 import React, { useState, ReactNode } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ClusterDescriptionList } from './cluster_description_list';
 import { ClusterHealth } from './cluster_health';
 
@@ -61,10 +61,13 @@ export function ClustersTable({ clusters }: Props) {
               }
               iconType={name in expandedRows ? 'arrowDown' : 'arrowRight'}
             />
-            {name}
+            <EuiText size="xs" color="subdued">
+              {name}
+            </EuiText>
           </>
         );
       },
+      width: '60%',
     },
     {
       field: 'status',
@@ -76,17 +79,21 @@ export function ClustersTable({ clusters }: Props) {
       },
     },
     {
+      align: 'right',
       field: 'responseTime',
       name: i18n.translate('inspector.requests.clustersTable.responseTimeLabel', {
         defaultMessage: 'Response time',
       }),
-      render: (responseTime: number | undefined) =>
-        responseTime
-          ? i18n.translate('inspector.requests.clustersTable.responseTimeInMilliseconds', {
-              defaultMessage: '{responseTime}ms',
-              values: { responseTime },
-            })
-          : null,
+      render: (responseTime: number | undefined) => (
+        <EuiText size="xs" color="subdued">
+          {responseTime
+            ? i18n.translate('inspector.requests.clustersTable.responseTimeInMilliseconds', {
+                defaultMessage: '{responseTime}ms',
+                values: { responseTime },
+              })
+            : null}
+        </EuiText>
+      ),
     },
   ];
 
