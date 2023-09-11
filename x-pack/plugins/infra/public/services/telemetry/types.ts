@@ -46,6 +46,7 @@ export interface AssetDetailsFlyoutViewedParams {
   assetType: string;
   componentName: string;
   tabId?: string;
+  integrations?: string[];
 }
 
 export type InfraTelemetryEventParams =

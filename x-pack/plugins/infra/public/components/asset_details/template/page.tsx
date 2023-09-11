@@ -21,14 +21,17 @@ import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
 
-// TODO
+enum INTEGRATION_NAME {
+  nginx = 'nginx',
+  kubernetes = 'kubernetes',
+}
 const INTEGRATIONS = {
-  nginx: ['nginx.stubstatus', 'nginx.access'],
-  kubernetes: ['kubernetes.node'],
+  [INTEGRATION_NAME.nginx]: ['nginx.stubstatus', 'nginx.access'],
+  [INTEGRATION_NAME.kubernetes]: ['kubernetes.node'],
 };
 
 const getIntegrationAvailable = (
-  integration: 'nginx' | 'kubernetes',
+  integration: INTEGRATION_NAME,
   metadata?: InfraMetadata | null
 ) => {
   if (metadata) {
@@ -56,15 +59,23 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       return;
     }
     if (!metadataLoading && metadata) {
-      const nginx = getIntegrationAvailable('nginx', metadata);
-      const kubernetes = getIntegrationAvailable('kubernetes', metadata);
-      const integrations = [nginx, kubernetes].filter(Boolean);
-
-      telemetry.reportAssetDetailsFlyoutViewed({
+      const nginx = getIntegrationAvailable(INTEGRATION_NAME.nginx, metadata) ?? '';
+      const kubernetes = getIntegrationAvailable(INTEGRATION_NAME.kubernetes, metadata) ?? '';
+      const integrations: string[] = [nginx, kubernetes].filter(Boolean);
+      const telemetryParams = {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
         assetType,
         tabId: activeTabId,
-      });
+      };
+
+      telemetry.reportAssetDetailsFlyoutViewed(
+        integrations.length > 0
+          ? {
+              ...telemetryParams,
+              integrations,
+            }
+          : telemetryParams
+      );
       trackOnlyOnce.current = true;
     }
   }, [activeTabId, assetType, metadata, metadataLoading, telemetry]);
@@ -91,6 +102,8 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       offset={0}
       restrictWidth={false}
       style={{ minBlockSize: `calc(100vh - ${headerHeight}px)` }}
+      data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
+      data-asset-type={assetType}
     >
       <EuiPageTemplate.Section paddingSize="none">
         <EuiPageTemplate.Header

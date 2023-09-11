@@ -194,6 +194,7 @@ describe('TelemetryService', () => {
         componentName: 'infraAssetDetailsFlyout',
         assetType: 'host',
         tabId: 'overview',
+        integrations: ['nginx'],
       });
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -203,6 +204,7 @@ describe('TelemetryService', () => {
           componentName: 'infraAssetDetailsFlyout',
           assetType: 'host',
           tabId: 'overview',
+          integrations: ['nginx'],
         }
       );
     });
