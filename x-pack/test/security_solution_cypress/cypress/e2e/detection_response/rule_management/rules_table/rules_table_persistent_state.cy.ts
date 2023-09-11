@@ -9,13 +9,8 @@ import { encode } from '@kbn/rison';
 
 import { cleanKibana, resetRulesTableState } from '../../../../tasks/common';
 import { login, visitWithDateRange } from '../../../../tasks/login';
-import {
-  DASHBOARDS_URL,
-  KIBANA_HOME,
-  RULES_MANAGEMENT_URL,
-  RULES_MONITORING_URL,
-  RULES_MANAGEMENT_URL,
-} from '../../../../urls/navigation';
+import { DASHBOARDS_URL, KIBANA_HOME } from '../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL, RULES_MONITORING_URL } from '../../../../urls/rules_management';
 import { getNewRule } from '../../../../objects/rule';
 import {
   filterByCustomRules,

@@ -106,14 +106,10 @@ import {
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
-import {
-  login,
-  visitWithDateRange,
-  visitSecurityDetectionRulesPage,
-  visit,
-} from '../../../tasks/login';
+import { login, visitWithDateRange, visit } from '../../../tasks/login';
 import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { ruleDetailsUrl, ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -258,7 +254,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
         );
         createRule(getExistingRule({ rule_id: 'rule3', name: 'Rule 1', enabled: false }));
         login();
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
       });
 
       it('Deletes one rule', () => {

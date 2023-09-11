@@ -14,7 +14,7 @@ import {
 import { cleanKibana, deleteAlertsAndRules, reload } from '../../../../../tasks/common';
 import { login, visit } from '../../../../../tasks/login';
 
-import { RULES_MANAGEMENT_URL } from '../../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
 // TODO: https://github.com/elastic/kibana/issues/161540

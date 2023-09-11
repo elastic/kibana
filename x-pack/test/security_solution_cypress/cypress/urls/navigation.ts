@@ -53,8 +53,6 @@ export const hostDetailsUrl = (hostName: string) =>
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
 export const ALERTS_URL = '/app/security/alerts';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
-export const RULES_MANAGEMENT_URL = '/app/security/detections/rules/management';
-export const RULES_MONITORING_URL = '/app/security/detections/rules/monitoring';
 export const CREATE_RULE_URL = '/app/security/rules/create';
 export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
 

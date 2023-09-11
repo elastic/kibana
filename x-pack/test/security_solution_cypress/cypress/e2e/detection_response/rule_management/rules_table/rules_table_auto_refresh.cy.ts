@@ -26,7 +26,7 @@ import {
 } from '../../../../tasks/alerts_detection_rules';
 import { login, visit } from '../../../../tasks/login';
 
-import { RULES_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';

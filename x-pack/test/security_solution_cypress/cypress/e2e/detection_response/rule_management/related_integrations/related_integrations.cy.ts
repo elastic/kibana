@@ -27,7 +27,8 @@ import {
   enableRelatedIntegrations,
 } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visit, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
+import { login, visit } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
@@ -81,7 +82,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
   describe('integrations not installed', () => {
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -149,7 +150,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 
@@ -239,7 +240,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
 
     describe('rules management table', () => {
       beforeEach(() => {
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
       });
 

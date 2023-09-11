@@ -8,7 +8,7 @@
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
 import { login, visit } from '../../../tasks/login';
-import { RULES_MANAGEMENT_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,
   waitForValueListsModalToBeLoaded,

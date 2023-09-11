@@ -11,11 +11,11 @@ import { login, visitWithDateRange, visit } from '../../tasks/login';
 import {
   ALERTS_URL,
   detectionRuleEditUrl,
-  RULES_MANAGEMENT_URL,
   ruleDetailsUrl,
   ruleEditUrl,
   CREATE_RULE_URL,
 } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,

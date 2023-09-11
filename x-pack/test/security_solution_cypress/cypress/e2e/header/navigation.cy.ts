@@ -47,7 +47,6 @@ import {
   OVERVIEW_URL,
   TIMELINES_URL,
   EXCEPTIONS_URL,
-  RULES_MANAGEMENT_URL,
   USERS_URL,
   DASHBOARDS_URL,
   DETECTION_AND_RESPONSE_URL,
@@ -62,6 +61,7 @@ import {
   ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
 } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import {
   openKibanaNavigation,
   navigateFromKibanaCollapsibleTo,

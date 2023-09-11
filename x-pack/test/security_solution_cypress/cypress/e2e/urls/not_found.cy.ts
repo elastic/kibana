@@ -14,11 +14,11 @@ import {
   EVENT_FILTERS_URL,
   TIMELINES_URL,
   EXCEPTIONS_URL,
-  RULES_MANAGEMENT_URL,
   CREATE_RULE_URL,
   ruleEditUrl,
   ruleDetailsUrl,
 } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 
 import { NOT_FOUND } from '../../screens/common/page';
 

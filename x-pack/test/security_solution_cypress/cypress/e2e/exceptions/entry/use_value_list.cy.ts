@@ -16,7 +16,8 @@ import { openExceptionFlyoutFromEmptyViewerPrompt } from '../../../tasks/rule_de
 import { getNewRule } from '../../../objects/rule';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
-import { RULES_MANAGEMENT_URL, ruleDetailsUrl } from '../../../urls/navigation';
+import { ruleDetailsUrl } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,
   waitForListsIndex,

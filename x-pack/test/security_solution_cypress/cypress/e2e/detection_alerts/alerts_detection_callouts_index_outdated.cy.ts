@@ -7,11 +7,13 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { RULES_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
+import { ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
 import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
+
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,

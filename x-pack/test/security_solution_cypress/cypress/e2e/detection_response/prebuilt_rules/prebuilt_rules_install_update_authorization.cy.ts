@@ -16,7 +16,7 @@ import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
 import { login, waitForPageWithoutDateRange } from '../../../tasks/login';
-import { RULES_MANAGEMENT_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   ADD_ELASTIC_RULES_BTN,
   getInstallSingleRuleButtonByRuleId,

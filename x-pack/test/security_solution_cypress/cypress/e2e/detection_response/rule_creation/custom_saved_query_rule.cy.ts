@@ -39,12 +39,8 @@ import { login, visitWithDateRange, visit } from '../../../tasks/login';
 import { assertDetailsNotExist, getDetails } from '../../../tasks/rule_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 
-import {
-  ruleDetailsUrl,
-  ruleEditUrl,
-  CREATE_RULE_URL,
-  RULES_MANAGEMENT_URL,
-} from '../../../urls/navigation';
+import { ruleDetailsUrl, ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';

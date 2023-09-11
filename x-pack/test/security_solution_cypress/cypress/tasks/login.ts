@@ -13,13 +13,7 @@ import Url from 'url';
 import type { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
-import {
-  hostDetailsUrl,
-  LOGOUT_URL,
-  RULES_MANAGEMENT_URL,
-  userDetailsUrl,
-} from '../urls/navigation';
-import { resetRulesTableState } from './common';
+import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -355,11 +349,6 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   visitWithDateRange(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]').should('exist');
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
-};
-
-export const visitSecurityDetectionRulesPage = (role?: ROLES) => {
-  resetRulesTableState(); // Clear persistent rules filter data before page loading
-  visit(RULES_MANAGEMENT_URL, role);
 };
 
 export const visitUserDetailsPage = (userName = 'test') => {

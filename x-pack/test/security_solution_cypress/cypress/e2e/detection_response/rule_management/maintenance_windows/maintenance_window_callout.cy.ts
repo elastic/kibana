@@ -10,7 +10,7 @@ import type { MaintenanceWindowCreateBody } from '@kbn/alerting-plugin/common';
 import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visitWithDateRange } from '../../../../tasks/login';
-import { RULES_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe(
