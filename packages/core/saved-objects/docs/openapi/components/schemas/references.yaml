@@ -1,0 +1,4 @@
+type: array
+description: >
+  Objects with `name`, `id`, and `type` properties that describe the other saved objects that this object references.
+  Use `name` in attributes to refer to the other saved object, but never the `id`, which can update automatically during migrations or import and export.

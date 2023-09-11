@@ -6,7 +6,6 @@
  */
 
 import path from 'path';
-import { tag } from '../../../../../tags';
 
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
@@ -56,7 +55,8 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
   });
 });
 
-describe('Export rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {

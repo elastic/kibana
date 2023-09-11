@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../../tasks/common';
@@ -24,9 +22,10 @@ import {
   ruleUpdatesTabClick,
 } from '../../../tasks/prebuilt_rules';
 
+// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
-  { tags: tag.ESS },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       login();

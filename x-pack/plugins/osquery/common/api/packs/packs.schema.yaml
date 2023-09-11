@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Packs Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/packs:
+    get:
+      summary: Find packs
+      parameters:
+          - $ref: './find_packs.schema.yaml#/components/parameters/FindPacksRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
+    post:
+      summary: Create a packs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './create_pack.schema.yaml#/components/schemas/SuccessResponse'
+  /api/osquery/packs/{id}:
+    get:
+      summary: Get packs details
+      parameters:
+        - $ref: './read_packs.schema.yaml#/components/parameters/ReadPacksRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './read_packs.schema.yaml#/components/schemas/SuccessResponse'
+    delete:
+      summary: Delete packs
+      parameters:
+        - $ref: './delete_packs.schema.yaml#/components/parameters/DeletePacksRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
+    put:
+      summary: Update packs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
+      parameters:
+        - $ref: './update_packs.schema.yaml#/components/parameters/UpdatePacksRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './update_packs.schema.yaml#/components/schemas/SuccessResponse'

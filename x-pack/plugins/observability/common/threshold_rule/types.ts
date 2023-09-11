@@ -14,8 +14,7 @@ import { metricsExplorerMetricRT } from './metrics_explorer';
 import { TimeUnitChar } from '../utils/formatters/duration';
 import { SNAPSHOT_CUSTOM_AGGREGATIONS } from './constants';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
+type DeepPartialArray<T> = Array<DeepPartial<T>>;
 
 type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
 export type DeepPartial<T> = T extends any[]
@@ -235,7 +234,7 @@ export type CustomMetricAggTypes = Exclude<
   Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
 >;
 
-export interface MetricExpressionCustomMetric {
+export interface CustomThresholdExpressionMetric {
   name: string;
   aggType: CustomMetricAggTypes;
   field?: string;
@@ -244,7 +243,7 @@ export interface MetricExpressionCustomMetric {
 
 export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.CUSTOM;
-  customMetrics: MetricExpressionCustomMetric[];
+  metrics: CustomThresholdExpressionMetric[];
   equation?: string;
   label?: string;
 }

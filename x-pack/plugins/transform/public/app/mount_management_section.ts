@@ -22,7 +22,8 @@ const localStorage = new Storage(window.localStorage);
 
 export async function mountManagementSection(
   coreSetup: CoreSetup<PluginsDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  isServerless: boolean
 ) {
   const { element, setBreadcrumbs, history } = params;
   const { http, getStartServices } = coreSetup;
@@ -92,7 +93,7 @@ export async function mountManagementSection(
     contentManagement,
   };
 
-  const unmountAppCallback = renderApp(element, appDependencies);
+  const unmountAppCallback = renderApp(element, appDependencies, isServerless);
 
   return () => {
     docTitle.reset();

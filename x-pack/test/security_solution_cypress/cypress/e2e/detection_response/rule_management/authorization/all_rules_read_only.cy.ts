@@ -6,7 +6,6 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../../tags';
 
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -25,7 +24,9 @@ import {
 } from '../../../../tasks/common/callouts';
 import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
 
-describe('All rules - read only', { tags: tag.ESS }, () => {
+// TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('All rules - read only', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
     createRule(getNewRule({ rule_id: '1', enabled: false }));

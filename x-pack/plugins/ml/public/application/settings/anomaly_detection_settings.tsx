@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -78,16 +77,14 @@ export const AnomalyDetectionSettings: FC = () => {
 
   return (
     <Fragment>
-      <EuiPageContentHeader>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
-              defaultMessage="Anomaly Detection"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiPageContentHeader>
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
+            defaultMessage="Anomaly Detection"
+          />
+        </h2>
+      </EuiTitle>
 
       <EuiSpacer size="m" />
 

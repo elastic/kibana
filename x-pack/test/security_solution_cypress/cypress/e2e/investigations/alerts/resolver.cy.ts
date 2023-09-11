@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { ANALYZER_NODE } from '../../../screens/alerts';
 
@@ -18,29 +17,33 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Analyze events view for alerts', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
-  before(() => {
-    cleanKibana();
-    createRule(getNewRule());
-  });
+describe(
+  'Analyze events view for alerts',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
+    before(() => {
+      cleanKibana();
+      createRule(getNewRule());
+    });
 
-  beforeEach(() => {
-    login();
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-  });
+    beforeEach(() => {
+      login();
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
+    });
 
-  it('should render when button is clicked', () => {
-    openAnalyzerForFirstAlertInTimeline();
-    cy.get(ANALYZER_NODE).first().should('be.visible');
-  });
+    it('should render when button is clicked', () => {
+      openAnalyzerForFirstAlertInTimeline();
+      cy.get(ANALYZER_NODE).first().should('be.visible');
+    });
 
-  it('should display a toast indicating the date range of found events when a time range has 0 events in it', () => {
-    const dateContainingZeroEvents = 'Jul 27, 2022 @ 00:00:00.000';
-    setStartDate(dateContainingZeroEvents);
-    waitForAlertsToPopulate();
-    openAnalyzerForFirstAlertInTimeline();
-    cy.get(TOASTER).should('be.visible');
-    cy.get(ANALYZER_NODE).first().should('be.visible');
-  });
-});
+    it('should display a toast indicating the date range of found events when a time range has 0 events in it', () => {
+      const dateContainingZeroEvents = 'Jul 27, 2022 @ 00:00:00.000';
+      setStartDate(dateContainingZeroEvents);
+      waitForAlertsToPopulate();
+      openAnalyzerForFirstAlertInTimeline();
+      cy.get(TOASTER).should('be.visible');
+      cy.get(ANALYZER_NODE).first().should('be.visible');
+    });
+  }
+);

@@ -140,6 +140,24 @@
       "prCreation": "immediate"
     },
     {
+      "groupName": "ansi-regex",
+      "matchPackageNames": [
+        "ansi-regex"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Core",
+        "backport:skip"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "babel",
       "matchPackageNames": [
         "@types/babel__core"
@@ -260,6 +278,7 @@
     {
       "groupName": "platform security modules",
       "matchPackageNames": [
+        "css.escape",
         "node-forge",
         "formik",
         "@types/node-forge",

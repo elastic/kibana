@@ -11,7 +11,6 @@ import {
   RULES_UPDATES,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
@@ -56,9 +55,11 @@ const loadPageAsReadOnlyUser = (url: string) => {
   waitForPageWithoutDateRange(url, ROLES.reader);
 };
 
+// TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless
+// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: tag.ESS },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       login();

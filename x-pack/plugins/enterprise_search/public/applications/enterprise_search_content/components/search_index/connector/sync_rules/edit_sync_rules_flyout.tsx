@@ -23,7 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringValidation } from '../../../../../../../common/types/connectors';
+import { FilteringValidation } from '@kbn/search-connectors';
+
 import { BetaCallOut } from '../../../../../shared/beta/beta_callout';
 
 import { AdvancedSyncRules } from './advanced_sync_rules';

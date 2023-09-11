@@ -52,7 +52,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
 
     if (!role) {
       throw new Error(
-        `Unknown role: [${name}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
+        `Unknown role: [${String(name)}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
       );
     }
 

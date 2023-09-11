@@ -15,7 +15,10 @@ import { BehaviorSubject } from 'rxjs';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import {
   type SavedObjectUnsanitizedDoc,
   type ISavedObjectTypeRegistry,
@@ -48,6 +51,7 @@ export interface KibanaMigratorOptions {
   docLinks: DocLinksServiceStart;
   waitForMigrationCompletion: boolean;
   nodeRoles: NodeRoles;
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 /**
@@ -71,6 +75,8 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly docLinks: DocLinksServiceStart;
   private readonly waitForMigrationCompletion: boolean;
   private readonly nodeRoles: NodeRoles;
+  private readonly esCapabilities: ElasticsearchCapabilities;
+
   public readonly kibanaVersion: string;
 
   /**
@@ -87,6 +93,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     docLinks,
     waitForMigrationCompletion,
     nodeRoles,
+    esCapabilities,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -109,6 +116,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
     this.docLinks = docLinks;
+    this.esCapabilities = esCapabilities;
   }
 
   public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
@@ -152,6 +160,7 @@ export class KibanaMigrator implements IKibanaMigrator {
         serializer: this.serializer,
         elasticsearchClient: this.client,
         nodeRoles: this.nodeRoles,
+        esCapabilities: this.esCapabilities,
       });
     } else {
       return runV2Migration({
@@ -167,6 +176,7 @@ export class KibanaMigrator implements IKibanaMigrator {
         elasticsearchClient: this.client,
         mappingProperties: this.mappingProperties,
         waitForMigrationCompletion: this.waitForMigrationCompletion,
+        esCapabilities: this.esCapabilities,
       });
     }
   }

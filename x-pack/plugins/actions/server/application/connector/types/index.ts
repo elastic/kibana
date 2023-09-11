@@ -6,3 +6,4 @@
  */
 
 export type { Connector, FindConnectorResult } from './connector';
+export type { ConnectorType } from './connector_type';

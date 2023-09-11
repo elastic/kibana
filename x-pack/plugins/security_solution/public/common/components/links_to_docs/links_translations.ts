@@ -41,3 +41,11 @@ export const ML_JOB_COMPATIBILITY_LINK_TEXT = i18n.translate(
     defaultMessage: 'ML job compatibility',
   }
 );
+
+export const COVERAGE_OVERVIEW_LINK_PATH = 'rules-coverage.html';
+export const COVERAGE_OVERVIEW_LINK_TEXT = i18n.translate(
+  'xpack.securitySolution.documentationLinks.coverageOverview.text',
+  {
+    defaultMessage: 'Learn more.',
+  }
+);
