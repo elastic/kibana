@@ -50,8 +50,9 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client as IScopedClusterClient;
-      const executeAfter =
-        (request.query as TypeOf<typeof querySchema>)?.executePolicyAfterCreation === 'true';
+      const executeAfter = Boolean(
+        (request.query as TypeOf<typeof querySchema>)?.executePolicyAfterCreation
+      );
 
       const { policy } = request.body;
       const serializedPolicy = serializeAsESPolicy(policy as SerializedEnrichPolicy);
