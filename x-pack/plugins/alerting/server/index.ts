@@ -64,6 +64,7 @@ export {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  isValidAlertIndexName,
 } from './alerts_service';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 

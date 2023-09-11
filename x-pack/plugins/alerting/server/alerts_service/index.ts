@@ -24,4 +24,5 @@ export {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  isValidAlertIndexName,
 } from './lib';
