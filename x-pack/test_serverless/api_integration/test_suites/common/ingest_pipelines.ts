@@ -350,7 +350,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('Fetch documents', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/165539
+    describe.skip('Fetch documents', () => {
       const INDEX = 'test_index';
       const DOCUMENT_ID = '1';
       const DOCUMENT = {

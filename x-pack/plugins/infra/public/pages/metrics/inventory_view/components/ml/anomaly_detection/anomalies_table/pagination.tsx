@@ -36,6 +36,7 @@ export const PaginationControls = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
           <EuiButtonIcon
+            data-test-subj="infraPaginationControlsButton"
             iconType="arrowLeft"
             isDisabled={!fetchPreviousPage || isLoading}
             onClick={fetchPreviousPage}
@@ -45,6 +46,7 @@ export const PaginationControls = ({
             <strong>{page}</strong>
           </span>
           <EuiButtonIcon
+            data-test-subj="infraPaginationControlsButton"
             iconType="arrowRight"
             isDisabled={!fetchNextPage || isLoading}
             onClick={fetchNextPage}
