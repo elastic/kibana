@@ -43,6 +43,7 @@ interface Props {
   hasFleetServer?: boolean;
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
+  fleetServerHost?: string;
   onCopy?: () => void;
 }
 
@@ -64,6 +65,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   isManaged,
   enrollToken,
   hasFleetServer,
+  fleetServerHost,
   fullCopyButton,
   onCopy,
 }) => {
@@ -205,6 +207,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               onCopy={onCopy}
               onDownload={onCopy}
               enrollmentAPIKey={enrollToken}
+              fleetServerHost={fleetServerHost}
             />
             <EuiSpacer size="s" />
           </>

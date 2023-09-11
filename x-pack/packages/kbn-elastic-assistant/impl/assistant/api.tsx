@@ -14,6 +14,7 @@ import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
 
 export interface FetchConnectorExecuteAction {
+  assistantLangChain: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
@@ -21,6 +22,7 @@ export interface FetchConnectorExecuteAction {
 }
 
 export const fetchConnectorExecuteAction = async ({
+  assistantLangChain,
   http,
   messages,
   apiConfig,
@@ -54,19 +56,20 @@ export const fetchConnectorExecuteAction = async ({
   };
 
   try {
+    const path = assistantLangChain
+      ? `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`
+      : `/api/actions/connector/${apiConfig?.connectorId}/_execute`;
+
     // TODO: Find return type for this API
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await http.fetch<any>(
-      `/api/actions/connector/${apiConfig?.connectorId}/_execute`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        signal,
-      }
-    );
+    const response = await http.fetch<any>(path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+      signal,
+    });
 
     const data = response.data;
     if (response.status !== 'ok') {

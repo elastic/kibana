@@ -7,6 +7,7 @@
  */
 
 import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './types';
+import { consoleDefinition } from './languages/console';
 
 export const getLanguageDefinitionCodeSnippet = (
   language: Partial<LanguageDefinition>,
@@ -22,5 +23,26 @@ export const getLanguageDefinitionCodeSnippet = (
       return snippetVal(args);
     default:
       return '';
+  }
+};
+
+export const getConsoleRequest = (
+  code: keyof LanguageDefinition,
+  args?: LanguageDefinitionSnippetArguments
+): string | undefined => {
+  if (code in consoleDefinition) {
+    const codeType = consoleDefinition[code];
+
+    switch (typeof codeType) {
+      case 'string':
+        return codeType as string;
+      case 'function':
+        if (args) {
+          return codeType(args) as string;
+        }
+        return undefined;
+      default:
+        return undefined;
+    }
   }
 };

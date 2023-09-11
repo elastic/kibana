@@ -6,7 +6,7 @@
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { internal, notFound } from '@hapi/boom';
-import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -108,11 +108,13 @@ export class ObservabilityAIAssistantClient {
     messages,
     connectorId,
     functions,
+    functionCall,
     stream = true,
   }: {
     messages: Message[];
     connectorId: string;
     functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+    functionCall?: string;
     stream?: TStream;
   }): Promise<TStream extends false ? CreateChatCompletionResponse : IncomingMessage> => {
     const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
@@ -140,6 +142,7 @@ export class ObservabilityAIAssistantClient {
       stream: true,
       functions: functionsForOpenAI,
       temperature: 0,
+      function_call: functionCall ? { name: functionCall } : undefined,
     };
 
     const executeResult = await this.dependencies.actionsClient.execute({
@@ -243,9 +246,17 @@ export class ObservabilityAIAssistantClient {
     });
 
     if ('object' in response && response.object === 'chat.completion') {
-      const title =
-        response.choices[0].message?.content?.slice(1, -1) ||
-        `Conversation on ${conversation['@timestamp']}`;
+      const input =
+        response.choices[0].message?.content || `Conversation on ${conversation['@timestamp']}`;
+
+      // This regular expression captures a string enclosed in single or double quotes.
+      // It extracts the string content without the quotes.
+      // Example matches:
+      // - "Hello, World!" => Captures: Hello, World!
+      // - 'Another Example' => Captures: Another Example
+      // - JustTextWithoutQuotes => Captures: JustTextWithoutQuotes
+      const match = input.match(/^["']?([^"']+)["']?$/);
+      const title = match ? match[1] : input;
 
       const updatedConversation: Conversation = merge(
         {},
@@ -312,20 +323,22 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
-  recall = async (query: string): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+  recall = async (
+    queries: string[]
+  ): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
-      query,
+      queries,
     });
   };
 
-  summarise = async ({
+  summarize = async ({
     entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
   }): Promise<void> => {
-    return this.dependencies.knowledgeBaseService.summarise({
+    return this.dependencies.knowledgeBaseService.summarize({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
       entry,

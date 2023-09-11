@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { StackTracesDisplayOption, TopNType } from '../../../common/stack_traces';
+import {
+  StackTracesDisplayOption,
+  TopNType,
+} from '@kbn/profiling-data-access-plugin/common/stack_traces';
 import { getTracesViewRouteParams } from './utils';
 
 describe('stack traces view utils', () => {

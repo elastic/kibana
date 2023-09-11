@@ -97,6 +97,7 @@ const RowActionComponent = ({
       },
     };
 
+    // excluding rule preview page as some sections in new flyout are not applicable when user is creating a new rule
     if (isSecurityFlyoutEnabled && tableId !== TableId.rulePreview) {
       openFlyout({
         right: {

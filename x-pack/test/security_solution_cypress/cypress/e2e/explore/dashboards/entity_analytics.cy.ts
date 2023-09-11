@@ -77,8 +77,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('Risk Score enabled but still no data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts_no_data');
-      cy.task('esArchiverLoad', 'risk_users_no_data');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts_no_data' });
+      cy.task('esArchiverLoad', { archiveName: 'risk_users_no_data' });
     });
 
     beforeEach(() => {
@@ -102,8 +102,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('With Legacy data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts_legacy_data');
-      cy.task('esArchiverLoad', 'risk_users_legacy_data');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts_legacy_data' });
+      cy.task('esArchiverLoad', { archiveName: 'risk_users_legacy_data' });
     });
 
     beforeEach(() => {
@@ -127,7 +127,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('With host risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_hosts');
+      cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
 
     beforeEach(() => {
@@ -215,7 +215,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('With user risk data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'risk_users');
+      cy.task('esArchiverLoad', { archiveName: 'risk_users' });
     });
 
     beforeEach(() => {
@@ -304,7 +304,7 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@brokenInServerless'] }
 
   describe('With anomalies data', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'network');
+      cy.task('esArchiverLoad', { archiveName: 'network' });
       login();
       visit(ENTITY_ANALYTICS_URL);
       cy.get(ANOMALIES_TABLE).should('be.visible');

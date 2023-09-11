@@ -31,6 +31,13 @@ export const WELCOME_SECURITY = i18n.translate(
   }
 );
 
+export const PRECONFIGURED_CONNECTOR = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.preconfiguredTitle',
+  {
+    defaultMessage: 'Preconfigured',
+  }
+);
+
 export const CONNECTOR_SELECTOR_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel',
   {

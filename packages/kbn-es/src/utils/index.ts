@@ -17,3 +17,4 @@ export { buildSnapshot } from './build_snapshot';
 export { archiveForPlatform } from './build_snapshot';
 export * from './parse_timeout_to_ms';
 export * from './docker';
+export * from './ess_file_realm';

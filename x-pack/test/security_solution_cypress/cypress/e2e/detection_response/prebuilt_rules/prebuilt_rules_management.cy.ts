@@ -18,6 +18,7 @@ import {
 } from '../../../screens/alerts_detection_rules';
 import {
   deleteFirstRule,
+  disableAutoRefresh,
   getRulesManagementTableRows,
   selectAllRules,
   selectRulesByName,
@@ -32,6 +33,7 @@ import {
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../tasks/api_calls/prebuilt_rules';
 import {
   cleanKibana,
@@ -48,7 +50,8 @@ const rules = Array.from(Array(5)).map((_, i) => {
   });
 });
 
-describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -57,10 +60,12 @@ describe('Prebuilt rules', { tags: ['@ess', '@serverless'] }, () => {
     login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
+    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
+    disableAutoRefresh();
   });
 
   describe('Alerts rules, prebuilt rules', () => {
