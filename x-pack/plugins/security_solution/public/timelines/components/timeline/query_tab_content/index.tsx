@@ -51,7 +51,7 @@ import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { StatefulEventContext } from '../../../../common/components/events_viewer/stateful_event_context';
-import { TimelineDataTable } from '../data_table/data_table';
+import { SAMPLE_SIZE_SETTING, TimelineDataTable } from '../data_table';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -292,7 +292,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     id: timelineId,
     indexNames: selectedPatterns,
     language: kqlQuery.language,
-    limit: 500,
+    limit: SAMPLE_SIZE_SETTING,
     runtimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,

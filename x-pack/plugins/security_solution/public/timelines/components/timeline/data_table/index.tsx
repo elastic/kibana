@@ -21,19 +21,20 @@ import {
 } from '@elastic/eui';
 import type { JSXElementConstructor } from 'react';
 import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
-import { css } from 'styled-components';
-import { useDispatch } from 'react-redux';
+import { css } from '@emotion/react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-plugin/common';
 import { flattenHit } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, DocViewFilterFn } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableSettingsColumn } from '@kbn/unified-data-table';
 import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import { i18n } from '@kbn/i18n';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../common/constants';
 import { EXIT_FULL_SCREEN } from '../../../../common/components/exit_full_screen/translations';
 import { isActiveTimeline } from '../../../../helpers';
@@ -43,7 +44,7 @@ import type {
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../common/types';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions } from '../../../store/timeline';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -55,7 +56,7 @@ import type {
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import type { inputsModel } from '../../../../common/store';
+import type { State, inputsModel } from '../../../../common/store';
 import { appSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -82,13 +83,15 @@ import { EventsTrSupplement } from '../styles';
 import { NoteCards } from '../../notes/note_cards';
 import type { TimelineResultNote } from '../../open_timeline/types';
 import { getFormattedFields } from '../body/renderers/formatted_field';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineBodySelector } from '../body/selectors';
 
 export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullScreenButton', {
   defaultMessage: 'Full screen',
 });
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;
-const SAMPLE_SIZE_SETTING = 500;
+export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
 export const isFullScreen = ({
@@ -159,10 +162,21 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   const [fetchedPage, setFechedPage] = useState<number>(0);
   const trGroupRef = useRef<HTMLDivElement | null>(null);
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const currentTimeline = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? TimelineId.active)
-  );
+  const {
+    timeline: {
+      // columns,
+      eventIdToNoteIds,
+      excludedRowRendererIds,
+      isSelectAllChecked,
+      loadingEventIds,
+      pinnedEventIds,
+      selectedEventIds,
+      filterManager,
+      show,
+      queryFields,
+      selectAll,
+    } = timelineDefaults,
+  } = useSelector((state: State) => timelineBodySelector(state, timelineId));
 
   const defaultColumns = useMemo(() => {
     return columns.map((c) => c.id);
@@ -331,16 +345,18 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             <Actions
               ariaRowindex={cveProps.rowIndex}
               columnId={cveProps.columnId}
+              width={100}
               data={discoverGridRows[cveProps.rowIndex].data}
               index={cveProps.colIndex}
               rowIndex={cveProps.rowIndex}
               setEventsDeleted={setEventsDeleted}
-              checked={x.id ? Object.keys(currentTimeline.selectedEventIds).includes(x.id) : false}
-              columnValues={x.columnValues ?? ''} // TODO: Fix type error
+              checked={x.id ? Object.keys(selectedEventIds).includes(x.id) : false}
+              isEventPinned={x.id ? eventIsPinned({ eventId: x.id, pinnedEventIds }) : false}
+              columnValues={x.columnValues ?? ''}
               ecsData={discoverGridRows[cveProps.rowIndex].ecs}
               eventId={discoverGridRows[cveProps.rowIndex].id}
-              eventIdToNoteIds={currentTimeline.eventIdToNoteIds}
-              loadingEventIds={currentTimeline.loadingEventIds}
+              eventIdToNoteIds={eventIdToNoteIds}
+              loadingEventIds={loadingEventIds}
               onRowSelected={x.onRowSelected ?? noop}
               onRuleChange={noop} // TODO: get refreshRule
               showCheckboxes={x.showCheckboxes ?? false}
@@ -356,16 +372,17 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       })),
     [
       ACTION_BUTTON_COUNT,
-      currentTimeline.eventIdToNoteIds,
-      currentTimeline.loadingEventIds,
-      currentTimeline.selectedEventIds,
-      discoverGridRows,
-      onToggleShowNotes,
-      refetch,
-      setEventsDeleted,
-      setEventsLoading,
-      showNotes,
       timelineId,
+      discoverGridRows,
+      setEventsDeleted,
+      selectedEventIds,
+      pinnedEventIds,
+      eventIdToNoteIds,
+      loadingEventIds,
+      showNotes,
+      refetch,
+      setEventsLoading,
+      onToggleShowNotes,
     ]
   );
 
@@ -402,13 +419,13 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       dispatch(timelineActions.addNoteToEvent({ eventId: event.id, id: timelineId, noteId }));
       const isEventPinned = eventIsPinned({
         eventId: event.id,
-        pinnedEventIds: currentTimeline.pinnedEventIds,
+        pinnedEventIds,
       });
       if (!isEventPinned) {
         dispatch(timelineActions.pinEvent({ id: timelineId, eventId: event.id }));
       }
     },
-    [dispatch, currentTimeline.pinnedEventIds, timelineId]
+    [dispatch, pinnedEventIds, timelineId]
   );
 
   const renderVisibleCols = useCallback(
@@ -531,23 +548,21 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const enabledRowRenderers = useMemo(() => {
     if (
-      currentTimeline.excludedRowRendererIds &&
-      currentTimeline.excludedRowRendererIds.length === Object.keys(RowRendererId).length
+      excludedRowRendererIds &&
+      excludedRowRendererIds.length === Object.keys(RowRendererId).length
     )
       return [plainRowRenderer];
 
-    if (!currentTimeline.excludedRowRendererIds) return rowRenderers;
+    if (!excludedRowRendererIds) return rowRenderers;
 
-    return rowRenderers.filter(
-      (rowRenderer) => !currentTimeline.excludedRowRendererIds.includes(rowRenderer.id)
-    );
-  }, [currentTimeline.excludedRowRendererIds, rowRenderers]);
+    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+  }, [excludedRowRendererIds, rowRenderers]);
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
   const notesById = useDeepEqualSelector(getNotesByIds);
   const getNotes = useCallback(
     (event: DataTableRecord) => {
-      const noteIds: string[] = currentTimeline.eventIdToNoteIds[event.id] || [];
+      const noteIds: string[] = eventIdToNoteIds[event.id] || [];
       return appSelectors.getNotes(notesById, noteIds).map((note) => ({
         savedObjectId: note.saveObjectId,
         note: note.note,
@@ -556,7 +571,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
         updatedBy: note.user,
       })) as unknown as TimelineResultNote[];
     },
-    [currentTimeline.eventIdToNoteIds, notesById]
+    [eventIdToNoteIds, notesById]
   );
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -695,20 +710,14 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const onAddFilter = useCallback(
     (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      if (dataView && currentTimeline.filterManager) {
+      if (dataView && filterManager) {
         const fieldName = typeof field === 'string' ? field : field.name;
         popularizeField(dataView, fieldName, dataViews, capabilities);
-        const newFilters = generateFilters(
-          currentTimeline.filterManager,
-          field,
-          values,
-          operation,
-          dataView
-        );
-        return currentTimeline.filterManager.addFilters(newFilters);
+        const newFilters = generateFilters(filterManager, field, values, operation, dataView);
+        return filterManager.addFilters(newFilters);
       }
     },
-    [currentTimeline.filterManager, dataView, dataViews, capabilities]
+    [filterManager, dataView, dataViews, capabilities]
   );
   const onChangeItemsPerPage = useCallback(
     (itemsChangedPerPage) =>
@@ -872,7 +881,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
       externalAdditionalControls={additionalControls}
       trailingControlColumns={rowDetails}
-      renderCustomGridBody={renderCustomGridBody}
+      // renderCustomGridBody={renderCustomGridBody}
       rowsPerPageOptions={itemsPerPageOptions}
       showFullScreenButton={false}
       useNewFieldsApi={true}
