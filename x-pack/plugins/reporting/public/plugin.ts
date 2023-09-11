@@ -129,7 +129,7 @@ export class ReportingPublicPlugin
         http,
         uiSettings,
         this.kibanaVersion,
-        this.config.enableStatefulSettings.enabled
+        this.config,
       );
     }
     return this.apiClient;

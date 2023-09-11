@@ -20,6 +20,7 @@ import {
 } from '../../../common/constants';
 import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
+import { ClientConfigType } from '../../plugin';
 import { Job } from '../job';
 
 /*
@@ -70,7 +71,7 @@ export class ReportingAPIClient implements IReportingAPI {
     http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string,
-    private enableStatefulSettings: boolean
+    private config: ClientConfigType,
   ) {
     this.http = http;
   }
@@ -226,7 +227,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public migrateReportingIndicesIlmPolicy() {
-    return this.enableStatefulSettings
+    return this.config.enableStatefulSettings.enabled
       ? this.http.put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
       : null;
   }
