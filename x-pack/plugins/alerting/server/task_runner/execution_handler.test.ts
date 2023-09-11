@@ -34,6 +34,7 @@ import sinon from 'sinon';
 import { mockAAD } from './fixtures';
 import { schema } from '@kbn/config-schema';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -137,6 +138,11 @@ const defaultExecutionParams = {
   alertsClient,
 };
 
+const defaultExecutionResponse = {
+  errors: false,
+  items: [{ actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS }],
+};
+
 let ruleRunMetricsStore: RuleRunMetricsStore;
 let clock: sinon.SinonFakeTimers;
 type ActiveActionGroup = 'default' | 'other-group';
@@ -223,6 +229,7 @@ describe('Execution Handler', () => {
       renderActionParameterTemplatesDefault
     );
     ruleRunMetricsStore = new RuleRunMetricsStore();
+    actionsClient.bulkEnqueueExecution.mockResolvedValue(defaultExecutionResponse);
   });
   beforeAll(() => {
     clock = sinon.useFakeTimers();
@@ -238,39 +245,40 @@ describe('Execution Handler', () => {
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
 
     expect(alertingEventLogger.logAction).toHaveBeenCalledTimes(1);
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, {
@@ -334,6 +342,7 @@ describe('Execution Handler', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
       {
+        actionTypeId: 'test2',
         consumer: 'rule-consumer',
         id: '2',
         params: {
@@ -423,39 +432,40 @@ describe('Execution Handler', () => {
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+              "contextVal": "My context-val goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-                  "contextVal": "My context-val goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test('state attribute gets parameterized', async () => {
@@ -463,39 +473,40 @@ describe('Execution Handler', () => {
     await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My state-val goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My state-val goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
@@ -514,6 +525,21 @@ describe('Execution Handler', () => {
   });
 
   test('Stops triggering actions when the number of total triggered actions is reached the number of max executable actions', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'test2',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test2',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     const actions = [
       {
         id: '1',
@@ -573,6 +599,27 @@ describe('Execution Handler', () => {
   });
 
   test('Skips triggering actions for a specific action type when it reaches the limit for that specific action type', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        { actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS },
+        {
+          actionTypeId: 'test-action-type-id',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'another-action-type-id',
+          id: '4',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'another-action-type-id',
+          id: '5',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     const actions = [
       ...defaultExecutionParams.rule.actions,
       {
@@ -652,6 +699,77 @@ describe('Execution Handler', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
+  test('Stops triggering actions when the number of total queued actions is reached the number of max queued actions', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: true,
+      items: [
+        {
+          actionTypeId: 'test',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+        {
+          actionTypeId: 'test',
+          id: '3',
+          response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+        },
+      ],
+    });
+    const actions = [
+      {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+      {
+        id: '3',
+        group: 'default',
+        actionTypeId: 'test',
+        params: {
+          foo: true,
+          contextVal: '{{context.value}} goes here',
+          stateVal: '{{state.value}} goes here',
+        },
+      },
+    ];
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions,
+        },
+      })
+    );
+    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+
+    expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
+    expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
+    expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
   test('schedules alerts with recovered actions', async () => {
     const actions = [
       {
@@ -680,39 +798,40 @@ describe('Execution Handler', () => {
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test('does not schedule alerts with recovered actions that are muted', async () => {
@@ -852,6 +971,16 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (per rule run)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
@@ -895,36 +1024,37 @@ describe('Execution Handler', () => {
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "testActionTypeId",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "message": "New: 1 Ongoing: 0 Recovered: 0",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "message": "New: 1 Ongoing: 0 Recovered: 0",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
     expect(alertingEventLogger.logAction).toBeCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
@@ -970,6 +1100,16 @@ describe('Execution Handler', () => {
   });
 
   test('triggers summary actions (custom interval)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
@@ -1022,36 +1162,37 @@ describe('Execution Handler', () => {
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "testActionTypeId",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "message": "New: 1 Ongoing: 0 Recovered: 0",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "message": "New: 1 Ongoing: 0 Recovered: 0",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
     expect(alertingEventLogger.logAction).toBeCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
@@ -1206,6 +1347,17 @@ describe('Execution Handler', () => {
   });
 
   test('schedules alerts with multiple recovered actions', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        { actionTypeId: 'test', id: '1', response: ExecutionResponseType.SUCCESS },
+        {
+          actionTypeId: 'test',
+          id: '2',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     const actions = [
       {
         id: '1',
@@ -1245,70 +1397,82 @@ describe('Execution Handler', () => {
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
-          Array [
-            Array [
+      Array [
+        Array [
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
               Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
                 "id": "1",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
-              },
-              Object {
-                "apiKey": "MTIzOmFiYw==",
-                "consumer": "rule-consumer",
-                "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
-                "id": "2",
-                "params": Object {
-                  "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
-                  "contextVal": "My  goes here",
-                  "foo": true,
-                  "stateVal": "My  goes here",
-                },
-                "relatedSavedObjects": Array [
-                  Object {
-                    "id": "1",
-                    "namespace": "test1",
-                    "type": "alert",
-                    "typeId": "test",
-                  },
-                ],
-                "source": Object {
-                  "source": Object {
-                    "id": "1",
-                    "type": "alert",
-                  },
-                  "type": "SAVED_OBJECT",
-                },
-                "spaceId": "test1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
               },
             ],
-          ]
-      `);
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+          Object {
+            "actionTypeId": "test",
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "2",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 1 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (for each alert)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
@@ -1372,6 +1536,16 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the summarized alerts that are filtered out (summary of alerts onThrottleInterval)', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 0,
@@ -1432,6 +1606,16 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule actions for the for-each type alerts that are filtered out', async () => {
+    actionsClient.bulkEnqueueExecution.mockResolvedValueOnce({
+      errors: false,
+      items: [
+        {
+          actionTypeId: 'testActionTypeId',
+          id: '1',
+          response: ExecutionResponseType.SUCCESS,
+        },
+      ],
+    });
     alertsClient.getSummarizedAlerts.mockResolvedValue({
       new: {
         count: 1,
@@ -1486,6 +1670,7 @@ describe('Execution Handler', () => {
     });
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
       {
+        actionTypeId: 'testActionTypeId',
         apiKey: 'MTIzOmFiYw==',
         consumer: 'rule-consumer',
         executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
