@@ -70,12 +70,14 @@ export function ClustersHealth({ clusters }: Props) {
         ) : null}
       </EuiFlexGroup>
 
-      <div style={{
-        background: getHeathBarLinearGradient(successful, partial, skipped, failed),
-        borderRadius: '8px',
-        height: '8px',
-        marginTop: '4px',
-      }}/>
+      <div
+        style={{
+          background: getHeathBarLinearGradient(successful, partial, skipped, failed),
+          borderRadius: '8px',
+          height: '8px',
+          marginTop: '4px',
+        }}
+      />
     </>
   );
 }
