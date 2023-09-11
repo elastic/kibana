@@ -51,6 +51,9 @@ describe('Reporting server createConfig', () => {
         port: 5677,
         protocol: 'httpsa',
       },
+      disableStatefulSettings: {
+        enabled: false,
+      },
     });
     const result = createConfig(mockCoreSetup, mockConfig, mockLogger);
 
@@ -64,6 +67,9 @@ describe('Reporting server createConfig', () => {
             "duration": "30s",
             "size": 500,
           },
+        },
+        "disableStatefulSettings": Object {
+          "enabled": false,
         },
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
         "export_types": Object {
