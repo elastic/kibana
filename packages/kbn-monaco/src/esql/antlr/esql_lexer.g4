@@ -91,6 +91,16 @@ DATE_LITERAL
     | 'second'
     | 'minute'
     | 'hour'
+    | 'week'
+    | 'millisecond'
+    | 'years'
+    | 'months'
+    | 'days'
+    | 'seconds'
+    | 'minutes'
+    | 'hours'
+    | 'weeks'
+    | 'milliseconds'
     ;
 
 AND : 'and';

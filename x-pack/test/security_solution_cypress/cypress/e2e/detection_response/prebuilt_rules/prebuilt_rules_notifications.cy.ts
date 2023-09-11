@@ -29,9 +29,10 @@ const RULE_1 = createRuleAssetSavedObject({
   rule_id: 'rule_1',
 });
 
+// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update Notifications',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
       login();
