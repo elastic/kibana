@@ -211,7 +211,7 @@ export const GroupPreview = ({
                   <p>
                     <FormattedMessage
                       id="eventAnnotationListing.groupPreview.missingDataViewDescription"
-                      defaultMessage="The currently selected data view no longer exists. Please select a valid data view in order to preview and use this annotation group."
+                      defaultMessage="The previously selected data view no longer exists. Please select a valid data view in order to preview and use this annotation group."
                     />
                   </p>
                 }
