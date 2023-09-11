@@ -587,6 +587,7 @@ export class Cluster {
   /**
    * Run an Elasticsearch Serverless Docker cluster
    * @param options ServerlessOptions
+   * @returns node names
    */
   async runServerless(options: ServerlessOptions) {
     if (this.process || this.outcome) {
@@ -606,6 +607,8 @@ export class Cluster {
        */
       process.on('exit', () => teardownServerlessClusterSync(this.log, options));
     }
+
+    return this.serverlessNodes;
   }
 
   /**
