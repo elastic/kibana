@@ -110,7 +110,7 @@ export class ReportingStore {
       const client = await this.getClient();
       this.ilmPolicyManager = IlmPolicyManager.create({ client });
     }
-    return this.config.enableStatefulSettings.enabled ? this.ilmPolicyManager: null;
+    return this.config.enableStatefulSettings.enabled ? this.ilmPolicyManager : null;
   }
 
   private async createIndex(indexName: string) {

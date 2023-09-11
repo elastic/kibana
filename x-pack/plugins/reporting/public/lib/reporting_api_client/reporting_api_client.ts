@@ -71,7 +71,7 @@ export class ReportingAPIClient implements IReportingAPI {
     http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string,
-    private config: ClientConfigType,
+    private config: ClientConfigType
   ) {
     this.http = http;
   }
