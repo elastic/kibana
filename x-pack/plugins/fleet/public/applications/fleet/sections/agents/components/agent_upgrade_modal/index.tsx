@@ -52,6 +52,7 @@ export interface AgentUpgradeAgentModalProps {
   agents: Agent[] | string;
   agentCount: number;
   isScheduled?: boolean;
+  isUpdating?: boolean;
 }
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
@@ -69,6 +70,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   agents,
   agentCount,
   isScheduled = false,
+  isUpdating = false,
 }) => {
   const { notifications } = useStartServices();
   const kibanaVersion = semverCoerce(useKibanaVersion())?.version || '';
@@ -170,10 +172,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         isSingleAgent && !isScheduled
           ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
               version,
+              force: isUpdating,
             })
           : await sendPostBulkAgentUpgrade({
               version,
               agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+              force: isUpdating,
               ...rolloutOptions,
             });
       if (error) {

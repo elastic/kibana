@@ -41,6 +41,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
   const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState<boolean>(false);
   const isUnenrolling = agent.status === 'unenrolling';
+  const isAgentUpdating = Boolean(agent.upgrade_started_at && !agent.upgraded_at);
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const onContextMenuChange = useCallback(
@@ -97,7 +98,27 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             defaultMessage="Unenroll agent"
           />
         )}
-      </EuiContextMenuItem>,
+      </EuiContextMenuItem>
+    );
+  }
+
+  if (isAgentUpdating) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="refresh"
+        onClick={() => {
+          setIsUpgradeModalOpen(true);
+        }}
+        key="restartUpgradeAgent"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.restartUpgradeOneButton"
+          defaultMessage="Restart upgrade"
+        />
+      </EuiContextMenuItem>
+    );
+  } else {
+    menuItems.push(
       <EuiContextMenuItem
         icon="refresh"
         disabled={!isAgentUpgradeable(agent, kibanaVersion)}
@@ -180,6 +201,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               setIsUpgradeModalOpen(false);
               refreshAgent();
             }}
+            isUpdating={isAgentUpdating}
           />
         </EuiPortal>
       )}

@@ -101,7 +101,24 @@ export const TableRowActions: React.FunctionComponent<{
             defaultMessage="Unenroll agent"
           />
         )}
-      </EuiContextMenuItem>,
+      </EuiContextMenuItem>
+    );
+
+    const isAgentUpdating = agent.upgrade_started_at && !agent.upgraded_at;
+    if (isAgentUpdating) {
+      <EuiContextMenuItem
+        key="agentRestartUpgradeBtn"
+        icon="refresh"
+        onClick={() => {
+          onUpgradeClick();
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.restartUpgradeOneButton"
+          defaultMessage="Restart upgrade agent"
+        />
+      </EuiContextMenuItem>;
+    } else {
       <EuiContextMenuItem
         key="agentUpgradeBtn"
         icon="refresh"
@@ -114,8 +131,8 @@ export const TableRowActions: React.FunctionComponent<{
           id="xpack.fleet.agentList.upgradeOneButton"
           defaultMessage="Upgrade agent"
         />
-      </EuiContextMenuItem>
-    );
+      </EuiContextMenuItem>;
+    }
 
     if (agentTamperProtectionEnabled && agent.policy_id) {
       menuItems.push(

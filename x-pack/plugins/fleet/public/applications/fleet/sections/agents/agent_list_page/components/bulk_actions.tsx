@@ -73,7 +73,11 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
+  const [updateModalState, setUpgradeModalState] = useState({
+    isOpen: false,
+    isScheduled: false,
+    isUpdating: false,
+  });
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
@@ -147,6 +151,11 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       : totalAgents > totalInactiveAgents;
   const totalActiveAgents = totalAgents - totalInactiveAgents;
 
+  const allAgentsUpdating =
+    selectionMode === 'manual'
+      ? selectedAgents.every((agent) => agent.upgrade_started_at && !agent.upgraded_at)
+      : false;
+
   const agentCount =
     selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents - managedAgents?.length;
 
@@ -204,12 +213,15 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setIsUnenrollModalOpen(true);
       },
     },
-    {
+  ];
+
+  if (allAgentsUpdating) {
+    menuItems.push({
       name: (
         <FormattedMessage
-          id="xpack.fleet.agentBulkActions.upgradeAgents"
-          data-test-subj="agentBulkActionsUpgrade"
-          defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
+          id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
+          data-test-subj="agentBulkActionsRestartUpgrade"
+          defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
           values={{
             agentCount,
           }}
@@ -219,28 +231,49 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: false });
+        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
       },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
-          data-test-subj="agentBulkActionsScheduleUpgrade"
-          defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="timeRefresh" size="m" />,
-      disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
-      onClick: () => {
-        closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: true });
+    });
+  } else {
+    menuItems.push(
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.upgradeAgents"
+            data-test-subj="agentBulkActionsUpgrade"
+            defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
+            values={{
+              agentCount,
+            }}
+          />
+        ),
+        icon: <EuiIcon type="refresh" size="m" />,
+        disabled: !atLeastOneActiveAgentSelected,
+        onClick: () => {
+          closeMenu();
+          setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
+        },
       },
-    },
-  ];
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
+            data-test-subj="agentBulkActionsScheduleUpgrade"
+            defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+            values={{
+              agentCount,
+            }}
+          />
+        ),
+        icon: <EuiIcon type="timeRefresh" size="m" />,
+        disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
+        onClick: () => {
+          closeMenu();
+          setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
+        },
+      }
+    );
+  }
 
   if (diagnosticFileUploadEnabled) {
     menuItems.push({
@@ -306,8 +339,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agents={agents}
             agentCount={agentCount}
             isScheduled={updateModalState.isScheduled}
+            isUpdating={updateModalState.isUpdating}
             onClose={() => {
-              setUpgradeModalState({ isOpen: false, isScheduled: false });
+              setUpgradeModalState({ isOpen: false, isScheduled: false, isUpdating: false });
               refreshAgents();
             }}
           />
