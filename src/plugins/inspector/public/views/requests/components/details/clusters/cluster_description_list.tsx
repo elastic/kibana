@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescriptionList, EuiDescriptionListProps, EuiText } from '@elastic/eui';
-import { ShardsDetails } from './shards_details';
+import { ShardsOverview } from './shards_overview';
 
 interface Props {
   clusterDetails: ClusterDetails;
@@ -40,7 +40,7 @@ export function ClusterDescriptionList({ clusterDetails }: Props) {
       }),
       description: (
         <EuiText size="xs" color="subdued">
-          <ShardsDetails
+          <ShardsOverview
             failures={clusterDetails.failures ?? []}
             shardsDetails={clusterDetails._shards}
           />

@@ -16,7 +16,7 @@ interface Props {
   shardsDetails: ShardStatistics;
 }
 
-export function ShardsDetails({ failures, shardsDetails }: Props) {
+export function ShardsOverview({ failures, shardsDetails }: Props) {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
