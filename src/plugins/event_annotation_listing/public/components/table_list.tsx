@@ -16,7 +16,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { EuiButton, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import type {
@@ -25,6 +25,7 @@ import type {
 } from '@kbn/event-annotation-common';
 import { ISessionService, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import { css } from '@emotion/react';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
@@ -46,10 +47,23 @@ const getCustomColumn = (dataViews: DataView[]) => {
       <div>
         {record.attributes.dataViewSpec
           ? record.attributes.dataViewSpec.name
-          : dataViewNameMap[record.attributes.indexPatternId] ??
-            i18n.translate('eventAnnotationListing.tableList.dataView.missing', {
-              defaultMessage: '(Missing)',
-            })}
+          : dataViewNameMap[record.attributes.indexPatternId] ?? (
+              <FormattedMessage
+                id="eventAnnotationListing.tableList.dataView.missing"
+                defaultMessage="{errorIcon} None"
+                values={{
+                  errorIcon: (
+                    <EuiIcon
+                      type="error"
+                      color="danger"
+                      css={css`
+                        margin-bottom: 3px;
+                      `}
+                    />
+                  ),
+                }}
+              />
+            )}
       </div>
     ),
   };
