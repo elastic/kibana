@@ -22,9 +22,9 @@ export const useCreateCloudFormationUrl = ({
   cloudFormationProps,
   fleetServerHost,
 }: {
-  enrollmentAPIKey: string | undefined;
-  cloudFormationProps: CloudFormationProps | undefined;
-  fleetServerHost: string | undefined;
+  enrollmentAPIKey?: string;
+  cloudFormationProps?: CloudFormationProps;
+  fleetServerHost?: string;
 }) => {
   const { isLoading } = useGetSettings();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -48,7 +48,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
   const fleetServerHostId = agentPolicy?.fleet_server_host_id;
   const { data } = useGetFleetServerHosts();
 
-  const fleetServerHosts = useMemo(() => data?.items ?? [], [data?.items]);
+  const fleetServerHosts = data ? data.items ?? [] : [];
 
   const selectedHost = fleetServerHosts.find((host) => host.id === fleetServerHostId);
 

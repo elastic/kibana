@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,7 @@ import type { CloudSecurityIntegration } from './types';
 interface Props {
   enrollmentAPIKey?: string;
   cloudSecurityIntegration: CloudSecurityIntegration;
-  agentPolicyId: string | undefined;
+  agentPolicyId?: string;
 }
 
 export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
@@ -29,9 +29,11 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
 }) => {
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(agentPolicyId);
   const fleetServerHostId = agentPolicyWithPackagePolicies?.fleet_server_host_id;
+
   const { data } = useGetFleetServerHosts();
 
-  const fleetServerHosts = useMemo(() => data?.items ?? [], [data?.items]);
+  const fleetServerHosts = data ? data.items ?? [] : [];
+
   const selectedHost = fleetServerHosts.find((host) => host.id === fleetServerHostId);
 
   const fleetServerUrl = selectedHost?.host_urls?.[0];
