@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { max, memoize } from 'lodash';
+import { max, memoize, isEmpty } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -65,6 +65,12 @@ export class TaskValidator {
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
     let state = task.state;
+
+    // Skip validating tasks who don't use state
+    if (!latestStateSchema && isEmpty(state)) {
+      return task;
+    }
+
     try {
       state = this.getValidatedStateSchema(
         this.migrateTaskState(task.state, task.stateVersion, taskTypeDef, latestStateSchema),
@@ -103,6 +109,11 @@ export class TaskValidator {
 
     const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
+
+    // Skip validating tasks who don't use state
+    if (!latestStateSchema && isEmpty(task.state)) {
+      return task;
+    }
 
     // We are doing a write operation which must validate against the latest state schema
     return {
