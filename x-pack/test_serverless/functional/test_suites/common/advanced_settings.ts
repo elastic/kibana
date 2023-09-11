@@ -15,8 +15,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // TODO: Skip before merging the PR
-  describe('Common advanced settings', function () {
+  // Skip until we enable the Advanced settings app in serverless
+  describe.skip('Common advanced settings', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('advancedSettings');
     });
