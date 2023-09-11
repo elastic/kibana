@@ -72,23 +72,29 @@ describe('group by expression', () => {
     );
 
     expect(wrapper.find('[data-test-subj="fieldsExpressionSelect"]')).toMatchInlineSnapshot(`
-        <EuiSelect
+        <EuiComboBox
+          async={false}
+          compressed={false}
           data-test-subj="fieldsExpressionSelect"
+          fullWidth={false}
+          isClearable={true}
           isInvalid={false}
-          onBlur={[Function]}
           onChange={[Function]}
           options={
             Array [
               Object {
-                "text": "Select a field",
-                "value": "",
-              },
-              Object {
-                "text": "test",
-                "value": "test",
+                "label": "test",
               },
             ]
           }
+          placeholder="Select a field"
+          selectedOptions={Array []}
+          singleSelection={
+            Object {
+              "asPlainText": true,
+            }
+          }
+          sortMatchesBy="none"
         />
     `);
   });
