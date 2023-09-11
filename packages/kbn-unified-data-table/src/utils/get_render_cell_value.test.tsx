@@ -477,41 +477,13 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          bytesDisplayName
+          and 3 more fields
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": Array [
-                100,
-              ],
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
+              "__html": "",
             }
           }
         />
