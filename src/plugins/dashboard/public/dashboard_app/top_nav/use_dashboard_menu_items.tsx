@@ -275,7 +275,7 @@ export const useDashboardMenuItems = ({
       resetChangesMenuItem,
       ...editMenuItem,
     ];
-  }, [menuItems, share, showWriteControls, resetChangesMenuItem, isLabsEnabled]);
+  }, [isLabsEnabled, menuItems, share, showWriteControls, managed, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
