@@ -17,7 +17,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlObltNavigation = getService('svlObltNavigation');
 
-  describe('cases list', () => {
+  describe('Cases list', () => {
     before(async () => {
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
@@ -53,7 +53,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('status', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/166027
+      describe.skip('status', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the status of cases to in-progress correctly', async () => {
@@ -63,7 +64,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('severity', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/166123
+      describe.skip('severity', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
@@ -143,7 +145,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('severity filtering', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/166127
+    describe.skip('severity filtering', () => {
       before(async () => {
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
 

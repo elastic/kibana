@@ -213,6 +213,7 @@ export function MetricIndicator({ type, indexFields, isLoadingIndex }: MetricInd
             </EuiFlexItem>
             <EuiFlexItem grow={0}>
               <EuiButtonIcon
+                data-test-subj="o11yMetricIndicatorButton"
                 iconType="trash"
                 color="danger"
                 style={{ marginTop: '1.5em' }}

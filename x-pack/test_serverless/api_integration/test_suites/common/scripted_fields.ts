@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('scripted fields disabled', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165511
+  describe.skip('scripted fields disabled', function () {
     before(async () => {
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
