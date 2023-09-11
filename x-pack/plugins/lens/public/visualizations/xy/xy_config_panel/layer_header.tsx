@@ -235,6 +235,7 @@ const DataLayerHeaderTrigger = function ({
       onClick={onClick}
       fullWidth
       size="s"
+      textProps={{ style: { lineHeight: '100%' } }}
     >
       <>
         <EuiIcon type={currentVisType.icon} />

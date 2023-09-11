@@ -44,7 +44,7 @@ export class AggField extends CountAggField {
 
   supportsFieldMetaFromLocalData(): boolean {
     // Elasticsearch vector tile search API returns meta tiles with numeric aggregation metrics.
-    return this._getDataTypeSynchronous() === 'number';
+    return this._source.isMvt() ? this._getDataTypeSynchronous() === 'number' : true;
   }
 
   isValid(): boolean {

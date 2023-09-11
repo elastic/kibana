@@ -13,6 +13,7 @@ import { ErrorResponse, HttpError, Status } from '../../../../../../../common/ty
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
 import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 
 import {
   getTextExpansionError,
@@ -36,6 +37,7 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   startTextExpansionModelStatus: Status.IDLE,
   textExpansionModel: undefined,
   textExpansionModelPollTimeoutId: null,
+  textExpansionError: null,
 };
 
 jest.useFakeTimers();
@@ -48,11 +50,15 @@ describe('TextExpansionCalloutLogic', () => {
   const { mount: mountFetchTextExpansionModelApiLogic } = new LogicMounter(
     FetchTextExpansionModelApiLogic
   );
+  const { mount: mountStartTextExpansionModelApiLogic } = new LogicMounter(
+    StartTextExpansionModelApiLogic
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
     mountCreateTextExpansionModelApiLogic();
     mountFetchTextExpansionModelApiLogic();
+    mountStartTextExpansionModelApiLogic();
     mount();
   });
 
@@ -290,6 +296,44 @@ describe('TextExpansionCalloutLogic', () => {
           modelId: 'mock-model-id',
         });
         expect(TextExpansionCalloutLogic.values.isCreateButtonDisabled).toBe(true);
+      });
+    });
+
+    describe('textExpansionError', () => {
+      const error = {
+        body: {
+          error: 'Error with ELSER deployment',
+          message: 'Mocked error message',
+          statusCode: 500,
+        },
+      } as HttpError;
+
+      it('returns null when there are no errors', () => {
+        CreateTextExpansionModelApiLogic.actions.apiReset();
+        FetchTextExpansionModelApiLogic.actions.apiReset();
+        StartTextExpansionModelApiLogic.actions.apiReset();
+        expect(TextExpansionCalloutLogic.values.textExpansionError).toBe(null);
+      });
+      it('returns extracted error for create', () => {
+        CreateTextExpansionModelApiLogic.actions.apiError(error);
+        expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
+          title: 'Error with ELSER deployment',
+          message: 'Mocked error message',
+        });
+      });
+      it('returns extracted error for fetch', () => {
+        FetchTextExpansionModelApiLogic.actions.apiError(error);
+        expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
+          title: 'Error fetching ELSER model',
+          message: 'Mocked error message',
+        });
+      });
+      it('returns extracted error for start', () => {
+        StartTextExpansionModelApiLogic.actions.apiError(error);
+        expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
+          title: 'Error starting ELSER deployment',
+          message: 'Mocked error message',
+        });
       });
     });
 

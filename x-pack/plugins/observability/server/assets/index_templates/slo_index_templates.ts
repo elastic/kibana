@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SLO_RESOURCES_VERSION } from '../constants';
+
 export const getSLOIndexTemplate = (name: string, indexPattern: string, composedOf: string[]) => ({
   name,
   index_patterns: [indexPattern],
@@ -12,7 +14,7 @@ export const getSLOIndexTemplate = (name: string, indexPattern: string, composed
   priority: 500,
   _meta: {
     description: 'Template for SLO rollup data',
-    version: 1,
+    version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
   },

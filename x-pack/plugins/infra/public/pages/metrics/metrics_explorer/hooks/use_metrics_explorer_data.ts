@@ -15,17 +15,14 @@ import {
   metricsExplorerResponseRT,
 } from '../../../../../common/http_api/metrics_explorer';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
-import {
-  MetricsExplorerOptions,
-  MetricsExplorerTimestampsRT,
-} from './use_metrics_explorer_options';
+import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   source: MetricsSourceConfigurationProperties | undefined,
   derivedIndexPattern: DataViewBase,
-  { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestampsRT,
+  { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestamp,
   enabled = true
 ) {
   const { http } = useKibana().services;

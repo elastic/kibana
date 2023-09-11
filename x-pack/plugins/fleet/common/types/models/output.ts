@@ -11,14 +11,18 @@ import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '..
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
 import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
+import type { kafkaVerificationModes } from '../../constants';
+import type { kafkaConnectionType } from '../../constants';
 
 export type OutputType = typeof outputType;
 export type KafkaCompressionType = typeof kafkaCompressionType;
 export type KafkaAuthType = typeof kafkaAuthType;
+export type KafkaConnectionTypeType = typeof kafkaConnectionType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
+export type KafkaVerificationMode = typeof kafkaVerificationModes;
 
 interface NewBaseOutput {
   is_default: boolean;
@@ -34,6 +38,7 @@ interface NewBaseOutput {
     certificate_authorities?: string[];
     certificate?: string;
     key?: string;
+    verification_mode?: ValueOf<KafkaVerificationMode>;
   } | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
@@ -76,6 +81,7 @@ export interface KafkaOutput extends NewBaseOutput {
   compression?: ValueOf<KafkaCompressionType>;
   compression_level?: number;
   auth_type?: ValueOf<KafkaAuthType>;
+  connection_type?: ValueOf<KafkaConnectionTypeType>;
   username?: string;
   password?: string;
   sasl?: {
@@ -105,6 +111,5 @@ export interface KafkaOutput extends NewBaseOutput {
   }>;
   timeout?: number;
   broker_timeout?: number;
-  broker_ack_reliability?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
-  broker_buffer_size?: number;
+  required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
 }

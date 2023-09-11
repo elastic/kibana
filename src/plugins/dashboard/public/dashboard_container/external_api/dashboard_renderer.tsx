@@ -108,7 +108,9 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
         const dashboardFactory = embeddable.getEmbeddableFactory(
           DASHBOARD_CONTAINER_TYPE
-        ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
+        ) as DashboardContainerFactory & {
+          create: DashboardContainerFactoryDefinition['create'];
+        };
         const container = await dashboardFactory?.create(
           { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
           undefined,

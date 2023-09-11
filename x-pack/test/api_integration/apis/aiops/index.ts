@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
-
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('AIOps', function () {
     this.tags(['aiops']);
 
-    if (AIOPS_ENABLED) {
-      loadTestFile(require.resolve('./explain_log_rate_spikes_full_analysis'));
-      loadTestFile(require.resolve('./explain_log_rate_spikes_groups_only'));
-      loadTestFile(require.resolve('./explain_log_rate_spikes_no_index'));
-    }
+    loadTestFile(require.resolve('./log_rate_analysis_full_analysis'));
+    loadTestFile(require.resolve('./log_rate_analysis_groups_only'));
+    loadTestFile(require.resolve('./log_rate_analysis_no_index'));
   });
 }

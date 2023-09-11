@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import type { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import type { State } from '@kbn/expandable-flyout/src/reducer';
-import type { RightPanelContext } from '../context';
+import {
+  ALERT_REASON,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+} from '@kbn/rule-data-utils';
 
 /**
  * Returns mocked data for field (mock this method: x-pack/plugins/security_solution/public/common/hooks/use_get_fields_data.ts)
@@ -25,6 +27,10 @@ export const mockGetFieldsData = (field: string): string[] => {
       return ['host1'];
     case 'user.name':
       return ['user1'];
+    case ALERT_REASON:
+      return ['reason'];
+    case ALERT_SUPPRESSION_DOCS_COUNT:
+      return ['1'];
     default:
       return [];
   }
@@ -81,6 +87,13 @@ export const mockDataFormattedForFieldBrowser = [
     field: 'process.entity_id',
     values: ['process-entity_id'],
     originalValue: ['process-entity_id'],
+    isObjectArray: false,
+  },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.workflow_status',
+    values: ['open'],
+    originalValue: ['open'],
     isObjectArray: false,
   },
 ];
@@ -141,32 +154,27 @@ export const mockSearchHit = {
 };
 
 /**
- * Mock contextValue for right panel context
+ * Mock the browserFields object
  */
-export const mockContextValue: RightPanelContext = {
-  eventId: 'eventId',
-  indexName: 'index',
-  scopeId: 'scopeId',
-  getFieldsData: mockGetFieldsData,
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-  browserFields: null,
-  dataAsNestedObject: null,
-  searchHit: undefined,
-  refetchFlyoutData: jest.fn(),
-};
-
-/**
- * Mock flyout context
- */
-export const mockFlyoutContextValue: ExpandableFlyoutContext = {
-  panels: {} as State,
-  openFlyout: jest.fn(),
-  openRightPanel: jest.fn(),
-  openLeftPanel: jest.fn(),
-  openPreviewPanel: jest.fn(),
-  closeRightPanel: jest.fn(),
-  closeLeftPanel: jest.fn(),
-  closePreviewPanel: jest.fn(),
-  previousPreviewPanel: jest.fn(),
-  closeFlyout: jest.fn(),
+export const mockBrowserFields = {
+  kibana: {
+    fields: {
+      'kibana.alert.workflow_status': {
+        aggregatable: true,
+        count: 0,
+        esTypes: [0],
+        format: {
+          id: 'string',
+          params: undefined,
+        },
+        isMapped: true,
+        name: 'kibana.alert.workflow_status',
+        readFromDocValues: true,
+        scripted: false,
+        searchable: true,
+        shortDotsEnable: false,
+        type: 'string',
+      },
+    },
+  },
 };

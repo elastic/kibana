@@ -10,8 +10,8 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { userAPIClientMock } from '../../index.mock';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
+import { userAPIClientMock } from '../../index.mock';
 
 describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a single user', () => {

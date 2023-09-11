@@ -1,27 +1,43 @@
 {
   "indices.put_settings": {
     "url_params": {
-      "master_timeout": "",
-      "timeout": "",
-      "preserve_existing": "__flag__",
-      "ignore_unavailable": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ],
-      "flat_settings": "__flag__"
+      "flat_settings": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "preserve_existing": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_settings",
-      "{indices}/_settings"
+      "{index}/_settings"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

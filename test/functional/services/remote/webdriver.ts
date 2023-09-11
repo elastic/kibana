@@ -30,7 +30,7 @@ import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
-import { NETWORK_PROFILES } from './network_profiles';
+import { NetworkProfile, NETWORK_PROFILES } from './network_profiles';
 
 const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
 const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
@@ -300,22 +300,17 @@ async function attemptToCreateCommand(
   const { session, consoleLog$ } = await buildDriverInstance();
 
   if (throttleOption === '1' && browserType === 'chrome') {
-    const { KBN_NETWORK_TEST_PROFILE = 'CLOUD_USER' } = process.env;
+    const KBN_NETWORK_TEST_PROFILE = (process.env.KBN_NETWORK_TEST_PROFILE ??
+      'CLOUD_USER') as NetworkProfile;
 
     const profile =
-      KBN_NETWORK_TEST_PROFILE in Object.keys(NETWORK_PROFILES)
-        ? KBN_NETWORK_TEST_PROFILE
-        : 'CLOUD_USER';
+      KBN_NETWORK_TEST_PROFILE in NETWORK_PROFILES ? KBN_NETWORK_TEST_PROFILE : 'CLOUD_USER';
 
-    const {
-      DOWNLOAD: downloadThroughput,
-      UPLOAD: uploadThroughput,
-      LATENCY: latency,
-    } = NETWORK_PROFILES[`${profile}`];
+    const networkProfileOptions = NETWORK_PROFILES[profile];
 
     // Only chrome supports this option.
     log.debug(
-      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput} B/s down, ${uploadThroughput} B/s up, ${latency} ms latency.`
+      `NETWORK THROTTLED with profile ${profile}: ${networkProfileOptions.download_throughput} B/s down, ${networkProfileOptions.upload_throughput} B/s up, ${networkProfileOptions.latency} ms latency.`
     );
 
     if (noCache) {
@@ -326,12 +321,7 @@ async function attemptToCreateCommand(
     }
 
     // @ts-expect-error
-    session.setNetworkConditions({
-      offline: false,
-      latency,
-      download_throughput: downloadThroughput,
-      upload_throughput: uploadThroughput,
-    });
+    session.setNetworkConditions(networkProfileOptions);
   }
 
   if (attemptId !== attemptCounter) {

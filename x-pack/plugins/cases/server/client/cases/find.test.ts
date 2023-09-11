@@ -6,7 +6,7 @@
  */
 import { v1 as uuidv1 } from 'uuid';
 
-import type { Case } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -55,8 +55,7 @@ describe('find', () => {
       const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
 
       expect(call.caseOptions.search).toBe(`"${search}" "cases:${search}"`);
-      expect(call.caseOptions).toHaveProperty('rootSearchFields');
-      expect(call.caseOptions.rootSearchFields).toStrictEqual(['_id']);
+      expect(call.caseOptions).toHaveProperty('rootSearchFields', ['_id']);
     });
 
     it('regular search term does not cause rootSearchFields to be appended', async () => {
@@ -70,8 +69,16 @@ describe('find', () => {
       expect(call.caseOptions.search).toBe(search);
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
+  });
 
-    it('should not have foo:bar attribute in request payload', async () => {
+  describe('errors', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('when foo:bar attribute in request payload', async () => {
       const search = 'sample_text';
       const findRequest = createCasesClientMockFindRequest({ search });
       await expect(
@@ -80,14 +87,6 @@ describe('find', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
       );
-    });
-  });
-
-  describe('errors', () => {
-    const clientArgs = createCasesClientMockArgs();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
     });
 
     it('invalid searchFields with array', async () => {
@@ -112,13 +111,24 @@ describe('find', () => {
       );
     });
 
+    it('invalid sortField', async () => {
+      const sortField = 'foobar';
+
+      // @ts-expect-error
+      const findRequest = createCasesClientMockFindRequest({ sortField });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrow(
+        'Error: Invalid value "foobar" supplied to "sortField"'
+      );
+    });
+
     it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
       const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
 
       const findRequest = createCasesClientMockFindRequest({ category });
 
       await expect(find(findRequest, clientArgs)).rejects.toThrow(
-        `Error: Too many categories provided. The maximum allowed is ${MAX_CATEGORY_FILTER_LENGTH}`
+        `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
       );
     });
 

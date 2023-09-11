@@ -13,6 +13,8 @@ import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
+// adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
+// x-pack/plugins/fleet/server/services/agent_policy.ts#L571
 export interface NewAgentPolicy {
   id?: string;
   name: string;

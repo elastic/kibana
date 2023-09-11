@@ -22,14 +22,13 @@ import {
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
-import { hasPreviewLayers, isLoadingPreviewLayers } from '../../selectors/map_selectors';
+import { hasPreviewLayers } from '../../selectors/map_selectors';
 import { DRAW_MODE } from '../../../common/constants';
 import { getAutoOpenLayerWizardId } from '../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     hasPreviewLayers: hasPreviewLayers(state),
-    isLoadingPreviewLayers: isLoadingPreviewLayers(state),
     autoOpenLayerWizardId: getAutoOpenLayerWizardId(state),
   };
 }

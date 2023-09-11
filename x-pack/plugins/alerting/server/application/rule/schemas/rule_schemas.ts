@@ -12,6 +12,7 @@ import {
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
 } from '../constants';
+import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionDomainSchema, actionSchema } from './action_schemas';
@@ -54,6 +55,7 @@ export const ruleExecutionStatusSchema = schema.object({
       reason: schema.oneOf([
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
+        schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
       ]),
       message: schema.string(),
     })
@@ -80,6 +82,7 @@ export const ruleLastRunSchema = schema.object({
         schema.literal(ruleExecutionStatusErrorReason.VALIDATE),
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
+        schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
       ])
     )
   ),
@@ -120,45 +123,6 @@ export const monitoringSchema = schema.object({
       }),
     }),
   }),
-});
-
-export const rRuleSchema = schema.object({
-  dtstart: schema.string(),
-  tzid: schema.string(),
-  freq: schema.maybe(
-    schema.oneOf([
-      schema.literal(0),
-      schema.literal(1),
-      schema.literal(2),
-      schema.literal(3),
-      schema.literal(4),
-      schema.literal(5),
-      schema.literal(6),
-    ])
-  ),
-  until: schema.maybe(schema.string()),
-  count: schema.maybe(schema.number()),
-  interval: schema.maybe(schema.number()),
-  wkst: schema.maybe(
-    schema.oneOf([
-      schema.literal('MO'),
-      schema.literal('TU'),
-      schema.literal('WE'),
-      schema.literal('TH'),
-      schema.literal('FR'),
-      schema.literal('SA'),
-      schema.literal('SU'),
-    ])
-  ),
-  byweekday: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-  bymonth: schema.maybe(schema.arrayOf(schema.number())),
-  bysetpos: schema.maybe(schema.arrayOf(schema.number())),
-  bymonthday: schema.arrayOf(schema.number()),
-  byyearday: schema.arrayOf(schema.number()),
-  byweekno: schema.arrayOf(schema.number()),
-  byhour: schema.arrayOf(schema.number()),
-  byminute: schema.arrayOf(schema.number()),
-  bysecond: schema.arrayOf(schema.number()),
 });
 
 export const snoozeScheduleSchema = schema.object({

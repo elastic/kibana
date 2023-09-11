@@ -84,7 +84,8 @@ export function registerRuleTypes(
         basePath,
         config,
         logger,
-        ruleDataClientThreshold
+        ruleDataClientThreshold,
+        alertsLocator
       )
     );
   }

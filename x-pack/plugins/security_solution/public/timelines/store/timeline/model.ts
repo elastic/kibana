@@ -25,8 +25,8 @@ import type {
   RowRendererId,
   TimelineStatus,
   TimelineType,
-} from '../../../../common/types/timeline/api';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event/api';
+  PinnedEvent,
+} from '../../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
@@ -191,7 +191,7 @@ export type SubsetTimelineModel = Readonly<
 
 export interface TimelineUrl {
   activeTab?: TimelineTabs;
-  id: string;
+  id?: string;
   isOpen: boolean;
   graphEventId?: string;
 }

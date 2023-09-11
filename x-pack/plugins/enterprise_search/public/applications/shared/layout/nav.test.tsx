@@ -52,19 +52,14 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Elasticsearch',
           },
           {
-            href: '/app/enterprise_search/esre',
-            id: 'esre',
-            name: 'ESRE',
-          },
-          {
             href: '/app/enterprise_search/vector_search',
             id: 'vectorSearch',
             name: 'Vector Search',
           },
           {
-            href: '/app/enterprise_search/search_experiences',
-            id: 'searchExperiences',
-            name: 'Search Experiences',
+            href: '/app/enterprise_search/esre',
+            id: 'esre',
+            name: 'ESRE',
           },
         ],
         name: 'Overview',
@@ -221,19 +216,14 @@ describe('useEnterpriseSearchApplicationNav', () => {
             name: 'Elasticsearch',
           },
           {
-            href: '/app/enterprise_search/esre',
-            id: 'esre',
-            name: 'ESRE',
-          },
-          {
             href: '/app/enterprise_search/vector_search',
             id: 'vectorSearch',
             name: 'Vector Search',
           },
           {
-            href: '/app/enterprise_search/search_experiences',
-            id: 'searchExperiences',
-            name: 'Search Experiences',
+            href: '/app/enterprise_search/esre',
+            id: 'esre',
+            name: 'ESRE',
           },
         ],
         name: 'Overview',
@@ -317,10 +307,10 @@ describe('useEnterpriseSearchApplicationNav', () => {
         "id": "searchApplicationId",
         "items": Array [
           Object {
-            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/preview",
-            "id": "enterpriseSearchApplicationPreview",
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/docs_explorer",
+            "id": "enterpriseSearchApplicationDocsExplorer",
             "items": undefined,
-            "name": "Search Preview",
+            "name": "Docs Explorer",
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
@@ -418,19 +408,14 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           name: 'Elasticsearch',
         },
         {
-          href: '/app/enterprise_search/esre',
-          id: 'esre',
-          name: 'ESRE',
-        },
-        {
           href: '/app/enterprise_search/vector_search',
           id: 'vectorSearch',
           name: 'Vector Search',
         },
         {
-          href: '/app/enterprise_search/search_experiences',
-          id: 'searchExperiences',
-          name: 'Search Experiences',
+          href: '/app/enterprise_search/esre',
+          id: 'esre',
+          name: 'ESRE',
         },
       ],
       name: 'Overview',

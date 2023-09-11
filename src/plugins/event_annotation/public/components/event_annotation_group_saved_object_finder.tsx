@@ -8,12 +8,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -23,27 +22,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
+  contentClient,
   uiSettings,
-  http,
-  savedObjectsManagement,
   fixedPageSize = 10,
   checkHasAnnotationGroups,
   onChoose,
   onCreateNew,
 }: {
   uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentClient: ContentClient;
   fixedPageSize?: number;
   checkHasAnnotationGroups: () => Promise<boolean>;
   onChoose: (value: {
     id: string;
     type: string;
     fullName: string;
-    savedObject: SavedObjectCommon<unknown>;
+    savedObject: SavedObjectCommon;
   }) => void;
   onCreateNew: () => void;
 }) => {
@@ -114,11 +111,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
         />
       }
       savedObjectMetaData={savedObjectMetaData}
-      services={{
-        uiSettings,
-        http,
-        savedObjectsManagement,
-      }}
+      services={{ contentClient, uiSettings }}
     />
   );
 };

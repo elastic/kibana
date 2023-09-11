@@ -17,6 +17,10 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import {
+  isOpenTelemetryAgentName,
+  isRumAgentName,
+} from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
@@ -31,6 +35,7 @@ import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -188,6 +193,10 @@ export function ErrorGroupDetails() {
     }
   }, [history, errorId, errorSamplesData, errorSamplesFetchStatus]);
 
+  const { agentName } = useApmServiceContext();
+  const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
+  const isRumAgent = isRumAgentName(agentName as AgentName);
+
   // If there are 0 occurrences, show only charts w. empty message
   const showDetails = errorSamplesData.occurrencesCount !== 0;
 
@@ -216,11 +225,13 @@ export function ErrorGroupDetails() {
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <EuiPanel hasBorder={true}>
-            <TopErroneousTransactions serviceName={serviceName} />
-          </EuiPanel>
-        </EuiFlexItem>
+        {!isOpenTelemetryAgent && !isRumAgent && (
+          <EuiFlexItem grow={2}>
+            <EuiPanel hasBorder={true}>
+              <TopErroneousTransactions serviceName={serviceName} />
+            </EuiPanel>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {showDetails && (

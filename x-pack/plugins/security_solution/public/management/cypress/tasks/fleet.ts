@@ -15,6 +15,7 @@ import {
   agentRouteService,
   epmRouteService,
   packagePolicyRouteService,
+  API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import type { PutAgentReassignResponse } from '@kbn/fleet-plugin/common/types';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -24,6 +25,9 @@ export const getEndpointIntegrationVersion = (): Cypress.Chainable<string> =>
   request<GetInfoResponse>({
     url: epmRouteService.getInfoPath('endpoint'),
     method: 'GET',
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
   }).then((response) => response.body.item.version);
 
 export const getAgentByHostName = (hostname: string): Cypress.Chainable<Agent> =>
@@ -32,6 +36,9 @@ export const getAgentByHostName = (hostname: string): Cypress.Chainable<Agent> =
     method: 'GET',
     qs: {
       kuery: `local_metadata.host.hostname: "${hostname}"`,
+    },
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
     },
   }).then((response) => response.body.items[0]);
 
@@ -45,6 +52,9 @@ export const reassignAgentPolicy = (
     body: {
       policy_id: agentPolicyId,
     },
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
+    },
   });
 
 export const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
@@ -53,6 +63,9 @@ export const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
     url: packagePolicyRouteService.getListPath(),
     qs: {
       kuery: 'ingest-package-policies.package.name: endpoint',
+    },
+    headers: {
+      'elastic-api-version': API_VERSIONS.public.v1,
     },
   }).then(({ body }) => {
     return body.items?.[0]?.revision ?? -1;

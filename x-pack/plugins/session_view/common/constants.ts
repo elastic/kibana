@@ -6,6 +6,7 @@
  */
 
 export const SESSION_VIEW_APP_ID = 'sessionView';
+export const USAGE_COLLECTION_APP_NAME = 'session_view'; // underscore delimited is required
 
 // routes
 export const CURRENT_API_VERSION = '1';

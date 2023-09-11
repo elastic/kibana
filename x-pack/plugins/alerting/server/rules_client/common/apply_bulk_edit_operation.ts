@@ -32,7 +32,9 @@ export const applyBulkEditOperation = <R extends object>(operation: BulkEditOper
 
   switch (operation.operation) {
     case 'set':
-      set(rule, operation.field, operation.value);
+      if (operation.field !== 'apiKey') {
+        set(rule, operation.field, operation.value);
+      }
       break;
 
     case 'add':

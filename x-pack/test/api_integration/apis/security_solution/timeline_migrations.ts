@@ -11,10 +11,11 @@ import {
   pinnedEventSavedObjectType,
   timelineSavedObjectType,
 } from '@kbn/security-solution-plugin/server/lib/timeline/saved_object_mappings';
-import { TimelineWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/api';
-import { BareNoteWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/note/api';
-
-import { BarePinnedEventWithoutExternalRefs } from '@kbn/security-solution-plugin/common/types/timeline/pinned_event/api';
+import {
+  BareNoteWithoutExternalRefs,
+  BarePinnedEventWithoutExternalRefs,
+  TimelineWithoutExternalRefs,
+} from '@kbn/security-solution-plugin/common/api/timeline';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getSavedObjectFromES } from './utils';
 

@@ -60,6 +60,7 @@ export enum RuleExecutionStatusErrorReasons {
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
+  MAX_QUEUED_ACTIONS = 'maxQueuedActions',
 }
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
@@ -170,7 +171,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   actions: RuleAction[];
   params: Params;
   mapped_params?: MappedParams;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: Date;

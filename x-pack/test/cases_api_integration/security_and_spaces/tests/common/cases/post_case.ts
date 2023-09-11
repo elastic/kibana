@@ -8,12 +8,8 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import {
-  ConnectorTypes,
-  ConnectorJiraTypeFields,
-  CaseStatuses,
-  CaseSeverity,
-} from '@kbn/cases-plugin/common/api';
+import { CaseStatuses, CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,

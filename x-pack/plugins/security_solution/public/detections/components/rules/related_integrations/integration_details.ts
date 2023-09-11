@@ -11,11 +11,11 @@ import semver from 'semver';
 import type {
   InstalledIntegration,
   InstalledIntegrationArray,
-} from '../../../../../common/detection_engine/fleet_integrations';
+} from '../../../../../common/api/detection_engine/fleet_integrations';
 import type {
   RelatedIntegration,
   RelatedIntegrationArray,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface IntegrationDetails {
   packageName: string;

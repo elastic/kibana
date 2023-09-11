@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { CasesMetricsRequest, SingleCaseMetricsRequest } from '../../../common/api';
+import type { CasesMetricsRequest, SingleCaseMetricsRequest } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts/count';

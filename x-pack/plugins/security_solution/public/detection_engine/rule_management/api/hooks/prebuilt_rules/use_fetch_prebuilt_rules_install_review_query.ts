@@ -8,8 +8,8 @@ import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { reviewRuleInstall } from '../../api';
-import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/detection_engine/prebuilt_rules/api/urls';
-import type { ReviewRuleInstallationResponseBody } from '../../../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
+import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
+import type { ReviewRuleInstallationResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
 
 export const REVIEW_RULE_INSTALLATION_QUERY_KEY = ['POST', REVIEW_RULE_INSTALLATION_URL];

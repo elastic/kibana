@@ -65,13 +65,11 @@ export function useFetchRuleTypes({
       refetchOnWindowFocus: false,
       onError: (error: Error) => {
         toasts.addError(error, {
-          title: i18n.translate('xpack.observability.ruleDetails.ruleLoadError', {
-            defaultMessage: 'Unable to load rule. Reason: {message}',
-            values: {
-              message:
-                error instanceof Error ? error.message : typeof error === 'string' ? error : '',
-            },
+          title: i18n.translate('xpack.observability.ruleDetails.ruleTypeLoadError', {
+            defaultMessage: 'Unable to load rule type.',
           }),
+          toastMessage:
+            error instanceof Error ? error.message : typeof error === 'string' ? error : '',
         });
       },
     }

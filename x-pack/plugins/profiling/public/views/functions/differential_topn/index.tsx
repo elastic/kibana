@@ -4,9 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TypeOf } from '@kbn/typed-react-router-config';
-import React from 'react';
+import {
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+import React, { useRef } from 'react';
+import { GridOnScrollProps } from 'react-window';
+import { TopNFunctionSortField } from '../../../../common/functions';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import {
@@ -15,32 +24,33 @@ import {
   NormalizationOptions,
 } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
-import { TopNFunctionsTable } from '../../../components/topn_functions';
+import { TopNFunctionsGrid } from '../../../components/topn_functions';
+import { TopNFunctionsSummary } from '../../../components/topn_functions_summary';
+import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
-import { ProfilingRoutes } from '../../../routing';
 
 export function DifferentialTopNFunctionsView() {
+  const baseGridRef = useRef<EuiDataGridRefProps>(null);
+  const comparisonGridRef = useRef<EuiDataGridRefProps>(null);
+  const { query } = useProfilingParams('/functions/differential');
   const {
-    path,
-    query,
-    query: {
-      rangeFrom,
-      rangeTo,
-      kuery,
-      sortDirection,
-      sortField,
-      comparisonKuery,
-      normalizationMode,
-      comparisonRangeFrom,
-      comparisonRangeTo,
-      baseline = 1,
-      comparison = 1,
-    },
-  } = useProfilingParams('/functions/differential');
+    rangeFrom,
+    rangeTo,
+    kuery,
+    sortDirection,
+    sortField,
+    comparisonKuery,
+    normalizationMode,
+    comparisonRangeFrom,
+    comparisonRangeTo,
+    baseline = 1,
+    comparison = 1,
+    pageIndex = 0,
+  } = query;
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
   const comparisonTimeRange = useTimeRange({
@@ -142,69 +152,106 @@ export function DifferentialTopNFunctionsView() {
     });
   }
 
+  function handleBaseGridScroll(scroll: GridOnScrollProps) {
+    if (comparisonGridRef?.current?.scrollTo) {
+      comparisonGridRef.current.scrollTo({
+        scrollTop: scroll.scrollTop,
+      });
+    }
+  }
+
+  function handleComparisonGridScroll(scroll: GridOnScrollProps) {
+    if (baseGridRef?.current?.scrollTo) {
+      baseGridRef.current.scrollTo({ scrollTop: scroll.scrollTop });
+    }
+  }
+
+  function handlePageChange(nextPage: number) {
+    profilingRouter.push('/functions/differential', {
+      path: {},
+      query: { ...query, pageIndex: nextPage },
+    });
+  }
+
+  function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
+    profilingRouter.push('/functions/differential', {
+      path: {},
+      query: {
+        ...query,
+        sortField: sorting.id as TopNFunctionSortField,
+        sortDirection: sorting.direction,
+      },
+    });
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <PrimaryAndComparisonSearchBar />
+          <EuiPanel hasShadow={false} color="subdued">
+            <PrimaryAndComparisonSearchBar />
+            <EuiHorizontalRule />
+            <NormalizationMenu
+              mode={normalizationMode}
+              options={normalizationOptions}
+              onChange={onChangeNormalizationMode}
+            />
+            <EuiSpacer />
+            <TopNFunctionsSummary
+              baselineTopNFunctions={state.data}
+              comparisonTopNFunctions={comparisonState.data}
+              baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+              comparisonScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+              isLoading={
+                state.status === AsyncStatus.Loading ||
+                comparisonState.status === AsyncStatus.Loading
+              }
+              baselineDuration={totalSeconds}
+              comparisonDuration={totalComparisonSeconds}
+            />
+          </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NormalizationMenu
-            mode={normalizationMode}
-            options={normalizationOptions}
-            onChange={onChangeNormalizationMode}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
-                <TopNFunctionsTable
+                <TopNFunctionsGrid
+                  ref={baseGridRef}
                   topNFunctions={state.data}
-                  sortDirection={sortDirection}
-                  sortField={sortField}
-                  onSortChange={(nextSort) => {
-                    profilingRouter.push(routePath, {
-                      path,
-                      query: {
-                        ...query,
-                        sortField: nextSort.sortField,
-                        sortDirection: nextSort.sortDirection,
-                      },
-                    });
-                  }}
                   totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                   isDifferentialView={true}
-                  baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
                   onFrameClick={handleOnFrameClick}
+                  baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                  onScroll={handleBaseGridScroll}
+                  pageIndex={pageIndex}
+                  onChangePage={handlePageChange}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onChangeSort={handleSortChange}
                 />
               </AsyncComponent>
             </EuiFlexItem>
             {comparisonTimeRange.inSeconds.start && comparisonTimeRange.inSeconds.end ? (
               <EuiFlexItem>
                 <AsyncComponent {...comparisonState} size="xl" alignTop>
-                  <TopNFunctionsTable
-                    sortDirection={sortDirection}
-                    sortField={sortField}
-                    onSortChange={(nextSort) => {
-                      profilingRouter.push(routePath, {
-                        path,
-                        query: {
-                          ...(query as TypeOf<ProfilingRoutes, '/functions/differential'>['query']),
-                          sortField: nextSort.sortField,
-                          sortDirection: nextSort.sortDirection,
-                        },
-                      });
-                    }}
+                  <TopNFunctionsGrid
+                    ref={comparisonGridRef}
                     topNFunctions={comparisonState.data}
-                    comparisonTopNFunctions={state.data}
-                    totalSeconds={
-                      comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
-                    }
-                    isDifferentialView={true}
                     baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+                    comparisonTopNFunctions={state.data}
                     comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                    totalSeconds={totalSeconds}
+                    isDifferentialView={true}
                     onFrameClick={handleOnFrameClick}
+                    onScroll={handleComparisonGridScroll}
+                    showDiffColumn
+                    pageIndex={pageIndex}
+                    onChangePage={handlePageChange}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onChangeSort={handleSortChange}
+                    dataTestSubj="TopNFunctionsComparisonGrid"
                   />
                 </AsyncComponent>
               </EuiFlexItem>

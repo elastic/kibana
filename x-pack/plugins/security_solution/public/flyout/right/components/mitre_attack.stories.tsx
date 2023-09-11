@@ -26,7 +26,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Emtpy: Story<void> = () => {
+export const Empty: Story<void> = () => {
   const contextValue = {
     searchHit: {
       some_field: 'some_value',

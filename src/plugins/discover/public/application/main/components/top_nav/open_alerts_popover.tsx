@@ -8,12 +8,11 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import type { Observable } from 'rxjs';
-import type { CoreTheme, I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -28,7 +27,6 @@ interface AlertsPopoverProps {
   stateContainer: DiscoverStateContainer;
   savedQueryId?: string;
   adHocDataViews: DataView[];
-  I18nContext: I18nStart['Context'];
   services: DiscoverServices;
 }
 
@@ -163,15 +161,11 @@ function closeAlertsPopover() {
 }
 
 export function openAlertsPopover({
-  I18nContext,
-  theme$,
   anchorElement,
   stateContainer,
   services,
   adHocDataViews,
 }: {
-  I18nContext: I18nStart['Context'];
-  theme$: Observable<CoreTheme>;
   anchorElement: HTMLElement;
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
@@ -186,20 +180,17 @@ export function openAlertsPopover({
   document.body.appendChild(container);
 
   const element = (
-    <I18nContext>
+    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
       <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>
-          <AlertsPopover
-            onClose={closeAlertsPopover}
-            anchorElement={anchorElement}
-            stateContainer={stateContainer}
-            adHocDataViews={adHocDataViews}
-            I18nContext={I18nContext}
-            services={services}
-          />
-        </KibanaThemeProvider>
+        <AlertsPopover
+          onClose={closeAlertsPopover}
+          anchorElement={anchorElement}
+          stateContainer={stateContainer}
+          adHocDataViews={adHocDataViews}
+          services={services}
+        />
       </KibanaContextProvider>
-    </I18nContext>
+    </KibanaRenderContextProvider>
   );
   ReactDOM.render(element, container);
 }

@@ -28,8 +28,8 @@ describe('ProductSwitch', () => {
     );
 
     const analyticsSwitch = getByText('Analytics');
-    const cloudSwitch = getByText('Cloud');
-    const endpointSwitch = getByText('Endpoint');
+    const cloudSwitch = getByText('Cloud Security');
+    const endpointSwitch = getByText('Endpoint Security');
 
     expect(analyticsSwitch).toBeInTheDocument();
     expect(cloudSwitch).toBeInTheDocument();

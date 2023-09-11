@@ -6,7 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { RuleExecutionEventType } from '../../../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionEventType } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 import * as i18n from './translations';

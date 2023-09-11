@@ -6,14 +6,7 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type {
-  SavedObjectsClientContract,
-  IScopedClusterClient,
-  Logger,
-  IBasePath,
-  CoreStart,
-} from '@kbn/core/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import type { SavedObjectsClientContract, IScopedClusterClient, IBasePath } from '@kbn/core/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -33,8 +26,6 @@ import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UptimeEsClient } from '../../lib';
-import type { TelemetryEventsSender } from '../../telemetry/sender';
-import type { UptimeRouter } from '../../../../types';
 import { UptimeConfig } from '../../../../../common/config';
 
 export type UMElasticsearchQueryFnParams<P> = {
@@ -52,23 +43,10 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeServerSetup {
-  router: UptimeRouter;
   config: UptimeConfig;
-  cloud?: CloudSetup;
-  spaces?: SpacesPluginStart;
-  fleet: FleetStartContract;
-  security: SecurityPluginStart;
-  savedObjectsClient?: SavedObjectsClientContract;
-  authSavedObjectsClient?: SavedObjectsClientContract;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   share: SharePluginSetup;
-  stackVersion: string;
-  logger: Logger;
-  telemetry: TelemetryEventsSender;
-  uptimeEsClient: UptimeEsClient;
   basePath: IBasePath;
   isDev?: boolean;
-  coreStart: CoreStart;
 }
 
 export interface UptimeCorePluginsSetup {
@@ -81,7 +59,6 @@ export interface UptimeCorePluginsSetup {
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
-  telemetry: TelemetryPluginSetup;
   bfetch: BfetchServerSetup;
   share: SharePluginSetup;
 }
@@ -91,6 +68,5 @@ export interface UptimeCorePluginsStart {
   fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
-  telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
 }

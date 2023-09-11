@@ -33,6 +33,7 @@ export type {
   ChromeProjectNavigationNode,
   AppDeepLinkId,
   AppId,
+  CloudLinkId,
   SideNavCompProps,
   SideNavComponent,
   ChromeSetProjectBreadcrumbsParams,

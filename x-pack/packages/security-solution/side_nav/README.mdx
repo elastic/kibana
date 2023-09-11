@@ -17,7 +17,6 @@ Using the `SecurityNav` wrapper provided by `@kbn/shared-ux-page-solution-nav` i
     children={
         <SolutionSideNavigation
             items={items}
-            footerItems={footerItems}
             selectedId={selectedId}
         />
     }
@@ -32,6 +31,7 @@ Both `items` and `footerItems` props are arrays of `SolutionSideNavItem` type. T
 | `label` (required) | `string` | The label that will be displayed for the link |
 | `href` (required) | `string` | The path to be used in the link anchor |
 | `onClick` | `React.MouseEventHandler` | The handler for the click event |
+| `position` | `string` (`top` \| `bottom`) | The position of the link in the main panel, defaults: `top` |
 | `items` | `SolutionSideNavItem[]` | The sub-items that will be displayed in the panel |
 | `categories` | `Category[]` | The categories to display in the panel for sub-items |
 | `iconType` | `IconType` | The EUI IconType to be pre-pended to the label |

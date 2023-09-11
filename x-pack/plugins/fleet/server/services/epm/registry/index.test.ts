@@ -8,7 +8,6 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PackageNotFoundError, RegistryResponseError } from '../../../errors';
-
 import * as Archive from '../archive';
 
 import {
@@ -17,10 +16,13 @@ import {
   fetchFindLatestPackageOrThrow,
   fetchInfo,
   getLicensePath,
+  fetchCategories,
+  fetchList,
 } from '.';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
+const mockGetConfig = jest.fn();
 
 const mockGetBundledPackageByName = jest.fn();
 const mockFetchUrl = jest.fn();
@@ -34,7 +36,7 @@ jest.mock('../..', () => ({
     getLogger: () => mockLogger,
     getKibanaBranch: () => 'main',
     getKibanaVersion: () => '99.0.0',
-    getConfig: () => ({}),
+    getConfig: () => mockGetConfig(),
     getIsProductionMode: () => false,
   },
 }));
@@ -217,5 +219,59 @@ describe('fetchInfo', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(PackageNotFoundError);
     }
+  });
+});
+
+describe('fetchCategories', () => {
+  beforeEach(() => {
+    mockFetchUrl.mockReset();
+    mockGetConfig.mockReset();
+  });
+  it('call registry with capabilities if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        capabilities: ['apm', 'security'],
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchCategories();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
+  });
+  it('does not call registry with capabilities if none are configured', async () => {
+    mockGetConfig.mockReturnValue({});
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchCategories();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBeNull();
+  });
+});
+
+describe('fetchList', () => {
+  beforeEach(() => {
+    mockFetchUrl.mockReset();
+    mockGetConfig.mockReset();
+  });
+  it('call registry with capabilities if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        capabilities: ['apm', 'security'],
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
+  });
+  it('does not call registry with capabilities if none are configured', async () => {
+    mockGetConfig.mockReturnValue({});
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('capabilities')).toBeNull();
   });
 });

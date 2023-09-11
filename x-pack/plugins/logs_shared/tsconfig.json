@@ -23,9 +23,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/test-subj-selector",
     "@kbn/observability-shared-plugin",
-    "@kbn/observability-plugin",
     "@kbn/datemath",
     "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
+    "@kbn/observability-ai-assistant-plugin",
   ]
 }

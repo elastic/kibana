@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { CreateCaseUserAction } from '../../../common/api';
-import type { UserActionBuilder, UserActionResponse } from './types';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { CreateCaseUserAction } from '../../../common/types/domain';
+import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
-const getLabelTitle = (userAction: UserActionResponse<CreateCaseUserAction>) =>
+const getLabelTitle = (userAction: SnakeToCamelCase<CreateCaseUserAction>) =>
   `${i18n.CREATE_CASE.toLowerCase()} "${userAction.payload.title}"`;
 
 export const createCaseUserActionBuilder: UserActionBuilder = ({
@@ -19,7 +20,7 @@ export const createCaseUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const createCaseUserAction = userAction as UserActionResponse<CreateCaseUserAction>;
+    const createCaseUserAction = userAction as SnakeToCamelCase<CreateCaseUserAction>;
     const label = getLabelTitle(createCaseUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,

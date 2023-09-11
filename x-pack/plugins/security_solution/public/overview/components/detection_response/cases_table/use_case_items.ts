@@ -7,9 +7,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-import type { CaseStatuses, CasesFindResponseUI } from '@kbn/cases-plugin/common';
+import type { CasesFindResponseUI } from '@kbn/cases-plugin/common';
 
 import { v4 as uuidv4 } from 'uuid';
+import type { CaseStatuses } from '@kbn/cases-components';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -57,7 +58,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
           from,
           to,
           owner: APP_ID,
-          sortField: 'create_at',
+          sortField: 'createdAt',
           sortOrder: 'desc',
           page: 1,
           perPage: 4,

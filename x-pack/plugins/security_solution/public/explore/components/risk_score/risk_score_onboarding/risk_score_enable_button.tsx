@@ -16,6 +16,9 @@ import type { inputsModel } from '../../../../common/store';
 import { REQUEST_NAMES, useFetch } from '../../../../common/hooks/use_fetch';
 import { useRiskScoreToastContent } from './use_risk_score_toast_content';
 import { installRiskScoreModule } from './utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
+import { SecurityPageName } from '../../../../../common/constants';
 
 const RiskScoreEnableButtonComponent = ({
   refetch,
@@ -35,6 +38,7 @@ const RiskScoreEnableButtonComponent = ({
   const { http, notifications, theme, dashboard } = useKibana().services;
   const { renderDocLink, renderDashboardLink } = useRiskScoreToastContent(riskScoreEntity);
   const { fetch, isLoading } = useFetch(REQUEST_NAMES.ENABLE_RISK_SCORE, installRiskScoreModule);
+  const isRiskEngineEnabled = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
   const onBoardingRiskScore = useCallback(() => {
     fetch({
@@ -64,19 +68,34 @@ const RiskScoreEnableButtonComponent = ({
   ]);
 
   return (
-    <EuiButton
-      color="primary"
-      fill
-      onClick={onBoardingRiskScore}
-      isLoading={isLoading}
-      data-test-subj={`enable_${riskScoreEntity}_risk_score`}
-      disabled={disabled}
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.riskScore.enableButtonTitle"
-        defaultMessage="Enable"
-      />
-    </EuiButton>
+    <>
+      {isRiskEngineEnabled ? (
+        <SecuritySolutionLinkButton
+          color="primary"
+          fill
+          deepLinkId={SecurityPageName.entityAnalyticsManagement}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.riskScore.enableButtonTitle"
+            defaultMessage="Enable"
+          />
+        </SecuritySolutionLinkButton>
+      ) : (
+        <EuiButton
+          color="primary"
+          fill
+          onClick={onBoardingRiskScore}
+          isLoading={isLoading}
+          data-test-subj={`enable_${riskScoreEntity}_risk_score`}
+          disabled={disabled}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.riskScore.enableButtonTitle"
+            defaultMessage="Enable"
+          />
+        </EuiButton>
+      )}
+    </>
   );
 };
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { mockApiLog } from './__mocks__/api_log.mock';
 import {
   LogicMounter,
   mockHttpValues,
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
-import { mockApiLog } from './__mocks__/api_log.mock';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';

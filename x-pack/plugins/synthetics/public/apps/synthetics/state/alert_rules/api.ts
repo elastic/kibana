@@ -9,6 +9,10 @@ import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 
+export async function getDefaultAlertingAPI(): Promise<{ statusRule: Rule; tlsRule: Rule }> {
+  return apiService.get(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
+}
+
 export async function enableDefaultAlertingAPI(): Promise<{ statusRule: Rule; tlsRule: Rule }> {
   return apiService.post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING);
 }

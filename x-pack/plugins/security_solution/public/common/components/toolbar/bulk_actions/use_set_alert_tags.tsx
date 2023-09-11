@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CoreStart } from '@kbn/core/public';
-
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { AlertTags } from '../../../../../common/detection_engine/schemas/common';
-import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../common/constants';
+import { useCallback, useEffect, useRef } from 'react';
+import type { AlertTags } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
-import { getUpdateAlertsQuery } from './helpers';
+import { setAlertTags } from '../../../containers/alert_tags/api';
 
 export type SetAlertTagsFunc = (
   tags: AlertTags,
@@ -22,7 +19,7 @@ export type SetAlertTagsFunc = (
   onSuccess: () => void,
   setTableLoading: (param: boolean) => void
 ) => Promise<void>;
-export type ReturnSetAlertTags = [boolean, SetAlertTagsFunc | null];
+export type ReturnSetAlertTags = SetAlertTagsFunc | null;
 
 /**
  * Update alert tags by query
@@ -37,22 +34,12 @@ export type ReturnSetAlertTags = [boolean, SetAlertTagsFunc | null];
  */
 export const useSetAlertTags = (): ReturnSetAlertTags => {
   const { http } = useKibana<CoreStart>().services;
-  const { addSuccess, addError, addWarning } = useAppToasts();
+  const { addSuccess, addError } = useAppToasts();
   const setAlertTagsRef = useRef<SetAlertTagsFunc | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const onUpdateSuccess = useCallback(
-    (updated: number, conflicts: number) => {
-      if (conflicts > 0) {
-        addWarning({
-          title: i18n.UPDATE_ALERT_TAGS_FAILED(conflicts),
-          text: i18n.UPDATE_ALERT_TAGS_FAILED_DETAILED(updated, conflicts),
-        });
-      } else {
-        addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated));
-      }
-    },
-    [addSuccess, addWarning]
+    (updated: number = 0) => addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated)),
+    [addSuccess]
   );
 
   const onUpdateFailure = useCallback(
@@ -67,30 +54,16 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
     const abortCtrl = new AbortController();
 
     const onSetAlertTags: SetAlertTagsFunc = async (tags, ids, onSuccess, setTableLoading) => {
-      const query: Record<string, unknown> = getUpdateAlertsQuery(ids).query;
       try {
-        setIsLoading(true);
         setTableLoading(true);
-        const response = await http.fetch<estypes.UpdateByQueryResponse>(
-          DETECTION_ENGINE_ALERT_TAGS_URL,
-          {
-            method: 'POST',
-            body: JSON.stringify({ tags, query }),
-            signal: abortCtrl.signal,
-          }
-        );
+        const response = await setAlertTags({ tags, ids, signal: abortCtrl.signal });
         if (!ignore) {
-          setTableLoading(false);
           onSuccess();
-          if (response.version_conflicts && ids.length === 1) {
-            throw new Error(i18n.BULK_ACTION_FAILED_SINGLE_ALERT);
-          }
-          setIsLoading(false);
-          onUpdateSuccess(response.updated ?? 0, response.version_conflicts ?? 0);
+          setTableLoading(false);
+          onUpdateSuccess(response.updated);
         }
       } catch (error) {
         if (!ignore) {
-          setIsLoading(false);
           setTableLoading(false);
           onUpdateFailure(error);
         }
@@ -104,5 +77,5 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
     };
   }, [http, onUpdateFailure, onUpdateSuccess]);
 
-  return [isLoading, setAlertTagsRef.current];
+  return setAlertTagsRef.current;
 };

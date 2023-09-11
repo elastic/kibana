@@ -11,6 +11,10 @@ import expect from '@kbn/expect';
 import SuperTest from 'supertest';
 import type { KbnClient } from '@kbn/test';
 import type { TelemetrySavedObjectAttributes } from '@kbn/telemetry-plugin/server/saved_objects';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
@@ -18,7 +22,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  describe('/api/telemetry/v2/optIn API', () => {
+  describe('/internal/telemetry/optIn API', () => {
     let defaultAttributes: TelemetrySavedObjectAttributes;
     let kibanaVersion: string;
     before(async () => {
@@ -88,8 +92,10 @@ async function postTelemetryV2OptIn(
   statusCode: number
 ): Promise<any> {
   const { body } = await supertest
-    .post('/api/telemetry/v2/optIn')
+    .post('/internal/telemetry/optIn')
     .set('kbn-xsrf', 'xxx')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send({ enabled: value })
     .expect(statusCode);
 

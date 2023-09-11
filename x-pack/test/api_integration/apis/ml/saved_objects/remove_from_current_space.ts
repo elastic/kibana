@@ -69,10 +69,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
+      await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('should remove AD job from current space', async () => {

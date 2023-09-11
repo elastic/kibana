@@ -130,12 +130,12 @@ const profileRegistry = createProfileRegistry();
 const callbacks = [jest.fn()];
 
 profileRegistry.set({
-  name: 'default',
+  id: 'default',
   customizationCallbacks: callbacks,
 });
 
 profileRegistry.set({
-  name: 'test',
+  id: 'test',
   customizationCallbacks: callbacks,
 });
 

@@ -15,16 +15,15 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
-import type { SavedTimeline } from '../../../../common/types/timeline/api';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
-
-import { requestMock } from '../../detection_engine/routes/__mocks__';
-
 import type {
+  SavedTimeline,
   patchTimelineSchema,
   createTimelineSchema,
   GetTimelineQuery,
-} from '../schemas/timelines';
+} from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+
+import { requestMock } from '../../detection_engine/routes/__mocks__';
 
 import { getReadables } from '../utils/common';
 

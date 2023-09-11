@@ -25,6 +25,7 @@ import {
   ADD_PACKAGE_POLICY_BTN,
 } from '../screens/fleet';
 import { ADD_INTEGRATION_POLICY_BTN, AGENT_POLICY_NAME_LINK } from '../screens/integrations';
+import { scrollToIntegration } from '../tasks/integrations';
 
 const rolesToCreate = [FleetAllIntegrReadRole];
 const usersToCreate = [FleetAllIntegrReadUser];
@@ -81,6 +82,7 @@ describe('When the user has All privilege for Fleet but Read for integrations', 
   describe('Integrations', () => {
     it('are visible but cannot be added', () => {
       loginWithUserAndWaitForPage(INTEGRATIONS, FleetAllIntegrReadUser);
+      scrollToIntegration(getIntegrationCard('apache'));
       cy.getBySel(getIntegrationCard('apache')).click();
       cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
     });

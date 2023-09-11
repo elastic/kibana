@@ -1,6 +1,6 @@
 post:
   summary: Creates a Composite SLO
-  operationId: createCompositeSlo
+  operationId: createCompositeSloOp
   description: >
     You must have `all` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
@@ -49,7 +49,7 @@ post:
 
 get:
   summary: Retrieves a paginated list of composite SLOs with summary
-  operationId: findCompositeSlo
+  operationId: findCompositeSloOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.

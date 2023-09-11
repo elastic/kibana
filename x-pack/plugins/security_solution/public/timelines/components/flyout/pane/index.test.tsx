@@ -45,6 +45,7 @@ describe('Pane', () => {
         <Pane timelineId={TimelineId.test} />
       </TestProviders>
     );
+
     await waitFor(() => {
       expect(EmptyComponent.getByTestId('flyout-pane')).toHaveStyle('display: block');
     });

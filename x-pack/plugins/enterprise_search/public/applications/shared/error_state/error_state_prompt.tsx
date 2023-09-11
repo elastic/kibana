@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiCode, EuiLink, EuiCodeBlock } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiCode, EuiLink, EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,9 +27,7 @@ import './error_state_prompt.scss';
 const WORKPLACE_SEARCH_PERSONAL_DASHBOARD_PATH = '/p/';
 
 export const ErrorStatePrompt: React.FC = () => {
-  const { errorConnectingMessage } = useValues(HttpLogic);
-  const { config, cloud, setChromeIsVisible, history } = useValues(KibanaLogic);
-  const isCloudEnabled = cloud.isCloudEnabled;
+  const { setChromeIsVisible, history } = useValues(KibanaLogic);
   const isWorkplaceSearchPersonalDashboardRoute = history.location.pathname.includes(
     WORKPLACE_SEARCH_PERSONAL_DASHBOARD_PATH
   );
@@ -55,25 +53,7 @@ export const ErrorStatePrompt: React.FC = () => {
         </h2>
       }
       titleSize="l"
-      body={
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.errorConnectingState.description1"
-              defaultMessage="We can’t establish a connection to Enterprise Search at the host URL {enterpriseSearchUrl} due to the following error:"
-              values={{
-                enterpriseSearchUrl: (
-                  <EuiLink target="_blank" href={config.host} css={{ overflowWrap: 'break-word' }}>
-                    {config.host}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-          <EuiCodeBlock css={{ textAlign: 'left' }}>{errorConnectingMessage}</EuiCodeBlock>
-          {isCloudEnabled ? cloudError(cloud) : nonCloudError()}
-        </>
-      }
+      body={<ErrorBody />}
       actions={[
         <EuiButtonTo iconType="help" fill to="/setup_guide">
           <FormattedMessage
@@ -83,6 +63,51 @@ export const ErrorStatePrompt: React.FC = () => {
         </EuiButtonTo>,
       ]}
     />
+  );
+};
+
+export const ErrorStateCallout: React.FC = () => {
+  return (
+    <EuiCallOut
+      title={i18n.translate('xpack.enterpriseSearch.errorConnectingCallout.title', {
+        defaultMessage: 'Unable to connect to Enterprise Search',
+      })}
+      iconType="warning"
+      color="warning"
+    >
+      <ErrorBody />
+      <EuiButtonTo iconType="help" fill to="/setup_guide" color="warning">
+        <FormattedMessage
+          id="xpack.enterpriseSearch.errorConnectingCallout.setupGuideCta"
+          defaultMessage="Review setup guide"
+        />
+      </EuiButtonTo>
+    </EuiCallOut>
+  );
+};
+
+const ErrorBody: React.FC = () => {
+  const { errorConnectingMessage } = useValues(HttpLogic);
+  const { config, cloud } = useValues(KibanaLogic);
+  const isCloudEnabled = cloud.isCloudEnabled;
+  return (
+    <>
+      <p>
+        <FormattedMessage
+          id="xpack.enterpriseSearch.errorConnectingState.description1"
+          defaultMessage="We can’t establish a connection to Enterprise Search at the host URL {enterpriseSearchUrl} due to the following error:"
+          values={{
+            enterpriseSearchUrl: (
+              <EuiLink target="_blank" href={config.host} css={{ overflowWrap: 'break-word' }}>
+                {config.host}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+      <EuiCodeBlock css={{ textAlign: 'left' }}>{errorConnectingMessage}</EuiCodeBlock>
+      {isCloudEnabled ? cloudError(cloud) : nonCloudError()}
+    </>
   );
 };
 

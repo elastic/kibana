@@ -14,6 +14,7 @@ import {
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -77,7 +78,7 @@ export function ApmHeaderActionMenu() {
       )}
       <EuiHeaderLink
         color="primary"
-        href={kibanaHref('/app/home#/tutorial/apm')}
+        href={kibanaHref('/app/apm/tutorial')}
         iconType="indexOpen"
         data-test-subj="apmAddDataHeaderLink"
       >
@@ -96,6 +97,7 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+      <ObservabilityAIAssistantActionMenuItem />
     </EuiHeaderLinks>
   );
 }

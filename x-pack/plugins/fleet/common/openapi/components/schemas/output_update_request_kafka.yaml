@@ -35,6 +35,9 @@ properties:
         type: string
       key:
         type: string
+      verification_mode:
+        type: string
+        enum: ['none', 'full', 'certificate', 'strict']
   proxy_id:
     type: string
   shipper:
@@ -66,6 +69,9 @@ properties:
     type: string
   auth_type:
     type: string
+  connection_type:
+    type: string
+    enum: ['plaintext', 'encryption']
   username:
     type: string
   password:
@@ -114,9 +120,7 @@ properties:
     type: number
   broker_timeout:
     type: number
-  broker_ack_reliability:
-    type: string
-  broker_buffer_size:
+  required_acks:
     type: number
 required:
   - name

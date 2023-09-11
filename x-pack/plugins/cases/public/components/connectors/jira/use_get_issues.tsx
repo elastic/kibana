@@ -11,7 +11,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { isEmpty } from 'lodash';
-import type { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { getIssues } from './api';
 import type { Issues } from './types';
 import * as i18n from './translations';

@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.closeAnomalyDetectionJob(jobIdSpace1);
       await ml.api.closeAnomalyDetectionJob(jobIdSpace2);
       await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.cleanMLSavedObjects([idSpace1, idSpace2]);
     });
 
     after(async () => {

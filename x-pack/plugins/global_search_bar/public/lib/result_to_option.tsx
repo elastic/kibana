@@ -22,7 +22,10 @@ export const resultToOption = (
   const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
   // only displaying icons for applications and integrations
   const useIcon =
-    type === 'application' || type === 'integration' || type.toLowerCase() === 'enterprise search';
+    type === 'application' ||
+    type === 'integration' ||
+    type.toLowerCase() === 'enterprise search' ||
+    type.toLowerCase() === 'search';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,

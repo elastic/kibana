@@ -53,7 +53,7 @@ export async function createStdoutSocket() {
     )
   ).toPromise();
 
-  server.listen(0);
+  server.listen(0, '127.0.0.1');
   cleanup$.subscribe(() => {
     server.close();
   });

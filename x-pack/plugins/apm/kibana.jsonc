@@ -9,12 +9,12 @@
     "browser": true,
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
+      "apmDataAccess",
       "data",
       "dashboard",
       "controls",
       "embeddable",
       "features",
-      "infra",
       "logsShared",
       "inspector",
       "licensing",
@@ -28,7 +28,8 @@
       "dataViews",
       "lens",
       "maps",
-      "uiActions"
+      "uiActions",
+      "observabilityAIAssistant"
     ],
     "optionalPlugins": [
       "actions",
@@ -39,6 +40,7 @@
       "discover",
       "fleet",
       "fieldFormats",
+      "infra",
       "home",
       "ml",
       "security",
@@ -56,8 +58,8 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "esUiShared",
-      "maps"
+      "maps",
+      "observabilityAIAssistant"
     ]
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/public';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../common';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 
 export const configMock = {
   get: (key: string) => {

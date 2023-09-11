@@ -43,6 +43,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerStandalone: true,
       disableProxies: true,
       activeAgentsSoftLimit: true,
+      onlyAllowAgentUpgradeToKnownVersions: true,
     },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
@@ -139,7 +140,6 @@ export const config: PluginConfigDescriptor = {
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
       bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
-      testSecretsIndex: schema.maybe(schema.string()),
     }),
     packageVerification: schema.object({
       gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -177,10 +177,25 @@ export const config: PluginConfigDescriptor = {
         fleetServerStandalone: schema.boolean({
           defaultValue: false,
         }),
+        onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
+          defaultValue: false,
+        }),
         activeAgentsSoftLimit: schema.maybe(
           schema.number({
             min: 0,
           })
+        ),
+        capabilities: schema.arrayOf(
+          schema.oneOf([
+            // See package-spec for the list of available capiblities https://github.com/elastic/package-spec/blob/dcc37b652690f8a2bca9cf8a12fc28fd015730a0/spec/integration/manifest.spec.yml#L113
+            schema.literal('apm'),
+            schema.literal('enterprise_search'),
+            schema.literal('observability'),
+            schema.literal('security'),
+            schema.literal('serverless_search'),
+            schema.literal('uptime'),
+          ]),
+          { defaultValue: [] }
         ),
       })
     ),

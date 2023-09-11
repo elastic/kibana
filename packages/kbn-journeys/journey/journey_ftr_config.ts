@@ -22,7 +22,11 @@ export function makeFtrConfigProvider(
   steps: AnyStep[]
 ): FtrConfigProvider {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    const configPath = config.getFtrConfigPath();
+    const isServerless = !!process.env.TEST_SERVERLESS;
+    // Use the same serverless FTR config for all journeys
+    const configPath = isServerless
+      ? 'x-pack/test_serverless/shared/config.base.ts'
+      : config.getFtrConfigPath();
     const defaultConfigPath = config.isXpack()
       ? 'x-pack/test/functional/config.base.js'
       : 'test/functional/config.base.js';
@@ -86,6 +90,7 @@ export function makeFtrConfigProvider(
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
+          '--coreApp.allowDynamicConfigOverrides=true',
         ],
 
         env: {

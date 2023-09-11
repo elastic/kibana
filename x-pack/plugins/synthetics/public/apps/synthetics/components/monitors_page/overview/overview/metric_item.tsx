@@ -65,10 +65,10 @@ export const MetricItem = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName =
-    useLocationName({ locationId: monitor.location?.id })?.label || monitor.location?.id;
+    useLocationName({ locationId: monitor.location.id })?.label || monitor.location?.id;
   const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
     monitor.configId,
-    locationName
+    monitor.location.id
   );
   const theme = useTheme();
 
@@ -116,7 +116,7 @@ export const MetricItem = ({
                   configId: monitor.configId,
                   id: monitor.id,
                   location: locationName,
-                  locationId: monitor.location?.id,
+                  locationId: monitor.location.id,
                 });
               }
             }}
@@ -139,13 +139,14 @@ export const MetricItem = ({
                       justifyContent="flexEnd"
                       // empty title to prevent default title from showing
                       title=""
+                      component="span"
                     >
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} component="span">
                         {i18n.translate('xpack.synthetics.overview.duration.label', {
                           defaultMessage: 'Duration',
                         })}
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} component="span">
                         <EuiIconTip
                           title={i18n.translate('xpack.synthetics.overview.duration.description', {
                             defaultMessage: 'Median duration of last 24 checks',

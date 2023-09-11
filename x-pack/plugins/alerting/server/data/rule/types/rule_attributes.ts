@@ -144,7 +144,7 @@ interface AlertsFilterAttributes {
   timeframe?: AlertsFilterTimeFrameAttributes;
 }
 
-interface RuleActionAttributes {
+export interface RuleActionAttributes {
   uuid: string;
   group: string;
   actionRef: string;

@@ -826,7 +826,12 @@ export const icmpPolicy = {
   typeMigrationVersion: '8.7.0',
 } as unknown as SavedObjectUnsanitizedDoc<PackagePolicy>;
 
-export const getBrowserPolicy = (throttling = '5d/3u/20l') =>
+export const getBrowserPolicy = (
+  throttling = '5d/3u/20l',
+  project: string | null = null,
+  testRunId?: string,
+  runOnce = false
+) =>
   ({
     type: 'ingest-package-policies',
     id: '420754e9-40f2-486c-bc2e-265bafd735c5-fe200580-dee2-11ed-933e-0f85f8c5dd40-default',
@@ -948,7 +953,7 @@ export const getBrowserPolicy = (throttling = '5d/3u/20l') =>
                 location_name: { value: 'Fleet managed', type: 'text' },
                 id: { type: 'text' },
                 config_id: { type: 'text' },
-                run_once: { value: false, type: 'bool' },
+                run_once: { value: runOnce, type: 'bool' },
                 origin: { type: 'text' },
                 'monitor.project.id': { type: 'text' },
                 'monitor.project.name': { type: 'text' },
@@ -1012,10 +1017,11 @@ export const getBrowserPolicy = (throttling = '5d/3u/20l') =>
                 location_name: { value: 'A private location', type: 'text' },
                 id: { value: '420754e9-40f2-486c-bc2e-265bafd735c5', type: 'text' },
                 config_id: { value: '420754e9-40f2-486c-bc2e-265bafd735c5', type: 'text' },
-                run_once: { value: false, type: 'bool' },
+                run_once: { value: runOnce, type: 'bool' },
                 origin: { value: 'ui', type: 'text' },
-                'monitor.project.id': { value: null, type: 'text' },
-                'monitor.project.name': { value: null, type: 'text' },
+                'monitor.project.id': { value: project, type: 'text' },
+                'monitor.project.name': { value: project, type: 'text' },
+                ...(testRunId ? { test_run_id: { value: testRunId, type: 'text' } } : {}),
               },
               id: 'synthetics/browser-browser-420754e9-40f2-486c-bc2e-265bafd735c5-fe200580-dee2-11ed-933e-0f85f8c5dd40-default',
               compiled_stream: {

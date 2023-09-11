@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiPageBody,
   EuiPanel,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -120,9 +119,9 @@ export function BeatsOverview({
         <EuiSpacer size="m" />
         <EuiPanel>{renderLatestActive(latestActive, latestTypes, latestVersions)}</EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

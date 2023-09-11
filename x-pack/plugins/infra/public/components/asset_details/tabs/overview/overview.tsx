@@ -9,60 +9,57 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
-import { useMetadata } from '../../hooks/use_metadata';
-import { useSourceContext } from '../../../../containers/metrics_source';
-import { MetadataSummary } from './metadata_summary';
-import { KPIGrid } from './kpi_grid';
-import type { StringDateRange } from '../../types';
+import {
+  MetadataSummaryList,
+  MetadataSummaryListCompact,
+} from './metadata_summary/metadata_summary_list';
+import { AlertsSummaryContent } from './alerts';
+import { KPIGrid } from './kpis/kpi_grid';
+import { MetricsGrid, MetricsGridCompact } from './metrics/metrics_grid';
+import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { SectionSeparator } from './section_separator';
 
-export interface MetadataSearchUrlState {
-  metadataSearchUrlState: string;
-  setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
-}
-
-export interface KPIProps {
-  dateRange?: StringDateRange;
-  dataView?: DataView;
-}
-export interface OverviewProps extends KPIProps {
-  currentTimeRange: MetricsTimeInput;
-  nodeName: string;
-  nodeType: InventoryItemType;
-}
-
-const DEFAULT_DATE_RANGE = {
-  from: 'now-15m',
-  to: 'now',
-  mode: 'absolute' as const,
-};
-
-export const Overview = ({
-  nodeName,
-  currentTimeRange,
-  nodeType,
-  dateRange,
-  dataView,
-}: OverviewProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId } = useSourceContext();
+export const Overview = () => {
+  const { getParsedDateRange } = useDateRangeProviderContext();
+  const { asset, assetType, renderMode } = useAssetDetailsRenderPropsContext();
   const {
+    metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-    metadata,
-  } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadataStateProviderContext();
+  const { logs, metrics } = useDataViewsProviderContext();
+
+  const parsedDateRange = getParsedDateRange();
+  const isFullPageView = renderMode.mode !== 'flyout';
+
+  const metricsSection = isFullPageView ? (
+    <MetricsGrid
+      dateRange={parsedDateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  ) : (
+    <MetricsGridCompact
+      dateRange={parsedDateRange}
+      logsDataView={logs.dataView}
+      metricsDataView={metrics.dataView}
+      assetName={asset.name}
+    />
+  );
+  const metadataSummarySection = isFullPageView ? (
+    <MetadataSummaryList metadata={metadata} metadataLoading={metadataLoading} />
+  ) : (
+    <MetadataSummaryListCompact metadata={metadata} metadataLoading={metadataLoading} />
+  );
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid
-          nodeName={nodeName}
-          dateRange={dateRange ?? DEFAULT_DATE_RANGE}
-          dataView={dataView}
-        />
+        <KPIGrid nodeName={asset.name} timeRange={parsedDateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
@@ -80,7 +77,7 @@ export const Overview = ({
               values={{
                 reload: (
                   <EuiLink
-                    data-test-subj="infraMetadataReloadPageLink"
+                    data-test-subj="infraAssetDetailsMetadataReloadPageLink"
                     onClick={() => window.location.reload()}
                   >
                     {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
@@ -92,9 +89,19 @@ export const Overview = ({
             />
           </EuiCallOut>
         ) : (
-          <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+          metadataSummarySection
         )}
+        <SectionSeparator />
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AlertsSummaryContent
+          assetName={asset.name}
+          assetType={assetType}
+          dateRange={parsedDateRange}
+        />
+        <SectionSeparator />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{metricsSection}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

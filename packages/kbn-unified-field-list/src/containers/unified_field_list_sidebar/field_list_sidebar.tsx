@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageSidebar } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
+import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
@@ -24,9 +25,6 @@ import {
   type SelectedFieldsResult,
   INITIAL_SELECTED_FIELDS_RESULT,
 } from './group_fields';
-
-const FIELDS_LIMIT_SETTING = 'fields:popularLimit';
-const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
 
 export type UnifiedFieldListSidebarCustomizableProps = Pick<
   UnifiedFieldListItemProps,

@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { ProductFeatures } from './types';
-import { IngestPipelineParams } from './types/connectors';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
   defaultMessage: 'Search',
@@ -79,7 +80,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'elasticsearch',
+  ID: 'enterpriseSearchElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),
@@ -199,6 +200,20 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   run_ml_inference: false,
 };
 
+export interface DefaultConnectorsPipelineMeta {
+  default_extract_binary_content: boolean;
+  default_name: string;
+  default_reduce_whitespace: boolean;
+  default_run_ml_inference: boolean;
+}
+
+export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
+  default_extract_binary_content: DEFAULT_PIPELINE_VALUES.extract_binary_content,
+  default_name: DEFAULT_PIPELINE_NAME,
+  default_reduce_whitespace: DEFAULT_PIPELINE_VALUES.reduce_whitespace,
+  default_run_ml_inference: DEFAULT_PIPELINE_VALUES.run_ml_inference,
+};
+
 export enum INGESTION_METHOD_IDS {
   API = 'api',
   CONNECTOR = 'connector',
@@ -215,3 +230,4 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
 };
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
+export const PLUGIN_ID = 'enterpriseSearch';

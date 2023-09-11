@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { firstValueFrom } from 'rxjs';
+
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -20,20 +21,17 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 
 export async function getServiceGroupFieldsForAnomaly({
-  config$,
+  apmIndices,
   scopedClusterClient,
-  savedObjectsClient,
   serviceName,
   environment,
   transactionType,
   timestamp,
   bucketSpan,
 }: {
-  config$: RegisterRuleDependencies['config$'];
+  apmIndices: APMIndices;
   scopedClusterClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
   serviceName: string;
@@ -42,15 +40,8 @@ export async function getServiceGroupFieldsForAnomaly({
   timestamp: number;
   bucketSpan: number;
 }) {
-  const config = await firstValueFrom(config$);
-  const indices = await getApmIndices({
-    config,
-    savedObjectsClient,
-  });
-  const { transaction: index } = indices;
-
   const params = {
-    index,
+    index: apmIndices.transaction,
     body: {
       size: 0,
       track_total_hits: false,

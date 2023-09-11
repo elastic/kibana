@@ -42,6 +42,25 @@
       }
     }
   },
+  "url": {
+    "dynamic": false,
+    "properties": {
+      "slug": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      }
+    }
+  },
   "usage-counters": {
     "dynamic": false,
     "properties": {
@@ -127,25 +146,6 @@
     "dynamic": false,
     "properties": {
       "lastUpdatedAt": {
-        "type": "date"
-      }
-    }
-  },
-  "url": {
-    "dynamic": false,
-    "properties": {
-      "slug": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        }
-      },
-      "accessDate": {
-        "type": "date"
-      },
-      "createDate": {
         "type": "date"
       }
     }
@@ -616,6 +616,23 @@
       }
     }
   },
+  "apm-indices": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "tag": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
   "alert": {
     "dynamic": false,
     "properties": {
@@ -874,30 +891,6 @@
       }
     }
   },
-  "tag": {
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "search": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      }
-    }
-  },
   "graph-workspace": {
     "properties": {
       "description": {
@@ -928,6 +921,17 @@
       "legacyIndexPatternRef": {
         "type": "text",
         "index": false
+      }
+    }
+  },
+  "search": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
       }
     }
   },
@@ -1407,6 +1411,14 @@
     "dynamic": false,
     "properties": {}
   },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
+  },
   "canvas-element": {
     "dynamic": false,
     "properties": {
@@ -1496,6 +1508,9 @@
         "index": false
       },
       "prerelease_integrations_enabled": {
+        "type": "boolean"
+      },
+      "secret_storage_requirements_met": {
         "type": "boolean"
       }
     }
@@ -1649,6 +1664,9 @@
       "auth_type": {
         "type": "keyword"
       },
+      "connection_type": {
+        "type": "keyword"
+      },
       "username": {
         "type": "keyword"
       },
@@ -1734,6 +1752,12 @@
         "type": "text"
       },
       "broker_buffer_size": {
+        "type": "integer"
+      },
+      "required_acks": {
+        "type": "integer"
+      },
+      "channel_buffer_size": {
         "type": "integer"
       }
     }
@@ -1942,6 +1966,9 @@
         "type": "boolean"
       },
       "host": {
+        "type": "keyword"
+      },
+      "proxy_id": {
         "type": "keyword"
       }
     }
@@ -2249,6 +2276,9 @@
   },
   "observability-onboarding-state": {
     "properties": {
+      "type": {
+        "type": "keyword"
+      },
       "state": {
         "type": "object",
         "dynamic": false
@@ -2796,6 +2826,9 @@
               },
               "value": {
                 "type": "text"
+              },
+              "relation": {
+                "type": "keyword"
               }
             }
           },
@@ -2924,6 +2957,48 @@
       }
     }
   },
+  "risk-engine-configuration": {
+    "dynamic": false,
+    "properties": {
+      "dataViewId": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "filter": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "identifierType": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "keyword"
+      },
+      "pageSize": {
+        "type": "integer"
+      },
+      "range": {
+        "properties": {
+          "start": {
+            "type": "keyword"
+          },
+          "end": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  },
+  "policy-settings-protection-updates-note": {
+    "properties": {
+      "note": {
+        "type": "text",
+        "index": false
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
@@ -2931,14 +3006,6 @@
   "inventory-view": {
     "dynamic": false,
     "properties": {}
-  },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
-      }
-    }
   },
   "metrics-explorer-view": {
     "dynamic": false,
@@ -2976,22 +3043,6 @@
       }
     }
   },
-  "enterprise_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-indices": {
-    "dynamic": false,
-    "properties": {}
-  },
   "apm-telemetry": {
     "dynamic": false,
     "properties": {}
@@ -3019,5 +3070,17 @@
         "type": "text"
       }
     }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
   }
 }

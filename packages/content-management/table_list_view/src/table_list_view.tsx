@@ -82,10 +82,8 @@ export const TableListView = <T extends UserContentCommonSchema>({
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
   const onFetchSuccess = useCallback(() => {
-    if (!hasInitialFetchReturned) {
-      setHasInitialFetchReturned(true);
-    }
-  }, [hasInitialFetchReturned]);
+    setHasInitialFetchReturned(true);
+  }, []);
 
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>

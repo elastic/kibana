@@ -6,15 +6,17 @@
  */
 
 import { filter, map, omit } from 'lodash';
-import { schema } from '@kbn/config-schema';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import type { FindPacksRequestQuerySchema } from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID } from '../../../common';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
+import { findPacksRequestQuerySchema } from '../../../common/api';
 
 export const findPackRoute = (router: IRouter) => {
   router.versioned
@@ -28,17 +30,10 @@ export const findPackRoute = (router: IRouter) => {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: schema.object(
-              {
-                page: schema.maybe(schema.number()),
-                pageSize: schema.maybe(schema.number()),
-                sort: schema.maybe(schema.string()),
-                sortOrder: schema.maybe(
-                  schema.oneOf([schema.literal('asc'), schema.literal('desc')])
-                ),
-              },
-              { unknowns: 'allow' }
-            ),
+            query: buildRouteValidation<
+              typeof findPacksRequestQuerySchema,
+              FindPacksRequestQuerySchema
+            >(findPacksRequestQuerySchema),
           },
         },
       },

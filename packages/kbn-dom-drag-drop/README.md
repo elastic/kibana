@@ -9,7 +9,7 @@ We aren't using EUI or another library, due to the fact that Lens visualizations
 First, place a RootDragDropProvider at the root of your application.
 
 ```js
-<RootDragDropProvider onTrackUICounterEvent={...}>
+<RootDragDropProvider customMiddleware={...}>
   ... your app here ...
 </RootDragDropProvider>
 ```
@@ -17,13 +17,13 @@ First, place a RootDragDropProvider at the root of your application.
 If you have a child React application (e.g. a visualization), you will need to pass the drag / drop context down into it. This can be obtained like so:
 
 ```js
-const context = useContext(DragContext);
+const context = useDragDropContext();
 ```
 
-In your child application, place a `ChildDragDropProvider` at the root of that, and spread the context into it:
+In your child application, place a `ChildDragDropProvider` at the root of that, and assign the context into it:
 
 ```js
-<ChildDragDropProvider {...context}>... your child app here ...</ChildDragDropProvider>
+<ChildDragDropProvider value={context}>... your child app here ...</ChildDragDropProvider>
 ```
 
 This enables your child application to share the same drag / drop context as the root application.
@@ -49,7 +49,7 @@ To enable dragging an item, use `DragDrop` with both a `draggable` and a `value`
 To enable dropping, use `DragDrop` with both a `dropTypes` attribute that should be an array with at least one value and an `onDrop` handler attribute. `dropType` should only be truthy if is an item being dragged, and if a drop of the dragged item is supported.
 
 ```js
-const { dragging } = useContext(DragContext);
+const [ dndState ] = useDragDropContext()
 
 return (
   <DragDrop
@@ -69,13 +69,13 @@ return (
 To create a reordering group, surround the elements from the same group with a `ReorderProvider`:
 
 ```js
-<ReorderProvider id="groupId">... elements from one group here ...</ReorderProvider>
+<ReorderProvider>... elements from one group here ...</ReorderProvider>
 ```
 
 The children `DragDrop` components must have props defined as in the example:
 
 ```js
-<ReorderProvider id="groupId">
+<ReorderProvider>
   <div className="field-list">
     {fields.map((f) => (
       <DragDrop

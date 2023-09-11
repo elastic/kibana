@@ -15,7 +15,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
-import type { HttpService } from '@kbn/core-http-server-internal';
+import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
 import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
@@ -30,20 +30,17 @@ describe('Routing versioned requests', () => {
   async function setupServer(cliArgs: Partial<CliArgs> = {}) {
     logger = loggingSystemMock.create();
     await server?.stop(); // stop the already started server
+    const serverConfig: Partial<HttpConfigType> = {
+      versioned: {
+        versionResolution: cliArgs.dev ? 'none' : cliArgs.serverless ? 'newest' : 'oldest',
+        strictClientVersionCheck: !cliArgs.serverless,
+      },
+    };
     server = createHttpServer({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
       configService: createConfigService({
-        // We manually sync the config in our mock at this point
-        server:
-          cliArgs.serverless === true
-            ? {
-                versioned: {
-                  versionResolution: 'newest',
-                  strictClientVersionCheck: false,
-                },
-              }
-            : undefined,
+        server: serverConfig,
       }),
     });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
@@ -316,10 +313,7 @@ describe('Routing versioned requests', () => {
         path: '/my-path',
         access: 'public',
       })
-      .addVersion(
-        { version: '2023-10-31', validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      );
+      .addVersion({ version: '2023-10-31', validate: false }, async (ctx, req, res) => res.ok());
     await server.start();
 
     await expect(

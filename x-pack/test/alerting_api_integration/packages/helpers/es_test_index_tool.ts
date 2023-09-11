@@ -110,6 +110,31 @@ export class ESTestIndexTool {
     return await this.es.search(params, { meta: true });
   }
 
+  async getAll(size: number = 10) {
+    const params = {
+      index: this.index,
+      size,
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    };
+    return await this.es.search(params, { meta: true });
+  }
+
+  async removeAll() {
+    const params = {
+      index: this.index,
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    };
+    return await this.es.deleteByQuery(params);
+  }
+
   async waitForDocs(source: string, reference: string, numDocs: number = 1) {
     return await this.retry.try(async () => {
       const searchResult = await this.search(source, reference);

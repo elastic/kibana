@@ -8,15 +8,25 @@ import { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy, AgentPolicy } from '../../types';
-import { sendGetOneAgentPolicy, useStartServices } from '../../hooks';
+import { sendGetOneAgentPolicy, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
 import {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
-import { getCloudFormationTemplateUrlFromAgentPolicy } from '../../services';
+import { getCloudShellUrlFromAgentPolicy } from '../../services';
 
-import type { K8sMode, CloudSecurityIntegrationType } from './types';
+import {
+  getCloudFormationTemplateUrlFromPackageInfo,
+  getCloudFormationTemplateUrlFromAgentPolicy,
+} from '../../services';
+
+import type {
+  K8sMode,
+  CloudSecurityIntegrationType,
+  CloudSecurityIntegrationAwsAccountType,
+  CloudSecurityIntegration,
+} from './types';
 
 // Packages that requires custom elastic-agent manifest
 const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_DEFEND_PACKAGE]);
@@ -74,19 +84,62 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
 }
 
 export function useCloudSecurityIntegration(agentPolicy?: AgentPolicy) {
-  const cloudSecurityIntegration = useMemo(() => {
-    if (!agentPolicy) {
+  const cloudSecurityPackagePolicy = useMemo(() => {
+    return getCloudSecurityPackagePolicyFromAgentPolicy(agentPolicy);
+  }, [agentPolicy]);
+
+  const integrationVersion = cloudSecurityPackagePolicy?.package?.version;
+
+  // Fetch the package info to get the CloudFormation template URL only
+  // if the package policy is a Cloud Security policy
+  const { data: packageInfoData, isLoading } = useGetPackageInfoByKeyQuery(
+    FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+    integrationVersion,
+    { full: true },
+    { enabled: Boolean(cloudSecurityPackagePolicy) }
+  );
+
+  const cloudSecurityIntegration: CloudSecurityIntegration | undefined = useMemo(() => {
+    if (!agentPolicy || !cloudSecurityPackagePolicy) {
       return undefined;
     }
 
-    const integrationType = getCloudSecurityIntegrationTypeFromPackagePolicy(agentPolicy);
-    const cloudformationUrl = getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
+    const integrationType = cloudSecurityPackagePolicy.inputs?.find((input) => input.enabled)
+      ?.policy_template as CloudSecurityIntegrationType;
 
+    if (!integrationType) return undefined;
+
+    const cloudFormationTemplateFromAgentPolicy =
+      getCloudFormationTemplateUrlFromAgentPolicy(agentPolicy);
+
+    // Use the latest CloudFormation template for the current version
+    // So it guarantee that the template version matches the integration version
+    // when the integration is upgraded.
+    // In case it can't find the template for the current version,
+    // it will fallback to the one from the agent policy.
+    const cloudFormationTemplateUrl = packageInfoData?.item
+      ? getCloudFormationTemplateUrlFromPackageInfo(packageInfoData.item, integrationType)
+      : cloudFormationTemplateFromAgentPolicy;
+
+    const AWS_ACCOUNT_TYPE = 'aws.account_type';
+
+    const cloudFormationAwsAccountType: CloudSecurityIntegrationAwsAccountType | undefined =
+      cloudSecurityPackagePolicy?.inputs?.find((input) => input.enabled)?.streams?.[0]?.vars?.[
+        AWS_ACCOUNT_TYPE
+      ]?.value;
+
+    const cloudShellUrl = getCloudShellUrlFromAgentPolicy(agentPolicy);
     return {
+      isLoading,
       integrationType,
-      cloudformationUrl,
+      isCloudFormation: Boolean(cloudFormationTemplateFromAgentPolicy),
+      cloudFormationProps: {
+        awsAccountType: cloudFormationAwsAccountType,
+        templateUrl: cloudFormationTemplateUrl,
+      },
+      cloudShellUrl,
     };
-  }, [agentPolicy]);
+  }, [agentPolicy, packageInfoData?.item, isLoading, cloudSecurityPackagePolicy]);
 
   return { cloudSecurityIntegration };
 }
@@ -97,13 +150,10 @@ const isK8sPackage = (pkg: PackagePolicy) => {
   return K8S_PACKAGES.has(name);
 };
 
-const getCloudSecurityIntegrationTypeFromPackagePolicy = (
-  agentPolicy: AgentPolicy
-): CloudSecurityIntegrationType | undefined => {
-  const packagePolicy = agentPolicy?.package_policies?.find(
+const getCloudSecurityPackagePolicyFromAgentPolicy = (
+  agentPolicy?: AgentPolicy
+): PackagePolicy | undefined => {
+  return agentPolicy?.package_policies?.find(
     (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
   );
-  if (!packagePolicy) return undefined;
-  return packagePolicy?.inputs?.find((input) => input.enabled)
-    ?.policy_template as CloudSecurityIntegrationType;
 };

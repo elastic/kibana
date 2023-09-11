@@ -13,4 +13,5 @@ export const createTelemetryClientMock = (): jest.Mocked<ITelemetryClient> => ({
   reportHostFlyoutFilterRemoved: jest.fn(),
   reportHostFlyoutFilterAdded: jest.fn(),
   reportHostsViewTotalHostCountRetrieved: jest.fn(),
+  reportAssetDetailsFlyoutViewed: jest.fn(),
 });

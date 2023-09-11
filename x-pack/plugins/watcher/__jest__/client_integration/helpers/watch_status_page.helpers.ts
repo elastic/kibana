@@ -32,11 +32,11 @@ const testBedConfig: AsyncTestBedConfig = {
 
 export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
   actions: {
-    selectTab: (tab: 'execution history' | 'action statuses') => void;
-    clickToggleActivationButton: () => void;
-    clickAcknowledgeButton: (index: number) => void;
-    clickDeleteWatchButton: () => void;
-    clickWatchExecutionAt: (index: number, tableCellText: string) => void;
+    selectTab: (tab: 'execution history' | 'action statuses') => Promise<void>;
+    clickToggleActivationButton: () => Promise<void>;
+    clickAcknowledgeButton: (index: number) => Promise<void>;
+    clickDeleteWatchButton: () => Promise<void>;
+    clickWatchExecutionAt: (index: number, tableCellText: string) => Promise<void>;
   };
 }
 
@@ -51,10 +51,14 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchStatusTestBed> =
    * User Actions
    */
 
-  const selectTab = (tab: 'execution history' | 'action statuses') => {
+  const selectTab = async (tab: 'execution history' | 'action statuses') => {
+    const { component, find } = testBed;
     const tabs = ['execution history', 'action statuses'];
 
-    testBed.find('tab').at(tabs.indexOf(tab)).simulate('click');
+    await act(async () => {
+      find('tab').at(tabs.indexOf(tab)).simulate('click');
+    });
+    component.update();
   };
 
   const clickToggleActivationButton = async () => {
@@ -63,8 +67,8 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchStatusTestBed> =
 
     await act(async () => {
       button.simulate('click');
-      component.update();
     });
+    component.update();
   };
 
   const clickAcknowledgeButton = async (index: number) => {
@@ -76,8 +80,8 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchStatusTestBed> =
 
     await act(async () => {
       button.simulate('click');
-      component.update();
     });
+    component.update();
   };
 
   const clickDeleteWatchButton = async () => {
@@ -86,8 +90,8 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchStatusTestBed> =
 
     await act(async () => {
       button.simulate('click');
-      component.update();
     });
+    component.update();
   };
 
   const clickWatchExecutionAt = async (index: number, tableCellText: string) => {

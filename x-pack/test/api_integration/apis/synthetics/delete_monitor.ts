@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { HTTPFields, MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import {
+  EncryptedSyntheticsSavedMonitor,
+  HTTPFields,
+  MonitorFields,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -31,7 +35,9 @@ export default function ({ getService }: FtrProviderContext) {
     let httpMonitorJson: HTTPFields;
     let testPolicyId = '';
 
-    const saveMonitor = async (monitor: MonitorFields) => {
+    const saveMonitor = async (
+      monitor: MonitorFields
+    ): Promise<EncryptedSyntheticsSavedMonitor> => {
       const res = await supertest
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
@@ -99,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(400);
     });
 
-    it('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
+    it.skip('handles private location errors and does not delete the monitor if integration policy is unable to be deleted', async () => {
       const name = `Monitor with a private location ${uuidv4()}`;
       const newMonitor = {
         name,

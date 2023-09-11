@@ -6,7 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { RuleObjectId } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleObjectId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface DeleteRuleOptions {
   ruleId: RuleObjectId;

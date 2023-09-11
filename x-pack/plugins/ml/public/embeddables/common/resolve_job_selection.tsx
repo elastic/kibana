@@ -9,14 +9,11 @@ import moment from 'moment';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs/operators';
 import { from } from 'rxjs';
 import React from 'react';
-import {
-  KibanaContextProvider,
-  toMountPoint,
-  wrapWithTheme,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getMlGlobalServices } from '../../application/app';
-import { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
 
 /**
@@ -35,6 +32,7 @@ export async function resolveJobSelection(
     http,
     uiSettings,
     theme,
+    i18n,
     application: { currentAppId$ },
   } = coreStart;
 
@@ -71,23 +69,19 @@ export async function resolveJobSelection(
 
       const flyoutSession = coreStart.overlays.openFlyout(
         toMountPoint(
-          wrapWithTheme(
-            <KibanaContextProvider
-              services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}
-            >
-              <JobSelectorFlyout
-                selectedIds={selectedJobIds}
-                withTimeRangeSelector={false}
-                dateFormatTz={dateFormatTz}
-                singleSelection={false}
-                timeseriesOnly={true}
-                onFlyoutClose={onFlyoutClose}
-                onSelectionConfirmed={onSelectionConfirmed}
-                maps={maps}
-              />
-            </KibanaContextProvider>,
-            theme.theme$
-          )
+          <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
+            <JobSelectorFlyout
+              selectedIds={selectedJobIds}
+              withTimeRangeSelector={false}
+              dateFormatTz={dateFormatTz}
+              singleSelection={false}
+              timeseriesOnly={true}
+              onFlyoutClose={onFlyoutClose}
+              onSelectionConfirmed={onSelectionConfirmed}
+              maps={maps}
+            />
+          </KibanaContextProvider>,
+          { theme, i18n }
         ),
         {
           'data-test-subj': 'mlFlyoutJobSelector',

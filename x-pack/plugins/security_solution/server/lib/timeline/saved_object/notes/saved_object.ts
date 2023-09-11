@@ -22,7 +22,7 @@ import type {
   BareNote,
   BareNoteWithoutExternalRefs,
   ResponseNote,
-} from '../../../../../common/types/timeline/note/api';
+} from '../../../../../common/api/timeline';
 import { SavedObjectNoteRuntimeType } from '../../../../../common/types/timeline/note/saved_object';
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';

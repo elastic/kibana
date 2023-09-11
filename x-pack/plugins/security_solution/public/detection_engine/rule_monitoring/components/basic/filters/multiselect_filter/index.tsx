@@ -10,6 +10,7 @@ import { noop } from 'lodash';
 import { EuiPopover, EuiFilterGroup, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { useBoolState } from '../../../../../../common/hooks/use_bool_state';
 
+/* eslint-disable react/no-unused-prop-types */
 export interface MultiselectFilterProps<T = unknown> {
   dataTestSubj?: string;
   title: string;
@@ -19,6 +20,7 @@ export interface MultiselectFilterProps<T = unknown> {
   renderItem?: (item: T) => React.ReactChild;
   renderLabel?: (item: T) => string;
 }
+/* eslint-enable react/no-unused-prop-types */
 
 const MultiselectFilterComponent = <T extends unknown>(props: MultiselectFilterProps<T>) => {
   const { dataTestSubj, title, items, selectedItems, onSelectionChange, renderItem, renderLabel } =

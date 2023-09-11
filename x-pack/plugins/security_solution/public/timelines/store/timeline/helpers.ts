@@ -32,9 +32,9 @@ import type {
   ToggleDetailPanel,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
-import type { RowRendererId, TimelineTypeLiteral } from '../../../../common/types/timeline/api';
+import type { RowRendererId, TimelineTypeLiteral } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -140,7 +140,7 @@ export const addTimelineToStore = ({
       ...timeline,
       filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
-      initialized: timelineById[id].initialized,
+      initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&

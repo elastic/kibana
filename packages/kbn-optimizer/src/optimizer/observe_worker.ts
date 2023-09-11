@@ -61,6 +61,7 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
       const proc = fork(require.resolve('../worker/run_worker'), [], {
         execArgv: [
           `--require=@kbn/babel-register/install`,
+          '--openssl-legacy-provider',
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
