@@ -115,7 +115,7 @@ export function MetricRowWithAgg({
               <EuiFormRow
                 fullWidth
                 label={i18n.translate(
-                  'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                  'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
                   { defaultMessage: 'Aggregation {name}', values: { name } }
                 )}
                 isInvalid={aggType !== Aggregators.COUNT && !field}
@@ -144,7 +144,7 @@ export function MetricRowWithAgg({
             <div>
               <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
                 <FormattedMessage
-                  id="xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationLabel"
+                  id="xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel"
                   defaultMessage="Aggregation {name}"
                   values={{ name }}
                 />
@@ -154,7 +154,7 @@ export function MetricRowWithAgg({
                 <EuiFlexItem grow>
                   <EuiFormRow
                     label={i18n.translate(
-                      'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.aggregationType',
+                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationType',
                       { defaultMessage: 'Aggregation type' }
                     )}
                     isInvalid={isAggInvalid}
@@ -180,7 +180,7 @@ export function MetricRowWithAgg({
                   {aggType === Aggregators.COUNT ? (
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.filterLabel',
+                        'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel',
                         { defaultMessage: 'KQL Filter {name}', values: { name } }
                       )}
                     >
@@ -195,7 +195,7 @@ export function MetricRowWithAgg({
                   ) : (
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.fieldLabel',
+                        'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.fieldLabel',
                         { defaultMessage: 'Field name' }
                       )}
                       isInvalid={isFieldInvalid}

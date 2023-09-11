@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { MetricExpressionParams } from '../../../../../common/threshold_rule/types';
 import { isCustom } from './metric_expression_params';
 import { AdditionalContext, getIntervalInSeconds } from '../utils';
-import { SearchConfigurationType } from '../threshold_executor';
+import { SearchConfigurationType } from '../custom_threshold_executor';
 import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';

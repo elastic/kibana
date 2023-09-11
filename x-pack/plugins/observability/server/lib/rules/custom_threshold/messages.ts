@@ -11,14 +11,14 @@ import { formatDurationFromTimeUnitChar, TimeUnitChar } from '../../../../common
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
 export const DOCUMENT_COUNT_I18N = i18n.translate(
-  'xpack.observability.threshold.rule.threshold.documentCount',
+  'xpack.observability.customThreshold.rule.threshold.documentCount',
   {
     defaultMessage: 'Document count',
   }
 );
 
 export const CUSTOM_EQUATION_I18N = i18n.translate(
-  'xpack.observability.threshold.rule.threshold.customEquation',
+  'xpack.observability.customThreshold.rule.threshold.customEquation',
   {
     defaultMessage: 'Custom equation',
   }
@@ -32,17 +32,23 @@ const recoveredComparatorToI18n = (
   threshold: number[],
   currentValue: number
 ) => {
-  const belowText = i18n.translate('xpack.observability.threshold.rule.threshold.belowRecovery', {
-    defaultMessage: 'below',
-  });
-  const aboveText = i18n.translate('xpack.observability.threshold.rule.threshold.aboveRecovery', {
-    defaultMessage: 'above',
-  });
+  const belowText = i18n.translate(
+    'xpack.observability.customThreshold.rule.threshold.belowRecovery',
+    {
+      defaultMessage: 'below',
+    }
+  );
+  const aboveText = i18n.translate(
+    'xpack.observability.customThreshold.rule.threshold.aboveRecovery',
+    {
+      defaultMessage: 'above',
+    }
+  );
   switch (comparator) {
     case Comparator.BETWEEN:
       return currentValue < threshold[0] ? belowText : aboveText;
     case Comparator.OUTSIDE_RANGE:
-      return i18n.translate('xpack.observability.threshold.rule.threshold.betweenRecovery', {
+      return i18n.translate('xpack.observability.customThreshold.rule.threshold.betweenRecovery', {
         defaultMessage: 'between',
       });
     case Comparator.GT:
@@ -56,7 +62,7 @@ const recoveredComparatorToI18n = (
 
 const thresholdToI18n = ([a, b]: Array<number | string>) => {
   if (typeof b === 'undefined') return a;
-  return i18n.translate('xpack.observability.threshold.rule.threshold.thresholdRange', {
+  return i18n.translate('xpack.observability.customThreshold.rule.threshold.thresholdRange', {
     defaultMessage: '{a} and {b}',
     values: { a, b },
   });
@@ -73,7 +79,7 @@ export const buildFiredAlertReason: (alertResult: {
   timeSize: number;
   timeUnit: TimeUnitChar;
 }) => string = ({ group, metric, comparator, threshold, currentValue, timeSize, timeUnit }) =>
-  i18n.translate('xpack.observability.threshold.rule.threshold.firedAlertReason', {
+  i18n.translate('xpack.observability.customThreshold.rule.threshold.firedAlertReason', {
     defaultMessage:
       '{metric} is {currentValue} in the last {duration}{group}. Alert when {comparator} {threshold}.',
     values: {
@@ -94,7 +100,7 @@ export const buildRecoveredAlertReason: (alertResult: {
   threshold: Array<number | string>;
   currentValue: number | string;
 }) => string = ({ group, metric, comparator, threshold, currentValue }) =>
-  i18n.translate('xpack.observability.threshold.rule.threshold.recoveredAlertReason', {
+  i18n.translate('xpack.observability.customThreshold.rule.threshold.recoveredAlertReason', {
     defaultMessage:
       '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue}) for {group}',
     values: {
@@ -116,7 +122,7 @@ export const buildNoDataAlertReason: (alertResult: {
   timeSize: number;
   timeUnit: string;
 }) => string = ({ group, metric, timeSize, timeUnit }) =>
-  i18n.translate('xpack.observability.threshold.rule.threshold.noDataAlertReason', {
+  i18n.translate('xpack.observability.customThreshold.rule.threshold.noDataAlertReason', {
     defaultMessage: '{metric} reported no data in the last {interval}{group}',
     values: {
       metric,
@@ -126,7 +132,7 @@ export const buildNoDataAlertReason: (alertResult: {
   });
 
 export const buildErrorAlertReason = (metric: string) =>
-  i18n.translate('xpack.observability.threshold.rule.threshold.errorAlertReason', {
+  i18n.translate('xpack.observability.customThreshold.rule.threshold.errorAlertReason', {
     defaultMessage: 'Elasticsearch failed when attempting to query data for {metric}',
     values: {
       metric,
@@ -134,14 +140,14 @@ export const buildErrorAlertReason = (metric: string) =>
   });
 
 export const groupByKeysActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.groupByKeysActionVariableDescription',
+  'xpack.observability.customThreshold.rule.groupByKeysActionVariableDescription',
   {
     defaultMessage: 'The object containing groups that are reporting data',
   }
 );
 
 export const alertDetailUrlActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.alertDetailUrlActionVariableDescription',
+  'xpack.observability.customThreshold.rule.alertDetailUrlActionVariableDescription',
   {
     defaultMessage:
       'Link to the alert troubleshooting view for further context and details. This will be an empty string if the server.publicBaseUrl is not configured.',
@@ -149,70 +155,70 @@ export const alertDetailUrlActionVariableDescription = i18n.translate(
 );
 
 export const reasonActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.reasonActionVariableDescription',
+  'xpack.observability.customThreshold.rule.reasonActionVariableDescription',
   {
     defaultMessage: 'A concise description of the reason for the alert',
   }
 );
 
 export const timestampActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.timestampDescription',
+  'xpack.observability.customThreshold.rule.timestampDescription',
   {
     defaultMessage: 'A timestamp of when the alert was detected.',
   }
 );
 
 export const valueActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.valueActionVariableDescription',
+  'xpack.observability.customThreshold.rule.valueActionVariableDescription',
   {
     defaultMessage: 'List of the condition values.',
   }
 );
 
 export const viewInAppUrlActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.viewInAppUrlActionVariableDescription',
+  'xpack.observability.customThreshold.rule.viewInAppUrlActionVariableDescription',
   {
     defaultMessage: 'Link to the alert source',
   }
 );
 
 export const cloudActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.cloudActionVariableDescription',
+  'xpack.observability.customThreshold.rule.cloudActionVariableDescription',
   {
     defaultMessage: 'The cloud object defined by ECS if available in the source.',
   }
 );
 
 export const hostActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.hostActionVariableDescription',
+  'xpack.observability.customThreshold.rule.hostActionVariableDescription',
   {
     defaultMessage: 'The host object defined by ECS if available in the source.',
   }
 );
 
 export const containerActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.containerActionVariableDescription',
+  'xpack.observability.customThreshold.rule.containerActionVariableDescription',
   {
     defaultMessage: 'The container object defined by ECS if available in the source.',
   }
 );
 
 export const orchestratorActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.orchestratorActionVariableDescription',
+  'xpack.observability.customThreshold.rule.orchestratorActionVariableDescription',
   {
     defaultMessage: 'The orchestrator object defined by ECS if available in the source.',
   }
 );
 
 export const labelsActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.labelsActionVariableDescription',
+  'xpack.observability.customThreshold.rule.labelsActionVariableDescription',
   {
     defaultMessage: 'List of labels associated with the entity where this alert triggered.',
   }
 );
 
 export const tagsActionVariableDescription = i18n.translate(
-  'xpack.observability.threshold.rule.tagsActionVariableDescription',
+  'xpack.observability.customThreshold.rule.tagsActionVariableDescription',
   {
     defaultMessage: 'List of tags associated with the entity where this alert triggered.',
   }

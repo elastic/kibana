@@ -38,7 +38,7 @@ import { generateUniqueKey } from '../lib/generate_unique_key';
 
 import { ExpressionChart } from './expression_chart';
 import { TIME_LABELS } from './criterion_preview_chart/criterion_preview_chart';
-import { Threshold } from './threshold';
+import { Threshold } from './custom_threshold';
 import { MetricsExplorerChartType } from '../hooks/use_metrics_explorer_options';
 import { AlertParams, MetricExpression, MetricThresholdRuleTypeParams } from '../types';
 
@@ -98,7 +98,7 @@ export default function AlertDetailsAppSection({
     setAlertSummaryFields([
       {
         label: i18n.translate(
-          'xpack.observability.threshold.rule.alertDetailsAppSection.summaryField.rule',
+          'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.rule',
           {
             defaultMessage: 'Rule',
           }
@@ -160,7 +160,7 @@ export default function AlertDetailsAppSection({
               </EuiTitle>
               <EuiText size="s" color="subdued">
                 <FormattedMessage
-                  id="xpack.observability.threshold.rule.alertDetailsAppSection.criterion.subtitle"
+                  id="xpack.observability.customThreshold.rule.alertDetailsAppSection.criterion.subtitle"
                   defaultMessage="Last {lookback} {timeLabel}"
                   values={{
                     lookback: criterion.timeSize,
@@ -180,7 +180,7 @@ export default function AlertDetailsAppSection({
                       metricValueFormatter(d, 'metric' in criterion ? criterion.metric : undefined)
                     }
                     title={i18n.translate(
-                      'xpack.observability.threshold.rule.alertDetailsAppSection.thresholdTitle',
+                      'xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle',
                       {
                         defaultMessage: 'Threshold breached',
                       }

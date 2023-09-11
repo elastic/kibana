@@ -20,16 +20,16 @@ type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series
 export const NUM_BUCKETS = 20;
 
 export const TIME_LABELS = {
-  s: i18n.translate('xpack.observability.threshold.rule..timeLabels.seconds', {
+  s: i18n.translate('xpack.observability.customThreshold.rule..timeLabels.seconds', {
     defaultMessage: 'seconds',
   }),
-  m: i18n.translate('xpack.observability.threshold.rule..timeLabels.minutes', {
+  m: i18n.translate('xpack.observability.customThreshold.rule..timeLabels.minutes', {
     defaultMessage: 'minutes',
   }),
-  h: i18n.translate('xpack.observability.threshold.rule..timeLabels.hours', {
+  h: i18n.translate('xpack.observability.customThreshold.rule..timeLabels.hours', {
     defaultMessage: 'hours',
   }),
-  d: i18n.translate('xpack.observability.threshold.rule..timeLabels.days', {
+  d: i18n.translate('xpack.observability.customThreshold.rule..timeLabels.days', {
     defaultMessage: 'days',
   }),
 };
@@ -109,7 +109,7 @@ export function NoDataState() {
     <EmptyContainer>
       <EuiText color="subdued" data-test-subj="thresholdRuleNoChartData">
         <FormattedMessage
-          id="xpack.observability.threshold.rule..charts.noDataMessage"
+          id="xpack.observability.customThreshold.rule..charts.noDataMessage"
           defaultMessage="No chart data available"
         />
       </EuiText>
@@ -132,7 +132,7 @@ export function ErrorState() {
     <EmptyContainer>
       <EuiText color="subdued" data-test-subj="thresholdRuleChartErrorState">
         <FormattedMessage
-          id="xpack.observability.threshold.rule..charts.errorMessage"
+          id="xpack.observability.customThreshold.rule..charts.errorMessage"
           defaultMessage="Uh oh, something went wrong"
         />
       </EuiText>

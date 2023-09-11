@@ -10,7 +10,7 @@ import { createFormatter } from './formatters';
 
 export const metricValueFormatter = (value: number | null, metric: string = '') => {
   const noDataValue = i18n.translate(
-    'xpack.observability.threshold.rule.alerting.noDataFormattedValue',
+    'xpack.observability.customThreshold.rule.alerting.noDataFormattedValue',
     {
       defaultMessage: '[NO DATA]',
     }

@@ -60,10 +60,13 @@ export function Threshold({
                 title,
                 extra: (
                   <span>
-                    {i18n.translate('xpack.observability.threshold.rule.thresholdExtraTitle', {
-                      values: { comparator, threshold: valueFormatter(threshold) },
-                      defaultMessage: `Alert when {comparator} {threshold}`,
-                    })}
+                    {i18n.translate(
+                      'xpack.observability.customThreshold.rule.thresholdExtraTitle',
+                      {
+                        values: { comparator, threshold: valueFormatter(threshold) },
+                        defaultMessage: `Alert when {comparator} {threshold}`,
+                      }
+                    )}
                   </span>
                 ),
                 color,

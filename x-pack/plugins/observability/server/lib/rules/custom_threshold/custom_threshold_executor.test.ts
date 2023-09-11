@@ -18,7 +18,7 @@ import {
   FIRED_ACTIONS,
   MetricThresholdAlertContext,
   NO_DATA_ACTIONS,
-} from './threshold_executor';
+} from './custom_threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';

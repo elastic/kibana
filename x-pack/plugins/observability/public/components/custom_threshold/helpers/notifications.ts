@@ -15,16 +15,19 @@ export const useSourceNotifier = () => {
     notifications.toasts.danger({
       toastLifeTimeMs: 3000,
       title: i18n.translate(
-        'xpack.observability.threshold.rule.sourceConfiguration.updateFailureTitle',
+        'xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureTitle',
         {
           defaultMessage: 'Configuration update failed',
         }
       ),
       body: [
-        i18n.translate('xpack.observability.threshold.rule.sourceConfiguration.updateFailureBody', {
-          defaultMessage:
-            "We couldn't apply the changes to the Metrics configuration. Try again later.",
-        }),
+        i18n.translate(
+          'xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureBody',
+          {
+            defaultMessage:
+              "We couldn't apply the changes to the Metrics configuration. Try again later.",
+          }
+        ),
         message,
       ]
         .filter(Boolean)
@@ -36,7 +39,7 @@ export const useSourceNotifier = () => {
     notifications.toasts.success({
       toastLifeTimeMs: 3000,
       title: i18n.translate(
-        'xpack.observability.threshold.rule.sourceConfiguration.updateSuccessTitle',
+        'xpack.observability.customThreshold.rule.sourceConfiguration.updateSuccessTitle',
         {
           defaultMessage: 'Metrics settings successfully updated',
         }

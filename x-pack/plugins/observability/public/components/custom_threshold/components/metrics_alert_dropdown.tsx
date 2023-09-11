@@ -44,15 +44,21 @@ export function MetricsAlertDropdown() {
   const infrastructureAlertsPanel = useMemo(
     () => ({
       id: 1,
-      title: i18n.translate('xpack.observability.threshold.rule.infrastructureDropdownTitle', {
-        defaultMessage: 'Infrastructure rules',
-      }),
+      title: i18n.translate(
+        'xpack.observability.customThreshold.rule.infrastructureDropdownTitle',
+        {
+          defaultMessage: 'Infrastructure rules',
+        }
+      ),
       items: [
         {
           'data-test-subj': 'inventory-alerts-create-rule',
-          name: i18n.translate('xpack.observability.threshold.rule.createInventoryRuleButton', {
-            defaultMessage: 'Create inventory rule',
-          }),
+          name: i18n.translate(
+            'xpack.observability.customThreshold.rule.createInventoryRuleButton',
+            {
+              defaultMessage: 'Create inventory rule',
+            }
+          ),
           onClick: () => {
             closePopover();
             setVisibleFlyoutType('inventory');
@@ -66,15 +72,18 @@ export function MetricsAlertDropdown() {
   const metricsAlertsPanel = useMemo(
     () => ({
       id: 2,
-      title: i18n.translate('xpack.observability.threshold.rule.metricsDropdownTitle', {
+      title: i18n.translate('xpack.observability.customThreshold.rule.metricsDropdownTitle', {
         defaultMessage: 'Metrics rules',
       }),
       items: [
         {
           'data-test-subj': 'metrics-threshold-alerts-create-rule',
-          name: i18n.translate('xpack.observability.threshold.rule.createThresholdRuleButton', {
-            defaultMessage: 'Create threshold rule',
-          }),
+          name: i18n.translate(
+            'xpack.observability.customThreshold.rule.createThresholdRuleButton',
+            {
+              defaultMessage: 'Create threshold rule',
+            }
+          ),
           onClick: () => {
             closePopover();
             setVisibleFlyoutType('threshold');
@@ -89,7 +98,7 @@ export function MetricsAlertDropdown() {
 
   const manageAlertsMenuItem = useMemo(
     () => ({
-      name: i18n.translate('xpack.observability.threshold.rule.manageRules', {
+      name: i18n.translate('xpack.observability.customThreshold.rule.manageRules', {
         defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
@@ -105,7 +114,7 @@ export function MetricsAlertDropdown() {
             {
               'data-test-subj': 'inventory-alerts-menu-option',
               name: i18n.translate(
-                'xpack.observability.threshold.rule.infrastructureDropdownMenu',
+                'xpack.observability.customThreshold.rule.infrastructureDropdownMenu',
                 {
                   defaultMessage: 'Infrastructure',
                 }
@@ -114,7 +123,7 @@ export function MetricsAlertDropdown() {
             },
             {
               'data-test-subj': 'metrics-threshold-alerts-menu-option',
-              name: i18n.translate('xpack.observability.threshold.rule.metricsDropdownMenu', {
+              name: i18n.translate('xpack.observability.customThreshold.rule.metricsDropdownMenu', {
                 defaultMessage: 'Metrics',
               }),
               panel: 2,
@@ -130,7 +139,7 @@ export function MetricsAlertDropdown() {
       [
         {
           id: 0,
-          title: i18n.translate('xpack.observability.threshold.rule.alertDropdownTitle', {
+          title: i18n.translate('xpack.observability.customThreshold.rule.alertDropdownTitle', {
             defaultMessage: 'Alerts and rules',
           }),
           items: firstPanelMenuItems,
@@ -152,7 +161,7 @@ export function MetricsAlertDropdown() {
             data-test-subj="thresholdRuleStructure-alerts-and-rules"
           >
             <FormattedMessage
-              id="xpack.observability.threshold.rule.alertsButton"
+              id="xpack.observability.customThreshold.rule.alertsButton"
               defaultMessage="Alerts and rules"
             />
           </EuiHeaderLink>

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 const missingHttpMessage = i18n.translate(
-  'xpack.observability.threshold.rule.sourceConfiguration.missingHttp',
+  'xpack.observability.customThreshold.rule.sourceConfiguration.missingHttp',
   {
     defaultMessage: 'Failed to load source: No HTTP client available.',
   }

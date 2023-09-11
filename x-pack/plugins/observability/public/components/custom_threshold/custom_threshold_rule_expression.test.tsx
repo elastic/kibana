@@ -16,7 +16,7 @@ import { Comparator } from '../../../common/threshold_rule/types';
 import { MetricsExplorerMetric } from '../../../common/threshold_rule/metrics_explorer';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import Expressions from './threshold_rule_expression';
+import Expressions from './custom_threshold_rule_expression';
 
 jest.mock('../../utils/kibana_react');
 

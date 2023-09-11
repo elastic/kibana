@@ -148,7 +148,7 @@ export function CustomEquationEditor({
           isDisabled={disableAdd}
         >
           <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.customEquationEditor.addCustomRow"
+            id="xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.addCustomRow"
             defaultMessage="Add aggregation/field"
           />
         </EuiButtonEmpty>
@@ -160,7 +160,7 @@ export function CustomEquationEditor({
             <EuiFormRow
               fullWidth
               label={i18n.translate(
-                'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
+                'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
                 { defaultMessage: 'Equation and threshold' }
               )}
               error={[errors.equation]}
@@ -171,7 +171,7 @@ export function CustomEquationEditor({
                 <EuiExpression
                   data-test-subj="customEquation"
                   description={i18n.translate(
-                    'xpack.observability.threshold.rule.alertFlyout.customEquationEditor.equationLabel',
+                    'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationLabel',
                     { defaultMessage: 'Equation' }
                   )}
                   value={equation ?? placeholder}
@@ -196,13 +196,13 @@ export function CustomEquationEditor({
             <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
               <span>
                 <FormattedMessage
-                  id="xpack.observability.threshold.rule.alertFlyout.customEquationLabel"
+                  id="xpack.observability.customThreshold.rule.alertFlyout.customEquationLabel"
                   defaultMessage="Custom equation"
                 />
                 &nbsp;
                 <EuiIconTip
                   content={i18n.translate(
-                    'xpack.observability.threshold.rule.alertFlyout.customEquationTooltip',
+                    'xpack.observability.customThreshold.rule.alertFlyout.customEquationTooltip',
                     {
                       defaultMessage:
                         'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',

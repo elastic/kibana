@@ -119,7 +119,7 @@ export default function Expressions(props: Props) {
           if (!timeFieldName) {
             setDataViewTimeFieldError(
               i18n.translate(
-                'xpack.observability.threshold.rule.alertFlyout.dataViewError.noTimestamp',
+                'xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp',
                 {
                   defaultMessage:
                     'The selected data view does not have a timestamp field, please select another data view.',
@@ -382,7 +382,7 @@ export default function Expressions(props: Props) {
   }
 
   const placeHolder = i18n.translate(
-    'xpack.observability.threshold.rule.alertFlyout.searchBar.placeholder',
+    'xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder',
     {
       defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
@@ -393,7 +393,7 @@ export default function Expressions(props: Props) {
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.selectDataViewPrompt"
+            id="xpack.observability.customThreshold.rule.alertFlyout.selectDataViewPrompt"
             defaultMessage="Select a data view"
           />
         </h5>
@@ -417,7 +417,7 @@ export default function Expressions(props: Props) {
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.defineTextQueryPrompt"
+            id="xpack.observability.customThreshold.rule.alertFlyout.defineTextQueryPrompt"
             defaultMessage="Define query filter (optional)"
           />
         </h5>
@@ -448,7 +448,7 @@ export default function Expressions(props: Props) {
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.setConditions"
+            id="xpack.observability.customThreshold.rule.alertFlyout.setConditions"
             defaultMessage="Set rule conditions"
           />
         </h5>
@@ -462,7 +462,7 @@ export default function Expressions(props: Props) {
                 <EuiTitle size="xs">
                   <h5>
                     <FormattedMessage
-                      id="xpack.observability.threshold.rule.alertFlyout.condition"
+                      id="xpack.observability.customThreshold.rule.alertFlyout.condition"
                       defaultMessage="Condition {conditionNumber}"
                       values={{ conditionNumber: idx + 1 }}
                     />
@@ -514,18 +514,21 @@ export default function Expressions(props: Props) {
           onClick={addExpression}
         >
           <FormattedMessage
-            id="xpack.observability.threshold.rule.alertFlyout.addCondition"
+            id="xpack.observability.customThreshold.rule.alertFlyout.addCondition"
             defaultMessage="Add condition"
           />
         </EuiButtonEmpty>
       </div>
       <EuiSpacer size="m" />
       <EuiFormRow
-        label={i18n.translate('xpack.observability.threshold.rule.alertFlyout.createAlertPerText', {
-          defaultMessage: 'Group alerts by (optional)',
-        })}
+        label={i18n.translate(
+          'xpack.observability.customThreshold.rule.alertFlyout.createAlertPerText',
+          {
+            defaultMessage: 'Group alerts by (optional)',
+          }
+        )}
         helpText={i18n.translate(
-          'xpack.observability.threshold.rule.alertFlyout.createAlertPerHelpText',
+          'xpack.observability.customThreshold.rule.alertFlyout.createAlertPerHelpText',
           {
             defaultMessage:
               'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
@@ -549,7 +552,7 @@ export default function Expressions(props: Props) {
           <EuiSpacer size="s" />
           <EuiText size="xs" color="danger">
             <FormattedMessage
-              id="xpack.observability.threshold.rule.alertFlyout.alertPerRedundantFilterError"
+              id="xpack.observability.customThreshold.rule.alertFlyout.alertPerRedundantFilterError"
               defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
               values={{
                 matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
@@ -560,7 +563,7 @@ export default function Expressions(props: Props) {
                     href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
                   >
                     {i18n.translate(
-                      'xpack.observability.threshold.rule.alertFlyout.alertPerRedundantFilterError.docsLink',
+                      'xpack.observability.customThreshold.rule.alertFlyout.alertPerRedundantFilterError.docsLink',
                       { defaultMessage: 'the docs' }
                     )}
                   </EuiLink>
@@ -576,7 +579,7 @@ export default function Expressions(props: Props) {
         label={
           <>
             {i18n.translate(
-              'xpack.observability.threshold.rule.alertFlyout.alertOnGroupDisappear',
+              'xpack.observability.customThreshold.rule.alertFlyout.alertOnGroupDisappear',
               {
                 defaultMessage: 'Alert me if a group stops reporting data',
               }
@@ -585,7 +588,7 @@ export default function Expressions(props: Props) {
               content={
                 (disableNoData ? `${docCountNoDataDisabledHelpText} ` : '') +
                 i18n.translate(
-                  'xpack.observability.threshold.rule.alertFlyout.groupDisappearHelpText',
+                  'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
                   {
                     defaultMessage:
                       'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
@@ -607,7 +610,7 @@ export default function Expressions(props: Props) {
 }
 
 const docCountNoDataDisabledHelpText = i18n.translate(
-  'xpack.observability.threshold.rule.alertFlyout.docCountNoDataDisabledHelpText',
+  'xpack.observability.customThreshold.rule.alertFlyout.docCountNoDataDisabledHelpText',
   {
     defaultMessage: '[This setting is not applicable to the Document Count aggregator.]',
   }

@@ -33,7 +33,7 @@ import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert
 const customComparators = {
   ...builtInComparators,
   [Comparator.OUTSIDE_RANGE]: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.outsideRangeLabel', {
+    text: i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.outsideRangeLabel', {
       defaultMessage: 'Is not between',
     }),
     value: Comparator.OUTSIDE_RANGE,
@@ -175,7 +175,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <EuiButtonIcon
               data-test-subj="o11yExpressionRowButton"
               aria-label={i18n.translate(
-                'xpack.observability.threshold.rule.alertFlyout.removeCondition',
+                'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
                 {
                   defaultMessage: 'Remove condition',
                 }
@@ -234,32 +234,41 @@ const ThresholdElement: React.FC<{
 
 export const aggregationType: { [key: string]: AggregationType } = {
   avg: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.avg', {
-      defaultMessage: 'Average',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.avg',
+      {
+        defaultMessage: 'Average',
+      }
+    ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'histogram'],
     value: AGGREGATION_TYPES.AVERAGE,
   },
   max: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.max', {
-      defaultMessage: 'Max',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.max',
+      {
+        defaultMessage: 'Max',
+      }
+    ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date', 'histogram'],
     value: AGGREGATION_TYPES.MAX,
   },
   min: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.min', {
-      defaultMessage: 'Min',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.min',
+      {
+        defaultMessage: 'Min',
+      }
+    ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date', 'histogram'],
     value: AGGREGATION_TYPES.MIN,
   },
   cardinality: {
     text: i18n.translate(
-      'xpack.observability.threshold.rule.alertFlyout.aggregationText.cardinality',
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.cardinality',
       {
         defaultMessage: 'Cardinality',
       }
@@ -269,41 +278,56 @@ export const aggregationType: { [key: string]: AggregationType } = {
     validNormalizedTypes: ['number', 'string', 'ip', 'date'],
   },
   rate: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.rate', {
-      defaultMessage: 'Rate',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.rate',
+      {
+        defaultMessage: 'Rate',
+      }
+    ),
     fieldRequired: false,
     value: AGGREGATION_TYPES.RATE,
     validNormalizedTypes: ['number'],
   },
   count: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.count', {
-      defaultMessage: 'Document count',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.count',
+      {
+        defaultMessage: 'Document count',
+      }
+    ),
     fieldRequired: false,
     value: AGGREGATION_TYPES.COUNT,
     validNormalizedTypes: ['number'],
   },
   sum: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.sum', {
-      defaultMessage: 'Sum',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.sum',
+      {
+        defaultMessage: 'Sum',
+      }
+    ),
     fieldRequired: false,
     value: AGGREGATION_TYPES.SUM,
     validNormalizedTypes: ['number', 'histogram'],
   },
   p95: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.p95', {
-      defaultMessage: '95th Percentile',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.p95',
+      {
+        defaultMessage: '95th Percentile',
+      }
+    ),
     fieldRequired: false,
     value: AGGREGATION_TYPES.P95,
     validNormalizedTypes: ['number', 'histogram'],
   },
   p99: {
-    text: i18n.translate('xpack.observability.threshold.rule.alertFlyout.aggregationText.p99', {
-      defaultMessage: '99th Percentile',
-    }),
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.p99',
+      {
+        defaultMessage: '99th Percentile',
+      }
+    ),
     fieldRequired: false,
     value: AGGREGATION_TYPES.P99,
     validNormalizedTypes: ['number', 'histogram'],

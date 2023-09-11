@@ -43,7 +43,7 @@ import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   NO_DATA_ACTIONS,
-} from './threshold_executor';
+} from './custom_threshold_executor';
 import { ObservabilityConfig } from '../../..';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/threshold_rule/constants';
 
@@ -121,7 +121,7 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Threshold (Technical Preview)',
+      defaultMessage: 'Custom threshold (BETA)',
     }),
     validate: {
       params: schema.object(
