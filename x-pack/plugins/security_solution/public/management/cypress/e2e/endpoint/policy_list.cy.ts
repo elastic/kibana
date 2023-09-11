@@ -19,7 +19,7 @@ describe('Policy List', () => {
 
     const monthAgo = moment().subtract(1, 'months').format('YYYY-MM-DD');
     const threeDaysAgo = moment().subtract(3, 'days').format('YYYY-MM-DD');
-    const eighteenMonthsAgo = moment().subtract(18, 'months').format('YYYY-MM-DD');
+    const eighteenMonthsAgo = moment().subtract(18, 'months').add(1, 'day').format('YYYY-MM-DD');
 
     const dates = [monthAgo, threeDaysAgo, eighteenMonthsAgo];
 
