@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
-import { getFieldTypeName } from '@kbn/discover-utils';
+import { getFieldTypeName } from '@kbn/field-utils';
 
 interface Props {
   fieldName: string;
