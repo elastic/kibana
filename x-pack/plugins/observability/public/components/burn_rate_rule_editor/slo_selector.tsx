@@ -41,6 +41,7 @@ function SloSelector({ initialSlo, onSelected, errors }: Props) {
     setSelectedOptions(opts);
     const selectedSlo =
       opts.length === 1 ? sloList?.find((slo) => slo.id === opts[0].value) : undefined;
+    console.log(selectedSlo, '!!ssss');
     onSelected(selectedSlo);
   };
 

@@ -34,16 +34,11 @@ export class SLOEmbeddable extends Embeddable {
    * @param node
    */
   public render(node: HTMLElement) {
-    //
+    const input = this.getInput();
+    console.log(input, '!!input');
     ReactDOM.render(
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
-        <EuiFlexItem grow>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {[1, 2, 3].map((slo) => (
-              <EuiFlexItem key={slo}>{slo}</EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexItem grow>{input.name}</EuiFlexItem>
       </EuiFlexGroup>,
       node
     );

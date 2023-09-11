@@ -48,6 +48,7 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+    console.log(initialInput, '!!Input');
     return new SLOEmbeddable(initialInput, parent);
   }
 
