@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { Failure } from './failure';
+import { FailureOverview } from './failure_overview';
 
 interface Props {
   failures: ShardFailure[];
@@ -44,7 +44,7 @@ export function Failures({ failures }: Props) {
     <>
       {button}
       {failures.map((failure) => {
-        return <Failure key={failure.shard} failure={failure} />;
+        return <FailureOverview key={failure.shard} failure={failure} />;
       })}
     </>
   ) : (
