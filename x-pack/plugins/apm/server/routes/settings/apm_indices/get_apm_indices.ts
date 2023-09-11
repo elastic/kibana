@@ -72,7 +72,13 @@ export async function getApmIndices({
 }
 
 export type ApmIndexSettingsResponse = Array<{
-  configurationName: 'transaction' | 'span' | 'error' | 'metric' | 'onboarding';
+  configurationName:
+    | 'transaction'
+    | 'span'
+    | 'error'
+    | 'metric'
+    | 'onboarding'
+    | 'sourcemap';
   defaultValue: string; // value defined in kibana[.dev].yml
   savedValue: string | undefined;
 }>;
