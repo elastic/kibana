@@ -41,6 +41,7 @@ import {
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
 
+import { createAstGenerator } from '@kbn/monaco/src/esql/lib/monaco/esql_ast_provider';
 import {
   textBasedLanguagedEditorStyles,
   EDITOR_INITIAL_HEIGHT,
@@ -50,7 +51,6 @@ import {
 } from './text_based_languages_editor.styles';
 import {
   useDebounceWithOptions,
-  parseErrors,
   parseWarning,
   getInlineEditorText,
   getDocumentationSections,
@@ -104,6 +104,21 @@ const languageId = (language: string) => {
     }
   }
 };
+
+function offsetToRowColumn(expression: string, offset: number): monaco.Position {
+  const lines = expression.split(/\n/);
+  let remainingChars = offset;
+  let lineNumber = 1;
+  for (const line of lines) {
+    if (line.length >= remainingChars) {
+      return new monaco.Position(lineNumber, remainingChars + 1);
+    }
+    remainingChars -= line.length + 1;
+    lineNumber++;
+  }
+
+  throw new Error('Algorithm failure');
+}
 
 let clickedOutside = false;
 let initialRender = true;
@@ -250,24 +265,52 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   useDebounceWithOptions(
     () => {
       if (!editorModel.current) return;
-      if (warning && (!errors || !errors.length)) {
-        const parsedWarning = parseWarning(warning);
-        setEditorWarning(parsedWarning);
-      } else {
-        setEditorWarning([]);
-      }
-      if (errors && errors.length) {
-        const parsedErrors = parseErrors(errors, code);
-        setEditorErrors(parsedErrors);
-        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', parsedErrors);
-      } else {
+      // Skip highlight server side errors for now and just display them in the workspace
+      // use only client-side highlight for testing
+      if (code && language === 'esql') {
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-        setEditorErrors([]);
+        const parser = createAstGenerator();
+        const { errors: parserErrors } = parser.getAst(
+          editorModel.current,
+          new monaco.Position(0, 1)
+        );
+
+        if (parserErrors) {
+          monaco.editor.setModelMarkers(
+            editorModel.current,
+            'Unified search',
+            parserErrors.map((e) => {
+              const startPosition = e.location
+                ? offsetToRowColumn(code, e.location.min)
+                : { column: 0, lineNumber: 0 };
+              const endPosition = e.location
+                ? offsetToRowColumn(code, e.location.max || 0)
+                : { column: 0, lineNumber: 0 };
+              return {
+                message: e.text,
+                startColumn: startPosition.column + 1,
+                startLineNumber: startPosition.lineNumber,
+                endColumn: endPosition.column + 1,
+                endLineNumber: endPosition.lineNumber,
+                severity: monaco.MarkerSeverity.Error,
+              };
+            })
+          );
+        } else {
+          if (warning) {
+            const parsedWarning = parseWarning(warning);
+            setEditorWarning(parsedWarning);
+          } else {
+            setEditorWarning([]);
+          }
+          monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
+          setEditorErrors([]);
+        }
       }
     },
     { skipFirstRender: false },
     256,
-    [errors, warning]
+    [errors, warning, code]
   );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoError) => {
@@ -334,6 +377,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
   useEffect(() => {
+    // const commandPipeRegex = /\|(?\|(?<=["']\|)|(?=["']))/;
+    // const commandPipeNewLineRegex = /(\n)*(\r)*\|(?\|(?<=["']\|)|(?=["']))/;
     if (isCodeEditorExpanded && !isWordWrapped) {
       const pipes = code?.split('|');
       const pipesWithNewLine = code?.split('\n|');

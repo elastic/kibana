@@ -34,3 +34,61 @@ export type AutocompleteCommandDefinition = Pick<
   monaco.languages.CompletionItem,
   'label' | 'insertText' | 'kind' | 'detail' | 'documentation' | 'sortText'
 >;
+
+export type ESQLAst = ESQLCommand[];
+
+export type ESQLAstItem = number | string | ESQLFunction | ESQLSource | ESQLColumn | ESQLVariable;
+
+export interface ESQLLocation {
+  min: number;
+  max: number | undefined;
+}
+
+export interface ESQLCommand {
+  type: 'command';
+  name: string;
+  text: string;
+  location?: ESQLLocation;
+  args: ESQLAstItem[];
+}
+
+export interface ESQLFunction {
+  type: 'function';
+  name: string;
+  text: string;
+  location?: ESQLLocation;
+}
+
+export interface ESQLSource {
+  type: 'source';
+  name: string;
+  text: string;
+  location?: ESQLLocation;
+}
+
+export interface ESQLVariable {
+  type: 'variable';
+  name: string;
+  text: string;
+  location?: ESQLLocation;
+}
+
+export interface ESQLColumn {
+  type: 'column';
+  name: string;
+  text: string;
+  location?: ESQLLocation;
+}
+
+export interface ESQLTimeInterval {
+  type: 'timeInterval';
+  name: string;
+  text: string;
+  location?: ESQLLocation;
+}
+
+export interface ESQLErrors {
+  type: 'error';
+  text: string;
+  location?: ESQLLocation;
+}

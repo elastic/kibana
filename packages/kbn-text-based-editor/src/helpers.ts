@@ -94,7 +94,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
         message: errorMessage,
         startColumn: Number(startPosition),
         startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength,
+        endColumn: Number(startPosition) + errorLength + 1,
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
       };
