@@ -37,7 +37,7 @@ interface AlertTestInstance {
   state: any;
 }
 
-let persistAlertInstances = false; // eslint-disable-line prefer-const
+const persistAlertInstances = false;
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;

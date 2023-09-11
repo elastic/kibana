@@ -20,8 +20,15 @@ const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
-const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch} telemetryEvents={mockTelemetryEvents}>
+const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: boolean }> = ({
+  children,
+  isILMAvailable = true,
+}) => (
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={isILMAvailable}
+  >
     {children}
   </DataQualityProvider>
 );
@@ -56,6 +63,34 @@ describe('useIlmExplain', () => {
 
     test('it returns a null error, because no errors occurred', async () => {
       expect(ilmExplainResult?.error).toBeNull();
+    });
+  });
+
+  describe('skip ilm api when isILMAvailable is false', () => {
+    let ilmExplainResult: UseIlmExplain | undefined;
+
+    beforeEach(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
+        wrapper: ({ children }) => (
+          <DataQualityProvider
+            httpFetch={mockHttpFetch}
+            telemetryEvents={mockTelemetryEvents}
+            isILMAvailable={false}
+          >
+            {children}
+          </DataQualityProvider>
+        ),
+      });
+      await waitForNextUpdate();
+      ilmExplainResult = await result.current;
+    });
+
+    test('it returns the expected ilmExplain map', async () => {
+      expect(ilmExplainResult?.ilmExplain).toEqual(null);
+    });
+
+    test('it returns loading: false, because the request is aborted', async () => {
+      expect(ilmExplainResult?.loading).toBe(false);
     });
   });
 

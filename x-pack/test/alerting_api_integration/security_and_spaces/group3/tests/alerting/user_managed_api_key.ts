@@ -397,7 +397,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .post(
             `${getUrlPrefix(
               SuperuserAtSpace1.space.id
-            )}/internal/alerting/rule/${ruleId}/_update_api_key`
+            )}/api/alerting/rule/${ruleId}/_update_api_key`
           )
           .set('kbn-xsrf', 'foo')
           .set('Authorization', `ApiKey ${apiKey}`);
@@ -422,7 +422,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           .post(
             `${getUrlPrefix(
               SuperuserAtSpace1.space.id
-            )}/internal/alerting/rule/${ruleId}/_update_api_key`
+            )}/api/alerting/rule/${ruleId}/_update_api_key`
           )
           .set('kbn-xsrf', 'foo');
         expect(response.status).to.eql(204);

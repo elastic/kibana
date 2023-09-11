@@ -129,7 +129,11 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
 
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        data-test-subj="mlTrainedModelsInferenceTestStep"
+      >
         <EuiFlexItem>
           <EuiTitle size="s">
             <h4>
@@ -245,6 +249,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
                 <>
                   <EuiResizablePanel grow hasBorder initialSize={50} paddingSize="xs">
                     <CodeEditor
+                      data-test-subj="mlTrainedModelsInferenceTestDocsEditor"
                       languageId="json"
                       options={{
                         automaticLayout: true,
@@ -259,7 +264,11 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex }) => {
                   <EuiResizableButton />
 
                   <EuiResizablePanel grow={false} hasBorder initialSize={50} paddingSize="xs">
-                    <EuiCodeBlock language="json" isCopyable className="reviewCodeBlock">
+                    <EuiCodeBlock
+                      language="json"
+                      isCopyable
+                      data-test-subj="mlTrainedModelsInferenceTestResult"
+                    >
                       {simulatePipelineError
                         ? JSON.stringify(simulatePipelineError, null, 2)
                         : simulatePipelineResult

@@ -26,6 +26,7 @@
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/discover-plugin",
+    "@kbn/discover-utils",
     "@kbn/embeddable-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",
@@ -67,7 +68,8 @@
     "@kbn/ml-string-hash",
     "@kbn/ml-random-sampler-utils",
     "@kbn/data-service",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/ebt-tools"
   ],
   "exclude": [
     "target/**/*",

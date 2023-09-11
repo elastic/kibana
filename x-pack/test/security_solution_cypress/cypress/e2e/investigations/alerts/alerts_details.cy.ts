@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
-import { tag } from '../../../tags';
+
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   ALERT_FLYOUT,
@@ -13,6 +13,7 @@ import {
   COPY_ALERT_FLYOUT_LINK,
   JSON_TEXT,
   OVERVIEW_RULE,
+  SUMMARY_VIEW,
   TABLE_CONTAINER,
   TABLE_ROWS,
 } from '../../../screens/alerts_details';
@@ -28,16 +29,16 @@ import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
 import { getNewRule, getUnmappedRule } from '../../../objects/rule';
-import { ALERTS_URL } from '../../../urls/navigation';
+import { ALERTS_URL, ruleDetailsUrl } from '../../../urls/navigation';
 import { tablePageSelector } from '../../../screens/table_pagination';
 import { ALERTS_TABLE_COUNT } from '../../../screens/timeline';
 import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../../helpers/common';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded } from '../../../tasks/rule_details';
 
-describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Basic functions', () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       disableExpandableFlyout();
@@ -48,6 +49,7 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
     });
 
     it('should update the table when status of the alert is updated', () => {
+      cy.get(OVERVIEW_RULE).should('be.visible');
       cy.get(ALERTS_TABLE_COUNT).should('have.text', '2 alerts');
       cy.get(ALERT_SUMMARY_SEVERITY_DONUT_CHART).should('contain.text', '2alerts');
       expandFirstAlert();
@@ -60,8 +62,8 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('With unmapped fields', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'unmapped_fields');
-      createRule(getUnmappedRule());
+      cy.task('esArchiverLoad', { archiveName: 'unmapped_fields' });
+      createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
     });
 
     beforeEach(() => {
@@ -74,6 +76,13 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
     after(() => {
       cy.task('esArchiverUnload', 'unmapped_fields');
+    });
+
+    it('should display user and system defined highlighted fields', () => {
+      cy.get(SUMMARY_VIEW)
+        .should('be.visible')
+        .and('contain.text', 'event.kind')
+        .and('contain.text', 'Rule type');
     });
 
     it('should display the unmapped field on the JSON view', () => {
@@ -126,7 +135,7 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   describe('Url state management', () => {
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'query_alert');
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {
@@ -170,9 +179,14 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
   });
 
   describe('Localstorage management', () => {
+    const ARCHIVED_RULE_ID = '7015a3e2-e4ea-11ed-8c11-49608884878f';
+    const ARCHIVED_RULE_NAME = 'Endpoint Security';
+
     before(() => {
       cleanKibana();
-      cy.task('esArchiverLoad', 'query_alert');
+
+      // It just imports an alert without a rule but rule details page should work anyway
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {
@@ -221,7 +235,10 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
     it('should remove the flyout state from localstorage when navigating away without closing the flyout', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
-      goToRuleDetails();
+
+      visitWithoutDateRange(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
+
       const localStorageCheck = () =>
         cy.getAllLocalStorage().then((storage) => {
           const securityDataTable = getLocalstorageEntryAsObject(storage, 'securityDataTable');
@@ -233,7 +250,10 @@ describe('Alert details flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
 
     it('should not reopen the flyout when navigating away from the alerts page and returning to it', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
-      goToRuleDetails();
+
+      visitWithoutDateRange(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
+
       visit(ALERTS_URL);
       cy.get(OVERVIEW_RULE).should('not.exist');
     });

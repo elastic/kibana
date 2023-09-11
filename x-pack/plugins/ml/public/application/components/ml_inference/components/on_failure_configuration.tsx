@@ -89,7 +89,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
     };
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" data-test-subj="mlTrainedModelsInferenceOnFailureStep">
         <EuiFlexItem>
           <EuiFlexGroup>
             <EuiFlexItem grow={3}>
@@ -146,6 +146,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                     <EuiFlexItem grow={false}>
                       <EuiFormRow fullWidth>
                         <EuiSwitch
+                          data-test-subj={'mlTrainedModelsInferenceIgnoreFailureSwitch'}
                           label={
                             <FormattedMessage
                               id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
@@ -161,6 +162,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                       {ignoreFailure === false ? (
                         <EuiFormRow>
                           <EuiSwitch
+                            data-test-subj={'mlTrainedModelsInferenceTakeActionOnFailureSwitch'}
                             label={
                               <EuiFlexItem>
                                 <FormattedMessage
@@ -236,6 +238,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                       <>
                         {!editOnFailure ? (
                           <EuiCodeBlock
+                            data-test-subj="mlTrainedModelsInferenceOnFailureCodeBlock"
                             isCopyable={true}
                             overflowHeight={350}
                             css={{ height: '350px' }}
@@ -245,6 +248,7 @@ export const OnFailureConfiguration: FC<Props> = memo(
                         ) : null}
                         {editOnFailure ? (
                           <CodeEditor
+                            data-test-subj="mlTrainedModelsInferenceOnFailureEditor"
                             height={300}
                             languageId="json"
                             options={{

@@ -179,9 +179,8 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
           </EuiText>
           <EuiFlexGroup gutterSize="xs" style={{ alignItems: 'center' }}>
             {showDurationWarning && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} data-test-subj="ruleDurationWarning">
                 <EuiIconTip
-                  data-test-subj="ruleDurationWarning"
                   anchorClassName="ruleDurationWarningIcon"
                   type="warning"
                   color="warning"

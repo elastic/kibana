@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
-import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { getDataStreams } from './bundle/get_data_streams';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';
 import { getElasticsearchVersion } from './get_elasticsearch_version';
@@ -30,7 +30,7 @@ export async function getDiagnosticsBundle({
   kuery,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
   start: number | undefined;
   end: number | undefined;
   kuery: string | undefined;
