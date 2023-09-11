@@ -5,18 +5,17 @@
     "types": [
       "jest",
       "node",
-      "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
+      "react"
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/storybook"
+    "@kbn/management-settings-types",
   ]
 }

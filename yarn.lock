@@ -4850,11 +4850,31 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-settings-components-field-input@link:packages/kbn-management/settings/components/field_input":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-settings-components-field-row@link:packages/kbn-management/settings/components/field_row":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-settings-field-definition@link:packages/kbn-management/settings/field_definition":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-settings-ids@link:packages/kbn-management/settings/setting_ids":
   version "0.0.0"
   uid ""
 
 "@kbn/management-settings-section-registry@link:packages/kbn-management/settings/section_registry":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-settings-types@link:packages/kbn-management/settings/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-settings-utilities@link:packages/kbn-management/settings/utilities":
   version "0.0.0"
   uid ""
 
