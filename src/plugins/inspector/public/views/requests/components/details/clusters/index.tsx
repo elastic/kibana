@@ -14,7 +14,7 @@ import { ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
 
 export class Clusters extends Component<RequestDetailsProps> {
-  static shouldShow = (request: Request) => Boolean(request.response?.json);
+  static shouldShow = (request: Request) => Boolean(request.response?.json?.rawResponse?._shards || request.response?.json?.rawResponse?._clusters);
 
   render() {
     const rawResponse = this.props.request.response?.json?.rawResponse;
