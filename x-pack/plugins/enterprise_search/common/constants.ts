@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
 import { ProductFeatures } from './types';
-import { IngestPipelineParams } from './types/connectors';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
   defaultMessage: 'Search',
@@ -79,7 +80,7 @@ export const ANALYTICS_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: 'elasticsearch',
+  ID: 'enterpriseSearchElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
     defaultMessage: 'Elasticsearch',
   }),

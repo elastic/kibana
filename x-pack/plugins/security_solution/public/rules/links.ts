@@ -36,7 +36,7 @@ export const links: LinkItem = {
   path: RULES_LANDING_PATH,
   hideTimeline: true,
   skipUrlState: true,
-  globalNavPosition: 8,
+  globalNavPosition: 2,
   capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
@@ -94,7 +94,7 @@ export const links: LinkItem = {
       description: i18n.translate(
         'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
         {
-          defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage',
+          defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage.',
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,

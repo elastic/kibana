@@ -75,7 +75,7 @@ export interface APMPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  infra: InfraPluginSetup;
+  infra?: InfraPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
 

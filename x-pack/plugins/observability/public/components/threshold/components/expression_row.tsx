@@ -173,6 +173,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         {canDelete && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="o11yExpressionRowButton"
               aria-label={i18n.translate(
                 'xpack.observability.threshold.rule.alertFlyout.removeCondition',
                 {

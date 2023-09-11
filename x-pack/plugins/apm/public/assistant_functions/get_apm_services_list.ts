@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { RegisterFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { ServiceHealthStatus } from '../../common/service_health_status';
 import { callApmApi } from '../services/rest/create_call_apm_api';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
@@ -28,6 +29,7 @@ export function registerGetApmServicesListFunction({
       ),
       parameters: {
         type: 'object',
+        additionalProperties: false,
         properties: {
           'service.environment': {
             ...NON_EMPTY_STRING,
@@ -44,15 +46,30 @@ export function registerGetApmServicesListFunction({
             description:
               'The end of the time range, in Elasticsearch date math, like `now-24h`.',
           },
+          healthStatus: {
+            type: 'array',
+            description: 'Filter service list by health status',
+            additionalProperties: false,
+            additionalItems: false,
+            items: {
+              type: 'string',
+              enum: [
+                ServiceHealthStatus.unknown,
+                ServiceHealthStatus.healthy,
+                ServiceHealthStatus.warning,
+                ServiceHealthStatus.critical,
+              ],
+            },
+          },
         },
         required: ['start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi('GET /internal/apm/assistant/get_services_list', {
+      return callApmApi('POST /internal/apm/assistant/get_services_list', {
         signal,
         params: {
-          query: args,
+          body: args,
         },
       });
     }

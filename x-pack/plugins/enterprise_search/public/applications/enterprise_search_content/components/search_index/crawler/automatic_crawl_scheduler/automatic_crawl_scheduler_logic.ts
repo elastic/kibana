@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
+import { ConnectorScheduling } from '@kbn/search-connectors';
 
 import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';

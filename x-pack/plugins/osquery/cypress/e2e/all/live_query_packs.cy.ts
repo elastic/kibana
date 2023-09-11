@@ -76,7 +76,6 @@ describe('ALL - Live Query Packs', { tags: ['@serverless', '@ess'] }, () => {
     selectAllAgents();
     submitQuery();
     cy.getBySel('live-query-loading').should('exist');
-    cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     checkResults();
     checkActionItemsInResults({

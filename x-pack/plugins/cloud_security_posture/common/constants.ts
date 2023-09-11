@@ -27,6 +27,7 @@ export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_postu
 export const FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION = '1';
 
 export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
+export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
