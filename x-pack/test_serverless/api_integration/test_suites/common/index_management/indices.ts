@@ -17,8 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165565
-  describe.skip('Indices', function () {
+  describe('Indices', function () {
     const indexName = `index-${Math.random()}`;
 
     before(async () => {
@@ -99,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             indexName: createIndexName,
           })
@@ -119,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .put(`${INTERNAL_API_BASE_PATH}/indices/create`)
           .set('kbn-xsrf', 'xxx')
+          .set('x-elastic-internal-origin', 'xxx')
           .send({
             indexName: createIndexName,
           })
