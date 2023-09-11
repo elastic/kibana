@@ -48,7 +48,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       const sampleModel = body.find((v: any) => v.model_id === 'dfa_regression_model_n_0');
 
-      // @todo: verify why is this originally 2
       expect(Object.keys(sampleModel.pipelines).length).to.eql(2);
     });
 

@@ -11,10 +11,10 @@ import { DocumentCountChart } from '@kbn/aiops-components';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { BrushSelectionUpdateHandler, DocumentCountChartProps } from '@kbn/aiops-components';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { Filter } from '@kbn/es-query';
-import { DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
+import type { Filter } from '@kbn/es-query';
+import { type DataDriftStateManager, useDataDriftStateManagerContext } from './use_state_manager';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { DocumentCountStats } from '../../../common/types/field_stats';
+import { type DocumentCountStats } from '../../../common/types/field_stats';
 import { TotalCountHeader } from '../common/components/document_count_content/total_count_header';
 import { SamplingMenu } from '../common/components/random_sampling_menu/random_sampling_menu';
 

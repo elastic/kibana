@@ -7,9 +7,9 @@
 
 import { createContext, useContext, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { RandomSampler } from '@kbn/ml-random-sampler-utils';
 
 export const defaultSearchQuery = {

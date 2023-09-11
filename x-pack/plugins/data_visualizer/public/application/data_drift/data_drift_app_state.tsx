@@ -20,7 +20,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { InitialSettings } from './use_data_drift_result';
+import type { InitialSettings } from './use_data_drift_result';
 import {
   DataDriftStateManagerContext,
   defaultSearchQuery,

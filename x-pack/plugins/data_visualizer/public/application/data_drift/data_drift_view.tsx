@@ -19,7 +19,7 @@ import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { kbnTypeToSupportedType } from '../common/util/field_types_utils';
 import {
   getDataComparisonType,
-  InitialSettings,
+  type InitialSettings,
   useFetchDataComparisonResult,
 } from './use_data_drift_result';
 import type { DataDriftField, Feature, TimeRange } from './types';

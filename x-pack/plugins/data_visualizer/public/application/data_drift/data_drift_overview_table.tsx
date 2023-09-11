@@ -21,7 +21,7 @@ import { FieldTypeIcon } from '../common/components/field_type_icon';
 import { COLLAPSE_ROW, EXPAND_ROW } from '../../../common/i18n_constants';
 import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
-import { DataDriftField, Feature, FETCH_STATUS } from './types';
+import { type DataDriftField, type Feature, FETCH_STATUS } from './types';
 import { formatSignificanceLevel } from './data_drift_utils';
 import { SingleDistributionChart } from './charts/single_distribution_chart';
 import { OverlapDistributionComparison } from './charts/overlap_distribution_chart';

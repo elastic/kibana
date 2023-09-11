@@ -35,7 +35,7 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
-import { InitialSettings } from './use_data_drift_result';
+import type { InitialSettings } from './use_data_drift_result';
 import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
 import {

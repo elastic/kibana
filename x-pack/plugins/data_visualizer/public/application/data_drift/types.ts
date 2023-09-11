@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { DATA_COMPARISON_TYPE } from './constants';

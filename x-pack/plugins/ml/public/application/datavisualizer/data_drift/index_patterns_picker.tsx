@@ -59,60 +59,57 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
             </EuiFlexGroup>
           </MlPageHeader>
           <EuiPanel hasShadow={false} hasBorder>
-            {
-              // @ts-ignore
-              <SavedObjectFinder
-                key="searchSavedObjectFinder"
-                onChoose={onObjectSelection}
-                showFilter
-                noItemsMessage={i18n.translate(
-                  'xpack.ml.newJob.wizard.searchSelection.notFoundLabel',
-                  {
-                    defaultMessage: 'No matching data views or saved searches found.',
-                  }
-                )}
-                savedObjectMetaData={[
-                  {
-                    type: 'search',
-                    getIconForSavedObject: () => 'search',
-                    name: i18n.translate(
-                      'xpack.ml.newJob.wizard.searchSelection.savedObjectType.search',
-                      {
-                        defaultMessage: 'Saved search',
-                      }
-                    ),
-                  },
-                  {
-                    type: 'index-pattern',
-                    getIconForSavedObject: () => 'indexPatternApp',
-                    name: i18n.translate(
-                      'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
-                      {
-                        defaultMessage: 'Data view',
-                      }
-                    ),
-                  },
-                ]}
-                fixedPageSize={20}
-                services={{
-                  contentClient: contentManagement.client,
-                  uiSettings,
-                }}
+            <SavedObjectFinder
+              key="searchSavedObjectFinder"
+              onChoose={onObjectSelection}
+              showFilter
+              noItemsMessage={i18n.translate(
+                'xpack.ml.newJob.wizard.searchSelection.notFoundLabel',
+                {
+                  defaultMessage: 'No matching data views or saved searches found.',
+                }
+              )}
+              savedObjectMetaData={[
+                {
+                  type: 'search',
+                  getIconForSavedObject: () => 'search',
+                  name: i18n.translate(
+                    'xpack.ml.newJob.wizard.searchSelection.savedObjectType.search',
+                    {
+                      defaultMessage: 'Saved search',
+                    }
+                  ),
+                },
+                {
+                  type: 'index-pattern',
+                  getIconForSavedObject: () => 'indexPatternApp',
+                  name: i18n.translate(
+                    'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
+                    {
+                      defaultMessage: 'Data view',
+                    }
+                  ),
+                },
+              ]}
+              fixedPageSize={20}
+              services={{
+                contentClient: contentManagement.client,
+                uiSettings,
+              }}
+            >
+              <EuiButton
+                size="m"
+                fill
+                iconType="plusInCircleFilled"
+                onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
+                disabled={!canEditDataView}
               >
-                <EuiButton
-                  size="m"
-                  fill
-                  iconType="plusInCircleFilled"
-                  onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
-                  disabled={!canEditDataView}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.dataDrift.createDataViewButton"
-                    defaultMessage="Create a data view"
-                  />
-                </EuiButton>
-              </SavedObjectFinder>
-            }
+                <FormattedMessage
+                  id="xpack.ml.dataDrift.createDataViewButton"
+                  defaultMessage="Create a data view"
+                />
+              </EuiButton>
+            </SavedObjectFinder>
           </EuiPanel>
         </>
       </EuiPageBody>

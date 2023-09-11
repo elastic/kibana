@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ErrorType } from '@kbn/ml-error-utils';
-import { type MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ErrorType } from '@kbn/ml-error-utils';
+import type { MlGetTrainedModelsRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
 import {
   deleteTrainedModelQuerySchema,
@@ -26,7 +26,10 @@ import {
   updateDeploymentParamsSchema,
   createIngestPipelineSchema,
 } from './schemas/inference_schema';
-import { PipelineDefinition, TrainedModelConfigResponse } from '../../common/types/trained_models';
+import type {
+  PipelineDefinition,
+  TrainedModelConfigResponse,
+} from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import { modelsProvider } from '../models/model_management';

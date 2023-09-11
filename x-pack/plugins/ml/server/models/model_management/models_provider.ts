@@ -6,10 +6,10 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { JOB_MAP_NODE_TYPES, MapElements } from '@kbn/ml-data-frame-analytics-utils';
+import { JOB_MAP_NODE_TYPES, type MapElements } from '@kbn/ml-data-frame-analytics-utils';
 import { flatten } from 'lodash';
 import type { TransformGetTransformTransformSummary } from '@elastic/elasticsearch/lib/api/types';
-import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestPipeline,
   IngestSimulateDocument,
@@ -198,6 +198,7 @@ export class ModelsProvider {
     try {
       pipelinesResponse = await this.getModelsPipelines([modelId]);
 
+      // 1. Get list of pipelines that are related to the model
       const pipelines = pipelinesResponse?.get(modelId);
       const modelNodeId = this.getNodeId(modelId, JOB_MAP_NODE_TYPES.TRAINED_MODEL);
 
@@ -249,6 +250,7 @@ export class ModelsProvider {
           return result;
         }
 
+        // 2. From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
         for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
           if (
             settings?.index?.default_pipeline &&
@@ -263,6 +265,7 @@ export class ModelsProvider {
           }
         }
 
+        // 3. Grab index information for all the indices found, and add their info to the map
         for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {
           const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.INGEST_PIPELINE);
 
@@ -301,7 +304,7 @@ export class ModelsProvider {
 
         const destinationIndices = flatten(Object.values(pipelineIdsToDestinationIndices));
 
-        // From these destination indices, see if there's any transforms that have the indexId as the source destination index
+        // 4. From these destination indices, check if there's any transforms that have the indexId as the source destination index
         if (destinationIndices.length > 0) {
           const transforms = await this.initTransformData();
 
@@ -316,6 +319,8 @@ export class ModelsProvider {
                 : t.source.index;
               return transformSourceIndex === destinationIndex;
             });
+
+            // 5. If any of the transforms use these indices as source , find the destination indices to complete the map
             if (foundTransform) {
               const transformDestIndex = foundTransform.dest.index;
               const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
