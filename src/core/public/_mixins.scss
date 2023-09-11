@@ -2,5 +2,5 @@
   // The `--euiFixedHeadersOffset` CSS variable is automatically updated by
   // styles/rendering/_base.scss, based on whether the Kibana chrome has a
   // header banner, and is visible or hidden
-  height: calc(100vh - var(--euiFixedHeadersOffset) - #{$additionalOffset});
+  height: calc(100vh - var(--euiFixedHeadersOffset, 0) - #{$additionalOffset});
 }

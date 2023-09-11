@@ -2,7 +2,7 @@
   // height of the header banner
   --kbnHeaderBannerHeight: #{$euiSizeXL};
   // total height of all fixed headers (when the banner is *not* present) inherited from EUI
-  --kbnHeaderOffset: var(--euiFixedHeadersOffset);
+  --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0);
   // total height of everything when the banner is present
   --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
 }
