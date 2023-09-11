@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import {
+  AlertStatus,
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -63,7 +64,7 @@ export function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
       }),
       description: (
         <AlertLifecycleStatusBadge
-          alertStatus={alert.fields[ALERT_STATUS]}
+          alertStatus={alert.fields[ALERT_STATUS] as AlertStatus}
           flapping={alert.fields[ALERT_FLAPPING]}
         />
       ),
