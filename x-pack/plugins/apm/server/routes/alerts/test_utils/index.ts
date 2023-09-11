@@ -58,26 +58,26 @@ export const createRuleTypeMocks = () => {
   };
 
   const dependencies = {
-      alerting,
-      basePath: {
-        prepend: (path: string) => `http://localhost:5601/eyr${path}`,
-        publicBaseUrl: 'http://localhost:5601/eyr',
-        serverBasePath: '/eyr',
-      } as IBasePath,
-      config$: mockedConfig$,
-      observability: {
-        getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
-      } as unknown as ObservabilityPluginSetup,
-      logger: loggerMock,
-      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
-        '.alerts-observability.apm.alerts'
-      ) as IRuleDataClient,
-      alertsLocator: {
-        getLocation: jest.fn().mockImplementation(() => ({
-          path: 'mockedAlertsLocator > getLocation',
-        })),
-      } as any as LocatorPublic<AlertsLocatorParams>,
-    } as unknown as RegisterRuleDependencies;
+    alerting,
+    basePath: {
+      prepend: (path: string) => `http://localhost:5601/eyr${path}`,
+      publicBaseUrl: 'http://localhost:5601/eyr',
+      serverBasePath: '/eyr',
+    } as IBasePath,
+    config$: mockedConfig$,
+    observability: {
+      getAlertDetailsConfig: jest.fn().mockReturnValue({ apm: true }),
+    } as unknown as ObservabilityPluginSetup,
+    logger: loggerMock,
+    ruleDataClient: ruleRegistryMocks.createRuleDataClient(
+      '.alerts-observability.apm.alerts'
+    ) as IRuleDataClient,
+    alertsLocator: {
+      getLocation: jest.fn().mockImplementation(() => ({
+        path: 'mockedAlertsLocator > getLocation',
+      })),
+    } as any as LocatorPublic<AlertsLocatorParams>,
+  } as unknown as RegisterRuleDependencies;
 
   return {
     dependencies,
