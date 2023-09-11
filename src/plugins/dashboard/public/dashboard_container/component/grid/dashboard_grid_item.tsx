@@ -72,27 +72,6 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, container, scrollToPanelId, highlightPanelId, ref]);
 
-    // const gridData = container.select((state) => state.explicitInput.panels[id].gridData);
-    // return (
-    //   <div
-    //     style={{
-    //       ...style,
-    //       zIndex: focusedPanelId === id ? 2 : 'auto',
-    //       backgroundColor: '#ffe5e5',
-    //       borderRadius: '10px',
-    //     }}
-    //     className={[classes, className].join(' ')}
-    //     data-test-subj="dashboardPanel"
-    //     id={`panel-${id}`}
-    //     ref={ref}
-    //     {...rest}
-    //   >
-    //     <div className="embPanel--dragHandle">
-    //       DASHBOARD PANEL: height: {gridData.h} width: {gridData.w} x: {gridData.x}, y: {gridData.y}
-    //     </div>
-    //   </div>
-    // );
-
     return (
       <div
         style={{ ...style, zIndex: focusedPanelId === id ? 2 : 'auto' }}
