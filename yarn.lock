@@ -4850,6 +4850,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-settings-ids@link:packages/kbn-management/settings/setting_ids":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-settings-section-registry@link:packages/kbn-management/settings/section_registry":
   version "0.0.0"
   uid ""
@@ -5458,6 +5462,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-common-settings@link:packages/serverless/settings/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-observability-settings@link:packages/serverless/settings/observability_project":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
   version "0.0.0"
   uid ""
@@ -5466,7 +5478,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-search-settings@link:packages/serverless/settings/search_project":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-security-settings@link:packages/serverless/settings/security_project":
   version "0.0.0"
   uid ""
 
