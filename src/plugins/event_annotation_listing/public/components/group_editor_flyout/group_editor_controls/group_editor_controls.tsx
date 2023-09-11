@@ -161,6 +161,13 @@ export const GroupEditorControls = ({
             defaultMessage: 'Data view',
           })}
           isInvalid={!isDataViewValid(currentDataView)}
+          error={
+            !isDataViewValid(currentDataView)
+              ? i18n.translate('eventAnnotationListing.groupEditor.dataViewMissingError', {
+                  defaultMessage: 'The previously selected data view no longer exists.',
+                })
+              : ''
+          }
         >
           <EuiSelect
             compressed
