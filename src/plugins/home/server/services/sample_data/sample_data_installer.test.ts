@@ -102,6 +102,7 @@ const testDatasets: SampleDatasetSchema[] = [
     previewImagePath: 'previewImagePath',
     darkPreviewImagePath: 'darkPreviewImagePath',
     defaultIndex: 'defaultIndex',
+    overviewDashboard: 'overviewDashboard',
     savedObjects: [
       {
         id: 'some-dashboard',

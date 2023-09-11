@@ -27,6 +27,7 @@ export const createListRoute = (
 ) => {
   router.get({ path: '/api/sample_data', validate: false }, async (context, _req, res) => {
     const allExistingObjects = await findExistingSampleObjects(context, logger, sampleDatasets);
+
     const registeredSampleDatasets = await Promise.all(
       sampleDatasets.map(async (sampleDataset) => {
         const existingObjects = allExistingObjects.get(sampleDataset.id)!;
@@ -94,13 +95,11 @@ async function getSampleDatasetStatus(
   existingSampleObjects: ExistingSampleObjects,
   sampleDataset: SampleDatasetSchema
 ): Promise<{ status: string; statusMsg?: string }> {
-  if (sampleDataset.overviewDashboard) {
-    const dashboard = existingSampleObjects
-      .get(sampleDataset.id)!
-      .find(({ type, id }) => type === 'dashboard' && id === sampleDataset.overviewDashboard);
-    if (!dashboard?.foundObjectId) {
-      return { status: NOT_INSTALLED };
-    }
+  const dashboard = existingSampleObjects
+    .get(sampleDataset.id)!
+    .find(({ type, id }) => type === 'dashboard' && id === sampleDataset.overviewDashboard);
+  if (!dashboard?.foundObjectId) {
+    return { status: NOT_INSTALLED };
   }
 
   const { elasticsearch } = await context.core;
