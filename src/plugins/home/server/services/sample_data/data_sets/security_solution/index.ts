@@ -24,7 +24,9 @@ const securitysolutionDescription = i18n.translate(
   }
 );
 
-export const securitySolutionSpecProvider = function (): SampleDatasetSchema {
+export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSchema = function (
+  spaceId = 'default'
+): SampleDatasetSchema {
   return {
     id: 'securitysolution',
     name: securitysolutionName,
@@ -32,7 +34,7 @@ export const securitySolutionSpecProvider = function (): SampleDatasetSchema {
     previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
     overviewDashboard: '6b348ca0-4e45-11ee-8ec1-71bbd0b34722',
     defaultIndex: 'c89b196d-d0cd-4cfb-8d95-787e4ce51551',
-    savedObjects: getSavedObjects(),
+    savedObjects: getSavedObjects(spaceId),
     dataIndices: [
       {
         id: 'auditbeat',
@@ -53,7 +55,7 @@ export const securitySolutionSpecProvider = function (): SampleDatasetSchema {
         currentTimeMarker: '2018-01-09T00:00:00',
         preserveDayOfWeekTimeOfDay: true,
         aliases: {
-          [`.alerts-security.alerts-{{spaceId}}`]: {},
+          [`.alerts-security.alerts-${spaceId}`]: {},
         },
         deleteAliasWhenRemoved: false,
       },

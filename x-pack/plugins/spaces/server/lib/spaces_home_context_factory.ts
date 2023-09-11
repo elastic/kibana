@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
-export function createSpacesTutorialContextFactory(getSpacesService: () => SpacesServiceStart) {
-  return function spacesTutorialContextFactory(request: KibanaRequest) {
+export function createSpacesHomeContextFactory(getSpacesService: () => SpacesServiceStart) {
+  return function spacesHomeContextFactory(request: KibanaRequest) {
     const spacesService = getSpacesService();
     return {
       spaceId: spacesService.getSpaceId(request),

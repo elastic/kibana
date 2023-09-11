@@ -10,18 +10,19 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { SampleDataContext, SampleDatasetProvider } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller, SAMPLE_DATA_UNINSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
+import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_beats_tutorial';
 
 export function createUninstallRoute(
   router: IRouter,
-  sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
   usageTracker: SampleDataUsageTracker,
   analytics: AnalyticsServiceSetup,
-  getSpaceId: (req: KibanaRequest) => Promise<string>
+  getScopedContext: (req: KibanaRequest) => SampleDataContext,
+  specProviders: Record<string, SampleDatasetProvider>
 ): void {
   router.delete(
     {
@@ -32,18 +33,21 @@ export function createUninstallRoute(
     },
     async (context, request, response) => {
       const routeStartTime = performance.now();
-      const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
+      const scopedContext = getScopedContext(request);
+      const spaceId = getSpaceId(scopedContext);
+      const spaceAwareSampleDatasets = Object.values(specProviders).map((specProvider) =>
+        specProvider(spaceId)
+      );
+      const sampleDataset = spaceAwareSampleDatasets.find(({ id }) => id === request.params.id);
       if (!sampleDataset) {
         return response.notFound();
       }
-      const spaceId = await getSpaceId(request);
 
       const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
-        sampleDatasets,
+        sampleDatasets: spaceAwareSampleDatasets,
         logger,
         context,
-        spaceId,
       });
 
       try {

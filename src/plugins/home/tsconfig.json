@@ -33,7 +33,6 @@
     "@kbn/cloud-chat-provider-plugin",
     "@kbn/shared-ux-router",
     "@kbn/core-http-common",
-    "@kbn/spaces-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -19,6 +19,7 @@ const createSetupMock = (): jest.Mocked<SampleDataRegistrySetup> => {
     addSavedObjectsToSampleDataset: jest.fn(),
     addAppLinksToSampleDataset: jest.fn(),
     replacePanelInSampleDatasetDashboard: jest.fn(),
+    addScopedSampleDataContextFactory: jest.fn(),
   };
   return setup;
 };

@@ -10,18 +10,19 @@ import { schema } from '@kbn/config-schema';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { SampleDataContext, SampleDatasetProvider } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller, SAMPLE_DATA_INSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
+import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_beats_tutorial';
 
 export function createInstallRoute(
   router: IRouter,
-  sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
   usageTracker: SampleDataUsageTracker,
   analytics: AnalyticsServiceSetup,
-  getSpaceId: (req: KibanaRequest) => Promise<string>
+  getScopedContext: (req: KibanaRequest) => SampleDataContext,
+  specProviders: Record<string, SampleDatasetProvider>
 ): void {
   router.post(
     {
@@ -34,23 +35,25 @@ export function createInstallRoute(
     },
     async (context, req, res) => {
       const routeStartTime = performance.now();
-      const spaceId = await getSpaceId(req);
+      const scopedContext = getScopedContext(req);
+      const spaceId = getSpaceId(scopedContext);
 
       const { params, query } = req;
-      const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
+      const sampleDataset = specProviders[params.id]?.(spaceId);
       if (!sampleDataset) {
         return res.notFound();
       }
 
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
-
+      const spaceAwareSampleDatasets = Object.values(specProviders).map((specProvider) =>
+        specProvider(spaceId)
+      );
       const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
-        sampleDatasets,
+        sampleDatasets: spaceAwareSampleDatasets,
         logger,
         context,
-        spaceId,
       });
 
       try {

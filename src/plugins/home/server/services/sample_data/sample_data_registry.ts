@@ -10,13 +10,15 @@ import { CoreSetup, KibanaRequest, PluginInitializerContext } from '@kbn/core/se
 import type { SavedObject } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import {
   SampleDatasetProvider,
   SampleDatasetSchema,
   SampleDatasetDashboardPanel,
   AppLinkData,
+  SampleDataContextFactory,
+  ScopedSampleDataContextFactory,
+  SampleDataContext,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
@@ -32,18 +34,19 @@ import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
 
-const DEFAULT_SPACE_ID = 'default';
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
-  private getSpaceId?: (req: KibanaRequest) => Promise<string>;
+  private readonly scopedSampleDataContextFactories: SampleDataContextFactory[] = [];
+  private readonly validatedSpaceProviders: Record<string, SampleDatasetProvider> = {};
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
     let value: SampleDatasetSchema;
     try {
       value = sampleDataSchema.validate(specProvider());
+      this.validatedSpaceProviders[value.id] = specProvider;
     } catch (error) {
       throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
     }
@@ -72,7 +75,7 @@ export class SampleDataRegistry {
   }
 
   public setup(
-    core: CoreSetup<{ spaces?: SpacesPluginSetup }>,
+    core: CoreSetup,
     usageCollections: UsageCollectionSetup | undefined,
     customIntegrations?: CustomIntegrationsPluginSetup,
     isDevMode?: boolean
@@ -87,28 +90,28 @@ export class SampleDataRegistry {
       this.initContext.logger.get('sample_data', 'usage')
     );
 
-    this.getSpaceId = async (req: KibanaRequest) =>
-      await core.getStartServices().then(([_, depsStart]) => {
-        return depsStart?.spaces?.spacesService?.getSpaceId(req) ?? DEFAULT_SPACE_ID;
-      });
+    const getScopedContext = (req: KibanaRequest): SampleDataContext =>
+      this.scopedSampleDataContextFactories.reduce((accumulatedContext, contextFactory) => {
+        return { ...accumulatedContext, ...contextFactory(req) };
+      }, {} as SampleDataContext);
     const router = core.http.createRouter();
     const logger = this.initContext.logger.get('sampleData');
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(
       router,
-      this.sampleDatasets,
       logger,
       usageTracker,
       core.analytics,
-      this.getSpaceId
+      getScopedContext,
+      this.validatedSpaceProviders
     );
     createUninstallRoute(
       router,
-      this.sampleDatasets,
       logger,
       usageTracker,
       core.analytics,
-      this.getSpaceId
+      getScopedContext,
+      this.validatedSpaceProviders
     );
 
     this.registerSampleDataSet(flightsSpecProvider);
@@ -148,6 +151,18 @@ export class SampleDataRegistry {
 
         const existingAppLinks = this.appLinksMap.get(id) ?? [];
         this.appLinksMap.set(id, [...existingAppLinks, ...appLinks]);
+      },
+
+      addScopedSampleDataContextFactory: (
+        scopedSampleDataContextFactory: ScopedSampleDataContextFactory
+      ) => {
+        if (typeof scopedSampleDataContextFactory !== 'function') {
+          throw new Error(
+            `Unable to add scoped(request) context factory because you did not provide a function`
+          );
+        }
+
+        this.scopedSampleDataContextFactories.push(scopedSampleDataContextFactory);
       },
 
       replacePanelInSampleDatasetDashboard: ({

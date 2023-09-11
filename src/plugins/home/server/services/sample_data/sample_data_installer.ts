@@ -26,7 +26,6 @@ export interface SampleDataInstallerOptions {
   soClient: SavedObjectsClientContract;
   soImporter: ISavedObjectsImporter;
   sampleDatasets: SampleDatasetSchema[];
-  spaceId?: string;
   logger: Logger;
 }
 
@@ -44,7 +43,6 @@ export class SampleDataInstaller {
   private readonly soImporter: ISavedObjectsImporter;
   private readonly sampleDatasets: SampleDatasetSchema[];
   private readonly logger: Logger;
-  private readonly spaceId: string;
 
   constructor({
     esClient,
@@ -52,14 +50,12 @@ export class SampleDataInstaller {
     soClient,
     sampleDatasets,
     logger,
-    spaceId,
   }: SampleDataInstallerOptions) {
     this.esClient = esClient;
     this.soClient = soClient;
     this.soImporter = soImporter;
     this.sampleDatasets = sampleDatasets;
     this.logger = logger;
-    this.spaceId = spaceId ?? 'default';
   }
 
   async install(
@@ -160,20 +156,9 @@ export class SampleDataInstaller {
     }
   }
 
-  private getAliasWithSpaceId(aliases: Record<string, {}> | undefined, spaceId: string) {
-    if (!aliases) {
-      return undefined;
-    }
-    return Object.keys(aliases).reduce<Record<string, {}>>((acc, alias) => {
-      const aliasWithSpaceId = alias.replace('{{spaceId}}', spaceId);
-      acc[aliasWithSpaceId] = {};
-      return acc;
-    }, {});
-  }
-
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
-    const aliases = this.getAliasWithSpaceId(dataIndex.aliases, this.spaceId);
+    const aliases = dataIndex.aliases;
     try {
       if (dataIndex.isDataStream) {
         const request = {
