@@ -29,6 +29,7 @@ import type {
 } from '@kbn/discover-utils/types';
 import { formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
+import type { DataTableColumnTypes } from '../types';
 import { UnifiedDataTableContext } from '../table_context';
 import { defaultMonacoEditorWidth } from '../constants';
 import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
@@ -36,19 +37,30 @@ import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 export const getRenderCellValueFn =
-  (
-    dataView: DataView,
-    rows: DataTableRecord[] | undefined,
-    useNewFieldsApi: boolean,
-    shouldShowFieldHandler: ShouldShowFieldInTableHandler,
-    closePopover: () => void,
-    fieldFormats: FieldFormatsStart,
-    maxEntries: number,
+  ({
+    dataView,
+    rows,
+    useNewFieldsApi,
+    shouldShowFieldHandler,
+    closePopover,
+    fieldFormats,
+    maxEntries,
+    externalCustomRenderers,
+    columnTypes,
+  }: {
+    dataView: DataView;
+    rows: DataTableRecord[] | undefined;
+    useNewFieldsApi: boolean;
+    shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+    closePopover: () => void;
+    fieldFormats: FieldFormatsStart;
+    maxEntries: number;
     externalCustomRenderers?: Record<
       string,
       (props: EuiDataGridCellValueElementProps) => React.ReactNode
-    >
-  ) =>
+    >;
+    columnTypes?: DataTableColumnTypes;
+  }) =>
   ({
     rowIndex,
     columnId,
@@ -140,12 +152,17 @@ export const getRenderCellValueFn =
           {pairs.map(([key, value, docField]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                {docField && (
+                {columnTypes ? ( // for text-based languages
+                  <FieldIcon
+                    type={columnTypes[key] ?? 'unknown'}
+                    className="unifiedDataTable__descriptionListToken"
+                  />
+                ) : docField ? (
                   <FieldIcon
                     {...getFieldIconProps(docField)}
                     className="unifiedDataTable__descriptionListToken"
                   />
-                )}
+                ) : null}
                 {key}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
