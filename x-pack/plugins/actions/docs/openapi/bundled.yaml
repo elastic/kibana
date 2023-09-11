@@ -955,6 +955,8 @@ components:
       title: Connector request properties for a D3 Security connector
       description: Defines properties for connectors when type is `.d3security`.
       type: object
+      required:
+        - url
       properties:
         url:
           type: string
@@ -2028,6 +2030,38 @@ components:
         name:
           type: string
           description: The display name for the connector.
+    connector_response_properties_d3security:
+      title: Connector response properties for a D3 Security connector
+      type: object
+      required:
+        - config
+        - connector_type_id
+        - id
+        - is_deprecated
+        - is_preconfigured
+        - name
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_d3security'
+        connector_type_id:
+          type: string
+          description: The type of connector.
+          enum:
+            - .d3security
+        id:
+          type: string
+          description: The identifier for the connector.
+        is_deprecated:
+          $ref: '#/components/schemas/is_deprecated'
+        is_missing_secrets:
+          $ref: '#/components/schemas/is_missing_secrets'
+        is_preconfigured:
+          $ref: '#/components/schemas/is_preconfigured'
+        is_system_action:
+          $ref: '#/components/schemas/is_system_action'
+        name:
+          type: string
+          description: The display name for the connector.
     connector_response_properties_email:
       title: Connector response properties for an email connector
       type: object
@@ -2571,6 +2605,7 @@ components:
       description: The properties vary depending on the connector type.
       oneOf:
         - $ref: '#/components/schemas/connector_response_properties_cases_webhook'
+        - $ref: '#/components/schemas/connector_response_properties_d3security'
         - $ref: '#/components/schemas/connector_response_properties_email'
         - $ref: '#/components/schemas/connector_response_properties_index'
         - $ref: '#/components/schemas/connector_response_properties_jira'

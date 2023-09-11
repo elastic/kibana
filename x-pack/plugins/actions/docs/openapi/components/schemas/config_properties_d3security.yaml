@@ -1,6 +1,8 @@
 title: Connector request properties for a D3 Security connector
 description: Defines properties for connectors when type is `.d3security`.
 type: object
+required:
+  - url
 properties:
   url:
     type: string
