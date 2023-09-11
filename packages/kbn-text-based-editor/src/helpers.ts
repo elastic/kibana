@@ -139,7 +139,7 @@ export const getDocumentationSections = async (language: string) => {
     };
   }
   if (language === 'esql') {
-    const { sourceCommands, processingCommands, initialSection, functions, aggregationFunctions } =
+    const { sourceCommands, processingCommands, initialSection, functions, aggregationFunctions, operators } =
       await import('./esql_documentation_sections');
     groups.push({
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
@@ -147,7 +147,7 @@ export const getDocumentationSections = async (language: string) => {
       }),
       items: [],
     });
-    groups.push(sourceCommands, processingCommands, functions, aggregationFunctions);
+    groups.push(sourceCommands, processingCommands, functions, aggregationFunctions, operators);
     return {
       groups,
       initialSection,
