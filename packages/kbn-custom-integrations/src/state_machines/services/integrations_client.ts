@@ -68,10 +68,10 @@ export class IntegrationsClient implements IIntegrationsClient {
           new DecodeError(`Failed to decode create custom integration response: ${message}"`)
       )(response);
 
-      return Promise.resolve({
+      return {
         integrationName: params.integrationName,
         installedAssets: data.items,
-      });
+      };
     } catch (error) {
       if (error?.body?.statusCode === 409) {
         throw new NamingCollisionError(error.body?.message ?? GENERIC_CREATE_ERROR_MESSAGE);
@@ -94,9 +94,9 @@ export class IntegrationsClient implements IIntegrationsClient {
         DELETE_PACKAGE_URL.replace('{pkgName}', integrationName).replace('{pkgVersion}', version),
         { version: '2023-10-31' }
       );
-      return Promise.resolve({
+      return {
         integrationName: params.integrationName,
-      });
+      };
     } catch (error) {
       if (error?.body?.message && error.body.message.includes('is not installed')) {
         throw new IntegrationNotInstalledError(error.body.message);

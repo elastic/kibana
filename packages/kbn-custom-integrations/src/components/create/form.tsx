@@ -148,6 +148,7 @@ export const CreateCustomIntegrationForm = ({
             value={integrationName}
             onChange={(event) => updateIntegrationName(event.target.value)}
             isInvalid={hasErrors(errors?.fields?.integrationName) && touchedFields.integrationName}
+            max={100}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -183,6 +184,7 @@ export const CreateCustomIntegrationForm = ({
             value={datasetName}
             onChange={(event) => updateDatasetName(event.target.value)}
             isInvalid={hasErrors(errors?.fields?.datasets?.[0].name) && touchedFields.datasets}
+            max={100}
           />
         </EuiFormRow>
       </EuiForm>
