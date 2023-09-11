@@ -53,6 +53,30 @@ export const installAllPrebuiltRulesRequest = () =>
     },
   });
 
+/* Install specific prebuilt rules. Should be available as security-rule saved objects
+/* as a prerequisite for this request to succeed.
+ * Use in combination with `preventPrebuiltRulesPackageInstallation` and
+ * `createNewRuleAsset` to create mocked prebuilt rules and install only those
+ * instead of all rules available in the `security_detection_engine` package
+ */
+export const installSpecificPrebuiltRulesRequest = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) =>
+  rootRequest<PerformRuleInstallationResponseBody>({
+    method: 'POST',
+    url: PERFORM_RULE_INSTALLATION_URL,
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      'elastic-api-version': '1',
+    },
+    body: {
+      mode: 'SPECIFIC_RULES',
+      rules: rules.map((rule) => ({
+        rule_id: rule['security-rule'].rule_id,
+        version: rule['security-rule'].version,
+      })),
+    },
+  });
+
 export const getAvailablePrebuiltRulesCount = () => {
   cy.log('Get prebuilt rules count');
   return getPrebuiltRulesStatus().then(({ body }) => {
@@ -214,7 +238,6 @@ export const installPrebuiltRuleAssets = (ruleAssets: Array<typeof SAMPLE_PREBUI
 /**
  * Prevent the installation of the `security_detection_engine` package from Fleet.
  * The create a `security-rule` asset for each rule provided in the `rules` array.
- * Optionally install the rules to Kibana, with a flag defaulting to true
  *
  * * @param {Array} rules - Rule assets to be created and optionally installed
  *
@@ -227,5 +250,5 @@ export const createAndInstallMockedPrebuiltRules = (
   installPrebuiltRuleAssets(ruleAssets);
 
   // Install rules into Kibana as `alerts` SOs
-  return installAllPrebuiltRulesRequest();
+  return installSpecificPrebuiltRulesRequest(ruleAssets);
 };
