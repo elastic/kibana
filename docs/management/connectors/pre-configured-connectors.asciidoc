@@ -241,19 +241,20 @@ The following example creates a {sn-itom} connector with OAuth authentication:
 
 [source,text]
 --
- my-servicenow:
-   name: preconfigured-oauth-servicenow-connector-type
-   actionTypeId: .servicenow-itom
-   config:
-     apiUrl: https://example.service-now.com/
-     usesTableApi: false <1>
-     isOAuth: true <2>
-     userIdentifierValue: testuser@email.com <3>
-     clientId: abcdefghijklmnopqrstuvwxyzabcdef <4>
-     jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <5>
-   secrets:
-     clientSecret: secretsecret <6>
-     privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <7>
+xpack.actions.preconfigured:
+  my-servicenow:
+    name: preconfigured-oauth-servicenow-connector-type
+    actionTypeId: .servicenow-itom
+    config:
+      apiUrl: https://example.service-now.com/
+      usesTableApi: false <1>
+      isOAuth: true <2>
+      userIdentifierValue: testuser@email.com <3>
+      clientId: abcdefghijklmnopqrstuvwxyzabcdef <4>
+      jwtKeyId: fedcbazyxwvutsrqponmlkjihgfedcba <5>
+    secrets:
+      clientSecret: secretsecret <6>
+      privateKey: -----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY----- <7>
 --
 <1> Specifies whether the connector uses the Table API or the Import Set API. If set to `false`, the Elastic application should be installed in ServiceNow.
 <2> Specifies whether the connector uses basic or OAuth authentication.
@@ -455,7 +456,7 @@ The following example creates an <<xmatters-action-type,xMatters connector>> wit
 [source,text]
 --
 xpack.actions.preconfigured:
-my-xmatters:
+  my-xmatters:
     name: preconfigured-xmatters-connector-type
     actionTypeId: .xmatters
     config:
