@@ -20,7 +20,13 @@ describe('trace queries', () => {
 
   it('fetches a trace', async () => {
     mock = await inspectSearchParams(({ mockConfig, mockApmEventClient }) =>
-      getTraceItems('foo', mockConfig, mockApmEventClient, 0, 50000)
+      getTraceItems({
+        traceId: 'foo',
+        config: mockConfig,
+        apmEventClient: mockApmEventClient,
+        start: 0,
+        end: 50000,
+      })
     );
 
     expect(mock.params).toMatchSnapshot();
