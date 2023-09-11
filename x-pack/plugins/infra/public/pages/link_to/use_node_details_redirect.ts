@@ -9,14 +9,32 @@ import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import rison from '@kbn/rison';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
-import type { RouteState } from '../../components/asset_details/types';
+import type { AssetDetailsUrlState, RouteState } from '../../components/asset_details/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
+import {
+  REDIRECT_NODE_DETAILS_FROM_KEY,
+  REDIRECT_NODE_DETAILS_TO_KEY,
+  REDIRECT_ASSET_DETAILS_KEY,
+} from './redirect_to_node_detail';
 
-interface QueryParams {
+export interface MetricDetailsQueryParams {
   from?: number;
   to?: number;
-  assetName?: string;
+}
+
+export type AssetDetailsQueryParams = MetricDetailsQueryParams &
+  Omit<AssetDetailsUrlState, 'dateRange'>;
+
+type SearchParams<T extends InventoryItemType> = T extends 'host'
+  ? AssetDetailsQueryParams
+  : MetricDetailsQueryParams;
+
+export interface NodeDetailsRedirectParams<T extends InventoryItemType> {
+  assetType: T;
+  assetId: string;
+  search: SearchParams<T>;
 }
 
 export const useNodeDetailsRedirect = () => {
@@ -29,42 +47,36 @@ export const useNodeDetailsRedirect = () => {
 
   const appId = useObservable(currentAppId$);
   const getNodeDetailUrl = useCallback(
-    ({
-      nodeType,
-      nodeId,
+    <T extends InventoryItemType>({
+      assetType,
+      assetId,
       search,
-    }: {
-      nodeType: InventoryItemType;
-      nodeId: string;
-      search: QueryParams;
-    }): LinkDescriptor => {
-      const { to, from, ...rest } = search;
+    }: NodeDetailsRedirectParams<T>): LinkDescriptor => {
+      const { from, to, ...additionalParams } = search;
 
       return {
         app: 'metrics',
-        pathname: `link-to/${nodeType}-detail/${nodeId}`,
+        pathname: `link-to/${assetType}-detail/${assetId}`,
         search: {
-          ...rest,
-          ...(to && from
-            ? {
-                to: `${to}`,
-                from: `${from}`,
-              }
+          ...(Object.keys(additionalParams).length > 0
+            ? { [REDIRECT_ASSET_DETAILS_KEY]: rison.encodeUnknown(additionalParams) }
             : undefined),
-          // While we don't have a shared state between all page in infra, this makes it possible to restore a page state when returning to the previous route
-          ...(location.search || location.pathname
-            ? {
-                state: JSON.stringify({
-                  originAppId: appId,
-                  originSearch: location.search,
-                  originPathname: location.pathname,
-                } as RouteState),
-              }
+          // retrocompatibility
+          ...(from ? { [REDIRECT_NODE_DETAILS_FROM_KEY]: `${from}` } : undefined),
+          ...(to ? { [REDIRECT_NODE_DETAILS_TO_KEY]: `${to}` } : undefined),
+        },
+        state: {
+          ...(location.key
+            ? ({
+                originAppId: appId,
+                originSearch: location.search,
+                originPathname: location.pathname,
+              } as RouteState)
             : undefined),
         },
       };
     },
-    [location.pathname, appId, location.search]
+    [location.key, location.search, location.pathname, appId]
   );
 
   return { getNodeDetailUrl };

@@ -315,11 +315,11 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
     insertText: 'date_trunc',
     kind: 1,
     detail: i18n.translate('monaco.esql.autocomplete.dateTruncDoc', {
-      defaultMessage: `Rounds down a date to the closest interval.`,
+      defaultMessage: `Rounds down a date to the closest interval. Intervals can be expressed using the timespan literal syntax.`,
     }),
     documentation: {
-      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
-        'from index where field="value" | eval year_hired = DATE_TRUNC(hire_date, 1 year)',
+      value: buildDocumentation('date_trunc(time_literal, grouped[T]): aggregated[T]', [
+        'from index where field="value" | eval year_hired = DATE_TRUNC(1 year, hire_date)',
       ]),
     },
     sortText: 'C',
@@ -332,7 +332,7 @@ export const mathCommandDefinition: AutocompleteCommandDefinition[] = [
       defaultMessage: `Parse dates from strings.`,
     }),
     documentation: {
-      value: buildDocumentation('substring(grouped[T]): aggregated[T]', [
+      value: buildDocumentation('date_parse(grouped[T]): aggregated[T]', [
         `from index where field="value" | eval year_hired = date_parse(hire_date, yyyy-MM-dd'T'HH:mm:ss.SSS'Z')`,
       ]),
     },
