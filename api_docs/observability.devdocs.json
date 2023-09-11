@@ -155,9 +155,7 @@
         "label": "AlertSummary",
         "description": [],
         "signature": [
-          "({ alertSummaryFields }: ",
-          "AlertSummaryProps",
-          ") => JSX.Element"
+          "({ alertSummaryFields }: AlertSummaryProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
         "deprecated": false,
@@ -418,9 +416,7 @@
         "label": "DatePicker",
         "description": [],
         "signature": [
-          "({\n  rangeFrom,\n  rangeTo,\n  refreshPaused,\n  refreshInterval,\n  width = 'restricted',\n  onTimeRangeRefresh,\n}: ",
-          "DatePickerProps",
-          ") => JSX.Element"
+          "({\n  rangeFrom,\n  rangeTo,\n  refreshPaused,\n  refreshInterval,\n  width = 'restricted',\n  onTimeRangeRefresh,\n}: DatePickerProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/pages/overview/components/date_picker/date_picker.tsx",
         "deprecated": false,
@@ -3178,6 +3174,20 @@
                 "text": "CloudStart"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.aiops",
+            "type": "Object",
+            "tags": [],
+            "label": "aiops",
+            "description": [],
+            "signature": [
+              "AiopsPluginStart"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
@@ -7790,7 +7800,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ tags: string[]; }"
+              "{ tags: string[]; access?: \"public\" | \"internal\" | undefined; }"
             ],
             "path": "x-pack/plugins/observability/server/routes/types.ts",
             "deprecated": false,
@@ -9224,6 +9234,34 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /api/observability/slos/_delete_instances 2023-10-31\": { endpoint: \"POST /api/observability/slos/_delete_instances 2023-10-31\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; instanceId: ",
+          "StringC",
+          "; }>>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { list: { sloId: string; instanceId: string; }[]; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10930,6 +10968,34 @@
             "text": "ObservabilityRouteHandlerResources"
           },
           " & { params: { path: { id: string; }; }; }) => Promise<void>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /api/observability/slos/_delete_instances 2023-10-31\": { endpoint: \"POST /api/observability/slos/_delete_instances 2023-10-31\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; instanceId: ",
+          "StringC",
+          "; }>>; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params: { body: { list: { sloId: string; instanceId: string; }[]; }; }; }) => Promise<void>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",

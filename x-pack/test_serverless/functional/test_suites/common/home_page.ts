@@ -12,6 +12,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getService('svlCommonNavigation');
 
   // Failing: See https://github.com/elastic/kibana/issues/165386
+  // FLAKY: https://github.com/elastic/kibana/issues/165414
   describe.skip('home page', function () {
     it('has project header', async () => {
       await svlCommonNavigation.navigateToKibanaHome();

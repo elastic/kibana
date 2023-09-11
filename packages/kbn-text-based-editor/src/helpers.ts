@@ -139,15 +139,21 @@ export const getDocumentationSections = async (language: string) => {
     };
   }
   if (language === 'esql') {
-    const { sourceCommands, processingCommands, initialSection, functions, aggregationFunctions } =
-      await import('./esql_documentation_sections');
+    const {
+      sourceCommands,
+      processingCommands,
+      initialSection,
+      functions,
+      aggregationFunctions,
+      operators,
+    } = await import('./esql_documentation_sections');
     groups.push({
       label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.esql', {
         defaultMessage: 'ES|QL',
       }),
       items: [],
     });
-    groups.push(sourceCommands, processingCommands, functions, aggregationFunctions);
+    groups.push(sourceCommands, processingCommands, functions, aggregationFunctions, operators);
     return {
       groups,
       initialSection,
@@ -157,4 +163,12 @@ export const getDocumentationSections = async (language: string) => {
 
 export const getInlineEditorText = (queryString: string, isMultiLine: boolean) => {
   return isMultiLine ? queryString.replace(/\r?\n|\r/g, ' ').replace(/  +/g, ' ') : queryString;
+};
+
+export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string => {
+  const pipes = code?.split('|');
+  const codeNoLines = pipes?.map((pipe) => {
+    return pipe.replaceAll('\n', '').trim();
+  });
+  return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
 };

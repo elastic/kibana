@@ -73,11 +73,9 @@ import {
 import {
   deleteFirstRule,
   deleteRuleFromDetailsPage,
-  editFirstRule,
   expectManagementTableRules,
   getRulesManagementTableRows,
-  goToRuleDetails,
-  goToTheRuleDetailsOf,
+  goToRuleDetailsOf,
   selectRulesByName,
 } from '../../../tasks/alerts_detection_rules';
 import { deleteSelectedRules } from '../../../tasks/rules_bulk_actions';
@@ -108,12 +106,17 @@ import {
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
-import { login, visit, visitSecurityDetectionRulesPage } from '../../../tasks/login';
+import {
+  login,
+  visit,
+  visitSecurityDetectionRulesPage,
+  visitWithoutDateRange,
+} from '../../../tasks/login';
 import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import { ruleDetailsUrl, ruleEditUrl, RULE_CREATION } from '../../../urls/navigation';
 
-import { RULE_CREATION } from '../../../urls/navigation';
-
-describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
   });
@@ -180,7 +183,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
         });
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToRuleDetailsOf(ruleFields.ruleName);
 
       cy.log('Asserting rule details');
       cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
@@ -236,10 +239,15 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
 
   describe('Custom detection rules deletion and edition', () => {
     context('Deletion', () => {
+      const TESTED_RULE_DATA = getNewRule({
+        rule_id: 'rule1',
+        name: 'New Rule Test',
+        enabled: false,
+        max_signals: 500,
+      });
+
       beforeEach(() => {
-        createRule(
-          getNewRule({ rule_id: 'rule1', name: 'New Rule Test', enabled: false, max_signals: 500 })
-        );
+        createRule(TESTED_RULE_DATA);
         createRule(
           getNewOverrideRule({
             rule_id: 'rule2',
@@ -279,7 +287,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
 
       it('Deletes more than one rule', () => {
         getRulesManagementTableRows().then((rules) => {
-          const rulesToDelete = ['New Rule Test', 'Override Rule'] as const;
+          const rulesToDelete = [TESTED_RULE_DATA.name, 'Override Rule'] as const;
           const initialNumberOfRules = rules.length;
           const numberOfRulesToBeDeleted = 2;
           const expectedNumberOfRulesAfterDeletion =
@@ -316,7 +324,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
           const initialNumberOfRules = rules.length;
           const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-          goToTheRuleDetailsOf('New Rule Test');
+          goToRuleDetailsOf(TESTED_RULE_DATA.name);
           cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
 
           deleteRuleFromDetailsPage();
@@ -339,108 +347,119 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
     });
 
     context('Edition', () => {
-      const rule = getEditedRule();
-      const expectedEditedtags = rule.tags?.join('');
-      const expectedEditedIndexPatterns = rule.index;
+      const editedRuleData = getEditedRule();
+      const expectedEditedTags = editedRuleData.tags?.join('');
+      const expectedEditedIndexPatterns = editedRuleData.index;
 
-      beforeEach(() => {
-        deleteConnectors();
-        createRule(getExistingRule({ rule_id: 'rule1', enabled: true }));
-        login();
-        visitSecurityDetectionRulesPage();
-      });
-
-      it('Only modifies rule active status on enable/disable', () => {
-        enablesRule();
-
-        cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
-
-        goToRuleDetails();
-
-        cy.wait('@fetchRuleDetails').then(({ response }) => {
-          cy.wrap(response?.statusCode).should('eql', 200);
-
-          cy.wrap(response?.body.max_signals).should('eql', getExistingRule().max_signals);
-          cy.wrap(response?.body.enabled).should('eql', false);
-        });
-      });
-
-      it('Allows a rule to be edited', () => {
-        const existingRule = getExistingRule();
-
-        editFirstRule();
-
-        // expect define step to populate
-        cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.query);
-
-        cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.index?.join(''));
-
-        goToAboutStepTab();
-
-        // expect about step to populate
-        cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
-        cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
-        cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
-        cy.get(SEVERITY_DROPDOWN).should('have.text', 'High');
-        cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', `${existingRule.risk_score}`);
-
-        goToScheduleStepTab();
-
-        // expect schedule step to populate
-        const interval = existingRule.interval;
-        const intervalParts = interval != null && interval.match(/[0-9]+|[a-zA-Z]+/g);
-        if (intervalParts) {
-          const [amount, unit] = intervalParts;
-          cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
-          cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
-        } else {
-          throw new Error('Cannot assert scheduling info on a rule without an interval');
-        }
-
-        goToActionsStepTab();
-
-        addEmailConnectorAndRuleAction('test@example.com', 'Subject');
-
-        cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
-        cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
-
-        goToAboutStepTab();
-        cy.get(TAGS_CLEAR_BUTTON).click();
-        fillAboutRule(getEditedRule());
-
-        cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
-
-        saveEditedRule();
-
-        cy.wait('@getRule').then(({ response }) => {
-          cy.wrap(response?.statusCode).should('eql', 200);
-          // ensure that editing rule does not modify max_signals
-          cy.wrap(response?.body.max_signals).should('eql', existingRule.max_signals);
-        });
-
-        cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);
-        cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getEditedRule().description);
-        cy.get(ABOUT_DETAILS).within(() => {
-          getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
-          getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
-          getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
-        });
-        cy.get(INVESTIGATION_NOTES_TOGGLE).click();
-        cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', getEditedRule().note);
-        cy.get(DEFINITION_DETAILS).within(() => {
-          getDetails(INDEX_PATTERNS_DETAILS).should(
-            'have.text',
-            expectedEditedIndexPatterns?.join('')
+      describe('on rule details page', () => {
+        beforeEach(() => {
+          deleteConnectors();
+          login();
+          createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((rule) =>
+            visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
           );
-          getDetails(CUSTOM_QUERY_DETAILS).should('have.text', getEditedRule().query);
-          getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
-          getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
         });
-        if (getEditedRule().interval) {
-          cy.get(SCHEDULE_DETAILS).within(() => {
-            getDetails(RUNS_EVERY_DETAILS).should('have.text', getEditedRule().interval);
+
+        it('Only modifies rule active status on enable/disable', () => {
+          enablesRule();
+
+          cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
+
+          cy.wait('@fetchRuleDetails').then(({ response }) => {
+            cy.wrap(response?.statusCode).should('eql', 200);
+
+            cy.wrap(response?.body.max_signals).should('eql', getExistingRule().max_signals);
+            cy.wrap(response?.body.enabled).should('eql', false);
           });
-        }
+        });
+      });
+
+      describe('on rule editing page', () => {
+        beforeEach(() => {
+          deleteConnectors();
+          login();
+          createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((rule) =>
+            visitWithoutDateRange(ruleEditUrl(rule.body.id))
+          );
+        });
+
+        it('Allows a rule to be edited', () => {
+          const existingRule = getExistingRule();
+
+          // expect define step to populate
+          cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.query);
+
+          cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.index?.join(''));
+
+          goToAboutStepTab();
+
+          // expect about step to populate
+          cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
+          cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
+          cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
+          cy.get(SEVERITY_DROPDOWN).should('have.text', 'High');
+          cy.get(DEFAULT_RISK_SCORE_INPUT)
+            .invoke('val')
+            .should('eql', `${existingRule.risk_score}`);
+
+          goToScheduleStepTab();
+
+          // expect schedule step to populate
+          const interval = existingRule.interval;
+          const intervalParts = interval != null && interval.match(/[0-9]+|[a-zA-Z]+/g);
+          if (intervalParts) {
+            const [amount, unit] = intervalParts;
+            cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
+            cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
+          } else {
+            throw new Error('Cannot assert scheduling info on a rule without an interval');
+          }
+
+          goToActionsStepTab();
+
+          addEmailConnectorAndRuleAction('test@example.com', 'Subject');
+
+          cy.get(ACTIONS_SUMMARY_BUTTON).should('have.text', 'Summary of alerts');
+          cy.get(ACTIONS_NOTIFY_WHEN_BUTTON).should('have.text', 'Per rule run');
+
+          goToAboutStepTab();
+          cy.get(TAGS_CLEAR_BUTTON).click();
+          fillAboutRule(getEditedRule());
+
+          cy.intercept('GET', '/api/detection_engine/rules?id*').as('getRule');
+
+          saveEditedRule();
+
+          cy.wait('@getRule').then(({ response }) => {
+            cy.wrap(response?.statusCode).should('eql', 200);
+            // ensure that editing rule does not modify max_signals
+            cy.wrap(response?.body.max_signals).should('eql', existingRule.max_signals);
+          });
+
+          cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);
+          cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getEditedRule().description);
+          cy.get(ABOUT_DETAILS).within(() => {
+            getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
+            getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
+            getDetails(TAGS_DETAILS).should('have.text', expectedEditedTags);
+          });
+          cy.get(INVESTIGATION_NOTES_TOGGLE).click();
+          cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', getEditedRule().note);
+          cy.get(DEFINITION_DETAILS).within(() => {
+            getDetails(INDEX_PATTERNS_DETAILS).should(
+              'have.text',
+              expectedEditedIndexPatterns?.join('')
+            );
+            getDetails(CUSTOM_QUERY_DETAILS).should('have.text', getEditedRule().query);
+            getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
+            getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+          });
+          if (getEditedRule().interval) {
+            cy.get(SCHEDULE_DETAILS).within(() => {
+              getDetails(RUNS_EVERY_DETAILS).should('have.text', getEditedRule().interval);
+            });
+          }
+        });
       });
     });
   });

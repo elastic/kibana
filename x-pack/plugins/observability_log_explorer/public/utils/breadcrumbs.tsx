@@ -9,11 +9,7 @@ import { EuiBreadcrumb } from '@elastic/eui';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useEffect } from 'react';
-import {
-  betaBadgeDescription,
-  betaBadgeTitle,
-  logExplorerAppTitle,
-} from '../../common/translations';
+import { logExplorerAppTitle } from '../../common/translations';
 
 export const useBreadcrumbs = (
   breadcrumbs: EuiBreadcrumb[],
@@ -40,10 +36,6 @@ export function setBreadcrumbs(
       ...breadcrumbs,
     ]);
   }
-  chromeService.setBadge({
-    text: betaBadgeTitle,
-    tooltip: betaBadgeDescription,
-  });
 }
 
 export const noBreadcrumbs: EuiBreadcrumb[] = [];
