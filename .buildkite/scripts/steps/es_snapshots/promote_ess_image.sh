@@ -2,19 +2,26 @@
 
 set -euo pipefail
 
+echo "\$1 is $1"
+echo "ESS_IMAGE_URL_OR_TAG is $ESS_IMAGE_URL_OR_TAG"
+X=$(buildkite-agent meta-data get ESS_IMAGE_URL_OR_TAG)
+echo "X is $X"
+
+SOURCE_IMAGE_OR_TAG=${ESS_IMAGE_URL_OR_TAG:-${1:-$X}}
+
 source .buildkite/scripts/common/util.sh
 
 BASE_ESS_REPO=docker.elastic.co/elasticsearch/elasticsearch
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest_verified
 
-echo "--- Promoting ${ESS_IMAGE_URL_OR_TAG} to ':latest_verified'"
+echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest_verified'"
 
-if [[ $ESS_IMAGE_URL_OR_TAG =~ :[a-zA-Z_-]+$ ]]; then
-  # $ESS_IMAGE_URL_OR_TAG was a full image
-  SOURCE_IMAGE=$ESS_IMAGE_URL_OR_TAG
+if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z_-]+$ ]]; then
+  # $SOURCE_IMAGE_OR_TAG was a full image
+  SOURCE_IMAGE=$SOURCE_IMAGE_OR_TAG
 else
-  # $ESS_IMAGE_URL_OR_TAG was an image tag
-  SOURCE_IMAGE="$BASE_ESS_REPO:$ESS_IMAGE_URL_OR_TAG"
+  # $SOURCE_IMAGE_OR_TAG was an image tag
+  SOURCE_IMAGE="$BASE_ESS_REPO:$SOURCE_IMAGE_OR_TAG"
 fi
 
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"

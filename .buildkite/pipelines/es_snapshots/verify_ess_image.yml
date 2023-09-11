@@ -9,12 +9,13 @@ steps:
     fields:
       - text: 'ESS_IMAGE_URL_OR_TAG'
         key: 'ESS_IMAGE_URL_OR_TAG'
+        default: "latest"
         hint: 'Enter a full image url (with tag) or a tag of an ESS image in the default image repo'
         required: true
 
   - label: ":pipeline: (:kibana: x :elastic:) Trigger Kibana Serverless suite with ESS image: ${ESS_IMAGE_URL_OR_TAG}"
     trigger: "kibana-serverless"
-    if: "build.env('SKIP_VERIFICATION') == '1' || build.env('SKIP_VERIFICATION') == 'true'"
+    if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
     build:
       env:
         TEST_ESS_IMAGE: ${ESS_IMAGE_URL_OR_TAG}
@@ -22,4 +23,7 @@ steps:
   - wait: ~
 
   - label: ":arrow_up::elastic::arrow_up: Promote docker image"
-    command: .buildkite/scripts/steps/es_snapshots/promote_ess_image.sh
+    command: .buildkite/scripts/steps/es_snapshots/promote_ess_image.sh $(buildkite-agent meta-data get ESS_IMAGE_URL_OR_TAG)
+    env:
+      ESS_IMAGE_URL_OR_TAG: $(buildkite-agent meta-data get ESS_IMAGE_URL_OR_TAG)
+
