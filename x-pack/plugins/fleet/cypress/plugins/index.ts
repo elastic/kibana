@@ -46,6 +46,9 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     return res.json();
   }
   on('task', {
+    log(message) {
+      console.log(message);
+    },
     async insertDoc({ index, doc, id }: { index: string; doc: any; id: string }) {
       return client.create({ id, document: doc, index, refresh: 'wait_for' });
     },

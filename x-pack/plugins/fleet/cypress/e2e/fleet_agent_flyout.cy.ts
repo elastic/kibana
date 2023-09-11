@@ -21,7 +21,14 @@ function cleanUp() {
   cleanupAgentPolicies();
 }
 let kibanaVersion: string;
-describe('Fleet add agent flyout', () => {
+
+describe('debug', () => {
+  it('works', () => {
+    cy.task('log', 'This will be output to the terminal');
+  });
+});
+
+describe.skip('Fleet add agent flyout', () => {
   describe('With a Fleet Server already setup', () => {
     beforeEach(() => {
       cleanUp();

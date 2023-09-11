@@ -42,6 +42,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // add feature flags here
         `--xpack.fleet.enableExperimental=${JSON.stringify(['agentTamperProtectionEnabled'])}`,
 
+        // Set API version resolution to `latest`
+        `--server.versioned.versionResolution=oldest`,
+
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),
 

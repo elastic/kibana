@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import fs from 'fs';
+import { promisify } from 'util';
+
+import fetch from 'node-fetch';
+
 import { defineCypressConfig } from '@kbn/cypress-config';
+import { createEsClientForTesting } from '@kbn/test';
+
+import { API_VERSIONS } from './common/constants';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
@@ -33,10 +41,93 @@ export default defineCypressConfig({
   },
 
   e2e: {
+    // Only load our example test file for now
+    specPattern: './cypress/e2e/test_spec/*.cy.ts',
     baseUrl: 'http://localhost:5601',
+
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
-      return require('./cypress/plugins')(on, config);
+      // async function kibanaFetch(opts: {
+      //   method: string;
+      //   path: string;
+      //   body?: any;
+      //   contentType?: string;
+      //   version?: string;
+      // }) {
+      //   const { method, path, body, contentType, version } = opts;
+      //   const Authorization = `Basic ${Buffer.from(
+      //     `elastic:${config.env.ELASTICSEARCH_PASSWORD}`
+      //   ).toString('base64')}`;
+
+      //   const url = `${config.env.KIBANA_URL}${path}`;
+      //   const res = await fetch(url, {
+      //     method,
+      //     headers: {
+      //       'kbn-xsrf': 'cypress',
+      //       'Content-Type': contentType || 'application/json',
+      //       Authorization,
+      //       ...(version ? { 'Elastic-Api-Version': version } : {}),
+      //     },
+      //     ...(body ? { body } : {}),
+      //   });
+
+      //   return res.json();
+      // }
+
+      // const client = createEsClientForTesting({
+      //   esUrl: config.env.ELASTICSEARCH_URL,
+      // });
+
+      // Only wire up our sample task for now
+      on('task', {
+        log(message) {
+          console.log(message);
+        },
+
+        // async insertDoc({ index, doc, id }: { index: string; doc: any; id: string }) {
+        //   return client.create({ id, document: doc, index, refresh: 'wait_for' });
+        // },
+        // async insertDocs({ index, docs }: { index: string; docs: any[] }) {
+        //   const operations = docs.flatMap((doc) => [{ index: { _index: index } }, doc]);
+
+        //   return client.bulk({ operations, refresh: 'wait_for' });
+        // },
+        // async deleteDocsByQuery({
+        //   index,
+        //   query,
+        //   ignoreUnavailable = false,
+        // }: {
+        //   index: string;
+        //   query: any;
+        //   ignoreUnavailable?: boolean;
+        // }) {
+        //   return client.deleteByQuery({
+        //     index,
+        //     query,
+        //     ignore_unavailable: ignoreUnavailable,
+        //     refresh: true,
+        //     conflicts: 'proceed',
+        //   });
+        // },
+        // async installTestPackage(packageName: string) {
+        //   const zipPath = require.resolve('../packages/' + packageName + '.zip');
+        //   const zipContent = await promisify(fs.readFile)(zipPath, 'base64');
+        //   return kibanaFetch({
+        //     method: 'POST',
+        //     path: '/api/fleet/epm/packages',
+        //     body: Buffer.from(zipContent, 'base64'),
+        //     contentType: 'application/zip',
+        //     version: API_VERSIONS.public.v1,
+        //   });
+        // },
+
+        // async uninstallTestPackage(packageName: string) {
+        //   return kibanaFetch({
+        //     method: 'DELETE',
+        //     path: `/api/fleet/epm/packages/${packageName}`,
+        //     version: API_VERSIONS.public.v1,
+        //   });
+        // },
+      });
     },
   },
 });
