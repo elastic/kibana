@@ -15,6 +15,7 @@ import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
 import { cleanKibana } from '../../tasks/common';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Ransomware Prevention Alerts',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
