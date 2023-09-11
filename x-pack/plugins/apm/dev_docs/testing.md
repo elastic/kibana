@@ -111,15 +111,11 @@ Accessibility tests are added on the e2e with `checkA11y()`, they will run toget
 
 ## Functional tests (Security and Correlations tests)
 
-#### Start server
-
-```
+```sh
+# Start server
 node scripts/functional_tests_server --config x-pack/test/functional/apps/apm/config.ts
-```
 
-#### Run tests
-
-```
+# Run tests
 node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/config.ts --grep='APM specs'
 ```
 
