@@ -50,7 +50,8 @@ const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
 const savedQueryFilterKey = 'testAgent.value';
 
-describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
