@@ -13,7 +13,7 @@ export const MAX_LOADED_GRID_ROWS = 10000;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
 
 export const defaultMonacoEditorWidth = 370;
-export const defaultTimeColumnWidth = 210;
+export const defaultTimeColumnWidth = 212;
 export const kibanaJSON = 'kibana-json';
 
 export const GRID_STYLE: EuiDataGridStyle = {
