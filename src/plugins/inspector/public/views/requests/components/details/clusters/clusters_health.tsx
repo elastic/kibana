@@ -10,63 +10,72 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ClusterHealth } from './cluster_health';
+import { getHeathBarLinearGradient } from './utils';
 
 interface Props {
   clusters: Record<string, ClusterDetails>;
 }
 
 export function ClustersHealth({ clusters }: Props) {
-  let successfulCount = 0;
-  let partialCount = 0;
-  let skippedCount = 0;
-  let failedCount = 0;
+  let successful = 0;
+  let partial = 0;
+  let skipped = 0;
+  let failed = 0;
   Object.values(clusters).forEach((clusterDetails) => {
     if (clusterDetails.status === 'successful') {
-      successfulCount++;
+      successful++;
     } else if (clusterDetails.status === 'partial') {
-      partialCount++;
+      partial++;
     } else if (clusterDetails.status === 'skipped') {
-      skippedCount++;
+      skipped++;
     } else if (clusterDetails.status === 'failed') {
-      failedCount++;
+      failed++;
     }
   });
 
-  function renderStatus(count: number, color: string) {}
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('inspector.requests.shardsDetails.totalClustersLabel', {
-            defaultMessage: '{total} {total, plural, one {cluster} other {clusters}}',
-            values: { total: Object.keys(clusters).length },
-          })}
-        </EuiText>
-      </EuiFlexItem>
-
-      {successfulCount > 0 ? (
+    <>
+      <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <ClusterHealth count={successfulCount} status="successful" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('inspector.requests.shardsDetails.totalClustersLabel', {
+              defaultMessage: '{total} {total, plural, one {cluster} other {clusters}}',
+              values: { total: Object.keys(clusters).length },
+            })}
+          </EuiText>
         </EuiFlexItem>
-      ) : null}
 
-      {partialCount > 0 ? (
-        <EuiFlexItem grow={false}>
-          <ClusterHealth count={partialCount} status="partial" />
-        </EuiFlexItem>
-      ) : null}
+        {successful > 0 ? (
+          <EuiFlexItem grow={false}>
+            <ClusterHealth count={successful} status="successful" />
+          </EuiFlexItem>
+        ) : null}
 
-      {skippedCount > 0 ? (
-        <EuiFlexItem grow={false}>
-          <ClusterHealth count={skippedCount} status="skipped" />
-        </EuiFlexItem>
-      ) : null}
+        {partial > 0 ? (
+          <EuiFlexItem grow={false}>
+            <ClusterHealth count={partial} status="partial" />
+          </EuiFlexItem>
+        ) : null}
 
-      {failedCount > 0 ? (
-        <EuiFlexItem grow={false}>
-          <ClusterHealth count={failedCount} status="failed" />
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+        {skipped > 0 ? (
+          <EuiFlexItem grow={false}>
+            <ClusterHealth count={skipped} status="skipped" />
+          </EuiFlexItem>
+        ) : null}
+
+        {failed > 0 ? (
+          <EuiFlexItem grow={false}>
+            <ClusterHealth count={failed} status="failed" />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+
+      <div style={{
+        background: getHeathBarLinearGradient(successful, partial, skipped, failed),
+        borderRadius: '8px',
+        height: '8px',
+        marginTop: '4px',
+      }}/>
+    </>
   );
 }

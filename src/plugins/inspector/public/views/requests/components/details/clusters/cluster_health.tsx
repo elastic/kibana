@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiHealth, EuiText } from '@elastic/eui';
+import { HEALTH_HEX_CODES } from './utils';
 
 interface Props {
   count?: number;
@@ -22,22 +23,22 @@ export function ClusterHealth({ count, status }: Props) {
   let color = 'subdued';
   let statusLabel = status;
   if (status === 'successful') {
-    color = '#54B399';
+    color = HEALTH_HEX_CODES.successful;
     statusLabel = i18n.translate('inspector.requests.clustersTable.successfulLabel', {
       defaultMessage: 'successful',
     });
   } else if (status === 'partial') {
-    color = '#D6BF57';
+    color = HEALTH_HEX_CODES.partial;
     statusLabel = i18n.translate('inspector.requests.clustersTable.partialLabel', {
       defaultMessage: 'partial',
     });
   } else if (status === 'skipped') {
-    color = '#DA8B45';
+    color = HEALTH_HEX_CODES.skipped;
     statusLabel = i18n.translate('inspector.requests.clustersTable.skippedLabel', {
       defaultMessage: 'skipped',
     });
   } else if (status === 'failed') {
-    color = '#E7664C';
+    color = HEALTH_HEX_CODES.failed;
     statusLabel = i18n.translate('inspector.requests.clustersTable.failedLabel', {
       defaultMessage: 'failed',
     });
