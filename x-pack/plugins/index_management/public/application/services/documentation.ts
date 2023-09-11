@@ -70,7 +70,7 @@ class DocumentationService {
 
     this.dataStreams = links.elasticsearch.dataStreams;
     this.esDocsBase = links.elasticsearch.docsBase;
-    this.enrichPolicies = links.elasticsearch.enrichApis;
+    this.enrichPolicies = links.elasticsearch.enrichPolicies;
     this.createEnrichPolicies = links.elasticsearch.createEnrichPolicy;
     this.matchAllQuery = links.elasticsearch.matchAllQuery;
     this.indexManagement = links.management.indexManagement;

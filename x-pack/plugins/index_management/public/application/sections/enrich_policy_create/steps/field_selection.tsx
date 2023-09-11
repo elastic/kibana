@@ -8,7 +8,13 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiSpacer, EuiComboBoxOptionOption, EuiCallOut } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiIconTip,
+  EuiSpacer,
+  EuiComboBoxOptionOption,
+  EuiCallOut,
+} from '@elastic/eui';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
 import {
   useForm,
@@ -146,14 +152,14 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         <>
           <EuiCallOut
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.noCommonFieldsFoundError', {
-              defaultMessage: 'No common fields found',
+              defaultMessage: 'No common fields',
             })}
             color="danger"
             iconType="error"
           >
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldError"
-              defaultMessage="The selected indices don't have any fields in common. Please select different indices."
+              defaultMessage="The selected indices don't have any fields in common."
             />
           </EuiCallOut>
 
@@ -163,6 +169,17 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
       <UseField
         path="matchField"
         component={ComboBoxField}
+        labelAppend={
+          <EuiIconTip
+            content={i18n.translate(
+              'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldPopover',
+              {
+                defaultMessage:
+                  'The field in your source indices to match with the incoming documents.',
+              }
+            )}
+          />
+        }
         componentProps={{
           fullWidth: false,
           helpText: hasSelectedMultipleIndices
@@ -170,7 +187,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
                 'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldHelpText',
                 {
                   defaultMessage:
-                    'Since multiple source indices were selected in the previous step, the match field must be the same across all selected source indices.',
+                    'The match field must be the same across all selected source indices.',
                 }
               )
             : undefined,
@@ -191,6 +208,16 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
       <UseField
         path="enrichFields"
         component={ComboBoxField}
+        labelAppend={
+          <EuiIconTip
+            content={i18n.translate(
+              'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.EnrichFieldsFieldPopover',
+              {
+                defaultMessage: 'The fields to add to your incoming documents.',
+              }
+            )}
+          />
+        }
         componentProps={{
           fullWidth: false,
           euiFieldProps: {

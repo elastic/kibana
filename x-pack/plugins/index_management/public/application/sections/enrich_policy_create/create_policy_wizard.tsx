@@ -142,7 +142,7 @@ export const CreatePolicyWizard = () => {
         <>
           <EuiCallOut
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.errorTitle', {
-              defaultMessage: 'There was an error while trying to create your policy',
+              defaultMessage: 'Unable to create your policy',
             })}
             color="danger"
             iconType="error"
