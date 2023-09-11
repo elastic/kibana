@@ -8,10 +8,7 @@
 
 import { DashboardPanelState } from '../../../../common';
 import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import {
-  ContactCardEmbeddableFactory,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples';
+import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
 
 import { placePanel } from './place_panel';
