@@ -265,7 +265,9 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       } as NewPackagePolicy);
     }
 
-    validateEndpointPackagePolicy(newPackagePolicy.inputs[0]);
+    if (newPackagePolicy.inputs && newPackagePolicy.inputs.length) {
+      validateEndpointPackagePolicy(newPackagePolicy.inputs[0]);
+    }
 
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
