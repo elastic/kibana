@@ -153,7 +153,8 @@ export const GroupEditorFlyout = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="s"
-                    iconType="arrowLeft"
+                    flush="both"
+                    iconType="sortLeft"
                     data-test-subj="backToGroupSettings"
                     onClick={() => setSelectedAnnotation(undefined)}
                   >
