@@ -1,3 +1,6 @@
+agents:
+  queue: kibana-default
+
 steps:
   - block: 'Verify'
     prompt: "Enter a tag or full image URL for the ESS docker image you'd like to verify and promote"
@@ -11,6 +14,7 @@ steps:
 
   - label: ":pipeline: (:kibana: x :elastic:) Trigger Kibana Serverless suite with ESS image: ${ESS_IMAGE_URL_OR_TAG}"
     trigger: "kibana-serverless"
+    if: "build.env('SKIP_VERIFICATION') == '1' || build.env('SKIP_VERIFICATION') == 'true'"
     build:
       env:
         TEST_ESS_IMAGE: ${ESS_IMAGE_URL_OR_TAG}
@@ -18,4 +22,4 @@ steps:
   - wait: ~
 
   - label: ":arrow_up::elastic::arrow_up: Promote docker image"
-    command: echo "Thereby, you're promoted, ${ESS_IMAGE_URL_OR_TAG}. You're now Sir ${ESS_IMAGE_URL_OR_TAG}"
+    command: .buildkite/scripts/steps/es_snapshots/promote_ess_image.sh
