@@ -71,15 +71,6 @@ const navigationTree: NavigationTreeDefinition = {
                   },
                 },
                 {
-                  title: i18n.translate('xpack.serverlessObservability.ml.logPatternAnalysis', {
-                    defaultMessage: 'Log pattern analysis',
-                  }),
-                  link: 'ml:logPatternAnalysis',
-                  getIsActive: ({ pathNameSerialized, prepend }) => {
-                    return pathNameSerialized.includes(prepend('/app/ml/aiops/log_categorization'));
-                  },
-                },
-                {
                   title: i18n.translate('xpack.serverlessObservability.ml.changePointDetection', {
                     defaultMessage: 'Change point detection',
                   }),
