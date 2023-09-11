@@ -23,6 +23,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { useLicense } from '../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
@@ -116,7 +117,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
           filters={[]}
           timeRange={{ kind: 'absolute', from: data.from, to: data.to }}
         >
-          <>{data.alertCount}</>
+          <FormattedCount count={data.alertCount} />
         </InvestigateInTimelineButton>
       ) : (
         getEmptyTagValue()
@@ -161,7 +162,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
           timeRange={{ kind: 'absolute', from: data.from, to: data.to }}
           keepDataView // changing dataview from only detections to include non-alerts docs
         >
-          <>{data.docCount}</>
+          <FormattedCount count={data.docCount} />
         </InvestigateInTimelineButton>
       ) : (
         getEmptyTagValue()
