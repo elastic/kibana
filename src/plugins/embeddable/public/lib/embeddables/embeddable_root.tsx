@@ -47,12 +47,16 @@ export const EmbeddableRoot: React.FC<Props> = ({ embeddable, loading, error, in
 
   useEffect(() => {
     if (input && embeddable && embeddableHasMounted) {
-      embeddable.updateInput(input);
+      embeddable.getExplicitInputIsEqual(input).then((isEqual) => {
+        if (!isEqual) {
+          embeddable.updateInput(input);
+        }
+      });
     }
   }, [input, embeddable, embeddableHasMounted]);
 
   return (
-    <React.Fragment>
+    <>
       <div ref={rootRef}>{node}</div>
       {loading && <EuiLoadingSpinner data-test-subj="embedSpinner" />}
       {error && (
@@ -60,6 +64,6 @@ export const EmbeddableRoot: React.FC<Props> = ({ embeddable, loading, error, in
           {({ message }) => <EuiText data-test-subj="embedError">{message}</EuiText>}
         </EmbeddableErrorHandler>
       )}
-    </React.Fragment>
+    </>
   );
 };
