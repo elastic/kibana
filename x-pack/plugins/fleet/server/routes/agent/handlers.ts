@@ -366,10 +366,10 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 // Read a static file generated at build time
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
   const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
+  const config = await appContextService.getConfig();
   let versionsToDisplay: string[] = [];
 
   const kibanaVersion = appContextService.getKibanaVersion();
-  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
 
   try {
     const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
@@ -382,13 +382,16 @@ export const getAvailableVersionsHandler: RequestHandler = async (context, reque
       .map((item: any) => semverCoerce(item)?.version || '')
       .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-    const parsedVersions = uniq(versions) as string[];
+    versionsToDisplay = uniq(versions) as string[];
 
-    // Add current version if not already present
-    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
-    versionsToDisplay = !hasCurrentVersion
-      ? [kibanaVersionCoerced].concat(parsedVersions)
-      : parsedVersions;
+    if (!config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
+      // Add current version if not already present
+      const hasCurrentVersion = versionsToDisplay.some((v) => v === kibanaVersion);
+
+      versionsToDisplay = !hasCurrentVersion
+        ? [kibanaVersion].concat(versionsToDisplay)
+        : versionsToDisplay;
+    }
     const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
   } catch (error) {

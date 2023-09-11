@@ -53,8 +53,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/166027
-      describe.skip('status', () => {
+      describe('status', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the status of cases to in-progress correctly', async () => {
@@ -64,8 +63,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/166123
-      describe.skip('severity', () => {
+      describe('severity', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the severity of cases to medium correctly', async () => {
@@ -145,8 +143,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/166127
-    describe.skip('severity filtering', () => {
+    describe('severity filtering', () => {
       before(async () => {
         await testSubjects.click('solutionSideNavItemLink-cases');
 
