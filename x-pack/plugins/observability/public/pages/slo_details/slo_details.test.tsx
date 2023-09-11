@@ -65,6 +65,9 @@ const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       theme: {},
+      lens: {
+        EmbeddableComponent: () => <div data-test-subj="errorRateChart">mocked component</div>,
+      },
       application: { navigateToUrl: mockNavigate },
       charts: chartPluginMock.createStartContract(),
       http: {
@@ -184,6 +187,7 @@ describe('SLO Details Page', () => {
     expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
+    expect(screen.queryByTestId('errorRateChart')).toBeTruthy();
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(0);
   });
 

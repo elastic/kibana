@@ -1319,7 +1319,7 @@
         "label": "useLinkProps",
         "description": [],
         "signature": [
-          "({ app, pathname, hash, search }: ",
+          "({ app, pathname, hash, search, state }: ",
           {
             "pluginId": "observabilityShared",
             "scope": "public",
@@ -1347,7 +1347,7 @@
             "id": "def-public.useLinkProps.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ app, pathname, hash, search }",
+            "label": "{ app, pathname, hash, search, state }",
             "description": [],
             "signature": [
               {
@@ -1833,6 +1833,20 @@
             "description": [],
             "signature": [
               "Search | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_link_props.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.LinkDescriptor.state",
+            "type": "Unknown",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "unknown"
             ],
             "path": "x-pack/plugins/observability_shared/public/hooks/use_link_props.ts",
             "deprecated": false,
