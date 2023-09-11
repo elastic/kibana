@@ -9,7 +9,7 @@
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { isKnownFieldType } from './field_types';
 import { getFieldType } from './get_field_type';
-import type { FieldBase, GetCustomFieldType } from '../../types';
+import type { FieldBase, GetCustomFieldType } from '../types';
 
 /**
  * Returns an icon type for a field

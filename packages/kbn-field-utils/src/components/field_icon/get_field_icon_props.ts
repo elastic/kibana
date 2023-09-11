@@ -9,7 +9,7 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldIconProps } from './field_icon';
 import { getFieldIconType } from '../../utils/get_field_icon_type';
-import type { FieldBase } from '../../../types';
+import type { FieldBase } from '../../types';
 
 export function getFieldIconProps<T extends FieldBase = DataViewField>(field: T): FieldIconProps {
   return {

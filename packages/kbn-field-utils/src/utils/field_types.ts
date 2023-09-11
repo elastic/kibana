@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type FieldTypeKnown } from '../../types';
+import { type FieldTypeKnown } from '../types';
 
 /**
  * Field types for which name and description are defined
