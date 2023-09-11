@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export type { FieldTypeKnown } from './src/types';
+export type { FieldTypeKnown, FieldBase } from './src/types';
