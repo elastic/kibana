@@ -7,7 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
@@ -115,7 +115,7 @@ describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () =>
     context('On Rules Management page', () => {
       beforeEach(() => {
         login(ROLES.platform_engineer);
-        loadPageAsPlatformEngineer(DETECTIONS_RULE_MANAGEMENT_URL);
+        loadPageAsPlatformEngineer(RULES_MANAGEMENT_URL);
       });
 
       it('We show no callout', () => {

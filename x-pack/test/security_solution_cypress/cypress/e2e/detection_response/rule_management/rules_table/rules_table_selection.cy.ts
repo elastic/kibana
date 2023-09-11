@@ -22,7 +22,7 @@ import {
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/navigation';
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',
@@ -47,7 +47,7 @@ describe.skip(
       login();
       /* Create and install two mock rules */
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      visitWithoutDateRange(RULES_MANAGEMENT_URL);
       waitForPrebuiltDetectionRulesToBeLoaded();
     });
 

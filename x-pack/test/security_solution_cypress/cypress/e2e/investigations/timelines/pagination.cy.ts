@@ -20,7 +20,7 @@ import { login, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 // Flaky on serverless
 const defaultPageSize = 25;
@@ -32,7 +32,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visit(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });

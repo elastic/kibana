@@ -108,11 +108,7 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 
-import {
-  DETECTIONS_RULE_MANAGEMENT_URL,
-  ruleDetailsUrl,
-  RULE_CREATION,
-} from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL, ruleDetailsUrl, CREATE_RULE_URL } from '../../../urls/navigation';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
@@ -138,7 +134,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('Index patterns', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(RULE_CREATION);
+          visitWithoutDateRange(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -162,7 +158,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('Indicator index patterns', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(RULE_CREATION);
+          visitWithoutDateRange(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -184,7 +180,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('custom query input', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(RULE_CREATION);
+          visitWithoutDateRange(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -201,7 +197,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('custom indicator query input', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(RULE_CREATION);
+          visitWithoutDateRange(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -219,7 +215,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         beforeEach(() => {
           login();
           const rule = getNewThreatIndicatorRule();
-          visitWithoutDateRange(RULE_CREATION);
+          visitWithoutDateRange(CREATE_RULE_URL);
           selectIndicatorMatchType();
           if (rule.index) {
             fillIndexAndIndicatorIndexPattern(rule.index, rule.threat_index);
@@ -414,7 +410,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
           login();
-          visitWithoutDateRange(RULE_CREATION);
+          visitWithoutDateRange(CREATE_RULE_URL);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
           fillAboutRuleAndContinue(getNewThreatIndicatorRule());
@@ -430,7 +426,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
     describe('Generating signals', () => {
       it('Creates and enables a new Indicator Match rule', () => {
         const rule = getNewThreatIndicatorRule();
-        visitWithoutDateRange(RULE_CREATION);
+        visitWithoutDateRange(CREATE_RULE_URL);
         selectIndicatorMatchType();
         fillDefineIndicatorMatchRuleAndContinue(rule);
         fillAboutRuleAndContinue(rule);
@@ -544,7 +540,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('on rule editing page', () => {
         beforeEach(() => {
           createRule(TESTED_RULE_DATA);
-          visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+          visitWithoutDateRange(RULES_MANAGEMENT_URL);
           disableAutoRefresh();
         });
 

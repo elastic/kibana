@@ -15,7 +15,7 @@ import { openEvents, openUncommonProcesses } from '../../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommon_processes';
 import { login, visit } from '../../../tasks/login';
 import { refreshPage } from '../../../tasks/security_header';
-import { HOSTS_URL, USERS_URL, HOSTS_PAGE_TAB_URLS } from '../../../urls/navigation';
+import { hostsUrl, USERS_URL } from '../../../urls/navigation';
 import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
 import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
@@ -29,7 +29,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
 
     beforeEach(() => {
       login();
-      visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+      visit(hostsUrl('uncommonProcesses'));
       waitForUncommonProcessesToBeLoaded();
     });
 
@@ -112,7 +112,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
     });
 
     it(`reset all Hosts pagination when sorting column`, () => {
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       goToTablePage(2);
       cy.get(ALL_HOSTS_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
 

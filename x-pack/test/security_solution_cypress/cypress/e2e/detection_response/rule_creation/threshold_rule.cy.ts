@@ -56,7 +56,7 @@ import {
 } from '../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -74,7 +74,7 @@ describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    visitWithoutDateRange(RULE_CREATION);
+    visitWithoutDateRange(CREATE_RULE_URL);
   });
 
   it('Creates and enables a new threshold rule', () => {

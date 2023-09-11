@@ -26,7 +26,7 @@ import {
 } from '../../../../tasks/alerts_detection_rules';
 import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
@@ -54,7 +54,7 @@ describe(
     });
 
     it('gets deactivated when any rule selected and activated after rules unselected', () => {
-      visit(DETECTIONS_RULE_MANAGEMENT_URL);
+      visit(RULES_MANAGEMENT_URL);
 
       expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
@@ -75,7 +75,7 @@ describe(
     describe('when enabled', () => {
       beforeEach(() => {
         mockGlobalClock();
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+        visitWithoutDateRange(RULES_MANAGEMENT_URL);
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -101,7 +101,7 @@ describe(
     describe('when disabled', () => {
       beforeEach(() => {
         mockGlobalClock();
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+        visitWithoutDateRange(RULES_MANAGEMENT_URL);
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
 
@@ -148,7 +148,7 @@ describe(
     describe('when one rule is selected', () => {
       it('does NOT refresh after refresh interval has passed', () => {
         mockGlobalClock();
-        visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+        visitWithoutDateRange(RULES_MANAGEMENT_URL);
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 

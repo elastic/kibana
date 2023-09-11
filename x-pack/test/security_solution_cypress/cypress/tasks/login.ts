@@ -16,7 +16,7 @@ import { LoginState } from '@kbn/security-plugin/common/login_state';
 import {
   hostDetailsUrl,
   LOGOUT_URL,
-  SECURITY_DETECTIONS_RULES_URL,
+  RULES_MANAGEMENT_URL,
   userDetailsUrl,
 } from '../urls/navigation';
 import { resetRulesTableState } from './common';
@@ -355,7 +355,7 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
 
 export const visitSecurityDetectionRulesPage = (role?: ROLES) => {
   resetRulesTableState(); // Clear persistent rules filter data before page loading
-  visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, role);
+  visitWithoutDateRange(RULES_MANAGEMENT_URL, role);
 };
 
 export const visitUserDetailsPage = (userName = 'test') => {

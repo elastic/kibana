@@ -9,7 +9,7 @@ import { login, visit } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
 
-import { HOSTS_URL, ALERTS_URL } from '../../urls/navigation';
+import { hostsUrl, ALERTS_URL } from '../../urls/navigation';
 
 import { createRule } from '../../tasks/api_calls/rules';
 
@@ -50,7 +50,7 @@ describe(
     });
 
     it('adds field to timeline', () => {
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

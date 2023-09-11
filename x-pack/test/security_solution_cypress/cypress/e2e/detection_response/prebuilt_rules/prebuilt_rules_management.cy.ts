@@ -41,7 +41,7 @@ import {
   deletePrebuiltRulesAssets,
 } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/navigation';
 
 const rules = Array.from(Array(5)).map((_, i) => {
   return createRuleAssetSavedObject({
@@ -61,7 +61,7 @@ describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
     preventPrebuiltRulesPackageInstallation();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visitWithoutDateRange(RULES_MANAGEMENT_URL);
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();

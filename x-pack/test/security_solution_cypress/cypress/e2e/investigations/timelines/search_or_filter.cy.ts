@@ -24,7 +24,7 @@ import {
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
-import { HOSTS_URL, TIMELINES_URL } from '../../../urls/navigation';
+import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
@@ -34,7 +34,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
     });
 
     it('executes a KQL query', () => {

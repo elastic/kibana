@@ -65,7 +65,7 @@ import {
 import { login, visit } from '../../../tasks/login';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -91,7 +91,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
@@ -149,7 +149,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and edits a new rule with a data view', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       cy.get(RULE_NAME_INPUT).clear();
       cy.get(RULE_NAME_INPUT).type(rule.name);

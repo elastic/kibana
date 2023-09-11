@@ -17,7 +17,7 @@ import {
   clickTimestampToggleField,
 } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 describe(
   'toggle column in timeline',
@@ -30,7 +30,7 @@ describe(
 
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
     });

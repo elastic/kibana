@@ -113,7 +113,7 @@ import {
   visitWithoutDateRange,
 } from '../../../tasks/login';
 import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
-import { ruleDetailsUrl, ruleEditUrl, RULE_CREATION } from '../../../urls/navigation';
+import { ruleDetailsUrl, ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -132,7 +132,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);

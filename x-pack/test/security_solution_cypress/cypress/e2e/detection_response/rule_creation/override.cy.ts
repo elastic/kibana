@@ -59,7 +59,7 @@ import {
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -76,7 +76,7 @@ describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   it('Creates and enables a new custom rule with override option', function () {
-    visitWithoutDateRange(RULE_CREATION);
+    visitWithoutDateRange(CREATE_RULE_URL);
     fillDefineCustomRuleAndContinue(rule);
     fillAboutRuleWithOverrideAndContinue(rule);
     fillScheduleRuleAndContinue(rule);

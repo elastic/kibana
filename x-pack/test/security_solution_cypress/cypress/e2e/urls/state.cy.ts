@@ -45,7 +45,7 @@ import {
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/timeline';
 
-import { HOSTS_URL } from '../../urls/navigation';
+import { hostsUrl } from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
 import { getTimeline } from '../../objects/timeline';
@@ -292,7 +292,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets and reads the url state for timeline by id', () => {
-    visit(HOSTS_URL);
+    visit(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
 

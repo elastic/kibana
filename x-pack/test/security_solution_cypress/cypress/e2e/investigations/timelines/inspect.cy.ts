@@ -11,7 +11,7 @@ import { login, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { executeTimelineKQL, openTimelineInspectButton } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165688
 describe('Inspect', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -19,7 +19,7 @@ describe('Inspect', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, ()
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
       openTimelineInspectButton();

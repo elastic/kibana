@@ -51,7 +51,7 @@ import {
 } from '../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 
-import { RULE_CREATION } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
@@ -67,7 +67,7 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInSer
 
   beforeEach(() => {
     login();
-    visitWithoutDateRange(RULE_CREATION);
+    visitWithoutDateRange(CREATE_RULE_URL);
   });
 
   it('Creates and enables a new ml rule', () => {

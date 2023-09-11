@@ -18,7 +18,7 @@ import {
   HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON,
 } from '../../../screens/hosts/host_risk';
 import { login, visit } from '../../../tasks/login';
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
@@ -30,7 +30,7 @@ describe.skip('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visit(hostsUrl('allHosts'));
     navigateToHostRiskDetailTab();
   });
 

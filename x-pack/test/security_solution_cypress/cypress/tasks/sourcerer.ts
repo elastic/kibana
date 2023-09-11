@@ -7,7 +7,7 @@
 
 import { DEFAULT_ALERTS_INDEX } from '@kbn/security-solution-plugin/common/constants';
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
-import { HOSTS_URL } from '../urls/navigation';
+import { hostsUrl } from '../urls/navigation';
 import { visit, waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { rootRequest } from './common';
@@ -110,7 +110,7 @@ export const addIndexToDefault = (index: string) => {
 
       cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
       cy.get('button[data-test-subj="windowReloadButton"]').click();
-      waitForPage(HOSTS_URL);
+      waitForPage(hostsUrl('allHosts'));
     });
 };
 

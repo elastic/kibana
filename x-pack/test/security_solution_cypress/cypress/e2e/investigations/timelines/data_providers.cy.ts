@@ -26,7 +26,7 @@ import {
   updateDataProviderByFieldHoverAction,
 } from '../../../tasks/timeline';
 import { getTimeline } from '../../../objects/timeline';
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../../tasks/common';
 
 // Failing in serverless
@@ -40,7 +40,7 @@ describe(
 
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       waitForAllHostsToBeLoaded();
       scrollToBottom();
       createNewTimeline();

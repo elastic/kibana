@@ -42,8 +42,8 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import {
   ruleDetailsUrl,
   ruleEditUrl,
-  RULE_CREATION,
-  SECURITY_DETECTIONS_RULES_URL,
+  CREATE_RULE_URL,
+  RULES_MANAGEMENT_URL,
 } from '../../../urls/navigation';
 
 const savedQueryName = 'custom saved query';
@@ -66,7 +66,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
     it('Creates saved query rule', function () {
       const rule = getSavedQueryRule();
       createSavedQuery(savedQueryName, savedQueryQuery, savedQueryFilterKey);
-      visit(RULE_CREATION);
+      visit(CREATE_RULE_URL);
 
       selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
 
@@ -232,7 +232,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
           visitWithoutDateRange(ruleEditUrl(rule.body.id))
         );
 
-        visit(SECURITY_DETECTIONS_RULES_URL);
+        visit(RULES_MANAGEMENT_URL);
 
         editFirstRule();
         uncheckLoadQueryDynamically();

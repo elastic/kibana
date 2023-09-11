@@ -7,7 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
+import { RULES_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
@@ -70,7 +70,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {
@@ -119,7 +119,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {
@@ -168,7 +168,7 @@ describe(
 
         context('On Rules Management page', () => {
           beforeEach(() => {
-            loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
+            loadPageAsPlatformEngineerUser(RULES_MANAGEMENT_URL);
           });
 
           it('We show 1 primary callout of need admin', () => {

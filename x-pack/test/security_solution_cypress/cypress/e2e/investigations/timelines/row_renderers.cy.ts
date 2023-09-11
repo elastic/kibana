@@ -22,7 +22,7 @@ import { login, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -32,7 +32,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
     login();
-    visit(HOSTS_URL, {
+    visit(hostsUrl('allHosts'), {
       onLoad: () => {
         waitForWelcomePanelToBeLoaded();
         waitForAllHostsToBeLoaded();

@@ -37,7 +37,7 @@ import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login, visit } from '../../../tasks/login';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 import { createNewTimeline } from '../../../tasks/timeline';
-import { ALERTS_URL, DASHBOARDS_URL, DETECTIONS_RESPONSE_URL } from '../../../urls/navigation';
+import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../../urls/navigation';
 
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
@@ -50,7 +50,7 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
 
   beforeEach(() => {
     login();
-    visit(DETECTIONS_RESPONSE_URL);
+    visit(DETECTION_AND_RESPONSE_URL);
   });
 
   context('KQL search bar', () => {

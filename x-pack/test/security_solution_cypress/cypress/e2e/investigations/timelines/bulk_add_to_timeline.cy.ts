@@ -20,7 +20,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
 import { login, visit } from '../../../tasks/login';
-import { ALERTS_URL, HOSTS_URL } from '../../../urls/navigation';
+import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 
 describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -70,7 +70,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
   context('Host -> Events Viewer', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });
@@ -101,7 +101,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
   context('Host -> Sessions Viewer', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openSessions();
       waitsForEventsToBeLoaded();
     });

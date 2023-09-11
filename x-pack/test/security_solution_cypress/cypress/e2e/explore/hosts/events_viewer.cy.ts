@@ -32,7 +32,7 @@ import {
 } from '../../../tasks/hosts/events';
 import { kqlSearch } from '../../../tasks/security_header';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { resetFields } from '../../../tasks/timeline';
 
 const defaultHeadersInDefaultEcsCategory = [
@@ -57,7 +57,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Fields rendering', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -82,7 +82,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events viewer fields behaviour', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -110,7 +110,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events behavior', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visit(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });

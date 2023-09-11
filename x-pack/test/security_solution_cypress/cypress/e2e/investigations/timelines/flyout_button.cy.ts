@@ -21,7 +21,7 @@ import {
   openCreateTimelineOptionsPopover,
 } from '../../../tasks/timeline';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 
 describe('timeline flyout button', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
@@ -30,7 +30,7 @@ describe('timeline flyout button', { tags: ['@ess', '@brokenInServerless'] }, ()
 
   beforeEach(() => {
     login();
-    visit(HOSTS_URL);
+    visit(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
   });
 

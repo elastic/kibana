@@ -14,8 +14,8 @@ import {
   EVENT_FILTERS_URL,
   TIMELINES_URL,
   EXCEPTIONS_URL,
-  DETECTIONS_RULE_MANAGEMENT_URL,
-  RULE_CREATION,
+  RULES_MANAGEMENT_URL,
+  CREATE_RULE_URL,
   ruleEditUrl,
   ruleDetailsUrl,
 } from '../../urls/navigation';
@@ -43,12 +43,12 @@ describe('Display not found page', { tags: ['@ess', '@serverless', '@brokenInSer
   });
 
   it('navigates to the rules page with incorrect link', () => {
-    visit(`${DETECTIONS_RULE_MANAGEMENT_URL}/randomUrl`);
+    visit(`${RULES_MANAGEMENT_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the rules creation page with incorrect link', () => {
-    visit(`${RULE_CREATION}/randomUrl`);
+    visit(`${CREATE_RULE_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
