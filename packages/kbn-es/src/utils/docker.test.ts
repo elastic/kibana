@@ -556,8 +556,7 @@ describe('resolveDockerCmd()', () => {
 describe('runDockerContainer()', () => {
   test('should resolve', async () => {
     execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
-
-    await expect(runDockerContainer(log, {})).resolves.toEqual({ stdout: '' });
+    await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // setupDocker execa calls then run container
     expect(execa.mock.calls).toHaveLength(5);
   });
