@@ -469,7 +469,15 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
         num: 2,
       });
-      expect(resp.hits.hits.length).to.be(2);
+
+      const resp2 = await waitForAlertInIndex({
+        esClient,
+        filter: testStart,
+        indexName: ALERT_INDEX,
+        ruleId,
+        num: 1,
+      });
+      expect(resp2.hits.hits.length).to.be(1);
 
       const document = resp.hits.hits[0];
       expect(document._source).to.eql({
@@ -491,6 +499,55 @@ export default function ({ getService }: FtrProviderContext) {
         ongoingIds: '[query matched,]',
         recovered: '0',
         recoveredIds: '[]',
+      });
+
+      const alertDocument = resp2.hits.hits[0]._source as Record<string, any>;
+      expect(omit(alertDocument, fields)).to.eql({
+        event: {
+          kind: 'signal',
+        },
+        tags: [],
+        kibana: {
+          space_ids: ['default'],
+          alert: {
+            title: "rule 'always fire' matched query",
+            evaluation: {
+              conditions: 'Number of matching documents is greater than -1',
+              value: 0,
+            },
+            action_group: 'query matched',
+            flapping: false,
+            duration: {},
+            instance: { id: 'query matched' },
+            status: 'active',
+            workflow_status: 'open',
+            rule: {
+              category: 'Elasticsearch query',
+              consumer: 'alerts',
+              name: 'always fire',
+              execution: {},
+              parameters: {
+                size: 100,
+                thresholdComparator: '>',
+                threshold: [-1],
+                index: ['alert-test-data'],
+                timeField: 'date',
+                esQuery: '{\n  "query":{\n    "match_all" : {}\n  }\n}',
+                timeWindowSize: 20,
+                timeWindowUnit: 's',
+                excludeHitsFromPreviousRun: true,
+                aggType: 'count',
+                groupBy: 'all',
+                searchType: 'esQuery',
+              },
+              producer: 'stackAlerts',
+              revision: 0,
+              rule_type_id: '.es-query',
+              tags: [],
+              uuid: ruleId,
+            },
+          },
+        },
       });
     });
   });
