@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { VALID_ALERT_INDEX_PREFIXES } from '../resource_installer_utils';
+
 export const isValidAlertIndexName = (indexName: string): boolean => {
-  return indexName.startsWith('.internal.alerts') || indexName.startsWith('.alerts');
+  return VALID_ALERT_INDEX_PREFIXES.some((prefix: string) => indexName.startsWith(prefix));
 };

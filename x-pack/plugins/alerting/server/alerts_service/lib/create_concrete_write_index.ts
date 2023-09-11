@@ -11,7 +11,6 @@ import { get } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { DataStreamAdapter } from './data_stream_adapter';
-import { isValidAlertIndexName } from './is_valid_alert_index_name';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -23,6 +22,7 @@ interface UpdateIndexMappingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  validIndexPrefixes?: string[];
   concreteIndices: ConcreteIndexInfo[];
 }
 
@@ -108,17 +108,27 @@ export const updateIndexMappings = async ({
   esClient,
   totalFieldsLimit,
   concreteIndices,
+  validIndexPrefixes,
 }: UpdateIndexMappingsOpts) => {
-  const validConcreteIndices = [];
-  for (const cIdx of concreteIndices) {
-    if (!isValidAlertIndexName(cIdx.index)) {
-      logger.warn(
-        `Found unexpected concrete index "${cIdx.index}". Not updating mappings or settings for this index.`
-      );
-    } else {
-      validConcreteIndices.push(cIdx);
+  let validConcreteIndices = [];
+  if (validIndexPrefixes) {
+    for (const cIdx of concreteIndices) {
+      if (!validIndexPrefixes?.some((prefix: string) => cIdx.index.startsWith(prefix))) {
+        logger.warn(
+          `Found unexpected concrete index name "${
+            cIdx.index
+          }" while expecting index with one of the following prefixes: [${validIndexPrefixes.join(
+            ','
+          )}] Not updating mappings or settings for this index.`
+        );
+      } else {
+        validConcreteIndices.push(cIdx);
+      }
     }
+  } else {
+    validConcreteIndices = concreteIndices;
   }
+
   logger.debug(
     `Updating underlying mappings for ${validConcreteIndices.length} indices / data streams.`
   );

@@ -220,6 +220,7 @@ export class ResourceInstaller {
       alias: indexInfo.getPrimaryAlias(namespace),
       name: indexInfo.getConcreteIndexInitialName(namespace),
       template: indexInfo.getIndexTemplateName(namespace),
+      validPrefixes: ['.internal.alerts-', '.alerts-'],
       ...(secondaryNamespacedAlias ? { secondaryAlias: secondaryNamespacedAlias } : {}),
     };
 

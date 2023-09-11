@@ -63,6 +63,7 @@ const IndexPatterns = {
   basePattern: '.alerts-test.alerts-*',
   alias: '.alerts-test.alerts-default',
   name: '.internal.alerts-test.alerts-default-000001',
+  validPrefixes: ['.internal.alerts-', '.alerts-'],
 };
 
 describe('createConcreteWriteIndex', () => {
@@ -407,7 +408,7 @@ describe('createConcreteWriteIndex', () => {
             },
           });
           expect(logger.warn).toHaveBeenCalledWith(
-            `Found unexpected concrete index "bad_index_name". Not updating mappings or settings for this index.`
+            `Found unexpected concrete index name "bad_index_name" while expecting index with one of the following prefixes: [.internal.alerts-,.alerts-] Not updating mappings or settings for this index.`
           );
         }
 
