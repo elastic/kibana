@@ -17,19 +17,6 @@ export interface MatchingIndexesResp {
   error?: Error;
 }
 
-export interface IndexSourceMappings {
-  _meta?: {
-    created_by: string;
-  };
-  properties: {
-    [key: string]: any;
-  };
-}
-
-export interface BodySettings {
-  [key: string]: any;
-}
-
 export interface WriteSettings {
   index: string;
   body: object;

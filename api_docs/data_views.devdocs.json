@@ -109,6 +109,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/query_bar/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
@@ -529,35 +533,11 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
               },
               {
                 "plugin": "stackAlerts",
@@ -657,15 +637,15 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_data_view_exists.ts"
               },
               {
                 "plugin": "transform",
@@ -5576,6 +5556,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublic.getRollupsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "getRollupsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -6548,6 +6544,22 @@
                 ]
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewsServicePublicDeps.getRollupsEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "getRollupsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/public/data_views_service_public.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -7937,7 +7949,24 @@
       "path": "src/plugins/data_views/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "dataViews",
+          "id": "def-public.DataViewsPublicPluginSetup.enableRollups",
+          "type": "Function",
+          "tags": [],
+          "label": "enableRollups",
+          "description": [],
+          "signature": [
+            "() => void"
+          ],
+          "path": "src/plugins/data_views/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -8070,6 +8099,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/query_bar/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8493,35 +8526,11 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
               },
               {
                 "plugin": "stackAlerts",
@@ -8621,15 +8630,15 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_data_view_exists.ts"
               },
               {
                 "plugin": "transform",
@@ -15147,6 +15156,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/components/query_bar/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
@@ -15567,35 +15580,11 @@
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
               },
               {
                 "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/query_builder/index.tsx"
+                "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
               },
               {
                 "plugin": "stackAlerts",
@@ -15695,15 +15684,15 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
-              },
-              {
-                "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_data_view_exists.ts"
               },
               {
                 "plugin": "transform",
