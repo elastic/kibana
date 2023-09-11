@@ -8,6 +8,7 @@
 
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import * as extractConfig from '../utils/extract_config_files';
+import * as dockerUtils from '../utils/docker';
 import { createAnyInstanceSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
 import * as installUtils from '../install';
 import { Cluster } from '../cluster';
@@ -34,23 +35,23 @@ const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-async function ensureResolve(promise: Promise<unknown>) {
+const ensureResolve = async (promise: Promise<unknown>, name: string) => {
   return await Promise.race([
     promise,
     sleep(100).then(() => {
-      throw new Error('promise was supposed to resolve with installSource() resolution');
+      throw new Error(`promise was supposed to resolve with ${name} resolution`);
     }),
   ]);
-}
+};
 
-async function ensureNoResolve(promise: Promise<unknown>) {
+const ensureNoResolve = async (promise: Promise<unknown>) => {
   await Promise.race([
     sleep(100),
     promise.then(() => {
       throw new Error('promise was not supposed to resolve');
     }),
   ]);
-}
+};
 
 jest.mock('execa');
 const execaMock = jest.requireMock('execa');
@@ -83,10 +84,6 @@ const mockEsBin = (
   );
 };
 
-jest.mock('../utils/extract_config_files', () => ({
-  extractConfigFiles: jest.fn(),
-}));
-
 jest.mock('../install', () => ({
   downloadSnapshot: jest.fn(),
   installSource: jest.fn(),
@@ -98,16 +95,24 @@ jest.mock('../utils/extract_config_files', () => ({
   extractConfigFiles: jest.fn(),
 }));
 
-const extractConfigMock = jest.spyOn(extractConfig, 'extractConfigFiles');
+jest.mock('../utils/docker', () => ({
+  runServerlessCluster: jest.fn(),
+  runDockerContainer: jest.fn(),
+}));
+
 const downloadSnapshotMock = jest.spyOn(installUtils, 'downloadSnapshot');
 const installSourceMock = jest.spyOn(installUtils, 'installSource');
 const installSnapshotMock = jest.spyOn(installUtils, 'installSnapshot');
 const installArchiveMock = jest.spyOn(installUtils, 'installArchive');
 const extractConfigFilesMock = jest.spyOn(extractConfig, 'extractConfigFiles');
+const runServerlessClusterMock = jest.spyOn(dockerUtils, 'runServerlessCluster');
+const runDockerContainerMock = jest.spyOn(dockerUtils, 'runDockerContainer');
 
 beforeEach(() => {
   jest.resetAllMocks();
-  extractConfigMock.mockImplementation((config) => (Array.isArray(config) ? config : [config]));
+  extractConfigFilesMock.mockImplementation((config) =>
+    Array.isArray(config) ? config : [config]
+  );
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
 });
@@ -132,7 +137,7 @@ describe('#downloadSnapshot()', () => {
     const promise = cluster.downloadSnapshot({ version: '8.10.0' });
     await ensureNoResolve(promise);
     resolveDownloadSnapshot!();
-    await expect(ensureResolve(promise)).resolves.toEqual({
+    await expect(ensureResolve(promise, 'downloadSnapshot()')).resolves.toEqual({
       downloadPath: 'foo',
     });
   });
@@ -180,7 +185,7 @@ describe('#installSource()', () => {
     const promise = cluster.installSource({ sourcePath: 'bar' });
     await ensureNoResolve(promise);
     resolveInstallSource!();
-    await expect(ensureResolve(promise)).resolves.toEqual({
+    await expect(ensureResolve(promise, 'installSource()')).resolves.toEqual({
       installPath: 'foo',
     });
   });
@@ -229,7 +234,7 @@ describe('#installSnapshot()', () => {
     const promise = cluster.installSnapshot({ version: '8.10.0' });
     await ensureNoResolve(promise);
     resolveInstallSnapshot!();
-    await expect(ensureResolve(promise)).resolves.toEqual({
+    await expect(ensureResolve(promise, 'installSnapshot()')).resolves.toEqual({
       installPath: 'foo',
     });
   });
@@ -279,7 +284,7 @@ describe('#installArchive()', () => {
     const promise = cluster.installArchive('bar');
     await ensureNoResolve(promise);
     resolveInstallArchive!();
-    await expect(ensureResolve(promise)).resolves.toEqual({
+    await expect(ensureResolve(promise, 'installArchive()')).resolves.toEqual({
       installPath: 'foo',
     });
   });
@@ -661,5 +666,150 @@ describe('#kill()', () => {
     const cluster = new Cluster({ log });
     await cluster.start(installPath, esClusterExecOptions);
     await cluster.kill();
+  });
+});
+
+describe('#runServerless()', () => {
+  test(`rejects if #start() was called before`, async () => {
+    mockEsBin({ start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.start(installPath, esClusterExecOptions);
+    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+      'ES stateful cluster has already been started'
+    );
+  });
+
+  test(`rejects if #run() was called before`, async () => {
+    mockEsBin({ start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.run(installPath, esClusterExecOptions);
+    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+      'ES stateful cluster has already been started'
+    );
+  });
+
+  test('awaits runServerlessCluster() promise and returns node names as string[]', async () => {
+    const nodeNames = ['es1', 'es2', 'es3'];
+    let resolveRunServerlessCluster: Function;
+    runServerlessClusterMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRunServerlessCluster = () => {
+            resolve(nodeNames);
+          };
+        })
+    );
+
+    const cluster = new Cluster({ log });
+    const promise = cluster.runServerless({ basePath: installPath });
+    await ensureNoResolve(promise);
+    resolveRunServerlessCluster!();
+    await expect(ensureResolve(promise, 'runServerless()')).resolves.toEqual(nodeNames);
+  });
+
+  test('rejects if #runServerless() was called before', async () => {
+    const nodeNames = ['es1', 'es2', 'es3'];
+    runServerlessClusterMock.mockResolvedValueOnce(nodeNames);
+
+    const cluster = new Cluster({ log });
+    await cluster.runServerless({ basePath: installPath });
+    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError(
+      'ES serverless docker cluster has already been started'
+    );
+  });
+
+  test('rejects if #runServerlessCluster() rejects', async () => {
+    runServerlessClusterMock.mockRejectedValueOnce(new Error('foo'));
+    const cluster = new Cluster({ log });
+    await expect(cluster.runServerless({ basePath: installPath })).rejects.toThrowError('foo');
+  });
+
+  test('passes through all options+log to #runServerlessCluster()', async () => {
+    const nodeNames = ['es1', 'es2', 'es3'];
+    runServerlessClusterMock.mockResolvedValueOnce(nodeNames);
+
+    const cluster = new Cluster({ log });
+    const serverlessOptions = {
+      clean: true,
+      basePath: installPath,
+      teardown: true,
+      background: true,
+      waitForReady: true,
+    };
+    await cluster.runServerless(serverlessOptions);
+    expect(runServerlessClusterMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        <ToolingLog>,
+        Object {
+          "background": true,
+          "basePath": "/Users/dmle/github/kibana/.es",
+          "clean": true,
+          "teardown": true,
+          "waitForReady": true,
+        },
+      ]
+    `);
+  });
+});
+
+describe('#runDocker()', () => {
+  const dockerOptions = {};
+  test(`rejects if #start() was called before`, async () => {
+    mockEsBin({ start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.start(installPath, esClusterExecOptions);
+    await expect(cluster.runDocker(dockerOptions)).rejects.toThrowError(
+      'ES stateful cluster has already been started'
+    );
+  });
+
+  test('rejects if #run() was called before', async () => {
+    mockEsBin({ start: true });
+    const cluster = new Cluster({ log });
+    await cluster.run(installPath, esClusterExecOptions);
+    await expect(cluster.runDocker(dockerOptions)).rejects.toThrowError(
+      'ES stateful cluster has already been started'
+    );
+  });
+
+  test('await #runDockerContainer() promise', async () => {
+    let resolveRunDockerContainer: Function;
+    runDockerContainerMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRunDockerContainer = () => {
+            resolve();
+          };
+        })
+    );
+    const cluster = new Cluster({ log });
+    const promise = cluster.runDocker(dockerOptions);
+    await ensureNoResolve(promise);
+    resolveRunDockerContainer!();
+    await expect(ensureResolve(promise, 'runDocker()')).resolves.toBeUndefined();
+  });
+
+  test('rejects if #runDockerContainer() rejects', async () => {
+    runDockerContainerMock.mockRejectedValueOnce(new Error('foo'));
+    const cluster = new Cluster({ log });
+    await expect(cluster.runDocker(dockerOptions)).rejects.toThrowError('foo');
+  });
+
+  test('passes through all options+log to #runDockerContainer()', async () => {
+    runDockerContainerMock.mockResolvedValueOnce();
+
+    const cluster = new Cluster({ log });
+    await cluster.runDocker({ dockerCmd: 'start -a es01' });
+    expect(runDockerContainerMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        <ToolingLog>,
+        Object {
+          "dockerCmd": "start -a es01",
+        },
+      ]
+    `);
   });
 });
