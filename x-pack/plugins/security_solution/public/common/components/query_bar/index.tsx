@@ -147,7 +147,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
 
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
-    
+
     return (
       <SearchBar
         showSubmitButton={false}
