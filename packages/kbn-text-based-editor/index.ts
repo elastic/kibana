@@ -10,8 +10,6 @@ export type { TextBasedLanguagesEditorProps } from './src/text_based_languages_e
 export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
 import { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
 
-export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
-
 // React.lazy support
 // eslint-disable-next-line import/no-default-export
 export default TextBasedLanguagesEditor;
