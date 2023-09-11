@@ -66,10 +66,10 @@ export function registerGetApmServicesListFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      return callApmApi('GET /internal/apm/assistant/get_services_list', {
+      return callApmApi('POST /internal/apm/assistant/get_services_list', {
         signal,
         params: {
-          query: args,
+          body: args,
         },
       });
     }

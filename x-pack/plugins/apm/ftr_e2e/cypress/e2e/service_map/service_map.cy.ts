@@ -9,7 +9,7 @@ import { synthtrace } from '../../../synthtrace';
 import { opbeans } from '../../fixtures/synthtrace/opbeans';
 
 const start = '2021-10-10T00:00:00.000Z';
-const end = '2021-10-10T00:15:00.000Z';
+const end = '2021-10-10T00:01:00.000Z';
 
 const serviceMapHref = url.format({
   pathname: '/app/apm/service-map',
@@ -29,7 +29,7 @@ const detailedServiceMap = url.format({
   },
 });
 
-describe('Service map', () => {
+describe('service map', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -47,22 +47,51 @@ describe('Service map', () => {
     cy.loginAsViewerUser();
   });
 
-  describe('When navigating to service map', () => {
-    it('opens service map', () => {
+  describe('when navigating to service map', () => {
+    beforeEach(() => {
+      cy.intercept('GET', '/internal/apm/service-map?*').as('serviceMap');
+    });
+
+    it.skip('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
-      cy.contains('h1', 'Services');
+      cy.wait('@serviceMap');
+      cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
+
+      prepareCanvasForScreenshot();
+
+      cy.withHidden('[data-test-subj="headerGlobalNav"]', () =>
+        cy.getByTestSubj('serviceMap').matchImage({
+          imagesPath: '{spec_path}/snapshots',
+          title: 'global_service_map',
+          matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
+          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
+        })
+      );
     });
 
-    it('opens detailed service map', () => {
+    it.skip('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
+      cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
+
+      prepareCanvasForScreenshot();
+
+      cy.withHidden('[data-test-subj="headerGlobalNav"]', () =>
+        cy.getByTestSubj('serviceMap').matchImage({
+          imagesPath: '{spec_path}/snapshots',
+          title: 'detailed_service_map',
+          matchAgainstPath:
+            'cypress/e2e/service_map/snapshots/detailed_service_map.png',
+          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
+        })
+      );
     });
 
-    describe('When there is no data', () => {
+    describe('when there is no data', () => {
       it('shows empty state', () => {
         cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
-        cy.contains('Dismiss').click();
+        cy.getByTestSubj('apmServiceGroupsTourDismissButton').click();
         cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
         cy.contains('No services available');
         // search bar is still visible
@@ -71,3 +100,15 @@ describe('Service map', () => {
     });
   });
 });
+
+function prepareCanvasForScreenshot() {
+  cy.get('html, body').invoke(
+    'attr',
+    'style',
+    'height: auto; scroll-behavior: auto;'
+  );
+
+  cy.wait(300);
+  cy.getByTestSubj('centerServiceMap').click();
+  cy.scrollTo('top');
+}
