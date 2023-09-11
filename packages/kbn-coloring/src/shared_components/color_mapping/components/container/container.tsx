@@ -89,7 +89,7 @@ export function Container(props: {
       <EuiFlexItem>
         <EuiSwitch
           data-test-subj="lns-colorMapping-autoAssignSwitch"
-          label={i18n.translate('kbnColorMapping.container.autoAssignLabel', {
+          label={i18n.translate('coloring.colorMapping.container.autoAssignLabel', {
             defaultMessage: 'Auto assign categories to colors',
           })}
           checked={autoAssignmentMode}
@@ -187,7 +187,7 @@ export function Container(props: {
           }}
           disabled={!canAddNewAssignment}
         >
-          {i18n.translate('kbnColorMapping.container.addAssignmentButtonLabel', {
+          {i18n.translate('coloring.colorMapping.container.addAssignmentButtonLabel', {
             defaultMessage: 'Add assignment',
           })}
         </EuiButtonEmpty>
@@ -200,7 +200,7 @@ export function Container(props: {
               dispatch(changeGradientSortOrder(colorMode.sort === 'asc' ? 'desc' : 'asc'));
             }}
           >
-            {i18n.translate('kbnColorMapping.container.invertGradientButtonLabel', {
+            {i18n.translate('coloring.colorMapping.container.invertGradientButtonLabel', {
               defaultMessage: 'Invert gradient',
             })}
           </EuiButtonEmpty>

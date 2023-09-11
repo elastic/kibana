@@ -43,7 +43,7 @@ export function PaletteColors({
       <EuiFlexItem>
         <EuiText size="s">
           <strong>
-            {i18n.translate('kbnColorMapping.colorPicker.paletteColorsLabel', {
+            {i18n.translate('coloring.colorMapping.colorPicker.paletteColorsLabel', {
               defaultMessage: 'Palette',
             })}
           </strong>
@@ -74,7 +74,7 @@ export function PaletteColors({
       <EuiFlexItem>
         <EuiText size="s">
           <strong>
-            {i18n.translate('kbnColorMapping.colorPicker.themeAwareColorsLabel', {
+            {i18n.translate('coloring.colorMapping.colorPicker.themeAwareColorsLabel', {
               defaultMessage: 'Contrast-aware greys',
             })}
           </strong>

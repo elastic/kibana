@@ -111,9 +111,12 @@ export function Assignment({
           size="xs"
           disabled={disableDelete}
           onClick={() => dispatch(removeAssignment(index))}
-          aria-label={i18n.translate('kbnColorMapping.assignments.deleteAssignmentButtonLabel', {
-            defaultMessage: 'Delete this assignment',
-          })}
+          aria-label={i18n.translate(
+            'coloring.colorMapping.assignments.deleteAssignmentButtonLabel',
+            {
+              defaultMessage: 'Delete this assignment',
+            }
+          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

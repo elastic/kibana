@@ -69,7 +69,7 @@ export const ColorSwatch = ({
       button={
         <EuiColorPickerSwatch
           color={colorHex}
-          aria-label={i18n.translate('kbnColorMapping.colorPicker.pickAColorAriaLabel', {
+          aria-label={i18n.translate('coloring.colorMapping.colorPicker.pickAColorAriaLabel', {
             defaultMessage: 'Pick a color',
           })}
           onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
@@ -112,7 +112,7 @@ export const ColorSwatch = ({
   ) : (
     <EuiColorPickerSwatch
       color={colorHex}
-      aria-label={i18n.translate('kbnColorMapping.colorPicker.newColorAriaLabel', {
+      aria-label={i18n.translate('coloring.colorMapping.colorPicker.newColorAriaLabel', {
         defaultMessage: 'Select a new color',
       })}
       style={{

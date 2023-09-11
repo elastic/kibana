@@ -98,7 +98,7 @@ export function PaletteSelector({
   const preserveChangesModal =
     preserveModalPaletteId !== null ? (
       <EuiConfirmModal
-        title={i18n.translate('kbnColorMapping.colorChangesModal.title', {
+        title={i18n.translate('coloring.colorMapping.colorChangesModal.title', {
           defaultMessage: 'Color changes detected',
         })}
         onCancel={() => {
@@ -109,17 +109,17 @@ export function PaletteSelector({
           if (preserveModalPaletteId) switchPaletteFn(preserveModalPaletteId, false);
           setPreserveModalPaletteId(null);
         }}
-        confirmButtonText={i18n.translate('kbnColorMapping.colorChangesModal.discardButton', {
+        confirmButtonText={i18n.translate('coloring.colorMapping.colorChangesModal.discardButton', {
           defaultMessage: 'Discard changes',
         })}
-        cancelButtonText={i18n.translate('kbnColorMapping.colorChangesModal.preserveButton', {
+        cancelButtonText={i18n.translate('coloring.colorMapping.colorChangesModal.preserveButton', {
           defaultMessage: 'Preserve changes',
         })}
         buttonColor="danger"
         defaultFocusedButton="confirm"
       >
         <p>
-          {i18n.translate('kbnColorMapping.colorChangesModal.switchPaletteDescription', {
+          {i18n.translate('coloring.colorMapping.colorChangesModal.switchPaletteDescription', {
             defaultMessage: 'Switching palette will discard all your custom color changes',
           })}
         </p>
@@ -133,7 +133,7 @@ export function PaletteSelector({
   const colorScaleModal =
     colorScaleModalId !== null ? (
       <EuiConfirmModal
-        title={i18n.translate('kbnColorMapping.colorChangesModal.modalTitle', {
+        title={i18n.translate('coloring.colorMapping.colorChangesModal.modalTitle', {
           defaultMessage: 'Color changes detected',
         })}
         onCancel={() => {
@@ -143,21 +143,27 @@ export function PaletteSelector({
           if (colorScaleModalId) updateColorMode(colorScaleModalId, false);
           setColorScaleModalId(null);
         }}
-        cancelButtonText={i18n.translate('kbnColorMapping.colorChangesModal.goBackButtonLabel', {
-          defaultMessage: 'Go back',
-        })}
-        confirmButtonText={i18n.translate('kbnColorMapping.colorChangesModal.discardButtonLabel', {
-          defaultMessage: 'Discard changes',
-        })}
+        cancelButtonText={i18n.translate(
+          'coloring.colorMapping.colorChangesModal.goBackButtonLabel',
+          {
+            defaultMessage: 'Go back',
+          }
+        )}
+        confirmButtonText={i18n.translate(
+          'coloring.colorMapping.colorChangesModal.discardButtonLabel',
+          {
+            defaultMessage: 'Discard changes',
+          }
+        )}
         defaultFocusedButton="confirm"
         buttonColor="danger"
       >
         <p>
           {colorScaleModalId === 'categorical'
-            ? i18n.translate('kbnColorMapping.colorChangesModal.categoricalModeDescription', {
+            ? i18n.translate('coloring.colorMapping.colorChangesModal.categoricalModeDescription', {
                 defaultMessage: `Switching to a categorical mode will discard all your custom color changes`,
               })
-            : i18n.translate('kbnColorMapping.colorChangesModal.sequentialModeDescription', {
+            : i18n.translate('coloring.colorMapping.colorChangesModal.sequentialModeDescription', {
                 defaultMessage: `Switching to a sequential mode will discard all your custom color changes`,
               })}
         </p>
@@ -171,7 +177,7 @@ export function PaletteSelector({
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate('kbnColorMapping.paletteSelector.paletteLabel', {
+            label={i18n.translate('coloring.colorMapping.paletteSelector.paletteLabel', {
               defaultMessage: `Palette`,
             })}
           >
@@ -206,7 +212,7 @@ export function PaletteSelector({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            label={i18n.translate('kbnColorMapping.paletteSelector.scaleLabel', {
+            label={i18n.translate('coloring.colorMapping.paletteSelector.scaleLabel', {
               defaultMessage: `Scale`,
             })}
           >
@@ -216,13 +222,13 @@ export function PaletteSelector({
               options={[
                 {
                   id: `categorical`,
-                  label: i18n.translate('kbnColorMapping.paletteSelector.categoricalLabel', {
+                  label: i18n.translate('coloring.colorMapping.paletteSelector.categoricalLabel', {
                     defaultMessage: `Categorical`,
                   }),
                 },
                 {
                   id: `gradient`,
-                  label: i18n.translate('kbnColorMapping.paletteSelector.sequentialLabel', {
+                  label: i18n.translate('coloring.colorMapping.paletteSelector.sequentialLabel', {
                     defaultMessage: `Sequential`,
                   }),
                 },

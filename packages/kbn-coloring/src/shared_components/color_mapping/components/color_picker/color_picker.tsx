@@ -43,12 +43,12 @@ export function ColorPicker({
     <div style={{ width: 200 }}>
       <EuiTabs size="s" expand>
         <EuiTab onClick={() => setTab('palette')} isSelected={tab === 'palette'}>
-          {i18n.translate('kbnColorMapping.colorPicker.paletteTabLabel', {
+          {i18n.translate('coloring.colorMapping.colorPicker.paletteTabLabel', {
             defaultMessage: 'Palette',
           })}
         </EuiTab>
         <EuiTab onClick={() => setTab('custom')} isSelected={tab === 'custom'}>
-          {i18n.translate('kbnColorMapping.colorPicker.customTabLabel', {
+          {i18n.translate('coloring.colorMapping.colorPicker.customTabLabel', {
             defaultMessage: 'Custom',
           })}
         </EuiTab>
@@ -82,7 +82,7 @@ export function ColorPicker({
               deleteStep();
             }}
           >
-            {i18n.translate('kbnColorMapping.colorPicker.removeGradientColorButtonLabel', {
+            {i18n.translate('coloring.colorMapping.colorPicker.removeGradientColorButtonLabel', {
               defaultMessage: 'Remove from gradient',
             })}
           </EuiButton>

@@ -59,10 +59,10 @@ export function SpecialAssignment({
           compressed
           fullWidth
           disabled={true}
-          placeholder={i18n.translate('kbnColorMapping.assignments.allOtherPlaceholder', {
+          placeholder={i18n.translate('coloring.colorMapping.assignments.allOtherPlaceholder', {
             defaultMessage: 'All other terms',
           })}
-          aria-label={i18n.translate('kbnColorMapping.assignments.allOtherAriaLabel', {
+          aria-label={i18n.translate('coloring.colorMapping.assignments.allOtherAriaLabel', {
             defaultMessage:
               'Assign this color to all other terms not described in the assignment list',
           })}

@@ -89,7 +89,7 @@ export function RGBPicker({
             }
           }}
         >
-          {i18n.translate('kbnColorMapping.colorPicker.useColorButtonLabel', {
+          {i18n.translate('coloring.colorMapping.colorPicker.useColorButtonLabel', {
             defaultMessage: 'Use this color',
           })}
         </EuiButton>
@@ -101,7 +101,7 @@ export function RGBPicker({
             close();
           }}
         >
-          {i18n.translate('kbnColorMapping.colorPicker.closePickerButtonLabel', {
+          {i18n.translate('coloring.colorMapping.colorPicker.closePickerButtonLabel', {
             defaultMessage: 'Close',
           })}
         </EuiButton>

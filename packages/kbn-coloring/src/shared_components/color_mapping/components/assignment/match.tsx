@@ -54,13 +54,16 @@ export const Match: React.FC<{
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
         isDisabled={!editable}
         fullWidth={true}
-        aria-label={i18n.translate('kbnColorMapping.assignments.autoAssignedTermAriaLabel', {
+        aria-label={i18n.translate('coloring.colorMapping.assignments.autoAssignedTermAriaLabel', {
           defaultMessage:
             "This color will be automatically assigned to the first term that doesn't match with all the other assignments",
         })}
-        placeholder={i18n.translate('kbnColorMapping.assignments.autoAssignedTermPlaceholder', {
-          defaultMessage: 'Auto assigned',
-        })}
+        placeholder={i18n.translate(
+          'coloring.colorMapping.assignments.autoAssignedTermPlaceholder',
+          {
+            defaultMessage: 'Auto assigned',
+          }
+        )}
         options={convertedOptions}
         selectedOptions={selectedOptions}
         onChange={(changedOptions) => {
