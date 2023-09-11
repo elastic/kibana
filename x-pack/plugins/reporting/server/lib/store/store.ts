@@ -173,7 +173,6 @@ export class ReportingStore {
         }),
       },
     };
-    console.log('\n\n\n\n\ does it reach here')
     const client = await this.getClient();
     return await client.index(doc);
   }
@@ -218,7 +217,6 @@ export class ReportingStore {
       report._index = index;
     }
     await this.createIndex(index);
-    console.log('\n\n\n\n\ creates the index')
 
     try {
       report.updateWithEsDoc(await this.indexReport(report));
