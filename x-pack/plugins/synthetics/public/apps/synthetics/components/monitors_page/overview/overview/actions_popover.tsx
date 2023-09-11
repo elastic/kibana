@@ -18,6 +18,7 @@ import {
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import {
   manualTestMonitorAction,
@@ -111,6 +112,8 @@ export function ActionsPopover({
 
   const canEditSynthetics = useCanEditSynthetics();
 
+  const canUsePublicLocations = useCanUsePublicLocById(monitor.configId);
+
   const labels = useMemo(
     () => ({
       enabledSuccessLabel: enabledSuccessLabel(monitor.name),
@@ -162,7 +165,6 @@ export function ActionsPopover({
   };
 
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
-
   let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
@@ -173,7 +175,7 @@ export function ActionsPopover({
     {
       name: runTestManually,
       icon: 'beaker',
-      disabled: testInProgress,
+      disabled: testInProgress || !canUsePublicLocations,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
         dispatch(setFlyoutConfig(null));
