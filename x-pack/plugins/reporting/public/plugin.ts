@@ -47,7 +47,7 @@ export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
   roles: { enabled: boolean };
   export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
-  disableStatefulSettings: { enabled: boolean };
+  enableStatefulSettings: { enabled: boolean };
 }
 
 function getStored(): JobId[] {
@@ -129,7 +129,7 @@ export class ReportingPublicPlugin
         http,
         uiSettings,
         this.kibanaVersion,
-        this.config.disableStatefulSettings.enabled
+        this.config.enableStatefulSettings.enabled
       );
     }
     return this.apiClient;

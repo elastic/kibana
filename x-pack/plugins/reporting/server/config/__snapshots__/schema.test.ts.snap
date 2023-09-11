@@ -18,8 +18,8 @@ Object {
     },
     "useByteOrderMarkEncoding": false,
   },
-  "disableStatefulSettings": Object {
-    "enabled": false,
+  "enableStatefulSettings": Object {
+    "enabled": true,
   },
   "enabled": true,
   "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -79,8 +79,8 @@ Object {
     },
     "useByteOrderMarkEncoding": false,
   },
-  "disableStatefulSettings": Object {
-    "enabled": false,
+  "enableStatefulSettings": Object {
+    "enabled": true,
   },
   "enabled": true,
   "export_types": Object {

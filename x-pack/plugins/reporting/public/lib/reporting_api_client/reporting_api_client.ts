@@ -70,7 +70,7 @@ export class ReportingAPIClient implements IReportingAPI {
     http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string,
-    private disableStatefulSettings: boolean
+    private enableStatefulSettings: boolean
   ) {
     this.http = http;
   }
@@ -226,8 +226,8 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public migrateReportingIndicesIlmPolicy() {
-    return this.disableStatefulSettings
-      ? null
-      : this.http.put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY);
+    return this.enableStatefulSettings
+      ? this.http.put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
+      : null;
   }
 }
