@@ -111,7 +111,6 @@ export const createThreatSignal = async ({
       ruleExecutionLogger,
       services,
       sortOrder: 'desc',
-      trackTotalHits: false,
       tuple,
       wrapHits,
       runtimeMappings,

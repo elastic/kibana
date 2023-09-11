@@ -125,5 +125,6 @@ export interface MetricsArgs {
   searchDurations?: string[];
   indexingDurations?: string[];
   enrichmentDurations?: string[];
+  valueListFilteringDurations?: string[];
   executionGap?: Duration;
 }

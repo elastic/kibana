@@ -13,13 +13,13 @@ import type { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from './typ
  * Returns a filter to exclude events that have already been included in a
  * previous threshold signal. Uses the threshold signal history to achieve this.
  */
-export const getThresholdBucketFilters = async ({
+export const getThresholdBucketFilters = ({
   signalHistory,
   aggregatableTimestampField,
 }: {
   signalHistory: ThresholdSignalHistory;
   aggregatableTimestampField: string;
-}): Promise<Filter[]> => {
+}): Filter[] => {
   const filters = Object.values(signalHistory).reduce(
     (acc: ESFilter[], bucket: ThresholdSignalHistoryRecord): ESFilter[] => {
       const filter = {

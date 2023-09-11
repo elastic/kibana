@@ -426,6 +426,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   success: result.success && runResult.success,
                   warning: warningMessages.length > 0,
                   warningMessages,
+                  metrics: result.metrics.concat(runResult.metrics),
                 };
                 runState = runResult.state;
               }
@@ -441,6 +442,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 success: true,
                 warning: false,
                 warningMessages: [],
+                metrics: [],
               };
             }
 

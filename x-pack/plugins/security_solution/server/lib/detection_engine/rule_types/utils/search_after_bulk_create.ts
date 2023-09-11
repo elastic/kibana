@@ -20,6 +20,7 @@ import {
   getSafeSortIds,
   addToSearchAfterReturn,
   getMaxSignalsWarning,
+  makeFloatString,
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -39,7 +40,6 @@ export const searchAfterAndBulkCreate = async ({
   ruleExecutionLogger,
   services,
   sortOrder,
-  trackTotalHits,
   tuple,
   wrapHits,
   runtimeMappings,
@@ -54,7 +54,7 @@ export const searchAfterAndBulkCreate = async ({
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
     let hasSortId = true; // default to true so we execute the search on initial run
-
+    let trackTotalHits = true; // default to true so we track on initial run
     if (tuple == null || tuple.to == null || tuple.from == null) {
       ruleExecutionLogger.error(
         `missing run options fields: ${!tuple.to ? '"tuple.to"' : ''}, ${
@@ -109,6 +109,10 @@ export const searchAfterAndBulkCreate = async ({
 
           // determine if there are any candidate signals to be processed
           const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
+          if (trackTotalHits) {
+            trackTotalHits = false;
+            ruleExecutionLogger.debug(`totalHits: ${totalHits}`);
+          }
           const lastSortIds = getSafeSortIds(
             searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
           );
@@ -141,13 +145,22 @@ export const searchAfterAndBulkCreate = async ({
         // filter out the search results that match with the values found in the list.
         // the resulting set are signals to be indexed, given they are not duplicates
         // of signals already present in the signals index.
+        const start = performance.now();
         const [includedEvents, _] = await filterEventsAgainstList({
           listClient,
           exceptionsList,
           ruleExecutionLogger,
           events: mergedSearchResults.hits.hits,
         });
-
+        const end = performance.now();
+        mergeReturns([
+          toReturn,
+          createSearchAfterReturnType({
+            metrics: {
+              valueListFilteringTimes: [makeFloatString(end - start)],
+            },
+          }),
+        ]);
         // only bulk create if there are filteredEvents leftover
         // if there isn't anything after going through the value list filter
         // skip the call to bulk create and proceed to the next search_after,

@@ -25,6 +25,7 @@ import {
   createErrorsFromShard,
   createSearchAfterReturnType,
   getMaxSignalsWarning,
+  makeFloatString,
   mergeReturns,
 } from '../utils/utils';
 import type { SetupPlugins } from '../../../../plugin';
@@ -115,12 +116,15 @@ export const mlExecutor = async ({
       result.warningMessages.push(getMaxSignalsWarning());
     }
 
+    const start = performance.now();
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
       ruleExecutionLogger,
       exceptionsList: unprocessedExceptions,
       events: anomalyResults.hits.hits,
     });
+    const end = performance.now();
+    result.metrics.valueListFilteringTimes.push(makeFloatString(end - start));
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {

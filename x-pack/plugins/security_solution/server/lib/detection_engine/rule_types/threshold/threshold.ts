@@ -90,8 +90,12 @@ export const thresholdExecutor = async ({
     }
 
     // Get state or build initial state (on upgrade)
-    const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
-      ? { signalHistory: state.signalHistory, searchErrors: [] }
+    const {
+      signalHistory,
+      searchErrors: previousSearchErrors,
+      searchDuration,
+    } = state.initialized
+      ? { signalHistory: state.signalHistory, searchErrors: [], searchDuration: undefined }
       : await getThresholdSignalHistory({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
@@ -102,7 +106,7 @@ export const thresholdExecutor = async ({
 
     const validSignalHistory = getSignalHistory(state, signalHistory, tuple);
     // Eliminate dupes
-    const bucketFilters = await getThresholdBucketFilters({
+    const bucketFilters = getThresholdBucketFilters({
       signalHistory: validSignalHistory,
       aggregatableTimestampField,
     });
@@ -160,6 +164,7 @@ export const thresholdExecutor = async ({
     result.errors.push(...searchErrors);
     result.warningMessages.push(...warnings);
     result.searchAfterTimes = searchDurations;
+    result.metrics.thresholdSignalHistorySearchTime = searchDuration;
 
     const createdAlerts = createResult.createdItems.map((alert) => {
       const { _id, _index, ...source } = alert;

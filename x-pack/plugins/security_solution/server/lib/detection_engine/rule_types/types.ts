@@ -73,6 +73,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
+  metrics: SearchAfterAndBulkCreateMetrics[];
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -374,6 +375,11 @@ export interface SearchAfterAndBulkCreateParams {
   additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
+export interface SearchAfterAndBulkCreateMetrics {
+  valueListFilteringTimes: string[];
+  thresholdSignalHistorySearchTime?: string;
+}
+
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
   warning: boolean;
@@ -385,6 +391,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
+  metrics: SearchAfterAndBulkCreateMetrics;
 }
 
 // the new fields can be added later if needed

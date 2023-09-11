@@ -251,6 +251,9 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
           total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
           total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
+          total_value_list_filtering_duration_ms: normalizeDurations(
+            metrics.valueListFilteringDurations
+          ),
         }
       : undefined,
   };

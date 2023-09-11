@@ -21,6 +21,7 @@ export const createResultObject = <TState extends RuleTypeState>(state: TState) 
     success: true,
     warning: false,
     warningMessages: [],
+    metrics: [],
   };
   return result;
 };

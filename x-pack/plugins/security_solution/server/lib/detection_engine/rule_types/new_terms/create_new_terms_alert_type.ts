@@ -39,6 +39,7 @@ import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
   getMaxSignalsWarning,
+  getTotalHitsValue,
   getUnprocessedExceptionsWarnings,
 } from '../utils/utils';
 import { createEnrichEventsFunction } from '../utils/enrichments';
@@ -143,6 +144,7 @@ export const createNewTermsAlertType = (
       });
 
       let afterKey;
+      let trackTotalHits = true;
 
       const result = createSearchAfterReturnType();
 
@@ -178,12 +180,17 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           runtimeMappings,
+          trackTotalHits,
         });
         const searchResultWithAggs = searchResult as RecentTermsAggResult;
         if (!searchResultWithAggs.aggregations) {
           throw new Error('Aggregations were missing on recent terms search result');
         }
         logger.debug(`Time spent on composite agg: ${searchDuration}`);
+        if (trackTotalHits) {
+          const totalHits = getTotalHitsValue(searchResult.hits.total);
+          ruleExecutionLogger.debug(`Recent terms search totalHits: ${totalHits}`);
+        }
 
         result.searchAfterTimes.push(searchDuration);
         result.errors.push(...searchErrors);
@@ -196,6 +203,9 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
+        ruleExecutionLogger.debug(
+          `Recent terms search unique terms count: ${bucketsForField.length}`
+        );
         const includeValues = transformBucketsToValues(params.newTermsFields, bucketsForField);
         const newTermsRuntimeMappings = getNewTermsRuntimeMappings(
           params.newTermsFields,
@@ -237,6 +247,10 @@ export const createNewTermsAlertType = (
         result.errors.push(...pageSearchErrors);
 
         logger.debug(`Time spent on phase 2 terms agg: ${pageSearchDuration}`);
+        if (trackTotalHits) {
+          const totalHits = getTotalHitsValue(searchResult.hits.total);
+          ruleExecutionLogger.debug(`History window search totalHits: ${totalHits}`);
+        }
 
         const pageSearchResultWithAggs = pageSearchResult as NewTermsAggResult;
         if (!pageSearchResultWithAggs.aggregations) {
@@ -323,6 +337,7 @@ export const createNewTermsAlertType = (
             break;
           }
         }
+        trackTotalHits = false;
       }
       return { ...result, state };
     },

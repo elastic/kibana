@@ -137,7 +137,6 @@ export const createEventSignal = async ({
       ruleExecutionLogger,
       services,
       sortOrder: 'desc',
-      trackTotalHits: false,
       tuple,
       wrapHits,
       runtimeMappings,
