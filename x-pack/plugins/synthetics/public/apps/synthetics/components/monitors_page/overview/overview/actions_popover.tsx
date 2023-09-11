@@ -14,10 +14,12 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
   EuiContextMenuPanelItemDescriptor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import {
@@ -173,7 +175,15 @@ export function ActionsPopover({
     },
     quickInspectPopoverItem,
     {
-      name: runTestManually,
+      name: testInProgress ? (
+        <EuiToolTip content={TEST_SCHEDULED_LABEL}>
+          <span>{runTestManually}</span>
+        </EuiToolTip>
+      ) : (
+        <NoPermissionsTooltip canUsePublicLocations={canUsePublicLocations}>
+          {runTestManually}
+        </NoPermissionsTooltip>
+      ),
       icon: 'beaker',
       disabled: testInProgress || !canUsePublicLocations,
       onClick: () => {
@@ -194,12 +204,15 @@ export function ActionsPopover({
     },
     {
       name: (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUsePublicLocations={canUsePublicLocations}
+        >
           {enableLabel}
         </NoPermissionsTooltip>
       ),
       icon: 'invert',
-      disabled: !canEditSynthetics,
+      disabled: !canEditSynthetics || !canUsePublicLocations,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
@@ -208,11 +221,14 @@ export function ActionsPopover({
     },
     {
       name: (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUsePublicLocations={canUsePublicLocations}
+        >
           {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
         </NoPermissionsTooltip>
       ),
-      disabled: !canEditSynthetics,
+      disabled: !canEditSynthetics || !canUsePublicLocations,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (
