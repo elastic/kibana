@@ -5,47 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
-import type { Moment } from 'moment';
+import React from 'react';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import type { DateRange } from '../../../api';
 
 interface EventDateRangeFilterProps {
-  value?: DateRange;
-  onChange: (value?: DateRange) => void;
+  value: DateRange;
+  onChange: (value: DateRange) => void;
 }
 
 export function EventDateRangeFilter({ value, onChange }: EventDateRangeFilterProps): JSX.Element {
-  const handleStartDateChange = useCallback(
-    (date?: Moment | null) => date && onChange({ start: date, end: value?.end }),
-    [onChange, value]
-  );
-  const handleEndDateChange = useCallback(
-    (date?: Moment | null) => date && onChange({ start: value?.start, end: date }),
-    [onChange, value]
-  );
-  const handleClear = useCallback(() => onChange(), [onChange]);
-
   return (
-    <EuiDatePickerRange
-      startDateControl={
-        <EuiDatePicker
-          showTimeSelect
-          selected={value?.start}
-          onChange={handleStartDateChange}
-          aria-label="Start event log date"
-        />
-      }
-      endDateControl={
-        <EuiDatePicker
-          showTimeSelect
-          selected={value?.end}
-          onChange={handleEndDateChange}
-          onClear={() => handleEndDateChange()}
-          aria-label="End event log date"
-        />
-      }
-      append={<EuiButtonIcon iconType="cross" onClick={handleClear} />}
+    <EuiSuperDatePicker
+      start={value.start}
+      end={value.end}
+      onTimeChange={onChange}
+      showUpdateButton={false}
     />
   );
 }

@@ -17,8 +17,10 @@ export const useFilters = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [logLevels, setLogLevels] = useState<LogLevel[]>([]);
   const [eventTypes, setEventTypes] = useState<RuleExecutionEventType[]>([]);
-  const [dateRange, setDateRange] = useState<DateRange>();
-
+  const [dateRange, setDateRange] = useState<DateRange>({
+    start: 'now-24h',
+    end: 'now',
+  });
   const state = useMemo(
     () => ({ searchTerm, logLevels, eventTypes, dateRange }),
     [searchTerm, logLevels, eventTypes, dateRange]

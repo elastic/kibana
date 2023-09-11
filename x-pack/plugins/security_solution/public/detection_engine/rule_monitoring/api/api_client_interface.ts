@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Moment } from 'moment';
 import type { SortOrder } from '../../../../common/api/detection_engine';
 import type {
   GetRuleExecutionEventsResponse,
@@ -48,8 +47,8 @@ export interface RuleMonitoringApiCallArgs {
 }
 
 export interface DateRange {
-  start?: Moment;
-  end?: Moment;
+  start?: string;
+  end?: string;
 }
 
 export interface FetchRuleExecutionEventsArgs extends RuleMonitoringApiCallArgs {
