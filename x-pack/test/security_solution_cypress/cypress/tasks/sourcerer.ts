@@ -8,7 +8,7 @@
 import { DEFAULT_ALERTS_INDEX } from '@kbn/security-solution-plugin/common/constants';
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
 import { hostsUrl } from '../urls/navigation';
-import { visit, waitForPage } from './login';
+import { visitWithDateRange, waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { rootRequest } from './common';
 
@@ -97,7 +97,7 @@ export const resetSourcerer = () => {
 export const clickAlertCheckbox = () => cy.get(SOURCERER.alertCheckbox).check({ force: true });
 
 export const addIndexToDefault = (index: string) => {
-  visit(`/app/management/kibana/settings?query=category:(securitySolution)`);
+  visitWithDateRange(`/app/management/kibana/settings?query=category:(securitySolution)`);
   cy.get(SOURCERER.siemDefaultIndexInput)
     .invoke('val')
     .then((patterns) => {

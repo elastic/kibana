@@ -14,7 +14,7 @@ import {
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visit } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
   createExceptionList,
@@ -106,7 +106,7 @@ describe('Duplicate List', { tags: ['@ess', '@serverless', '@skipInServerless'] 
       ],
       expire_time: futureDate,
     });
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
   });
 

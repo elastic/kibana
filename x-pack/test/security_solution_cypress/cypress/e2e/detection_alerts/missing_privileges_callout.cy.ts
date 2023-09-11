@@ -11,7 +11,7 @@ import { RULES_MANAGEMENT_URL, ALERTS_URL, ruleDetailsUrl } from '../../urls/nav
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,
@@ -47,7 +47,7 @@ describe('Detections > Callouts', { tags: ['@ess', '@skipInServerless'] }, () =>
     // First, we have to open the app on behalf of a privileged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
     login();
-    visitWithoutDateRange(ALERTS_URL);
+    visit(ALERTS_URL);
     waitForPageTitleToBeShown();
   });
 

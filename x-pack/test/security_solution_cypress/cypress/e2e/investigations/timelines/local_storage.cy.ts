@@ -6,7 +6,7 @@
  */
 
 import { reload } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { hostsUrl } from '../../../urls/navigation';
 import { openEvents } from '../../../tasks/hosts/main';
 import { DATAGRID_HEADERS, DATAGRID_HEADER } from '../../../screens/timeline';
@@ -16,7 +16,7 @@ import { removeColumn } from '../../../tasks/timeline';
 describe('persistent timeline', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     login();
-    visit(hostsUrl('allHosts'));
+    visitWithDateRange(hostsUrl('allHosts'));
     openEvents();
     waitsForEventsToBeLoaded();
 

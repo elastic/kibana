@@ -40,7 +40,7 @@ import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { RULES_MANAGEMENT_URL } from '../../../urls/navigation';
 
 const rules = Array.from(Array(5)).map((_, i) => {
@@ -61,7 +61,7 @@ describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
     preventPrebuiltRulesPackageInstallation();
-    visitWithoutDateRange(RULES_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
     createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();

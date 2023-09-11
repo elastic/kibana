@@ -10,7 +10,7 @@ import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../../screens/ti
 import { cleanKibana } from '../../../tasks/common';
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import {
   closeTimelineUsingCloseButton,
   closeTimelineUsingToggle,
@@ -30,7 +30,7 @@ describe('timeline flyout button', { tags: ['@ess', '@brokenInServerless'] }, ()
 
   beforeEach(() => {
     login();
-    visit(hostsUrl('allHosts'));
+    visitWithDateRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
   });
 

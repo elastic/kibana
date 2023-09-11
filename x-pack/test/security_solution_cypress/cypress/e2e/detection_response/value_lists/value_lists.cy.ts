@@ -7,7 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { RULES_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
   createListsIndex,
@@ -44,7 +44,7 @@ describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, 
         KNOWN_VALUE_LIST_FILES.CIDRs,
       ]);
       createListsIndex();
-      visitWithoutDateRange(RULES_MANAGEMENT_URL);
+      visit(RULES_MANAGEMENT_URL);
       waitForListsIndex();
       waitForValueListsModalToBeLoaded();
     });
@@ -268,7 +268,7 @@ describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, 
     () => {
       it('Does not allow a t1 analyst user to upload a value list', () => {
         login(ROLES.t1_analyst);
-        visitWithoutDateRange(RULES_MANAGEMENT_URL, ROLES.t1_analyst);
+        visit(RULES_MANAGEMENT_URL, ROLES.t1_analyst);
         cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
       });
     }

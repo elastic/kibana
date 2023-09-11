@@ -6,7 +6,7 @@
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import { login, visit, visitWithoutDateRange } from '../../tasks/login';
+import { login, visitWithDateRange, visit } from '../../tasks/login';
 
 import {
   ALERTS_URL,
@@ -36,47 +36,47 @@ const RULE_ID = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 describe('URL compatibility', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login(ROLES.platform_engineer);
-    visit(LEGACY_SECURITY_DETECTIONS_URL);
+    visitWithDateRange(LEGACY_SECURITY_DETECTIONS_URL);
     login();
   });
 
   it('Redirects to alerts from old siem Detections URL', () => {
-    visit(LEGACY_DETECTIONS_URL);
+    visitWithDateRange(LEGACY_DETECTIONS_URL);
     cy.url().should('include', ALERTS_URL);
   });
 
   it('Redirects to alerts from old Detections URL', () => {
-    visit(LEGACY_SECURITY_DETECTIONS_URL);
+    visitWithDateRange(LEGACY_SECURITY_DETECTIONS_URL);
     cy.url().should('include', ALERTS_URL);
   });
 
   it('Redirects to rules from old Detections rules URL', () => {
-    visit(LEGACY_SECURITY_DETECTIONS_RULES_URL);
+    visitWithDateRange(LEGACY_SECURITY_DETECTIONS_RULES_URL);
     cy.url().should('include', RULES_MANAGEMENT_URL);
   });
 
   it('Redirects to rules creation from old Detections rules creation URL', () => {
-    visit(CREATE_RULE_URL);
+    visitWithDateRange(CREATE_RULE_URL);
     cy.url().should('include', CREATE_RULE_URL);
   });
 
   it('Redirects to rule details from old Detections rule details URL', () => {
-    visit(ruleDetailsUrl(RULE_ID));
+    visitWithDateRange(ruleDetailsUrl(RULE_ID));
     cy.url().should('include', ruleDetailsUrl(RULE_ID));
   });
 
   it('Redirects to rule details alerts tab from old Detections rule details URL', () => {
-    visit(ruleDetailsUrl(RULE_ID));
+    visitWithDateRange(ruleDetailsUrl(RULE_ID));
     cy.url().should('include', `${ruleDetailsUrl(RULE_ID)}/alerts`);
   });
 
   it('Redirects to rule edit from old Detections rule edit URL', () => {
-    visit(detectionRuleEditUrl(RULE_ID));
+    visitWithDateRange(detectionRuleEditUrl(RULE_ID));
     cy.url().should('include', ruleEditUrl(RULE_ID));
   });
 
   it('sets the global start and end dates from the url with timestamps', () => {
-    visitWithoutDateRange(ABSOLUTE_DATE_RANGE.urlWithTimestamps);
+    visit(ABSOLUTE_DATE_RANGE.urlWithTimestamps);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
       'have.attr',
       'title',

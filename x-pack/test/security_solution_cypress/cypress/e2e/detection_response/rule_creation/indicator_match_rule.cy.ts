@@ -101,7 +101,7 @@ import {
   SCHEDULE_LOOKBACK_UNITS_INPUT,
 } from '../../../screens/create_new_rule';
 import { goBackToRuleDetails } from '../../../tasks/edit_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import {
   goBackToRulesTable,
   getDetails,
@@ -134,7 +134,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('Index patterns', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(CREATE_RULE_URL);
+          visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -158,7 +158,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('Indicator index patterns', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(CREATE_RULE_URL);
+          visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -180,7 +180,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('custom query input', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(CREATE_RULE_URL);
+          visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -197,7 +197,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('custom indicator query input', () => {
         beforeEach(() => {
           login();
-          visitWithoutDateRange(CREATE_RULE_URL);
+          visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
@@ -215,7 +215,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         beforeEach(() => {
           login();
           const rule = getNewThreatIndicatorRule();
-          visitWithoutDateRange(CREATE_RULE_URL);
+          visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
           if (rule.index) {
             fillIndexAndIndicatorIndexPattern(rule.index, rule.threat_index);
@@ -410,7 +410,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
           login();
-          visitWithoutDateRange(CREATE_RULE_URL);
+          visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
           fillAboutRuleAndContinue(getNewThreatIndicatorRule());
@@ -426,7 +426,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
     describe('Generating signals', () => {
       it('Creates and enables a new Indicator Match rule', () => {
         const rule = getNewThreatIndicatorRule();
-        visitWithoutDateRange(CREATE_RULE_URL);
+        visit(CREATE_RULE_URL);
         selectIndicatorMatchType();
         fillDefineIndicatorMatchRuleAndContinue(rule);
         fillAboutRuleAndContinue(rule);
@@ -500,7 +500,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
         loadPrepackagedTimelineTemplates();
         createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })).then(
-          (rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+          (rule) => visit(ruleDetailsUrl(rule.body.id))
         );
 
         waitForAlertsToPopulate();
@@ -540,7 +540,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('on rule editing page', () => {
         beforeEach(() => {
           createRule(TESTED_RULE_DATA);
-          visitWithoutDateRange(RULES_MANAGEMENT_URL);
+          visit(RULES_MANAGEMENT_URL);
           disableAutoRefresh();
         });
 
@@ -561,7 +561,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('on rule details page', () => {
         beforeEach(() => {
           createRule(getNewThreatIndicatorRule(TESTED_RULE_DATA)).then((rule) =>
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+            visit(ruleDetailsUrl(rule.body.id))
           );
         });
 

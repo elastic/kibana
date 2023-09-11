@@ -19,7 +19,7 @@ import {
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 
 describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {
@@ -40,7 +40,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
 
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -70,7 +70,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
   context('Host -> Events Viewer', () => {
     beforeEach(() => {
       login();
-      visit(hostsUrl('allHosts'));
+      visitWithDateRange(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });
@@ -101,7 +101,7 @@ describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () =
   context('Host -> Sessions Viewer', () => {
     beforeEach(() => {
       login();
-      visit(hostsUrl('allHosts'));
+      visitWithDateRange(hostsUrl('allHosts'));
       openSessions();
       waitsForEventsToBeLoaded();
     });

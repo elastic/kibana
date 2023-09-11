@@ -8,7 +8,7 @@
 import { ID_HEADER_FIELD, TIMESTAMP_HEADER_FIELD } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   clickIdToggleField,
@@ -30,7 +30,7 @@ describe(
 
     beforeEach(() => {
       login();
-      visit(hostsUrl('allHosts'));
+      visitWithDateRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
     });

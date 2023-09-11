@@ -20,7 +20,7 @@ import {
 import { findSavedObjects } from '../../../tasks/api_calls/risk_scores/saved_objects';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { clickEnableRiskScore } from '../../../tasks/risk_scores';
 import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 import {
@@ -44,7 +44,7 @@ describe('Enable risk scores', { tags: ['@ess', '@serverless', '@brokenInServerl
     login();
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
-    visit(ENTITY_ANALYTICS_URL);
+    visitWithDateRange(ENTITY_ANALYTICS_URL);
   });
 
   afterEach(() => {

@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,
@@ -49,7 +49,7 @@ describe(
       createRule(getNewRule()).as('createdRule');
 
       login();
-      visitWithoutDateRange(EXCEPTIONS_URL);
+      visit(EXCEPTIONS_URL);
       waitForExceptionsTableToBeLoaded();
     });
 
@@ -87,7 +87,7 @@ describe(
 
         // Navigate to Rule details page
         cy.get<Cypress.Response<RuleResponse>>('@createdRule').then((rule) =>
-          visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions'))
+          visit(ruleDetailsUrl(rule.body.id, 'rule_exceptions'))
         );
 
         // Only one Exception should generated
@@ -107,7 +107,7 @@ describe(
         cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
 
         // Go back to Shared Exception List
-        visitWithoutDateRange(EXCEPTIONS_URL);
+        visit(EXCEPTIONS_URL);
 
         // Click on "Create shared exception list" button on the header
         // Click on "Create exception item"

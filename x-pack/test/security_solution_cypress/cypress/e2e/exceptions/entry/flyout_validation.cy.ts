@@ -10,7 +10,7 @@ import { getNewRule } from '../../../objects/rule';
 import { RULE_STATUS } from '../../../screens/create_new_rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
@@ -94,7 +94,7 @@ describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServe
             },
           ],
         })
-      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')))
+      ).then((rule) => visit(ruleDetailsUrl(rule.body.id, 'rule_exceptions')))
     );
     cy.get(RULE_STATUS).should('have.text', '—');
   });

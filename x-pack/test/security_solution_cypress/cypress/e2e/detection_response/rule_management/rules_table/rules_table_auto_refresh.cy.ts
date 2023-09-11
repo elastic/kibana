@@ -24,7 +24,7 @@ import {
   getRuleRow,
   setRulesTableAutoRefreshIntervalSetting,
 } from '../../../../tasks/alerts_detection_rules';
-import { login, visit, visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visit } from '../../../../tasks/login';
 
 import { RULES_MANAGEMENT_URL } from '../../../../urls/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -75,7 +75,7 @@ describe(
     describe('when enabled', () => {
       beforeEach(() => {
         mockGlobalClock();
-        visitWithoutDateRange(RULES_MANAGEMENT_URL);
+        visit(RULES_MANAGEMENT_URL);
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -101,7 +101,7 @@ describe(
     describe('when disabled', () => {
       beforeEach(() => {
         mockGlobalClock();
-        visitWithoutDateRange(RULES_MANAGEMENT_URL);
+        visit(RULES_MANAGEMENT_URL);
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
 
@@ -148,7 +148,7 @@ describe(
     describe('when one rule is selected', () => {
       it('does NOT refresh after refresh interval has passed', () => {
         mockGlobalClock();
-        visitWithoutDateRange(RULES_MANAGEMENT_URL);
+        visit(RULES_MANAGEMENT_URL);
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 

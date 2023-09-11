@@ -26,7 +26,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import {
   clearKqlQueryBar,
   fillAddFilterForm,
@@ -46,7 +46,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@brokenInServerless'] }, () =>
   describe('Filter', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -102,7 +102,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@brokenInServerless'] }, () =>
   describe('Add to timeline', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -135,7 +135,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@brokenInServerless'] }, () =>
   describe('Show Top N', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -154,7 +154,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@brokenInServerless'] }, () =>
   describe('Copy to clipboard', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 

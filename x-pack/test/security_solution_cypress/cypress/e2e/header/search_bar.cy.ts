@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
+import { login, visitWithDateRange } from '../../tasks/login';
 import {
   openAddFilterPopover,
   fillAddFilterForm,
@@ -26,7 +26,7 @@ import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 describe('SearchBar', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
-    visit(hostsUrl('allHosts'));
+    visitWithDateRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
   });
 

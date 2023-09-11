@@ -15,7 +15,7 @@ import {
 } from '../../../screens/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { addEqlToTimeline } from '../../../tasks/timeline';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
@@ -30,7 +30,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
     deleteTimelines();
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
     createTimeline(getTimeline()).then((response) => {
-      visitWithoutDateRange(TIMELINES_URL);
+      visit(TIMELINES_URL);
       openTimeline(response.body.data.persistTimeline.timeline.savedObjectId);
       addEqlToTimeline(eql);
       cy.wait('@updateTimeline');

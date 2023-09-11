@@ -19,11 +19,11 @@ import {
   RISK_PREVIEW_ERROR_BUTTON,
 } from '../screens/entity_analytics_management';
 
-import { visit } from './login';
+import { visitWithDateRange } from './login';
 
 export const waitForAnomaliesToBeLoaded = () => {
   cy.waitUntil(() => {
-    visit(ENTITY_ANALYTICS_URL);
+    visitWithDateRange(ENTITY_ANALYTICS_URL);
     cy.get(BASIC_TABLE_LOADING).should('exist');
     cy.get(BASIC_TABLE_LOADING).should('not.exist');
     return cy.get(ANOMALIES_TABLE_ROWS).then((tableRows) => tableRows.length > 1);

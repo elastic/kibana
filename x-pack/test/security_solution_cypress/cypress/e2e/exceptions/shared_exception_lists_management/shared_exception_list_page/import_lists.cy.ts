@@ -17,7 +17,7 @@ import {
   validateImportExceptionListWentSuccessfully,
   validateImportExceptionListFailedBecauseExistingListFound,
 } from '../../../../tasks/exceptions_table';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visit } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -29,7 +29,7 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
   });
   beforeEach(() => {
     login();
-    visitWithoutDateRange(EXCEPTIONS_URL);
+    visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
   });

@@ -30,7 +30,7 @@ import {
 } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login, visit } from '../../../../tasks/login';
+import { login, visitWithDateRange } from '../../../../tasks/login';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 describe(
@@ -41,7 +41,7 @@ describe(
       cleanKibana();
       login();
       createRule(getNewRule());
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();

@@ -18,7 +18,7 @@ import {
 import { cleanKibana, deleteTimelines, waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
@@ -32,7 +32,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
     login();
-    visit(hostsUrl('allHosts'), {
+    visitWithDateRange(hostsUrl('allHosts'), {
       onLoad: () => {
         waitForWelcomePanelToBeLoaded();
         waitForAllHostsToBeLoaded();

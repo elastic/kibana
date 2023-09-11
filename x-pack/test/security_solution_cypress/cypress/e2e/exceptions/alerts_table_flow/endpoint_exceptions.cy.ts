@@ -13,7 +13,7 @@ import {
   openAddEndpointExceptionFromFirstAlert,
   waitForAlerts,
 } from '../../../tasks/alerts';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
@@ -53,9 +53,7 @@ describe.skip(
       deleteAlertsAndRules();
 
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
-      createRule(getEndpointRule()).then((rule) =>
-        visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
-      );
+      createRule(getEndpointRule()).then((rule) => visit(ruleDetailsUrl(rule.body.id)));
 
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();

@@ -18,7 +18,7 @@ import {
   waitForCallOutToBeShown,
   MISSING_PRIVILEGES_CALLOUT,
 } from '../../../../tasks/common/callouts';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visit } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539 Do we need to run it in Serverless?
@@ -34,7 +34,7 @@ describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerle
     createExceptionList(getExceptionList(), getExceptionList().list_id);
 
     login(ROLES.reader);
-    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
+    visit(EXCEPTIONS_URL, ROLES.reader);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown

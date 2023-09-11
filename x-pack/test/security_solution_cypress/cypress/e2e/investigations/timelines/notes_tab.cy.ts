@@ -22,7 +22,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import {
   addNotesToTimeline,
   goToNotesTab,
@@ -39,7 +39,7 @@ describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
 
     createTimeline(getTimelineNonValidQuery())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
@@ -53,7 +53,7 @@ describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(function () {
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     openTimelineById(this?.timelineId as string);
     goToNotesTab();
     // eslint-disable-next-line cypress/no-unnecessary-waiting

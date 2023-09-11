@@ -35,7 +35,7 @@ import {
   uncheckLoadQueryDynamically,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
-import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithDateRange, visit } from '../../../tasks/login';
 import { assertDetailsNotExist, getDetails } from '../../../tasks/rule_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 
@@ -66,7 +66,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
     it('Creates saved query rule', function () {
       const rule = getSavedQueryRule();
       createSavedQuery(savedQueryName, savedQueryQuery, savedQueryFilterKey);
-      visit(CREATE_RULE_URL);
+      visitWithDateRange(CREATE_RULE_URL);
 
       selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
 
@@ -113,7 +113,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
               saved_id: 'non-existent',
               query: undefined,
             })
-          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+          ).then((rule) => visit(ruleDetailsUrl(rule.body.id)));
         });
 
         it('Shows error toast on details page when saved query can not be loaded', function () {
@@ -128,7 +128,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
               saved_id: 'non-existent',
               query: undefined,
             })
-          ).then((rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id)));
+          ).then((rule) => visit(ruleEditUrl(rule.body.id)));
         });
 
         it('Shows validation error on rule edit when saved query can not be loaded', function () {
@@ -157,7 +157,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
     context('Editing', () => {
       it('Allows to update query rule as saved_query rule type', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createRule(getNewRule()).then((rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id)));
+        createRule(getNewRule()).then((rule) => visit(ruleEditUrl(rule.body.id)));
 
         selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
         checkLoadQueryDynamically();
@@ -181,7 +181,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
         createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
           cy.log(JSON.stringify(response.body, null, 2));
           createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined })).then(
-            (rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id))
+            (rule) => visit(ruleEditUrl(rule.body.id))
           );
         });
 
@@ -206,7 +206,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
         const expectedCustomTestQuery = 'random test query';
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-          visitWithoutDateRange(ruleEditUrl(rule.body.id))
+          visit(ruleEditUrl(rule.body.id))
         );
 
         uncheckLoadQueryDynamically();
@@ -229,10 +229,10 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
       it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-          visitWithoutDateRange(ruleEditUrl(rule.body.id))
+          visit(ruleEditUrl(rule.body.id))
         );
 
-        visit(RULES_MANAGEMENT_URL);
+        visitWithDateRange(RULES_MANAGEMENT_URL);
 
         editFirstRule();
         uncheckLoadQueryDynamically();

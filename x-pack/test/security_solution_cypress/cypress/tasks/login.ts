@@ -291,7 +291,11 @@ export const waitForPage = (url: string) => {
   );
 };
 
-export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, role?: ROLES) => {
+export const visitWithDateRange = (
+  url: string,
+  options: Partial<Cypress.VisitOptions> = {},
+  role?: ROLES
+) => {
   const timerangeConfig = {
     from: 1547914976217,
     fromStr: '2019-01-19T16:22:56.217Z',
@@ -328,7 +332,7 @@ export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}, 
   });
 };
 
-export const visitWithoutDateRange = (url: string, role?: ROLES) => {
+export const visit = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url, {
     onBeforeLoad: disableNewFeaturesTours,
   });
@@ -348,18 +352,18 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
 };
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
-  visit(hostDetailsUrl(hostName));
+  visitWithDateRange(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]').should('exist');
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
 };
 
 export const visitSecurityDetectionRulesPage = (role?: ROLES) => {
   resetRulesTableState(); // Clear persistent rules filter data before page loading
-  visitWithoutDateRange(RULES_MANAGEMENT_URL, role);
+  visit(RULES_MANAGEMENT_URL, role);
 };
 
 export const visitUserDetailsPage = (userName = 'test') => {
-  visit(userDetailsUrl(userName));
+  visitWithDateRange(userDetailsUrl(userName));
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {

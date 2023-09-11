@@ -14,7 +14,7 @@ import {
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { login, visit } from '../../tasks/login';
+import { login, visitWithDateRange } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
@@ -36,7 +36,7 @@ describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless']
     deleteAlertsAndRules();
     cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     createRule(getNewRule({ rule_id: 'new custom rule' }));
-    visit(ALERTS_URL);
+    visitWithDateRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 

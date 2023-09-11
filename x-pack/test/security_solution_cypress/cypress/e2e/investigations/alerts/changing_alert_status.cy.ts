@@ -34,7 +34,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
@@ -52,7 +52,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     beforeEach(() => {
       login();
       createRule(getNewRule());
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       selectNumberOfAlerts(3);
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
@@ -121,7 +121,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     beforeEach(() => {
       deleteAlertsAndRules();
       createRule(getNewRule());
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
     });
@@ -160,7 +160,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       login();
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
     });
@@ -313,7 +313,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       login(ROLES.t2_analyst);
       deleteAlertsAndRules();
       createRule(getNewRule());
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
     });

@@ -32,7 +32,7 @@ import {
   ENTITY_ANALYTICS,
 } from '../../screens/security_header';
 
-import { login, visit } from '../../tasks/login';
+import { login, visitWithDateRange } from '../../tasks/login';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
@@ -80,7 +80,7 @@ import {
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
-    visit(TIMELINES_URL);
+    visitWithDateRange(TIMELINES_URL);
   });
 
   it('navigates to the Dashboards landing page', () => {
@@ -202,7 +202,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
-    visit(KIBANA_HOME);
+    visitWithDateRange(KIBANA_HOME);
     openKibanaNavigation();
   });
 

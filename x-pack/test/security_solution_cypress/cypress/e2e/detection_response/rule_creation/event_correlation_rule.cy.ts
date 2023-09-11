@@ -52,7 +52,7 @@ import {
   selectEqlRuleType,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
@@ -78,7 +78,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
     const expectedNumberOfAlerts = '2 alerts';
 
     it('Creates and enables a new EQL rule', function () {
-      visit(CREATE_RULE_URL);
+      visitWithDateRange(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
@@ -155,7 +155,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, 
 
     it('Creates and enables a new EQL rule with a sequence', function () {
       login();
-      visit(CREATE_RULE_URL);
+      visitWithDateRange(CREATE_RULE_URL);
       selectEqlRuleType();
       fillDefineEqlRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);

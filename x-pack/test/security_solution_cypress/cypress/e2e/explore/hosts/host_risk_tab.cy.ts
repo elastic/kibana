@@ -17,7 +17,7 @@ import {
   HOST_BY_RISK_TABLE_HOSTNAME_CELL,
   HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON,
 } from '../../../screens/hosts/host_risk';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { hostsUrl } from '../../../urls/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 
@@ -30,7 +30,7 @@ describe.skip('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
   beforeEach(() => {
     login();
-    visit(hostsUrl('allHosts'));
+    visitWithDateRange(hostsUrl('allHosts'));
     navigateToHostRiskDetailTab();
   });
 

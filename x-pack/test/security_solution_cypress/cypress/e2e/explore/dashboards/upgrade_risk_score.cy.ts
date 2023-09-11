@@ -21,7 +21,7 @@ import {
 import { findSavedObjects } from '../../../tasks/api_calls/risk_scores/saved_objects';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import {
   clickUpgradeRiskScore,
   clickUpgradeRiskScoreConfirmed,
@@ -52,7 +52,7 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServer
     deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
     installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId);
     installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId);
-    visit(ENTITY_ANALYTICS_URL);
+    visitWithDateRange(ENTITY_ANALYTICS_URL);
   });
 
   it('shows upgrade risk button for host and user', () => {
@@ -109,7 +109,7 @@ versions.forEach((version) =>
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId });
       installLegacyRiskScoreModule(RiskScoreEntity.host, spaceId, version);
       installLegacyRiskScoreModule(RiskScoreEntity.user, spaceId, version);
-      visit(ENTITY_ANALYTICS_URL);
+      visitWithDateRange(ENTITY_ANALYTICS_URL);
     });
 
     afterEach(() => {

@@ -108,9 +108,9 @@ import {
 import { saveEditedRule } from '../../../tasks/edit_rule';
 import {
   login,
-  visit,
+  visitWithDateRange,
   visitSecurityDetectionRulesPage,
-  visitWithoutDateRange,
+  visit,
 } from '../../../tasks/login';
 import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { ruleDetailsUrl, ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
@@ -132,7 +132,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visit(CREATE_RULE_URL);
+      visitWithDateRange(CREATE_RULE_URL);
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);
@@ -356,7 +356,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
           deleteConnectors();
           login();
           createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((rule) =>
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+            visit(ruleDetailsUrl(rule.body.id))
           );
         });
 
@@ -379,7 +379,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
           deleteConnectors();
           login();
           createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((rule) =>
-            visitWithoutDateRange(ruleEditUrl(rule.body.id))
+            visit(ruleEditUrl(rule.body.id))
           );
         });
 

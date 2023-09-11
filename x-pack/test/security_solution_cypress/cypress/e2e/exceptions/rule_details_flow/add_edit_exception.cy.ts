@@ -14,7 +14,7 @@ import {
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
   goToAlertsTab,
@@ -121,7 +121,7 @@ describe(
               ],
               rule_id: '2',
             })
-          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+          ).then((rule) => visit(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
         });
       });
 
@@ -259,7 +259,7 @@ describe(
             interval: '10s',
             rule_id: 'rule_testing',
           })
-        ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+        ).then((rule) => visit(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
       });
 
       afterEach(() => {

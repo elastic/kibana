@@ -54,7 +54,7 @@ import {
   selectThresholdRuleType,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
@@ -74,7 +74,7 @@ describe('Threshold rules', { tags: ['@ess', '@serverless', '@brokenInServerless
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-    visitWithoutDateRange(CREATE_RULE_URL);
+    visit(CREATE_RULE_URL);
   });
 
   it('Creates and enables a new threshold rule', () => {

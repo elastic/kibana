@@ -15,7 +15,7 @@ import {
 import { openExceptionFlyoutFromEmptyViewerPrompt } from '../../../tasks/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { RULES_MANAGEMENT_URL, ruleDetailsUrl } from '../../../urls/navigation';
 import {
   createListsIndex,
@@ -37,7 +37,7 @@ import {
 } from '../../../screens/exceptions';
 
 const goToRulesAndOpenValueListModal = () => {
-  visitWithoutDateRange(RULES_MANAGEMENT_URL);
+  visit(RULES_MANAGEMENT_URL);
   waitForListsIndex();
   waitForValueListsModalToBeLoaded();
   openValueListsModal();
@@ -64,7 +64,7 @@ describe(
           rule_id: '2',
           enabled: false,
         })
-      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+      ).then((rule) => visit(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
     });
 
     afterEach(() => {

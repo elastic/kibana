@@ -8,7 +8,7 @@
 import { disableExpandableFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../objects/rule';
 import { cleanKibana } from '../../tasks/common';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { login, visit } from '../../tasks/login';
 import {
   JSON_TEXT,
   TABLE_CELL,
@@ -47,7 +47,7 @@ describe('CTI Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'
   beforeEach(() => {
     login();
     createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
-      (rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
+      (rule) => visit(ruleDetailsUrl(rule.body.id))
     );
   });
 

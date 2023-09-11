@@ -28,7 +28,7 @@ import {
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addDescriptionToTimeline,
@@ -61,7 +61,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless', '@brokenInServerl
   });
 
   it.skip('Creates a timeline template', () => {
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
     populateTimeline();
@@ -109,7 +109,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless', '@brokenInServerl
 
   it('Create template from timeline', () => {
     createTimeline(getTimeline());
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
     expandEventAction();
     clickingOnCreateTemplateFromTimelineBtn();

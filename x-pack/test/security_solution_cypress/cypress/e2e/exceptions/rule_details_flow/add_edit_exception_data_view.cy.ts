@@ -17,7 +17,7 @@ import {
   editExceptionFlyoutItemName,
   submitEditedExceptionItem,
 } from '../../../tasks/exceptions';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import {
   addFirstExceptionFromRuleDetails,
   goToAlertsTab,
@@ -69,7 +69,7 @@ describe(
           interval: '10s',
           rule_id: 'rule_testing',
         })
-      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
+      ).then((rule) => visit(ruleDetailsUrl(rule.body.id)));
       waitForAlertsToPopulate();
     });
 

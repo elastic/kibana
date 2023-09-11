@@ -10,11 +10,7 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/dete
 
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
-import {
-  login,
-  visitSecurityDetectionRulesPage,
-  visitWithoutDateRange,
-} from '../../../../../tasks/login';
+import { login, visitSecurityDetectionRulesPage, visit } from '../../../../../tasks/login';
 import { getNewRule } from '../../../../../objects/rule';
 import { ruleDetailsUrl, ruleEditUrl } from '../../../../../urls/navigation';
 import { internalAlertingSnoozeRule } from '../../../../../urls/routes';
@@ -189,7 +185,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }
 
     it('adds an action to a snoozed rule', () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
-        visitWithoutDateRange(ruleEditUrl(rule.id));
+        visit(ruleEditUrl(rule.id));
         goToActionsStepTab();
 
         addEmailConnectorAndRuleAction('abc@example.com', 'Test action');
@@ -231,7 +227,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }
           statusCode: 500,
         });
 
-        visitWithoutDateRange(ruleDetailsUrl(rule.id));
+        visit(ruleDetailsUrl(rule.id));
       });
 
       cy.get(DISABLED_SNOOZE_BADGE).trigger('mouseover');
@@ -243,7 +239,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }
       createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('POST', internalAlertingSnoozeRule(rule.id), { forceNetworkError: true });
 
-        visitWithoutDateRange(ruleDetailsUrl(rule.id));
+        visit(ruleDetailsUrl(rule.id));
       });
 
       snoozeRule('3 days');

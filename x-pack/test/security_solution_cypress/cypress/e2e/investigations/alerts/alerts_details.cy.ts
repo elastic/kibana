@@ -27,7 +27,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithDateRange, visit } from '../../../tasks/login';
 import { getNewRule, getUnmappedRule } from '../../../objects/rule';
 import { ALERTS_URL, ruleDetailsUrl } from '../../../urls/navigation';
 import { tablePageSelector } from '../../../screens/table_pagination';
@@ -43,7 +43,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
       login();
       disableExpandableFlyout();
       createRule(getNewRule());
-      visitWithoutDateRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
@@ -69,7 +69,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visitWithoutDateRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
@@ -141,7 +141,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
@@ -192,7 +192,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
@@ -236,7 +236,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     it('should remove the flyout state from localstorage when navigating away without closing the flyout', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
 
-      visitWithoutDateRange(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      visit(ruleDetailsUrl(ARCHIVED_RULE_ID));
       waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
       const localStorageCheck = () =>
@@ -251,10 +251,10 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     it('should not reopen the flyout when navigating away from the alerts page and returning to it', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
 
-      visitWithoutDateRange(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      visit(ruleDetailsUrl(ARCHIVED_RULE_ID));
       waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       cy.get(OVERVIEW_RULE).should('not.exist');
     });
   });

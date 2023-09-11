@@ -9,7 +9,7 @@ import { ALERT_FLYOUT } from '../../../screens/alerts_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { refreshPage } from '../../../tasks/security_header';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -27,7 +27,7 @@ describe('user details flyout', () => {
   });
 
   it('shows user detail flyout from alert table', () => {
-    visitWithoutDateRange(ALERTS_URL);
+    visit(ALERTS_URL);
     createRule(getNewRule({ query: 'user.name:*' }));
     refreshPage();
     waitForAlertsToPopulate();

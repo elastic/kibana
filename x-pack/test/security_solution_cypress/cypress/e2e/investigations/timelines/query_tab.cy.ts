@@ -18,7 +18,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import {
   addFilter,
   openTimelineById,
@@ -32,7 +32,7 @@ describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
-    visitWithoutDateRange(TIMELINES_URL);
+    visit(TIMELINES_URL);
     createTimeline(getTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId: string) => {
@@ -59,7 +59,7 @@ describe.skip('Timeline query tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('Query tab', () => {
     beforeEach(function () {
       login();
-      visitWithoutDateRange(TIMELINES_URL);
+      visit(TIMELINES_URL);
       openTimelineById(this.timelineId).then(() => addFilter(getTimeline().filter));
     });
 

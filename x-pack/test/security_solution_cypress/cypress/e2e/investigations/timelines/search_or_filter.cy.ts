@@ -15,7 +15,7 @@ import {
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithDateRange, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   changeTimelineQueryLanguage,
@@ -34,7 +34,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       login();
-      visit(hostsUrl('allHosts'));
+      visitWithDateRange(hostsUrl('allHosts'));
     });
 
     it('executes a KQL query', () => {
@@ -58,7 +58,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
   describe('Update kqlMode for timeline', () => {
     beforeEach(() => {
       login();
-      visitWithoutDateRange(TIMELINES_URL);
+      visit(TIMELINES_URL);
       waitForTimelinesPanelToBeLoaded();
       openTimelineUsingToggle();
       cy.intercept('PATCH', '/api/timeline').as('update');

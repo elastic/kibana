@@ -21,7 +21,7 @@ import {
   createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visit } from '../../../../tasks/login';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/navigation';
 
 const RULE_1 = createRuleAssetSavedObject({
@@ -47,7 +47,7 @@ describe.skip(
       login();
       /* Create and install two mock rules */
       createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
-      visitWithoutDateRange(RULES_MANAGEMENT_URL);
+      visit(RULES_MANAGEMENT_URL);
       waitForPrebuiltDetectionRulesToBeLoaded();
     });
 

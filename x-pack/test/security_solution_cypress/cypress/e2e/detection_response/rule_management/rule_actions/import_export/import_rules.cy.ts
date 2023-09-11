@@ -12,7 +12,7 @@ import {
   importRulesWithOverwriteAll,
 } from '../../../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules, reload } from '../../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../../tasks/login';
+import { login, visit } from '../../../../../tasks/login';
 
 import { RULES_MANAGEMENT_URL } from '../../../../../urls/navigation';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
@@ -27,7 +27,7 @@ describe('Import rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
     login();
     deleteAlertsAndRules();
     cy.intercept('POST', '/api/detection_engine/rules/_import*').as('import');
-    visitWithoutDateRange(RULES_MANAGEMENT_URL);
+    visit(RULES_MANAGEMENT_URL);
   });
 
   it('Imports a custom rule with exceptions', function () {

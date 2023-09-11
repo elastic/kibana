@@ -8,7 +8,7 @@
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import {
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
@@ -86,9 +86,7 @@ describe(
               rule_id: '2',
               enabled: false,
             })
-          ).then((rule) =>
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'))
-          );
+          ).then((rule) => visit(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions')));
         });
       });
 
@@ -170,7 +168,7 @@ describe(
               enabled: false,
             })
           ).then((rule) => {
-            visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'));
+            visit(ruleDetailsUrl(rule.body.id, 'endpoint_exceptions'));
             waitForRuleDetailsPageToBeLoaded('Rule with exceptions');
           });
         });

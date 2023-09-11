@@ -23,7 +23,7 @@ import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { closeTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addNameAndDescriptionToTimeline,
@@ -50,7 +50,7 @@ describe('Save Timeline Prompts', { tags: ['@ess', '@serverless', '@brokenInServ
 
   beforeEach(() => {
     login();
-    visit(hostsUrl('allHosts'));
+    visitWithDateRange(hostsUrl('allHosts'));
     createNewTimeline();
   });
 

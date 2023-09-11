@@ -23,7 +23,7 @@ import {
   validateHighlightedFieldsPopulatedAsExceptionConditions,
   validateEmptyExceptionConditionField,
 } from '../../../../tasks/exceptions';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
+import { login, visit } from '../../../../tasks/login';
 import { goToExceptionsTab } from '../../../../tasks/rule_details';
 
 import { ruleDetailsUrl } from '../../../../urls/navigation';
@@ -52,9 +52,7 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
-      createRule(getEndpointRule()).then((rule) =>
-        visitWithoutDateRange(ruleDetailsUrl(rule.body.id))
-      );
+      createRule(getEndpointRule()).then((rule) => visit(ruleDetailsUrl(rule.body.id)));
 
       waitForAlertsToPopulate();
     });

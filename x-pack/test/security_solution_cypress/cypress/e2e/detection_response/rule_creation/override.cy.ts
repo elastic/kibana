@@ -56,7 +56,7 @@ import {
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
@@ -76,7 +76,7 @@ describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   it('Creates and enables a new custom rule with override option', function () {
-    visitWithoutDateRange(CREATE_RULE_URL);
+    visit(CREATE_RULE_URL);
     fillDefineCustomRuleAndContinue(rule);
     fillAboutRuleWithOverrideAndContinue(rule);
     fillScheduleRuleAndContinue(rule);

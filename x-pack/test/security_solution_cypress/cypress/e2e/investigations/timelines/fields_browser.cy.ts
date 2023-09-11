@@ -32,7 +32,7 @@ import {
   activateViewSelected,
   activateViewAll,
 } from '../../../tasks/fields_browser';
-import { login, visit } from '../../../tasks/login';
+import { login, visitWithDateRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../../tasks/timeline';
 
@@ -58,7 +58,7 @@ describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'
   context('Fields Browser rendering', () => {
     beforeEach(() => {
       login();
-      visit(hostsUrl('allHosts'));
+      visitWithDateRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
@@ -125,7 +125,7 @@ describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'
   context('Editing the timeline', () => {
     beforeEach(() => {
       login();
-      visit(hostsUrl('allHosts'));
+      visitWithDateRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

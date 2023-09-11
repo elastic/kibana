@@ -12,7 +12,7 @@ import {
   OVERVIEW_CTI_TOTAL_EVENT_COUNT,
 } from '../../screens/overview';
 
-import { login, visit } from '../../tasks/login';
+import { login, visitWithDateRange } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -23,7 +23,7 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
   });
 
   it('renders disabled threat intel module as expected', () => {
-    visit(OVERVIEW_URL);
+    visitWithDateRange(OVERVIEW_URL);
     cy.get(`${OVERVIEW_CTI_LINKS} ${OVERVIEW_CTI_LINKS_ERROR_INNER_PANEL}`).should('exist');
     cy.get(`${OVERVIEW_CTI_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 indicators');
     cy.get(`${OVERVIEW_CTI_ENABLE_MODULE_BUTTON}`).should('exist');
@@ -51,7 +51,7 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       it('renders disabled dashboard module as expected when there are no events in the selected time period', () => {
-        visit(
+        visitWithDateRange(
           `${OVERVIEW_URL}?sourcerer=(timerange:(from:%272021-07-08T04:00:00.000Z%27,kind:absolute,to:%272021-07-09T03:59:59.999Z%27))`
         );
         cy.get(`${OVERVIEW_CTI_LINKS}`).should('exist');
@@ -59,7 +59,7 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       it('renders dashboard module as expected when there are events in the selected time period', () => {
-        visit(OVERVIEW_URL);
+        visitWithDateRange(OVERVIEW_URL);
 
         cy.get(`${OVERVIEW_CTI_LINKS}`).should('exist');
         cy.get(OVERVIEW_CTI_LINKS).should('not.contain.text', 'Anomali');

@@ -27,11 +27,7 @@ import {
   enableRelatedIntegrations,
 } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { deleteAlertsAndRules } from '../../../../tasks/common';
-import {
-  login,
-  visitSecurityDetectionRulesPage,
-  visitWithoutDateRange,
-} from '../../../../tasks/login';
+import { login, visit, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
@@ -283,7 +279,7 @@ function addAndInstallPrebuiltRules(rules: Array<typeof SAMPLE_PREBUILT_RULE>): 
 function visitFirstInstalledPrebuiltRuleDetailsPage(): void {
   cy.get<Cypress.Response<PerformRuleInstallationResponseBody>>(
     `@${INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS}`
-  ).then((response) => visitWithoutDateRange(ruleDetailsUrl(response.body.results.created[0].id)));
+  ).then((response) => visit(ruleDetailsUrl(response.body.results.created[0].id)));
 }
 
 interface IntegrationDefinition {
@@ -406,14 +402,3 @@ const AWS_PACKAGE_POLICY: PackagePolicyWithoutAgentPolicyId = {
     },
   },
 };
-
-const createValidJsonStringArray = (jsonStringArray: string[]) =>
-  jsonStringArray.map((jsonString, index) => {
-    if (index === 0) {
-      return `${jsonString}}`;
-    } else if (index === jsonStringArray.length - 1) {
-      return `{${jsonString}`;
-    } else {
-      return `{${jsonString}}`;
-    }
-  });

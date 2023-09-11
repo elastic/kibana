@@ -18,7 +18,7 @@ import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../ta
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { ANALYZER_NODE } from '../../../../screens/alerts';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visit } from '../../../../tasks/login';
+import { login, visitWithDateRange } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -33,7 +33,7 @@ describe.skip(
       cleanKibana();
       login();
       createRule(getNewRule());
-      visit(ALERTS_URL);
+      visitWithDateRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
