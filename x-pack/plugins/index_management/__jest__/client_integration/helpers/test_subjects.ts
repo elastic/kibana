@@ -84,4 +84,12 @@ export type TestSubjects =
   | 'typePopoverIcon'
   | 'uploadFileLink'
   | 'matchAllQueryLink'
+  | 'matchField'
+  | 'enrichFields'
+  | 'noCommonFieldsError'
+  | 'createButton'
+  | 'createAndExecuteButton'
+  | 'enrichPolicySummaryList'
+  | 'requestBody'
+  | 'errorWhenCreatingCallout'
   | 'createIndexSaveButton';

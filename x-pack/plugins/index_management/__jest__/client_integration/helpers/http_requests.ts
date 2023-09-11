@@ -149,6 +149,17 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
+  const setGetFieldsFromIndices = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse(
+      'POST',
+      `${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`,
+      response,
+      error
+    );
+
+  const setCreateEnrichPolicy = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/enrich_policies`, response, error);
+
   const setDeleteEnrichPolicyResponse = (
     policyName: string,
     response?: HttpResponse,
@@ -201,6 +212,8 @@ const registerHttpRequestMockHelpers = (
     setLoadIndexDetailsResponse,
     setCreateIndexResponse,
     setGetMatchingIndices,
+    setGetFieldsFromIndices,
+    setCreateEnrichPolicy,
   };
 };
 

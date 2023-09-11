@@ -37,7 +37,7 @@ const SummaryTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
     <>
       <EuiSpacer size="m" />
 
-      <EuiDescriptionList>
+      <EuiDescriptionList data-test-subj="enrichPolicySummaryList">
         {/* Policy name */}
         {policy.name && (
           <>
@@ -163,7 +163,7 @@ const RequestTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
 
       <EuiSpacer size="m" />
 
-      <EuiCodeBlock language={language} isCopyable>
+      <EuiCodeBlock language={language} isCopyable data-test-subj="requestBody">
         {getESPolicyCreationApiCall(policy.name)}
         {`\n`}
         {request}
@@ -187,6 +187,7 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
       name: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.summaryTabLabel', {
         defaultMessage: 'Summary',
       }),
+      'data-test-subj': 'summaryTab',
       content: <SummaryTab policy={draft as SerializedEnrichPolicy} />,
     },
     {
@@ -194,6 +195,7 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
       name: i18n.translate('xpack.idxMgmt.enrichPolicyCreate.createStep.requestTabLabel', {
         defaultMessage: 'Request',
       }),
+      'data-test-subj': 'requestTab',
       content: <RequestTab policy={draft as SerializedEnrichPolicy} />,
     },
   ];
@@ -206,12 +208,13 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
 
       <EuiSpacer size="l" />
 
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj="creationStep">
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
             onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)}
             isDisabled={isLoading}
+            data-test-subj="createAndExecuteButton"
           >
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
@@ -221,7 +224,13 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton fill color="primary" onClick={() => onSubmit()} isDisabled={isLoading}>
+          <EuiButton
+            fill
+            color="primary"
+            onClick={() => onSubmit()}
+            isDisabled={isLoading}
+            data-test-subj="createButton"
+          >
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.createStep.createButtonLabel"
               defaultMessage="Create policy"

@@ -62,3 +62,16 @@ export const createTestEnrichPolicy = (name: string, type: EnrichPolicyType) => 
 export const getMatchingIndices = () => ({
   indices: ['test-1', 'test-2', 'test-3', 'test-4', 'test-5'],
 });
+
+export const getFieldsFromIndices = () => ({
+  commonFields: [],
+  indices: [
+    {
+      index: 'test-1',
+      fields: [
+        { name: 'first_name', type: 'keyword', normalizedType: 'keyword' },
+        { name: 'age', type: 'long', normalizedType: 'number' },
+      ],
+    },
+  ],
+});

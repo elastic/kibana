@@ -25,8 +25,13 @@ const testBedConfig: AsyncTestBedConfig = {
 export interface CreateEnrichPoliciesTestBed extends TestBed<TestSubjects> {
   actions: {
     clickNextButton: () => Promise<void>;
+    clickRequestTab: () => Promise<void>;
+    clickCreatePolicy: () => Promise<void>;
+    completeCreationStep: ({ indices }: { indices?: string }) => Promise<void>;
+    completeFieldsSelectionStep: () => Promise<void>;
     isOnConfigurationStep: () => boolean;
     isOnFieldSelectionStep: () => boolean;
+    isOnCreateStep: () => boolean;
   };
 }
 
@@ -45,6 +50,7 @@ export const setup = async (
    */
   const isOnConfigurationStep = () => testBed.exists('configurationForm');
   const isOnFieldSelectionStep = () => testBed.exists('fieldSelectionForm');
+  const isOnCreateStep = () => testBed.exists('creationStep');
   const clickNextButton = async () => {
     await act(async () => {
       testBed.find('nextButton').simulate('click');
@@ -52,13 +58,52 @@ export const setup = async (
 
     testBed.component.update();
   };
+  const clickCreatePolicy = async (executeAfter?: boolean) => {
+    await act(async () => {
+      testBed.find(executeAfter ? 'createAndExecuteButton' : 'createButton').simulate('click');
+    });
+
+    testBed.component.update();
+  };
+
+  const clickRequestTab = async () => {
+    await act(async () => {
+      testBed.find('requestTab').simulate('click');
+    });
+
+    testBed.component.update();
+  };
+
+  const completeCreationStep = async ({ indices }: { indices?: string }) => {
+    const { form } = testBed;
+
+    form.setInputValue('policyNameField.input', 'test_policy');
+    form.setSelectValue('policyTypeField', 'match');
+    form.setSelectValue('policySourceIndicesField', indices ?? 'test-1');
+
+    await clickNextButton();
+  };
+
+  const completeFieldsSelectionStep = async () => {
+    const { form } = testBed;
+
+    form.setSelectValue('matchField', 'name');
+    form.setSelectValue('enrichFields', 'email');
+
+    await clickNextButton();
+  };
 
   return {
     ...testBed,
     actions: {
       clickNextButton,
+      clickRequestTab,
+      clickCreatePolicy,
+      completeCreationStep,
+      completeFieldsSelectionStep,
       isOnConfigurationStep,
       isOnFieldSelectionStep,
+      isOnCreateStep,
     },
   };
 };

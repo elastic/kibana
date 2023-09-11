@@ -8,8 +8,9 @@
 import React from 'react';
 
 import { setupEnvironment } from '../helpers';
-import { getMatchingIndices } from '../helpers/fixtures';
+import { getMatchingIndices, getFieldsFromIndices } from '../helpers/fixtures';
 import { CreateEnrichPoliciesTestBed, setup } from './create_enrich_policy.helpers';
+import { getESPolicyCreationApiCall } from '../../../common/lib';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -32,6 +33,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
+    // Mock EuiComboBox as a simple input instead so that its easier to test
     EuiComboBox: (props: any) => (
       <input
         data-test-subj={props['data-test-subj'] || 'mockEuiCombobox'}
@@ -78,13 +80,9 @@ describe('Create enrich policy', () => {
     });
 
     it('Allows to submit the form when fields are filled', async () => {
-      const { form, actions } = testBed;
+      const { actions } = testBed;
 
-      form.setInputValue('policyNameField.input', 'test_policy');
-      form.setSelectValue('policyTypeField', 'match');
-      form.setSelectValue('policySourceIndicesField', 'test-1');
-
-      await testBed.actions.clickNextButton();
+      await testBed.actions.completeCreationStep({});
 
       expect(actions.isOnFieldSelectionStep()).toBe(true);
     });
@@ -92,27 +90,12 @@ describe('Create enrich policy', () => {
 
   describe('Fields selection step', () => {
     beforeEach(async () => {
+      httpRequestsMockHelpers.setGetFieldsFromIndices(getFieldsFromIndices());
+
       testBed = await setup(httpSetup);
       testBed.component.update();
 
-      const { form, actions } = testBed;
-
-      form.setInputValue('policyNameField.input', 'test_policy');
-      form.setSelectValue('policyTypeField', 'match');
-      form.setSelectValue('policySourceIndicesField', 'test-1');
-
-      // console.log(testBed.form.getErrorsMessages());
-      await actions.clickNextButton();
-    });
-
-    it('Fields have helpers', async () => {
-      const { actions, exists } = testBed;
-
-      console.log(testBed.component.debug());
-
-      expect(actions.isOnFieldSelectionStep()).toBe(true);
-      expect(exists('enrichFieldsPopover')).toBe(true);
-      expect(exists('matchFieldPopover')).toBe(true);
+      await testBed.actions.completeCreationStep({});
     });
 
     it('shows validation errors if form isnt filled', async () => {
@@ -121,15 +104,73 @@ describe('Create enrich policy', () => {
       expect(testBed.form.getErrorsMessages()).toHaveLength(2);
     });
 
-    it.skip('Allows to submit the form when fields are filled', async () => {
+    it('Allows to submit the form when fields are filled', async () => {
       const { form, actions } = testBed;
 
-      form.setSelectValue('policyTypeField', 'match');
-      form.setSelectValue('policySourceIndicesField', 'test-1');
+      form.setSelectValue('matchField', 'name');
+      form.setSelectValue('enrichFields', 'email');
 
       await testBed.actions.clickNextButton();
 
-      expect(actions.isOnFieldSelectionStep()).toBe(true);
+      expect(actions.isOnCreateStep()).toBe(true);
+    });
+
+    it('When no common fields are returned it shows an error callout', async () => {
+      httpRequestsMockHelpers.setGetFieldsFromIndices({
+        commonFields: [],
+        indices: [],
+      });
+
+      testBed = await setup(httpSetup);
+      testBed.component.update();
+
+      await testBed.actions.completeCreationStep({ indices: 'test-1, test-2' });
+
+      expect(testBed.exists('noCommonFieldsError')).toBe(true);
+    });
+  });
+
+  describe('Creation step', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setGetFieldsFromIndices(getFieldsFromIndices());
+
+      testBed = await setup(httpSetup);
+      testBed.component.update();
+
+      await testBed.actions.completeCreationStep({});
+      await testBed.actions.completeFieldsSelectionStep();
+    });
+
+    it('Shows CTAs for creating the policy', async () => {
+      const { exists } = testBed;
+
+      expect(exists('createButton')).toBe(true);
+      expect(exists('createAndExecuteButton')).toBe(true);
+    });
+
+    it('Shows policy summary and request', async () => {
+      const { find } = testBed;
+
+      expect(find('enrichPolicySummaryList').html()).toMatchSnapshot();
+
+      await testBed.actions.clickRequestTab();
+
+      expect(find('requestBody').text()).toContain(getESPolicyCreationApiCall('test_policy'));
+    });
+
+    it('Shows error message when creating the policy fails', async () => {
+      const { exists, actions } = testBed;
+      const error = {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'something went wrong...',
+      };
+
+      httpRequestsMockHelpers.setCreateEnrichPolicy(undefined, error);
+
+      await actions.clickCreatePolicy();
+
+      expect(exists('errorWhenCreatingCallout')).toBe(true);
     });
   });
 });
