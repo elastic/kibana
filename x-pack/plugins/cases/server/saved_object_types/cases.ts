@@ -197,26 +197,33 @@ export const createCaseSavedObjectType = (
           key: {
             type: 'keyword',
           },
-          value: {
+          type: {
             type: 'keyword',
-            fields: {
-              number: {
-                type: 'long',
-                ignore_malformed: true,
-              },
-              boolean: {
-                type: 'boolean',
-              },
-              string: {
-                type: 'text',
-              },
-              date: {
-                type: 'date',
-                ignore_malformed: true,
-              },
-              ip: {
-                type: 'ip',
-                ignore_malformed: true,
+          },
+          field: {
+            properties: {
+              value: {
+                type: 'keyword',
+                fields: {
+                  number: {
+                    type: 'long',
+                    ignore_malformed: true,
+                  },
+                  boolean: {
+                    type: 'boolean',
+                  },
+                  string: {
+                    type: 'text',
+                  },
+                  date: {
+                    type: 'date',
+                    ignore_malformed: true,
+                  },
+                  ip: {
+                    type: 'ip',
+                    ignore_malformed: true,
+                  },
+                },
               },
             },
           },
