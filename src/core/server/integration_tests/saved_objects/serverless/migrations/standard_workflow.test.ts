@@ -7,11 +7,17 @@
  */
 
 import Path from 'path';
-import '../jest_matchers';
-import { startElasticsearch } from '../kibana_migrator_test_kit';
-import { createStandardWorkflowTest } from '../shared_suites/zdt/standard_workflow';
+import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
+import { createStandardWorkflowTest } from '../../migrations/shared_suites/zdt/standard_workflow';
 
-describe('ZDT upgrades - standard workflow', () => {
+describe('serverless - ZDT upgrades - standard workflow', () => {
+  const startElasticsearch = async () => {
+    const { startES } = createTestServerlessInstances({
+      adjustTimeout: jest.setTimeout,
+    });
+    return await startES();
+  };
+
   createStandardWorkflowTest({
     startES: startElasticsearch,
     logFilePath: Path.join(__dirname, 'standard_workflow.test.log'),
