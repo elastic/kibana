@@ -298,7 +298,7 @@ xpack.actions.preconfigured:
 [[preconfigured-xmatters-configuration]]
 ==== xMatters connectors
 
-The following example creates a <<xmatters-action-type,xMatters connector>> with basic authentication:
+The following example creates an <<xmatters-action-type,xMatters connector>> with basic authentication:
 
 [source,text]
 --
