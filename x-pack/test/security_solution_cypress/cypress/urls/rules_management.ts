@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const RULES_MANAGEMENT_URL = '/app/security/detections/rules/management';
-export const RULES_MONITORING_URL = '/app/security/detections/rules/monitoring';
+export const RULES_MANAGEMENT_URL = '/app/security/rules/management';
+export const RULES_MONITORING_URL = '/app/security/rules/monitoring';
