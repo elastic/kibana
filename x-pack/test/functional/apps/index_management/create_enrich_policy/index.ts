@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Index Management app', function () {
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./home_page'));
-    loadTestFile(require.resolve('./index_template_wizard'));
-    loadTestFile(require.resolve('./enrich_policies_tab'));
+  describe('Index Management: create enrich policy', function () {
     loadTestFile(require.resolve('./create_enrich_policy'));
   });
 };
