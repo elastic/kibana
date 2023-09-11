@@ -2,12 +2,7 @@
 
 set -euo pipefail
 
-echo "\$1 is $1"
-echo "ESS_IMAGE_URL_OR_TAG is $ESS_IMAGE_URL_OR_TAG"
-X=$(buildkite-agent meta-data get ESS_IMAGE_URL_OR_TAG)
-echo "X is $X"
-
-SOURCE_IMAGE_OR_TAG=${ESS_IMAGE_URL_OR_TAG:-${1:-$X}}
+SOURCE_IMAGE_OR_TAG=$1
 
 source .buildkite/scripts/common/util.sh
 

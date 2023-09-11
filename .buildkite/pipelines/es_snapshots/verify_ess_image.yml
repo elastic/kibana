@@ -24,6 +24,3 @@ steps:
 
   - label: ":arrow_up::elastic::arrow_up: Promote docker image"
     command: .buildkite/scripts/steps/es_snapshots/promote_ess_image.sh $(buildkite-agent meta-data get ESS_IMAGE_URL_OR_TAG)
-    env:
-      ESS_IMAGE_URL_OR_TAG: $(buildkite-agent meta-data get ESS_IMAGE_URL_OR_TAG)
-
