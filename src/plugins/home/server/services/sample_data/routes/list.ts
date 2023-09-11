@@ -54,9 +54,7 @@ export const createListRoute = (
           description: sampleDataset.description,
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
-          overviewDashboard: sampleDataset.overviewDashboard
-            ? findObjectId('dashboard', sampleDataset.overviewDashboard)
-            : null,
+          overviewDashboard: findObjectId('dashboard', sampleDataset.overviewDashboard),
           appLinks: sortBy(appLinks, 'order'),
           defaultIndex: findObjectId('index-pattern', sampleDataset.defaultIndex),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),

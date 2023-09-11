@@ -39,16 +39,17 @@ export function createInstallRoute(
       const spaceId = getSpaceId(scopedContext);
 
       const { params, query } = req;
-      const sampleDataset = specProviders[params.id]?.(spaceId);
+      const spaceAwareSampleDatasets = Object.values(specProviders).map((specProvider) =>
+        specProvider(spaceId)
+      );
+      const sampleDataset = spaceAwareSampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
         return res.notFound();
       }
 
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
-      const spaceAwareSampleDatasets = Object.values(specProviders).map((specProvider) =>
-        specProvider(spaceId)
-      );
+
       const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
         sampleDatasets: spaceAwareSampleDatasets,

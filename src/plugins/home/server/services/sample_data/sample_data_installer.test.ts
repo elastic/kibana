@@ -18,7 +18,6 @@ import {
 import type { SampleDatasetSchema } from './lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from './sample_data_installer';
 import { SampleDataInstallError } from './errors';
-import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 const testDatasets: SampleDatasetSchema[] = [
   {
@@ -130,7 +129,7 @@ const testDatasets: SampleDatasetSchema[] = [
         timeFields: ['@timestamp'],
         preserveDayOfWeekTimeOfDay: true,
         aliases: {
-          [`.alerts-security.alerts-{{spaceId}}`]: {},
+          [`.alerts-security.alerts-default`]: {},
         },
         deleteAliasWhenRemoved: false,
       },
@@ -332,16 +331,6 @@ describe('SampleDataInstaller', () => {
         expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
         expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
           index: indexName,
-        });
-      });
-
-      it('should replace {{spaceId}} in the alias name with the current space id', async () => {
-        await installer.install('test_securitysolution_data_index');
-
-        expect(
-          (esClient.asCurrentUser.indices.create.mock.calls[0][0] as IndicesCreateRequest).aliases
-        ).toEqual({
-          '.alerts-security.alerts-default': {},
         });
       });
     });

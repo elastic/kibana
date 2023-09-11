@@ -9,7 +9,6 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,

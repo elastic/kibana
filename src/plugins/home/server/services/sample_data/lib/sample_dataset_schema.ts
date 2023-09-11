@@ -73,7 +73,7 @@ export const sampleDataSchema = schema.object({
   iconPath: schema.maybe(schema.string()), // relative path to icon. Used for display in the Fleet-integrations app
 
   // saved object id of main dashboard for sample data set
-  overviewDashboard: schema.maybe(schema.string()),
+  overviewDashboard: schema.string(),
 
   // saved object id of default index-pattern for sample data set
   defaultIndex: schema.string(),
