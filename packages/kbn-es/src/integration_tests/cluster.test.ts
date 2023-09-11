@@ -744,7 +744,7 @@ describe('#runServerless()', () => {
         <ToolingLog>,
         Object {
           "background": true,
-          "basePath": "/Users/dmle/github/kibana/.es",
+          "basePath": "${installPath}",
           "clean": true,
           "teardown": true,
           "waitForReady": true,
