@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import type { DataViewBase, Filter, Query, AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -15,7 +15,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '../../lib/kibana';
 
 const convertToQueryType = (query: Query | AggregateQuery): Query => {
   if ('esql' in query) {
@@ -27,6 +26,7 @@ const convertToQueryType = (query: Query | AggregateQuery): Query => {
 
   return query as Query;
 };
+
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
@@ -46,9 +46,6 @@ export interface QueryBarComponentProps {
   displayStyle?: SearchBarProps['displayStyle'];
   isDisabled?: boolean;
 }
-
-export const isDataView = (obj: unknown): obj is DataView =>
-  obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
 
 export const QueryBar = memo<QueryBarComponentProps>(
   ({
@@ -70,8 +67,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
     displayStyle,
     isDisabled,
   }) => {
-    const { data } = useKibana().services;
-    const [dataView, setDataView] = useState<DataView>();
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -121,23 +116,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    useEffect(() => {
-      if (isDataView(indexPattern)) {
-        setDataView(indexPattern);
-      } else {
-        const createDataView = async () => {
-          const dv = await data.dataViews.create({ title: indexPattern.title });
-          setDataView(dv);
-        };
-        createDataView();
-      }
-      return () => {
-        if (dataView?.id) {
-          data.dataViews.clearInstanceCache(dataView?.id);
-        }
-      };
-    }, [data.dataViews, dataView?.id, indexPattern]);
-
     const query = useMemo(() => {
       if (filterQuery?.language === 'esql') {
         return { esql: filterQuery.query as string };
@@ -145,8 +123,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
       return filterQuery;
     }, [filterQuery]);
 
+    const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
-    const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 
     return (
       <SearchBar
@@ -154,7 +132,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        indexPatterns={arrDataView}
+        indexPatterns={indexPatterns as DataView[]}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={query}
