@@ -12,6 +12,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { Cluster } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import { esTestConfig } from '@kbn/test';
 import { CliArgs } from '@kbn/config';
 import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
@@ -26,6 +27,8 @@ export interface TestServerlessUtils {
   startKibana: (abortSignal?: AbortSignal) => Promise<TestServerlessKibanaUtils>;
 }
 
+const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
+
 /**
  * See docs in {@link TestUtils}. This function provides the same utilities but
  * configured for serverless.
@@ -37,9 +40,11 @@ export function createTestServerlessInstances({
 }: {
   adjustTimeout: (timeout: number) => void;
 }): TestServerlessUtils {
+  adjustTimeout?.(150_000);
+
   const esUtils = createServerlessES();
   const kbUtils = createServerlessKibana();
-  adjustTimeout?.(120_000);
+
   return {
     startES: async () => {
       const { stop, getClient } = await esUtils.start();
@@ -64,26 +69,29 @@ export function createTestServerlessInstances({
   };
 }
 
-const ES_BASE_PATH_DIR = Path.join(REPO_ROOT, '.es/es_test_serverless');
 function createServerlessES() {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
   });
   const es = new Cluster({ log });
+  const esPort = esTestConfig.getPort();
   return {
     es,
     start: async () => {
       await es.runServerless({
         basePath: ES_BASE_PATH_DIR,
+        port: esPort,
         teardown: true,
         background: true,
         clean: true,
         kill: true,
         waitForReady: true,
       });
+      const client = getServerlessESClient({ port: esPort });
+
       return {
-        getClient: getServerlessESClient,
+        getClient: () => client,
         stop: async () => {
           await es.stop();
         },
@@ -92,10 +100,9 @@ function createServerlessES() {
   };
 }
 
-const getServerlessESClient = () => {
+const getServerlessESClient = ({ port }: { port: number }) => {
   return new Client({
-    // node ports not configurable from
-    node: 'http://localhost:9200',
+    node: `http://localhost:${port}`,
     Connection: HttpConnection,
   });
 };
@@ -108,6 +115,9 @@ const getServerlessDefault = () => {
         versionResolution: 'newest',
         strictClientVersionCheck: false,
       },
+    },
+    elasticsearch: {
+      hosts: [`http://localhost:${esTestConfig.getPort()}`],
     },
     migrations: {
       algorithm: 'zdt',
@@ -138,6 +148,7 @@ const getServerlessDefault = () => {
     },
   };
 };
+
 function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   return createRoot(defaultsDeep(settings, getServerlessDefault()), {
     ...cliArgs,

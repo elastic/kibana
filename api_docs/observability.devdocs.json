@@ -3178,6 +3178,20 @@
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.aiops",
+            "type": "Object",
+            "tags": [],
+            "label": "aiops",
+            "description": [],
+            "signature": [
+              "AiopsPluginStart"
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

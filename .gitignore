@@ -94,6 +94,8 @@ npm-debug.log*
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
+/x-pack/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
+/x-pack/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
 
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
