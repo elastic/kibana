@@ -136,6 +136,7 @@ export function SelectableUrlList({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
+              data-test-subj="exploratoryViewPopOverTitleButton"
               color="text"
               onClick={() => closePopover()}
               aria-label={i18n.translate('xpack.exploratoryView.search.url.close', {

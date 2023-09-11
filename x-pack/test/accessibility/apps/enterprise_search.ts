@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('loads a landing page with product cards', async function () {
         await retry.waitFor(
           'Elasticsearch product card visible',
-          async () => await testSubjects.exists('elasticsearchProductCard')
+          async () => await testSubjects.exists('enterpriseSearchElasticsearchProductCard')
         );
         await retry.waitFor(
           'Search Applications product card visible',
