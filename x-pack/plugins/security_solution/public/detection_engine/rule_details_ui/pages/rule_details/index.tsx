@@ -63,8 +63,6 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepDefineRuleReadOnly } from '../../../../detections/components/rules/step_define_rule';
-import { StepScheduleRuleReadOnly } from '../../../../detections/components/rules/step_schedule_rule';
 import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
 import {
   buildAlertsFilter,
@@ -140,6 +138,8 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
+import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
@@ -671,6 +671,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     loading={isLoading}
                     stepData={aboutRuleData}
                     stepDataDetails={modifiedAboutRuleDetailsData}
+                    rule={rule}
                   />
                 </EuiFlexItem>
 
@@ -681,30 +682,15 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         loading={isLoading || isSavedQueryLoading}
                         title={ruleI18n.DEFINITION}
                       >
-                        {defineRuleData != null && !isSavedQueryLoading && !isStartingJobs && (
-                          <StepDefineRuleReadOnly
-                            addPadding={false}
-                            descriptionColumns="singleSplit"
-                            defaultValues={{
-                              dataViewTitle,
-                              ...defineRuleData,
-                              queryBar: savedQueryBar ?? defineRuleData.queryBar,
-                            }}
-                            indexPattern={ruleIndexPattern}
-                          />
+                        {rule != null && !isSavedQueryLoading && !isStartingJobs && (
+                          <RuleDefinitionSection rule={rule} isInteractive />
                         )}
                       </StepPanel>
                     </EuiFlexItem>
                     <EuiSpacer />
                     <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                       <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                        {scheduleRuleData != null && (
-                          <StepScheduleRuleReadOnly
-                            addPadding={false}
-                            descriptionColumns="singleSplit"
-                            defaultValues={scheduleRuleData}
-                          />
-                        )}
+                        {rule != null && <RuleScheduleSection rule={rule} />}
                       </StepPanel>
                     </EuiFlexItem>
                     {hasActions && (
