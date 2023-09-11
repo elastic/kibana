@@ -21,6 +21,13 @@ export const QUERY_LABEL = i18n.translate(
   }
 );
 
+export const EQL_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.QueryLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);
+
 export const THREAT_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.threatQueryLabel',
   {

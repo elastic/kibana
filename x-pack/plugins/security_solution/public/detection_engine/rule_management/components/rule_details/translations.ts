@@ -56,6 +56,13 @@ export const SETUP_GUIDE_SECTION_LABEL = i18n.translate(
   }
 );
 
+export const NAME_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.nameFieldLabel',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
 export const DESCRIPTION_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.descriptionFieldLabel',
   {
@@ -270,6 +277,27 @@ export const THREAT_FILTERS_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFiltersFieldLabel',
   {
     defaultMessage: 'Filters',
+  }
+);
+
+export const SUPPRESS_ALERTS_BY_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.suppressAlertsByFieldLabel',
+  {
+    defaultMessage: 'Suppress alerts by',
+  }
+);
+
+export const SUPPRESS_ALERTS_DURATION_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.suppressAlertsForFieldLabel',
+  {
+    defaultMessage: 'Suppress alerts for',
+  }
+);
+
+export const SUPPRESSION_FIELD_MISSING_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.suppressionFieldMissingFieldLabel',
+  {
+    defaultMessage: 'If a suppression field is missing',
   }
 );
 
