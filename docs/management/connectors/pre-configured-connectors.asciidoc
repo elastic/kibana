@@ -111,10 +111,12 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-email-configuration>>
 * <<preconfigured-index-configuration>>
 * <<preconfigured-jira-configuration>>
+* <<preconfigured-teams-configuration>>
 * <<preconfigured-opsgenie-configuration>>
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-slack-configuration>>
+* <<preconfigured-torq-configuration>>
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
@@ -412,7 +414,6 @@ xpack.actions.preconfigured:
     actionTypeId: .server-log
 --
 
-
 [float]
 [[preconfigured-slack-configuration]]
 ==== Slack connectors
@@ -442,6 +443,26 @@ xpack.actions.preconfigured:
       token: 'xoxb-xxxx-xxxx-xxxx' <1>
 --
 <1> The Slack bot user OAuth token.
+
+[float]
+[[preconfigured-torq-configuration]]
+==== Torq connectors
+
+The following example creates a <<torq-action-type,Torq connector>>:
+
+[source,yaml]
+--
+xpack.actions.preconfigured:
+  my-torq:
+    name: preconfigured-torq-connector-type
+    actionTypeId: .torq
+    config:
+      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook <1>
+    secrets:
+      token: mytorqtoken <2>
+--
+<1> The endpoint URL of the Elastic Security integration in Torq.
+<2> `token`:: A string that corresponds to **Torq authentication header secret**.
 
 [float]
 [[preconfigured-webhook-configuration]]

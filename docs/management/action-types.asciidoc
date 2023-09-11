@@ -7,9 +7,17 @@ Connectors provide a central place to store connection information for services 
 [cols="2"]
 |===
 
+a| <<d3security-action-type,D3 Security>>
+
+| Send a request to D3 Security.
+
 a| <<email-action-type,Email>>
 
 | Send email from your server.
+
+a| <<gen-ai-action-type,Generative AI>>
+
+| Send a request to OpenAI.
 
 a| <<resilient-action-type,{ibm-r}>>
 
@@ -63,6 +71,10 @@ a| <<tines-action-type,Tines>>
 
 | Send events to a Tines Story.
 
+a| <<torq-action-type,Torq>>
+
+| Trigger a Torq workflow.
+
 a| <<webhook-action-type, {webhook}>>
 
 | Send a request to a web service.
@@ -74,18 +86,6 @@ a| <<cases-webhook-action-type,{webhook-cm}>>
 a| <<xmatters-action-type,xMatters>>
 
 | Send actionable alerts to on-call xMatters resources.
-
-a| <<torq-action-type,Torq>>
-
-| Trigger a Torq workflow.
-
-a| <<gen-ai-action-type,Generative AI>>
-
-| Send a request to OpenAI.
-
-a| <<d3security-action-type,D3 Security>>
-
-| Send a request to D3 Security.
 
 |===
 
