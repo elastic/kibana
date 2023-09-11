@@ -48,7 +48,7 @@ Object {
         },
       },
     },
-    "size": 5000,
+    "size": 1000,
     "track_total_hits": false,
   },
 }
