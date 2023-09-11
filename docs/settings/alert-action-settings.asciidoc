@@ -390,6 +390,11 @@ A user name secret that varies by connector:
 * For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
 * For an <<xmatters-action-type,xMatters connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
+`xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl`::
+For a <<teams-action-type,Microsoft Teams>>, specifies the URL of the incoming webhook.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
+
 
 [float]
 [[alert-settings]]
