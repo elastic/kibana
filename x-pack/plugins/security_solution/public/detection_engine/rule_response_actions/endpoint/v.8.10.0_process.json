@@ -1,9 +1,5 @@
 [
   {
-    "field": "host.pid_ns_ino",
-    "description": "Pid namespace inode"
-  },
-  {
     "field": "process.entity_id",
     "description": "Unique identifier for the process."
   },

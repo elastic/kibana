@@ -92,8 +92,6 @@ const FieldNameFieldComponent = ({
         }}
       </UseField>
       <EuiSpacer size="s" />
-      {/* TODO: Still waiting for mock ups regarding this*/}
-      {/* {renderEntityIdNote}*/}
     </>
   );
 };

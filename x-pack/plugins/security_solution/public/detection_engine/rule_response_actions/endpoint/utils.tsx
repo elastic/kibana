@@ -64,15 +64,45 @@ const useGetCommandText = (
       };
     case 'kill-process':
       return {
-        title: name,
-        description: name,
-        tooltip: '',
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.killProcess"
+            defaultMessage="Kill process"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.killProcessDescription"
+            defaultMessage="Kill process description"
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.killProcessTooltip"
+            defaultMessage="Insufficient privileges to kill process. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
       };
     case 'suspend-process':
       return {
-        title: name,
-        description: name,
-        tooltip: '',
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.suspendProcess"
+            defaultMessage="Suspend process"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.suspendProcessDescription"
+            defaultMessage="Suspend Process"
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.suspendProcessTooltip"
+            defaultMessage="Insufficient privileges to supend process. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
       };
     default:
       return {
