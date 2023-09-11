@@ -201,7 +201,11 @@ export const GroupEditorFlyout = ({
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            background-color: ${euiThemeVars.euiColorLightestShade};
+          `}
+        >
           <GroupPreview
             group={group}
             dataViews={dataViews}
