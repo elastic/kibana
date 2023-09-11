@@ -35,12 +35,14 @@ const rolesToCreate = [secReadCasesAll];
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
-describe('Sourcerer', () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Sourcerer', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
   });
 
+  // TODO: https://github.com/elastic/kibana/issues/161539
   describe('permissions', { tags: ['@ess', '@brokenInServerless'] }, () => {
     before(() => {
       createUsersAndRoles(usersToCreate, rolesToCreate);
@@ -52,6 +54,7 @@ describe('Sourcerer', () => {
     });
   });
 
+  // TODO: https://github.com/elastic/kibana/issues/161539
   // FLAKY: https://github.com/elastic/kibana/issues/165766
   describe('Default scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {

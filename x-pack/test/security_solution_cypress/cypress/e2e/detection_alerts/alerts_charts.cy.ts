@@ -24,6 +24,7 @@ import {
 } from '../../screens/search_bar';
 import { TOASTER } from '../../screens/alerts_detection_rules';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Histogram legend hover actions',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },
