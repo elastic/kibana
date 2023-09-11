@@ -10,6 +10,7 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { getUrl } from '@kbn/test';
 import moment from 'moment';
+import { logging } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {
@@ -32,6 +33,17 @@ export class CommonPageObject extends FtrService {
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
+
+  public async checkForBundleErrors() {
+    const logEntries = await this.browser.getBrowserLogs();
+    const errors = logEntries
+      .filter((v) => v.level === logging.Level.SEVERE)
+      .filter((v) => v.message.includes('TypeError: Failed to fetch'));
+    if (errors.length > 0) {
+      this.log.error('Failed to fetch some bundles');
+      throw Error('Failed to fetch some bundles');
+    }
+  }
 
   /**
    * Logins to Kibana as default user and navigates to provided app
@@ -120,6 +132,8 @@ export class CommonPageObject extends FtrService {
         this.log.debug(msg);
         throw new Error(msg);
       }
+
+      await this.checkForBundleErrors();
 
       if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
         throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
@@ -275,6 +289,8 @@ export class CommonPageObject extends FtrService {
         let currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();
+
+        await this.checkForBundleErrors();
 
         if (currentUrl.includes('app/kibana')) {
           await this.testSubjects.find('kibanaChrome');
