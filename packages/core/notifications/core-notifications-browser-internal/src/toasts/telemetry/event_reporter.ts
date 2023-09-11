@@ -7,6 +7,7 @@
  */
 
 import { type AnalyticsServiceStart } from '@kbn/core/public';
+import { EventMetric, FieldType } from './event_types';
 
 export class EventReporter {
   private reportEvent: AnalyticsServiceStart['reportEvent'];
@@ -15,7 +16,21 @@ export class EventReporter {
     this.reportEvent = analytics.reportEvent;
   }
 
+  onDismissToast({
+    recurrenceCount,
+    toastMessage,
+  }: {
+    recurrenceCount: number;
+    toastMessage: string;
+  }) {
+    this.reportEvent(EventMetric.TOAST_DISMISSED, {
+      [FieldType.RECURRENCE_COUNT]: recurrenceCount,
+      [FieldType.TOAST_MESSAGE]: toastMessage,
+    });
+  }
+
   onClearAllToasts() {
-    // this.reportEvent('', { });
+    // TODO: add in fields for all toasts dismissal
+    this.reportEvent(EventMetric.ALL_TOASTS_DISMISSED, {});
   }
 }

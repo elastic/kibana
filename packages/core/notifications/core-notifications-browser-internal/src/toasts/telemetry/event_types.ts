@@ -9,12 +9,12 @@
 import { RootSchema } from '@kbn/analytics-client';
 import { EventTypeOpts } from '@kbn/core/public';
 
-enum EventMetric {
-  TOAST_DISMISSED = '',
-  ALL_TOASTS_DISMISSED = '',
+export enum EventMetric {
+  TOAST_DISMISSED = 'toast_dismissed',
+  ALL_TOASTS_DISMISSED = 'all_toasts_dismissed',
 }
 
-enum FieldType {
+export enum FieldType {
   RECURRENCE_COUNT = 'recurrence_count',
   TOAST_MESSAGE = 'toast_message',
 }
@@ -46,6 +46,17 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     schema: {
       ...fields[FieldType.TOAST_MESSAGE],
       ...fields[FieldType.RECURRENCE_COUNT],
+    },
+  },
+  {
+    eventType: EventMetric.ALL_TOASTS_DISMISSED,
+    schema: {
+      items: {
+        properties: {
+          ...fields[FieldType.TOAST_MESSAGE],
+          ...fields[FieldType.RECURRENCE_COUNT],
+        },
+      },
     },
   },
 ];

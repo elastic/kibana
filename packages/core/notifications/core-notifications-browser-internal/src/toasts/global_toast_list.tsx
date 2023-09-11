@@ -56,6 +56,13 @@ export const GlobalToastList: FunctionComponent<Props> = ({
     const representedToasts = idToToasts[id];
     if (representedToasts) {
       representedToasts.forEach((toast) => dismissToast(toast.id));
+
+      if (representedToasts.length > 1) {
+        reportEvent.onDismissToast({
+          recurrenceCount: representedToasts.length,
+          toastMessage: representedToasts[0].title!,
+        });
+      }
     }
   };
 
@@ -73,7 +80,6 @@ export const GlobalToastList: FunctionComponent<Props> = ({
        * provided in development.
        */
       toastLifeTimeMs={Infinity}
-      // onClearAllToasts={reportEvent.onClearAllToasts}
     />
   );
 };
