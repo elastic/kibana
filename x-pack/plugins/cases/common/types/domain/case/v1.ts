@@ -7,12 +7,10 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
-import { limitedArraySchema } from '../../../schema';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../constants';
 
 export { CaseStatuses };
 
@@ -74,14 +72,9 @@ const CustomFieldList = rt.strict({
   field: customFieldValue(rt.string),
 });
 
-const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle, CustomFieldList]);
+export const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle, CustomFieldList]);
 
-export const CaseCustomFieldsRt = limitedArraySchema({
-  codec: CustomFieldRt,
-  fieldName: 'customFields',
-  min: 0,
-  max: MAX_CUSTOM_FIELDS_PER_CASE,
-});
+const CaseCustomFieldsRt = rt.array(CustomFieldRt);
 
 const CaseBasicRt = rt.strict({
   /**
