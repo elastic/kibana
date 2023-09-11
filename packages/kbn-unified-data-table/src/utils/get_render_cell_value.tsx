@@ -28,6 +28,7 @@ import type {
   FormattedHit,
 } from '@kbn/discover-utils/types';
 import { formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import { defaultMonacoEditorWidth } from '../constants';
 import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
@@ -136,9 +137,15 @@ export const getRenderCellValueFn =
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value]) => (
+          {pairs.map(([key, value, docField]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+                {docField && (
+                  <FieldIcon
+                    {...getFieldIconProps(docField)}
+                    className="unifiedDataTable__descriptionListToken"
+                  />
+                )}
                 {key}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription

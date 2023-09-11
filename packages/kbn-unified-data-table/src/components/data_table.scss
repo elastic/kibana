@@ -116,6 +116,11 @@
   font-weight: $euiFontWeightBold;
 }
 
+.unifiedDataTable__descriptionListToken {
+  margin-right: $euiSizeXS;
+  vertical-align: text-bottom;
+}
+
 .unifiedDataTable__descriptionListDescription {
   margin-inline: $euiSizeS $euiSizeS;
   padding-inline: 0;

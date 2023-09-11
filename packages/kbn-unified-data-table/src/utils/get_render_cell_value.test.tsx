@@ -215,6 +215,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="string"
+          />
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -228,6 +233,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="number"
+          />
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -241,6 +251,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="string"
+          />
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -374,6 +389,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="string"
+          />
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -389,6 +409,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="number"
+          />
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -404,6 +429,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="string"
+          />
           _index
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -462,6 +492,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="string"
+          />
           extension
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -602,6 +637,11 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            scripted={false}
+            type="number"
+          />
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
