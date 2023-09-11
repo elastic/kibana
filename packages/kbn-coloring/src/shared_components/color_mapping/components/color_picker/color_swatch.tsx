@@ -72,6 +72,7 @@ export const ColorSwatch = ({
           aria-label={i18n.translate('coloring.colorMapping.colorPicker.pickAColorAriaLabel', {
             defaultMessage: 'Pick a color',
           })}
+          data-test-subj={`lns-colorMapping-colorSwatch-${index}`}
           onClick={() => dispatch(colorPickerVisibility({ index, visible: true, type: forType }))}
           style={{
             ...(swatchShape === 'round' ? { borderRadius: '50%', width: 15, height: 15 } : {}),

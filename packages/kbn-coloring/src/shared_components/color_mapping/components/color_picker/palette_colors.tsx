@@ -58,6 +58,7 @@ export function PaletteColors({
           {colors.map((c, index) => (
             <EuiFlexItem key={c} grow={0}>
               <EuiColorPickerSwatch
+                data-test-subj={`lns-colorMapping-colorPicker-staticColor-${index}`}
                 style={{
                   border: isSameColor(c, originalColor) ? '2px solid black' : 'transparent',
                 }}
@@ -92,6 +93,7 @@ export function PaletteColors({
                 style={{
                   border: isSameColor(c, originalColor) ? '2px solid black' : 'transparent',
                 }}
+                data-test-subj={`lns-colorMapping-colorPicker-neutralColor-${index}`}
                 color={c}
                 onClick={() =>
                   selectColor({

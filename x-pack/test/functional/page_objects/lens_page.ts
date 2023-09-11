@@ -1875,5 +1875,40 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('lensSuggestionsPanelToggleButton');
       }
     },
+
+    async changeColorMappingPalette(selector: string, paletteId: string) {
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(selector);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+      await this.setPalette(paletteId, false);
+      await this.closeDimensionEditor();
+    },
+
+    async changeColorMappingCategoricalColors(
+      selector: string,
+      colorSwatchIndex: number,
+      paletteColorIndex: number
+    ) {
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(selector);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+      await testSubjects.click('lns_colorEditing_trigger');
+      // disable autoAssign
+      await testSubjects.setEuiSwitch('lns-colorMapping-autoAssignSwitch', 'uncheck');
+
+      await testSubjects.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
+
+      await testSubjects.click(`lns-colorMapping-colorPicker-staticColor-${paletteColorIndex}`);
+
+      await this.closePaletteEditor();
+
+      await this.closeDimensionEditor();
+    },
   });
 }
