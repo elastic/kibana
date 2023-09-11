@@ -13,6 +13,7 @@ import {
   createIndex,
   getDocumentsInIndex,
   waitForAlertInIndex,
+  waitForAllTasksIdle,
   waitForDocumentInIndex,
 } from './helpers/alerting_wait_for_helpers';
 
@@ -400,6 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should schedule actions for summary of alerts on a custom interval', async () => {
+      const testStart = new Date();
       const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
@@ -451,6 +453,11 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
+
+      await waitForAllTasksIdle({
+        esClient,
+        filter: testStart,
+      });
 
       await runRule({
         supertest,
