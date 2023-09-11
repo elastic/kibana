@@ -5,38 +5,29 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services as xpackApiIntegrationServices } from '../../../test/api_integration/services';
+import { services as apiIntegrationServices } from '../../../test/api_integration/services';
 
 /*
  * Some FTR services from api integration stateful tests are compatible with serverless environment
  * While adding a new one, make sure to verify that it works on both Kibana CI and MKI
  */
-const {
-  es,
-  kibanaServer,
-  esArchiver,
-  retry,
-  randomness,
-  security,
-  esDeleteAllIndices,
-  indexPatterns,
-  usageAPI,
-  ingestPipelines,
-  deployment,
-} = xpackApiIntegrationServices;
+const deploymentAgnosticApiIntegrationServices = _.pick(apiIntegrationServices, [
+  'deployment',
+  'es',
+  'esArchiver',
+  'esDeleteAllIndices',
+  'indexPatterns',
+  'ingestPipelines',
+  'kibanaServer',
+  'randomness',
+  'retry',
+  'security',
+  'usageAPI',
+]);
 
 export const services = {
   // deployment agnostic FTR services
-  es,
-  kibanaServer,
-  esArchiver,
-  retry,
-  randomness,
-  security,
-  esDeleteAllIndices,
-  indexPatterns,
-  usageAPI,
-  ingestPipelines,
-  deployment,
+  ...deploymentAgnosticApiIntegrationServices,
 };
