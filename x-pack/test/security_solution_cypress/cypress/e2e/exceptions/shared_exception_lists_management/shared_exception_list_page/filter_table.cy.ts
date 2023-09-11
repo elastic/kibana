@@ -35,7 +35,9 @@ const getExceptionList2 = () => ({
   name: EXCEPTION_LIST_NAME_TWO,
   list_id: 'exception_list_2',
 });
-describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
+
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   beforeEach(() => {
     cy.task('esArchiverResetKibana');
     login();
@@ -56,9 +58,7 @@ describe('Filter Lists', { tags: ['@ess', '@serverless'] }, () => {
     );
 
     // Create exception list not used by any rules
-    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
-      'exceptionListResponse'
-    );
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
   });

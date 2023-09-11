@@ -7,7 +7,7 @@
 
 import { sendGetPackagePolicy, sendGetEndpointSecurityPackage } from './ingest';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { PACKAGE_POLICY_API_ROOT, epmRouteService } from '@kbn/fleet-plugin/common';
+import { PACKAGE_POLICY_API_ROOT, epmRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';
 
 describe('ingest service', () => {
@@ -20,7 +20,9 @@ describe('ingest service', () => {
   describe('sendGetPackagePolicy()', () => {
     it('builds correct API path', async () => {
       await sendGetPackagePolicy(http, '123');
-      expect(http.get).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROOT}/123`, undefined);
+      expect(http.get).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROOT}/123`, {
+        version: API_VERSIONS.public.v1,
+      });
     });
     it('supports http options', async () => {
       await sendGetPackagePolicy(http, '123', { query: { page: 1 } });
@@ -28,6 +30,7 @@ describe('ingest service', () => {
         query: {
           page: 1,
         },
+        version: API_VERSIONS.public.v1,
       });
     });
   });
@@ -37,7 +40,9 @@ describe('ingest service', () => {
       const path = epmRouteService.getInfoPath('endpoint');
       http.get.mockReturnValue(Promise.resolve(policyListApiPathHandlers()[path]()));
       await sendGetEndpointSecurityPackage(http);
-      expect(http.get).toHaveBeenCalledWith(path);
+      expect(http.get).toHaveBeenCalledWith(path, {
+        version: API_VERSIONS.public.v1,
+      });
     });
 
     it('should throw if package is not found', async () => {

@@ -21,6 +21,41 @@
     "functions": [
       {
         "parentPluginId": "@kbn/es",
+        "id": "def-common.getDockerFileMountPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getDockerFileMountPath",
+        "description": [
+          "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ESS container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
+        ],
+        "signature": [
+          "(hostPath: string) => string"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.getDockerFileMountPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "hostPath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
         "id": "def-common.run",
         "type": "Function",
         "tags": [],
@@ -56,6 +91,36 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ELASTIC_SERVERLESS_SUPERUSER",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_SERVERLESS_SUPERUSER",
+        "description": [],
+        "signature": [
+          "\"elastic_serverless\""
+        ],
+        "path": "packages/kbn-es/src/utils/ess_file_realm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ELASTIC_SERVERLESS_SUPERUSER_PASSWORD",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_SERVERLESS_SUPERUSER_PASSWORD",
+        "description": [],
+        "signature": [
+          "\"changeme\""
+        ],
+        "path": "packages/kbn-es/src/utils/ess_file_realm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/es",
         "id": "def-common.SYSTEM_INDICES_SUPERUSER",
