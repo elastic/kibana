@@ -13,35 +13,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
-  const actionBody =
-    `{\n` +
-    `"model": "gpt-3.5-turbo",\n` +
-    `"messages": [{\n` +
-    `"role": "user",\n` +
-    `"content": "You are a cyber security analyst using Elastic Security. I would like you to evaluate the event below and format your output neatly in markdown syntax. Add your description, an accuracy rating, and a threat rating."\n` +
-    `}]`;
 
-  describe('generative ai connector', function () {
+  describe('jira connector', function () {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('generative ai connector screenshots', async () => {
+    it('index connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await actions.common.openNewConnectorForm('gen-ai');
-      await testSubjects.setValue('nameInput', 'OpenAI test connector');
-      await testSubjects.setValue('secrets.apiKey-input', 'testkey');
-      await commonScreenshots.takeScreenshot('gen-ai-connector', screenshotDirectories, 1920, 1200);
+      await actions.common.openNewConnectorForm('jira');
+      await testSubjects.setValue('nameInput', 'Jira test connector');
+      await testSubjects.setValue('config.apiUrl-input', 'https://elastic.atlassian.net');
+      await testSubjects.setValue('config.projectKey-input', 'ES');
+      await testSubjects.setValue('secrets.email-input', 'testuser@example.com');
+      await testSubjects.setValue('secrets.apiToken-input', 'test');
+      await commonScreenshots.takeScreenshot('jira-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
       await testSubjects.click('toastCloseButton');
-      const editor = await testSubjects.find('kibanaCodeEditor');
-      await editor.clearValue();
-      await testSubjects.setValue('kibanaCodeEditor', actionBody, {
-        clearWithKeyboard: true,
-      });
-      await commonScreenshots.takeScreenshot('gen-ai-params-test', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('jira-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
