@@ -22,22 +22,22 @@ export function ClusterHealth({ count, status }: Props) {
   let color = 'subdued';
   let statusLabel = status;
   if (status === 'successful') {
-    color = 'success';
+    color = '#54B399';
     statusLabel = i18n.translate('inspector.requests.clustersTable.successfulLabel', {
       defaultMessage: 'successful',
     });
   } else if (status === 'partial') {
-    color = 'warning';
+    color = '#D6BF57';
     statusLabel = i18n.translate('inspector.requests.clustersTable.partialLabel', {
       defaultMessage: 'partial',
     });
   } else if (status === 'skipped') {
-    color = 'warning';
+    color = '#DA8B45';
     statusLabel = i18n.translate('inspector.requests.clustersTable.skippedLabel', {
       defaultMessage: 'skipped',
     });
   } else if (status === 'failed') {
-    color = 'danger';
+    color = '#E7664C';
     statusLabel = i18n.translate('inspector.requests.clustersTable.failedLabel', {
       defaultMessage: 'failed',
     });
