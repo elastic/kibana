@@ -30,7 +30,8 @@ import { login, visit } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Enrichment', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'risk_users' });

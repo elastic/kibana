@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { AnalyticsServiceStart, CoreSetup, CoreStart } from '@kbn/core/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -42,6 +42,7 @@ export interface DataVisualizerSetupDependencies {
   discover: DiscoverSetup;
 }
 export interface DataVisualizerStartDependencies {
+  analytics: AnalyticsServiceStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   fileUpload: FileUploadPluginStart;

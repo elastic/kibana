@@ -178,7 +178,7 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
 });
 
 const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/summarise',
+  endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
   params: t.type({
     body: t.type({
       id: t.string,
@@ -208,7 +208,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       labels,
     } = resources.params.body;
 
-    return client.summarise({
+    return client.summarize({
       entry: {
         confidence,
         id,
