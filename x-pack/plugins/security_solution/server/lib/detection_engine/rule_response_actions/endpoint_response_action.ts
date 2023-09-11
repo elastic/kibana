@@ -63,38 +63,35 @@ export const endpointResponseAction = (
   };
 
   if (command === 'isolate') {
-    return Promise.all(
-      map(uniqueAlerts, async (alertPerAgent) =>
-        endpointAppContextService.getActionCreateService().createActionFromAlert(
-          {
-            hosts: alertPerAgent.hosts,
-            endpoint_ids: [alertPerAgent.agent.id],
-            alert_ids: alertPerAgent.alertIds,
-            ...commonData,
-          },
-          [alertPerAgent.agent.id]
-        )
+    const actions = map(uniqueAlerts, async (alertPerAgent) =>
+      endpointAppContextService.getActionCreateService().createActionFromAlert(
+        {
+          hosts: alertPerAgent.hosts,
+          endpoint_ids: [alertPerAgent.agent.id],
+          alert_ids: alertPerAgent.alertIds,
+          ...commonData,
+        },
+        [alertPerAgent.agent.id]
       )
     );
+    return Promise.all(actions);
   }
 
   if (command === 'kill-process' || command === 'suspend-process') {
     const flatAlerts = flatten(map(uniqueAlerts, (agent) => flatMap(agent.pids)));
-
-    return Promise.all(
-      each(flatAlerts, async (alert) => {
-        return endpointAppContextService.getActionCreateService().createActionFromAlert(
-          {
-            hosts: alert.hosts,
-            endpoint_ids: [alert.agentId],
-            alert_ids: alert.alertIds,
-            parameters: alert.parameters,
-            ...commonData,
-          },
-          [alert.agentId]
-        );
-      })
-    );
+    const actions = each(flatAlerts, async (alert) => {
+      return endpointAppContextService.getActionCreateService().createActionFromAlert(
+        {
+          hosts: alert.hosts,
+          endpoint_ids: [alert.agentId],
+          alert_ids: alert.alertIds,
+          parameters: alert.parameters,
+          ...commonData,
+        },
+        [alert.agentId]
+      );
+    });
+    return Promise.all(actions);
   }
 };
 const getProcessAlerts = (
@@ -106,7 +103,7 @@ const getProcessAlerts = (
     return {};
   }
   const { overwrite, field } = config;
-  const valueFromAlert = overwrite ? alert[field] : alert.process?.pid;
+  const valueFromAlert = overwrite ? alert.process?.pid : alert[field];
   const isEntityId = field.includes('entity_id');
   const key = isEntityId ? 'entity_id' : 'pid';
 

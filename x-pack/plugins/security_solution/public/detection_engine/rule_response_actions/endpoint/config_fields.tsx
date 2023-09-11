@@ -41,8 +41,9 @@ export const ConfigFieldsComponent = ({
         <EuiSpacer />
         <FieldNameField
           path={`${basePath}.config.field`}
-          disabled={!currentOverwrite || disabled}
+          disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
+          isRequired={!currentOverwrite}
         />
         <EuiSpacer />
       </>

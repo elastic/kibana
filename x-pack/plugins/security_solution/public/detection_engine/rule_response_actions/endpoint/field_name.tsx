@@ -4,8 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { useMemo, useEffect } from 'react';
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+  useFormData,
+  useFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,6 +22,7 @@ interface FieldNameFieldProps {
   path: string;
   disabled: boolean;
   readDefaultValueOnForm: boolean;
+  isRequired: boolean;
 }
 
 const ECSSchemaOptions = ECSSchema.map((ecs) => ({
@@ -30,9 +36,33 @@ const FieldNameFieldComponent = ({
   path,
   disabled,
   readDefaultValueOnForm,
+  isRequired,
 }: FieldNameFieldProps) => {
   const [data] = useFormData();
   const fieldValue = get(data, path);
+  const context = useFormContext();
+
+  const currentField = context.getFields()[path];
+
+  useEffect(() => {
+    // hackish way to clear errors on this field - because we base this validation on the value of overwrite toggle
+    if (currentField) {
+      if (!isRequired) {
+        currentField?.clearErrors();
+      } else if (isRequired && currentField.value === '') {
+        currentField.setErrors([
+          {
+            message: i18n.translate(
+              'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Action is a required field.',
+              }
+            ),
+          },
+        ]);
+      }
+    }
+  }, [currentField, isRequired]);
 
   const renderEntityIdNote = useMemo(() => {
     const contains = fieldValue?.includes('entity_id');
@@ -46,12 +76,15 @@ const FieldNameFieldComponent = ({
     }
     return null;
   }, [fieldValue]);
-  const CONFIG = {
-    label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
-      defaultMessage: 'Custom field name',
-    }),
-    helpText: renderEntityIdNote,
-  };
+
+  const CONFIG = useMemo(() => {
+    return {
+      label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
+        defaultMessage: 'Custom field name',
+      }),
+      helpText: renderEntityIdNote,
+    };
+  }, [renderEntityIdNote]);
 
   const optionsAsComboBoxOptions = ECSSchemaOptions.map(({ label }) => ({
     label,
@@ -63,17 +96,20 @@ const FieldNameFieldComponent = ({
       <UseField<string> path={path} readDefaultValueOnForm={readDefaultValueOnForm} config={CONFIG}>
         {(field) => {
           const { value, setValue } = field;
+          const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
           const valueInList = !!optionsAsComboBoxOptions.find((option) => option.label === value);
           return (
-            <EuiFormRow label={field.label} helpText={field.helpText} fullWidth>
+            <EuiFormRow
+              label={field.label}
+              helpText={field.helpText}
+              fullWidth
+              error={errorMessage}
+              isInvalid={isInvalid}
+            >
               <EuiComboBox
-                isDisabled={disabled}
-                placeholder={i18n.translate(
-                  'xpack.securitySolution.responseActions.endpoint.validations.customField',
-                  {
-                    defaultMessage: 'Defaults to process.pid',
-                  }
-                )}
+                isInvalid={isInvalid}
+                isDisabled={disabled || !isRequired}
                 singleSelection={SINGLE_SELECTION}
                 noSuggestions={false}
                 options={optionsAsComboBoxOptions}

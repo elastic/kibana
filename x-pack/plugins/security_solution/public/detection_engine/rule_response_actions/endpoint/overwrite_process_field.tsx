@@ -6,9 +6,8 @@
  */
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface OverwriteFieldProps {
   path: string;
@@ -17,14 +16,16 @@ interface OverwriteFieldProps {
 }
 
 const CONFIG = {
-  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel', {
-    defaultMessage: 'Use different field',
-  }),
-  helpText: (
-    <FormattedMessage
-      id="xpack.securitySolution.responseActions.endpoint.overwriteFieldDescription"
-      defaultMessage="If turned off, this defaults to process.pid"
-    />
+  label: (
+    <p>
+      <FormattedMessage
+        id="xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel"
+        defaultMessage="Use {pid} as process identifier"
+        values={{
+          pid: <strong>process.pid</strong>,
+        }}
+      />
+    </p>
   ),
 };
 
