@@ -8,3 +8,5 @@
 export const ASSET_DETAILS_FLYOUT_COMPONENT_NAME = 'infraAssetDetailsFlyout';
 export const METRIC_CHART_HEIGHT = 300;
 export const APM_HOST_FILTER_FIELD = 'host.hostname';
+
+export const ASSET_DETAILS_URL_STATE_KEY = 'assetDetails';
