@@ -322,7 +322,6 @@ const AnnotationEditorControls = ({
         )}
 
         <ColorPicker
-          overwriteColor={currentAnnotation.color}
           defaultColor={isRange ? defaultAnnotationRangeColor : defaultAnnotationColor}
           showAlpha={isRange}
           setConfig={update}
