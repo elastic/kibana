@@ -21,13 +21,14 @@ import type { DiscoverAppLocator } from '../../common';
  * It navigates to Discover with a default query extracted from the default dataview
  */
 export const getSearchProvider: (
+  isESQLEnabled: boolean,
   uiCapabilities: Promise<ApplicationStart['capabilities']>,
   data: Promise<DataPublicPluginStart>,
   locator?: DiscoverAppLocator
-) => GlobalSearchResultProvider = (uiCapabilities, data, locator) => ({
+) => GlobalSearchResultProvider = (isESQLEnabled, uiCapabilities, data, locator) => ({
   id: 'esql',
   find: ({ term = '', types, tags }) => {
-    if (tags || (types && !types.includes('application')) || !locator) {
+    if (tags || (types && !types.includes('application')) || !locator || !isESQLEnabled) {
       return of([]);
     }
 

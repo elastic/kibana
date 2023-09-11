@@ -31,7 +31,7 @@ describe('ES|QL search provider', () => {
     getRedirectUrl: jest.fn(() => ''),
   } as unknown as DiscoverAppLocator;
   test('returns score 100 if term is esql', async () => {
-    const esqlSearchProvider = getSearchProvider(uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
     const observable = esqlSearchProvider.find(
       { term: 'esql' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -51,7 +51,7 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns score 90 if user tries to write es|ql', async () => {
-    const esqlSearchProvider = getSearchProvider(uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
     const observable = esqlSearchProvider.find(
       { term: 'es|' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -71,9 +71,19 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns empty results if user tries to write something irrelevant', async () => {
-    const esqlSearchProvider = getSearchProvider(uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
     const observable = esqlSearchProvider.find(
       { term: 'woof' },
+      { aborted$: NEVER, maxResults: 100, preference: '' }
+    );
+
+    await expect(lastValueFrom(observable)).resolves.toEqual([]);
+  });
+
+  test('returns empty results if ESQL is disabled', async () => {
+    const esqlSearchProvider = getSearchProvider(false, uiCapabilitiesMock, dataMock, locator);
+    const observable = esqlSearchProvider.find(
+      { term: 'esql' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
     );
 
@@ -87,7 +97,12 @@ describe('ES|QL search provider', () => {
         dataViews: { ...dataViewMock, getDefaultDataView: jest.fn(() => undefined) },
       } as unknown as DataPublicPluginStart);
     });
-    const esqlSearchProvider = getSearchProvider(uiCapabilitiesMock, updatedDataMock, locator);
+    const esqlSearchProvider = getSearchProvider(
+      true,
+      uiCapabilitiesMock,
+      updatedDataMock,
+      locator
+    );
     const observable = esqlSearchProvider.find(
       { term: 'woof' },
       { aborted$: NEVER, maxResults: 100, preference: '' }

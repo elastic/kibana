@@ -44,7 +44,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
@@ -237,8 +237,10 @@ export class DiscoverPlugin
     }
 
     if (plugins.globalSearch) {
+      const enableESQL = core.uiSettings.get(ENABLE_ESQL);
       plugins.globalSearch.registerResultProvider(
         getSearchProvider(
+          enableESQL,
           core.getStartServices().then(
             ([
               {
