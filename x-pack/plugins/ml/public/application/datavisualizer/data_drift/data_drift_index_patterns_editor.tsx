@@ -116,6 +116,23 @@ export function DataDriftIndexPatternsEditor({
 
   useEffect(() => {
     let unmounted = false;
+
+    if (
+      !unmounted &&
+      Array.isArray(combinedTimeFieldOptions) &&
+      combinedTimeFieldOptions.length > 0 &&
+      timeField.length === 0
+    ) {
+      setTimeField([combinedTimeFieldOptions[0]]);
+    }
+
+    return () => {
+      unmounted = true;
+    };
+  }, [combinedTimeFieldOptions, timeField]);
+
+  useEffect(() => {
+    let unmounted = false;
     const getMatchingDataView = async () => {
       setDataViewMsg(undefined);
       setFoundDataViewId(undefined);
