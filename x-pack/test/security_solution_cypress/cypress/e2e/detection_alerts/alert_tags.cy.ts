@@ -24,6 +24,7 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../screens/alerts';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe('Alert tagging', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
