@@ -56,6 +56,7 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../objects/exception';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // Test Skipped until we fix the Flyout rerendering issue
 // https://github.com/elastic/kibana/issues/154994
 
@@ -64,7 +65,7 @@ import { getExceptionList } from '../../../objects/exception';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     // this is a made-up index that has just the necessary
