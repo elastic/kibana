@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import { promisify } from 'util';
-
-import fetch from 'node-fetch';
-
 import { defineCypressConfig } from '@kbn/cypress-config';
-import { createEsClientForTesting } from '@kbn/test';
-
-import { API_VERSIONS } from './common/constants';
 
 export default defineCypressConfig({
   defaultCommandTimeout: 60000,
