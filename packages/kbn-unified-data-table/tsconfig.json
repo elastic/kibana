@@ -33,5 +33,6 @@
     "@kbn/code-editor",
     "@kbn/config",
     "@kbn/monaco",
+    "@kbn/field-utils",
   ]
 }
