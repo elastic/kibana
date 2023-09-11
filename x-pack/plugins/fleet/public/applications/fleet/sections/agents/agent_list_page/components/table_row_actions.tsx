@@ -116,7 +116,7 @@ export const TableRowActions: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.fleet.agentList.restartUpgradeOneButton"
-            defaultMessage="Restart upgrade agent"
+            defaultMessage="Restart upgrade"
           />
         </EuiContextMenuItem>
       );
