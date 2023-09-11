@@ -212,6 +212,7 @@ export function Controls() {
       <Panel hasShadow={true} paddingSize="none">
         <EuiToolTip anchorClassName="eui-displayInline" content={centerLabel}>
           <Button
+            data-test-subj="centerServiceMap"
             aria-label={centerLabel}
             color="text"
             iconType="crosshairs"
