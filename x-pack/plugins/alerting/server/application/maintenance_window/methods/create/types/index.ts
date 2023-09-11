@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { CreateMaintenanceWindowData } from './create_maintenace_window_data';
+export type { CreateMaintenanceWindowParams } from './create_maintenance_window_params';

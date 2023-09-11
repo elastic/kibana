@@ -6,17 +6,15 @@
  */
 
 import moment from 'moment-timezone';
-import {
-  createMaintenanceWindow,
-  CreateMaintenanceWindowParams,
-} from './create_maintenance_window';
+import { createMaintenanceWindow } from './create_maintenance_window';
+import { CreateMaintenanceWindowParams } from './types';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObject } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../../../../common';
-import { getMockMaintenanceWindow } from '../../../../maintenance_window_client/methods/test_helpers';
+import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

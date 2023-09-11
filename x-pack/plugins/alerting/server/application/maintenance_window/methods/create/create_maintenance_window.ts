@@ -9,19 +9,15 @@ import moment from 'moment';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
-import { MaintenanceWindowClientContext } from '../../../../../common';
+import type { MaintenanceWindowClientContext } from '../../../../../common';
+import type { MaintenanceWindow } from '../../types';
+import type { CreateMaintenanceWindowParams } from './types';
 import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../../transforms';
 import { createMaintenanceWindowSo } from '../../../../data/maintenance_window';
-import { createMaintenanceWindowDataSchema } from './schemas';
-import { MaintenanceWindow } from '../../types';
-import { CreateMaintenanceWindowData } from './types';
-
-export interface CreateMaintenanceWindowParams {
-  data: CreateMaintenanceWindowData;
-}
+import { createMaintenanceWindowParamsSchema } from './schemas';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -32,7 +28,7 @@ export async function createMaintenanceWindow(
   const { title, duration, rRule } = data;
 
   try {
-    createMaintenanceWindowDataSchema.validate(data);
+    createMaintenanceWindowParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Error validating create maintenance window data - ${error.message}`);
   }

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createMaintenanceWindowDataSchema } from './create_maintenance_window_data_schema';
+export { createMaintenanceWindowParamsSchema } from './create_maintenance_window_params_schema';

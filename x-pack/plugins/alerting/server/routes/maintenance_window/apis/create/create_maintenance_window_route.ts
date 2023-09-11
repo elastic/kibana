@@ -13,10 +13,10 @@ import {
   INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
 } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
-
 import { MaintenanceWindow } from '../../../../application/maintenance_window/types';
 import {
   createBodySchemaV1,
+  CreateMaintenanceWindowRequestBodyV1,
   CreateMaintenanceWindowResponseV1,
 } from '../../../../../common/routes/maintenance_window/apis/create';
 import { transformCreateBodyV1 } from './transforms';
@@ -40,14 +40,18 @@ export const createMaintenanceWindowRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         licenseState.ensureLicenseForMaintenanceWindow();
 
+        const body: CreateMaintenanceWindowRequestBodyV1 = req.body;
+
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
+
         const maintenanceWindow: MaintenanceWindow = await maintenanceWindowClient.create({
-          data: transformCreateBodyV1(req.body),
+          data: transformCreateBodyV1(body),
         });
 
         const response: CreateMaintenanceWindowResponseV1 = {
           body: transformMaintenanceWindowToResponseV1(maintenanceWindow),
         };
+
         return res.ok(response);
       })
     )

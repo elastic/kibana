@@ -47,7 +47,6 @@ import {
   parseDuration,
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
-  MaintenanceWindow,
   RuleAlertData,
   SanitizedRule,
 } from '../../common';
@@ -79,6 +78,7 @@ import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { LegacyAlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
