@@ -107,11 +107,12 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 === Examples
 
 * <<preconfigured-index-configuration>>
+* <<preconfigured-jira-configuration>>
 * <<preconfigured-opsgenie-configuration>>
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-webhook-configuration>>
-
+* <<preconfigured-cases-webhook-configuration>>
 
 [float]
 [[preconfigured-index-configuration]]
@@ -131,6 +132,30 @@ xpack.actions.preconfigured:
 --
 <1> The {es} index to be written to.
 <2> A field that indicates when the document was indexed.
+
+[float]
+[[preconfigured-jira-configuration]]
+==== Jira connectors
+
+The following example creates a <<jira-action-type,Jira connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-jira:
+    name: preconfigured-jira-connector-type
+    actionTypeId: .jira
+    config:
+      apiUrl: https://elastic.atlassian.net <1>
+      projectKey: ES <2>
+    secrets:
+      email: testuser <3>
+      apiToken: tokenkeystorevalue <4>
+--
+<1> The Jira instance URL.
+<2> The Jira project key.
+<3> The account email for HTTP basic authentication.
+<4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 [float]
 [[preconfigured-opsgenie-configuration]]
@@ -217,3 +242,53 @@ xpack.actions.preconfigured:
 <6> A valid password. Required if `hasAuth` is set to `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 NOTE: SSL authentication is not supported in preconfigured webhook connectors.
+
+
+[float]
+[[preconfigured-cases-webhook-configuration]]
+==== {webhook-cm} connectors
+
+The following example creates a <<cases-webhook-action-type,{webhook-cm} connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-case-management-webhook:
+    name: Case Management Webhook Connector
+    actionTypeId: .cases-webhook
+    config:
+      hasAuth: true <1>
+      headers: <2>
+        'content-type': 'application/json'
+      createIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue' <3>
+      createIncidentMethod: 'post' <4>
+      createIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <5>
+      getIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}' <6>
+      getIncidentResponseExternalTitleKey: 'key' <7>
+      viewIncidentUrl: 'https://testing-jira.atlassian.net/browse/{{{external.system.title}}}' <8>
+      updateIncidentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}' <9>
+      updateIncidentMethod: 'put' <10>
+      updateIncidentJson: '{"fields":{"summary":{{{case.title}}},"description":{{{case.description}}},"labels":{{{case.tags}}}' <11>
+      createCommentMethod: 'post', <12>
+      createCommentUrl: 'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment', <13>
+      createCommentJson: '{"body": {{{case.comment}}}}', <14>
+    secrets:
+      user: testuser <15>
+      password: passwordvalue <16>
+--
+<1> If `true`, this connector will require values for `user` and `password` inside the secrets configuration.
+<2> A set of key-value pairs sent as headers with the request.
+<3> A REST API URL string to create a case in the third-party system.
+<4> The REST API HTTP request method to create a case in the third-party system.
+<5> A stringified JSON payload with Mustache variables that is sent to the create case URL to create a case.
+<6> A REST API URL string with an external service ID Mustache variable to get the case from the third-party system.
+<7> A string from the response body of the get case method that corresponds to the external service title.
+<8> A URL string with either the external service ID or external service title Mustache variable to view a case in the external system.
+<9> The REST API URL to update the case by ID in the third-party system.
+<10> The REST API HTTP request method to update the case in the third-party system.
+<11> A stringified JSON payload with Mustache variables that is sent to the update case URL to update a case.
+<12> The REST API HTTP request method to create a case comment in the third-party system.
+<13> A REST API URL string to create a case comment by ID in the third-party system.
+<14> A stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment.
+<15> A user name, which is required when `hasAuth` is `true`.
+<16> A password, which is required when `hasAuth` is `true`.
