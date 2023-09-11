@@ -22,6 +22,7 @@ const CONFIG = {
         id="xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel"
         defaultMessage="Use {pid} as process identifier"
         values={{
+          // eslint-disable-next-line react/jsx-no-literals
           pid: <strong>process.pid</strong>,
         }}
       />

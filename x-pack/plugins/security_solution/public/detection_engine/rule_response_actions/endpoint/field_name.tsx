@@ -53,9 +53,9 @@ const FieldNameFieldComponent = ({
         currentField.setErrors([
           {
             message: i18n.translate(
-              'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
+              'xpack.securitySolution.responseActions.endpoint.validations.fieldRequiredErrorMessage',
               {
-                defaultMessage: 'Action is a required field.',
+                defaultMessage: 'This is a required field.',
               }
             ),
           },
