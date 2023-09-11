@@ -118,8 +118,12 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-pagerduty-configuration>>
 * <<preconfigured-server-log-configuration>>
 * <<preconfigured-slack-configuration>>
+<<<<<<< HEAD
 * <<preconfigured-swimlane-configuration>>
 * <<preconfigured-torq-configuration>>
+=======
+* <<preconfigured-tines-configuration>>
+>>>>>>> 07b87f0ab71 ([DOCS] Moves preconfigured Tines connector details)
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
@@ -529,6 +533,28 @@ xpack.actions.preconfigured:
 <2> The {swimlane} application identifier.
 <3> Field mappings for properties such as the alert identifer, severity, and rule name.
 <4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore, {kib} keystore>>.
+
+[float]
+[[preconfigured-tines-configuration]]
+==== Tines connectors
+
+The following example creates a <<tines-action-type,Tines connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+my-tines:
+    name: preconfigured-tines-connector-type
+    actionTypeId: .tines
+    config:
+      url: https://some-tenant-2345.tines.com <1>
+    secrets:
+      email: some.address@test.com <2>
+      token: ausergeneratedapitoken <3>
+--
+<1> The Tines tenant URL.
+<2> The email used to sign in to Tines.
+<3> The Tines API token.
 
 [float]
 [[preconfigured-torq-configuration]]
