@@ -18,6 +18,7 @@ const createRuleTypeRegistryMock = () => {
     list: jest.fn(),
     getAllTypes: jest.fn(),
     ensureRuleTypeEnabled: jest.fn(),
+    createAlertsClient: jest.fn(),
   };
   return mocked;
 };

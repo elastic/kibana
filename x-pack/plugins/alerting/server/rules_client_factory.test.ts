@@ -46,6 +46,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   ruleTypeRegistry: ruleTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   spaceIdToNamespace: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   internalSavedObjectsRepository,
