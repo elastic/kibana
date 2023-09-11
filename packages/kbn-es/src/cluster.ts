@@ -9,7 +9,7 @@
 import fs from 'fs';
 import fsp from 'fs/promises';
 import chalk from 'chalk';
-import { resolve as pathResolve, relative as pathRelative } from 'path';
+import * as path from 'path';
 import execa from 'execa';
 import { Readable } from 'stream';
 import Rx from 'rxjs';
@@ -133,14 +133,14 @@ export class Cluster {
 
   /**
    * Installs ES from a local tar
-   * @param path ES archive path
+   * @param archivePath ES archive path
    * @param options InstallArchiveOptions
    * @returns Promise<{ installPath }>
    */
-  async installArchive(path: string, options?: InstallArchiveOptions) {
+  async installArchive(archivePath: string, options?: InstallArchiveOptions) {
     this.log.info(chalk.bold('Installing from an archive'));
     return await this.log.indent(4, async () => {
-      const { installPath } = await installArchive(path, {
+      const { installPath } = await installArchive(archivePath, {
         log: this.log,
         ...(options || {}),
       });
@@ -160,7 +160,7 @@ export class Cluster {
     await this.log.indent(4, async () => {
       // stripComponents=1 excludes the root directory as that is how our archives are
       // structured. This works in our favor as we can explicitly extract into the data dir
-      const extractPath = pathResolve(installPath, extractDirName);
+      const extractPath = path.resolve(installPath, extractDirName);
       this.log.info(`Data archive: ${archivePath}`);
       this.log.info(`Extract path: ${extractPath}`);
 
@@ -352,7 +352,7 @@ export class Cluster {
       this.stdioTarget = fs.createWriteStream(writeLogsToPath, 'utf8');
       this.log.info(
         chalk.bold('Starting'),
-        `and writing logs to ${pathRelative(process.cwd(), writeLogsToPath)}`
+        `and writing logs to ${path.resolve(process.cwd(), writeLogsToPath)}`
       );
     } else {
       this.log.info(chalk.bold('Starting'));
@@ -413,7 +413,7 @@ export class Cluster {
     this.process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath ? { ES_TMPDIR: pathResolve(installPath, 'ES_TMPDIR') } : {}),
+        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ES_JAVA_OPTS: esJavaOpts,
