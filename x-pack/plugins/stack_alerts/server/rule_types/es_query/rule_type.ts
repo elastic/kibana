@@ -134,7 +134,7 @@ export function getRuleType(
   const actionVariableEsqlQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextEsqlQueryLabel',
     {
-      defaultMessage: 'ESQL query field used to fetch data from Elasticsearch.',
+      defaultMessage: 'ES|QL query field used to fetch data from Elasticsearch.',
     }
   );
 
