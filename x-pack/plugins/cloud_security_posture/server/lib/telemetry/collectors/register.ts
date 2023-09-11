@@ -11,7 +11,7 @@ import { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
 import { getResourcesStats } from './resources_stats_collector';
 import { cspmUsageSchema } from './schema';
-import { CspmUsage } from './types';
+import { CspmUsage, type CloudSecurityUsageCollectorType } from './types';
 import { getAccountsStats } from './accounts_stats_collector';
 import { getRulesStats } from './rules_stats_collector';
 import { getInstallationStats } from './installation_stats_collector';
@@ -35,15 +35,16 @@ export function registerCspmUsageCollector(
       return true;
     },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const handleResult = <T>(taskName: string, result: PromiseSettledResult<T>) => {
+      const getPromiseValue = <T>(
+        taskName: CloudSecurityUsageCollectorType,
+        result: PromiseSettledResult<T>
+      ) => {
         if (result.status === 'fulfilled') {
           return result.value;
         } else {
-          // Handle the error and log it
           logger.error(`${taskName} task failed: ${result.reason}`);
 
-          // Return null or some default value, depending on your needs
-          return [];
+          return undefined;
         }
       };
       const results = await Promise.allSettled([
@@ -65,12 +66,12 @@ export function registerCspmUsageCollector(
         getAlertsStats(collectorFetchContext.esClient, logger),
       ]);
 
-      const indicesStats = handleResult('Indices', results[0]);
-      const accountsStats = handleResult('Accounts', results[1]);
-      const resourcesStats = handleResult('Resources', results[2]);
-      const rulesStats = handleResult('Rules', results[3]);
-      const installationStats = handleResult('Installation', results[4]);
-      const alertsStats = handleResult('Alerts', results[5]);
+      const indicesStats = getPromiseValue('Indices', results[0]);
+      const accountsStats = getPromiseValue('Accounts', results[1]);
+      const resourcesStats = getPromiseValue('Resources', results[2]);
+      const rulesStats = getPromiseValue('Rules', results[3]);
+      const installationStats = getPromiseValue('Installation', results[4]);
+      const alertsStats = getPromiseValue('Alerts', results[5]);
 
       return {
         indices: indicesStats,

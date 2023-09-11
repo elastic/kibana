@@ -7,13 +7,21 @@
 
 import { CspStatusCode } from '../../../../common/types';
 
+export type CloudSecurityUsageCollectorType =
+  | 'Indices'
+  | 'Accounts'
+  | 'Resources'
+  | 'Rules'
+  | 'Installation'
+  | 'Alerts';
+
 export interface CspmUsage {
-  indices: CspmIndicesStats | never[];
-  resources_stats: CspmResourcesStats[];
-  accounts_stats: CspmAccountsStats[];
-  rules_stats: CspmRulesStats[];
-  installation_stats: CloudSecurityInstallationStats[];
-  alerts_stats: CloudSecurityAlertsStats[];
+  indices: CspmIndicesStats | undefined;
+  resources_stats: CspmResourcesStats[] | undefined;
+  accounts_stats: CspmAccountsStats[] | undefined;
+  rules_stats: CspmRulesStats[] | undefined;
+  installation_stats: CloudSecurityInstallationStats[] | undefined;
+  alerts_stats: CloudSecurityAlertsStats[] | undefined;
 }
 
 export interface PackageSetupStatus {
