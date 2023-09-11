@@ -105,6 +105,7 @@ const updateSearchText = debounce(
 
 export const DocViewerTable = ({
   columns,
+  columnTypes,
   hit,
   dataView,
   filter,
@@ -165,7 +166,9 @@ export const DocViewerTable = ({
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, dataView)
+      const fieldType = columnTypes
+        ? columnTypes[field] // for text-based results types come separately
+        : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
         ? getFieldIconType(fieldMapping)
@@ -208,6 +211,7 @@ export const DocViewerTable = ({
       onToggleColumn,
       filter,
       columns,
+      columnTypes,
       flattened,
       pinnedFields,
       onTogglePinned,

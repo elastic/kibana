@@ -204,14 +204,28 @@ function DiscoverDocumentsComponent({
     [isTextBasedQuery, columns, uiSettings, dataView.timeFieldName]
   );
 
+  const columnTypes: DataTableColumnTypes | undefined = useMemo(
+    () =>
+      documentState.textBasedQueryColumns
+        ? getTextBasedColumnTypes(documentState.textBasedQueryColumns)
+        : undefined,
+    [documentState.textBasedQueryColumns]
+  );
+
   const renderDocumentView = useCallback(
-    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnTypes?: DataTableColumnTypes
+    ) => (
       <DiscoverGridFlyout
         dataView={dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
+        columnTypes={customColumnTypes}
         savedSearchId={savedSearch.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}
@@ -222,14 +236,6 @@ function DiscoverDocumentsComponent({
       />
     ),
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
-  );
-
-  const columnTypes: DataTableColumnTypes | undefined = useMemo(
-    () =>
-      documentState.textBasedQueryColumns
-        ? getTextBasedColumnTypes(documentState.textBasedQueryColumns)
-        : undefined,
-    [documentState.textBasedQueryColumns]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

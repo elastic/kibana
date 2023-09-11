@@ -226,7 +226,8 @@ export interface UnifiedDataTableProps {
   renderDocumentView?: (
     hit: DataTableRecord,
     displayedRows: DataTableRecord[],
-    displayedColumns: string[]
+    displayedColumns: string[],
+    columnTypes?: DataTableColumnTypes
   ) => JSX.Element | undefined;
   /**
    * Optional value for providing configuration setting for UnifiedDataTable rows height
@@ -845,7 +846,7 @@ export const UnifiedDataTable = ({
         )}
         {canSetExpandedDoc &&
           expandedDoc &&
-          renderDocumentView!(expandedDoc, displayedRows, displayedColumns)}
+          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnTypes)}
       </span>
     </UnifiedDataTableContext.Provider>
   );
