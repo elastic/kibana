@@ -104,7 +104,7 @@ export const getElasticsearchMetricQuery = (
       : isCustom(metricParams)
       ? createCustomMetricsAggregations(
           'aggregatedValue',
-          metricParams.customMetrics,
+          metricParams.metrics,
           metricParams.equation
         )
       : {

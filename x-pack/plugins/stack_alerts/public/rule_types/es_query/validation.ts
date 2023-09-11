@@ -247,7 +247,7 @@ const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQu
   if (!ruleParams.esqlQuery) {
     errors.esqlQuery.push(
       i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
-        defaultMessage: 'ESQL query is required.',
+        defaultMessage: 'ES|QL query is required.',
       })
     );
   }
