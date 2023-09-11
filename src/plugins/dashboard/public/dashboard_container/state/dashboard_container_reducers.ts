@@ -103,6 +103,13 @@ export const dashboardContainerReducers = {
     state.explicitInput.title = action.payload;
   },
 
+  setManaged: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardPublicState['managed']>
+  ) => {
+    state.componentState.managed = action.payload;
+  },
+
   // ------------------------------------------------------------------------------
   // Unsaved Changes Reducers
   // ------------------------------------------------------------------------------

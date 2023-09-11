@@ -94,6 +94,21 @@ test('pulls state from dashboard saved object when given a saved object id', asy
   expect(dashboard!.getState().explicitInput.description).toBe(`wow would you look at that? Wow.`);
 });
 
+test('passes managed state from the saved object into the Dashboard component state', async () => {
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+      managed: true,
+    });
+  const dashboard = await createDashboard({}, 0, 'what-an-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().componentState.managed).toBe(true);
+});
+
 test('pulls state from session storage which overrides state from saved object', async () => {
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()

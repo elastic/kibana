@@ -33,10 +33,11 @@ export function runSaveAs(this: DashboardContainer) {
 
   const {
     explicitInput: currentState,
-    componentState: { lastSavedId },
+    componentState: { lastSavedId, managed },
   } = this.getState();
 
   return new Promise<SaveDashboardReturn | undefined>((resolve) => {
+    if (managed) resolve(undefined);
     const onSave = async ({
       newTags,
       newTitle,
@@ -132,8 +133,10 @@ export async function runQuickSave(this: DashboardContainer) {
 
   const {
     explicitInput: currentState,
-    componentState: { lastSavedId },
+    componentState: { lastSavedId, managed },
   } = this.getState();
+
+  if (managed) return;
 
   const saveResult = await saveDashboardState({
     lastSavedId,
