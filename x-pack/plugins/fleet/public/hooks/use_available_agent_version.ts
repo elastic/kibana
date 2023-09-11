@@ -17,17 +17,21 @@ export const useAvailableAgentVersion = () => {
 
   useEffect(() => {
     const pickAvailableAgentVersion = async () => {
-      const res = await sendGetAgentsAvailableVersions();
-      const availableVersions = res?.data?.items;
+      try {
+        const res = await sendGetAgentsAvailableVersions();
+        const availableVersions = res?.data?.items;
 
-      if (
-        availableVersions &&
-        availableVersions.length > 0 &&
-        availableVersions.indexOf(kibanaVersion) === -1
-      ) {
-        availableVersions.sort(semverRcompare);
-        setAgentVersion(availableVersions[0]);
-      } else {
+        if (
+          availableVersions &&
+          availableVersions.length > 0 &&
+          availableVersions.indexOf(kibanaVersion) === -1
+        ) {
+          availableVersions.sort(semverRcompare);
+          setAgentVersion(availableVersions[0]);
+        } else {
+          setAgentVersion(kibanaVersion);
+        }
+      } catch (error) {
         setAgentVersion(kibanaVersion);
       }
     };

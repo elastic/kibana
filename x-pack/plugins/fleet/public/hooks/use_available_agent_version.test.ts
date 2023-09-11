@@ -69,4 +69,16 @@ describe('useAvailableAgentVersion', () => {
 
     expect(result.current).toEqual('8.9.2');
   });
+
+  it('should return kibana version if the list of available agent versions is not available', async () => {
+    const mockKibanaVersion = '8.11.0';
+
+    (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
+    (sendGetAgentsAvailableVersions as jest.Mock).mockRejectedValue(new Error('Fetching error'));
+
+    const { result } = renderHook(() => useAvailableAgentVersion());
+
+    expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
+    expect(result.current).toEqual(mockKibanaVersion);
+  });
 });
