@@ -48,7 +48,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
         tabId: activeTabId,
       };
 
-      telemetry.reportAssetDetailsFlyoutViewed(
+      telemetry.reportAssetDetailsPageViewed(
         integrations.length > 0
           ? {
               ...telemetryParams,

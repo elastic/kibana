@@ -212,7 +212,7 @@ describe('TelemetryService', () => {
       service.setup(setupParams);
       const telemetry = service.start();
 
-      telemetry.reportAssetDetailsFlyoutViewed({
+      telemetry.reportAssetDetailsPageViewed({
         componentName: 'infraAssetDetailsPage',
         assetType: 'host',
         tabId: 'overview',
