@@ -125,6 +125,9 @@
                 },
                 "createWebhookConnectorRequest": {
                   "$ref": "#/components/examples/create_webhook_connector_request"
+                },
+                "createXmattersConnectorRequest": {
+                  "$ref": "#/components/examples/create_xmatters_connector_request"
                 }
               }
             }
@@ -144,6 +147,9 @@
                   },
                   "createWebhookConnectorResponse": {
                     "$ref": "#/components/examples/create_webhook_connector_response"
+                  },
+                  "createXmattersConnectorResponse": {
+                    "$ref": "#/components/examples/create_xmatters_connector_response"
                   }
                 }
               }
@@ -477,6 +483,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/update_connector_request_swimlane"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_connector_request_xmatters"
                   }
                 ]
               },
@@ -2743,16 +2752,40 @@
         }
       },
       "config_properties_xmatters": {
-        "title": "Connector request properties for a xMatters connector",
+        "title": "Connector request properties for an xMatters connector",
         "description": "Defines properties for connectors when type is `.xmatters`.",
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "configUrl": {
+            "description": "The request URL for the Elastic Alerts trigger in xMatters. It is applicable only when `usesBasic` is `true`.\n",
+            "type": "string",
+            "nullable": true
+          },
+          "usesBasic": {
+            "description": "Specifies whether the connector uses HTTP basic authentication (`true`) or URL authentication (`false`).",
+            "type": "boolean",
+            "default": true
+          }
+        }
       },
       "secrets_properties_xmatters": {
         "title": "Connector secrets properties for an xMatters connector",
         "description": "Defines secrets for connectors when type is `.xmatters`.",
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "password": {
+            "description": "A user name for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.\n",
+            "type": "string"
+          },
+          "secretsUrl": {
+            "description": "The request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL. It is applicable only when `usesBasic` is `false`.\n",
+            "type": "string"
+          },
+          "user": {
+            "description": "A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.\n",
+            "type": "string"
+          }
+        }
       },
       "create_connector_request_xmatters": {
         "title": "Create xMatters connector request",
@@ -3883,6 +3916,27 @@
           }
         }
       },
+      "update_connector_request_xmatters": {
+        "title": "Update xMatters connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_xmatters"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_xmatters"
+          }
+        }
+      },
       "connector_types": {
         "title": "Connector types",
         "type": "string",
@@ -4662,6 +4716,19 @@
           }
         }
       },
+      "create_xmatters_connector_request": {
+        "summary": "Create an xMatters connector with URL authentication.",
+        "value": {
+          "name": "my-xmatters-connector",
+          "connector_type_id": ".xmatters",
+          "config": {
+            "usesBasic": false
+          },
+          "secrets": {
+            "secretsUrl": "https://example.com?apiKey=xxxxx"
+          }
+        }
+      },
       "create_index_connector_response": {
         "summary": "A new index connector.",
         "value": {
@@ -4694,6 +4761,22 @@
             "hasAuth": true
           },
           "connector_type_id": ".webhook",
+          "is_preconfigured": false,
+          "is_deprecated": false,
+          "is_missing_secrets": false,
+          "is_system_action": false
+        }
+      },
+      "create_xmatters_connector_response": {
+        "summary": "A new xMatters connector.",
+        "value": {
+          "id": "4d2d8da0-4d1f-11ee-9367-577408be4681",
+          "name": "my-xmatters-connector",
+          "config": {
+            "usesBasic": false,
+            "configUrl": null
+          },
+          "connector_type_id": ".xmatters",
           "is_preconfigured": false,
           "is_deprecated": false,
           "is_missing_secrets": false,

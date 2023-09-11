@@ -273,6 +273,9 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 `xpack.actions.preconfigured.<connector-id>.config.clientId`::
 For a <<servicenow-itom-action-type,{sn-itom}>>, <<servicenow-action-type,{sn-itsm}>>, or <<servicenow-sir-action-type,{sn-sir} connector>> specifies the client identifier assigned to the OAuth application.
 
+`xpack.actions.preconfigured.<connector-id>.config.configUrl`::
+For an <<xmatters-action-type,xMatters connector>> with basic authentication, specifies the request URL for the Elastic Alerts trigger in xMatters.
+
 `xpack.actions.preconfigured.<connector-id>.config.createCommentJson`::
 For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment. The required variable is `case.description`.
 +
@@ -349,6 +352,9 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 `xpack.actions.preconfigured.<connector-id>.config.userIdentifierValue`::
 For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies the user identifier. It is required when required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `true`.
 
+`xpack.actions.preconfigured.<connector-id>.config.usesBasic`::
+For an <<xmatters-action-type,xMatters connector>>, specifies whether it uses HTTP basic authentication. Defaults to `true`.
+
 `xpack.actions.preconfigured.<connector-id>.config.usesTableApi`::
 For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies whether the connector uses the Table API or the Import Set API.
 If set to `false`, the Elastic application should be installed in ServiceNow.
@@ -390,6 +396,7 @@ A password secret that varies by connector:
 --
 * For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir}>>, or <<servicenow-itom-action-type,{sn-itom} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
 * For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+* For an <<xmatters-action-type,xMatters connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
 
 `xpack.actions.preconfigured.<connector-id>.secrets.privateKey`::
@@ -401,11 +408,18 @@ For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir
 `xpack.actions.preconfigured.<connector-id>.secrets.routingKey`::
 For a <<pagerduty-action-type,PagerDuty connector>>, specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
+`xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl`::
+For an <<xmatters-action-type,xMatters connector>> with URL authentication, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.
+It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `false`.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
+
 `xpack.actions.preconfigured.<connector-id>.secrets.user`::
 A user name secret that varies by connector:
 +
 --
 * For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+* For an <<xmatters-action-type,xMatters connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
 
 `xpack.actions.preconfigured.<connector-id>.secrets.username`::

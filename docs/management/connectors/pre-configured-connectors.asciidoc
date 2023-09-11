@@ -116,6 +116,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-servicenow-sir-configuration>>
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
+* <<preconfigured-xmatters-configuration>>
 
 [float]
 [[preconfigured-index-configuration]]
@@ -444,3 +445,43 @@ xpack.actions.preconfigured:
 <14> A stringified JSON payload with Mustache variables that is sent to the create comment URL to create a case comment.
 <15> A user name, which is required when `hasAuth` is `true`.
 <16> A password, which is required when `hasAuth` is `true`.
+
+[float]
+[[preconfigured-xmatters-configuration]]
+==== xMatters connectors
+
+The following example creates an <<xmatters-action-type,xMatters connector>> with basic authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      configUrl: https://test.host <1>
+      usesBasic: true <2>
+    secrets:
+      user: testuser <3>
+      password: passwordkeystorevalue <4>
+--
+<1> The request URL for the Elastic Alerts trigger in xMatters.
+<2> Indicates whether the connector uses HTTP basic authentication. If `true`, you must provide `user` and `password` values. Defaults to `true`.
+<3> A user name for authentication, which is required when `usesBasic` is `true`.
+<4> A password for authentication, which is required when `usesBasic` is `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
+
+The following example creates an xMatters connector with URL authentication:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-xmatters:
+    name: preconfigured-xmatters-connector-type
+    actionTypeId: .xmatters
+    config:
+      usesBasic: false <1>
+    secrets:
+      secretsUrl: https://test.host?apiKey=1234-abcd <2>
+--
+<1> Indicates whether the connector uses HTTP basic authentication. Set to `false` to use URL authentication. Defaults to `true`.
+<2> The request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.
