@@ -12,8 +12,9 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { isExplicitInputWithAttributes } from '@kbn/embeddable-plugin/public';
 
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
@@ -83,15 +84,26 @@ export function DashboardEditingToolbar() {
         trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
       }
 
-      let explicitInput: Awaited<ReturnType<typeof embeddableFactory.getExplicitInput>>;
+      let explicitInput: Partial<EmbeddableInput>;
+      let attributes: unknown;
       try {
-        explicitInput = await embeddableFactory.getExplicitInput(undefined, dashboard);
+        const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, dashboard);
+        if (isExplicitInputWithAttributes(explicitInputReturn)) {
+          explicitInput = explicitInputReturn.newInput;
+          attributes = explicitInputReturn.attributes;
+        } else {
+          explicitInput = explicitInputReturn;
+        }
       } catch (e) {
         // error likely means user canceled embeddable creation
         return;
       }
 
-      const newEmbeddable = await dashboard.addNewEmbeddable(embeddableFactory.type, explicitInput);
+      const newEmbeddable = await dashboard.addNewEmbeddable(
+        embeddableFactory.type,
+        explicitInput,
+        attributes
+      );
 
       if (newEmbeddable) {
         dashboard.setScrollToPanelId(newEmbeddable.id);

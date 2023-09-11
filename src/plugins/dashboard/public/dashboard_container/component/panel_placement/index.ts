@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { createPanelState } from './create_panel_state';
+export { placePanel } from './place_panel';
+
+export { placeClonePanel } from './place_clone_panel_strategy';
