@@ -100,7 +100,6 @@ export const ProcessesExplanationMessage = () => {
           iconSize="s"
           iconColor="subdued"
           icon="iInCircle"
-          panelPaddingSize="m"
           data-test-subj="infraAssetDetailsProcessesPopoverButton"
         >
           <ProcessesExplanationTooltipContent />

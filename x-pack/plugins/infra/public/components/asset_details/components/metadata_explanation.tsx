@@ -91,7 +91,6 @@ export const MetadataExplanationMessage = () => {
           iconSize="s"
           iconColor="subdued"
           icon="iInCircle"
-          panelPaddingSize="m"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
           <MetadataExplanationTooltipContent />
