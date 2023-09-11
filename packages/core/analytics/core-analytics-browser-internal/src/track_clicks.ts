@@ -10,7 +10,7 @@ import { fromEvent } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 
 /** HTML attributes that should be skipped from reporting because they might contain data we do not wish to collect */
-const HTML_ATTRIBUTES_WITH_EXTRA_DATA = [
+const HTML_ATTRIBUTES_TO_REMOVE = [
   'data-href',
   'data-ech-series-name',
   'data-provider-id',
@@ -80,7 +80,7 @@ function getTargetDefinition(target: HTMLElement): string[] {
     ...(target.parentElement ? getTargetDefinition(target.parentElement) : []),
     target.tagName,
     ...[...target.attributes]
-      .filter((attr) => !HTML_ATTRIBUTES_WITH_EXTRA_DATA.includes(attr.name))
+      .filter((attr) => !HTML_ATTRIBUTES_TO_REMOVE.includes(attr.name))
       .map((attr) => `${attr.name}=${attr.value}`),
   ];
 }

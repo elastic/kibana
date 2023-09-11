@@ -129,7 +129,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     const event: Event = {
       timestamp,
       event_type: eventType,
-      context: maskSecurityUrls(this.context$.value),
+      context: maskContext(this.context$.value),
       properties: eventData as unknown as Record<string, unknown>,
     };
 
@@ -362,33 +362,35 @@ export class AnalyticsClient implements IAnalyticsClient {
 }
 
 /** security paths that contain user data */
-const SECURITY_PATHS = ['hosts/name', 'users/name', 'network/ip'];
+const PATHS_TO_MASK = ['hosts/name/', 'users/name/', 'network/ip/'];
 // this indicates a user query
-const queryMarker = `?_g=`;
-const fixUrl = (url: string) => {
+const queryMarker = `?`;
+const maskUrl = (url: string) => {
   if (url.includes(queryMarker)) {
     url = url.substring(0, url.indexOf(queryMarker) + queryMarker.length);
   }
-  const matchedKnownPiiData = SECURITY_PATHS.find((path) => url.includes(path));
+  const matchedPaths = PATHS_TO_MASK.find((path) => url.includes(path));
 
-  if (matchedKnownPiiData) {
-    const res = url.split(matchedKnownPiiData);
-    return res[0] + matchedKnownPiiData + res[1].replace(/^\/[^\/\r\n]+(?=\/)/, '/MASKED');
+  if (matchedPaths) {
+    const res = url.split(matchedPaths);
+    const rmArr = res[1].split('/');
+    rmArr.splice(0, 1, 'MASKED');
+    return res[0] + matchedPaths + rmArr.join('/');
   }
 
   return url;
 };
 
-export function maskSecurityUrls(properties: Partial<EventContext>): Record<string, unknown> {
+export function maskContext(properties: Partial<EventContext>): Record<string, unknown> {
   const maskedProperties: Partial<EventContext> = {};
   if (properties.page_url) {
-    maskedProperties.page_url = fixUrl(properties.page_url as string);
+    maskedProperties.page_url = maskUrl(properties.page_url as string);
   }
   if (properties.page) {
-    maskedProperties.page = fixUrl(properties.page as string);
+    maskedProperties.page = maskUrl(properties.page as string);
   }
   if (properties.pageName) {
-    maskedProperties.pageName = fixUrl(properties.pageName as string);
+    maskedProperties.pageName = maskUrl(properties.pageName as string);
   }
 
   return {
