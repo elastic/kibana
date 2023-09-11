@@ -76,7 +76,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/166027
       describe('status', () => {
         before(async () => {
           await cases.api.createNthRandomCases(2);
@@ -96,7 +95,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/166123
       describe('severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(2);
@@ -503,7 +501,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/166127
     describe('severity filtering', () => {
       before(async () => {
         await cases.navigation.navigateToApp();
