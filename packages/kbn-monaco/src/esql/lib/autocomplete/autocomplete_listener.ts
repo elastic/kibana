@@ -15,6 +15,7 @@ import {
   esql_parser as ESQLParser,
   EnrichCommandContext,
   EnrichWithClauseContext,
+  OperatorExpressionContext,
 } from '../../antlr/esql_parser';
 
 import {
@@ -67,6 +68,13 @@ import {
   onOperatorDefinition,
   withOperatorDefinition,
 } from './autocomplete_definitions/operators_commands';
+import { dateExpressionDefinitions } from './autocomplete_definitions/date_math_expressions';
+import {
+  endsWithOpenBracket,
+  getDateMathOperation,
+  getDurationItemsWithQuantifier,
+  isDateFunction,
+} from './helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -103,6 +111,37 @@ export class AutocompleteListener implements ESQLParserListener {
 
   private isTerminalNodeExists(node: TerminalNode | undefined) {
     return node && node.payload?.startIndex >= 0;
+  }
+
+  private inspectOperatorExpressionContext(
+    context: OperatorExpressionContext | OperatorExpressionContext[] | undefined,
+    innerScope: 'constant' | 'dateExpression' | 'booleanExpression'
+  ): boolean {
+    if (!context) {
+      return false;
+    }
+    if (Array.isArray(context)) {
+      return context.some((c) => this.inspectOperatorExpressionContext(c, innerScope));
+    }
+    if (context.operatorExpression()?.length) {
+      return this.inspectOperatorExpressionContext(context.operatorExpression(), innerScope);
+    }
+    if (context.primaryExpression()) {
+      return Boolean(context.primaryExpression()?.[innerScope]());
+    }
+    return false;
+  }
+
+  private hasDateExpressionTerminalNode(
+    context: OperatorExpressionContext | OperatorExpressionContext[] | undefined
+  ): boolean {
+    return this.inspectOperatorExpressionContext(context, 'dateExpression');
+  }
+
+  private hasOnlyConstantDefined(
+    context: OperatorExpressionContext | OperatorExpressionContext[] | undefined
+  ): boolean {
+    return this.inspectOperatorExpressionContext(context, 'constant');
   }
 
   private applyConditionalSuggestion(
@@ -346,36 +385,101 @@ export class AutocompleteListener implements ESQLParserListener {
     const isInStats = this.parentContext === ESQLParser.STATS;
     const isInEval = this.parentContext === ESQLParser.EVAL;
 
-    if (this.parentContext && (isInStats || isInEval)) {
+    if (isInStats || isInEval) {
       const hasFN =
         ctx.tryGetToken(esql_parser.UNARY_FUNCTION, 0) ||
         ctx.tryGetToken(esql_parser.MATH_FUNCTION, 0);
       const hasLP = ctx.tryGetToken(esql_parser.LP, 0);
       const hasRP = ctx.tryGetToken(esql_parser.RP, 0);
+      // TODO: handle also other math signs later on
+      const hasPlusOrMinus =
+        ctx.tryGetToken(esql_parser.PLUS, 0) || ctx.tryGetToken(esql_parser.MINUS, 0);
 
+      const hasDateLiteral = ctx.tryGetToken(esql_parser.DATE_LITERAL, 0);
+
+      const isInDurationMode = hasDateLiteral || (hasFN && isDateFunction(hasFN.text));
+      if (hasPlusOrMinus && this.isTerminalNodeExists(hasPlusOrMinus)) {
+        if (isInEval) {
+          this.suggestions = isInDurationMode
+            ? // eval a = 1 year + ||  eval a = date_trunc(1 year, date) -
+              [
+                ...mathCommandDefinition.filter(({ label }) => isDateFunction(String(label))),
+                ...getDurationItemsWithQuantifier(),
+              ]
+            : // eval a = 1 + || eval a = abs(b) -
+              [...this.fields, ...mathCommandDefinition];
+        } else {
+          this.suggestions = [...this.fields, ...aggregationFunctionsDefinitions];
+        }
+        return;
+      }
+
+      // Monaco will auto close the brackets but the language listener will not pick up yet this auto-change.
+      // We try to inject it outside but it won't cover all scenarios
       if (hasFN) {
         if (!hasLP) {
           this.suggestions = [openBracketDefinition];
           return;
         }
+
+        this.suggestions = [];
+
         if (!hasRP) {
           if (ctx.childCount === 3) {
-            this.suggestions = [closeBracketDefinition, ...this.fields];
-            return;
+            // TODO: improve here to suggest comma if signature has multiple args
+            this.suggestions.push(closeBracketDefinition);
           }
         }
+        this.suggestions.push(...this.fields);
+        // Need to get the function name from the previous node (current is "(" )
+        const fnName = hasFN.text;
+        const fnsToCheck = isInEval ? mathCommandDefinition : aggregationFunctionsDefinitions;
+        if (fnName && fnsToCheck.some(({ label }) => label === fnName)) {
+          // push date suggestions only for date functions
+          // TODO: improve this checks
+          if (isInEval && isDateFunction(fnName)) {
+            if (!ctx.tryGetToken(esql_parser.DATE_LITERAL, 0)) {
+              this.suggestions.push(
+                // if it's just after the open bracket, suggest also a number together with a date period,
+                // otherwise just the date period unit
+                ...(endsWithOpenBracket(ctx.text)
+                  ? getDurationItemsWithQuantifier()
+                  : dateExpressionDefinitions)
+              );
+            }
+          }
+        }
+
+        return;
       } else {
         if (ctx.childCount === 1) {
           if (ctx.text && ctx.text.indexOf('(') === -1) {
-            this.suggestions = [
-              ...(isInEval ? mathCommandDefinition : []),
-              ...(isInStats ? aggregationFunctionsDefinitions : []),
-            ];
+            this.suggestions = [...mathOperatorsCommandsDefinitions];
+            if (isInEval) {
+              // eval a = 1 || eval a = 1 year + 1
+              if (
+                this.hasDateExpressionTerminalNode(ctx.operatorExpression()) ||
+                this.hasOnlyConstantDefined(ctx.operatorExpression())
+              ) {
+                this.suggestions = [...getDateMathOperation(), ...dateExpressionDefinitions];
+              }
+            }
+
+            if (isInStats) {
+              this.suggestions.push(...aggregationFunctionsDefinitions);
+            }
+
+            this.suggestions.push(...this.getEndCommandSuggestions());
           }
           return;
         }
       }
-      this.suggestions = this.fields;
+      this.suggestions = [...this.fields];
+      if (ctx.exception && isInEval) {
+        // case: eval a = x * or / <here>
+        this.suggestions.push(...mathCommandDefinition);
+      }
+      this.suggestions.push(...this.getEndCommandSuggestions());
     }
   }
 
