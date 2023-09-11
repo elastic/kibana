@@ -7,11 +7,17 @@
  */
 
 import Path from 'path';
-import '../jest_matchers';
-import { startElasticsearch } from '../kibana_migrator_test_kit';
-import { createBasicDocumentsMigrationTest } from '../shared_suites/zdt/basic_document_migration';
+import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
+import { createBasicDocumentsMigrationTest } from '../../migrations/shared_suites/zdt/basic_document_migration';
 
-describe('ZDT upgrades - basic document migration', () => {
+describe('serverless - ZDT upgrades - basic document migration', () => {
+  const startElasticsearch = async () => {
+    const { startES } = createTestServerlessInstances({
+      adjustTimeout: jest.setTimeout,
+    });
+    return await startES();
+  };
+
   createBasicDocumentsMigrationTest({
     startES: startElasticsearch,
     logFilePath: Path.join(__dirname, 'basic_document_migration.test.log'),
