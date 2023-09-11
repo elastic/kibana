@@ -5,19 +5,24 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+
+import type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 import { spacesClientServiceMock } from './spaces_client/spaces_client_service.mock';
 import { spacesServiceMock } from './spaces_service/spaces_service.mock';
 
-function createSetupMock() {
+function createSetupMock(): jest.Mocked<SpacesPluginSetup> {
   return {
     spacesService: spacesServiceMock.createSetupContract(),
     spacesClient: spacesClientServiceMock.createSetup(),
+    hasOnlyDefaultSpace$: of(false),
   };
 }
 
-function createStartMock() {
+function createStartMock(): jest.Mocked<SpacesPluginStart> {
   return {
     spacesService: spacesServiceMock.createStartContract(),
+    hasOnlyDefaultSpace$: of(false),
   };
 }
 
