@@ -383,6 +383,13 @@ It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasi
 +
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
 
+`xpack.actions.preconfigured.<connector-id>.secrets.token`::
+A token secret that varies by connector:
++
+--
+For a <<slack-action-type,Slack connector>>, specifies the Slack bot user OAuth token.
+--
+
 `xpack.actions.preconfigured.<connector-id>.secrets.user`::
 A user name secret that varies by connector:
 +
@@ -390,6 +397,11 @@ A user name secret that varies by connector:
 * For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
 * For an <<xmatters-action-type,xMatters connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
+
+`xpack.actions.preconfigured.<connector-id>.secrets.webhookUrl`::
+For a <<slack-action-type,Slack connector>>, specifies the Slack webhook URL.
++
+NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
 
 [float]
 [[alert-settings]]
