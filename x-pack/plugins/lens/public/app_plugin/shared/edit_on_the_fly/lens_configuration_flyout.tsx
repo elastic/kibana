@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import {
   EuiButtonEmpty,
+  EuiButton,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
@@ -30,6 +31,8 @@ import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
+import { extractReferencesFromState } from '../../../utils';
+import type { Document } from '../../../persistence';
 
 export interface EditConfigPanelProps {
   attributes: TypedLensByValueInput['attributes'];
@@ -42,8 +45,11 @@ export interface EditConfigPanelProps {
   closeFlyout?: () => void;
   wrapInFlyout?: boolean;
   panelId?: string;
+  savedObjectId?: string;
   datasourceId: 'formBased' | 'textBased';
   adaptersTables?: Record<string, Datatable>;
+  saveByRef?: (attrs: Document) => void;
+  updateByRefInput?: (soId: string) => void;
 }
 
 export function LensEditConfigurationFlyout({
@@ -57,11 +63,70 @@ export function LensEditConfigurationFlyout({
   updateAll,
   closeFlyout,
   adaptersTables,
+  saveByRef,
+  savedObjectId,
+  updateByRefInput,
 }: EditConfigPanelProps) {
+  const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { euiTheme } = useEuiTheme();
+
+  const onCancel = useCallback(() => {
+    const attrs = previousAttributes.current;
+    updateAll?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
+    if (savedObjectId) {
+      updateByRefInput?.(savedObjectId);
+    }
+    closeFlyout?.();
+  }, [updateAll, datasourceId, savedObjectId, closeFlyout, updateByRefInput]);
+  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+
+  const onApply = useCallback(() => {
+    if (savedObjectId) {
+      const dsStates = Object.fromEntries(
+        Object.entries(datasourceStates).map(([id, ds]) => {
+          const dsState = ds.state;
+          return [id, dsState];
+        })
+      );
+      const references = extractReferencesFromState({
+        activeDatasources: Object.keys(datasourceStates).reduce(
+          (acc, id) => ({
+            ...acc,
+            [id]: datasourceMap[id],
+          }),
+          {}
+        ),
+        datasourceStates,
+        visualizationState: visualization.state,
+        activeVisualization,
+      });
+      const attrs = {
+        ...attributes,
+        state: {
+          ...attributes.state,
+          visualization: visualization.state,
+          datasourceStates: dsStates,
+        },
+        references,
+      };
+      saveByRef?.(attrs);
+      updateByRefInput?.(savedObjectId);
+    }
+    closeFlyout?.();
+  }, [
+    activeVisualization,
+    savedObjectId,
+    closeFlyout,
+    attributes,
+    datasourceMap,
+    visualization.state,
+    datasourceStates,
+    saveByRef,
+    updateByRefInput,
+  ]);
 
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
@@ -83,7 +148,6 @@ export function LensEditConfigurationFlyout({
     };
     return selectFramePublicAPI(newState, datasourceMap);
   });
-  const { isLoading } = useLensSelector((state) => state.lens);
   if (isLoading) return null;
 
   const layerPanelsProps = {
@@ -139,17 +203,35 @@ export function LensEditConfigurationFlyout({
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty
-          onClick={closeFlyout}
-          data-test-subj="collapseFlyoutButton"
-          aria-controls="lens-config-close-button"
-          aria-expanded="true"
-          aria-label={i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
-            defaultMessage: 'Close flyout',
-          })}
-        >
-          <FormattedMessage id="xpack.lens.config.closeFlyoutLabel" defaultMessage="Close" />
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={onCancel}
+              flush="left"
+              aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
+                defaultMessage: 'Cancel applied changes',
+              })}
+            >
+              <FormattedMessage id="xpack.lens.config.cancelFlyoutLabel" defaultMessage="Cancel" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={onApply}
+              fill
+              aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
+                defaultMessage: 'Apply changes',
+              })}
+              iconType="check"
+              data-test-subj="collapseFlyoutButton"
+            >
+              <FormattedMessage
+                id="xpack.lens.config.applyFlyoutLabel"
+                defaultMessage="Apply and close"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>
   );

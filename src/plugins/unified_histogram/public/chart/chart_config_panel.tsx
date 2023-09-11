@@ -49,9 +49,7 @@ export function ChartConfigPanel({
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       } as Suggestion;
-      if (!isEqual(updatedSuggestion, currentSuggestion)) {
-        onSuggestionChange?.(updatedSuggestion);
-      }
+      onSuggestionChange?.(updatedSuggestion);
     },
     [currentSuggestion, onSuggestionChange]
   );

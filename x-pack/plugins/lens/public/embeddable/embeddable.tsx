@@ -774,8 +774,13 @@ export class Embeddable
         },
         references,
       };
-      this.updateInput({ attributes: attrs });
+      this.updateInput({ attributes: attrs, savedObjectId: undefined });
     }
+  }
+
+  public updateByRefInput(savedObjectId: string) {
+    const attrs = this.savedVis;
+    this.updateInput({ attributes: attrs, savedObjectId });
   }
 
   async openConfingPanel(startDependencies: LensPluginStartDependencies) {
@@ -801,6 +806,8 @@ export class Embeddable
           datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
           panelId={this.id}
+          savedObjectId={this.savedVis?.savedObjectId}
+          updateByRefInput={this.updateByRefInput.bind(this)}
         />
       );
     }

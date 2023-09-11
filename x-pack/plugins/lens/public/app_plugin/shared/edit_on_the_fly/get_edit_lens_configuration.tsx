@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -29,6 +29,8 @@ import {
   LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
+import { SavedObjectIndexStore, type Document } from '../../../persistence';
+import { DOC_TYPE } from '../../../../common/constants';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -93,10 +95,23 @@ export async function getEditLensConfiguration(
     datasourceId,
     adaptersTables,
     panelId,
+    savedObjectId,
+    updateByRefInput,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }
+    const saveByRef = useCallback(
+      async (attrs: Document) => {
+        const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement.client);
+        await savedObjectStore.save({
+          ...attrs,
+          savedObjectId,
+          type: DOC_TYPE,
+        });
+      },
+      [savedObjectId]
+    );
     const datasourceState = attributes.state.datasourceStates[datasourceId];
     const storeDeps = {
       lensServices,
@@ -159,6 +174,9 @@ export async function getEditLensConfiguration(
       startDependencies,
       visualizationMap,
       datasourceMap,
+      saveByRef,
+      savedObjectId,
+      updateByRefInput,
     };
 
     return getWrapper(
