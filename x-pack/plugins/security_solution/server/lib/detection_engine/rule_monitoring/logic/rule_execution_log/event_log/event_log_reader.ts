@@ -184,10 +184,10 @@ const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {
   const sequence = normalizeEventSequence(rawEvent);
   const level = normalizeLogLevel(rawEvent);
   const type = normalizeEventType(rawEvent);
-  const execution = normalizeExecutionId(rawEvent);
+  const executionId = normalizeExecutionId(rawEvent);
   const message = normalizeEventMessage(rawEvent, type);
 
-  return { timestamp, sequence, level, type, message, execution };
+  return { timestamp, sequence, level, type, message, execution_id: executionId };
 };
 
 type RawEvent = NonNullable<IValidatedEvent>;

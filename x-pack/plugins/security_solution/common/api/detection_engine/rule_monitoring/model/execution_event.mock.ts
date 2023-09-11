@@ -18,7 +18,7 @@ const getMessageEvent = (props: Partial<RuleExecutionEvent> = {}): RuleExecution
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
     level: LogLevel.debug,
-    execution: 'execution-id-1',
+    execution_id: 'execution-id-1',
     message: 'Some message',
     // Overridden values
     ...props,
@@ -32,7 +32,7 @@ const getRunningStatusChange = (props: Partial<RuleExecutionEvent> = {}): RuleEx
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
-    execution: 'execution-id-1',
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "running"',
     // Overridden values
     ...props,
@@ -49,7 +49,7 @@ const getPartialFailureStatusChange = (
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
-    execution: 'execution-id-1',
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "partial failure". Unknown error',
     // Overridden values
     ...props,
@@ -64,7 +64,7 @@ const getFailedStatusChange = (props: Partial<RuleExecutionEvent> = {}): RuleExe
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
-    execution: 'execution-id-1',
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "failed". Unknown error',
     // Overridden values
     ...props,
@@ -79,7 +79,7 @@ const getSucceededStatusChange = (props: Partial<RuleExecutionEvent> = {}): Rule
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
-    execution: 'execution-id-1',
+    execution_id: 'execution-id-1',
     message: 'Rule changed status to "succeeded". Rule executed successfully',
     // Overridden values
     ...props,
@@ -94,7 +94,7 @@ const getExecutionMetricsEvent = (props: Partial<RuleExecutionEvent> = {}): Rule
     // Default values
     timestamp: DEFAULT_TIMESTAMP,
     sequence: DEFAULT_SEQUENCE_NUMBER,
-    execution: 'execution-id-1',
+    execution_id: 'execution-id-1',
     message: JSON.stringify({ some_metric_ms: 10 }),
     // Overridden values
     ...props,

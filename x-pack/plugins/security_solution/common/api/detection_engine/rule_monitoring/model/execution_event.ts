@@ -56,6 +56,6 @@ export const RuleExecutionEvent = t.type({
   sequence: t.number,
   level: TLogLevel,
   type: TRuleExecutionEventType,
-  execution: NonEmptyString, // Execution UUID
+  execution_id: NonEmptyString,
   message: t.string,
 });
