@@ -14,7 +14,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
 import { CliArgs } from '@kbn/config';
-import { kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
@@ -87,6 +86,8 @@ function createServerlessES() {
         clean: true,
         kill: true,
         waitForReady: true,
+        // security is enabled by default, if needed kibana requires serviceAccountToken
+        esArgs: ['xpack.security.enabled=false'],
       });
       const client = getServerlessESClient({ port: esPort });
 
@@ -118,7 +119,6 @@ const getServerlessDefault = () => {
     },
     elasticsearch: {
       hosts: [`http://localhost:${esTestConfig.getPort()}`],
-      serviceAccountToken: kibanaDevServiceAccount.token,
     },
     migrations: {
       algorithm: 'zdt',
