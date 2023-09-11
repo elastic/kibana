@@ -34,6 +34,7 @@ export type BaseChartProps = Pick<
   | 'loading'
   | 'overrides'
   | 'onBrushEnd'
+  | 'onFilter'
   | 'query'
   | 'title'
 > & {
