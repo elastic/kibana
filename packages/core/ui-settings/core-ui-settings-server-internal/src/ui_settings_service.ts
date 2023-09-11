@@ -51,6 +51,7 @@ export class UiSettingsService
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
   private readonly isDist: boolean;
+  private readonly isDev: boolean;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private readonly uiSettingsGlobalDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
@@ -60,6 +61,7 @@ export class UiSettingsService
     this.log = coreContext.logger.get('ui-settings-service');
     this.isDist = coreContext.env.packageInfo.dist;
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
+    this.isDev = coreContext.env.mode.dev;
   }
 
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
@@ -106,7 +108,7 @@ export class UiSettingsService
   public async start(): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
       // If we are in development mode, check if all settings in the allowlist are registered
-      if (process.env.NODE_ENV !== 'production') {
+      if (this.isDev) {
         this.validateAllowlist();
       }
       this.applyAllowlist(this.uiSettingsDefaults, false);
