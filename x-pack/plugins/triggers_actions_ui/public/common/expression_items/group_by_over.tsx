@@ -76,20 +76,21 @@ export const GroupByExpression = ({
   const MIN_TERM_SIZE = 1;
   const MAX_TERM_SIZE = 1000;
 
-  const availableFieldOptions: GroupByOverFieldOption[] = fields.reduce(
-    (options: GroupByOverFieldOption[], field: FieldOption) => {
-      if (groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)) {
-        options.push({ label: field.name });
-      }
-      return options;
-    },
-    []
+  const availableFieldOptions: GroupByOverFieldOption[] = useMemo(
+    () =>
+      fields.reduce((options: GroupByOverFieldOption[], field: FieldOption) => {
+        if (groupByTypes[groupBy].validNormalizedTypes.includes(field.normalizedType)) {
+          options.push({ label: field.name });
+        }
+        return options;
+      }, []),
+    [groupByTypes, fields, groupBy]
   );
 
   const initialTermFieldOptions = useMemo(() => {
     let initialFields: string[] = [];
 
-    if (termField) {
+    if (!!termField) {
       initialFields = Array.isArray(termField) ? termField : [termField];
     }
     return initialFields.map((field: string) => ({
@@ -101,10 +102,14 @@ export const GroupByExpression = ({
     useState<GroupByOverFieldOption[]>(initialTermFieldOptions);
 
   useEffect(() => {
-    const termsFields = selectedTermsFieldsOptions.map((option) => option.label);
-    const toSave =
-      Array.isArray(termsFields) && termsFields.length > 1 ? termsFields : termsFields[0];
-    onChangeSelectedTermField(toSave || '');
+    const selectedTermFields = selectedTermsFieldsOptions.map((option) => option.label);
+    const termsToSave =
+      Array.isArray(selectedTermFields) && selectedTermFields.length > 1
+        ? selectedTermFields
+        : selectedTermFields[0];
+    if (!!termsToSave) {
+      onChangeSelectedTermField(termsToSave);
+    }
   }, [selectedTermsFieldsOptions, onChangeSelectedTermField]);
 
   useEffect(() => {
