@@ -251,7 +251,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
           >
             <FormattedMessage
               id="xpack.securitySolution.endpoint.protectionUpdates.manifestOutdated"
-              defaultMessage="Your protections artifacts have not been updated in over 30 days. We strongly recommend keeping these up to date ensure the highest level of security for your environment.{break}Note: After 18 months, protections artifacts will expire and cannot be rolled back. {learnMore}"
+              defaultMessage="Your protection artifacts have not been updated in over 30 days. We strongly recommend keeping these up to date to ensure the highest level of security for your environment.{break}Note: After 18 months, protection artifacts will expire and cannot be rolled back. {learnMore}"
               values={{
                 learnMore: (
                   <EuiLink
