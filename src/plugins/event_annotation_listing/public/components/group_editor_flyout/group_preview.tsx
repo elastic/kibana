@@ -111,7 +111,11 @@ export const GroupPreview = ({
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h4>
+              <h4
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
                 <FormattedMessage
                   id="eventAnnotationListing.groupPreview.preview"
                   defaultMessage="Preview"

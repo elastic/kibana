@@ -114,6 +114,7 @@ export const GroupEditorFlyout = ({
       <EuiFlexGroup
         css={css`
           height: 100%;
+          overflow-y: auto;
         `}
         gutterSize="none"
       >
