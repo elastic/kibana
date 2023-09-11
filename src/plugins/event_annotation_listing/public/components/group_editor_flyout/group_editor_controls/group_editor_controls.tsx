@@ -201,7 +201,16 @@ export const GroupEditorControls = ({
         css={css`
           margin-top: ${euiThemeVars.euiSize};
           padding-top: ${euiThemeVars.euiSize};
-          border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+          position: relative;
+
+          &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -${euiThemeVars.euiSize};
+            left: -${euiThemeVars.euiSize};
+            border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+          }
         `}
       >
         <EuiTitle
