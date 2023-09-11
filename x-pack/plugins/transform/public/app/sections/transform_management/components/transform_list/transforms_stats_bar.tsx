@@ -12,6 +12,7 @@ import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useIsServerless } from '../../../../serverless_context';
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListRow } from '../../../../common';
@@ -20,8 +21,12 @@ import { useDocumentationLinks, useRefreshTransformList } from '../../../../hook
 
 import { StatsBar, TransformStatsBarStats } from '../stats_bar';
 
-function createTranformStats(transformNodes: number, transformsList: TransformListRow[]) {
-  const transformStats = {
+function createTranformStats(
+  transformNodes: number,
+  transformsList: TransformListRow[],
+  hideNodeInfo: boolean
+): TransformStatsBarStats {
+  const transformStats: TransformStatsBarStats = {
     total: {
       label: i18n.translate('xpack.transform.statsBar.totalTransformsLabel', {
         defaultMessage: 'Total transforms',
@@ -57,14 +62,17 @@ function createTranformStats(transformNodes: number, transformsList: TransformLi
       value: 0,
       show: true,
     },
-    nodes: {
+  };
+
+  if (!hideNodeInfo) {
+    transformStats.nodes = {
       label: i18n.translate('xpack.transform.statsBar.transformNodesLabel', {
         defaultMessage: 'Nodes',
       }),
       value: transformNodes,
       show: true,
-    },
-  };
+    };
+  }
 
   if (transformsList === undefined) {
     return transformStats;
@@ -74,9 +82,15 @@ function createTranformStats(transformNodes: number, transformsList: TransformLi
   let startedTransforms = 0;
 
   transformsList.forEach((transform) => {
-    if (transform.mode === TRANSFORM_MODE.CONTINUOUS) {
+    if (
+      transform.mode === TRANSFORM_MODE.CONTINUOUS &&
+      typeof transformStats.continuous.value === 'number'
+    ) {
       transformStats.continuous.value++;
-    } else if (transform.mode === TRANSFORM_MODE.BATCH) {
+    } else if (
+      transform.mode === TRANSFORM_MODE.BATCH &&
+      typeof transformStats.batch.value === 'number'
+    ) {
       transformStats.batch.value++;
     }
 
@@ -109,17 +123,19 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
   transformNodes,
   transformsList,
 }) => {
+  const hideNodeInfo = useIsServerless();
   const refreshTransformList = useRefreshTransformList();
   const { esNodeRoles } = useDocumentationLinks();
 
   const transformStats: TransformStatsBarStats = createTranformStats(
     transformNodes,
-    transformsList
+    transformsList,
+    hideNodeInfo
   );
 
   return (
     <>
-      {transformNodes === 0 && (
+      {!hideNodeInfo && transformNodes === 0 && (
         <>
           <EuiCallOut
             title={
