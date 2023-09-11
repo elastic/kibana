@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import type { InfraMetadata } from '../../../../common/http_api';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useKibanaHeader } from '../../../hooks/use_kibana_header';
 import { InfraLoadingPanel } from '../../loading';
@@ -20,26 +19,7 @@ import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
-
-enum INTEGRATION_NAME {
-  nginx = 'nginx',
-  kubernetes = 'kubernetes',
-}
-const INTEGRATIONS = {
-  [INTEGRATION_NAME.nginx]: ['nginx.stubstatus', 'nginx.access'],
-  [INTEGRATION_NAME.kubernetes]: ['kubernetes.node'],
-};
-
-const getIntegrationAvailable = (
-  integration: INTEGRATION_NAME,
-  metadata?: InfraMetadata | null
-) => {
-  if (metadata) {
-    return metadata?.features?.some((f) => INTEGRATIONS[integration].includes(f.name))
-      ? integration
-      : null;
-  }
-};
+import { INTEGRATION_NAME, getIntegrationAvailable } from '../utils';
 
 export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
