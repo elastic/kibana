@@ -428,7 +428,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           const titlePattern = /rule 'always fire' matched query for group group-\d/;
           expect(title).to.match(titlePattern);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents for group \"group-\d,\d\" is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents for group \"group-\d,\d{1,2}\" is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
