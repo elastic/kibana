@@ -83,7 +83,8 @@ export function registerQueryFunction({
       previous command.
 
       ES|QL is not Elasticsearch SQL, nor is it anything like SQL. SQL
-      commands are not available in ES|QL.
+      commands are not available in ES|QL. Its close equivalent is SPL
+      (Search Processing Language).
 
       # Constructing a query
 
@@ -93,7 +94,8 @@ export function registerQueryFunction({
       - What data source is the user requesting? What command should I
       select for this data source?
       - What are the steps needed to get the result that the user needs?
-      Break each operation down into its own step.
+      Break each operation down into its own step. Reason about what data
+      is the outcome of each command or function.
       - For each step, refer back to examples and documentation that are
       part of the current conversation. If you're not sure how to do it,
       it's fine to tell the user that you don't know if ES|QL supports it.
@@ -218,12 +220,14 @@ export function registerQueryFunction({
       ### EVAL
       
       \`EVAL\` appends a new column to the documents by using aliasing. It
-      also supports functions:
-      \`\`\`
+      also supports functions, but not aggregation functions like COUNT:
+      
+      - \`\`\`
       | EVAL monthly_salary = yearly_salary / 12,
         total_comp = ROUND(yearly_salary + yearly+bonus),
         is_rich =total_comp > 1000000
       \`\`\`
+      - \`| EVAL height_in_ft = height_in_cm / 0.0328\`
 
       ### WHERE
 
@@ -269,14 +273,18 @@ export function registerQueryFunction({
       the number of arguments is odd, the last argument is the default value which
       is returned when no condition matches. Some examples:
 
-      \`\`\`
+      - \`\`\`
       | EVAL type = CASE(
         languages <= 1, "monolingual",
         languages <= 2, "bilingual",
          "polyglot")
       \`\`\`
-      
-      \`| EVAL g = CASE(gender == "F", 1 + null, 10)\`
+      - \`| EVAL g = CASE(gender == "F", 1 + null, 10)\`
+      - \`\`\`
+      | EVAL successful = CASE(http.response.status_code == 200, 1, 0), failed = CASE(http.response.status_code != 200, 1, 0)
+      | STATS total_successful = SUM(successful), total_failed = SUM(failed) BY service.name
+      | EVAL success_rate = total_failed / (total_successful + total_failed)
+      \`\`\`
 
       ## Date operations
 
@@ -490,10 +498,10 @@ export function registerQueryFunction({
 
       ### Third example
 
-      The user asks: From "employees*", I want to see the employees, sorted by
-      employee number (emp_no), and for each I want to see whether they speak
-      one language (monolingual), two (bilingual), or more (polyglot). How
-      many languages they speak is tracked in the field "languages".
+      The user asks: From "http_requests*", I want to create an SLO, where
+      any status code (http.response.status_code) < 400 is considered a success,
+      and >= 400 is considered a failure. From this I want to calculate the
+      success rate, as a percentage (0-100). Break it down by service.name.
 
       You reply:
 
@@ -501,38 +509,44 @@ export function registerQueryFunction({
       command, which selects an index. There's no need to escape the data
       source (from: "Source commands > FROM"):
 
-      \`FROM employees*\`
+      \`FROM http_requests*\`
 
-      Our next step is to append a new column where we assign an enum according
-      to how many languages they speak. We can use the \`EVAL\` command for
-      this (from: "Processing commands > EVAL"):
+      Our next step is to append a new column (using the EVAL command) where
+      we assign a value of either 0 and 1 using the CASE function, which
+      conditionally assigns a value. This creates a numeric column that we
+      can later aggregate over with the STATS command.
 
-      \`\`\`| EVAL type = CASE(
-        languages <= 1, "monolingual",
-        languages <= 2, "bilingual",
-         "polyglot")
+      \`\`\`| EVAL request_success = CASE(
+        http.response.status_code < 400, 1,
+        http.response.status_code >= 400, 0,
+        null)
       \`\`\`
 
-      We then need to sort the documents by the \`emp_no\` field. We can use
-      the \`SORT\` processing command for this, which sorts a row on one or
-      more fields. By default, documents are sorted ascending, which is what
-      we want. Here field names should not be escaped either (from: "Processing
-      commands > SORT"):
+      We then need to aggregate this value by service.name. For this we can
+      use the STATS ... BY function. As a result, we'll have a single value
+      per service that describes the success rate between 0 and 1:
+      \`| STATS success_rate = AVG(request_success) BY service.name\`
 
-      \`\`\`| SORT emp_no\`\`\`
+      We then need to convert the \`success_rate\` column to a value between
+      0 and 100. For this we can use EVAL that appends a new column using
+      mathematical functions:
+      \`| EVAL success_perc = ROUND(success_rate * 100)\`
 
-      We should then return only the top 10 results. For this, we'll use the
-      limit processing command, which limits the number of rows returned.
-      LIMIT only supports a single field (from: "Processing commands > LIMIT"):
-
-      \`\`\`| LIMIT 10\`\`\`
+      Finally, we can drop the success_rate as the user doesn\'t need it.
+      We now only have service.name and success_perc.
+      \`| DROP success_rate\`
 
       This results in the following query:
 
       \`\`\`
-      FROM employees
-        | SORT salary DESC
-        | LIMIT 10
+      FROM http_requests*
+      | EVAL request_success = CASE(
+        http.response.status_code < 400, 1,
+        http.response.status_code >= 400, 0,
+        null)
+      | STATS success_rate = AVG(request_success) BY service.name
+      | EVAL success_perc = ROUND(success_rate * 100)
+      | DROP success_rate
       \`\`\`
       
       ### Fourth example:
