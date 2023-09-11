@@ -37,24 +37,39 @@ export const GroupPreview = ({
   LensEmbeddableComponent,
   searchSessionId,
   refreshSearchSession,
+  timePickerQuickRanges,
 }: {
   group: EventAnnotationGroupConfig;
   dataViews: DataView[];
   LensEmbeddableComponent: LensEmbeddableComponent;
   searchSessionId: string;
   refreshSearchSession: () => void;
+  timePickerQuickRanges: Array<{ from: string; to: string; display: string }> | undefined;
 }) => {
   const [chartTimeRange, setChartTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const commonlyUsedRanges = useMemo(
+    () =>
+      timePickerQuickRanges?.map(
+        ({ from, to, display }: { from: string; to: string; display: string }) => {
+          return {
+            start: from,
+            end: to,
+            label: display,
+          };
+        }
+      ) ?? [],
+    [timePickerQuickRanges]
+  );
 
   const customQuickSelectRender = useCallback<
     Required<EuiSuperDatePickerProps>['customQuickSelectRender']
   >(
-    ({ quickSelect, commonlyUsedRanges, customQuickSelectPanels }) =>
+    ({ quickSelect, commonlyUsedRanges: ranges, customQuickSelectPanels }) =>
       (
         <>
           {customQuickSelectPanels}
           {quickSelect}
-          {commonlyUsedRanges}
+          {ranges}
         </>
       ) as React.ReactNode,
     []
@@ -119,6 +134,7 @@ export const GroupPreview = ({
               start={chartTimeRange.from}
               end={chartTimeRange.to}
               compressed
+              commonlyUsedRanges={commonlyUsedRanges}
               updateButtonProps={{
                 iconOnly: true,
                 fill: false,

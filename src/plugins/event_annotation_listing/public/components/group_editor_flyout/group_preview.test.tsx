@@ -155,6 +155,7 @@ describe('group editor preview', () => {
     LensEmbeddableComponent,
     searchSessionId: 'some-search-session-id',
     refreshSearchSession: jest.fn(),
+    timePickerQuickRanges: [{ from: 'now/d', to: 'now/d', display: 'Today' }],
   };
 
   beforeEach(() => {

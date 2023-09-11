@@ -45,6 +45,7 @@ export const GroupEditorFlyout = ({
   queryInputServices,
   searchSessionId,
   refreshSearchSession,
+  timePickerQuickRanges,
 }: {
   group: EventAnnotationGroupConfig;
   updateGroup: (newGroup: EventAnnotationGroupConfig) => void;
@@ -57,6 +58,7 @@ export const GroupEditorFlyout = ({
   queryInputServices: QueryInputServices;
   searchSessionId: string;
   refreshSearchSession: () => void;
+  timePickerQuickRanges: Array<{ from: string; to: string; display: string }> | undefined;
 }) => {
   const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
   const flyoutBodyOverflowRef = useRef<Element | null>(null);
@@ -212,6 +214,7 @@ export const GroupEditorFlyout = ({
             LensEmbeddableComponent={LensEmbeddableComponent}
             searchSessionId={searchSessionId}
             refreshSearchSession={refreshSearchSession}
+            timePickerQuickRanges={timePickerQuickRanges}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

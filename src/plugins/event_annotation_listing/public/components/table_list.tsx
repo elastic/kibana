@@ -23,7 +23,7 @@ import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
-import { ISessionService } from '@kbn/data-plugin/public';
+import { ISessionService, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
@@ -163,6 +163,7 @@ export const EventAnnotationGroupTableList = ({
       queryInputServices={queryInputServices}
       searchSessionId={searchSessionId}
       refreshSearchSession={refreshSearchSession}
+      timePickerQuickRanges={uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)}
     />
   ) : undefined;
 
