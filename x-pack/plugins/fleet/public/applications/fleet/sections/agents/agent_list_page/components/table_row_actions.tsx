@@ -106,32 +106,36 @@ export const TableRowActions: React.FunctionComponent<{
 
     const isAgentUpdating = agent.upgrade_started_at && !agent.upgraded_at;
     if (isAgentUpdating) {
-      <EuiContextMenuItem
-        key="agentRestartUpgradeBtn"
-        icon="refresh"
-        onClick={() => {
-          onUpgradeClick();
-        }}
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.restartUpgradeOneButton"
-          defaultMessage="Restart upgrade agent"
-        />
-      </EuiContextMenuItem>;
+      menuItems.push(
+        <EuiContextMenuItem
+          key="agentRestartUpgradeBtn"
+          icon="refresh"
+          onClick={() => {
+            onUpgradeClick();
+          }}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.restartUpgradeOneButton"
+            defaultMessage="Restart upgrade agent"
+          />
+        </EuiContextMenuItem>
+      );
     } else {
-      <EuiContextMenuItem
-        key="agentUpgradeBtn"
-        icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
-        onClick={() => {
-          onUpgradeClick();
-        }}
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.upgradeOneButton"
-          defaultMessage="Upgrade agent"
-        />
-      </EuiContextMenuItem>;
+      menuItems.push(
+        <EuiContextMenuItem
+          key="agentUpgradeBtn"
+          icon="refresh"
+          disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+          onClick={() => {
+            onUpgradeClick();
+          }}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.upgradeOneButton"
+            defaultMessage="Upgrade agent"
+          />
+        </EuiContextMenuItem>
+      );
     }
 
     if (agentTamperProtectionEnabled && agent.policy_id) {
