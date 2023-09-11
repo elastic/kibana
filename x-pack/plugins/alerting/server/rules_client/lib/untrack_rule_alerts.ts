@@ -95,21 +95,6 @@ export const untrackRuleAlerts = async (
           const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
           await alertsClient.untrackAlertIdByIndices(alertId, indices);
         }
-        // const { taskType } = taskInstance;
-        // const untrackTaskType = taskType.replace('alerting:', 'alerting:untrack:');
-        // const untrackTaskInstance = {
-        //   id: `untrack-${id}`,
-        //   taskType: untrackTaskType,
-        //   params: {
-        //     alertId: id,
-        //     spaceId: context.spaceId,
-        //     consumer: attributes.consumer,
-        //   },
-        //   scope: ['alerting'],
-        //   state: {},
-        //   enabled: true,
-        // };
-        // await context.taskManager.schedule(untrackTaskInstance);
       }
     } catch (error) {
       // this should not block the rest of the disable process
