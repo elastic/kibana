@@ -106,6 +106,7 @@ export const GroupEditorControls = ({
           })}
         >
           <EuiFieldText
+            compressed
             data-test-subj="annotationGroupTitle"
             value={group.title}
             isInvalid={showValidation && !isTitleValid(group.title)}
@@ -131,6 +132,7 @@ export const GroupEditorControls = ({
           }
         >
           <EuiTextArea
+            compressed
             data-test-subj="annotationGroupDescription"
             value={group.description}
             onChange={({ target: { value } }) =>
@@ -145,6 +147,7 @@ export const GroupEditorControls = ({
           <TagSelector
             initialSelection={group.tags}
             markOptional
+            compressed
             onTagsSelected={(tags: string[]) =>
               update({
                 ...group,
@@ -160,6 +163,7 @@ export const GroupEditorControls = ({
           isInvalid={!isDataViewValid(currentDataView)}
         >
           <EuiSelect
+            compressed
             data-test-subj="annotationDataViewSelection"
             isInvalid={!isDataViewValid(currentDataView)}
             options={dataViews.map(({ id: value, title, name }) => ({
@@ -185,18 +189,41 @@ export const GroupEditorControls = ({
             }}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('eventAnnotationListing.groupEditor.addAnnotation', {
-            defaultMessage: 'Annotations',
-          })}
-        >
-          <AnnotationList
-            annotations={group.annotations}
-            selectAnnotation={setSelectedAnnotation}
-            update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
-          />
-        </EuiFormRow>
       </EuiForm>
+      <div
+        css={css`
+          margin-top: ${euiThemeVars.euiSize};
+          padding-top: ${euiThemeVars.euiSize};
+          border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+        `}
+      >
+        <EuiTitle
+          size="xs"
+          css={css`
+            margin-bottom: ${euiThemeVars.euiSize};
+          `}
+        >
+          <h4>
+            <FormattedMessage
+              id="eventAnnotationListing.groupEditor.annotations"
+              defaultMessage="Annotations"
+            />
+          </h4>
+        </EuiTitle>
+        <EuiForm>
+          <EuiFormRow
+            label={i18n.translate('eventAnnotationListing.groupEditor.annotationGroupLabel', {
+              defaultMessage: 'Date histogram axis',
+            })}
+          >
+            <AnnotationList
+              annotations={group.annotations}
+              selectAnnotation={setSelectedAnnotation}
+              update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </div>
     </>
   ) : currentDataView ? (
     <AnnotationEditorControls
