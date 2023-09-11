@@ -201,6 +201,7 @@ export const EventAnnotationGroupTableList = ({
         customTableColumn={getCustomColumn(dataViews)}
         emptyPrompt={
           <EuiEmptyPrompt
+            color="transparent"
             title={
               <EuiTitle>
                 <h2>
@@ -215,8 +216,7 @@ export const EventAnnotationGroupTableList = ({
               <p>
                 <FormattedMessage
                   id="eventAnnotationListing.tableList.emptyPrompt.body"
-                  defaultMessage="You can create and save annotations for use across multiple visualization in the
-                    Lens visualization editor."
+                  defaultMessage="ou can create and save annotations for use across multiple visualizations in the Lens editor."
                 />
               </p>
             }
@@ -224,7 +224,7 @@ export const EventAnnotationGroupTableList = ({
               <EuiButton onClick={navigateToLens}>
                 <FormattedMessage
                   id="eventAnnotationListing.tableList.emptyPrompt.cta"
-                  defaultMessage="Create new annotation in Lens"
+                  defaultMessage="Create annotation in Lens"
                 />
               </EuiButton>
             }
