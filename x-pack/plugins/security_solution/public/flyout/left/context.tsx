@@ -6,26 +6,15 @@
  */
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { css } from '@emotion/react';
-import React, { createContext, useContext, useMemo } from 'react';
-import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { ERROR_MESSAGE, ERROR_TITLE, FLYOUT_ERROR } from '../shared/translations';
-import { FLYOUT_ERROR_TEST_ID } from '../shared/test_ids';
+import { useEventDetails } from '../shared/hooks/use_event_details';
+import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import type { SearchHit } from '../../../common/search_strategy';
 import type { LeftPanelProps } from '.';
 import type { GetFieldsData } from '../../common/hooks/use_get_fields_data';
-import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
-import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import {
-  getAlertIndexAlias,
-  useBasicDataFromDetailsData,
-} from '../../timelines/components/side_panel/event_details/helpers';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
-import { SecurityPageName } from '../../../common/constants';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useBasicDataFromDetailsData } from '../../timelines/components/side_panel/event_details/helpers';
 import { useRuleWithFallback } from '../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 export interface LeftPanelContext {
@@ -76,81 +65,66 @@ export type LeftPanelProviderProps = {
   children: React.ReactNode;
 } & Partial<LeftPanelProps['params']>;
 
-export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPanelProviderProps) => {
-  const currentSpaceId = useSpaceId();
-  const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
-  const [{ pageName }] = useRouteSpy();
-  const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-  const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject] =
-    useTimelineEventsDetails({
-      indexName: eventIndex,
-      eventId: id ?? '',
-      runtimeMappings: sourcererDataView.runtimeMappings,
-      skip: !id,
-    });
-  const getFieldsData = useGetFieldsData(searchHit?.fields);
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const { rule: maybeRule } = useRuleWithFallback(ruleId);
-
-  const contextValue = useMemo(
-    () =>
-      id && indexName && scopeId && dataAsNestedObject && dataFormattedForFieldBrowser && searchHit
-        ? {
-            eventId: id,
-            indexName,
-            scopeId,
-            browserFields: sourcererDataView.browserFields,
-            dataAsNestedObject,
-            dataFormattedForFieldBrowser,
-            searchHit,
-            investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
-            getFieldsData,
-          }
-        : undefined,
-    [
-      id,
-      indexName,
-      scopeId,
-      sourcererDataView.browserFields,
+export const LeftPanelProvider = memo(
+  ({ id, indexName, scopeId, children }: LeftPanelProviderProps) => {
+    const {
+      browserFields,
       dataAsNestedObject,
       dataFormattedForFieldBrowser,
-      searchHit,
-      maybeRule?.investigation_fields,
       getFieldsData,
-    ]
-  );
+      loading,
+      searchHit,
+    } = useEventDetails({ eventId: id, indexName });
 
-  if (loading) {
-    return (
-      <EuiFlexItem
-        css={css`
-          align-items: center;
-          justify-content: center;
-        `}
-      >
-        <EuiLoadingSpinner size="xxl" />
-      </EuiFlexItem>
+    const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+    const { rule: maybeRule } = useRuleWithFallback(ruleId);
+
+    const contextValue = useMemo(
+      () =>
+        id &&
+        indexName &&
+        scopeId &&
+        dataAsNestedObject &&
+        dataFormattedForFieldBrowser &&
+        searchHit
+          ? {
+              eventId: id,
+              indexName,
+              scopeId,
+              browserFields,
+              dataAsNestedObject,
+              dataFormattedForFieldBrowser,
+              searchHit,
+              investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
+              getFieldsData,
+            }
+          : undefined,
+      [
+        id,
+        indexName,
+        scopeId,
+        browserFields,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+        searchHit,
+        maybeRule?.investigation_fields,
+        getFieldsData,
+      ]
     );
-  }
 
-  if (!contextValue) {
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{ERROR_TITLE(FLYOUT_ERROR)}</h2>}
-        body={<p>{ERROR_MESSAGE(FLYOUT_ERROR)}</p>}
-        data-test-subj={FLYOUT_ERROR_TEST_ID}
-      />
-    );
-  }
+    if (loading) {
+      return <FlyoutLoading />;
+    }
 
-  return <LeftPanelContext.Provider value={contextValue}>{children}</LeftPanelContext.Provider>;
-};
+    if (!contextValue) {
+      return <FlyoutError />;
+    }
+
+    return <LeftPanelContext.Provider value={contextValue}>{children}</LeftPanelContext.Provider>;
+  }
+);
+
+LeftPanelProvider.displayName = 'LeftPanelProvider';
 
 export const useLeftPanelContext = () => {
   const contextValue = useContext(LeftPanelContext);

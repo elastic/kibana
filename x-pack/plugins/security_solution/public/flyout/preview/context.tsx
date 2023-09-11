@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { FLYOUT_ERROR_TEST_ID } from '../shared/test_ids';
-import { ERROR_MESSAGE, ERROR_TITLE, FLYOUT_ERROR } from '../shared/translations';
+import { useEventDetails } from '../shared/hooks/use_event_details';
+import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import type { PreviewPanelProps } from '.';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 
 export interface PreviewPanelContext {
   /**
@@ -56,59 +49,43 @@ export type PreviewPanelProviderProps = {
   children: React.ReactNode;
 } & Partial<PreviewPanelProps['params']>;
 
-export const PreviewPanelProvider = ({
-  id,
-  indexName,
-  scopeId,
-  ruleId,
-  children,
-}: PreviewPanelProviderProps) => {
-  const currentSpaceId = useSpaceId();
-  const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
-  const [{ pageName }] = useRouteSpy();
-  const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-  const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [_, __, ___, dataAsNestedObject] = useTimelineEventsDetails({
-    indexName: eventIndex,
-    eventId: id ?? '',
-    runtimeMappings: sourcererDataView.runtimeMappings,
-    skip: !id,
-  });
+export const PreviewPanelProvider = memo(
+  ({ id, indexName, scopeId, ruleId, children }: PreviewPanelProviderProps) => {
+    const { dataAsNestedObject, indexPattern, loading } = useEventDetails({
+      eventId: id,
+      indexName,
+    });
 
-  const contextValue = useMemo(
-    () =>
-      id && indexName && scopeId && dataAsNestedObject
-        ? {
-            eventId: id,
-            indexName,
-            scopeId,
-            ruleId: ruleId ?? '',
-            indexPattern: sourcererDataView.indexPattern,
-            dataAsNestedObject,
-          }
-        : undefined,
-    [id, indexName, scopeId, ruleId, sourcererDataView.indexPattern, dataAsNestedObject]
-  );
+    const contextValue = useMemo(
+      () =>
+        id && indexName && scopeId && dataAsNestedObject
+          ? {
+              eventId: id,
+              indexName,
+              scopeId,
+              ruleId: ruleId ?? '',
+              indexPattern,
+              dataAsNestedObject,
+            }
+          : undefined,
+      [id, indexName, scopeId, ruleId, indexPattern, dataAsNestedObject]
+    );
 
-  if (!contextValue) {
+    if (loading) {
+      return <FlyoutLoading />;
+    }
+
+    if (!contextValue) {
+      return <FlyoutError />;
+    }
+
     return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{ERROR_TITLE(FLYOUT_ERROR)}</h2>}
-        body={<p>{ERROR_MESSAGE(FLYOUT_ERROR)}</p>}
-        data-test-subj={FLYOUT_ERROR_TEST_ID}
-      />
+      <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>
     );
   }
+);
 
-  return (
-    <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>
-  );
-};
+PreviewPanelProvider.displayName = 'PreviewPanelProvider';
 
 export const usePreviewPanelContext = (): PreviewPanelContext => {
   const contextValue = useContext(PreviewPanelContext);
