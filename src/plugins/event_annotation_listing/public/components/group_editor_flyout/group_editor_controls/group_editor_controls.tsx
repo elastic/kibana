@@ -234,7 +234,7 @@ export const GroupEditorControls = ({
           >
             <AnnotationList
               annotations={group.annotations}
-              selectAnnotation={setSelectedAnnotation}
+              selectAnnotation={currentDataView ? setSelectedAnnotation : () => {}}
               update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
             />
           </EuiFormRow>
