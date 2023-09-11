@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [0.9],
                 timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [
+                metrics: [
                   { name: 'A', field: 'system.network.in.bytes', aggType: Aggregators.AVERAGE },
                   { name: 'B', field: 'system.network.out.bytes', aggType: Aggregators.AVERAGE },
                 ],
@@ -176,7 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [0.9],
                 timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [
+                metrics: [
                   { name: 'A', field: 'system.network.in.bytes', aggType: Aggregators.AVERAGE },
                   { name: 'B', field: 'system.network.out.bytes', aggType: Aggregators.AVERAGE },
                 ],
