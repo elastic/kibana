@@ -94,10 +94,10 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
   });
 
   const initialSettings: InitialSettings = {
-    index: getStr(params.index) ?? dataView.id,
-    production: getStr(params.production) ?? dataView.getIndexPattern(),
-    reference: getStr(params.reference) ?? dataView.getIndexPattern(),
-    timeField: getStr(params.timeField) ?? dataView.getTimeField()?.name,
+    index: getStr(params.index, dataView.id),
+    production: getStr(params.production, dataView.getIndexPattern()),
+    reference: getStr(params.reference, dataView.getIndexPattern()),
+    timeField: getStr(params.timeField, dataView.getTimeField()?.name),
   };
 
   const referenceStateManager = useDataDriftStateManager({

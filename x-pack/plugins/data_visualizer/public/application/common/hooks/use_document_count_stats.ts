@@ -236,6 +236,15 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
             totalNumDocs: totalCount,
             seed: RANDOM_SAMPLER_SEED,
           });
+
+      // eslint-disable-next-line no-console
+      console.log(
+        `--@@Documents stats`,
+        getDocumentCountStatsRequest(
+          { ...searchParams, trackTotalHits: false },
+          randomSamplerWrapper
+        )
+      );
       const resp = await lastValueFrom(
         data.search.search(
           {
