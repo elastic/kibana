@@ -32,7 +32,6 @@ import {
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
 import { addLensDocsToKb } from './service/kb_service/kb_docs/lens';
-import { addEsqlDocsToKb } from './service/kb_service/kb_docs/esql';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -110,8 +109,7 @@ export class ObservabilityAIAssistantPlugin
       taskManager: plugins.taskManager,
     });
 
-    addLensDocsToKb(service);
-    addEsqlDocsToKb({ service, logger: this.logger.get('kb').get('es|ql') });
+    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
 
     registerServerRoutes({
       core,

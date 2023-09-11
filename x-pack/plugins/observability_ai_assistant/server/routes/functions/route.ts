@@ -157,9 +157,14 @@ const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
 const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
   params: t.type({
-    body: t.type({
-      queries: t.array(nonEmptyStringRt),
-    }),
+    body: t.intersection([
+      t.type({
+        queries: t.array(nonEmptyStringRt),
+      }),
+      t.partial({
+        contexts: t.array(t.string),
+      }),
+    ]),
   }),
   options: {
     tags: ['access:ai_assistant'],
@@ -171,11 +176,15 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
 
+    const {
+      body: { queries, contexts },
+    } = resources.params;
+
     if (!client) {
       throw notImplemented();
     }
 
-    return client.recall(resources.params.body.queries);
+    return client.recall({ queries, contexts });
   },
 });
 

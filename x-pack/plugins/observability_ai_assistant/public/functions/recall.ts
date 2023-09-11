@@ -32,10 +32,17 @@ export function registerRecallFunction({
       DO NOT include the user's request. It will be added internally.
       
       The user asks: "can you visualise the average request duration for opbeans-go over the last 7 days?"
-      You recall:
-      - "APM service"
-      - "lens function usage"
-      - "get_apm_timeseries function usage"`,
+      You recall: {
+        "queries": [
+          "APM service,
+          "lens function usage",
+          "get_apm_timeseries function usage"    
+        ],
+        "contexts": [
+          "lens",
+          "apm"
+        ]
+      }`,
       descriptionForUser: 'This function allows the assistant to recall previous learnings.',
       parameters: {
         type: 'object',
@@ -45,16 +52,27 @@ export function registerRecallFunction({
             type: 'array',
             additionalItems: false,
             additionalProperties: false,
+            description: 'The query for the semantic search',
             items: {
               type: 'string',
-              description: 'The query for the semantic search',
+            },
+          },
+          contexts: {
+            type: 'array',
+            additionalItems: false,
+            additionalProperties: false,
+            description:
+              'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded.',
+            items: {
+              type: 'string',
+              enum: ['apm', 'lens'],
             },
           },
         },
-        required: ['queries'],
+        required: ['queries', 'contexts'],
       } as const,
     },
-    ({ arguments: { queries }, messages }, signal) => {
+    ({ arguments: { queries, contexts }, messages }, signal) => {
       const userMessages = messages.filter((message) => message.message.role === MessageRole.User);
 
       const userPrompt = userMessages[userMessages.length - 1]?.message.content;
@@ -66,6 +84,7 @@ export function registerRecallFunction({
           params: {
             body: {
               queries: queriesWithUserPrompt,
+              contexts,
             },
           },
           signal,

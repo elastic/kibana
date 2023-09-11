@@ -17,6 +17,7 @@ import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from
 import type { KnowledgeBaseEntry } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
+import { getCategoryQuery } from '../util/get_category_query';
 
 interface Dependencies {
   esClient: ElasticsearchClient;
@@ -181,9 +182,11 @@ export class KnowledgeBaseService {
   recall = async ({
     user,
     queries,
+    contexts,
     namespace,
   }: {
     queries: string[];
+    contexts?: string[];
     user: { name: string };
     namespace: string;
   }): Promise<{
@@ -205,6 +208,7 @@ export class KnowledgeBaseService {
               user,
               namespace,
             }),
+            ...getCategoryQuery({ contexts }),
           ],
         },
       };

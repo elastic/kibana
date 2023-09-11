@@ -75,10 +75,10 @@ export async function registerFunctions({
         When using the "recall" function for an ES|QL query, use the following approach: 
 
         Input: "For service.name, what are the top 5 values by doc count in \`metrics-apm*\`
-        Output: \`ES|QL query, COUNT, FROM, SORT, LIMIT, STATS\`
+        Output: { "queries": [ "ES|QL query, COUNT, FROM, SORT, LIMIT, STATS" ], "contexts": [ ] }
         
         Input: "How many unique values do I have for \`labels.userId\` in \`user-sessions\`?
-        Output: \`ES|QL query, UNIQUE, FROM\``;
+        Output: { "queries": [ "ES|QL query, UNIQUE, FROM" ], "contexts": [  ] }`;
 
         description += `Here are principles you MUST adhere to, in order:
 

@@ -358,11 +358,18 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
-  recall = async (queries: string[]): Promise<{ entries: RecalledEntry[] }> => {
+  recall = async ({
+    queries,
+    contexts,
+  }: {
+    queries: string[];
+    contexts?: string[];
+  }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
       queries,
+      contexts,
     });
   };
 
