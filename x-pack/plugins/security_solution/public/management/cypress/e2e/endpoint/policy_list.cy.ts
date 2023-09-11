@@ -8,7 +8,6 @@
 import moment from 'moment';
 import { setCustomProtectionUpdatesManifestVersion } from '../../tasks/endpoint_policy';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
-import type { PolicyData } from '../../../../../common/endpoint/types';
 
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../tasks/login';
@@ -17,13 +16,12 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 describe('Policy List', () => {
   describe('Renders policy list with outdated policies', () => {
     const indexedPolicies: IndexedFleetEndpointPolicyResponse[] = [];
-    const policies: PolicyData[] = [];
 
     const monthAgo = moment().subtract(1, 'months').format('YYYY-MM-DD');
     const threeDaysAgo = moment().subtract(3, 'days').format('YYYY-MM-DD');
-    const nineteenMonthsAgo = moment().subtract(19, 'months').format('YYYY-MM-DD');
+    const eighteenMonthsAgo = moment().subtract(18, 'months').format('YYYY-MM-DD');
 
-    const dates = [monthAgo, threeDaysAgo, nineteenMonthsAgo];
+    const dates = [monthAgo, threeDaysAgo, eighteenMonthsAgo];
 
     beforeEach(() => {
       login();
@@ -35,7 +33,6 @@ describe('Policy List', () => {
         for (let i = 0; i < 4; i++) {
           createAgentPolicyTask(version).then((data) => {
             indexedPolicies.push(data);
-            policies.push(data.integrationPolicies[0]);
             if (dates[i]) {
               setCustomProtectionUpdatesManifestVersion(data.integrationPolicies[0].id, dates[i]);
             }
@@ -64,7 +61,6 @@ describe('Policy List', () => {
 
   describe('Renders policy list with no outdated policies', () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
-    let policy: PolicyData;
 
     beforeEach(() => {
       login();
@@ -75,7 +71,6 @@ describe('Policy List', () => {
       getEndpointIntegrationVersion().then((version) => {
         createAgentPolicyTask(version).then((data) => {
           indexedPolicy = data;
-          policy = indexedPolicy.integrationPolicies[0];
         });
       });
     });

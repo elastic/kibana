@@ -380,8 +380,9 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
-
-    validateEndpointPackagePolicy(newData.inputs[0]);
+    if (newData.inputs && newData.inputs.length) {
+      validateEndpointPackagePolicy(newData.inputs[0]);
+    }
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
