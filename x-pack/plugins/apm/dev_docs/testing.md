@@ -129,6 +129,18 @@ APM tests are located in `x-pack/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 diff --git a/x-pack/plugins/apm/scripts/test/README.md b/x-pack/plugins/apm/scripts/test/README.md
 
+## Serverless API tests
+
+**Start server**
+```
+node scripts/functional_tests_server.js --config x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+```
+
+**Run tests**
+```
+node scripts/functional_test_runner --config=x-pack/test_serverless/api_integration/test_suites/observability/config.ts
+```
+
 ## Storybook
 
 ### Start
