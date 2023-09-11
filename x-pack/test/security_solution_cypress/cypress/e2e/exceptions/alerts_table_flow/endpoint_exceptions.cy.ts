@@ -36,10 +36,11 @@ import {
 } from '../../../screens/exceptions';
 import { goToEndpointExceptionsTab, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // See https://github.com/elastic/kibana/issues/163967
 describe.skip(
   'Endpoint Exceptions workflows from Alert',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const ITEM_NAME = 'Sample Exception List Item';
     const ITEM_NAME_EDIT = 'Sample Exception List Item';
