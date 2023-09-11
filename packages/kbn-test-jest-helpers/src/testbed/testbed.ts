@@ -222,6 +222,7 @@ export function registerTestBed<T extends string = string, P extends object = an
         const formInput = findTestSubject(comboBox, 'comboBoxSearchInput');
         setInputValue(formInput, value);
 
+        comboBox.simulate('keydown', { key: 'Down' });
         comboBox.simulate('keydown', { key: 'Enter' });
         component.update();
       };

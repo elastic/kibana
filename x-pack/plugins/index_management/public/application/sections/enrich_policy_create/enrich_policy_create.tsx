@@ -23,7 +23,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
   return (
     <CreatePolicyContextProvider>
       <EuiPageHeader
-        data-test-subj="indexManagementHeaderContent"
+        data-test-subj="createEnrichPolicyHeaderContent"
         pageTitle={
           <span data-test-subj="appTitle">
             <FormattedMessage
@@ -44,7 +44,7 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
             href={documentationService.getCreateEnrichPolicyLink()}
             target="_blank"
             iconType="help"
-            data-test-subj="documentationLink"
+            data-test-subj="createEnrichPolicyDocumentationLink"
           >
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.titleDocsLinkText"

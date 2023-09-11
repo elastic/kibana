@@ -76,4 +76,12 @@ export type TestSubjects =
   | 'createIndexButton'
   | 'createIndexNameFieldText'
   | 'createIndexCancelButton'
+  | 'createEnrichPolicyHeaderContent'
+  | 'createEnrichPolicyDocumentationLink'
+  | 'policyNameField.input'
+  | 'policyTypeField'
+  | 'policySourceIndicesField'
+  | 'typePopoverIcon'
+  | 'uploadFileLink'
+  | 'matchAllQueryLink'
   | 'createIndexSaveButton';

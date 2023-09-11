@@ -20,6 +20,9 @@ interface IOption {
 
 interface Props {
   field: FieldHook;
+  euiFieldProps: {
+    [key: string]: any;
+  };
   [key: string]: any;
 }
 
@@ -61,7 +64,7 @@ const getIndexOptions = async (patternString: string) => {
   return options;
 };
 
-export const IndicesSelector = ({ field, ...rest }: Props) => {
+export const IndicesSelector = ({ field, euiFieldProps, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const [indexOptions, setIndexOptions] = useState<IOption[]>([]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
@@ -114,6 +117,8 @@ export const IndicesSelector = ({ field, ...rest }: Props) => {
             field.setValue([]);
           }
         }}
+        data-test-subj="comboBox"
+        {...euiFieldProps}
       />
     </EuiFormRow>
   );

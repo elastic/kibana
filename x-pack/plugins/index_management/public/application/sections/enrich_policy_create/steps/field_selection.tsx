@@ -147,7 +147,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
   const hasSelectedMultipleIndices = (draft.sourceIndices?.length ?? 0) > 1;
 
   return (
-    <Form form={form}>
+    <Form form={form} data-test-subj="fieldSelectionForm">
       {hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
         <>
           <EuiCallOut
@@ -171,6 +171,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         component={ComboBoxField}
         labelAppend={
           <EuiIconTip
+            data-test-subj="matchFieldPopover"
             content={i18n.translate(
               'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldPopover',
               {
@@ -210,6 +211,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         component={ComboBoxField}
         labelAppend={
           <EuiIconTip
+            data-test-subj="enrichFieldsPopover"
             content={i18n.translate(
               'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.EnrichFieldsFieldPopover',
               {
@@ -241,6 +243,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         iconSide="right"
         iconType="arrowRight"
         disabled={form.isValid === false}
+        data-test-subj="nextButton"
         onClick={onSubmit}
       >
         <FormattedMessage

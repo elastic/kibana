@@ -154,8 +154,13 @@ export const ConfigurationStep = ({ onNext }: Props) => {
   };
 
   return (
-    <Form form={form}>
-      <UseField path="name" component={TextField} componentProps={{ fullWidth: false }} />
+    <Form form={form} data-test-subj="configurationForm">
+      <UseField
+        path="name"
+        component={TextField}
+        componentProps={{ fullWidth: false }}
+        data-test-subj="policyNameField"
+      />
 
       <UseField
         path="type"
@@ -163,7 +168,10 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         labelAppend={
           <EuiPopover
             button={
-              <EuiLink onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}>
+              <EuiLink
+                data-test-subj="typePopoverIcon"
+                onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+              >
                 <EuiIcon type="questionInCircle" />
               </EuiLink>
             }
@@ -206,6 +214,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         componentProps={{
           fullWidth: false,
           euiFieldProps: {
+            'data-test-subj': 'policyTypeField',
             options: [
               {
                 value: 'match',
@@ -251,6 +260,9 @@ export const ConfigurationStep = ({ onNext }: Props) => {
           </EuiText>
         }
         componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'policySourceIndicesField',
+          },
           fullWidth: false,
         }}
       />
@@ -269,6 +281,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
                   <EuiLink
                     external
                     target="_blank"
+                    data-test-subj="matchAllQueryLink"
                     href={documentationService.getMatchAllQueryLink()}
                   >
                     <FormattedMessage
@@ -306,6 +319,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         iconSide="right"
         iconType="arrowRight"
         disabled={form.isValid === false}
+        data-test-subj="nextButton"
         onClick={onSubmit}
       >
         <FormattedMessage
