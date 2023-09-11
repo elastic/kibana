@@ -1,4 +1,4 @@
-title: Connector response properties for a Slack connector
+title: Connector response properties for a D3 Security connector
 type: object
 required:
   - config

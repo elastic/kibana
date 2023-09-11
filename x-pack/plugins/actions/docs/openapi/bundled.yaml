@@ -2804,6 +2804,7 @@ components:
       description: The type of connector. For example, `.email`, `.index`, `.jira`, `.opsgenie`, or `.server-log`.
       enum:
         - .cases-webhook
+        - .d3security
         - .email
         - .gen-ai
         - .index
