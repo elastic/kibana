@@ -8,12 +8,11 @@
 import expect from '@kbn/expect';
 import { omit, padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { createIndexConnector, createEsQueryRule, runRule } from './helpers/alerting_api_helper';
+import { createIndexConnector, createEsQueryRule } from './helpers/alerting_api_helper';
 import {
   createIndex,
   getDocumentsInIndex,
   waitForAlertInIndex,
-  waitForAllTasksIdle,
   waitForDocumentInIndex,
 } from './helpers/alerting_wait_for_helpers';
 
@@ -453,16 +452,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-
-      await waitForAllTasksIdle({
-        esClient,
-        filter: testStart,
-      });
-
-      await runRule({
-        supertest,
-        ruleId,
-      });
 
       const resp = await waitForDocumentInIndex({
         esClient,
