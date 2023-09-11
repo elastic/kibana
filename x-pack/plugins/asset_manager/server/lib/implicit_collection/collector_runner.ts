@@ -53,7 +53,7 @@ export class CollectorRunner {
         if (collectorResult.assets.length) {
           totalAssets += collectorResult.assets.length;
           const bulkBody = collectorResult.assets.flatMap((asset: Asset) => {
-            return [{ create: { _index: `assets-${asset['asset.kind']}-default` } }, asset];
+            return [{ create: { _index: `assets-raw-default` } }, asset];
           });
 
           await withSpan({ name: 'write', transaction }, () =>

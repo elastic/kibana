@@ -29,6 +29,6 @@ export interface CollectorResult {
 }
 
 export { collectContainers } from './containers';
-export { collectHosts } from './hosts';
+export * from './hosts';
 export { collectPods } from './pods';
 export { collectServices } from './services';
