@@ -11,7 +11,7 @@ import { getAvailableVersionsHandler } from './handlers';
 
 jest.mock('../../services/agents/versions', () => {
   return {
-    getAvailableVersions: jest.fn().mockReturnValue(['8.1.0', '8.0.0', '7.17.0', '7.16.0']),
+    getAvailableVersions: jest.fn().mockReturnValue(['8.1.0', '8.0.0', '7.17.0']),
   };
 });
 
@@ -25,7 +25,7 @@ jest.mock('../../services/app_context', () => {
 });
 
 describe('getAvailableVersionsHandler', () => {
-  it('should return available version and filter version < 7.17', async () => {
+  it('should return the value from getAvailableVersions', async () => {
     const ctx = coreMock.createCustomRequestHandlerContext(coreMock.createRequestHandlerContext());
     const response = httpServerMock.createResponseFactory();
 
@@ -33,7 +33,7 @@ describe('getAvailableVersionsHandler', () => {
 
     expect(response.ok).toBeCalled();
     expect(response.ok.mock.calls[0][0]?.body).toEqual({
-      items: ['8.1.0', '8.0.0', '7.17.0', '7.16.0'],
+      items: ['8.1.0', '8.0.0', '7.17.0'],
     });
   });
 });

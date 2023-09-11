@@ -37,28 +37,37 @@ export const getAvailableVersions = async (cached = true): Promise<string[]> => 
   let versionsToDisplay: string[] = [];
 
   const kibanaVersion = appContextService.getKibanaVersion();
-  const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
 
-  // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
-  // De-dup and sort in descending order
-  const data: string[] = JSON.parse(file);
+  try {
+    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
 
-  const versions = data
-    .map((item: any) => semverCoerce(item)?.version || '')
-    .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-    .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-  versionsToDisplay = uniq(versions) as string[];
+    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
+    // De-dup and sort in descending order
+    const data: string[] = JSON.parse(file);
 
-  if (!config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
-    // Add current version if not already present
-    const hasCurrentVersion = versionsToDisplay.some((v) => v === kibanaVersion);
+    const versions = data
+      .map((item: any) => semverCoerce(item)?.version || '')
+      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
+    versionsToDisplay = uniq(versions) as string[];
 
-    versionsToDisplay = !hasCurrentVersion
-      ? [kibanaVersion].concat(versionsToDisplay)
-      : versionsToDisplay;
+    if (!config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
+      // Add current version if not already present
+      const hasCurrentVersion = versionsToDisplay.some((v) => v === kibanaVersion);
+
+      versionsToDisplay = !hasCurrentVersion
+        ? [kibanaVersion].concat(versionsToDisplay)
+        : versionsToDisplay;
+    }
+
+    availableVersions = versionsToDisplay;
+
+    return availableVersions;
+  } catch (e) {
+    if (e.code === 'ENOENT' && !config?.internal?.onlyAllowAgentUpgradeToKnownVersions) {
+      // If the file does not exist, return the current version
+      return [kibanaVersion];
+    }
+    throw e;
   }
-
-  availableVersions = versionsToDisplay;
-
-  return availableVersions;
 };
