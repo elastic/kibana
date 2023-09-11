@@ -53,7 +53,8 @@ import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, machine learning', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Machine Learning rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const expectedUrls = (getMachineLearningRule().references ?? []).join('');
   const expectedFalsePositives = (getMachineLearningRule().false_positives ?? []).join('');
   const expectedTags = (getMachineLearningRule().tags ?? []).join('');
