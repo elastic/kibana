@@ -6,7 +6,7 @@ SOURCE_IMAGE_OR_TAG=$1
 
 source .buildkite/scripts/common/util.sh
 
-BASE_ESS_REPO=docker.elastic.co/elasticsearch/elasticsearch
+BASE_ESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest_verified
 
 echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest_verified'"
