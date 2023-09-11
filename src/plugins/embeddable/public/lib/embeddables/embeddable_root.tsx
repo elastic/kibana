@@ -47,11 +47,7 @@ export const EmbeddableRoot: React.FC<Props> = ({ embeddable, loading, error, in
 
   useEffect(() => {
     if (input && embeddable && embeddableHasMounted) {
-      embeddable.getExplicitInputIsEqual(input).then((isEqual) => {
-        if (!isEqual) {
-          embeddable.updateInput(input);
-        }
-      });
+      embeddable.updateInput(input);
     }
   }, [input, embeddable, embeddableHasMounted]);
 
