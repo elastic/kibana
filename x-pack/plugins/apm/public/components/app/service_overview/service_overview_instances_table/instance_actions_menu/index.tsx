@@ -40,7 +40,7 @@ export function InstanceActionsMenu({
   kuery,
   onClose,
 }: Props) {
-  const { core, infra } = useApmPluginContext();
+  const { core, infra, observabilityLogExplorer } = useApmPluginContext();
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
     serviceNodeName,
@@ -90,6 +90,7 @@ export function InstanceActionsMenu({
     onFilterByInstanceClick: handleFilterByInstanceClick,
     metricsHref,
     infraLocators: infra?.locators,
+    observabilityLogExplorerLocators: observabilityLogExplorer.locators,
   });
 
   return (

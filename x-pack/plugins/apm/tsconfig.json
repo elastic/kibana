@@ -98,7 +98,8 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/observability-log-explorer-plugin",
   ],
   "exclude": ["target/**/*"]
 }

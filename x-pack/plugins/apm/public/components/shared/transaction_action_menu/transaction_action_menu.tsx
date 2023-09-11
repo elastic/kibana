@@ -125,7 +125,8 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const { core, uiActions, infra } = useApmPluginContext();
+  const { core, uiActions, infra, observabilityLogExplorer } =
+    useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
 
@@ -153,6 +154,7 @@ function ActionMenuSections({
     rangeFrom,
     rangeTo,
     environment,
+    observabilityLogExplorerLocators: observabilityLogExplorer.locators,
   });
 
   const externalMenuItems = useAsync(() => {

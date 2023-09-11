@@ -13,6 +13,7 @@ import moment from 'moment';
 import url from 'url';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import type { ProfilingLocators } from '@kbn/profiling-plugin/public';
+import type { ObservabilityLogExplorerLocators } from '@kbn/observability-log-explorer-plugin/common/locators';
 import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
@@ -22,6 +23,10 @@ import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
+import {
+  getNodeLogsHref,
+  getTraceLogsHref,
+} from '../links/observability_logs_link';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -44,6 +49,7 @@ export const getSections = ({
   rangeFrom,
   rangeTo,
   environment,
+  observabilityLogExplorerLocators,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -55,12 +61,15 @@ export const getSections = ({
   rangeFrom: string;
   rangeTo: string;
   environment: Environment;
+  observabilityLogExplorerLocators: ObservabilityLogExplorerLocators;
 }) => {
   if (!transaction) return [];
+
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
   const { nodeLogsLocator, logsLocator } = infraLocators ?? {};
+  const { allDatasetsLocator } = observabilityLogExplorerLocators;
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);
@@ -79,86 +88,107 @@ export const getSections = ({
     )}`,
   });
 
-  const podActions: Action[] = nodeLogsLocator
-    ? [
-        {
-          key: 'podLogs',
-          label: i18n.translate(
-            'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
-            { defaultMessage: 'Pod logs' }
-          ),
-          href: nodeLogsLocator.getRedirectUrl({
-            nodeId: podId!,
-            nodeType: 'pod',
-            time,
-          }),
-          condition: !!podId,
-        },
-        {
-          key: 'podMetrics',
-          label: i18n.translate(
-            'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
-            { defaultMessage: 'Pod metrics' }
-          ),
-          href: getInfraHref({
-            app: 'metrics',
-            basePath,
-            path: `/link-to/pod-detail/${podId}`,
-            query: infraMetricsQuery,
-          }),
-          condition: !!podId,
-        },
-      ]
-    : [];
+  // Logs hrefs
+  const podLogsHref = getNodeLogsHref(
+    'pod',
+    podId!,
+    time,
+    allDatasetsLocator,
+    nodeLogsLocator
+  );
+  const containerLogsHref = getNodeLogsHref(
+    'container',
+    containerId!,
+    time,
+    allDatasetsLocator,
+    nodeLogsLocator
+  );
+  const hostLogsHref = getNodeLogsHref(
+    'host',
+    hostName!,
+    time,
+    allDatasetsLocator,
+    nodeLogsLocator
+  );
+  const traceLogsHref = getTraceLogsHref(
+    transaction.trace.id!,
+    time,
+    allDatasetsLocator,
+    logsLocator
+  );
 
-  const containerActions: Action[] = nodeLogsLocator
-    ? [
-        {
-          key: 'containerLogs',
-          label: i18n.translate(
-            'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
-            { defaultMessage: 'Container logs' }
-          ),
-          href: nodeLogsLocator.getRedirectUrl({
-            nodeId: containerId!,
-            nodeType: 'container',
-            time,
-          }),
-          condition: !!containerId,
-        },
-        {
-          key: 'containerMetrics',
-          label: i18n.translate(
-            'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
-            { defaultMessage: 'Container metrics' }
-          ),
-          href: getInfraHref({
-            app: 'metrics',
-            basePath,
-            path: `/link-to/container-detail/${containerId}`,
-            query: infraMetricsQuery,
-          }),
-          condition: !!containerId,
-        },
-      ]
-    : [];
-
-  const hostActions: Action[] = [
+  const podActions: Action[] = [
+    {
+      key: 'podLogs',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
+        { defaultMessage: 'Pod logs' }
+      ),
+      href: podLogsHref,
+      condition: !!podId,
+    },
     ...(nodeLogsLocator
       ? [
           {
-            key: 'hostLogs',
+            key: 'podMetrics',
             label: i18n.translate(
-              'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
-              { defaultMessage: 'Host logs' }
+              'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
+              { defaultMessage: 'Pod metrics' }
             ),
-            href: nodeLogsLocator.getRedirectUrl({
-              nodeId: hostName!,
-              nodeType: 'host',
-              time,
+            href: getInfraHref({
+              app: 'metrics',
+              basePath,
+              path: `/link-to/pod-detail/${podId}`,
+              query: infraMetricsQuery,
             }),
-            condition: !!hostName,
+            condition: !!podId,
           },
+        ]
+      : []),
+  ];
+
+  const containerActions: Action[] = [
+    {
+      key: 'containerLogs',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
+        { defaultMessage: 'Container logs' }
+      ),
+      href: containerLogsHref,
+      condition: !!containerId,
+    },
+    ...(nodeLogsLocator
+      ? [
+          {
+            key: 'containerMetrics',
+            label: i18n.translate(
+              'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
+              { defaultMessage: 'Container metrics' }
+            ),
+            href: getInfraHref({
+              app: 'metrics',
+              basePath,
+              path: `/link-to/container-detail/${containerId}`,
+              query: infraMetricsQuery,
+            }),
+            condition: !!containerId,
+          },
+        ]
+      : []),
+  ];
+
+  const hostActions: Action[] = [
+    {
+      key: 'hostLogs',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
+        { defaultMessage: 'Host logs' }
+      ),
+      href: hostLogsHref,
+      condition: !!hostName,
+    },
+    ...(nodeLogsLocator
+      ? [
           {
             key: 'hostMetrics',
             label: i18n.translate(
@@ -175,6 +205,7 @@ export const getSections = ({
           },
         ]
       : []),
+
     {
       key: 'hostProfilingFlamegraph',
       label: i18n.translate(
@@ -213,22 +244,17 @@ export const getSections = ({
     },
   ];
 
-  const logActions: Action[] = logsLocator
-    ? [
-        {
-          key: 'traceLogs',
-          label: i18n.translate(
-            'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
-            { defaultMessage: 'Trace logs' }
-          ),
-          href: logsLocator.getRedirectUrl({
-            filter: `trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`,
-            time,
-          }),
-          condition: true,
-        },
-      ]
-    : [];
+  const logActions: Action[] = [
+    {
+      key: 'traceLogs',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showTraceLogsLinkLabel',
+        { defaultMessage: 'Trace logs' }
+      ),
+      href: traceLogsHref,
+      condition: true,
+    },
+  ];
 
   const uptimeActions: Action[] = [
     {
@@ -338,27 +364,19 @@ export const getSections = ({
             },
           ]
         : []),
-
-      ...(infraLocators
-        ? [
-            {
-              key: 'traceDetails',
-              title: i18n.translate(
-                'xpack.apm.transactionActionMenu.trace.title',
-                {
-                  defaultMessage: 'Trace details',
-                }
-              ),
-              subtitle: i18n.translate(
-                'xpack.apm.transactionActionMenu.trace.subtitle',
-                {
-                  defaultMessage: 'View trace logs to get further details.',
-                }
-              ),
-              actions: logActions,
-            },
-          ]
-        : []),
+      {
+        key: 'traceDetails',
+        title: i18n.translate('xpack.apm.transactionActionMenu.trace.title', {
+          defaultMessage: 'Trace details',
+        }),
+        subtitle: i18n.translate(
+          'xpack.apm.transactionActionMenu.trace.subtitle',
+          {
+            defaultMessage: 'View trace logs to get further details.',
+          }
+        ),
+        actions: logActions,
+      },
       {
         key: 'statusDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.status.title', {

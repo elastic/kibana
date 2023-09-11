@@ -645,7 +645,7 @@ describe('[Logs onboarding] System logs', () => {
         .should('exist');
     });
 
-    it('when user clicks on Explore Logs it navigates to discover', () => {
+    it('when user clicks on Explore Logs it navigates to observability log explorer', () => {
       cy.wait('@systemIntegrationInstall');
       cy.wait('@checkOnboardingProgress');
       cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();

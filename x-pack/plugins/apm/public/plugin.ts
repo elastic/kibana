@@ -69,6 +69,7 @@ import type {
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ObservabilityLogExplorerPluginSetup } from '@kbn/observability-log-explorer-plugin/public/types';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
@@ -104,6 +105,7 @@ export interface ApmPluginSetupDeps {
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
+  observabilityLogExplorer: ObservabilityLogExplorerPluginSetup;
 }
 
 export interface ApmServices {

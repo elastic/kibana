@@ -44,11 +44,9 @@ export class DatasetsClient implements IDatasetsClient {
 
     const query = findIntegrationsRequestQueryRT.encode(search);
 
-    const response = await this.http
-      .get(INTEGRATIONS_URL, { query, version: '2023-10-31' })
-      .catch((error) => {
-        throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
-      });
+    const response = await this.http.get(INTEGRATIONS_URL, { query }).catch((error) => {
+      throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
+    });
 
     const data = decodeOrThrow(
       findIntegrationsResponseRT,
