@@ -221,7 +221,7 @@ describe('TelemetryService', () => {
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
-        InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED,
+        InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED,
         {
           componentName: 'infraAssetDetailsPage',
           assetType: 'host',
