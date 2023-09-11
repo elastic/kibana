@@ -18,8 +18,7 @@ import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions'
 import { useRightPanelContext } from '../context';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
-import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { ANALYZER_PREVIEW_TITLE } from './translations';
+import { ANALYZER_PREVIEW_NO_DATA_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 const timelineId = 'timeline-1';
@@ -58,7 +57,12 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   return (
     <ExpandablePanel
       header={{
-        title: ANALYZER_PREVIEW_TITLE,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.right.analyzerPreviewTitle"
+            defaultMessage="Analyzer preview"
+          />
+        ),
         iconType: 'timeline',
         ...(isEnabled && { callback: goToAnalyzerTab }),
       }}
@@ -67,7 +71,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
       {isEnabled ? (
         <AnalyzerPreview />
       ) : (
-        <div data-test-subj={`${ANALYZER_PREVIEW_TEST_ID}Error`}>
+        <p data-test-subj={ANALYZER_PREVIEW_NO_DATA_TEST_ID}>
           <FormattedMessage
             id="xpack.securitySolution.flyout.analyzerPreviewError"
             defaultMessage="You can only visualize events triggered by hosts configured with the Elastic Defend integration or any {sysmon} data from {winlogbeat}. Refer to {link} for more information."
@@ -87,7 +91,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
               ),
             }}
           />
-        </div>
+        </p>
       )}
     </ExpandablePanel>
   );

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RELATED_ALERTS_BY_SESSION_NO_DATA } from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CORRELATIONS_SESSION_ALERTS } from '../../shared/translations';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
@@ -52,7 +52,12 @@ export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
       alertIds={data}
       scopeId={scopeId}
       eventId={eventId}
-      noItemsMessage={RELATED_ALERTS_BY_SESSION_NO_DATA}
+      noItemsMessage={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.correlations.relatedAlertsBySessionNoDataDescription"
+          defaultMessage="No alerts related by session."
+        />
+      }
       data-test-subj={CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID}
     />
   );

@@ -9,6 +9,7 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseDetailsLink } from '../../../common/components/links';
 import { CORRELATIONS_RELATED_CASES } from '../../shared/translations';
 import {
@@ -17,18 +18,18 @@ import {
 } from './test_ids';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
-import {
-  CORRELATIONS_CASE_NAME_COLUMN_TITLE,
-  CORRELATIONS_CASE_STATUS_COLUMN_TITLE,
-  RELATED_CASES_NO_DATA,
-} from './translations';
 
 const ICON = 'warning';
 
 const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
   {
     field: 'title',
-    name: CORRELATIONS_CASE_NAME_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.correlations.nameColumnLabel"
+        defaultMessage="Name"
+      />
+    ),
     truncateText: true,
     render: (value: string, caseData: RelatedCase) => (
       <CaseDetailsLink detailName={caseData.id} title={caseData.title}>
@@ -38,7 +39,12 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
   },
   {
     field: 'status',
-    name: CORRELATIONS_CASE_STATUS_COLUMN_TITLE,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.correlations.statusColumnLabel"
+        defaultMessage="Status"
+      />
+    ),
     truncateText: true,
   },
 ];
@@ -83,7 +89,12 @@ export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
         items={data}
         columns={columns}
         pagination={true}
-        message={RELATED_CASES_NO_DATA}
+        message={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.correlations.relatedCasesNoDataDescription"
+            defaultMessage="No related cases."
+          />
+        }
         data-test-subj={CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID}
       />
     </ExpandablePanel>

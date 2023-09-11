@@ -7,22 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FLYOUT_ERROR = i18n.translate('xpack.securitySolution.flyout.documentDetails.error', {
-  defaultMessage: 'data',
-});
-
-export const ERROR_TITLE = (title: string) =>
-  i18n.translate('xpack.securitySolution.flyout.errorTitle', {
-    values: { title },
-    defaultMessage: 'Unable to display {title}',
-  });
-
-export const ERROR_MESSAGE = (message: string) =>
-  i18n.translate('xpack.securitySolution.flyout.errorMessage', {
-    values: { message },
-    defaultMessage: 'There was an error displaying {message}',
-  });
-
 export const CORRELATIONS_SUPPRESSED_ALERTS = (count: number) =>
   i18n.translate('xpack.securitySolution.flyout.documentDetails.correlations.suppressedAlerts', {
     defaultMessage: 'suppressed {count, plural, =1 {alert} other {alerts}}',
