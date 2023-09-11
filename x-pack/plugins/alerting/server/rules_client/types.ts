@@ -32,6 +32,7 @@ import {
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
+import { GetAlertIndicesAlias } from '../lib';
 
 export type {
   BulkEditOperation,
@@ -74,6 +75,7 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
+  readonly getAlertIndicesAlias: GetAlertIndicesAlias;
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;

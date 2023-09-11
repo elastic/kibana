@@ -34,6 +34,7 @@ export const untrackRuleAlerts = async (
         state.alertInstances ?? {},
         (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
       );
+
       const untrackedAlertIds = Object.keys(untrackedAlerts);
 
       const { isLifecycleAlert } = taskInstance.state?.alertTypeState ?? {
@@ -73,21 +74,42 @@ export const untrackRuleAlerts = async (
       }
 
       if (isLifecycleAlert) {
-        const { taskType } = taskInstance;
-        const untrackTaskType = taskType.replace('alerting:', 'alerting:untrack:');
-        const untrackTaskInstance = {
-          id: `untrack-${id}`,
-          taskType: untrackTaskType,
-          params: {
-            alertId: id,
-            spaceId: context.spaceId,
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+        const alertsClient = await context.ruleTypeRegistry.createAlertsClient({
+          namespace: context.namespace!,
+          rule: {
+            id,
+            name: attributes.name,
             consumer: attributes.consumer,
+            revision: attributes.revision,
+            spaceId: context.spaceId,
+            tags: attributes.tags,
+            parameters: attributes.parameters,
+            executionId: '',
           },
-          scope: ['alerting'],
-          state: {},
-          enabled: true,
-        };
-        await context.taskManager.schedule(untrackTaskInstance);
+          ruleType,
+          logger: context.logger,
+        });
+        if (!alertsClient) throw new Error('Could not create alertsClient');
+        for (const alertId of untrackedAlertIds) {
+          const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
+          await alertsClient.untrackAlertIdByIndices(alertId, indices);
+        }
+        // const { taskType } = taskInstance;
+        // const untrackTaskType = taskType.replace('alerting:', 'alerting:untrack:');
+        // const untrackTaskInstance = {
+        //   id: `untrack-${id}`,
+        //   taskType: untrackTaskType,
+        //   params: {
+        //     alertId: id,
+        //     spaceId: context.spaceId,
+        //     consumer: attributes.consumer,
+        //   },
+        //   scope: ['alerting'],
+        //   state: {},
+        //   enabled: true,
+        // };
+        // await context.taskManager.schedule(untrackTaskInstance);
       }
     } catch (error) {
       // this should not block the rest of the disable process

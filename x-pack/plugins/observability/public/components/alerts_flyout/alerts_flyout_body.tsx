@@ -23,8 +23,7 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
@@ -64,7 +63,7 @@ export function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
       }),
       description: (
         <AlertLifecycleStatusBadge
-          alertStatus={alert.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+          alertStatus={alert.fields[ALERT_STATUS]}
           flapping={alert.fields[ALERT_FLAPPING]}
         />
       ),

@@ -495,6 +495,7 @@ export class AlertingPlugin {
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
     });
 
     rulesSettingsClientFactory.initialize({

@@ -6,7 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
@@ -195,6 +201,30 @@ export class AlertsClient<
     });
 
     return { hits, total };
+  }
+
+  public async untrackAlertIdByIndices(alertId: string, indices: string[]) {
+    const esClient = await this.options.elasticsearchClientPromise;
+    for (const index of indices) {
+      try {
+        await esClient.updateByQuery({
+          index,
+          body: {
+            script: {
+              source: `ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'`,
+              lang: 'painless',
+            },
+            query: {
+              term: {
+                [ALERT_INSTANCE_ID]: { value: alertId },
+              },
+            },
+          },
+        });
+      } catch (err) {
+        this.options.logger.error(`Error marking ${alertId} as untracked - ${err.message}`);
+      }
+    }
   }
 
   public report(

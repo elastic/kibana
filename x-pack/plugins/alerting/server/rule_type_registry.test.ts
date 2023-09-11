@@ -413,7 +413,7 @@ describe('Create Lifecycle', () => {
       );
     });
 
-    test("registers the executor and the executor's untrack task with the task manager", () => {
+    test('registers the executor with the task manager', () => {
       const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
         id: 'test',
         name: 'Test',
@@ -435,7 +435,7 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
-      expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(2);
+      expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
       expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
         'alerting:test': {
           timeout: '20m',
