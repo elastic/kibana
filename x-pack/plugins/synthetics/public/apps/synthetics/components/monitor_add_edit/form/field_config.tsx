@@ -78,6 +78,7 @@ import {
   ResponseCheckJSON,
   ThrottlingConfig,
   RequestBodyCheck,
+  SourceType,
 } from '../types';
 import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -209,7 +210,7 @@ export const MONITOR_TYPE_CONFIG = {
   },
 };
 
-export const FIELD = (readOnly?: boolean, isProjectMonitor?: boolean): FieldMap => ({
+export const FIELD = (readOnly?: boolean): FieldMap => ({
   [ConfigKey.FORM_MONITOR_TYPE]: {
     fieldKey: ConfigKey.FORM_MONITOR_TYPE,
     required: true,
@@ -485,66 +486,78 @@ export const FIELD = (readOnly?: boolean, isProjectMonitor?: boolean): FieldMap 
     helpText: i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
       defaultMessage: `When disabled, the monitor doesn't run any tests. You can enable it at any time.`,
     }),
-    props: ({ setValue, field, trigger }): EuiSwitchProps => ({
-      id: 'syntheticsMontiorConfigIsEnabled',
-      label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
-        defaultMessage: 'Enable Monitor',
-      }),
-      checked: field?.value || false,
-      onChange: async (event) => {
-        setValue(ConfigKey.ENABLED, !!event.target.checked);
-        await trigger(ConfigKey.ENABLED);
-      },
-      'data-test-subj': 'syntheticsEnableSwitch',
-      // enabled is an allowed field for read only
-      disabled: !isProjectMonitor && readOnly,
-    }),
+    props: ({ setValue, field, trigger, formState }): EuiSwitchProps => {
+      const isProjectMonitor =
+        formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+      return {
+        id: 'syntheticsMontiorConfigIsEnabled',
+        label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
+          defaultMessage: 'Enable Monitor',
+        }),
+        checked: field?.value || false,
+        onChange: async (event) => {
+          setValue(ConfigKey.ENABLED, !!event.target.checked);
+          await trigger(ConfigKey.ENABLED);
+        },
+        'data-test-subj': 'syntheticsEnableSwitch',
+        // enabled is an allowed field for read only
+        disabled: !isProjectMonitor && readOnly,
+      };
+    },
   },
   [AlertConfigKey.STATUS_ENABLED]: {
     fieldKey: AlertConfigKey.STATUS_ENABLED,
     component: Switch,
     controlled: true,
-    props: ({ setValue, field, trigger }): EuiSwitchProps => ({
-      id: 'syntheticsMonitorConfigIsAlertEnabled',
-      label: field?.value
-        ? i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
-            defaultMessage: 'Disable status alerts on this monitor',
-          })
-        : i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
-            defaultMessage: 'Enable status alerts on this monitor',
-          }),
-      checked: field?.value || false,
-      onChange: async (event) => {
-        setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
-        await trigger(AlertConfigKey.STATUS_ENABLED);
-      },
-      'data-test-subj': 'syntheticsAlertStatusSwitch',
-      // alert config is an allowed field for read only
-      disabled: !isProjectMonitor && readOnly,
-    }),
+    props: ({ setValue, field, trigger, formState }): EuiSwitchProps => {
+      const isProjectMonitor =
+        formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+      return {
+        id: 'syntheticsMonitorConfigIsAlertEnabled',
+        label: field?.value
+          ? i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
+              defaultMessage: 'Disable status alerts on this monitor',
+            })
+          : i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
+              defaultMessage: 'Enable status alerts on this monitor',
+            }),
+        checked: field?.value || false,
+        onChange: async (event) => {
+          setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
+          await trigger(AlertConfigKey.STATUS_ENABLED);
+        },
+        'data-test-subj': 'syntheticsAlertStatusSwitch',
+        // alert config is an allowed field for read only
+        disabled: !isProjectMonitor && readOnly,
+      };
+    },
   },
   [AlertConfigKey.TLS_ENABLED]: {
     fieldKey: AlertConfigKey.TLS_ENABLED,
     component: Switch,
     controlled: true,
-    props: ({ setValue, field, trigger }): EuiSwitchProps => ({
-      id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
-      label: field?.value
-        ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
-            defaultMessage: 'Disable TLS alerts on this monitor.',
-          })
-        : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
-            defaultMessage: 'Enable TLS alerts on this monitor.',
-          }),
-      checked: field?.value || false,
-      onChange: async (event) => {
-        setValue(AlertConfigKey.TLS_ENABLED, !!event.target.checked);
-        await trigger(AlertConfigKey.TLS_ENABLED);
-      },
-      'data-test-subj': 'syntheticsAlertStatusSwitch',
-      // alert config is an allowed field for read only
-      disabled: !isProjectMonitor && readOnly,
-    }),
+    props: ({ setValue, field, trigger, formState }): EuiSwitchProps => {
+      const isProjectMonitor =
+        formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+      return {
+        id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
+        label: field?.value
+          ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
+              defaultMessage: 'Disable TLS alerts on this monitor.',
+            })
+          : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
+              defaultMessage: 'Enable TLS alerts on this monitor.',
+            }),
+        checked: field?.value || false,
+        onChange: async (event) => {
+          setValue(AlertConfigKey.TLS_ENABLED, !!event.target.checked);
+          await trigger(AlertConfigKey.TLS_ENABLED);
+        },
+        'data-test-subj': 'syntheticsAlertStatusSwitch',
+        // alert config is an allowed field for read only
+        disabled: !isProjectMonitor && readOnly,
+      };
+    },
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
