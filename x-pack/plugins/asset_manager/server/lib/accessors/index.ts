@@ -6,14 +6,18 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { AssetManagerConfig } from '../../types';
 
 export interface InjectedValues {
   sourceIndices: AssetManagerConfig['sourceIndices'];
+  getApmIndices: (soClient: SavedObjectsClientContract) => Promise<APMDataAccessConfig['indices']>;
 }
 
 export type OptionsWithInjectedValues<T extends object> = T & InjectedValues;
 
 export interface AccessorOptions {
   esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
 }
