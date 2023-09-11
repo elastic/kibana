@@ -16,6 +16,7 @@ interface OverwriteFieldProps {
 }
 
 const CONFIG = {
+  defaultValue: true,
   label: (
     <p>
       <FormattedMessage
@@ -27,7 +28,7 @@ const CONFIG = {
         }}
       />
     </p>
-  ),
+  ) as unknown as string,
 };
 
 const OverwriteFieldComponent = ({
