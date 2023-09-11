@@ -29,6 +29,7 @@ import type {
 } from '@kbn/event-annotation-common';
 import { css } from '@emotion/react';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { GroupEditorControls, isGroupValid } from './group_editor_controls';
 import { GroupPreview } from './group_preview';
 
@@ -101,7 +102,13 @@ export const GroupEditorFlyout = ({
   const onClose = () => (selectedAnnotation ? setSelectedAnnotation(undefined) : parentOnClose());
 
   return (
-    <EuiFlyout onClose={onClose} size="l">
+    <EuiFlyout
+      onClose={onClose}
+      paddingSize="m"
+      size="l"
+      hideCloseButton
+      outsideClickCloses={false}
+    >
       <EuiFlexGroup
         css={css`
           height: 100%;
@@ -112,6 +119,7 @@ export const GroupEditorFlyout = ({
           grow={false}
           css={css`
             width: 360px;
+            border-right: 1px solid ${euiThemeVars.euiColorLightShade};
           `}
         >
           <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
