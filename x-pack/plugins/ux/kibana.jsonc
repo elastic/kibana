@@ -17,7 +17,6 @@
       "observabilityShared",
       "observabilityAIAssistant",
       "embeddable",
-      "infra",
       "inspector",
       "apm"
     ],

@@ -13,7 +13,8 @@ import { EuiBadge, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncJobType, SyncStatus } from '../../../../../../common/types/connectors';
+import { SyncJobType, SyncStatus } from '@kbn/search-connectors';
+
 import { FormattedDateTime } from '../../../../shared/formatted_date_time';
 import { pageToPagination } from '../../../../shared/pagination/page_to_pagination';
 
