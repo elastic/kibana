@@ -155,13 +155,13 @@ export class SampleDataInstaller {
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
+
     try {
       if (dataIndex.isDataStream) {
         const request = {
           name: index,
           body: {
             template: {
-              settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
               mappings: { properties: dataIndex.fields },
             },
             index_patterns: [index],
@@ -180,8 +180,6 @@ export class SampleDataInstaller {
             settings: {
               index: {
                 ...dataIndex.indexSettings,
-                number_of_shards: 1,
-                auto_expand_replicas: '0-1',
               },
             },
             mappings: { properties: dataIndex.fields },
