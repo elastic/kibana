@@ -1,5 +1,5 @@
 {
-  "journeyName": "GET /api/status",
+  "journeyName": "GET /bootstrap.js",
   "scalabilitySetup": {
     "responseTimeThreshold": {
       "threshold1": 1000,
@@ -17,11 +17,11 @@
       {
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
-        "maxUsersCount": 1210,
-        "duration": "80s"
+        "maxUsersCount": 700,
+        "duration": "138s"
       }
     ],
-    "maxDuration": "4m"
+    "maxDuration": "6m"
   },
   "testData": {
     "esArchives": [],
@@ -33,10 +33,10 @@
         {
           "http": {
             "method": "GET",
-            "path": "/api/status",
+            "path": "/bootstrap.js",
             "headers": {
-              "Accept-Encoding": "gzip",
-              "Content-Type": "application/json; charset=utf-8"
+              "Cookie": "",
+              "Accept-Encoding": "gzip, deflate, br"
             },
             "statusCode": 200
           }
