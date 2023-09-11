@@ -8,7 +8,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+} from '@elastic/eui';
 
 interface Props {
   failure: ShardFailure;
@@ -17,15 +24,14 @@ interface Props {
 
 export function FailureDetails({ failure, onClose }: Props) {
   return (
-    <EuiFlyout
-      onClose={onClose}
-      ownFocus={false}
-    >
+    <EuiFlyout onClose={onClose} ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h1>{i18n.translate('inspector.requests.shardsDetails.flyoutTitle', {
-            defaultMessage: 'Shard failure',
-          })}</h1>
+          <h1>
+            {i18n.translate('inspector.requests.shardsDetails.flyoutTitle', {
+              defaultMessage: 'Shard failure',
+            })}
+          </h1>
         </EuiTitle>
       </EuiFlyoutHeader>
 
@@ -34,17 +40,12 @@ export function FailureDetails({ failure, onClose }: Props) {
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButtonEmpty
-          iconType="cross"
-          onClick={onClose}
-          flush="left"
-        >
+        <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
           {i18n.translate('inspector.requests.shardsDetails.closeButtonLabel', {
             defaultMessage: 'Close',
           })}
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
-
     </EuiFlyout>
   );
 }

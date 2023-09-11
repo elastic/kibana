@@ -36,34 +36,37 @@ export function FailureOverview({ failure }: Props) {
         defaultMessage: 'Type',
       }),
       description: failure.reason.type,
-    }
+    },
   ];
 
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiDescriptionList
-            type="inline"
-            listItems={items}
-            compressed
-          />
+          <EuiDescriptionList type="inline" listItems={items} compressed />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-          flush="right"
-          onClick={() => {
-            setShowDetails(true);
-          }}
-          size="xs"
-        >
-          {i18n.translate('inspector.requests.shardsDetails.viewDetailsLabel', {
-            defaultMessage: 'Details',
-          })}
-        </EuiButtonEmpty>
+            flush="right"
+            onClick={() => {
+              setShowDetails(true);
+            }}
+            size="xs"
+          >
+            {i18n.translate('inspector.requests.shardsDetails.viewDetailsLabel', {
+              defaultMessage: 'Details',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showDetails ? <FailureDetails failure={failure} onClose={() => { setShowDetails(false); }} /> : null}
+      {showDetails ? (
+        <FailureDetails
+          failure={failure}
+          onClose={() => {
+            setShowDetails(false);
+          }}
+        />
+      ) : null}
     </>
   );
 }
