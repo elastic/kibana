@@ -36,7 +36,7 @@ export interface DimensionButtonProps {
   groupLabel: string;
   children: React.ReactElement;
   onClick: (id: string) => void;
-  onRemoveClick: (id: string) => void;
+  onRemoveClick?: (id: string) => void;
   accessorConfig: AccessorConfig;
   label: string;
   message?: Message;
@@ -98,37 +98,42 @@ export function DimensionButton({
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiButtonIcon
-        className="lnsLayerPanel__dimensionRemove"
-        data-test-subj="indexPattern-dimension-remove"
-        iconType="trash"
-        size="xs"
-        color="danger"
-        aria-label={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
-          defaultMessage: 'Remove configuration from "{groupLabel}"',
-          values: { groupLabel },
-        })}
-        title={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
-          defaultMessage: 'Remove configuration from "{groupLabel}"',
-          values: { groupLabel },
-        })}
-        onClick={() => onRemoveClick(accessorConfig.columnId)}
-        css={css`
-          color: ${euiThemeVars.euiTextSubduedColor};
-          transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
-          transition-property: color, opacity, background-color, transform;
-          opacity: 0;
+      {onRemoveClick && (
+        <EuiButtonIcon
+          className="lnsLayerPanel__dimensionRemove"
+          data-test-subj="indexPattern-dimension-remove"
+          iconType="trash"
+          size="xs"
+          color="danger"
+          aria-label={i18n.translate(
+            'visualizationUiComponents.dimensionButton.removeColumnLabel',
+            {
+              defaultMessage: 'Remove configuration from "{groupLabel}"',
+              values: { groupLabel },
+            }
+          )}
+          title={i18n.translate('visualizationUiComponents.dimensionButton.removeColumnLabel', {
+            defaultMessage: 'Remove configuration from "{groupLabel}"',
+            values: { groupLabel },
+          })}
+          onClick={() => onRemoveClick(accessorConfig.columnId)}
+          css={css`
+            color: ${euiThemeVars.euiTextSubduedColor};
+            transition: ${euiThemeVars.euiAnimSpeedFast} ease-in-out;
+            transition-property: color, opacity, background-color, transform;
+            opacity: 0;
 
-          .domDragDrop:hover &,
-          .domDragDrop:focus-within & {
-            opacity: 1;
-          }
-          &:hover,
-          &:focus {
-            color: ${euiThemeVars.euiColorDangerText};
-          }
-        `}
-      />
+            .domDragDrop:hover &,
+            .domDragDrop:focus-within & {
+              opacity: 1;
+            }
+            &:hover,
+            &:focus {
+              color: ${euiThemeVars.euiColorDangerText};
+            }
+          `}
+        />
+      )}
       <PaletteIndicator accessorConfig={accessorConfig} />
     </div>
   );

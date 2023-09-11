@@ -88,13 +88,17 @@ export const AnnotationList = ({
   const [{ dragging }] = useDragDropContext();
 
   return (
-    <div>
+    <div
+      css={css`
+        background-color: ${euiThemeVars.euiColorLightestShade};
+        padding: ${euiThemeVars.euiSizeS};
+      `}
+    >
       <ReorderProvider>
         {annotations.map((annotation, index) => (
           <div
             key={index}
             css={css`
-              margin-top: ${euiThemeVars.euiSizeS};
               position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
             `}
           >
@@ -123,8 +127,10 @@ export const AnnotationList = ({
                   defaultMessage: 'Annotations',
                 })}
                 onClick={() => selectAnnotation(annotation)}
-                onRemoveClick={() =>
-                  updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
+                onRemoveClick={
+                  annotations.length > 1
+                    ? () => updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
+                    : undefined
                 }
                 accessorConfig={getAnnotationAccessor(annotation)}
                 label={annotation.label}
