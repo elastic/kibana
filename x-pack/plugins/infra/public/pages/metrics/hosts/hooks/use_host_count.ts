@@ -27,7 +27,6 @@ export const useHostCount = () => {
   const { search: fetchHostCount, requests$ } = useDataSearch({
     getRequest: useCallback(() => {
       const query = buildQuery();
-      const dateRange = parsedDateRange;
 
       const filters: QueryDslQueryContainer = {
         bool: {
@@ -42,8 +41,8 @@ export const useHostCount = () => {
             {
               range: {
                 [dataView?.timeFieldName ?? '@timestamp']: {
-                  gte: dateRange.from,
-                  lte: dateRange.to,
+                  gte: parsedDateRange.from,
+                  lte: parsedDateRange.to,
                   format: 'strict_date_optional_time',
                 },
               },

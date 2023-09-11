@@ -17,6 +17,8 @@ import {
   ObservabilityOnboardingPluginStart,
 } from './plugin';
 
+export { OBSERVABILITY_ONBOARDING_LOCATOR } from './locators/onboarding_locator/locator_definition';
+
 export interface ConfigSchema {
   ui: {
     enabled: boolean;
