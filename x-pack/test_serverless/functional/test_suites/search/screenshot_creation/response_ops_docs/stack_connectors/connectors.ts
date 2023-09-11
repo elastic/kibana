@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const commonScreenshots = getService('commonScreenshots');
+  const svlCommonScreenshots = getService('svlCommonScreenshots');
   // const browser = getService('browser');
   // const find = getService('find');
   // const testSubjects = getService('testSubjects');
@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('connectors list screenshot', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await commonScreenshots.takeScreenshot(
+      await svlCommonScreenshots.takeScreenshot(
         'connector-listing',
         screenshotDirectories,
         1400,

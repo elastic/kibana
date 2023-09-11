@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function CommonScreenshotsProvider({ getService }: FtrProviderContext) {
+export function SvlCommonScreenshotsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');

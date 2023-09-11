@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const actions = getService('actions');
@@ -13,6 +13,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const es = getService('es');
   const rules = getService('rules');
   const testIndex = `test-index`;
+  const svlCommonApi = getService('svlCommonApi');
 
   describe('stack connectors', function () {
     before(async () => {
@@ -22,6 +23,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         config: {},
         secrets: {},
         connectorTypeId: '.server-log',
+        additionalRequestHeaders: svlCommonApi.getInternalRequestHeader(),
       });
 
       await es.indices.create({
@@ -37,6 +39,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           },
         },
       });
+
       await actions.api.createConnector({
         name: 'my-index-connector',
         config: {
@@ -44,12 +47,13 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         },
         secrets: {},
         connectorTypeId: '.index',
+        additionalRequestHeaders: svlCommonApi.getInternalRequestHeader(),
       });
     });
 
     after(async () => {
-      await rules.api.deleteAllRules();
-      await actions.api.deleteAllConnectors();
+      await rules.api.deleteAllRules(svlCommonApi.getInternalRequestHeader());
+      await actions.api.deleteAllConnectors(svlCommonApi.getInternalRequestHeader());
       await es.indices.delete({ index: testIndex });
     });
 

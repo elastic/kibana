@@ -94,10 +94,10 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
-  - x-pack/test_serverless/screenshot_creation/config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
