@@ -295,6 +295,7 @@ export function Home() {
               )}
               footer={
                 <EuiButton
+                  data-test-subj="observabilityOnboardingHomeButton"
                   onClick={handleClickUniversalProfilingSetupGuide}
                   color="primary"
                 >
