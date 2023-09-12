@@ -180,7 +180,7 @@ export function transformSavedObjectToExternalModel(
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
   const customFields = !caseSavedObjectAttributes.customFields
     ? []
-    : (caseSavedObjectAttributes.customFields as unknown as CaseCustomFields);
+    : (caseSavedObjectAttributes.customFields as CaseCustomFields);
 
   return {
     ...caseSavedObject,
