@@ -12,7 +12,7 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDeep, findIndex } from 'lodash';
+import { cloneDeep, findIndex, merge } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
@@ -132,13 +132,20 @@ export abstract class AbstractDataView {
   constructor(config: AbstractDataViewDeps) {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
+    const extractedFieldAttrs = spec?.fields
+      ? Object.entries(spec.fields).reduce((acc, [key, value]) => {
+          if (value.count) {
+            acc[key] = { count: value.count };
+          }
+          return acc;
+        }, {} as Record<string, FieldAttrSet>)
+      : [];
+
     this.allowNoIndex = spec?.allowNoIndex || false;
     // CRUD operations on scripted fields need to be examined
     this.scriptedFields = spec?.fields
       ? Object.values(spec.fields).filter((field) => field.scripted)
       : [];
-    // CRUD operations on field attributes need to be examined
-    this.fieldAttrsSet = spec?.fieldAttrs;
 
     // set dependencies
     this.fieldFormats = { ...fieldFormats };
@@ -157,7 +164,7 @@ export abstract class AbstractDataView {
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
+    this.fieldAttrs = cloneDeep(merge({}, extractedFieldAttrs, spec.fieldAttrs)) || {};
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
@@ -263,6 +270,16 @@ export abstract class AbstractDataView {
   }
 
   /**
+   * Set field custom label
+   * @param fieldName name of field to set custom label on
+   * @param customLabel custom label value. If undefined, custom label is removed
+   */
+
+  protected setFieldCustomLabelInternal(fieldName: string, customLabel: string | undefined | null) {
+    this.setFieldAttrs(fieldName, 'customLabel', customLabel === null ? undefined : customLabel);
+  }
+
+  /**
    * Set field formatter
    * @param fieldName name of field to set format on
    * @param format field format in serialized form
@@ -307,7 +324,7 @@ export abstract class AbstractDataView {
     };
   }
 
-  upsertScriptedFieldInternal = (field: FieldSpec) => {
+  protected upsertScriptedFieldInternal = (field: FieldSpec) => {
     // search for scriped field with same name
     const findByName = (f: DataViewFieldBase) => f.name === field.name;
 

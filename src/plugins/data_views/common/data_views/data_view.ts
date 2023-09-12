@@ -466,7 +466,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       fieldObject.customLabel = newCustomLabel;
     }
 
-    this.setFieldAttrs(fieldName, 'customLabel', newCustomLabel);
+    this.setFieldCustomLabelInternal(fieldName, customLabel);
   }
 
   /**

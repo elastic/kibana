@@ -834,7 +834,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     if (field.customLabel !== customLabel) {
       field.customLabel = customLabel;
-      indexPattern.fields.update(field);
+      indexPattern.setFieldCustomLabel(field.name, customLabel);
     }
 
     return indexPatternService
