@@ -426,7 +426,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   success: result.success && runResult.success,
                   warning: warningMessages.length > 0,
                   warningMessages,
-                  metrics: result.metrics.concat(runResult.metrics),
+                  durationMetrics: result.durationMetrics.concat(runResult.durationMetrics),
                 };
                 runState = runResult.state;
               }
@@ -442,7 +442,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 success: true,
                 warning: false,
                 warningMessages: [],
-                metrics: [],
+                durationMetrics: [],
               };
             }
 
@@ -475,6 +475,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
                     enrichmentDurations: result.enrichmentTimes,
+                    durationMetrics: result.durationMetrics,
                   },
                 });
               }
@@ -486,6 +487,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
+                  durationMetrics: result.durationMetrics,
                 },
               });
             }
@@ -499,6 +501,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
                 enrichmentDurations: result.enrichmentTimes,
+                durationMetrics: result.durationMetrics,
               },
             });
           }

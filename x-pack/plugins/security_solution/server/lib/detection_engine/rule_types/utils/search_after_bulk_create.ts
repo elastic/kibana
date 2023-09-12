@@ -23,6 +23,7 @@ import {
   makeFloatString,
 } from './utils';
 import type { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from '../types';
+import { RulePhase } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { createEnrichEventsFunction } from './enrichments';
 
@@ -156,9 +157,9 @@ export const searchAfterAndBulkCreate = async ({
         mergeReturns([
           toReturn,
           createSearchAfterReturnType({
-            metrics: {
-              valueListFilteringTimes: [makeFloatString(end - start)],
-            },
+            durationMetrics: [
+              { phaseName: RulePhase.ValueListFiltering, duration: makeFloatString(end - start) },
+            ],
           }),
         ]);
         // only bulk create if there are filteredEvents leftover

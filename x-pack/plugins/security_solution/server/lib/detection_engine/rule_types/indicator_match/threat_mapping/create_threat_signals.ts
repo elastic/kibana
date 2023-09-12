@@ -90,6 +90,7 @@ export const createThreatSignals = async ({
     createdSignals: [],
     errors: [],
     warningMessages: [],
+    durationMetrics: [],
   };
 
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);

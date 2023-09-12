@@ -73,7 +73,7 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   success: boolean;
   warning: boolean;
   warningMessages: string[];
-  metrics: SearchAfterAndBulkCreateMetrics[];
+  durationMetrics: DurationMetrics[];
 }
 
 export interface RunOpts<TParams extends RuleParams> {
@@ -375,9 +375,16 @@ export interface SearchAfterAndBulkCreateParams {
   additionalFilters?: estypes.QueryDslQueryContainer[];
 }
 
-export interface SearchAfterAndBulkCreateMetrics {
-  valueListFilteringTimes: string[];
-  thresholdSignalHistorySearchTime?: string;
+export enum RulePhase {
+  CompositeAgg = 'composite_agg',
+  BulkCreate = 'bulk_create',
+  AlertEnrichment = 'alert_enrichment',
+  ValueListFiltering = 'value_list_filtering',
+}
+
+export interface DurationMetrics {
+  phaseName: RulePhase;
+  duration: string;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -391,7 +398,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
-  metrics: SearchAfterAndBulkCreateMetrics;
+  durationMetrics: DurationMetrics[];
 }
 
 // the new fields can be added later if needed

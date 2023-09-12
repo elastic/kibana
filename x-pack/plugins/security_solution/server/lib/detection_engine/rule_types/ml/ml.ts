@@ -20,6 +20,7 @@ import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../utils/large_list_filters/filter_events_against_list';
 import { findMlSignals } from './find_ml_signals';
 import type { BulkCreate, RuleRangeTuple, WrapHits } from '../types';
+import { RulePhase } from '../types';
 import {
   addToSearchAfterReturn,
   createErrorsFromShard,
@@ -124,7 +125,10 @@ export const mlExecutor = async ({
       events: anomalyResults.hits.hits,
     });
     const end = performance.now();
-    result.metrics.valueListFilteringTimes.push(makeFloatString(end - start));
+    result.durationMetrics.push({
+      phaseName: RulePhase.ValueListFiltering,
+      duration: makeFloatString(end - start),
+    });
 
     const anomalyCount = filteredAnomalyHits.length;
     if (anomalyCount) {

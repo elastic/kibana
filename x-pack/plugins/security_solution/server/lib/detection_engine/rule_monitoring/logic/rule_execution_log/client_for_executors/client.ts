@@ -33,10 +33,12 @@ import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
 import type {
+  DurationMetricReturn,
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
+import type { DurationMetrics } from '../../../../rule_types/types';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
@@ -247,13 +249,11 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
     message: truncateValue(message) ?? '',
     metrics: metrics
       ? {
+          ...formatDurationMetrics(metrics.durationMetrics),
           total_search_duration_ms: normalizeDurations(metrics.searchDurations),
           total_indexing_duration_ms: normalizeDurations(metrics.indexingDurations),
           total_enrichment_duration_ms: normalizeDurations(metrics.enrichmentDurations),
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
-          total_value_list_filtering_duration_ms: normalizeDurations(
-            metrics.valueListFilteringDurations
-          ),
         }
       : undefined,
   };
@@ -270,4 +270,16 @@ const normalizeDurations = (durations?: string[]): number | undefined => {
 
 const normalizeGap = (duration?: Duration): number | undefined => {
   return duration ? Math.round(duration.asSeconds()) : undefined;
+};
+
+const formatDurationMetrics = (durationMetrics?: DurationMetrics[]) => {
+  if (durationMetrics == null) {
+    return undefined;
+  }
+  const toReturn: DurationMetricReturn = {};
+  for (const { phaseName, duration } of durationMetrics) {
+    const newDuration = toReturn[phaseName] ?? 0;
+    toReturn[phaseName] = newDuration + parseInt(duration, 10);
+  }
+  return toReturn;
 };

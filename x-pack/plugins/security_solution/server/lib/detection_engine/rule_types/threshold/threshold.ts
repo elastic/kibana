@@ -164,7 +164,6 @@ export const thresholdExecutor = async ({
     result.errors.push(...searchErrors);
     result.warningMessages.push(...warnings);
     result.searchAfterTimes = searchDurations;
-    result.metrics.thresholdSignalHistorySearchTime = searchDuration;
 
     const createdAlerts = createResult.createdItems.map((alert) => {
       const { _id, _index, ...source } = alert;

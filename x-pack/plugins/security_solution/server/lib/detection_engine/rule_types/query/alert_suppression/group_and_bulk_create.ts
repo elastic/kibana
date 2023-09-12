@@ -149,9 +149,7 @@ export const groupAndBulkCreate = async ({
       state: {
         suppressionGroupHistory: filteredBucketHistory,
       },
-      metrics: {
-        valueListFilteringTimes: [],
-      },
+      durationMetrics: [],
     };
 
     const exceptionsWarning = getUnprocessedExceptionsWarnings(runOpts.unprocessedExceptions);
