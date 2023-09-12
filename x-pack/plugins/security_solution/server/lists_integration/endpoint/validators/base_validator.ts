@@ -10,6 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
+
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/src/app_features_keys';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -71,6 +73,25 @@ export class BaseValidator {
       (!this.isItemByPolicy(item) && !featureKey.endsWith('_BY_POLICY'))
     ) {
       this.endpointAppContext.getFeatureUsageService().notifyUsage(featureKey);
+    }
+  }
+
+  protected async validateHasEndpointExceptionsPrivileges(
+    privilege: keyof EndpointAuthz
+  ): Promise<void> {
+    const appFeaturesService = this.endpointAppContext.getAppFeaturesService();
+
+    const isEndpointExceptionsFeaturesEnabled = (await appFeaturesService).isEnabled(
+      AppFeatureSecurityKey.endpointExceptions
+    );
+
+    // for serverless only when Endpoint Exceptions is not enabled
+    // verify that the user has the privilege to create/read/update/delete endpoint exceptions
+    if (!isEndpointExceptionsFeaturesEnabled && !(await this.endpointAuthzPromise)[privilege]) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Endpoint exceptions authorization failure',
+        403
+      );
     }
   }
 
