@@ -7,14 +7,14 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useAvailableAgentVersion } from './use_available_agent_version';
+import { useAgentVersion } from './use_agent_version';
 import { useKibanaVersion } from './use_kibana_version';
 import { sendGetAgentsAvailableVersions } from './use_request';
 
 jest.mock('./use_kibana_version');
 jest.mock('./use_request');
 
-describe('useAvailableAgentVersion', () => {
+describe('useAgentVersion', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -28,9 +28,12 @@ describe('useAvailableAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result } = renderHook(() => useAvailableAgentVersion());
+    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
+
+    await waitForNextUpdate();
+
     expect(result.current).toEqual(mockKibanaVersion);
   });
 
@@ -43,7 +46,7 @@ describe('useAvailableAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAvailableAgentVersion());
+    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -61,7 +64,7 @@ describe('useAvailableAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAvailableAgentVersion());
+    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
@@ -76,9 +79,11 @@ describe('useAvailableAgentVersion', () => {
     (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
     (sendGetAgentsAvailableVersions as jest.Mock).mockRejectedValue(new Error('Fetching error'));
 
-    const { result } = renderHook(() => useAvailableAgentVersion());
+    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
+    await waitForNextUpdate();
+
     expect(result.current).toEqual(mockKibanaVersion);
   });
 });

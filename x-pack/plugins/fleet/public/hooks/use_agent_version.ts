@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useEffect, useState } from 'react';
+import semverRcompare from 'semver/functions/rcompare';
 
 import { useKibanaVersion } from './use_kibana_version';
 import { sendGetAgentsAvailableVersions } from './use_request';
@@ -21,12 +21,20 @@ export const useAgentVersion = (): string | undefined => {
     const getVersions = async () => {
       try {
         const res = await sendGetAgentsAvailableVersions();
-        // if the endpoint returns an error, use the fallback versions
-        const versionsList = res?.data?.items ? res.data.items : [kibanaVersion];
+        const availableVersions = res?.data?.items;
 
-        setAgentVersion(versionsList[0]);
+        if (
+          availableVersions &&
+          availableVersions.length > 0 &&
+          availableVersions.indexOf(kibanaVersion) === -1
+        ) {
+          availableVersions.sort(semverRcompare);
+          setAgentVersion(availableVersions[0]);
+        } else {
+          setAgentVersion(kibanaVersion);
+        }
       } catch (err) {
-        return;
+        setAgentVersion(kibanaVersion);
       }
     };
 
