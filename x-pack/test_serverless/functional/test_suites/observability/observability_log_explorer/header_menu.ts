@@ -37,6 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Discover fallback link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+      });
+
       it('should render a button link ', async () => {
         const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
         expect(await discoverLink.isDisplayed()).to.be(true);
@@ -76,6 +80,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Add data link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+      });
+
       it('should render a button link ', async () => {
         const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
         expect(await onboardingLink.isDisplayed()).to.be(true);
