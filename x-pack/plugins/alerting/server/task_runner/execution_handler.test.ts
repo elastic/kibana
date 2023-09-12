@@ -1634,6 +1634,11 @@ describe('Execution Handler', () => {
           actions: [
             {
               ...defaultExecutionParams.rule.actions[0],
+              params: {
+                ...defaultExecutionParams.rule.actions[0].params,
+                alertVal:
+                  'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.uuid}} goes here',
+              },
               frequency: {
                 summary: false,
                 notifyWhen: RuleNotifyWhen.CHANGE,
@@ -1652,6 +1657,96 @@ describe('Execution Handler', () => {
     });
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B c9443c16-b107-4315-892b-2054c964b211 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+          Object {
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B c3bf17a8-774d-48ed-beb2-3f8e6911ba5f goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+          Object {
+            "apiKey": "MTIzOmFiYw==",
+            "consumer": "rule-consumer",
+            "executionId": "5f6aa57d-3e22-484e-bae8-cbed868f4d28",
+            "id": "1",
+            "params": Object {
+              "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 7f199442-24a3-4370-998b-10158cab4a19 goes here",
+              "contextVal": "My  goes here",
+              "foo": true,
+              "stateVal": "My  goes here",
+            },
+            "relatedSavedObjects": Array [
+              Object {
+                "id": "1",
+                "namespace": "test1",
+                "type": "alert",
+                "typeId": "test",
+              },
+            ],
+            "source": Object {
+              "source": Object {
+                "id": "1",
+                "type": "alert",
+              },
+              "type": "SAVED_OBJECT",
+            },
+            "spaceId": "test1",
+          },
+        ],
+      ]
+    `);
   });
 
   describe('rule url', () => {
