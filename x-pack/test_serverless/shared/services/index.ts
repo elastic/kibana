@@ -6,7 +6,10 @@
  */
 
 import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
+import { SvlCommonApiServiceProvider } from './svl_common_api';
+
 export const services = {
   supertest: SupertestProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
+  svlCommonApi: SvlCommonApiServiceProvider,
 };
