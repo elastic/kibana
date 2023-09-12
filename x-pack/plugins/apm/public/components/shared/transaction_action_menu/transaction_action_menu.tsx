@@ -125,11 +125,7 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const {
-    core,
-    uiActions,
-    infra: { locators },
-  } = useApmPluginContext();
+  const { core, uiActions, infra } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
 
@@ -151,7 +147,7 @@ function ActionMenuSections({
     basePath: core.http.basePath,
     location,
     apmRouter,
-    infraLocators: locators,
+    infraLocators: infra?.locators,
     infraLinksAvailable,
     profilingLocators,
     rangeFrom,
