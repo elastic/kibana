@@ -145,7 +145,7 @@ export const ConfigSchema = schema.object({
   roles: RolesSchema,
   poll: PollSchema,
   export_types: ExportTypeSchema,
-  enableStatefulSettings: SettingsSchema,
+  statefulSettings: SettingsSchema,
 });
 
 export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

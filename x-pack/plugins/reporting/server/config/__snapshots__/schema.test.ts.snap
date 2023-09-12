@@ -18,9 +18,6 @@ Object {
     },
     "useByteOrderMarkEncoding": false,
   },
-  "enableStatefulSettings": Object {
-    "enabled": true,
-  },
   "enabled": true,
   "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "export_types": Object {
@@ -58,6 +55,9 @@ Object {
     ],
     "enabled": true,
   },
+  "statefulSettings": Object {
+    "enabled": true,
+  },
 }
 `;
 
@@ -78,9 +78,6 @@ Object {
       "size": 500,
     },
     "useByteOrderMarkEncoding": false,
-  },
-  "enableStatefulSettings": Object {
-    "enabled": true,
   },
   "enabled": true,
   "export_types": Object {
@@ -116,6 +113,9 @@ Object {
     "allow": Array [
       "reporting_user",
     ],
+    "enabled": true,
+  },
+  "statefulSettings": Object {
     "enabled": true,
   },
 }

@@ -44,7 +44,7 @@ describe('ReportingAPIClient', () => {
       roles: {
         enabled: false,
       },
-      enableStatefulSettings: { enabled: true },
+      statefulSettings: { enabled: true },
     };
     apiClient = new ReportingAPIClient(httpClient, uiSettingsClient, 'version', mockConfig);
   });

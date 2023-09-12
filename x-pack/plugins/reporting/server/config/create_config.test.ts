@@ -51,7 +51,7 @@ describe('Reporting server createConfig', () => {
         port: 5677,
         protocol: 'httpsa',
       },
-      enableStatefulSettings: {
+      statefulSettings: {
         enabled: true,
       },
     });
@@ -67,9 +67,6 @@ describe('Reporting server createConfig', () => {
             "duration": "30s",
             "size": 500,
           },
-        },
-        "enableStatefulSettings": Object {
-          "enabled": true,
         },
         "encryptionKey": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
         "export_types": Object {
@@ -97,6 +94,9 @@ describe('Reporting server createConfig', () => {
         },
         "roles": Object {
           "enabled": false,
+        },
+        "statefulSettings": Object {
+          "enabled": true,
         },
       }
     `);

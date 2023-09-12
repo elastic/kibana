@@ -117,7 +117,7 @@ export const createMockConfigSchema = (
       csv: { enabled: true },
       ...overrides.export_types,
     },
-    enableStatefulSettings: { enabled: true },
+    statefulSettings: { enabled: true },
   } as ReportingConfigType;
 };
 

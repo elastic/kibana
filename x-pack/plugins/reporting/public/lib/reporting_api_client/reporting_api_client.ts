@@ -227,7 +227,7 @@ export class ReportingAPIClient implements IReportingAPI {
   }
 
   public migrateReportingIndicesIlmPolicy() {
-    return this.config.enableStatefulSettings.enabled
+    return this.config.statefulSettings.enabled
       ? this.http.put(INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY)
       : null;
   }

@@ -47,7 +47,7 @@ export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
   roles: { enabled: boolean };
   export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
-  enableStatefulSettings: { enabled: boolean };
+  statefulSettings: { enabled: boolean };
 }
 
 function getStored(): JobId[] {
