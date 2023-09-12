@@ -8,9 +8,9 @@
 import { DEFAULT_ALERTS_INDEX } from '@kbn/security-solution-plugin/common/constants';
 import { HOSTS_STAT, SOURCERER } from '../screens/sourcerer';
 import { hostsUrl } from '../urls/navigation';
-import { visitWithTimeRange } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { rootRequest } from './common';
+import { visitWithTimeRange } from './navigation';
 
 export const openSourcerer = (sourcererScope?: string) => {
   if (sourcererScope != null && sourcererScope === 'timeline') {

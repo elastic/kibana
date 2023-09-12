@@ -18,8 +18,7 @@ import {
   RISK_SCORE_SWITCH,
   RISK_PREVIEW_ERROR_BUTTON,
 } from '../screens/entity_analytics_management';
-
-import { visitWithTimeRange } from './login';
+import { visitWithTimeRange } from './navigation';
 
 export const waitForAnomaliesToBeLoaded = () => {
   cy.waitUntil(() => {

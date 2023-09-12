@@ -7,7 +7,7 @@
 
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { RISK_SCORE_URL } from '../../../urls/risk_score';
-import { visitWithTimeRange } from '../../login';
+import { visitWithTimeRange } from '../../navigation';
 import { RiskScoreEntity } from '../../risk_scores/common';
 import {
   getLegacyRiskScoreIndicesOptions,

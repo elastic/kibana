@@ -33,7 +33,7 @@ import {
 } from '../../screens/security_header';
 
 import { login } from '../../tasks/login';
-import { visit } from '../../tasks/navigation';
+import { visit, visitWithTimeRange } from '../../tasks/navigation';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
