@@ -208,6 +208,11 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, AggregateQueryTopNavMenu]
   );
 
+  const showSaveQuery =
+    !isPlainRecord &&
+    (Boolean(services.capabilities.discover.saveQuery) ||
+      Boolean(services.capabilities.globalSavedQueries.edit));
+
   return (
     <SearchBar
       appName="discover"
@@ -220,7 +225,7 @@ export const DiscoverTopNav = ({
       savedQueryId={savedQuery}
       screenTitle={savedSearch.title}
       showDatePicker={showDatePicker}
-      showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
+      showSaveQuery={showSaveQuery}
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerOverride={
