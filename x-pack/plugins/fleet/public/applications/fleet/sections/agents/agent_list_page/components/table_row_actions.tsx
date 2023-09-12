@@ -101,9 +101,23 @@ export const TableRowActions: React.FunctionComponent<{
             defaultMessage="Unenroll agent"
           />
         )}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="agentUpgradeBtn"
+        icon="refresh"
+        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        onClick={() => {
+          onUpgradeClick();
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.upgradeOneButton"
+          defaultMessage="Upgrade agent"
+        />
       </EuiContextMenuItem>
     );
 
+    // TODO only if updating since x hours - single action
     const isAgentUpdating = agent.upgrade_started_at && !agent.upgraded_at;
     if (isAgentUpdating) {
       menuItems.push(
@@ -117,22 +131,6 @@ export const TableRowActions: React.FunctionComponent<{
           <FormattedMessage
             id="xpack.fleet.agentList.restartUpgradeOneButton"
             defaultMessage="Restart upgrade"
-          />
-        </EuiContextMenuItem>
-      );
-    } else {
-      menuItems.push(
-        <EuiContextMenuItem
-          key="agentUpgradeBtn"
-          icon="refresh"
-          disabled={!isAgentUpgradeable(agent, kibanaVersion)}
-          onClick={() => {
-            onUpgradeClick();
-          }}
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.upgradeOneButton"
-            defaultMessage="Upgrade agent"
           />
         </EuiContextMenuItem>
       );

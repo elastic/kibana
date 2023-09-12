@@ -223,14 +223,27 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       title={
         <>
           {isSingleAgent ? (
-            <FormattedMessage
-              id="xpack.fleet.upgradeAgents.upgradeSingleTitle"
-              defaultMessage="Upgrade agent"
-            />
+            isUpdating ? (
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.restartUpgradeSingleTitle"
+                defaultMessage="Restart upgrade"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.upgradeSingleTitle"
+                defaultMessage="Upgrade agent"
+              />
+            )
           ) : isScheduled ? (
             <FormattedMessage
               id="xpack.fleet.upgradeAgents.scheduleUpgradeMultipleTitle"
               defaultMessage="Schedule upgrade for {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
+              values={{ count: isAllAgents || agentCount }}
+            />
+          ) : isUpdating ? (
+            <FormattedMessage
+              id="xpack.fleet.upgradeAgents.restartUpgradeMultipleTitle"
+              defaultMessage="Restart upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
               values={{ count: isAllAgents || agentCount }}
             />
           ) : (

@@ -213,6 +213,43 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setIsUnenrollModalOpen(true);
       },
     },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.upgradeAgents"
+          data-test-subj="agentBulkActionsUpgrade"
+          defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="refresh" size="m" />,
+      disabled: !atLeastOneActiveAgentSelected || allAgentsUpdating,
+      onClick: () => {
+        closeMenu();
+        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
+          data-test-subj="agentBulkActionsScheduleUpgrade"
+          defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="timeRefresh" size="m" />,
+      disabled:
+        !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade || allAgentsUpdating,
+      onClick: () => {
+        closeMenu();
+        setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
+      },
+    },
   ];
 
   if (allAgentsUpdating) {
@@ -234,45 +271,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
       },
     });
-  } else {
-    menuItems.push(
-      {
-        name: (
-          <FormattedMessage
-            id="xpack.fleet.agentBulkActions.upgradeAgents"
-            data-test-subj="agentBulkActionsUpgrade"
-            defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        ),
-        icon: <EuiIcon type="refresh" size="m" />,
-        disabled: !atLeastOneActiveAgentSelected,
-        onClick: () => {
-          closeMenu();
-          setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
-        },
-      },
-      {
-        name: (
-          <FormattedMessage
-            id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
-            data-test-subj="agentBulkActionsScheduleUpgrade"
-            defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        ),
-        icon: <EuiIcon type="timeRefresh" size="m" />,
-        disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
-        onClick: () => {
-          closeMenu();
-          setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
-        },
-      }
-    );
   }
 
   if (diagnosticFileUploadEnabled) {

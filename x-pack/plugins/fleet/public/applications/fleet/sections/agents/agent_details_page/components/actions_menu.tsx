@@ -98,6 +98,19 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             defaultMessage="Unenroll agent"
           />
         )}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="refresh"
+        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        onClick={() => {
+          setIsUpgradeModalOpen(true);
+        }}
+        key="upgradeAgent"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.upgradeOneButton"
+          defaultMessage="Upgrade agent"
+        />
       </EuiContextMenuItem>
     );
   }
@@ -114,22 +127,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         <FormattedMessage
           id="xpack.fleet.agentList.restartUpgradeOneButton"
           defaultMessage="Restart upgrade"
-        />
-      </EuiContextMenuItem>
-    );
-  } else {
-    menuItems.push(
-      <EuiContextMenuItem
-        icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
-        onClick={() => {
-          setIsUpgradeModalOpen(true);
-        }}
-        key="upgradeAgent"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentList.upgradeOneButton"
-          defaultMessage="Upgrade agent"
         />
       </EuiContextMenuItem>
     );
