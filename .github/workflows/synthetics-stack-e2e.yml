@@ -11,6 +11,9 @@ on:
     types:
       - created
 
+permissions:
+  issues: write
+
 jobs:
   synthetics-stack-e2e: # This name needs to be the same as in synthetic-stack-e2e-init.yml
     if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/synthetics-stack-e2e') }}
