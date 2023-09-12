@@ -128,7 +128,7 @@ export function Container(props: {
                     key={i}
                     data={props.data}
                     index={i}
-                    total={assignments.length - 1}
+                    total={assignments.length}
                     colorMode={colorMode}
                     canPickColor={!autoAssignmentMode && colorMode.type !== 'gradient'}
                     palette={palette}
@@ -156,6 +156,7 @@ export function Container(props: {
                         isDarkMode={props.isDarkMode}
                         getPaletteFn={getPaletteFn}
                         assignment={assignment}
+                        total={specialAssignments.length}
                       />
                     );
                   })}

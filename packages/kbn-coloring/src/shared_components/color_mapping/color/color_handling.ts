@@ -45,7 +45,7 @@ export function getAssignmentColor(
           : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
       steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
       const colorScale = scaleSequential(piecewise(interpolateLab, steps));
-      return colorScale(index / total);
+      return total === 0 ? 'red' : total === 1 ? colorScale(0) : colorScale(index / (total - 1));
     }
   }
 }
@@ -111,7 +111,7 @@ export function getColorFactory(
             getPaletteFn,
             isDarkMode,
             autoAssignmentIndex,
-            assignments.length - 1
+            assignments.length
           );
         }
         // if no auto-assign color rule/color is available then use the other color
@@ -133,7 +133,7 @@ export function getColorFactory(
           getPaletteFn,
           isDarkMode,
           matchingAssignmentIndex,
-          assignments.length - 1
+          assignments.length
         );
       }
       // if no assign color rule/color is available then use the other color
@@ -152,7 +152,7 @@ export function getColorFactory(
           getPaletteFn,
           isDarkMode,
           matchingAssignmentIndex,
-          assignments.length - 1
+          assignments.length
         );
       }
       return getColor(model.specialAssignments[0].color, getPaletteFn, isDarkMode);

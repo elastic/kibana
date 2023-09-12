@@ -21,12 +21,14 @@ export function SpecialAssignment({
   palette,
   getPaletteFn,
   isDarkMode,
+  total,
 }: {
   isDarkMode: boolean;
   index: number;
   assignment: ColorMapping.Config['specialAssignments'][number];
   palette: ColorMapping.CategoricalPalette;
   getPaletteFn: ReturnType<typeof getPalette>;
+  total: number;
 }) {
   const dispatch = useDispatch();
   const canPickColor = true;
@@ -41,7 +43,7 @@ export function SpecialAssignment({
           getPaletteFn={getPaletteFn}
           index={index}
           palette={palette}
-          total={index}
+          total={total}
           swatchShape="square"
           isDarkMode={isDarkMode}
           onColorChange={(color) => {
