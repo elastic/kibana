@@ -34,7 +34,7 @@ const EsqlInfoIconComponent = () => {
       <EuiText style={{ width: POPOVER_WIDTH }} size="s">
         <Markdown
           markdown={i18n.translate(
-            'pack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent',
+            'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent',
             {
               defaultMessage: `
 ### Aggregating rule
