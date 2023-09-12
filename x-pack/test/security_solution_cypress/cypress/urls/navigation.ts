@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ruleDetailsUrl } from './rule_details';
-
 export const KIBANA_HOME = '/app/home#/';
 export const KIBANA_SAVED_OBJECTS = '/app/management/kibana/objects';
 export const LOGOUT_URL = '/logout';
@@ -60,5 +58,3 @@ export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_m
 
 export const exceptionsListDetailsUrl = (listId: string) =>
   `/app/security/exceptions/details/${listId}`;
-
-export const ruleEditUrl = (ruleId: string) => `${ruleDetailsUrl(ruleId)}/edit`;

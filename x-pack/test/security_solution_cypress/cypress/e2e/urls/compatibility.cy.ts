@@ -7,14 +7,15 @@
 
 import { login, visit } from '../../tasks/login';
 
-import { ALERTS_URL, ruleEditUrl, CREATE_RULE_URL } from '../../urls/navigation';
+import { ALERTS_URL, CREATE_RULE_URL } from '../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
 } from '../../screens/date_picker';
-import { RuleDetailsTab, ruleDetailsUrl } from '../../urls/rule_details';
+import { ruleDetailsUrl } from '../../urls/rule_details';
+import { editRuleUrl } from '../../urls/edit_rule';
 
 const LEGACY_DETECTIONS_URL_1 = '/app/siem#/detections';
 const LEGACY_DETECTIONS_URL_2 = '/app/security/detections';
@@ -62,12 +63,12 @@ describe('URL compatibility', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
   it('Redirects to rule details alerts tab from old Detections rule details URL', () => {
     visit(legacyRuleDetailsUrl(RULE_ID));
-    cy.url().should('include', ruleDetailsUrl(RULE_ID, RuleDetailsTab.Alerts));
+    cy.url().should('include', ruleDetailsUrl(RULE_ID, 'alerts'));
   });
 
   it('Redirects to rule edit from old Detections rule edit URL', () => {
     visit(legacyRuleEditUrl(RULE_ID));
-    cy.url().should('include', ruleEditUrl(RULE_ID));
+    cy.url().should('include', editRuleUrl(RULE_ID));
   });
 
   it('sets the global start and end dates from the url with timestamps', () => {
