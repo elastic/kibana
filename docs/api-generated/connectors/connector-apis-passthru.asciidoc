@@ -1847,7 +1847,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="create_connector_request_d3security"><code>create_connector_request_d3security</code> - Create D3 Security connector request</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>The Slack connector uses axios to send a POST request to a D3 Security endpoint.</div>
+    <div class='model-description'>The connector uses axios to send a POST request to a D3 Security endpoint.</div>
     <div class="field-items">
       <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_d3security">config_properties_d3security</a></span>  </div>
 <div class="param">connector_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>

@@ -975,7 +975,7 @@ components:
     create_connector_request_d3security:
       title: Create D3 Security connector request
       description: |
-        The Slack connector uses axios to send a POST request to a D3 Security endpoint.
+        The connector uses axios to send a POST request to a D3 Security endpoint.
       type: object
       required:
         - config
