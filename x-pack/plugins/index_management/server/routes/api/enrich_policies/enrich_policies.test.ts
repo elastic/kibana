@@ -135,6 +135,7 @@ describe('Enrich policies API', () => {
 
   describe('Create policy - POST /api/index_management/enrich_policies', () => {
     const createPolicyMock = router.getMockESApiFn('enrich.putPolicy');
+    const executePolicyMock = router.getMockESApiFn('enrich.executePolicy');
 
     it('correctly creates a policy', async () => {
       const mockRequest: RequestMock = {
@@ -158,6 +159,38 @@ describe('Enrich policies API', () => {
       expect(res).toEqual({
         body: { status: { status: 'OK' } },
       });
+
+      expect(executePolicyMock).not.toHaveBeenCalled();
+    });
+
+    it('can create a policy and execute it', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addInternalBasePath('/enrich_policies'),
+        query: {
+          executePolicyAfterCreation: true,
+        },
+        body: {
+          policy: {
+            name: 'my-policy',
+            type: 'match',
+            matchField: 'my_field',
+            enrichFields: ['field_1', 'field_2'],
+            sourceIndex: ['index_1'],
+          },
+        },
+      };
+
+      createPolicyMock.mockResolvedValue({ status: { status: 'OK' } });
+      executePolicyMock.mockResolvedValue({ status: { status: 'OK' } });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: { status: { status: 'OK' } },
+      });
+
+      expect(executePolicyMock).toHaveBeenCalled();
     });
 
     it('should return an error if it fails', async () => {
@@ -179,6 +212,129 @@ describe('Enrich policies API', () => {
       createPolicyMock.mockRejectedValue(error);
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    });
+  });
+
+  describe('Fields from indices - POST /api/index_management/enrich_policies/get_fields_from_indices', () => {
+    const fieldCapsMock = router.getMockESApiFn('fieldCaps');
+
+    it('correctly returns fields and common fields for the selected indices', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addInternalBasePath('/enrich_policies/get_fields_from_indices'),
+        body: {
+          indices: ['test-a', 'test-b'],
+        },
+      };
+
+      fieldCapsMock.mockResolvedValue({
+        body: {
+          indices: ['test-a'],
+          fields: {
+            name: { text: { type: 'text' } },
+          },
+        },
+        statusCode: 200,
+      });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: {
+          indices: [
+            {
+              index: 'test-a',
+              fields: [{ name: 'name', type: 'text', normalizedType: 'text' }],
+            },
+            {
+              index: 'test-b',
+              fields: [{ name: 'name', type: 'text', normalizedType: 'text' }],
+            },
+          ],
+          commonFields: [{ name: 'name', type: 'text', normalizedType: 'text' }],
+        },
+      });
+
+      expect(fieldCapsMock).toHaveBeenCalled();
+    });
+
+    it('should return an error if it fails', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addInternalBasePath('/enrich_policies/get_fields_from_indices'),
+        body: {
+          indices: ['test-a'],
+        },
+      };
+
+      const error = new Error('Oh no!');
+      fieldCapsMock.mockRejectedValue(error);
+
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
+    });
+  });
+
+  describe('Get matching indices - POST /api/index_management/enrich_policies/get_matching_indices', () => {
+    const getAliasMock = router.getMockESApiFn('indices.getAlias');
+    const searchMock = router.getMockESApiFn('search');
+
+    it('Return matching indices using alias api', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addInternalBasePath('/enrich_policies/get_matching_indices'),
+        body: {
+          pattern: 'test',
+        },
+      };
+
+      getAliasMock.mockResolvedValue({
+        body: {},
+        statusCode: 200,
+      });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: {
+          indices: [],
+        },
+      });
+
+      expect(searchMock).not.toHaveBeenCalled();
+      expect(getAliasMock).toHaveBeenCalledWith(
+        { index: '*test*', expand_wildcards: 'open' },
+        { ignore: [404], meta: true }
+      );
+    });
+
+    it('When alias api fails or returns nothing it fallsback to search api', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addInternalBasePath('/enrich_policies/get_matching_indices'),
+        body: {
+          pattern: 'test',
+        },
+      };
+
+      getAliasMock.mockResolvedValue({
+        body: {},
+        statusCode: 404,
+      });
+
+      searchMock.mockResolvedValue({
+        body: {},
+        statusCode: 404,
+      });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: {
+          indices: [],
+        },
+      });
+
+      expect(searchMock).toHaveBeenCalled();
     });
   });
 });

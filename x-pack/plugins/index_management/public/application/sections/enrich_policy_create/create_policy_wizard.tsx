@@ -146,6 +146,7 @@ export const CreatePolicyWizard = () => {
             })}
             color="danger"
             iconType="error"
+            data-test-subj="errorWhenCreatingCallout"
           >
             <p className="eui-textBreakWord">{createError?.message || createError?.error}</p>
           </EuiCallOut>

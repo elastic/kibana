@@ -18,6 +18,7 @@ import {
   themeServiceMock,
   scopedHistoryMock,
   executionContextServiceMock,
+  applicationServiceMock,
 } from '@kbn/core/public/mocks';
 
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
@@ -64,6 +65,7 @@ const appDependencies = {
   core: {
     getUrlForApp: () => {},
     executionContext: executionContextServiceMock.createStartContract(),
+    application: applicationServiceMock.createStartContract(),
   },
   plugins: {},
   // Default stateful configuration

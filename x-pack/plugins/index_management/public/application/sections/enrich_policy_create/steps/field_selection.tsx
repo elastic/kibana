@@ -87,13 +87,16 @@ const buildFieldOption = (field: FieldItem) => ({
 });
 
 export const FieldSelectionStep = ({ onNext }: Props) => {
+  const [isLoading, setIsLoading] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [matchFieldOptions, setMatchFieldOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   useEffect(() => {
     const fetchFields = async () => {
+      setIsLoading(true);
       const { data } = await getFieldsFromIndices(draft.sourceIndices as string[]);
+      setIsLoading(false);
 
       if (data?.commonFields?.length) {
         setMatchFieldOptions(data.commonFields.map(buildFieldOption));
@@ -147,8 +150,8 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
   const hasSelectedMultipleIndices = (draft.sourceIndices?.length ?? 0) > 1;
 
   return (
-    <Form form={form}>
-      {hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
+    <Form form={form} data-test-subj="fieldSelectionForm">
+      {!isLoading && hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
         <>
           <EuiCallOut
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.noCommonFieldsFoundError', {
@@ -156,6 +159,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
             })}
             color="danger"
             iconType="error"
+            data-test-subj="noCommonFieldsError"
           >
             <FormattedMessage
               id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldError"
@@ -171,6 +175,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         component={ComboBoxField}
         labelAppend={
           <EuiIconTip
+            data-test-subj="matchFieldPopover"
             content={i18n.translate(
               'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldPopover',
               {
@@ -192,6 +197,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
               )
             : undefined,
           euiFieldProps: {
+            'data-test-subj': 'matchField',
             placeholder: i18n.translate(
               'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.matchFieldPlaceholder',
               {
@@ -210,6 +216,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         component={ComboBoxField}
         labelAppend={
           <EuiIconTip
+            data-test-subj="enrichFieldsPopover"
             content={i18n.translate(
               'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.EnrichFieldsFieldPopover',
               {
@@ -221,6 +228,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         componentProps={{
           fullWidth: false,
           euiFieldProps: {
+            'data-test-subj': 'enrichFields',
             placeholder: i18n.translate(
               'xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.enrichFieldsPlaceholder',
               {
@@ -241,6 +249,7 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
         iconSide="right"
         iconType="arrowRight"
         disabled={form.isValid === false}
+        data-test-subj="nextButton"
         onClick={onSubmit}
       >
         <FormattedMessage
