@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { FC, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -73,6 +73,13 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   const [jobDependencies, setJobDependencies] = useState<JobDependencies>([]);
   const [selectedJobDependencies, setSelectedJobDependencies] = useState<JobDependencies>([]);
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   useEffect(
     function onFlyoutChange() {
       setLoadingADJobs(true);
@@ -87,16 +94,19 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
         if (isADEnabled) {
           getJobs()
             .then(({ jobs }) => {
+              if (isMounted.current === false) return;
               setLoadingADJobs(false);
               setAdJobIds(jobs.map((j) => j.job_id));
 
               jobsExportService
                 .getJobDependencies(jobs)
                 .then((jobDeps) => {
+                  if (isMounted.current === false) return;
                   setJobDependencies(jobDeps);
                   setLoadingADJobs(false);
                 })
                 .catch((error) => {
+                  if (isMounted.current === false) return;
                   const errorTitle = i18n.translate(
                     'xpack.ml.importExport.exportFlyout.calendarsError',
                     {
@@ -107,6 +117,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
                 });
             })
             .catch((error) => {
+              if (isMounted.current === false) return;
               const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.adJobsError', {
                 defaultMessage: 'Could not load anomaly detection jobs',
               });
@@ -117,10 +128,13 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
         if (isDFAEnabled) {
           getDataFrameAnalytics()
             .then(({ data_frame_analytics: dataFrameAnalytics }) => {
+              if (isMounted.current === false) return;
               setLoadingDFAJobs(false);
               setDfaJobIds(dataFrameAnalytics.map((j) => j.id));
             })
             .catch((error) => {
+              if (isMounted.current === false) return;
+
               const errorTitle = i18n.translate('xpack.ml.importExport.exportFlyout.dfaJobsError', {
                 defaultMessage: 'Could not load data frame analytics jobs',
               });
