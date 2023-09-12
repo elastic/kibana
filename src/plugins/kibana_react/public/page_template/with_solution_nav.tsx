@@ -9,7 +9,6 @@
 import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
 import { useIsWithinBreakpoints } from '@elastic/eui';
-import { EuiPageSideBarProps_Deprecated as EuiPageSideBarProps } from '@elastic/eui/src/components/page/page_side_bar';
 import { KibanaPageTemplateSolutionNav, KibanaPageTemplateSolutionNavProps } from './solution_nav';
 import { KibanaPageTemplateProps } from '.';
 
@@ -56,16 +55,15 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
         {...solutionNav}
       />
     );
-    const pageSideBarProps = {
-      paddingSize: 'none',
-      ...props.pageSideBarProps,
-      className: sideBarClasses,
-    } as EuiPageSideBarProps; // needed because for some reason 'none' is not recognized as a valid value for paddingSize
     return (
       <WrappedComponent
         {...propagatedProps}
         pageSideBar={pageSideBar}
-        pageSideBarProps={pageSideBarProps}
+        pageSideBarProps={{
+          paddingSize: 'none',
+          ...props.pageSideBarProps,
+          className: sideBarClasses,
+        }}
         template={templateToUse}
       >
         {children}
