@@ -137,7 +137,9 @@ export const getRenderCellValueFn =
         >
           {pairs.map(([key, value]) => (
             <Fragment key={key}>
-              <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+                {key}
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
                 className="unifiedDataTable__descriptionListDescription"
                 dangerouslySetInnerHTML={{ __html: value }}

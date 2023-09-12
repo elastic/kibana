@@ -425,8 +425,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should set the cases title', async () => {
-        svlCommonNavigation.breadcrumbs.expectExists();
-        svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
+        await svlCommonNavigation.breadcrumbs.expectExists();
+        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: createdCase.title });
       });
     });
 
