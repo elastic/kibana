@@ -151,7 +151,7 @@ export const getRenderCellValueFn = ({
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value]) => {
+          {pairs.map(([key, value, fieldName]) => {
             let fieldIcon = null;
 
             // only for "Document" column
@@ -159,7 +159,7 @@ export const getRenderCellValueFn = ({
               if (fieldIconsCache.has(key)) {
                 fieldIcon = fieldIconsCache.get(key);
               } else {
-                fieldIcon = renderFieldToken({ dataView, fieldName: key, columnTypes });
+                fieldIcon = renderFieldToken({ dataView, fieldName, columnTypes });
                 fieldIconsCache.set(key, fieldIcon);
               }
             }
@@ -219,9 +219,13 @@ function renderFieldToken({
   columnTypes,
 }: {
   dataView: DataView;
-  fieldName: string;
+  fieldName: string | null;
   columnTypes?: DataTableColumnTypes;
 }) {
+  if (!fieldName) {
+    return null;
+  }
+
   // for text-based searches
   if (columnTypes) {
     return columnTypes[fieldName] && columnTypes[fieldName] !== 'unknown' ? ( // renders an icon or nothing
@@ -359,10 +363,10 @@ function getTopLevelObjectPairs(
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
       if (shouldShowFieldHandler(displayKey)) {
-        pairs.push([displayKey, formatted]);
+        pairs.push([displayKey, formatted, key]);
       }
     } else {
-      pairs.push([key, formatted]);
+      pairs.push([key, formatted, key]);
     }
   });
   return [...highlightPairs, ...sourcePairs];

@@ -291,8 +291,8 @@ describe('Unified data table cell rendering', function () {
       shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
-      maxEntries: 2,
-      columnTypes: { extension: 'murmur3' }, // custom override
+      maxEntries: 3,
+      columnTypes: { extension: 'murmur3', bytes: 'string' }, // custom override
     });
     const component = shallow(
       <DataTableCellValue
@@ -331,6 +331,10 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            type="string"
+          />
           bytesDisplayName
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
@@ -344,7 +348,20 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          and 2 more fields
+          _index
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "test",
+            }
+          }
+        />
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          and 1 more field
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
@@ -713,11 +730,6 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          <WrappedFieldIcon
-            className="unifiedDataTable__descriptionListToken"
-            scripted={false}
-            type="number"
-          />
           object.value
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription

@@ -80,7 +80,7 @@ export const formatTopLevelObject = (
       )
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    pairs.push([displayKey ? displayKey : key, formatted]);
+    pairs.push([displayKey ? displayKey : key, formatted, key]);
   });
   return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
 };

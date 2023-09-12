@@ -68,26 +68,32 @@ describe('Row formatter', () => {
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
               "foo",
               "bar",
+              "foo",
             ],
             Array [
               "hello",
               "<h1>World</h1>",
+              "hello",
             ],
             Array [
               "number",
               42,
+              "number",
             ],
             Array [
               "_id",
               "a",
+              "_id",
             ],
             Array [
               "_score",
               1,
+              "_score",
             ],
           ]
         }
@@ -112,10 +118,12 @@ describe('Row formatter', () => {
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
               "and 4 more fields",
               "",
+              null,
             ],
           ]
         }
@@ -137,26 +145,32 @@ describe('Row formatter', () => {
             Array [
               "number",
               42,
+              "number",
             ],
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
               "foo",
               "bar",
+              "foo",
             ],
             Array [
               "hello",
               "<h1>World</h1>",
+              "hello",
             ],
             Array [
               "_id",
               "a",
+              "_id",
             ],
             Array [
               "_score",
               1,
+              "_score",
             ],
           ]
         }
@@ -192,6 +206,7 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "formatted, formatted",
+              "object.value",
             ],
           ]
         }
@@ -250,10 +265,12 @@ describe('Row formatter', () => {
             Array [
               "object.keys",
               "formatted, formatted",
+              "object.keys",
             ],
             Array [
               "object.value",
               "formatted, formatted",
+              "object.value",
             ],
           ]
         }
@@ -285,6 +302,7 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "5, 10",
+              "object.value",
             ],
           ]
         }

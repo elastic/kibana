@@ -36,7 +36,11 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
-type FormattedHitPair = readonly [fieldName: string, formattedValue: string];
+type FormattedHitPair = readonly [
+  fieldDisplayName: string,
+  formattedValue: string,
+  fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
+];
 
 /**
  * Pairs array for each field in the hit
