@@ -279,59 +279,6 @@ describe('When calling package policy', () => {
         body: { item: { ...existingPolicy, namespace: 'namespace' } },
       });
     });
-
-    it.each([
-      { date: 'invalid', message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format.' },
-      {
-        date: '2020-10-31',
-        message:
-          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months.',
-      },
-      {
-        date: '2100-10-01',
-        message: 'Global manifest version cannot be in the future.',
-      },
-    ])(
-      'should return bad request for invalid endpoint package policy global manifest values',
-      async ({ date, message }) => {
-        const newData = {
-          name: 'endpoint-2',
-          description: '',
-          policy_id: '3',
-          enabled: false,
-          inputs: [
-            {
-              type: 'endpoint',
-              enabled: true,
-              streams: [],
-              config: {
-                policy: {
-                  value: {
-                    global_manifest_version: date,
-                  },
-                },
-              },
-            },
-          ],
-          namespace: 'namespace',
-          package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.6.0' },
-          vars: {
-            paths: {
-              value: ['/my/access.log*'],
-              type: 'text',
-            },
-          },
-        };
-        const request = getUpdateKibanaRequest(newData as any);
-        await routeHandler(context, request, response);
-        expect(response.customError).toHaveBeenCalledWith({
-          statusCode: 400,
-          body: {
-            message,
-          },
-        });
-      }
-    );
   });
 
   describe('list api handler', () => {

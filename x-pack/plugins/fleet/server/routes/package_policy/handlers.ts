@@ -13,8 +13,6 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
-import { validateEndpointPackagePolicy } from '../utils/validate_endpoint_package_policy';
-
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
@@ -265,10 +263,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       } as NewPackagePolicy);
     }
 
-    if (newPackagePolicy.inputs && newPackagePolicy.inputs.length) {
-      validateEndpointPackagePolicy(newPackagePolicy.inputs[0]);
-    }
-
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
@@ -382,10 +376,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
-    if (newData.inputs && newData.inputs.length) {
-      validateEndpointPackagePolicy(newData.inputs[0]);
-    }
-
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
@@ -403,6 +393,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

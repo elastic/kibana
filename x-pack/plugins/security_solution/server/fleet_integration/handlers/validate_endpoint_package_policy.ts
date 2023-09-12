@@ -6,32 +6,41 @@
  */
 
 import moment from 'moment';
-import Boom from '@hapi/boom';
 
-import type { NewPackagePolicyInput } from '../../../common';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 
 export const validateEndpointPackagePolicy = (input: NewPackagePolicyInput) => {
-  if (input.type !== 'endpoint') {
-    return;
-  }
   if (input.config?.policy?.value?.global_manifest_version) {
     const globalManifestVersion = input.config.policy.value.global_manifest_version;
 
     if (globalManifestVersion !== 'latest') {
       const parsedDate = moment(globalManifestVersion, 'YYYY-MM-DD', true);
       if (!parsedDate.isValid()) {
-        throw Boom.badRequest('Invalid date format. Use "latest" or "YYYY-MM-DD" format.');
+        throw createManifestVersionError(
+          'Invalid date format. Use "latest" or "YYYY-MM-DD" format.'
+        );
       }
 
       const maxAllowedDate = moment().subtract(18, 'months');
       if (parsedDate.isBefore(maxAllowedDate)) {
-        throw Boom.badRequest(
+        throw createManifestVersionError(
           'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months.'
         );
       }
       if (parsedDate.isAfter(moment())) {
-        throw Boom.badRequest('Global manifest version cannot be in the future.');
+        throw createManifestVersionError('Global manifest version cannot be in the future.');
       }
     }
   }
+};
+
+const createManifestVersionError = (
+  message: string
+): Error & { statusCode?: number; apiPassThrough?: boolean } => {
+  const manifestVersionError: Error & { statusCode?: number; apiPassThrough?: boolean } = new Error(
+    message
+  );
+  manifestVersionError.statusCode = 400;
+  manifestVersionError.apiPassThrough = true;
+  return manifestVersionError;
 };
