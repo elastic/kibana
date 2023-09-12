@@ -10,7 +10,11 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { SampleDataContext, SampleDatasetProvider } from '../lib/sample_dataset_registry_types';
+import {
+  SampleDataContext,
+  SampleDatasetProvider,
+  SampleDatasetSchema,
+} from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller, SAMPLE_DATA_UNINSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
@@ -18,6 +22,7 @@ import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_bea
 
 export function createUninstallRoute(
   router: IRouter,
+  sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
   usageTracker: SampleDataUsageTracker,
   analytics: AnalyticsServiceSetup,
@@ -35,17 +40,19 @@ export function createUninstallRoute(
       const routeStartTime = performance.now();
       const scopedContext = getScopedContext(request);
       const spaceId = getSpaceId(scopedContext);
-      const spaceAwareSampleDatasets = Object.values(specProviders).map((specProvider) =>
-        specProvider(spaceId)
-      );
-      const sampleDataset = spaceAwareSampleDatasets.find(({ id }) => id === request.params.id);
-      if (!sampleDataset) {
+
+      const spaceAwareSampleDataset: SampleDatasetSchema | undefined =
+        specProviders[request.params.id]?.(spaceId);
+
+      if (!spaceAwareSampleDataset) {
         return response.notFound();
       }
-
+      const mergedSampleDataset = sampleDatasets.map((sampleDataset) =>
+        sampleDataset.id === spaceAwareSampleDataset.id ? spaceAwareSampleDataset : sampleDataset
+      );
       const sampleDataInstaller = await getSampleDataInstaller({
-        datasetId: sampleDataset.id,
-        sampleDatasets: spaceAwareSampleDatasets,
+        datasetId: spaceAwareSampleDataset.id,
+        sampleDatasets: mergedSampleDataset,
         logger,
         context,
       });
@@ -58,7 +65,7 @@ export function createUninstallRoute(
         reportPerformanceMetricEvent(analytics, {
           eventName: SAMPLE_DATA_UNINSTALLED_EVENT,
           duration: performance.now() - routeStartTime,
-          key1: sampleDataset.id,
+          key1: spaceAwareSampleDataset.id,
         });
         return response.noContent();
       } catch (e) {

@@ -105,6 +105,7 @@ export class SampleDataRegistry {
     );
     createUninstallRoute(
       router,
+      this.sampleDatasets,
       logger,
       usageTracker,
       core.analytics,
