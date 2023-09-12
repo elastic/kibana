@@ -26,6 +26,7 @@ import { AlertingAuthorization } from './authorization';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -55,6 +56,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   kibanaVersion: '7.10.0',
   authorization:
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 const actionsAuthorization = actionsAuthorizationMock.create();
@@ -112,6 +114,7 @@ test('creates a rules client with proper constructor arguments when security is 
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
   });
 });
 
@@ -154,6 +157,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     minimumScheduleInterval: { value: '1m', enforce: false },
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
+    connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
   });
 });
 

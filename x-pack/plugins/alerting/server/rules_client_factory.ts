@@ -26,6 +26,7 @@ import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingRulesConfig } from './config';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -43,6 +44,7 @@ export interface RulesClientFactoryOpts {
   eventLogger?: IEventLogger;
   minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
+  connectorAdapterRegistry: ConnectorAdapterRegistry;
 }
 
 export class RulesClientFactory {
@@ -63,6 +65,7 @@ export class RulesClientFactory {
   private eventLogger?: IEventLogger;
   private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
+  private connectorAdapterRegistry!: ConnectorAdapterRegistry;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -85,6 +88,7 @@ export class RulesClientFactory {
     this.eventLogger = options.eventLogger;
     this.minimumScheduleInterval = options.minimumScheduleInterval;
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
+    this.connectorAdapterRegistry = options.connectorAdapterRegistry;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -113,6 +117,7 @@ export class RulesClientFactory {
       internalSavedObjectsRepository: this.internalSavedObjectsRepository,
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
       async getUserName() {
         if (!securityPluginStart) {
           return null;
