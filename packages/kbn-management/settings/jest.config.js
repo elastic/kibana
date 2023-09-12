@@ -8,12 +8,10 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/kbn-management/settings/section_registry'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/packages/kbn-management/settings/section_registry',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/kbn-management/settings'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-management/settings',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/packages/kbn-management/settings/section_registry/**/*.{ts,tsx}',
-  ],
+  collectCoverageFrom: ['<rootDir>/packages/kbn-management/settings/**/*.{ts,tsx}'],
+  coveragePathIgnorePatterns: ['__stories__', '.stories.tsx', 'storybook', 'mocks'],
 };
