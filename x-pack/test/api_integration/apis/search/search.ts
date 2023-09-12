@@ -455,8 +455,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(404);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/164856
-      it.skip('should delete a completed search', async function () {
+      it('should delete a completed search', async function () {
         await markRequiresShardDelayAgg(this);
 
         const resp = await supertest
