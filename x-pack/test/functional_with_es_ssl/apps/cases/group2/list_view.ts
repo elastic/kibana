@@ -76,8 +76,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/166027
-      describe.skip('status', () => {
+      describe('status', () => {
         before(async () => {
           await cases.api.createNthRandomCases(2);
           await header.waitUntilLoadingHasFinished();
