@@ -7,7 +7,7 @@
 
 import { createTestConfig } from '../../config.base';
 
-const enabledActionTypes = ['.index', '.server-log'];
+const enabledActionTypes = ['.index', '.server-log', '.tines'];
 
 export default createTestConfig({
   serverlessProject: 'es',

@@ -58,6 +58,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./connectors'));
-    // loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./tines_connector'));
   });
 }
