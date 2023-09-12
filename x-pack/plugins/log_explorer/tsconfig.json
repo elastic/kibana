@@ -22,6 +22,7 @@
     "@kbn/core-application-browser",
     "@kbn/share-plugin",
     "@kbn/utility-types",
+    "@kbn/unified-data-table",
   ],
   "exclude": ["target/**/*"]
 }
