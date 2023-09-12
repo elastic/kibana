@@ -19,20 +19,14 @@ import { mergeTransformFunctions } from '@kbn/core-saved-objects-base-server-int
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 
-export interface CreateEsoModelVersionFnOpts/*<
-  InputAttributes = unknown,
-  MigratedAttributes = InputAttributes
->*/ {
+export interface CreateEsoModelVersionFnOpts {
   modelVersion: SavedObjectsModelVersion
   shouldTransformIfDecryptionFails?: boolean;
   inputType?: EncryptedSavedObjectTypeRegistration;
   outputType?: EncryptedSavedObjectTypeRegistration;
 }
 
-export type CreateEsoModelVersionFn = /*<
-  InputAttributes = unknown,
-  MigratedAttributes = InputAttributes
->*/(
+export type CreateEsoModelVersionFn = (
   opts: CreateEsoModelVersionFnOpts
 ) => SavedObjectsModelVersion;
 
@@ -78,12 +72,12 @@ export const getCreateEsoModelVersion =
   return { ...modelVersion, changes };
 };
 
-function createMergedUnsafeTransformFn/*<InputAttributes, MigratedAttributes>*/(
+function createMergedUnsafeTransformFn(
   inputService: Readonly<EncryptedSavedObjectsService>,
   transformedService: Readonly<EncryptedSavedObjectsService>,
   shouldTransformIfDecryptionFails: boolean | undefined,
-  unsafeTransforms: SavedObjectModelUnsafeTransformFn/*<InputAttributes, MigratedAttributes>*/[]
-): SavedObjectModelUnsafeTransformFn/*<InputAttributes, MigratedAttributes>*/
+  unsafeTransforms: SavedObjectModelUnsafeTransformFn[]
+): SavedObjectModelUnsafeTransformFn
 {
   // merge all transforms
   const mergedUnsafetransform = mergeTransformFunctions(unsafeTransforms);
@@ -122,7 +116,7 @@ function createMergedUnsafeTransformFn/*<InputAttributes, MigratedAttributes>*/(
     });
 
     // call merged transforms
-    const result/*:SavedObjectModelTransformationResult<MigratedAttributes>*/ = mergedUnsafetransform(documentToTransform, context);
+    const result = mergedUnsafetransform(documentToTransform, context);
 
     // encrypt
     const transformedDoc = mapAttributes/*<MigratedAttributes>*/(result.document, (transformedAttributes) => {
