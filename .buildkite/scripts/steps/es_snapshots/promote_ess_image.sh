@@ -31,7 +31,7 @@ docker push "$TARGET_IMAGE"
 
 # annotate the build with some info about the docker image that was re-pushed and the hashes that were tested.
 ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
-ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq '.[].Config.Labels["org.opencontainers.image.revision"]')
+ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq -r '.[].Config.Labels["org.opencontainers.image.revision"]')
 
 cat << EOT | buildkite-agent annotate --style "success"
   Promotion successful!
