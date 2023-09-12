@@ -8,10 +8,10 @@
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { BACK_TO_RULE_DETAILS, EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
 import { editRuleUrl } from '../urls/edit_rule';
-import { visit } from './login';
+import { visit } from './navigation';
 
 export function visitEditRulePage(ruleId: string, role?: ROLES): void {
-  visit(editRuleUrl(ruleId), role);
+  visit(editRuleUrl(ruleId), { role });
 }
 
 export const saveEditedRule = () => {

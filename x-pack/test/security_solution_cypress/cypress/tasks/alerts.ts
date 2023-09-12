@@ -83,8 +83,8 @@ import {
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
-import { visitWithTimeRange } from './login';
 import { openFilterGroupContextMenu } from './common/filter_group';
+import { visitWithTimeRange } from './navigation';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();

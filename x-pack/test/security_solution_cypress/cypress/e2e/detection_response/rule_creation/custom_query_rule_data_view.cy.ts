@@ -150,7 +150,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and edits a new rule with a data view', function () {
-      visitWithTimeRange(CREATE_RULE_URL);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       cy.get(RULE_NAME_INPUT).clear();
       cy.get(RULE_NAME_INPUT).type(rule.name);

@@ -197,7 +197,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(formatPageFilterSearchParam(NEW_FILTERS)));
-      visitWithTimeRange(currURL.toString());
+      visit(currURL.toString());
       waitForAlerts();
       assertFilterControlsWithFilterObject(NEW_FILTERS);
     });
@@ -218,7 +218,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(pageFilterUrlString));
-      visitWithTimeRange(currURL.toString());
+      visit(currURL.toString());
 
       waitForAlerts();
       cy.get(OPTION_LIST_LABELS).should((sub) => {

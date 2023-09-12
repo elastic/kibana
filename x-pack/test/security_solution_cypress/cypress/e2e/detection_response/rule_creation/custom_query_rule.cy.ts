@@ -107,7 +107,7 @@ import {
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   enablesRule,
   getDetails,
@@ -134,7 +134,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visit(CREATE_RULE_URL);
+      visitWithTimeRange(CREATE_RULE_URL);
 
       cy.log('Filling define section');
       importSavedQuery(this.timelineId);

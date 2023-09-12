@@ -14,7 +14,7 @@ import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openUncommonProcesses } from '../../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommon_processes';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { refreshPage } from '../../../tasks/security_header';
 import { hostsUrl, USERS_URL } from '../../../urls/navigation';
 import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
@@ -30,7 +30,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
 
     beforeEach(() => {
       login();
-      visit(hostsUrl('uncommonProcesses'));
+      visitWithTimeRange(hostsUrl('uncommonProcesses'));
       waitForUncommonProcessesToBeLoaded();
     });
 
@@ -113,7 +113,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
     });
 
     it(`reset all Hosts pagination when sorting column`, () => {
-      visit(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
       goToTablePage(2);
       cy.get(ALL_HOSTS_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
 
@@ -123,7 +123,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
     });
 
     it(`reset all users pagination when sorting column`, () => {
-      visit(USERS_URL);
+      visitWithTimeRange(USERS_URL);
       goToTablePage(2);
       cy.get(ALL_USERS_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
 

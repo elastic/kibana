@@ -122,7 +122,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     beforeEach(() => {
       deleteAlertsAndRules();
       createRule(getNewRule());
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
     });
@@ -161,7 +161,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       login();
       deleteAlertsAndRules();
       createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
     });
@@ -314,7 +314,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
       login(ROLES.t2_analyst);
       deleteAlertsAndRules();
       createRule(getNewRule());
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectCountTable();
     });

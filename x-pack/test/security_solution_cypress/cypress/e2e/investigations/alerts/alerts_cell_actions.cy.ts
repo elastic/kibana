@@ -103,7 +103,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@brokenInServerless'] }, () =>
   describe('Add to timeline', () => {
     beforeEach(() => {
       login();
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -136,7 +136,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@brokenInServerless'] }, () =>
   describe('Show Top N', () => {
     beforeEach(() => {
       login();
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
@@ -155,7 +155,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@brokenInServerless'] }, () =>
   describe('Copy to clipboard', () => {
     beforeEach(() => {
       login();
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 
