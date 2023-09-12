@@ -68,48 +68,26 @@ describe('Row formatter', () => {
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
-              undefined,
             ],
             Array [
               "foo",
               "bar",
-              undefined,
             ],
             Array [
               "hello",
               "<h1>World</h1>",
-              undefined,
             ],
             Array [
               "number",
               42,
-              undefined,
             ],
             Array [
               "_id",
               "a",
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": Array [
-                  "_id",
-                ],
-                "lang": undefined,
-                "name": "_id",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
             ],
             Array [
               "_score",
               1,
-              undefined,
             ],
           ]
         }
@@ -134,12 +112,10 @@ describe('Row formatter', () => {
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
-              undefined,
             ],
             Array [
               "and 4 more fields",
               "",
-              undefined,
             ],
           ]
         }
@@ -161,48 +137,26 @@ describe('Row formatter', () => {
             Array [
               "number",
               42,
-              undefined,
             ],
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
-              undefined,
             ],
             Array [
               "foo",
               "bar",
-              undefined,
             ],
             Array [
               "hello",
               "<h1>World</h1>",
-              undefined,
             ],
             Array [
               "_id",
               "a",
-              Object {
-                "aggregatable": true,
-                "conflictDescriptions": undefined,
-                "count": 0,
-                "customLabel": undefined,
-                "esTypes": Array [
-                  "_id",
-                ],
-                "lang": undefined,
-                "name": "_id",
-                "readFromDocValues": false,
-                "script": undefined,
-                "scripted": false,
-                "searchable": true,
-                "subType": undefined,
-                "type": "string",
-              },
             ],
             Array [
               "_score",
               1,
-              undefined,
             ],
           ]
         }
@@ -238,9 +192,6 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "formatted, formatted",
-              Object {
-                "name": "subfield",
-              },
             ],
           ]
         }
@@ -299,16 +250,10 @@ describe('Row formatter', () => {
             Array [
               "object.keys",
               "formatted, formatted",
-              Object {
-                "name": "subfield",
-              },
             ],
             Array [
               "object.value",
               "formatted, formatted",
-              Object {
-                "name": "subfield",
-              },
             ],
           ]
         }
@@ -340,7 +285,6 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "5, 10",
-              undefined,
             ],
           ]
         }

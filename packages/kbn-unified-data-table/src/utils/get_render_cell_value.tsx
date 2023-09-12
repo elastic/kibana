@@ -149,20 +149,11 @@ export const getRenderCellValueFn =
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value, docField]) => (
+          {pairs.map(([key, value]) => (
             <Fragment key={key}>
               <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                {columnTypes ? ( // for text-based languages
-                  <FieldIcon
-                    type={columnTypes[key] ?? 'unknown'}
-                    className="unifiedDataTable__descriptionListToken"
-                  />
-                ) : docField ? (
-                  <FieldIcon
-                    {...getFieldIconProps(docField)}
-                    className="unifiedDataTable__descriptionListToken"
-                  />
-                ) : null}
+                {field?.type === '_source' &&
+                  renderFieldToken({ dataView, fieldName: key, columnTypes })}
                 {key}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
@@ -204,6 +195,36 @@ function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumn
     ? getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId)
     : row.raw;
   return json as Record<string, unknown>;
+}
+
+function renderFieldToken({
+  dataView,
+  fieldName,
+  columnTypes,
+}: {
+  dataView: DataView;
+  fieldName: string;
+  columnTypes?: DataTableColumnTypes;
+}) {
+  // for text-based searches
+  if (columnTypes) {
+    return columnTypes[fieldName] && columnTypes[fieldName] !== 'unknown' ? ( // renders an icon or nothing
+      <FieldIcon type={columnTypes[fieldName]} className="unifiedDataTable__descriptionListToken" />
+    ) : null;
+  }
+
+  const dataViewField = dataView.getFieldByName(fieldName);
+
+  if (dataViewField) {
+    return (
+      <FieldIcon
+        {...getFieldIconProps(dataViewField)}
+        className="unifiedDataTable__descriptionListToken"
+      />
+    );
+  }
+
+  return null;
 }
 
 /**
@@ -318,10 +339,10 @@ function getTopLevelObjectPairs(
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
       if (shouldShowFieldHandler(displayKey)) {
-        pairs.push([displayKey, formatted, subField]);
+        pairs.push([displayKey, formatted]);
       }
     } else {
-      pairs.push([key, formatted, subField]);
+      pairs.push([key, formatted]);
     }
   });
   return [...highlightPairs, ...sourcePairs];

@@ -18,8 +18,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-// TODO: add tests
-
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
 
@@ -278,6 +276,81 @@ describe('Unified data table cell rendering', function () {
           dangerouslySetInnerHTML={
             Object {
               "__html": 1,
+            }
+          }
+        />
+      </EuiDescriptionList>
+    `);
+  });
+
+  it('renders _source column with custom column types correctly', () => {
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSource.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 2,
+      columnTypes: { extension: 'murmur3' }, // custom override
+    });
+    const component = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
+    );
+    expect(component).toMatchInlineSnapshot(`
+      <EuiDescriptionList
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
+        compressed={true}
+        type="inline"
+      >
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          <WrappedFieldIcon
+            className="unifiedDataTable__descriptionListToken"
+            type="murmur3"
+          />
+          extension
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": ".gz",
+            }
+          }
+        />
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          bytesDisplayName
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": 100,
+            }
+          }
+        />
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          and 2 more fields
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "",
             }
           }
         />

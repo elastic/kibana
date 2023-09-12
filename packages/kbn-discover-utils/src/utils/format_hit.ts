@@ -61,10 +61,10 @@ export function formatHit(
     // we always include it into the result.
     if (displayKey) {
       if (shouldShowFieldHandler(key)) {
-        pairs.push([displayKey, formattedValue, field]);
+        pairs.push([displayKey, formattedValue]);
       }
     } else {
-      pairs.push([key, formattedValue, field]);
+      pairs.push([key, formattedValue]);
     }
   });
   const pairs = [...highlightPairs, ...sourcePairs];
@@ -81,7 +81,6 @@ export function formatHit(
               values: { count: pairs.length - maxEntries },
             }),
             '',
-            undefined,
           ] as const,
         ];
   formattedHitCache.set(hit.raw, { formattedHit: formatted, maxEntries });

@@ -7,7 +7,6 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 
@@ -37,11 +36,7 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
-type FormattedHitPair = readonly [
-  fieldName: string,
-  formattedValue: string,
-  field: DataViewField | undefined
-];
+type FormattedHitPair = readonly [fieldName: string, formattedValue: string];
 
 /**
  * Pairs array for each field in the hit
