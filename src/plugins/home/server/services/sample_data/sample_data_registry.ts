@@ -46,7 +46,6 @@ export class SampleDataRegistry {
     let value: SampleDatasetSchema;
     try {
       value = sampleDataSchema.validate(specProvider());
-      this.validatedSpaceProviders[value.id] = specProvider;
     } catch (error) {
       throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
     }
@@ -69,6 +68,7 @@ export class SampleDataRegistry {
     }
 
     this.sampleDatasets.push(value);
+    this.validatedSpaceProviders[value.id] = specProvider;
   }
 
   public setup(
@@ -96,6 +96,7 @@ export class SampleDataRegistry {
     createListRoute(router, this.sampleDatasets, this.appLinksMap, logger);
     createInstallRoute(
       router,
+      this.sampleDatasets,
       logger,
       usageTracker,
       core.analytics,

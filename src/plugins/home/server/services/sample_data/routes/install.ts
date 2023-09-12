@@ -10,7 +10,11 @@ import { schema } from '@kbn/config-schema';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { SampleDataContext, SampleDatasetProvider } from '../lib/sample_dataset_registry_types';
+import {
+  SampleDataContext,
+  SampleDatasetProvider,
+  SampleDatasetSchema,
+} from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
 import { getSampleDataInstaller, SAMPLE_DATA_INSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
@@ -18,6 +22,7 @@ import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_bea
 
 export function createInstallRoute(
   router: IRouter,
+  sampleDatasets: SampleDatasetSchema[],
   logger: Logger,
   usageTracker: SampleDataUsageTracker,
   analytics: AnalyticsServiceSetup,
@@ -39,20 +44,21 @@ export function createInstallRoute(
       const spaceId = getSpaceId(scopedContext);
 
       const { params, query } = req;
-      const spaceAwareSampleDatasets = Object.values(specProviders).map((specProvider) =>
-        specProvider(spaceId)
-      );
-      const sampleDataset = spaceAwareSampleDatasets.find(({ id }) => id === params.id);
-      if (!sampleDataset) {
+      const spaceAwareSampleDataset: SampleDatasetSchema | undefined =
+        specProviders[params.id]?.(spaceId);
+
+      if (!spaceAwareSampleDataset) {
         return res.notFound();
       }
 
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
-
+      const mergedSampleDataset = sampleDatasets.map((sampleDataset) =>
+        sampleDataset.id === spaceAwareSampleDataset.id ? spaceAwareSampleDataset : sampleDataset
+      );
       const sampleDataInstaller = await getSampleDataInstaller({
-        datasetId: sampleDataset.id,
-        sampleDatasets: spaceAwareSampleDatasets,
+        datasetId: spaceAwareSampleDataset.id,
+        sampleDatasets: mergedSampleDataset,
         logger,
         context,
       });
