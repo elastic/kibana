@@ -31,12 +31,15 @@ export function useProfilingPlugin() {
     fetchIsProfilingSetup();
   }, [plugins.profiling]);
 
+  const isProfilingAvailable =
+    isProfilingIntegrationEnabled && isProfilingPluginInitialized;
+
   return {
     isProfilingPluginInitialized,
-    profilingLocators:
-      isProfilingIntegrationEnabled && isProfilingPluginInitialized
-        ? plugins.profiling?.locators
-        : undefined,
+    profilingLocators: isProfilingAvailable
+      ? plugins.profiling?.locators
+      : undefined,
     isProfilingIntegrationEnabled,
+    isProfilingAvailable,
   };
 }
