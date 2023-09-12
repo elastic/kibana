@@ -553,6 +553,7 @@ examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling_data_access @elastic/profiling-ui
 x-pack/plugins/profiling @elastic/profiling-ui
+packages/kbn-profiling-utils @elastic/profiling-ui
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
 packages/react/kibana_context/common @elastic/appex-sharedux
@@ -1022,7 +1023,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /.buildkite/ @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
-catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
+/catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
 
 # Appex QA
 /src/dev/code_coverage @elastic/appex-qa
