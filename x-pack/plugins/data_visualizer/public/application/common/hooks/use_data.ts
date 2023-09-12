@@ -56,7 +56,7 @@ export const useData = (
   const docCountRequestParams:
     | {
         reference: DocumentStatsSearchStrategyParams | undefined;
-        production: DocumentStatsSearchStrategyParams | undefined;
+        comparison: DocumentStatsSearchStrategyParams | undefined;
       }
     | undefined = useMemo(() => {
     const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
@@ -77,9 +77,9 @@ export const useData = (
           ...query,
           index: initialSettings ? initialSettings.reference : selectedDataView.getIndexPattern(),
         },
-        production: {
+        comparison: {
           ...query,
-          index: initialSettings ? initialSettings.production : selectedDataView.getIndexPattern(),
+          index: initialSettings ? initialSettings.comparison : selectedDataView.getIndexPattern(),
         },
       };
     }
@@ -92,7 +92,7 @@ export const useData = (
     randomSampler
   );
   const documentStatsProd = useDocumentCountStats(
-    docCountRequestParams?.production,
+    docCountRequestParams?.comparison,
     lastRefresh,
     randomSamplerProd
   );

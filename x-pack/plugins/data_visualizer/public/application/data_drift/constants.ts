@@ -35,10 +35,6 @@ export const COMPARISON_LABEL = i18n.translate('xpack.dataVisualizer.dataDrift.c
   defaultMessage: 'Comparison',
 });
 
-export const PRODUCTION_LABEL = i18n.translate('xpack.dataVisualizer.dataDrift.productionLabel', {
-  defaultMessage: 'Production',
-});
-
 export const DATA_COMPARISON_TYPE_LABEL = {
   [DATA_COMPARISON_TYPE.NUMERIC]: NUMERIC_TYPE_LABEL,
   [DATA_COMPARISON_TYPE.CATEGORICAL]: CATEGORICAL_TYPE_LABEL,

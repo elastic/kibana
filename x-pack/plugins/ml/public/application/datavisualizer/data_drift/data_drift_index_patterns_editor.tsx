@@ -48,21 +48,21 @@ export const canAppendWildcard = (keyPressed: string) => {
 };
 
 type DataViewEditorServiceSpec = DataViewEditorService;
-const getDefaultIndexPattern = (referenceIndexPattern: string, productionIndexPattern: string) =>
-  referenceIndexPattern === productionIndexPattern
+const getDefaultIndexPattern = (referenceIndexPattern: string, comparisonIndexPattern: string) =>
+  referenceIndexPattern === comparisonIndexPattern
     ? referenceIndexPattern
-    : `${referenceIndexPattern},${productionIndexPattern}`;
+    : `${referenceIndexPattern},${comparisonIndexPattern}`;
 
 export function DataDriftIndexPatternsEditor({
   referenceDataViewEditorService,
-  productionDataViewEditorService,
+  comparisonDataViewEditorService,
   initialReferenceIndexPattern,
-  initialProductionIndexPattern,
+  initialComparisonIndexPattern,
 }: {
   referenceDataViewEditorService: DataViewEditorServiceSpec;
-  productionDataViewEditorService: DataViewEditorServiceSpec;
+  comparisonDataViewEditorService: DataViewEditorServiceSpec;
   initialReferenceIndexPattern?: string;
-  initialProductionIndexPattern?: string;
+  initialComparisonIndexPattern?: string;
 }) {
   const {
     services: {
@@ -86,7 +86,7 @@ export function DataDriftIndexPatternsEditor({
     useMemo(() => {
       return combineLatest([
         referenceDataViewEditorService?.timestampFieldOptions$,
-        productionDataViewEditorService?.timestampFieldOptions$,
+        comparisonDataViewEditorService?.timestampFieldOptions$,
       ]).pipe(
         map(([referenceTimeFieldOptions, productionTimeFieldOptions]) => {
           const intersectedTimeFields = intersectionBy<TimestampOption, TimestampOption>(
@@ -101,15 +101,15 @@ export function DataDriftIndexPatternsEditor({
           return intersectedTimeFields;
         })
       );
-    }, [productionDataViewEditorService, referenceDataViewEditorService]);
+    }, [comparisonDataViewEditorService, referenceDataViewEditorService]);
 
   const combinedTimeFieldOptions = useObservable(combinedTimeFieldOptions$, []);
 
   const [referenceIndexPattern, setReferenceIndexPattern] = useState<string>(
     initialReferenceIndexPattern ?? ''
   );
-  const [productionIndexPattern, setProductionIndexPattern] = useState<string>(
-    initialProductionIndexPattern ?? ''
+  const [comparisonIndexPattern, setComparisonIndexPattern] = useState<string>(
+    initialComparisonIndexPattern ?? ''
   );
 
   const navigateToPath = useNavigateToPath();
@@ -136,8 +136,8 @@ export function DataDriftIndexPatternsEditor({
     const getMatchingDataView = async () => {
       setDataViewMsg(undefined);
       setFoundDataViewId(undefined);
-      if (!unmounted && referenceIndexPattern && productionIndexPattern) {
-        const indicesName = getDefaultIndexPattern(referenceIndexPattern, productionIndexPattern);
+      if (!unmounted && referenceIndexPattern && comparisonIndexPattern) {
+        const indicesName = getDefaultIndexPattern(referenceIndexPattern, comparisonIndexPattern);
 
         const matchingDataViews = await dataViews.find(indicesName);
 
@@ -173,10 +173,10 @@ export function DataDriftIndexPatternsEditor({
     return () => {
       unmounted = true;
     };
-  }, [referenceIndexPattern, productionIndexPattern, timeField, dataViews]);
+  }, [referenceIndexPattern, comparisonIndexPattern, timeField, dataViews]);
   const createDataViewAndRedirectToDataDriftPage = async (createAdHocDV = false) => {
     // Create adhoc data view
-    const indicesName = getDefaultIndexPattern(referenceIndexPattern, productionIndexPattern);
+    const indicesName = getDefaultIndexPattern(referenceIndexPattern, comparisonIndexPattern);
 
     const timeFieldName =
       Array.isArray(timeField) && timeField.length > 0 ? timeField[0].value : undefined;
@@ -210,7 +210,7 @@ export function DataDriftIndexPatternsEditor({
       pageState: {
         index: dataViewId,
         reference: referenceIndexPattern,
-        production: productionIndexPattern,
+        comparison: comparisonIndexPattern,
         timeFieldName,
       },
     });
@@ -221,12 +221,14 @@ export function DataDriftIndexPatternsEditor({
   const hasError =
     refError !== undefined ||
     comparisonError !== undefined ||
-    !productionIndexPattern ||
+    !comparisonIndexPattern ||
     !referenceIndexPattern;
 
   const firstSetOfSteps = [
     {
-      title: 'Pick index pattern for reference data',
+      title: i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.enterReferenceDataTitle', {
+        defaultMessage: 'Enter index pattern for reference data',
+      }),
       children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
@@ -234,7 +236,7 @@ export function DataDriftIndexPatternsEditor({
             label={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.referenceData"
-                defaultMessage="Select an index pattern to specify the reference data."
+                defaultMessage="Index pattern"
               />
             }
             helpText={
@@ -252,15 +254,17 @@ export function DataDriftIndexPatternsEditor({
       ),
     },
     {
-      title: 'Pick index pattern for comparison data',
+      title: i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.enterComparisonDataTitle', {
+        defaultMessage: 'Enter index pattern for comparison data',
+      }),
       children: (
         <EuiFlexItem grow={false}>
           <DataViewEditor
             key={'comparison'}
             label={
               <FormattedMessage
-                id="xpack.ml.dataDrift.indexPatternsEditor.comparisonData"
-                defaultMessage="Select an index pattern to specify the comparison data"
+                id="xpack.ml.dataDrift.indexPatternsEditor.comparisonDataIndexPatternHelp"
+                defaultMessage="Index pattern"
               />
             }
             helpText={
@@ -269,16 +273,18 @@ export function DataDriftIndexPatternsEditor({
                 defaultMessage="To view the changes in the data over time, reference and comparison data can have different index patterns, but they must have the same time field."
               />
             }
-            dataViewEditorService={productionDataViewEditorService}
-            indexPattern={productionIndexPattern}
-            setIndexPattern={setProductionIndexPattern}
+            dataViewEditorService={comparisonDataViewEditorService}
+            indexPattern={comparisonIndexPattern}
+            setIndexPattern={setComparisonIndexPattern}
             onError={setComparisonError}
           />
         </EuiFlexItem>
       ),
     },
     {
-      title: 'Additional settings',
+      title: i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.additionalSettingsTitle', {
+        defaultMessage: 'Additional settings',
+      }),
       children: (
         <EuiFlexGroup direction="column">
           {combinedTimeFieldOptions.length > 0 ? (
@@ -308,7 +314,7 @@ export function DataDriftIndexPatternsEditor({
                     setTimeField(newValue);
                   }}
                   isClearable={false}
-                  isDisabled={productionIndexPattern === '' && referenceIndexPattern === ''}
+                  isDisabled={comparisonIndexPattern === '' && referenceIndexPattern === ''}
                   data-test-subj="timestampField"
                   aria-label={i18n.translate(
                     'xpack.ml.dataDrift.indexPatternsEditor.timestampSelectAriaLabel',
@@ -330,7 +336,7 @@ export function DataDriftIndexPatternsEditor({
                 i18n.translate('xpack.ml.dataDrift.indexPatternsEditor.dataViewHelpText', {
                   defaultMessage: 'Optional data view name.',
                 }) +
-                (referenceIndexPattern && productionIndexPattern
+                (referenceIndexPattern && comparisonIndexPattern
                   ? ` ${i18n.translate(
                       'xpack.ml.dataDrift.indexPatternsEditor.defaultDataViewHelpText',
                       {
@@ -338,7 +344,7 @@ export function DataDriftIndexPatternsEditor({
                         values: {
                           fallbackDataViewName: getDefaultIndexPattern(
                             referenceIndexPattern,
-                            productionIndexPattern
+                            comparisonIndexPattern
                           ),
                         },
                       }

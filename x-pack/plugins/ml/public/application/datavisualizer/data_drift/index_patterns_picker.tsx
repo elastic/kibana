@@ -118,14 +118,14 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
 };
 
 export const DataDriftIndexPatternsPicker: FC = () => {
-  const { sourceIp, destIp } = parse(location.search, {
+  const { reference, comparison } = parse(location.search, {
     sort: false,
-  }) as { sourceIp: string; destIp: string };
+  }) as { reference: string; comparison: string };
 
   const [dataViewEditorServices, setDataViewEditorServices] = useState<
     | {
         referenceDataViewEditorService: DataViewEditorServiceSpec;
-        productionDataViewEditorService: DataViewEditorServiceSpec;
+        comparisonDataViewEditorService: DataViewEditorServiceSpec;
       }
     | undefined
   >();
@@ -139,13 +139,13 @@ export const DataDriftIndexPatternsPicker: FC = () => {
   } = useMlKibana();
   const { dataViewEditorServiceFactory } = dataViewEditor;
 
-  const initialProductionIndexPattern = useMemo(
-    () => (destIp ? destIp.replaceAll(`'`, '') : ''),
-    [destIp]
+  const initialComparisonIndexPattern = useMemo(
+    () => (comparison ? comparison.replaceAll(`'`, '') : ''),
+    [comparison]
   );
   const initialReferenceIndexPattern = useMemo(
-    () => (sourceIp ? sourceIp.replaceAll(`'`, '') : ''),
-    [sourceIp]
+    () => (reference ? reference.replaceAll(`'`, '') : ''),
+    [reference]
   );
 
   useEffect(() => {
@@ -163,19 +163,19 @@ export const DataDriftIndexPatternsPicker: FC = () => {
           },
           requireTimestampField: false,
         });
-        const productionDataViewEditorService = new DataViewEditorService({
+        const comparisonDataViewEditorService = new DataViewEditorService({
           // @ts-expect-error Mismatch in DataViewsServicePublic import, but should be same
           services: { http, dataViews },
           initialValues: {
             name: '',
             type: INDEX_PATTERN_TYPE.DEFAULT,
-            indexPattern: initialProductionIndexPattern,
+            indexPattern: initialComparisonIndexPattern,
           },
           requireTimestampField: false,
         });
         setDataViewEditorServices({
           referenceDataViewEditorService,
-          productionDataViewEditorService,
+          comparisonDataViewEditorService,
         });
       }
     };
@@ -189,7 +189,7 @@ export const DataDriftIndexPatternsPicker: FC = () => {
     http,
     dataViews,
     initialReferenceIndexPattern,
-    initialProductionIndexPattern,
+    initialComparisonIndexPattern,
   ]);
 
   return (
@@ -204,11 +204,11 @@ export const DataDriftIndexPatternsPicker: FC = () => {
         <EuiPageSection>
           {dataViewEditorServices ? (
             <DataDriftIndexPatternsEditor
-              initialProductionIndexPattern={initialProductionIndexPattern}
+              initialComparisonIndexPattern={initialComparisonIndexPattern}
               initialReferenceIndexPattern={initialReferenceIndexPattern}
               referenceDataViewEditorService={dataViewEditorServices.referenceDataViewEditorService}
-              productionDataViewEditorService={
-                dataViewEditorServices.productionDataViewEditorService
+              comparisonDataViewEditorService={
+                dataViewEditorServices.comparisonDataViewEditorService
               }
             />
           ) : null}

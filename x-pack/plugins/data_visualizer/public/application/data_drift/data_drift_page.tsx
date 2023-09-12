@@ -48,7 +48,7 @@ import { DataComparisonFullAppState, getDefaultDataComparisonState } from './typ
 import { useDataSource } from '../common/hooks/data_source_context';
 import { useDataVisualizerKibana } from '../kibana_context';
 import { DataDriftView } from './data_drift_view';
-import { COMPARISON_LABEL, PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
+import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithDualBrush } from './document_count_with_dual_brush';
@@ -138,7 +138,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   } = useDataVisualizerKibana();
   const { dataView, savedSearch } = useDataSource();
 
-  const { reference: referenceStateManager, production: productionStateManager } =
+  const { reference: referenceStateManager, comparison: comparisonStateManager } =
     useDataDriftStateManagerContext();
 
   const [dataComparisonListState, setDataComparisonListState] = usePageUrlState<{
@@ -153,8 +153,8 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const randomSampler = useMemo(() => referenceStateManager.randomSampler, [referenceStateManager]);
 
   const randomSamplerProd = useMemo(
-    () => productionStateManager.randomSampler,
-    [productionStateManager]
+    () => comparisonStateManager.randomSampler,
+    [comparisonStateManager]
   );
 
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -242,7 +242,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const euiTheme = useCurrentEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
-    productionColor: euiTheme.euiColorVis1,
+    comparisonColor: euiTheme.euiColorVis1,
   };
 
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
@@ -279,7 +279,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
         return colors.referenceColor;
       }
       if (start >= windowParameters.deviationMin && end <= windowParameters.deviationMax) {
-        return colors.productionColor;
+        return colors.comparisonColor;
       }
 
       return null;
@@ -291,8 +291,8 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
   const referenceIndexPatternLabel = initialSettings?.reference
     ? getDataDriftDataLabel(REFERENCE_LABEL, initialSettings.reference)
     : getDataDriftDataLabel(REFERENCE_LABEL);
-  const productionIndexPatternLabel = initialSettings?.production
-    ? getDataDriftDataLabel(PRODUCTION_LABEL, initialSettings?.production)
+  const comparisonIndexPatternLabel = initialSettings?.comparison
+    ? getDataDriftDataLabel(COMPARISON_LABEL, initialSettings?.comparison)
     : getDataDriftDataLabel(COMPARISON_LABEL);
 
   return (
@@ -339,8 +339,8 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                   label: COMPARISON_LABEL,
                   annotationStyle: {
                     strokeWidth: 0,
-                    stroke: colors.productionColor,
-                    fill: colors.productionColor,
+                    stroke: colors.comparisonColor,
+                    fill: colors.comparisonColor,
                     opacity: 0.5,
                   },
                   badgeWidth: 90,
@@ -349,7 +349,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
               />
               <EuiHorizontalRule />
               <DocumentCountWithDualBrush
-                label={productionIndexPatternLabel}
+                label={comparisonIndexPatternLabel}
                 randomSampler={randomSamplerProd}
                 reload={forceRefresh}
                 brushSelectionUpdateHandler={brushSelectionUpdate}
@@ -375,13 +375,13 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                   label: COMPARISON_LABEL,
                   annotationStyle: {
                     strokeWidth: 0,
-                    stroke: colors.productionColor,
-                    fill: colors.productionColor,
+                    stroke: colors.comparisonColor,
+                    fill: colors.comparisonColor,
                     opacity: 0.5,
                   },
                   badgeWidth: 90,
                 }}
-                stateManager={productionStateManager}
+                stateManager={comparisonStateManager}
               />
             </EuiPanel>
           </EuiFlexItem>

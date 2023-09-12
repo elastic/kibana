@@ -165,7 +165,7 @@ export const Controls: FC<Props> = React.memo(
       closePopover();
       const path = await mlLocator.getUrl({
         page: ML_PAGES.DATA_DRIFT_CUSTOM,
-        pageState: { destIp: nodeLabel },
+        pageState: { comparison: nodeLabel },
       });
       await navigateToPath(path);
 

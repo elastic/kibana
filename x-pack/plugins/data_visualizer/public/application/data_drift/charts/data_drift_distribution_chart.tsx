@@ -20,7 +20,7 @@ export const DataDriftDistributionChart = ({
   colors,
 }: {
   item: Feature | undefined;
-  colors: { referenceColor: string; productionColor: string };
+  colors: { referenceColor: string; comparisonColor: string };
   domain?: Feature['domain'];
 }) => {
   const valueFormatter = useMemo(
@@ -61,7 +61,7 @@ export const DataDriftDistributionChart = ({
           data={data}
           color={(identifier) => {
             const key = identifier.seriesKeys[0];
-            return key === COMPARISON_LABEL ? colors.productionColor : colors.referenceColor;
+            return key === COMPARISON_LABEL ? colors.comparisonColor : colors.referenceColor;
           }}
         />
       </Chart>

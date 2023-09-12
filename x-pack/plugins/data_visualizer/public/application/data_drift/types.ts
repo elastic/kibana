@@ -20,7 +20,7 @@ export interface DataComparisonQueryState {
 
 export interface DataComparisonAppState extends DataComparisonQueryState {
   reference: DataComparisonQueryState;
-  production: DataComparisonQueryState;
+  comparison: DataComparisonQueryState;
 }
 
 export type DataComparisonFullAppState = Required<DataComparisonAppState>;
@@ -43,7 +43,7 @@ export const getDefaultDataComparisonState = (
     searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
     filters: [],
   },
-  production: {
+  comparison: {
     searchString: '',
     searchQuery: defaultSearchQuery,
     searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -72,7 +72,7 @@ export interface Feature {
   fieldType: DataDriftField['type'];
   driftDetected: boolean;
   similarityTestPValue: number;
-  productionHistogram: Histogram[];
+  comparisonHistogram: Histogram[];
   referenceHistogram: Histogram[];
   comparisonDistribution: ComparisonHistogram[];
   domain?: {
@@ -118,7 +118,7 @@ export interface NumericDriftData {
   pValue: number;
   range?: Range;
   referenceHistogram: Histogram[];
-  productionHistogram: Histogram[];
+  comparisonHistogram: Histogram[];
   secondaryType: string;
 }
 export interface CategoricalDriftData {

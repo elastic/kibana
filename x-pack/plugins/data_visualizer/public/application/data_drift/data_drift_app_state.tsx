@@ -95,7 +95,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
 
   const initialSettings: InitialSettings = {
     index: getStr(params.index, dataView.id),
-    production: getStr(params.production, dataView.getIndexPattern()),
+    comparison: getStr(params.comparison, dataView.getIndexPattern()),
     reference: getStr(params.reference, dataView.getIndexPattern()),
     timeField: getStr(params.timeField, dataView.getTimeField()?.name),
   };
@@ -109,9 +109,9 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
     filters: [],
     timeField: dataView.timeFieldName,
   });
-  const productionStateManager = useDataDriftStateManager({
-    id: 'productionDataDriftData',
-    indexPattern: getStr(params.production) ?? dataView.getIndexPattern(),
+  const comparisonStateManager = useDataDriftStateManager({
+    id: 'comparisonDataDriftData',
+    indexPattern: getStr(params.comparison) ?? dataView.getIndexPattern(),
     searchString: '',
     searchQuery: defaultSearchQuery,
     searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -130,7 +130,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
                   value={{
                     dataView,
                     reference: referenceStateManager,
-                    production: productionStateManager,
+                    comparison: comparisonStateManager,
                   }}
                 >
                   <DataDriftPage initialSettings={initialSettings} />

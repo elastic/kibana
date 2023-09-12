@@ -29,7 +29,7 @@ interface StateManagerInitialParams {
 export const DataDriftStateManagerContext = createContext<{
   dataView: DataView | never;
   reference: DataDriftStateManager;
-  production: DataDriftStateManager;
+  comparison: DataDriftStateManager;
 }>({
   get dataView(): never {
     throw new Error('DataDriftStateManagerContext is not implemented');
@@ -37,8 +37,8 @@ export const DataDriftStateManagerContext = createContext<{
   get reference(): never {
     throw new Error('reference is not implemented');
   },
-  get production(): never {
-    throw new Error('production is not implemented');
+  get comparison(): never {
+    throw new Error('comparison is not implemented');
   },
 });
 

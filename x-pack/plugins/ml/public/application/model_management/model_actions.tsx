@@ -557,7 +557,7 @@ export function useModelActions({
           const indexPatterns = item?.indices?.map((o) => Object.keys(o));
           const path = await urlLocator.getUrl({
             page: ML_PAGES.DATA_DRIFT_CUSTOM,
-            pageState: indexPatterns ? { destIp: indexPatterns.join(',') } : {},
+            pageState: indexPatterns ? { comparison: indexPatterns.join(',') } : {},
           });
 
           await navigateToPath(path, false);

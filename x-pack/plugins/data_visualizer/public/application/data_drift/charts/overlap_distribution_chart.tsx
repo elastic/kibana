@@ -30,7 +30,7 @@ export const OverlapDistributionComparison = ({
   fieldName,
 }: {
   data: ComparisonHistogram[];
-  colors: { referenceColor: string; productionColor: string };
+  colors: { referenceColor: string; comparisonColor: string };
   fieldType?: DataDriftField['type'];
   fieldName?: DataDriftField['field'];
 }) => {
@@ -82,7 +82,7 @@ export const OverlapDistributionComparison = ({
         curve={CurveType.CURVE_STEP}
         color={(identifier) => {
           const key = identifier.seriesKeys[0];
-          return key === COMPARISON_LABEL ? colors.productionColor : colors.referenceColor;
+          return key === COMPARISON_LABEL ? colors.comparisonColor : colors.referenceColor;
         }}
       />
     </Chart>

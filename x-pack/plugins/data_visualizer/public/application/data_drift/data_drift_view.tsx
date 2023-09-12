@@ -64,7 +64,7 @@ export const DataDriftView = ({
     | {
         fields: DataDriftField[];
         currentDataView: DataView;
-        timeRanges?: { reference: TimeRange; production: TimeRange };
+        timeRanges?: { reference: TimeRange; comparison: TimeRange };
       }
     | undefined
   >();
@@ -101,7 +101,7 @@ export const DataDriftView = ({
                 start: windowParameters.baselineMin,
                 end: windowParameters.baselineMax,
               },
-              production: {
+              comparison: {
                 start: windowParameters.deviationMin,
                 end: windowParameters.deviationMax,
               },

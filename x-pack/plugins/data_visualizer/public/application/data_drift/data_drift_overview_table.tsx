@@ -50,7 +50,7 @@ export const DataDriftOverviewTable = ({
   const euiTheme = useCurrentEuiTheme();
   const colors = {
     referenceColor: euiTheme.euiColorVis2,
-    productionColor: euiTheme.euiColorVis1,
+    comparisonColor: euiTheme.euiColorVis1,
   };
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
@@ -188,17 +188,17 @@ export const DataDriftOverviewTable = ({
       },
     },
     {
-      field: 'productionHistogram',
+      field: 'comparisonHistogram',
       name: comparisonDistributionLabel,
       'data-test-subj': 'mlDataDriftOverviewTableDataComparisonDistributionChart',
       sortable: false,
-      render: (productionDistribution: Feature['productionHistogram'], item) => {
+      render: (comparisonDistribution: Feature['comparisonHistogram'], item) => {
         return (
           <div css={{ width: 100, height: 40 }}>
             <SingleDistributionChart
               fieldType={item.fieldType}
-              data={productionDistribution}
-              color={colors.productionColor}
+              data={comparisonDistribution}
+              color={colors.comparisonColor}
               name={comparisonDistributionLabel}
             />
           </div>
