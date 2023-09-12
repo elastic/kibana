@@ -7,14 +7,11 @@
 
 import { logger } from 'elastic-apm-node';
 
-import { SavedObjectsModelUnsafeTransformChange } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelUnsafeTransformChange } from '@kbn/core-saved-objects-server';
 
 import { getCreateEsoModelVersion } from './create_model_version';
-import {
-  EncryptedSavedObjectTypeRegistration,
-  EncryptionError,
-  EncryptionErrorOperation,
-} from './crypto';
+import type { EncryptedSavedObjectTypeRegistration } from './crypto';
+import { EncryptionError, EncryptionErrorOperation } from './crypto';
 import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 
 afterEach(() => {
