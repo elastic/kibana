@@ -9,6 +9,8 @@ steps:
     #  Inputs are not accessible in the pipeline code,
     #  so you'd have to get a script to dig up the meta-data, then emit a build step to buildkite
 
+  - wait: ~
+
   - label: ":pipeline: (:kibana: x :elastic:) Trigger Kibana Serverless suite"
     trigger: "kibana-serverless"
     if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
