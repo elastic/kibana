@@ -174,8 +174,6 @@ export class ManagementPlugin
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
       setLandingPageRedirect: (landingPageRedirect: string) =>
         this.landingPageRedirect$.next(landingPageRedirect),
-      setBreadcrumbsUpdatesEnabled: (areBreadcrumbsUpdatesEnabled: boolean) =>
-        this.areBreadcrumbsUpdatesEnabled$.next(areBreadcrumbsUpdatesEnabled),
     };
   }
 }
