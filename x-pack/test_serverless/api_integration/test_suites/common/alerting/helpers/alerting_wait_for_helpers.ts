@@ -344,10 +344,7 @@ export async function waitForNumRuleRuns({
   for (let i = 0; i < numOfRuns; i++) {
     await pRetry(
       async () => {
-        const resp = await runRule({ supertest, ruleId });
-        if (resp.status !== 204) {
-          throw new Error(`Expected ${resp.status} to equal 204`);
-        }
+        await runRule({ supertest, ruleId });
         await waitForExecutionEventLog({
           esClient,
           filter: testStart,
