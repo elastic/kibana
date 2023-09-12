@@ -63,6 +63,33 @@ describe('group by expression', () => {
     expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
   });
 
+  it('filters out the terms that are not in the available fields', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'test',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termField={['test', 'notavailable']}
+          groupBy={'top'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(['test']);
+  });
+
   it('calls onChangeSelectedTermField when a termField is selected', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(

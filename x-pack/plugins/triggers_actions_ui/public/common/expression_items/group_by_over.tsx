@@ -114,14 +114,17 @@ export const GroupByExpression = ({
 
   useEffect(() => {
     // if current field set doesn't contain selected field, clear selection
-    if (
-      termField &&
-      !Array.isArray(termField) &&
-      termField.length > 0 &&
-      fields.length > 0 &&
-      !fields.find((field: FieldOption) => field.name === termField)
-    ) {
-      onChangeSelectedTermField('');
+    if (termField && termField.length > 0 && fields.length > 0) {
+      if (Array.isArray(termField)) {
+        const filteredTerms = termField.filter((term) =>
+          fields.some((field) => field.name === term)
+        );
+        onChangeSelectedTermField(filteredTerms);
+      } else {
+        if (!fields.find((field: FieldOption) => field.name === termField)) {
+          onChangeSelectedTermField('');
+        }
+      }
     }
   }, [termField, fields, onChangeSelectedTermField]);
 
