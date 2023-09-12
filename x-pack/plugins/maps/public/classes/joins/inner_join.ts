@@ -56,7 +56,7 @@ export function createJoinSource(
 export class InnerJoin {
   private readonly _descriptor: Partial<JoinDescriptor>;
   private readonly _rightSource?: IJoinSource;
-  private readonly _leftField?: IField;
+  private readonly _leftField?: IField | null;
 
   constructor(joinDescriptor: Partial<JoinDescriptor>, leftSource: IVectorSource) {
     this._descriptor = joinDescriptor;

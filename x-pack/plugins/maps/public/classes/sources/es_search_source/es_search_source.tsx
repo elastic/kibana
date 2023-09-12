@@ -213,7 +213,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     }
   }
 
-  getFieldByName(fieldName: string): IField | null {
+  getFieldByName(fieldName: string): ESDocField {
     return new ESDocField({
       fieldName,
       source: this,

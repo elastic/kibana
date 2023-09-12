@@ -186,7 +186,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return fields.map((f) => this.getFieldByName(f.name));
   }
 
-  getFieldByName(fieldName: string): IField | null {
+  getFieldByName(fieldName: string): IField {
     return new EMSFileField({
       fieldName,
       source: this,

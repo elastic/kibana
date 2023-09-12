@@ -165,6 +165,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
+  getFieldByName(fieldName: string): IField | null {
+    throw new Error('Must implement VectorSource#getFieldByName');
+  }
+
   async getLeftJoinFields(): Promise<IField[]> {
     return [];
   }
