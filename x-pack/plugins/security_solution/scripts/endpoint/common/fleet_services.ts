@@ -37,6 +37,7 @@ import type {
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
+import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -249,7 +250,7 @@ export const fetchAgentPolicyList = async (
 export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient
 ): Promise<string> => {
-  const kbnStatus = await kbnClient.status.get();
+  const kbnStatus = await fetchKibanaStatus(kbnClient);
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
     .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));

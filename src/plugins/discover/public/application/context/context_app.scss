@@ -17,8 +17,4 @@
   &__cell--highlight {
     background-color: tintOrShade($euiColorPrimary, 90%, 70%);
   }
-
-  .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
-    padding: 0;
-  }
 }
