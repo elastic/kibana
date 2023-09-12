@@ -107,10 +107,10 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
               const modelsClient = modelsProvider(client);
 
               const modelsPipelinesAndIndices = await Promise.all(
-                modelIdsAndAliases.map(async (modelIdAndAlias) => {
+                modelIdsAndAliases.map(async (modelIdOrAlias) => {
                   return {
-                    modelIdAndAlias,
-                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdAndAlias),
+                    modelIdOrAlias,
+                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdOrAlias),
                   };
                 })
               );
@@ -118,7 +118,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
               for (const model of result) {
                 const modelAliases = model.metadata?.model_aliases ?? [];
                 const modelMap = modelsPipelinesAndIndices.find(
-                  (d) => d.modelIdAndAlias === model.model_id
+                  (d) => d.modelIdOrAlias === model.model_id
                 )?.result;
 
                 const allRelatedModels = modelsPipelinesAndIndices
@@ -128,7 +128,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                         model.model_id,
                         ...modelAliases,
                         ...(modelDeploymentsMap[model.model_id] ?? []),
-                      ].findIndex((alias) => alias === m.modelIdAndAlias) > -1
+                      ].findIndex((alias) => alias === m.modelIdOrAlias) > -1
                   )
                   .map((r) => r?.result)
                   .filter(isDefined);
