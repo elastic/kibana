@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
   EuiPage,
   EuiPageBody,
   EuiPanel,
-  EuiSpacer,
+  useEuiBackgroundColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
@@ -52,11 +53,6 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 
-/**
- * Local storage key for sidebar persistence state
- */
-export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
-
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
@@ -72,11 +68,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     data,
     uiSettings,
     filterManager,
-    storage,
     history,
     spaces,
     inspector,
   } = useDiscoverServices();
+  const { euiTheme } = useEuiTheme();
+  const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
@@ -109,8 +106,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
   }, [dataView]);
 
-  const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
-  const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
@@ -171,11 +166,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       .map((filter) => ({ ...filter, meta: { ...filter.meta, disabled: true } }));
     filterManager.setFilters(disabledFilters);
   }, [filterManager]);
-
-  const toggleSidebarCollapse = useCallback(() => {
-    storage.set(SIDEBAR_CLOSED_KEY, !isSidebarClosed);
-    setIsSidebarClosed(!isSidebarClosed);
-  }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const documentState = useDataState(stateContainer.dataState.data$.documents$);
@@ -240,7 +230,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
 
   return (
-    <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
+    <EuiPage
+      className="dscPage"
+      data-fetch-counter={fetchCounter.current}
+      css={css`
+        background-color: ${pageBackgroundColor};
+      `}
+    >
       <h1
         id="savedSearchTitle"
         className="euiScreenReaderOnly"
@@ -274,7 +270,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           spaces={spaces}
           history={history}
         />
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
+        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               documents$={stateContainer.dataState.data$.documents$}
@@ -284,7 +280,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
               onRemoveField={onRemoveColumn}
               onChangeDataView={stateContainer.actions.onChangeDataView}
               selectedDataView={dataView}
-              isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               onFieldEdited={onFieldEdited}
               onDataViewCreated={stateContainer.actions.onDataViewCreated}
@@ -292,23 +287,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiSpacer size="s" />
-                <EuiButtonIcon
-                  iconType={isSidebarClosed ? 'menuRight' : 'menuLeft'}
-                  iconSize="m"
-                  size="xs"
-                  onClick={toggleSidebarCollapse}
-                  data-test-subj="collapseSideBarButton"
-                  aria-controls="discover-sidebar"
-                  aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
-                    defaultMessage: 'Toggle sidebar',
-                  })}
-                />
-              </div>
-            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                border-right: ${euiTheme.border.thin};
+              `}
+            />
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
             {resultState === 'none' ? (
@@ -335,7 +319,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 role="main"
                 panelRef={resizeRef}
                 paddingSize="none"
+                borderRadius="none"
                 hasShadow={false}
+                hasBorder={false}
+                color="transparent"
                 className={classNames('dscPageContent', {
                   'dscPageContent--centered': contentCentered,
                 })}
