@@ -41,7 +41,6 @@ export function ChartConfigPanel({
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousSuggestion = useRef<Suggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
-  const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
   const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
       const updatedSuggestion = {
@@ -56,9 +55,7 @@ export function ChartConfigPanel({
 
   useEffect(() => {
     const dataHasChanged =
-      Boolean(lensTablesAdapter) &&
-      !isEqual(previousAdapters.current, lensTablesAdapter) &&
-      query !== previousQuery?.current;
+      Boolean(lensTablesAdapter) && !isEqual(previousAdapters.current, lensTablesAdapter);
     async function fetchLensConfigComponent() {
       const Component = await services.lens.EditLensConfigPanelApi();
       const panel = (
@@ -77,9 +74,6 @@ export function ChartConfigPanel({
       setEditLensConfigPanel(panel);
       previousSuggestion.current = currentSuggestion;
       previousAdapters.current = lensTablesAdapter;
-      if (dataHasChanged) {
-        previousQuery.current = query;
-      }
     }
     const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
     // rerender the component if the data has changed or the suggestion
