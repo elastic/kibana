@@ -8,6 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useLocationName } from './use_location_name';
 import { WrappedHelper } from '../utils/testing';
+import { MonitorOverviewItem } from '../../../../common/runtime_types';
 
 describe('useLocationName', () => {
   beforeEach(() => {
@@ -48,7 +49,7 @@ describe('useLocationName', () => {
       () =>
         useLocationName({
           location: { id: 'us_central' },
-        } as any),
+        } as MonitorOverviewItem),
       { wrapper: WrapperWithState }
     );
     expect(result.current).toEqual('US Central');
@@ -88,7 +89,7 @@ describe('useLocationName', () => {
       () =>
         useLocationName({
           location: { id: 'us_west' },
-        } as any),
+        } as MonitorOverviewItem),
       { wrapper: WrapperWithState }
     );
     expect(result.current).toEqual('us_west');
