@@ -9,7 +9,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'visEditor', 'common']);
+  const PageObjects = getPageObjects(['visualize', 'annotationEditor']);
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
 
@@ -87,6 +87,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.deleteItem('to delete 2');
         await listingTable.searchForItemWithName('to delete');
         await listingTable.expectItemsCount('eventAnnotation', 1, 1000);
+      });
+    });
+
+    describe('edit', function () {
+      it('edits group metadata', async function () {
+        await listingTable.clickItemLink('eventAnnotation', 'group 3');
+        PageObjects.annotationEditor.editGroupMetadata({
+          title: 'edited title',
+          description: 'edited description',
+        });
+
+        await listingTable.searchForItemWithName('edited title');
+        await listingTable.expectItemsCount('eventAnnotation', 1);
+
+        await listingTable.searchForItemWithName('edited description');
+        await listingTable.expectItemsCount('eventAnnotation', 1);
+      });
+
+      describe('individual annotations', () => {
+        it('edits an existing annotation', async function () {});
+        it('adds a new annotation', async function () {});
+        it('removes an annotation', async function () {});
+      });
+
+      describe('data view switching', () => {
+        it('recovers from missing data view', () => {});
+        it('recovers from missing field in data view', () => {});
       });
     });
   });
