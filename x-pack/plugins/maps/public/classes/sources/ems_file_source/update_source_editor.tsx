@@ -27,7 +27,8 @@ export function UpdateSourceEditor(props: Props) {
   useEffect(() => {
     let ignore = false;
     setIsLoading(true);
-    props.source.getFields()
+    props.source
+      .getFields()
       .then((nextFields) => {
         if (!ignore) {
           setFields(nextFields);
