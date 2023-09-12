@@ -24,15 +24,17 @@ export const ROWS_HEIGHT_OPTIONS = {
 };
 
 export const defaultMonacoEditorWidth = 370;
-export const defaultTimeColumnWidth = 210;
+export const defaultTimeColumnWidth = 212;
 export const kibanaJSON = 'kibana-json';
 
-export const GRID_STYLE = {
-  border: 'all',
+export const GRID_STYLE: EuiDataGridStyle = {
+  border: 'horizontal',
   fontSize: 's',
-  cellPadding: 's',
-  rowHover: 'none',
-} as EuiDataGridStyle;
+  cellPadding: 'l',
+  rowHover: 'highlight',
+  header: 'underline',
+  stripes: true,
+};
 
 export const toolbarVisibility = {
   showColumnSelector: {

@@ -15,6 +15,7 @@ jest.mock('../../hooks', () => {
     ...jest.requireActual('../../hooks'),
     useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
+    useAgentVersion: jest.fn().mockReturnValue('8.1.0'),
   };
 });
 
