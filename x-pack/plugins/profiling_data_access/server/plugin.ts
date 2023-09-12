@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { ProfilingConfig } from '.';
 import { registerServices } from './services/register_services';
 import { createProfilingEsClient } from './utils/create_profiling_es_client';
@@ -15,7 +21,11 @@ export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugi
 export type ProfilingDataAccessPluginStart = ReturnType<ProfilingDataAccessPlugin['start']>;
 
 export class ProfilingDataAccessPlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext<ProfilingConfig>) {}
+  private readonly logger: Logger;
+
+  constructor(private readonly initializerContext: PluginInitializerContext<ProfilingConfig>) {
+    this.logger = initializerContext.logger.get();
+  }
   public setup(core: CoreSetup) {}
 
   public start(core: CoreStart, plugins: ProfilingPluginStartDeps) {
@@ -38,6 +48,7 @@ export class ProfilingDataAccessPlugin implements Plugin {
 
         return createProfilingEsClient({ esClient });
       },
+      logger: this.logger,
       deps: {
         fleet: plugins.fleet,
         cloud: plugins.cloud,

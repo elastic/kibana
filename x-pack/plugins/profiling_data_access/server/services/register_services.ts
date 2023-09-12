@@ -6,17 +6,19 @@
  */
 
 import { CloudStart } from '@kbn/cloud-plugin/server';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { createFetchFlamechart } from './fetch_flamechart';
+import { createHasSetupService } from './setup';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {
     esClient: ElasticsearchClient;
     useDefaultAuth?: boolean;
   }) => ProfilingESClient;
+  logger: Logger;
   deps: {
     fleet: FleetStartContract;
     cloud: CloudStart;
@@ -25,5 +27,8 @@ export interface RegisterServicesParams {
 }
 
 export function registerServices(params: RegisterServicesParams) {
-  return { fetchFlamechartData: createFetchFlamechart(params) };
+  return {
+    fetchFlamechartData: createFetchFlamechart(params),
+    hasSetup: createHasSetupService(params),
+  };
 }
