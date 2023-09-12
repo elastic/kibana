@@ -7,12 +7,10 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { debounce } from 'lodash';
 import { EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import type { MountPoint } from '@kbn/core/public';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
 import { OpenIncompleteResultsModalButton } from '../../incomplete_results_modal';
@@ -22,27 +20,6 @@ import {
   WarningHandlerCallback,
 } from '../types';
 import { extractWarnings } from './extract_warnings';
-
-const getDebouncedWarning = () => {
-  const addWarning = () => {
-    const { toasts } = getNotifications();
-    return debounce(toasts.addWarning.bind(toasts), 30000, {
-      leading: true,
-    });
-  };
-  const memory: Record<string, ReturnType<typeof addWarning>> = {};
-
-  return (
-    debounceKey: string,
-    title: string,
-    text?: string | MountPoint<HTMLElement> | undefined
-  ) => {
-    memory[debounceKey] = memory[debounceKey] || addWarning();
-    return memory[debounceKey]({ title, text });
-  };
-};
-
-const debouncedIncompleteWarning = getDebouncedWarning();
 
 /**
  * @internal
@@ -82,10 +59,9 @@ export function handleWarnings({
   }
 
   const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
-  debouncedIncompleteWarning(
-    sessionId + incompleteWarning.type,
-    incompleteWarning.message,
-    toMountPoint(
+  getNotifications().toasts.addWarning({
+    title: incompleteWarning.message,
+    text: toMountPoint(
       <EuiTextAlign textAlign="right">
         <OpenIncompleteResultsModalButton
           theme={theme}
@@ -98,7 +74,7 @@ export function handleWarnings({
       </EuiTextAlign>,
       { theme$: theme.theme$ }
     )
-  );
+  });
 }
 
 /**
