@@ -193,10 +193,7 @@ export class ReportingStore {
   public async start() {
     const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
-      if (
-        this.config.statefulSettings.enabled &&
-        (await ilmPolicyManager!.doesIlmPolicyExist())
-      ) {
+      if (this.config.statefulSettings.enabled && (await ilmPolicyManager!.doesIlmPolicyExist())) {
         this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
         return;
       }

@@ -86,8 +86,7 @@ describe('Reporting Config Schema', () => {
   });
 
   it('disables ilm settings in serverless', () => {
-    expect(ConfigSchema.validate({}, { serverless: true }).statefulSettings)
-      .toMatchInlineSnapshot(`
+    expect(ConfigSchema.validate({}, { serverless: true }).statefulSettings).toMatchInlineSnapshot(`
       Object {
         "enabled": false,
       }
