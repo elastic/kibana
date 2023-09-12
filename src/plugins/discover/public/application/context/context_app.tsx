@@ -10,7 +10,8 @@ import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from '
 import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -213,6 +214,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     };
   };
 
+  const titlePadding = useEuiPaddingSize('m');
+
   return (
     <Fragment>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
@@ -233,12 +236,16 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageBody
               panelled
-              paddingSize="s"
+              paddingSize="none"
               className="dscDocsContent"
               panelProps={{ role: 'main' }}
             >
-              <EuiSpacer size="s" />
-              <EuiText data-test-subj="contextDocumentSurroundingHeader">
+              <EuiText
+                data-test-subj="contextDocumentSurroundingHeader"
+                css={css`
+                  padding: ${titlePadding} ${titlePadding} 0;
+                `}
+              >
                 <strong>
                   <FormattedMessage
                     id="discover.context.contextOfTitle"
