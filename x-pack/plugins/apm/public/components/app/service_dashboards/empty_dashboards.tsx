@@ -9,9 +9,12 @@ import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
 import { useTheme } from '../../../hooks/use_theme';
-import { AddButton } from './actions/add_dashboard';
 
-export function EmptyDashboards() {
+interface Props {
+  actions: React.ReactNode;
+}
+
+export function EmptyDashboards({ actions }: Props) {
   const theme = useTheme();
   return (
     <EuiEmptyPrompt
@@ -61,7 +64,7 @@ export function EmptyDashboards() {
           </p>
         </>
       }
-      actions={<AddButton />}
+      actions={actions}
     />
   );
 }
