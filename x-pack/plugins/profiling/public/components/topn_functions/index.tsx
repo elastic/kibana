@@ -264,8 +264,6 @@ export const TopNFunctionsGrid = forwardRef(
       return null;
     }
 
-    const rowCount = topNFunctions?.TopN ? topNFunctions?.TopN.length : totalCount;
-
     return (
       <>
         <EuiDataGrid
@@ -274,7 +272,7 @@ export const TopNFunctionsGrid = forwardRef(
           aria-label="TopN functions"
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
-          rowCount={rowCount > 100 ? 100 : rowCount}
+          rowCount={rows.length}
           renderCellValue={RenderCellValue}
           inMemory={{ level: 'sorting' }}
           sorting={{ columns: [{ id: sortField, direction: sortDirection }], onSort }}
