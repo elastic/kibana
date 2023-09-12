@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { ProfilingConfig } from '.';
 import { registerServices } from './services/register_services';
 import { createProfilingEsClient } from './utils/create_profiling_es_client';
+import { ProfilingPluginStartDeps } from './types';
 
 export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugin['setup']>;
 export type ProfilingDataAccessPluginStart = ReturnType<ProfilingDataAccessPlugin['start']>;
@@ -17,7 +18,7 @@ export class ProfilingDataAccessPlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext<ProfilingConfig>) {}
   public setup(core: CoreSetup) {}
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: ProfilingPluginStartDeps) {
     const config = this.initializerContext.config.get();
 
     const profilingSpecificEsClient = config.elasticsearch
@@ -36,6 +37,11 @@ export class ProfilingDataAccessPlugin implements Plugin {
             : defaultEsClient;
 
         return createProfilingEsClient({ esClient });
+      },
+      deps: {
+        fleet: plugins.fleet,
+        cloud: plugins.cloud,
+        spaces: plugins.spaces,
       },
     });
 
