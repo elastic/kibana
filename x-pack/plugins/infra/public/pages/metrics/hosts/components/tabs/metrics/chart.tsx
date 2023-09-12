@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import type { AssetXYChartProps } from '../../../../../../common/visualizations';
 import { LensChart } from '../../../../../../components/lens';
 import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -15,10 +15,8 @@ import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build'
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
-import { XYChartLayerParams } from '../../../../../../common/visualizations/types';
 
-export interface ChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides' | 'title'> {
-  layers: XYChartLayerParams[];
+export interface ChartProps extends AssetXYChartProps {
   visualOptions?: XYVisualOptions;
 }
 

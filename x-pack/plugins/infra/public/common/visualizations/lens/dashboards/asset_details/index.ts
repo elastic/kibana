@@ -6,10 +6,9 @@
  */
 
 import { hostMetricFlyoutCharts, hostMetricChartsFullPage } from './host/host_metric_charts';
-import { hostKPICharts, KPIChartProps } from './host/host_kpi_charts';
+import { hostKPICharts } from './host/host_kpi_charts';
 import { nginxAccessCharts, nginxStubstatusCharts } from './host/nginx_charts';
 
-export { type KPIChartProps };
 export const assetDetailsDashboards = {
   host: { hostMetricFlyoutCharts, hostMetricChartsFullPage, hostKPICharts },
   nginx: { nginxStubstatusCharts, nginxAccessCharts },

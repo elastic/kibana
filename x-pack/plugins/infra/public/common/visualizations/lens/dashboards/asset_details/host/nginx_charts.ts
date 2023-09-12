@@ -10,7 +10,7 @@ import {
   nginxRequestsPerConnection,
   nginxResponseStatusCodes,
 } from '../metric_charts/nginx';
-import type { XYConfig } from '../metric_charts/types';
+import type { XYConfig } from '../../types';
 
 export const nginxStubstatusCharts: XYConfig[] = [
   nginxActiveConnections,

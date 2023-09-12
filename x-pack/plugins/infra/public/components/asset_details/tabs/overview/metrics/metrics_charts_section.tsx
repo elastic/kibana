@@ -10,8 +10,10 @@ import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import { XY_MISSING_VALUE_DOTTED_LINE_CONFIG } from '../../../../../common/visualizations';
-import type { XYConfig } from '../../../../../common/visualizations/lens/dashboards/asset_details/metric_charts/types';
+import {
+  type XYConfig,
+  XY_MISSING_VALUE_DOTTED_LINE_CONFIG,
+} from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensChart } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';

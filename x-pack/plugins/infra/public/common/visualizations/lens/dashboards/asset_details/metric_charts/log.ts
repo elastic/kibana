@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { hostLensFormulas } from '../../../../constants';
-import type { XYConfig } from './types';
+import type { XYConfig } from '../../types';
 
 export const logRate: XYConfig = {
   id: 'logRate',
