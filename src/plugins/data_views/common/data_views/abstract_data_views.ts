@@ -12,6 +12,8 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { cloneDeep, findIndex } from 'lodash';
+import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
   FieldSpec,
@@ -25,7 +27,6 @@ import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 
 import type { DataViewField } from '../fields';
 
-// copied from data_view
 interface SavedObjectBody {
   fieldAttrs?: string;
   title?: string;
@@ -57,7 +58,6 @@ export abstract class AbstractDataView {
   /**
    * Map of field formats by field name
    */
-  // @ts-expect-error
   public fieldFormatMap: FieldFormatMap;
   /**
    * Only used by rollup indices, used by rollup specific endpoint to load field list.
@@ -73,14 +73,8 @@ export abstract class AbstractDataView {
    */
   public type: string | undefined;
   /**
-   * @deprecated Use `flattenHit` utility method exported from data plugin instead.
-   */
-  // @ts-expect-error
-  public flattenHit: (hit: Record<string, unknown[]>, deep?: boolean) => Record<string, unknown>;
-  /**
    * List of meta fields by name
    */
-  // @ts-expect-error
   public metaFields: string[];
   /**
    * SavedObject version
@@ -93,7 +87,6 @@ export abstract class AbstractDataView {
   /**
    * Array of namespace ids
    */
-  // @ts-expect-error
   public namespaces: string[];
   /**
    * Original saved object body. Used to check for saved object changes.
@@ -110,12 +103,10 @@ export abstract class AbstractDataView {
   /**
    * Map of field attributes by field name. Currently count and customLabel.
    */
-  // @ts-expect-error
   protected fieldAttrs: FieldAttrs;
   /**
    * Map of runtime field definitions by field name
    */
-  // @ts-expect-error
   protected runtimeFieldMap: Record<string, RuntimeFieldSpec>;
   /**
    * Prevents errors when index pattern exists before indices
@@ -133,14 +124,13 @@ export abstract class AbstractDataView {
 
   /** NEW ITEMS */
 
-  protected scriptedFields: FieldSpec[];
+  protected scriptedFields: DataViewFieldBase[];
 
   // HOW IS THIS SAVED
   protected fieldAttrsSet?: Record<string, FieldAttrSet>;
 
-  constructor({ spec, fieldFormats }: AbstractDataViewDeps) {
-    // set dependencies
-    this.fieldFormats = { ...fieldFormats };
+  constructor(config: AbstractDataViewDeps) {
+    const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     this.allowNoIndex = spec?.allowNoIndex || false;
     // CRUD operations on scripted fields need to be examined
@@ -149,6 +139,28 @@ export abstract class AbstractDataView {
       : [];
     // CRUD operations on field attributes need to be examined
     this.fieldAttrsSet = spec?.fieldAttrs;
+
+    // set dependencies
+    this.fieldFormats = { ...fieldFormats };
+    // set config
+    this.shortDotsEnable = shortDotsEnable;
+    this.metaFields = metaFields;
+
+    // set values
+    this.id = spec.id;
+    this.fieldFormatMap = { ...spec.fieldFormats };
+
+    this.version = spec.version;
+
+    this.title = spec.title || '';
+    this.timeFieldName = spec.timeFieldName;
+    this.sourceFilters = [...(spec.sourceFilters || [])];
+    this.type = spec.type;
+    this.typeMeta = spec.typeMeta;
+    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
+    this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
+    this.namespaces = spec.namespaces || [];
+    this.name = spec.name || '';
   }
 
   /**
@@ -294,4 +306,25 @@ export abstract class AbstractDataView {
       name: this.name,
     };
   }
+
+  upsertScriptedFieldInternal = (field: FieldSpec) => {
+    // search for scriped field with same name
+    const findByName = (f: DataViewFieldBase) => f.name === field.name;
+
+    const fieldIndex = findIndex(this.scriptedFields, findByName);
+
+    const scriptedField: DataViewFieldBase = {
+      name: field.name,
+      script: field.script,
+      lang: field.lang,
+      type: field.type,
+      scripted: field.scripted,
+    };
+
+    if (fieldIndex === -1) {
+      this.scriptedFields.push(scriptedField);
+    } else {
+      this.scriptedFields[fieldIndex] = scriptedField;
+    }
+  };
 }

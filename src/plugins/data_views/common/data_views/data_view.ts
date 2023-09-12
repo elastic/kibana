@@ -22,10 +22,11 @@ import type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeType,
+  FieldSpec,
 } from '../types';
-import { flattenHitWrapper } from './flatten_hit';
 import { removeFieldAttrs } from './utils';
 import { AbstractDataView } from './abstract_data_views';
+import { flattenHitWrapper } from './flatten_hit';
 
 interface DataViewDeps {
   spec?: DataViewSpec;
@@ -56,6 +57,10 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * Field list, in extended array format
    */
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
+  /**
+   * @deprecated Use `flattenHit` utility method exported from data plugin instead.
+   */
+  public flattenHit: (hit: Record<string, unknown[]>, deep?: boolean) => Record<string, unknown>;
 
   /**
    * constructor
@@ -64,34 +69,13 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
   constructor(config: DataViewDeps) {
     super(config);
-    const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
+    const { spec = {}, metaFields } = config;
 
-    // set dependencies
-    this.fieldFormats = { ...fieldFormats };
-    // set config
-    this.shortDotsEnable = shortDotsEnable;
-    this.metaFields = metaFields;
-    // initialize functionality
     this.fields = fieldList([], this.shortDotsEnable);
-
     this.flattenHit = flattenHitWrapper(this, metaFields);
 
     // set values
-    this.id = spec.id;
-    this.fieldFormatMap = { ...spec.fieldFormats };
-
-    this.version = spec.version;
-
-    this.title = spec.title || '';
-    this.timeFieldName = spec.timeFieldName;
-    this.sourceFilters = [...(spec.sourceFilters || [])];
     this.fields.replaceAll(Object.values(spec.fields || {}));
-    this.type = spec.type;
-    this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = cloneDeep(spec.fieldAttrs) || {};
-    this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
-    this.namespaces = spec.namespaces || [];
-    this.name = spec.name || '';
   }
 
   /**
@@ -603,4 +587,16 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     return createdField ?? existingField!;
   }
+
+  upsertScriptedField = (field: FieldSpec) => {
+    this.upsertScriptedFieldInternal(field);
+    const fieldExists = !!this.fields.getByName(field.name);
+
+    if (fieldExists) {
+      // oldField = indexPattern.fields.getByName(field.name)!.spec;
+      this.fields.update(field);
+    } else {
+      this.fields.add(field);
+    }
+  };
 }
