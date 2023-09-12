@@ -16,7 +16,12 @@ import {
   SampleDatasetSchema,
 } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getSampleDataInstaller, SAMPLE_DATA_UNINSTALLED_EVENT } from './utils';
+import {
+  getSampleDataInstaller,
+  getSpaceAwareSampleDatasets,
+  getSampleDatasetsWithSpaceAwareSavedObjects,
+  SAMPLE_DATA_UNINSTALLED_EVENT,
+} from './utils';
 import { SampleDataInstallError } from '../errors';
 import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_beats_tutorial';
 
@@ -41,18 +46,22 @@ export function createUninstallRoute(
       const scopedContext = getScopedContext(request);
       const spaceId = getSpaceId(scopedContext);
 
-      const spaceAwareSampleDataset: SampleDatasetSchema | undefined =
-        specProviders[request.params.id]?.(spaceId);
+      const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
 
-      if (!spaceAwareSampleDataset) {
+      if (!sampleDataset) {
         return response.notFound();
       }
-      const mergedSampleDataset = sampleDatasets.map((sampleDataset) =>
-        sampleDataset.id === spaceAwareSampleDataset.id ? spaceAwareSampleDataset : sampleDataset
+      const spaceAwareSampleDatasets = getSpaceAwareSampleDatasets(specProviders, spaceId);
+
+      const spaceAwareSampleDataset = spaceAwareSampleDatasets[request.params.id];
+
+      const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects(
+        sampleDatasets,
+        spaceAwareSampleDataset
       );
       const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: spaceAwareSampleDataset.id,
-        sampleDatasets: mergedSampleDataset,
+        sampleDatasets: sampleDatasetsWithSpaceAwareSavedObjects,
         logger,
         context,
       });

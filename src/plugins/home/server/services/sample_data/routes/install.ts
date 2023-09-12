@@ -16,7 +16,12 @@ import {
   SampleDatasetSchema,
 } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getSampleDataInstaller, SAMPLE_DATA_INSTALLED_EVENT } from './utils';
+import {
+  getSampleDataInstaller,
+  getSampleDatasetsWithSpaceAwareSavedObjects,
+  getSpaceAwareSampleDatasets,
+  SAMPLE_DATA_INSTALLED_EVENT,
+} from './utils';
 import { SampleDataInstallError } from '../errors';
 import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_beats_tutorial';
 
@@ -44,21 +49,23 @@ export function createInstallRoute(
       const spaceId = getSpaceId(scopedContext);
 
       const { params, query } = req;
-      const spaceAwareSampleDataset: SampleDatasetSchema | undefined =
-        specProviders[params.id]?.(spaceId);
-
-      if (!spaceAwareSampleDataset) {
+      const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
+      if (!sampleDataset) {
         return res.notFound();
       }
+      const spaceAwareSampleDatasets = getSpaceAwareSampleDatasets(specProviders, spaceId);
+      const spaceAwareSampleDataset = spaceAwareSampleDatasets[params.id];
 
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
-      const mergedSampleDataset = sampleDatasets.map((sampleDataset) =>
-        sampleDataset.id === spaceAwareSampleDataset.id ? spaceAwareSampleDataset : sampleDataset
+      const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects(
+        sampleDatasets,
+        spaceAwareSampleDataset
       );
+
       const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: spaceAwareSampleDataset.id,
-        sampleDatasets: mergedSampleDataset,
+        sampleDatasets: sampleDatasetsWithSpaceAwareSavedObjects,
         logger,
         context,
       });

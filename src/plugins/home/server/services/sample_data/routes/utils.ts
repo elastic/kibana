@@ -7,7 +7,10 @@
  */
 
 import type { RequestHandlerContext, Logger } from '@kbn/core/server';
-import type { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import type {
+  SampleDatasetProvider,
+  SampleDatasetSchema,
+} from '../lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from '../sample_data_installer';
 import { getUniqueObjectTypes } from '../lib/utils';
 
@@ -51,3 +54,29 @@ export const getSavedObjectsClient = async (
   );
   return getClient({ includedHiddenTypes });
 };
+
+export const getSpaceAwareSampleDatasets = (
+  specProviders: Record<string, SampleDatasetProvider>,
+  spaceId: string
+) =>
+  Object.entries(specProviders).reduce<Record<string, SampleDatasetSchema>>(
+    (acc, [specProviderId, specProvider]) => ({
+      ...acc,
+      [specProviderId]: specProvider(spaceId),
+    }),
+    {}
+  );
+
+export const getSampleDatasetsWithSpaceAwareSavedObjects = (
+  sampleDatasets: SampleDatasetSchema[],
+  spaceAwareSampleDataset: SampleDatasetSchema
+) =>
+  sampleDatasets.map((dataset) => ({
+    ...dataset,
+    savedObjects: dataset.savedObjects.map((so) => {
+      const spaceAwareSavedObject = spaceAwareSampleDataset.savedObjects.find(
+        (spaceAwareSO) => spaceAwareSO.id === so.id
+      );
+      return spaceAwareSavedObject ?? so;
+    }),
+  }));
