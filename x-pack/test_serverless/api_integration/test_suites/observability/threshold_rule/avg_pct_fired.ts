@@ -7,7 +7,7 @@
 
 import { cleanup, generate } from '@kbn/infra-forge';
 import { Aggregators, Comparator } from '@kbn/observability-plugin/common/threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/threshold/threshold_executor';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.rule_type_id',
-          'observability.rules.threshold'
+          'observability.rules.custom_threshold '
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.uuid', ruleId);
         expect(resp.hits.hits[0]._source).property('kibana.space_ids').contain('default');

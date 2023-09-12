@@ -164,7 +164,7 @@ export const buildMetricThresholdAlert = (
       'kibana.alert.rule.execution.uuid': '62dd07ef-ead9-4b1f-a415-7c83d03925f7',
       'kibana.alert.rule.name': 'One condition',
       'kibana.alert.rule.producer': 'observability',
-      'kibana.alert.rule.rule_type_id': 'observability.rules.threshold',
+      'kibana.alert.rule.rule_type_id': 'observability.rules.custom_threshold ',
       'kibana.alert.rule.uuid': '3a1ed8c0-c1a8-11ed-9249-ed6d75986bdc',
       'kibana.space_ids': ['default'],
       'kibana.alert.rule.tags': [],

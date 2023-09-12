@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.revision', 0);
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.rule_type_id',
-          'observability.rules.threshold'
+          'observability.rules.custom_threshold '
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.uuid', ruleId);
         expect(resp.hits.hits[0]._source).property('kibana.space_ids').contain('default');
