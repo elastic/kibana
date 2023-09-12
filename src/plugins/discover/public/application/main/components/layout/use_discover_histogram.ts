@@ -250,7 +250,9 @@ export const useDiscoverHistogram = ({
     }
 
     const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
-      setIsSuggestionLoading(true);
+      if (!skipRefetch.current) {
+        setIsSuggestionLoading(true);
+      }
     });
     const fetchComplete = textBasedFetchComplete$.subscribe(() => {
       setIsSuggestionLoading(false);
