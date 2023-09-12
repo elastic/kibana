@@ -94,7 +94,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
-    class="euiAccordion"
+    class="euiAccordion emotion-euiAccordion"
     data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
@@ -288,7 +288,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
-    class="euiAccordion"
+    class="euiAccordion emotion-euiAccordion"
     data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div
@@ -423,7 +423,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
     style="width: auto; margin-left: -16px; margin-right: -16px;"
   />
   <div
-    class="euiAccordion"
+    class="euiAccordion emotion-euiAccordion"
     data-test-subj="shareReportingAdvancedOptionsButton"
   >
     <div

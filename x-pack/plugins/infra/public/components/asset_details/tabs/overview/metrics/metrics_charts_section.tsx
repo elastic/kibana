@@ -6,18 +6,20 @@
  */
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
-import type { XYConfig } from '../../../../../common/visualizations/lens/dashboards/asset_details/metric_charts/types';
 import { XY_MISSING_VALUE_DOTTED_LINE_CONFIG } from '../../../../../common/visualizations';
+import type { XYConfig } from '../../../../../common/visualizations/lens/dashboards/asset_details/metric_charts/types';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { LensChart } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
-import type { DataViewOrigin } from '../../../types';
 import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
 import { useMetadataStateProviderContext } from '../../../hooks/use_metadata_state';
+import type { DataViewOrigin } from '../../../types';
+import type { OnFilterEvent } from './chart_utils';
+import { extractRangeFromChartFilterEvent } from './chart_utils';
 
 type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
 
@@ -66,6 +68,20 @@ export const ChartGrid = React.memo(
       [setDateRange]
     );
 
+    const handleFilter = useCallback(
+      (event: OnFilterEvent) => {
+        const range = extractRangeFromChartFilterEvent(event);
+
+        if (range === null) {
+          return;
+        }
+
+        setDateRange(range);
+        event.preventDefault();
+      },
+      [setDateRange]
+    );
+
     const chartsToRender = useMemo(
       () =>
         charts.filter(
@@ -93,6 +109,7 @@ export const ChartGrid = React.memo(
               overrides={overrides}
               visualizationType="lnsXY"
               onBrushEnd={handleBrushEnd}
+              onFilter={handleFilter}
             />
           </EuiFlexItem>
         ))}
