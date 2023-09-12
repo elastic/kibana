@@ -15,8 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165629
-  describe.skip('navigation', function () {
+  describe('navigation', function () {
     before(async () => {
       await svlSecNavigation.navigateToLandingPage();
     });
