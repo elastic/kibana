@@ -94,6 +94,7 @@ export function LensEditConfigurationFlyout({
   const onCancel = useCallback(() => {
     const attrs = previousAttributes.current;
     if (attributesChanged) {
+      // needs to be updated with indexPatternId
       updateAll?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
     }
     if (savedObjectId) {
