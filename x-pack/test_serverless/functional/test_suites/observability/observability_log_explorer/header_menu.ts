@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -70,6 +71,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+        });
+      });
+    });
+
+    describe('Add data link', () => {
+      it('should render a button link ', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        expect(await onboardingLink.isDisplayed()).to.be(true);
+      });
+
+      it('should navigate to the observability onboarding overview page', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        onboardingLink.click();
+
+        await retry.try(async () => {
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/app/observabilityOnboarding`);
         });
       });
     });

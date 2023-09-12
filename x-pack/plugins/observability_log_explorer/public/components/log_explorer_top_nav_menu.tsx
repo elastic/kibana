@@ -13,6 +13,7 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import {
   EuiBetaBadge,
+  EuiButton,
   EuiHeaderLink,
   EuiHeaderLinks,
   EuiHeaderSection,
@@ -21,8 +22,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { LogExplorerStateContainer } from '@kbn/log-explorer-plugin/public';
+import {
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+  ObservabilityOnboardingLocatorParams,
+} from '@kbn/observability-onboarding-plugin/public';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
-import { betaBadgeDescription, betaBadgeTitle, discoverLinkTitle } from '../../common/translations';
+import {
+  betaBadgeDescription,
+  betaBadgeTitle,
+  discoverLinkTitle,
+  onboardingLinkTitle,
+} from '../../common/translations';
 
 interface LogExplorerTopNavMenuProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -54,6 +64,7 @@ export const LogExplorerTopNavMenu = ({
         </EuiHeaderSectionItem>
         <EuiHeaderLinks gutterSize="xs">
           <DiscoverLink state$={state$} />
+          <OnboardingLink />
         </EuiHeaderLinks>
       </EuiHeaderSection>
     </HeaderMenuPortal>
@@ -103,3 +114,29 @@ const DiscoverLink = React.memo(
     );
   }
 );
+
+const OnboardingLink = React.memo(() => {
+  const {
+    services: { share },
+  } = useKibanaContextForPlugin();
+
+  const locator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+
+  const navigateToOnboarding = () => {
+    locator?.navigate({});
+  };
+
+  return (
+    <EuiButton
+      onClick={navigateToOnboarding}
+      fill
+      size="s"
+      iconType="indexOpen"
+      data-test-subj="logExplorerOnboardingLink"
+    >
+      {onboardingLinkTitle}
+    </EuiButton>
+  );
+});
