@@ -239,6 +239,48 @@ packageInfoCache.set('profiler_collector-8.9.0-preview', {
   },
 });
 
+packageInfoCache.set('apm-8.9.0-preview', {
+  format_version: '2.7.0',
+  name: 'apm',
+  title: 'APM',
+  version: '8.9.0-preview',
+  license: 'basic',
+  description: 'APM Server integration',
+  type: 'integration',
+  release: 'beta',
+  categories: ['observability'],
+  icons: [],
+  owner: { github: 'elastic/apm-server' },
+  data_streams: [],
+  latestVersion: '8.9.0-preview',
+  status: 'not_installed',
+  assets: {
+    kibana: {
+      csp_rule_template: [],
+      dashboard: [],
+      visualization: [],
+      search: [],
+      index_pattern: [],
+      map: [],
+      lens: [],
+      security_rule: [],
+      ml_module: [],
+      tag: [],
+      osquery_pack_asset: [],
+      osquery_saved_query: [],
+    },
+    elasticsearch: {
+      component_template: [],
+      ingest_pipeline: [],
+      ilm_policy: [],
+      transform: [],
+      index_template: [],
+      data_stream_ilm_policy: [],
+      ml_model: [],
+    },
+  },
+});
+
 describe('storedPackagePoliciesToAgentPermissions()', () => {
   it('Returns `undefined` if there are no package policies', async () => {
     const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, []);
@@ -540,6 +582,55 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           {
             names: ['profiling-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+        ],
+      },
+    });
+  });
+
+  it('returns the correct permissions for the APM package', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: '',
+        enabled: true,
+        package: { name: 'apm', version: '8.9.0-preview', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'pf-elastic-collector',
+            enabled: true,
+            streams: [],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      packagePolicies
+    );
+
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        indices: [
+          {
+            names: ['traces-*', 'logs-*', 'metrics-*'],
+            privileges: [
+              'auto_configure',
+              'read',
+              'create_doc',
+              'create',
+              'write',
+              'index',
+              'view_index_metadata',
+            ],
           },
         ],
       },
