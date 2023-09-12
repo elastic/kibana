@@ -8,5 +8,7 @@
 
 import noResultsIllustrationDark from './src/assets/no_results_dark.svg';
 import noResultsIllustrationLight from './src/assets/no_results_light.svg';
+import dashboardsLight from './src/assets/dashboards_light.svg';
+import dashboardsDark from './src/assets/dashboards_dark.svg';
 
-export { noResultsIllustrationDark, noResultsIllustrationLight };
+export { noResultsIllustrationDark, noResultsIllustrationLight, dashboardsLight, dashboardsDark };
