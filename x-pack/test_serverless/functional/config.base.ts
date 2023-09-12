@@ -62,6 +62,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        advancedSettings: {
+          pathname: '/app/management/kibana/settings',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {

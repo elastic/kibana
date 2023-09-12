@@ -63,6 +63,8 @@ paths:
                 $ref: '#/components/examples/create_index_connector_request'
               createWebhookConnectorRequest:
                 $ref: '#/components/examples/create_webhook_connector_request'
+              createXmattersConnectorRequest:
+                $ref: '#/components/examples/create_xmatters_connector_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -75,6 +77,8 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
                 createWebhookConnectorResponse:
                   $ref: '#/components/examples/create_webhook_connector_response'
+                createXmattersConnectorResponse:
+                  $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
       servers:
@@ -250,6 +254,8 @@ paths:
                 - $ref: '#/components/schemas/update_connector_request_slack_api'
                 - $ref: '#/components/schemas/update_connector_request_slack_webhook'
                 - $ref: '#/components/schemas/update_connector_request_swimlane'
+                - $ref: '#/components/schemas/update_connector_request_teams'
+                - $ref: '#/components/schemas/update_connector_request_xmatters'
             examples:
               updateIndexConnectorRequest:
                 $ref: '#/components/examples/update_index_connector_request'
@@ -1708,7 +1714,13 @@ components:
       title: Connector secrets properties for a Microsoft Teams connector
       description: Defines secrets for connectors when type is `.teams`.
       type: object
-      additionalProperties: true
+      required:
+        - webhookUrl
+      properties:
+        webhookUrl:
+          type: string
+          description: |
+            The URL of the incoming webhook. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
     create_connector_request_teams:
       title: Create Microsoft Teams connector request
       description: The Microsoft Teams connector uses Incoming Webhooks.
@@ -1866,15 +1878,36 @@ components:
         secrets:
           $ref: '#/components/schemas/secrets_properties_webhook'
     config_properties_xmatters:
-      title: Connector request properties for a xMatters connector
+      title: Connector request properties for an xMatters connector
       description: Defines properties for connectors when type is `.xmatters`.
       type: object
-      additionalProperties: true
+      properties:
+        configUrl:
+          description: |
+            The request URL for the Elastic Alerts trigger in xMatters. It is applicable only when `usesBasic` is `true`.
+          type: string
+          nullable: true
+        usesBasic:
+          description: Specifies whether the connector uses HTTP basic authentication (`true`) or URL authentication (`false`).
+          type: boolean
+          default: true
     secrets_properties_xmatters:
       title: Connector secrets properties for an xMatters connector
       description: Defines secrets for connectors when type is `.xmatters`.
       type: object
-      additionalProperties: true
+      properties:
+        password:
+          description: |
+            A user name for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
+          type: string
+        secretsUrl:
+          description: |
+            The request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL. It is applicable only when `usesBasic` is `false`.
+          type: string
+        user:
+          description: |
+            A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
+          type: string
     create_connector_request_xmatters:
       title: Create xMatters connector request
       description: |
@@ -2369,6 +2402,8 @@ components:
         - is_preconfigured
         - name
       properties:
+        config:
+          type: object
         connector_type_id:
           type: string
           description: The type of connector.
@@ -2674,6 +2709,33 @@ components:
           example: my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
+    update_connector_request_teams:
+      title: Update Microsoft Teams connector request
+      type: object
+      required:
+        - name
+        - secrets
+      properties:
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_teams'
+    update_connector_request_xmatters:
+      title: Update xMatters connector request
+      type: object
+      required:
+        - config
+        - name
+        - secrets
+      properties:
+        config:
+          $ref: '#/components/schemas/config_properties_xmatters'
+        name:
+          type: string
+          description: The display name for the connector.
+        secrets:
+          $ref: '#/components/schemas/secrets_properties_xmatters'
     connector_types:
       title: Connector types
       type: string
@@ -3240,6 +3302,15 @@ components:
           crt: QmFnIEF0dH...
           key: LS0tLS1CRUdJ...
           password: my-passphrase
+    create_xmatters_connector_request:
+      summary: Create an xMatters connector with URL authentication.
+      value:
+        name: my-xmatters-connector
+        connector_type_id: .xmatters
+        config:
+          usesBasic: false
+        secrets:
+          secretsUrl: https://example.com?apiKey=xxxxx
     create_index_connector_response:
       summary: A new index connector.
       value:
@@ -3268,6 +3339,19 @@ components:
           headers: null
           hasAuth: true
         connector_type_id: .webhook
+        is_preconfigured: false
+        is_deprecated: false
+        is_missing_secrets: false
+        is_system_action: false
+    create_xmatters_connector_response:
+      summary: A new xMatters connector.
+      value:
+        id: 4d2d8da0-4d1f-11ee-9367-577408be4681
+        name: my-xmatters-connector
+        config:
+          usesBasic: false
+          configUrl: null
+        connector_type_id: .xmatters
         is_preconfigured: false
         is_deprecated: false
         is_missing_secrets: false
