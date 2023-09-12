@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/166033
-  describe.skip('outlier detection saved search creation', function () {
+  describe('outlier detection saved search creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote_small', '@timestamp');
@@ -90,7 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '1mb',
                   'Version',
-                  '8.9.2',
+                  '8.9.3',
                 ],
               },
               {
@@ -174,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '1mb',
                   'Version',
-                  '8.9.2',
+                  '8.9.3',
                 ],
               },
               {
@@ -258,7 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '1mb',
                   'Version',
-                  '8.9.2',
+                  '8.9.3',
                 ],
               },
               {
@@ -343,7 +342,7 @@ export default function ({ getService }: FtrProviderContext) {
                   'Model memory limit',
                   '1mb',
                   'Version',
-                  '8.9.2',
+                  '8.9.3',
                 ],
               },
               {
