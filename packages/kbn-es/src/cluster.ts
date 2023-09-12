@@ -86,8 +86,6 @@ export class Cluster {
 
   /**
    * Builds and installs ES from source
-   * @param options InstallSourceOptions
-   * @returns Promise<{ installPath: string }>
    */
   async installSource(options: InstallSourceOptions) {
     this.log.info(chalk.bold('Installing from source'));
@@ -99,8 +97,6 @@ export class Cluster {
 
   /**
    * Download ES from a snapshot
-   * @param options DownloadSnapshotOptions
-   * @returns Promise<{ downloadPath: string }>
    */
   async downloadSnapshot(options: DownloadSnapshotOptions) {
     this.log.info(chalk.bold('Downloading snapshot'));
@@ -116,8 +112,6 @@ export class Cluster {
 
   /**
    * Download and installs ES from a snapshot
-   * @param options InstallSnapshotOptions
-   * @returns Promise<{ installPath: string }>
    */
   async installSnapshot(options: InstallSnapshotOptions) {
     this.log.info(chalk.bold('Installing from snapshot'));
@@ -133,9 +127,6 @@ export class Cluster {
 
   /**
    * Installs ES from a local tar
-   * @param archivePath ES archive path
-   * @param options InstallArchiveOptions
-   * @returns Promise<{ installPath }>
    */
   async installArchive(archivePath: string, options?: InstallArchiveOptions) {
     this.log.info(chalk.bold('Installing from an archive'));
@@ -151,9 +142,6 @@ export class Cluster {
 
   /**
    * Unpacks a tar or zip file containing the data directory for an ES cluster.
-   * @param installPath
-   * @param archivePath
-   * @param extractDirName by default 'data'
    */
   async extractDataDirectory(installPath: string, archivePath: string, extractDirName = 'data') {
     this.log.info(chalk.bold(`Extracting data directory`));
@@ -173,10 +161,7 @@ export class Cluster {
   }
 
   /**
-   * Starts ES and returns resolved promise once started
-   * @param installPath
-   * @param plugins comma separated list of plugins to install
-   * @param esJavaOpts
+   * Installs comma separated list of ES plugins to the specified path
    */
   async installPlugins(installPath: string, plugins: string, esJavaOpts?: string) {
     const javaOpts = this.getJavaOptions(esJavaOpts);
@@ -211,8 +196,6 @@ export class Cluster {
 
   /**
    * Starts ES and returns resolved promise once started
-   * @param installPath
-   * @param options EsClusterExecOptions
    */
   async start(installPath: string, options: EsClusterExecOptions) {
     // `exec` indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
@@ -259,8 +242,6 @@ export class Cluster {
 
   /**
    * Starts Elasticsearch and waits for Elasticsearch to exit
-   * @param installPath
-   * @param options EsClusterExecOptions
    */
   async run(installPath: string, options: EsClusterExecOptions) {
     // `exec` indents and we wait for our own end condition, so reset the indent level to it's current state after we're done waiting
@@ -280,8 +261,6 @@ export class Cluster {
 
   /**
    * Stops cluster
-   * @param options StopOptions
-   * @returns Promise
    */
   private async stopCluster(options: StopOptions) {
     if (this.stopCalled) {
@@ -330,8 +309,6 @@ export class Cluster {
    * Start the Elasticsearch process (stored at `this.process`)
    * and "pipe" its stdio to `this.log`. Also create `this.outcome`
    * which will be resolved/rejected when the process exits.
-   * @param installPath
-   * @param opts EsClusterExecOptions
    */
   private exec(installPath: string, opts: EsClusterExecOptions) {
     const {
@@ -585,9 +562,7 @@ export class Cluster {
   }
 
   /**
-   * Run an Elasticsearch Serverless Docker cluster
-   * @param options ServerlessOptions
-   * @returns node names
+   * Runs an Elasticsearch Serverless Docker cluster and returns node names
    */
   async runServerless(options: ServerlessOptions) {
     if (this.process || this.outcome) {
@@ -613,7 +588,6 @@ export class Cluster {
 
   /**
    * Run an Elasticsearch Docker container
-   * @param options DockerOptions
    */
   async runDocker(options: DockerOptions) {
     if (this.process || this.outcome) {
