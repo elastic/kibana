@@ -50,7 +50,7 @@ describe(
       login();
     });
 
-    it('gets disabled when any rule selected and enabled after rules unselected', () => {
+    it('gets deactivated when any rule selected and activated after rules unselected', () => {
       visit(DETECTIONS_RULE_MANAGEMENT_URL);
 
       expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
