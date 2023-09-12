@@ -110,7 +110,6 @@ export const DocumentCountWithDualBrush: FC<DocumentCountContentProps> = ({
               indexPatterns={[dataView]}
               displayStyle={'inPage'}
               isClearable={true}
-              customSubmitButton={<div />}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

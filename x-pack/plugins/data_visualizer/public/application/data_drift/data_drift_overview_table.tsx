@@ -48,10 +48,14 @@ export const DataDriftOverviewTable = ({
   status: FETCH_STATUS;
 } & UseTableState<Feature>) => {
   const euiTheme = useCurrentEuiTheme();
-  const colors = {
-    referenceColor: euiTheme.euiColorVis2,
-    comparisonColor: euiTheme.euiColorVis1,
-  };
+
+  const colors = useMemo(
+    () => ({
+      referenceColor: euiTheme.euiColorVis2,
+      comparisonColor: euiTheme.euiColorVis1,
+    }),
+    [euiTheme]
+  );
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -80,14 +84,18 @@ export const DataDriftOverviewTable = ({
         const { featureName } = item;
 
         updatedItemIdToExpandedRowMap[featureName] = (
-          <DataDriftDistributionChart item={item} colors={colors} />
+          <DataDriftDistributionChart
+            item={item}
+            colors={colors}
+            secondaryType={item.secondaryType}
+          />
         );
       }
     });
     setItemIdToExpandedRowMap(updatedItemIdToExpandedRowMap);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [data, colors]);
 
   const columns: Array<EuiBasicTableColumn<Feature>> = [
     {
@@ -182,6 +190,7 @@ export const DataDriftOverviewTable = ({
               data={referenceHistogram}
               color={colors.referenceColor}
               name={referenceDistributionLabel}
+              secondaryType={item.secondaryType}
             />
           </div>
         );
@@ -200,6 +209,7 @@ export const DataDriftOverviewTable = ({
               data={comparisonDistribution}
               color={colors.comparisonColor}
               name={comparisonDistributionLabel}
+              secondaryType={item.secondaryType}
             />
           </div>
         );
@@ -218,6 +228,7 @@ export const DataDriftOverviewTable = ({
               fieldType={item.fieldType}
               data={comparisonDistribution}
               colors={colors}
+              secondaryType={item.secondaryType}
             />
           </div>
         );
@@ -236,7 +247,6 @@ export const DataDriftOverviewTable = ({
   const getCellProps = (item: Feature, column: EuiTableFieldDataColumnType<Feature>) => {
     const { field } = column;
     return {
-      className: 'mlDataDriftOverviewTableCell',
       'data-test-subj': `mlDataDriftOverviewTableCell row-${item.featureName}-column-${String(
         field
       )}`,
@@ -251,7 +261,11 @@ export const DataDriftOverviewTable = ({
       delete itemIdToExpandedRowMapValues[item.featureName];
     } else {
       itemIdToExpandedRowMapValues[item.featureName] = (
-        <DataDriftDistributionChart item={item} colors={colors} />
+        <DataDriftDistributionChart
+          item={item}
+          colors={colors}
+          secondaryType={item.secondaryType}
+        />
       );
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);

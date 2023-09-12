@@ -39,7 +39,7 @@ interface DataDriftViewProps {
   runAnalysisDisabled?: boolean;
   onReset: () => void;
   lastRefresh: number;
-  forceRefresh: () => void;
+  onRefresh: () => void;
   initialSettings: InitialSettings;
 }
 // Data drift view
@@ -51,7 +51,7 @@ export const DataDriftView = ({
   onReset,
   isBrushCleared,
   lastRefresh,
-  forceRefresh,
+  onRefresh,
   initialSettings,
 }: DataDriftViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
@@ -69,7 +69,7 @@ export const DataDriftView = ({
     | undefined
   >();
 
-  const onRefresh = useCallback(() => {
+  const refresh = useCallback(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
     const mergedFields: DataDriftField[] = [];
     if (dataView) {
@@ -109,10 +109,10 @@ export const DataDriftView = ({
           }
         : {}),
     });
-    if (forceRefresh) {
-      forceRefresh();
+    if (onRefresh) {
+      onRefresh();
     }
-  }, [dataView, windowParameters, forceRefresh]);
+  }, [dataView, windowParameters, onRefresh]);
 
   const { result, cancelRequest } = useFetchDataComparisonResult({
     ...fetchInfo,
@@ -186,7 +186,7 @@ export const DataDriftView = ({
         progress={result.loaded}
         progressMessage={result.progressMessage ?? ''}
         isRunning={result.loaded > 0 && result.loaded < 1}
-        onRefresh={onRefresh}
+        onRefresh={refresh}
         onCancel={cancelRequest}
         shouldRerunAnalysis={shouldRerunAnalysis}
         runAnalysisDisabled={!dataView || requiresWindowParameters}

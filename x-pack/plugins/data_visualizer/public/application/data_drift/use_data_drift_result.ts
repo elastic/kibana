@@ -62,7 +62,7 @@ export const getDataComparisonType = (kibanaType: string): DataDriftField['type'
 
 type UseDataSearch = ReturnType<typeof useDataSearch>;
 
-const computeDomain = (comparisonDistribution: ComparisonHistogram[]) => {
+const computeDomain = (comparisonDistribution: Histogram[] | ComparisonHistogram[]) => {
   const domain: NonNullable<Feature['domain']> = {
     x: { min: 0, max: 0 },
     percentage: { min: 0, max: 0 },
@@ -178,37 +178,7 @@ const processDataComparisonResult = (
         ...comparisonHistogram.map((h) => ({ ...h, g: COMPARISON_LABEL })),
       ];
 
-      const domain = {
-        x: { min: 0, max: 0 },
-        percentage: { min: 0, max: 0 },
-        doc_count: { min: 0, max: 0 },
-      };
-      comparisonDistribution.forEach((dist) => {
-        if (isDefined<number>(dist.percentage)) {
-          if (dist.percentage >= domain.percentage.max) {
-            domain.percentage.max = dist.percentage;
-          } else {
-            domain.percentage.min = dist.percentage;
-          }
-        }
-
-        if (isDefined<number>(dist.doc_count)) {
-          if (dist.doc_count >= domain.doc_count.max) {
-            domain.doc_count.max = dist.doc_count;
-          } else {
-            domain.doc_count.min = dist.doc_count;
-          }
-        }
-
-        const parsedKey = typeof dist.key === 'number' ? dist.key : parseFloat(dist.key);
-        if (!isNaN(parsedKey)) {
-          if (parsedKey >= domain.x.max) {
-            domain.x.max = parsedKey;
-          } else {
-            domain.x.min = parsedKey;
-          }
-        }
-      });
+      const domain = computeDomain(comparisonHistogram);
       return {
         featureName,
         secondaryType: data.secondaryType,

@@ -70,6 +70,7 @@ interface Domain {
 export interface Feature {
   featureName: string;
   fieldType: DataDriftField['type'];
+  secondaryType: DataDriftField['secondaryType'];
   driftDetected: boolean;
   similarityTestPValue: number;
   comparisonHistogram: Histogram[];

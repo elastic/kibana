@@ -7,8 +7,9 @@
 
 import { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
-import React, { useMemo } from 'react';
-import { defaultValueFormatter } from './default_value_formatter';
+import React from 'react';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
 import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { NoChartsData } from './no_charts_data';
 import { DATA_COMPARISON_TYPE } from '../constants';
@@ -18,18 +19,18 @@ export const SingleDistributionChart = ({
   data,
   color,
   fieldType,
+  secondaryType,
   name,
 }: {
   data: Histogram[];
   name: string;
+  secondaryType: string;
   color?: SeriesColorAccessor;
   fieldType?: DataDriftField['type'];
   domain?: Feature['domain'];
 }) => {
-  const valueFormatter = useMemo(
-    () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),
-    [fieldType]
-  );
+  const xAxisFormatter = useFieldFormatter(getFieldFormatType(secondaryType));
+  const yAxisFormatter = useFieldFormatter(FIELD_FORMAT_IDS.NUMBER);
 
   if (data.length === 0) return <NoChartsData textAlign="left" />;
 
@@ -41,7 +42,7 @@ export const SingleDistributionChart = ({
       <Axis
         id="vertical"
         position={Position.Left}
-        tickFormat={valueFormatter}
+        tickFormat={yAxisFormatter}
         domain={{ min: 0, max: 1 }}
         hide={true}
       />
@@ -49,8 +50,8 @@ export const SingleDistributionChart = ({
       <Axis
         id="bottom"
         position={Position.Bottom}
-        tickFormat={valueFormatter}
-        labelFormat={valueFormatter}
+        tickFormat={xAxisFormatter}
+        labelFormat={xAxisFormatter}
         hide={true}
       />
 

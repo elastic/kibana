@@ -16,29 +16,29 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { NoChartsData } from './no_charts_data';
 import type { ComparisonHistogram, DataDriftField } from '../types';
 import { DataComparisonChartTooltipBody } from '../data_drift_chart_tooltip_body';
 import { COMPARISON_LABEL, DATA_COMPARISON_TYPE, REFERENCE_LABEL } from '../constants';
-import { defaultValueFormatter } from './default_value_formatter';
+import { getFieldFormatType, useFieldFormatter } from './default_value_formatter';
 
 export const OverlapDistributionComparison = ({
   data,
   colors,
   fieldType,
   fieldName,
+  secondaryType,
 }: {
   data: ComparisonHistogram[];
   colors: { referenceColor: string; comparisonColor: string };
+  secondaryType: string;
   fieldType?: DataDriftField['type'];
   fieldName?: DataDriftField['field'];
 }) => {
-  const valueFormatter = useMemo(
-    () => (fieldType === DATA_COMPARISON_TYPE.NUMERIC ? defaultValueFormatter : undefined),
-    [fieldType]
-  );
-
+  const xAxisFormatter = useFieldFormatter(getFieldFormatType(secondaryType));
+  const yAxisFormatter = useFieldFormatter(FIELD_FORMAT_IDS.NUMBER);
   if (data.length === 0) return <NoChartsData textAlign="left" />;
 
   return (
@@ -47,15 +47,15 @@ export const OverlapDistributionComparison = ({
       <Axis
         id="vertical"
         position={Position.Left}
-        tickFormat={valueFormatter}
+        tickFormat={yAxisFormatter}
         domain={{ min: 0, max: 1 }}
         hide={true}
       />
       <Axis
         id="bottom"
         position={Position.Bottom}
-        tickFormat={valueFormatter}
-        labelFormat={valueFormatter}
+        tickFormat={xAxisFormatter}
+        labelFormat={xAxisFormatter}
         hide={true}
       />
 

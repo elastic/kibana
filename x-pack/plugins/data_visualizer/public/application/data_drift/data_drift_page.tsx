@@ -397,7 +397,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 searchString={searchString ?? ''}
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
-                forceRefresh={forceRefresh}
+                onRefresh={forceRefresh}
               />
             </EuiPanel>
           </EuiFlexItem>

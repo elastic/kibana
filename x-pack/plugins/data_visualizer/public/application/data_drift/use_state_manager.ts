@@ -27,7 +27,7 @@ interface StateManagerInitialParams {
 }
 
 export const DataDriftStateManagerContext = createContext<{
-  dataView: DataView | never;
+  dataView: DataView;
   reference: DataDriftStateManager;
   comparison: DataDriftStateManager;
 }>({

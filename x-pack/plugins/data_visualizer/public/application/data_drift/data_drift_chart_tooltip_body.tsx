@@ -17,9 +17,13 @@ import {
   TooltipTableRow,
 } from '@elastic/charts';
 import React from 'react';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { useFieldFormatter } from './charts/default_value_formatter';
 
 const style: TooltipCellStyle = { textAlign: 'right' };
 export const DataComparisonChartTooltipBody: TooltipSpec['body'] = ({ items }) => {
+  const percentFormatter = useFieldFormatter(FIELD_FORMAT_IDS.PERCENT);
+
   const footer =
     items.length > 1 ? (
       <TooltipTableFooter>
@@ -31,7 +35,7 @@ export const DataComparisonChartTooltipBody: TooltipSpec['body'] = ({ items }) =
             {items[1].datum.doc_count - items[0].datum.doc_count}
           </TooltipTableCell>
           <TooltipTableCell style={style}>
-            {`${((items[1].datum.percentage - items[0].datum.percentage) * 100).toFixed(1)}%`}
+            {percentFormatter(items[1].datum.percentage - items[0].datum.percentage)}
           </TooltipTableCell>
         </TooltipTableRow>
       </TooltipTableFooter>
@@ -52,9 +56,7 @@ export const DataComparisonChartTooltipBody: TooltipSpec['body'] = ({ items }) =
             {<TooltipTableColorCell color={color} />}
             <TooltipTableCell style={style}>{label}</TooltipTableCell>
             <TooltipTableCell style={style}>{datum.doc_count}</TooltipTableCell>
-            <TooltipTableCell style={style}>{`${(datum.percentage * 100).toFixed(
-              1
-            )}`}</TooltipTableCell>
+            <TooltipTableCell style={style}>{percentFormatter(datum.percentage)}</TooltipTableCell>
           </TooltipTableRow>
         ))}
       </TooltipTableBody>

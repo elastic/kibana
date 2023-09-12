@@ -6,14 +6,7 @@
  */
 
 import React, { FC, useEffect, useState, useMemo } from 'react';
-import {
-  EuiPageBody,
-  EuiPageSection,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiPageBody, EuiPageSection, EuiButton, EuiPanel } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,71 +40,62 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
   return (
     <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
-        <>
-          <MlPageHeader>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={true}>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-                  defaultMessage="Select data view or saved search"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </MlPageHeader>
-          <EuiPanel hasShadow={false} hasBorder>
-            <SavedObjectFinder
-              key="searchSavedObjectFinder"
-              onChoose={onObjectSelection}
-              showFilter
-              noItemsMessage={i18n.translate(
-                'xpack.ml.newJob.wizard.searchSelection.notFoundLabel',
-                {
-                  defaultMessage: 'No matching data views or saved searches found.',
-                }
-              )}
-              savedObjectMetaData={[
-                {
-                  type: 'search',
-                  getIconForSavedObject: () => 'search',
-                  name: i18n.translate(
-                    'xpack.ml.newJob.wizard.searchSelection.savedObjectType.search',
-                    {
-                      defaultMessage: 'Saved search',
-                    }
-                  ),
-                },
-                {
-                  type: 'index-pattern',
-                  getIconForSavedObject: () => 'indexPatternApp',
-                  name: i18n.translate(
-                    'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
-                    {
-                      defaultMessage: 'Data view',
-                    }
-                  ),
-                },
-              ]}
-              fixedPageSize={20}
-              services={{
-                contentClient: contentManagement.client,
-                uiSettings,
-              }}
+        <MlPageHeader>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+            defaultMessage="Select data view or saved search"
+          />
+        </MlPageHeader>
+        <EuiPanel hasShadow={false} hasBorder>
+          <SavedObjectFinder
+            key="searchSavedObjectFinder"
+            onChoose={onObjectSelection}
+            showFilter
+            noItemsMessage={i18n.translate('xpack.ml.newJob.wizard.searchSelection.notFoundLabel', {
+              defaultMessage: 'No matching data views or saved searches found.',
+            })}
+            savedObjectMetaData={[
+              {
+                type: 'search',
+                getIconForSavedObject: () => 'search',
+                name: i18n.translate(
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.search',
+                  {
+                    defaultMessage: 'Saved search',
+                  }
+                ),
+              },
+              {
+                type: 'index-pattern',
+                getIconForSavedObject: () => 'indexPatternApp',
+                name: i18n.translate(
+                  'xpack.ml.newJob.wizard.searchSelection.savedObjectType.dataView',
+                  {
+                    defaultMessage: 'Data view',
+                  }
+                ),
+              },
+            ]}
+            fixedPageSize={20}
+            services={{
+              contentClient: contentManagement.client,
+              uiSettings,
+            }}
+          >
+            <EuiButton
+              size="m"
+              fill
+              iconType="plusInCircleFilled"
+              onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
+              disabled={!canEditDataView}
             >
-              <EuiButton
-                size="m"
-                fill
-                iconType="plusInCircleFilled"
-                onClick={() => navigateToPath(createPath(ML_PAGES.DATA_DRIFT_CUSTOM))}
-                disabled={!canEditDataView}
-              >
-                <FormattedMessage
-                  id="xpack.ml.dataDrift.createDataViewButton"
-                  defaultMessage="Create a data view"
-                />
-              </EuiButton>
-            </SavedObjectFinder>
-          </EuiPanel>
-        </>
+              <FormattedMessage
+                id="xpack.ml.dataDrift.createDataViewButton"
+                defaultMessage="Create a data view"
+              />
+            </EuiButton>
+          </SavedObjectFinder>
+        </EuiPanel>
       </EuiPageBody>
     </div>
   );
