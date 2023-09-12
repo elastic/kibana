@@ -184,6 +184,7 @@ export const EventAnnotationGroupTableList = ({
   return (
     <>
       <TableListViewTable<EventAnnotationGroupContent>
+        id="eventAnnotation"
         refreshListBouncer={refreshListBouncer}
         tableCaption={i18n.translate('eventAnnotationListing.tableList.listTitle', {
           defaultMessage: 'Annotation Library',
