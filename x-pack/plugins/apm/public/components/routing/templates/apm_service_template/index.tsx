@@ -62,7 +62,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'service-map'
     | 'logs'
     | 'alerts'
-    | 'profiling';
+    | 'profiling'
+    | 'dashboards';
   hidden?: boolean;
 };
 
@@ -411,6 +412,17 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
           })}
         </EuiBadge>
       ),
+    },
+    {
+      key: 'dashboards',
+      href: router.link('/services/{serviceName}/dashboards', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {
+        defaultMessage: 'Dashboards',
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
     },
   ];
 
