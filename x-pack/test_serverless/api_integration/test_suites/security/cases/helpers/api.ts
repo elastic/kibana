@@ -161,6 +161,7 @@ export const postCaseResp = (
   status: CaseStatuses.open,
   updated_by: null,
   category: null,
+  customFields: [],
 });
 
 const findCommon = {
