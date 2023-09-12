@@ -21010,7 +21010,6 @@
     "xpack.lens.indexPattern.percentFormatLabel": "百分比",
     "xpack.lens.indexPattern.percentile": "百分位数",
     "xpack.lens.indexPattern.percentile.documentation.quick": "\n      小于所有文档中出现值的 n% 的最大值。\n      ",
-    "xpack.lens.indexPattern.percentile.errorMessage": "百分位数必须是介于 1 到 99 之间的整数",
     "xpack.lens.indexPattern.percentile.percentileRanksValue": "百分位等级值",
     "xpack.lens.indexPattern.percentile.percentileValue": "百分位数",
     "xpack.lens.indexPattern.percentile.signature": "field: string, [percentile]: number",
