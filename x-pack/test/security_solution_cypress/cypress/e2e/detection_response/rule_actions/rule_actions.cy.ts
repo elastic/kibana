@@ -27,9 +27,10 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Rule actions during detection rule creation',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
   () => {
     const indexConnector = getIndexConnector();
 

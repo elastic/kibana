@@ -967,7 +967,7 @@ export default function ({
   }
 
   function addMethodAutoCompleteSetToContext(context: AutoCompleteContext) {
-    context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
+    context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'].map((m, i) => ({
       name: m,
       score: -i,
       meta: i18n.translate('console.autocomplete.addMethodMetaText', { defaultMessage: 'method' }),
