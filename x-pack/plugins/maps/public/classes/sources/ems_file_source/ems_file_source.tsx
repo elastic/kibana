@@ -66,16 +66,8 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     super(EMSFileSource.createDescriptor(descriptor));
     this._descriptor = EMSFileSource.createDescriptor(descriptor);
     this._tooltipFields = this._descriptor.tooltipProperties.map((propertyKey) =>
-      this.createField({ fieldName: propertyKey })
+      this.getFieldByName(propertyKey)
     );
-  }
-
-  createField({ fieldName }: { fieldName: string }): IField {
-    return new EMSFileField({
-      fieldName,
-      source: this,
-      origin: FIELD_ORIGIN.SOURCE,
-    });
   }
 
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
@@ -188,10 +180,22 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     };
   }
 
-  async getLeftJoinFields() {
+  async getFields(): Promise<IField[]> {
     const emsFileLayer = await this.getEMSFileLayer();
     const fields = emsFileLayer.getFieldsInLanguage();
-    return fields.map((f) => this.createField({ fieldName: f.name }));
+    return fields.map((f) => this.getFieldByName(f.name));
+  }
+
+  getFieldByName(fieldName: string): IField | null {
+    return new EMSFileField({
+      fieldName,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE,
+    });
+  }
+
+  async getLeftJoinFields() {
+    return this.getFields();
   }
 
   hasTooltipProperties() {

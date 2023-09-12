@@ -113,7 +113,6 @@ export interface IVectorSource extends ISource {
    */
   getSyncMeta(dataFilters: DataFilters): object | null;
 
-  createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
@@ -141,14 +140,6 @@ export interface IVectorSource extends ISource {
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   isMvt() {
     return false;
-  }
-
-  createField({ fieldName }: { fieldName: string }): IField {
-    throw new Error('Not implemented');
-  }
-
-  getFieldByName(fieldName: string): IField | null {
-    return this.createField({ fieldName });
   }
 
   isFilterByMapBounds() {

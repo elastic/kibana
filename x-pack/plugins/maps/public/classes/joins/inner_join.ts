@@ -62,7 +62,7 @@ export class InnerJoin {
     this._descriptor = joinDescriptor;
     this._rightSource = createJoinSource(this._descriptor.right);
     this._leftField = joinDescriptor.leftField
-      ? leftSource.createField({ fieldName: joinDescriptor.leftField })
+      ? leftSource.getFieldByName(joinDescriptor.leftField)
       : undefined;
   }
 
