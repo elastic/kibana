@@ -135,7 +135,7 @@ export const DataDriftIndexPatternsPicker: FC = () => {
   useEffect(() => {
     let unmounted = false;
     const getDataViewEditorService = async () => {
-      if (!unmounted && http && dataViews && dataViewEditorServiceFactory) {
+      if (http && dataViews && dataViewEditorServiceFactory) {
         const { DataViewEditorService } = await dataViewEditorServiceFactory();
         const referenceDataViewEditorService = new DataViewEditorService({
           // @ts-expect-error Mismatch in DataViewsServicePublic import, but should be same
@@ -157,10 +157,12 @@ export const DataDriftIndexPatternsPicker: FC = () => {
           },
           requireTimestampField: false,
         });
-        setDataViewEditorServices({
-          referenceDataViewEditorService,
-          comparisonDataViewEditorService,
-        });
+        if (!unmounted) {
+          setDataViewEditorServices({
+            referenceDataViewEditorService,
+            comparisonDataViewEditorService,
+          });
+        }
       }
     };
     getDataViewEditorService();
