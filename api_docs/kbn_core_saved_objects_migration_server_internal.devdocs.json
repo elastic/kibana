@@ -843,6 +843,8 @@
           "IndexNotGreenTimeout",
           " | ",
           "ClusterShardLimitExceeded",
+          " | ",
+          "OperationNotSupported",
           ", ",
           "AcknowledgeResponse",
           ">"
