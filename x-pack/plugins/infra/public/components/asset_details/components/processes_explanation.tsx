@@ -22,7 +22,7 @@ const ProcessesExplanationTooltipContent = React.memo(() => {
   };
 
   return (
-    <EuiText size="s" onClick={onClick} style={{ width: 300 }}>
+    <EuiText size="xs" onClick={onClick} style={{ width: 300 }}>
       <p>
         <FormattedMessage
           id="xpack.infra.assetDetails.processes.tooltip.explanationLabel"
@@ -100,7 +100,6 @@ export const ProcessesExplanationMessage = () => {
           iconSize="s"
           iconColor="subdued"
           icon="iInCircle"
-          panelPaddingSize="m"
           data-test-subj="infraAssetDetailsProcessesPopoverButton"
         >
           <ProcessesExplanationTooltipContent />
