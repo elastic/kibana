@@ -147,10 +147,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // eslint-disable-next-line ban/ban
-    describe.only('Alert summary widget component', () => {
+    describe('Alert summary widget component', () => {
       before(async () => {
-        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
+        await retry.waitFor(
+          'Rule details to be visible',
+          async () => await testSubjects.exists('ruleDetails')
+        );
       });
 
       it('shows component on the rule details page', async () => {
