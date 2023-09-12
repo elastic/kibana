@@ -39,7 +39,7 @@ cat << EOT | buildkite-agent annotate --style "success"
   Promotion successful!
   New image: $TARGET_IMAGE
   Source image: $SOURCE_IMAGE
-  ElasticSearch commit: $ELASTIC_COMMIT_HASH (https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH)
+  Elasticsearch commit: $ELASTIC_COMMIT_HASH (https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH)
 EOT
 
 docker logout docker.elastic.co
