@@ -17,9 +17,9 @@ if (!global.URL.hasOwnProperty('createObjectURL')) {
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!global.hasOwnProperty('TextEncoder')) {
-  const { TextEncoder, TextDecoder } = require('util');
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
+  const textEncoding = require('text-encoding-utf-8');
+  global.TextEncoder = textEncoding.TextEncoder;
+  global.TextDecoder = textEncoding.TextDecoder;
 }
 
 // NOTE: We should evaluate removing this once we upgrade to Node 18 and find out if loaders.gl already fixed this usage
