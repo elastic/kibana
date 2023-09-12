@@ -1,0 +1,482 @@
+{
+  "id": "@kbn/management-settings-components-field-input",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-input",
+        "id": "def-common.FieldInput",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldInput",
+        "description": [
+          "\nAn input that allows one to change a setting in Kibana.\n"
+        ],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">(props: ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.FieldInputProps",
+            "text": "FieldInputProps"
+          },
+          "<T>) => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInput.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "The props for the {@link FieldInput } component."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-common.FieldInputProps",
+                "text": "FieldInputProps"
+              },
+              "<T>"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-input",
+        "id": "def-common.FieldInputKibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldInputKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
+        ],
+        "path": "packages/kbn-management/settings/components/field_input/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputKibanaDependencies.toasts",
+            "type": "Object",
+            "tags": [],
+            "label": "toasts",
+            "description": [
+              "The portion of the {@link ToastsStart} contract used by this component."
+            ],
+            "signature": [
+              "{ addDanger: (toastOrTitle: ",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.ToastInput",
+                "text": "ToastInput"
+              },
+              ", options?: any) => ",
+              {
+                "pluginId": "@kbn/core-notifications-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+                "section": "def-common.Toast",
+                "text": "Toast"
+              },
+              "; }"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-input",
+        "id": "def-common.FieldInputProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldInputProps",
+        "description": [
+          "\nThe props that are passed to the {@link FieldInput} component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.FieldInputProps",
+            "text": "FieldInputProps"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputProps.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "The {@link FieldDefinition} for the component."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<T, ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.KnownTypeToValue",
+                "text": "KnownTypeToValue"
+              },
+              "<T> | null>"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputProps.unsavedChange",
+            "type": "Object",
+            "tags": [],
+            "label": "unsavedChange",
+            "description": [
+              "An {@link UnsavedFieldChange} for the component, if any."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [
+              "The `onChange` handler for the input."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-common.OnChangeParams",
+                "text": "OnChangeParams"
+              },
+              "<T>) => void"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-input",
+                "id": "def-common.FieldInputProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/management-settings-components-field-input",
+                    "scope": "common",
+                    "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                    "section": "def-common.OnChangeParams",
+                    "text": "OnChangeParams"
+                  },
+                  "<T>"
+                ],
+                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputProps.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "True if the input is disabled, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputProps.isInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [
+              "True if the value within the input is invalid, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-input",
+        "id": "def-common.FieldInputServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldInputServices",
+        "description": [
+          "\nContextual services used by a {@link FieldInput} component."
+        ],
+        "path": "packages/kbn-management/settings/components/field_input/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.FieldInputServices.showDanger",
+            "type": "Function",
+            "tags": [],
+            "label": "showDanger",
+            "description": [
+              "\nDisplays a danger toast message."
+            ],
+            "signature": [
+              "(value: string) => void"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-input",
+                "id": "def-common.FieldInputServices.showDanger.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [
+                  "The message to display."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-input",
+        "id": "def-common.OnChangeParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "OnChangeParams",
+        "description": [
+          "\nParameters for the {@link OnChangeFn} handler."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.OnChangeParams",
+            "text": "OnChangeParams"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-management/settings/components/field_input/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.OnChangeParams.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "The value provided to the handler."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.KnownTypeToValue",
+                "text": "KnownTypeToValue"
+              },
+              "<T> | null | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.OnChangeParams.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "An error message, if one occurred."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.OnChangeParams.isInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [
+              "True if the format of a change is not valid, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-input",
+        "id": "def-common.OnChangeFn",
+        "type": "Type",
+        "tags": [],
+        "label": "OnChangeFn",
+        "description": [
+          "\nA function that is called when the value of a {@link FieldInput} changes."
+        ],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.OnChangeParams",
+            "text": "OnChangeParams"
+          },
+          "<T>) => void"
+        ],
+        "path": "packages/kbn-management/settings/components/field_input/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-input",
+            "id": "def-common.OnChangeFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [
+              "The {@link OnChangeParams } parameters passed to the handler."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-components-field-input",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+                "section": "def-common.OnChangeParams",
+                "text": "OnChangeParams"
+              },
+              "<T>"
+            ],
+            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

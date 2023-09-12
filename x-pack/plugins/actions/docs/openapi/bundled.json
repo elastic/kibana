@@ -485,6 +485,9 @@
                     "$ref": "#/components/schemas/update_connector_request_swimlane"
                   },
                   {
+                    "$ref": "#/components/schemas/update_connector_request_teams"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_xmatters"
                   }
                 ]
@@ -2558,7 +2561,15 @@
         "title": "Connector secrets properties for a Microsoft Teams connector",
         "description": "Defines secrets for connectors when type is `.teams`.",
         "type": "object",
-        "additionalProperties": true
+        "required": [
+          "webhookUrl"
+        ],
+        "properties": {
+          "webhookUrl": {
+            "type": "string",
+            "description": "The URL of the incoming webhook. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.\n"
+          }
+        }
       },
       "create_connector_request_teams": {
         "title": "Create Microsoft Teams connector request",
@@ -3459,6 +3470,9 @@
           "name"
         ],
         "properties": {
+          "config": {
+            "type": "object"
+          },
           "connector_type_id": {
             "type": "string",
             "description": "The type of connector.",
@@ -3913,6 +3927,23 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_swimlane"
+          }
+        }
+      },
+      "update_connector_request_teams": {
+        "title": "Update Microsoft Teams connector request",
+        "type": "object",
+        "required": [
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_teams"
           }
         }
       },

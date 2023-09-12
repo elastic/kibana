@@ -480,8 +480,13 @@ packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
+packages/kbn-management/settings/components/field_input @elastic/platform-deployment-management @elastic/appex-sharedux
+packages/kbn-management/settings/components/field_row @elastic/platform-deployment-management @elastic/appex-sharedux
+packages/kbn-management/settings/field_definition @elastic/platform-deployment-management @elastic/appex-sharedux
 packages/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/platform-deployment-management
 packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/platform-deployment-management
+packages/kbn-management/settings/types @elastic/platform-deployment-management @elastic/appex-sharedux
+packages/kbn-management/settings/utilities @elastic/platform-deployment-management @elastic/appex-sharedux
 packages/kbn-management/storybook/config @elastic/platform-deployment-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-app-services
 packages/kbn-mapbox-gl @elastic/kibana-gis
@@ -548,6 +553,7 @@ examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling_data_access @elastic/profiling-ui
 x-pack/plugins/profiling @elastic/profiling-ui
+packages/kbn-profiling-utils @elastic/profiling-ui
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
 packages/react/kibana_context/common @elastic/appex-sharedux
@@ -1017,7 +1023,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /.buildkite/ @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
-catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
+/catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
 
 # Appex QA
 /src/dev/code_coverage @elastic/appex-qa
