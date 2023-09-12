@@ -9,6 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { uniq, isEmpty } from 'lodash';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import { getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
@@ -20,9 +21,7 @@ interface IOption {
 
 interface Props {
   field: FieldHook;
-  euiFieldProps: {
-    [key: string]: any;
-  };
+  euiFieldProps: EuiComboBoxProps<string>;
   [key: string]: any;
 }
 

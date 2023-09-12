@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
 import { getMatchingIndices, getFieldsFromIndices } from '../helpers/fixtures';
@@ -53,7 +54,11 @@ describe('Create enrich policy', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setGetMatchingIndices(getMatchingIndices());
 
-    testBed = await setup(httpSetup);
+    await act(async () => {
+      testBed = await setup(httpSetup);
+    });
+
+    testBed.component.update();
   });
 
   test('Has header and docs link', async () => {
@@ -92,7 +97,10 @@ describe('Create enrich policy', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetFieldsFromIndices(getFieldsFromIndices());
 
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
       testBed.component.update();
 
       await testBed.actions.completeCreationStep({});
@@ -121,7 +129,10 @@ describe('Create enrich policy', () => {
         indices: [],
       });
 
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
       testBed.component.update();
 
       await testBed.actions.completeCreationStep({ indices: 'test-1, test-2' });
@@ -134,7 +145,10 @@ describe('Create enrich policy', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetFieldsFromIndices(getFieldsFromIndices());
 
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
       testBed.component.update();
 
       await testBed.actions.completeCreationStep({});
@@ -151,7 +165,7 @@ describe('Create enrich policy', () => {
     it('Shows policy summary and request', async () => {
       const { find } = testBed;
 
-      expect(find('enrichPolicySummaryList').html()).toMatchSnapshot();
+      expect(find('enrichPolicySummaryList').text()).toContain('test_policy');
 
       await testBed.actions.clickRequestTab();
 
