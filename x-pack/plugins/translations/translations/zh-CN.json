@@ -665,7 +665,6 @@
     "core.deprecations.elasticsearchUsername.manualSteps2": "将“elasticsearch.serviceAccountToken”设置添加到 kibana.yml。",
     "core.deprecations.elasticsearchUsername.manualSteps3": "从 kibana.yml 中移除“elasticsearch.username”和“elasticsearch.password”。",
     "core.deprecations.noCorrectiveAction": "无法自动解决此弃用。",
-    "core.euiAccordion.isLoading": "正在加载",
     "core.euiAutoRefresh.autoRefreshLabel": "自动刷新",
     "core.euiAutoRefresh.buttonLabelOff": "自动刷新已关闭",
     "core.euiBasicTable.noItemsMessage": "找不到项目",

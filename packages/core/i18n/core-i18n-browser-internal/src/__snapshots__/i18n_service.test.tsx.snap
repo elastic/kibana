@@ -7,7 +7,7 @@ exports[`#start() returns \`Context\` component 1`] = `
       Object {
         "mapping": Object {
           "euiAbsoluteTab.dateFormatError": [Function],
-          "euiAccordion.isLoading": "Loading",
+          "euiAccordionChildrenLoading.message": "Loading",
           "euiAutoRefresh.autoRefreshLabel": "Auto refresh",
           "euiAutoRefresh.buttonLabelOff": "Auto refresh is off",
           "euiAutoRefresh.buttonLabelOn": [Function],
@@ -153,6 +153,8 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiFormControlLayoutDelimited.delimiterLabel": "to",
           "euiFullscreenSelector.fullscreenButton": "Enter fullscreen",
           "euiFullscreenSelector.fullscreenButtonActive": "Exit fullscreen",
+          "euiGlobalToastList.clearAllToastsButtonAriaLabel": "Clear all toast notifications",
+          "euiGlobalToastList.clearAllToastsButtonDisplayText": "Clear all",
           "euiHeaderLinks.appNavigation": "App menu",
           "euiHeaderLinks.openNavigationMenu": "Open menu",
           "euiHue.label": "Select the HSV color mode \\"hue\\" value",
