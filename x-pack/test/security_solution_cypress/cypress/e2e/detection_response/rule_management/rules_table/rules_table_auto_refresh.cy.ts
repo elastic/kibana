@@ -30,7 +30,7 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
 
-const ONE_MINUTE_IN_MS = 60000; // Corresponds to the auto-refresh interval
+const DEFAULT_RULE_REFRESH_INTERVAL_VALUE_MS = 60000;
 const NUM_OF_TEST_RULES = 6;
 
 describe(
@@ -79,14 +79,14 @@ describe(
 
       it('refreshes rules after refresh interval has passed', () => {
         cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
-        cy.tick(ONE_MINUTE_IN_MS);
+        cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE_MS);
         cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('be.visible');
 
         cy.contains(REFRESH_RULES_STATUS, 'Updated now');
       });
 
       it('refreshes rules on window focus', () => {
-        cy.tick(ONE_MINUTE_IN_MS / 2);
+        cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE_MS / 2);
 
         cy.window().trigger('blur');
         cy.window().trigger('focus');
@@ -99,10 +99,9 @@ describe(
       beforeEach(() => {
         mockGlobalClock();
         visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-        // waitForPageToBeLoaded();
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, NUM_OF_TEST_RULES);
         disableAutoRefresh();
-        cy.tick(ONE_MINUTE_IN_MS * 2); // Make sure enough time has passed to verify auto-refresh doesn't happen
+        cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE_MS * 2); // Make sure enough time has passed to verify auto-refresh doesn't happen
       });
 
       it('does NOT refresh rules after refresh interval has passed', () => {
@@ -113,13 +112,15 @@ describe(
         cy.window().trigger('blur');
         cy.window().trigger('focus');
 
-        // Without a delay here the following expectations pass even it shouldn't happen
-        // 'focus' event gets handled in async way so the status gets updated with some delay
+        // We need to make sure window focus event doesn't cause refetching. Without some delay
+        // the following expectations always pass even. It happens since 'focus' event gets handled
+        // in an async way so the status text is updated with some delay.
         // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(1000);
 
-        cy.get(REFRESH_RULES_STATUS).should('not.contain', 'Updating...');
-        cy.contains(REFRESH_RULES_STATUS, 'Updated 2 minutes ago');
+        // By using a custom timeout make sure it doesn't wait too long due to global timeout configuration
+        // so the expected text appears after a refresh and the test passes while it shouldn't.
+        cy.contains(REFRESH_RULES_STATUS, 'Updated 2 minutes ago', { timeout: 10000 });
       });
 
       it('does NOT get enabled after rules were unselected', () => {
@@ -145,7 +146,7 @@ describe(
 
         // mock 1 minute passing to make sure refresh is not conducted
         cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
-        cy.tick(ONE_MINUTE_IN_MS * 2); // Make sure enough time has passed
+        cy.tick(DEFAULT_RULE_REFRESH_INTERVAL_VALUE_MS * 2); // Make sure enough time has passed
         cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
 
         // ensure rule is still selected
