@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsModelUnsafeTransformChange } from '@kbn/core-saved-objects-server';
 import { logger } from 'elastic-apm-node';
-import { getCreateEsoModelVersion } from './create_model_version';
 
-import { EncryptedSavedObjectTypeRegistration, EncryptionError, EncryptionErrorOperation } from './crypto';
+import { SavedObjectsModelUnsafeTransformChange } from '@kbn/core-saved-objects-server';
+
+import { getCreateEsoModelVersion } from './create_model_version';
+import {
+  EncryptedSavedObjectTypeRegistration,
+  EncryptionError,
+  EncryptionErrorOperation,
+} from './crypto';
 import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 
 afterEach(() => {
@@ -17,12 +22,15 @@ afterEach(() => {
 });
 
 describe('create ESO model version', () => {
-  const inputType : EncryptedSavedObjectTypeRegistration = { type: 'known-type-1', attributesToEncrypt: new Set(['firstAttr']) };
-  const outputType : EncryptedSavedObjectTypeRegistration = {
+  const inputType: EncryptedSavedObjectTypeRegistration = {
+    type: 'known-type-1',
+    attributesToEncrypt: new Set(['firstAttr']),
+  };
+  const outputType: EncryptedSavedObjectTypeRegistration = {
     type: 'known-type-1',
     attributesToEncrypt: new Set(['firstAttr', 'secondAttr']),
   };
-  const context = { log: logger, modelVersion: 1 }
+  const context = { log: logger, modelVersion: 1 };
   const encryptionSavedObjectService = encryptedSavedObjectsServiceMock.create();
 
   it('throws if the types are not compatible', async () => {
@@ -35,7 +43,9 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } },
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
         },
@@ -70,32 +80,32 @@ describe('create ESO model version', () => {
             type: 'unsafe_transform',
             transformFn: (document) => {
               document.attributes.one = '1';
-              return { document }
+              return { document };
             },
           },
           {
             type: 'unsafe_transform',
             transformFn: (document) => {
               document.attributes.two = '2';
-              return { document: {...document, new_prop_1: 'new prop 1' } }
+              return { document: { ...document, new_prop_1: 'new prop 1' } };
             },
           },
           {
             type: 'unsafe_transform',
             transformFn: (document) => {
               document.attributes.three = '3';
-              return { document }
+              return { document };
             },
           },
           {
             type: 'unsafe_transform',
             transformFn: (document) => {
-              document.attributes.four = '4'
-              return { document: {...document, new_prop_2: 'new prop 2' } }
+              document.attributes.four = '4';
+              return { document: { ...document, new_prop_2: 'new prop 2' } };
             },
           },
         ],
-      }
+      },
     });
 
     const attributes = {
@@ -106,7 +116,9 @@ describe('create ESO model version', () => {
     encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
 
     // There should be only one unsafe transform now
-    const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+    const unsafeTransforms = esoModelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
     expect(unsafeTransforms.length === 1);
 
     const result = unsafeTransforms[0].transformFn(
@@ -130,9 +142,9 @@ describe('create ESO model version', () => {
         one: '1',
         two: '2',
         three: '3',
-        four: '4'
-      }
-    })
+        four: '4',
+      },
+    });
   });
 
   describe('transformation on an existing type', () => {
@@ -151,10 +163,12 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } },
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
-        }
+        },
       });
 
       const attributes = {
@@ -164,7 +178,9 @@ describe('create ESO model version', () => {
       encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
       encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       unsafeTransforms[0].transformFn(
         {
@@ -211,11 +227,13 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } },
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
         },
-        shouldTransformIfDecryptionFails: false
+        shouldTransformIfDecryptionFails: false,
       });
 
       const attributes = {
@@ -226,7 +244,9 @@ describe('create ESO model version', () => {
         throw new Error('decryption failed!');
       });
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       expect(() => {
         unsafeTransforms[0].transformFn(
@@ -268,11 +288,13 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } },
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
         },
-        shouldTransformIfDecryptionFails: true
+        shouldTransformIfDecryptionFails: true,
       });
 
       const attributes = {
@@ -283,7 +305,9 @@ describe('create ESO model version', () => {
         throw new Error('decryption failed!');
       });
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       expect(() => {
         unsafeTransforms[0].transformFn(
@@ -326,11 +350,13 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } },
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
         },
-        shouldTransformIfDecryptionFails: true
+        shouldTransformIfDecryptionFails: true,
       });
 
       const attributes = {
@@ -354,7 +380,9 @@ describe('create ESO model version', () => {
         attributes: strippedAttributes,
       });
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       unsafeTransforms[0].transformFn(
         {
@@ -415,7 +443,9 @@ describe('create ESO model version', () => {
 
       encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       expect(() => {
         unsafeTransforms[0].transformFn(
@@ -463,7 +493,7 @@ describe('create ESO model version', () => {
             },
           ],
         },
-        shouldTransformIfDecryptionFails: true
+        shouldTransformIfDecryptionFails: true,
       });
 
       const attributes = {
@@ -472,7 +502,9 @@ describe('create ESO model version', () => {
 
       encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       expect(() => {
         unsafeTransforms[0].transformFn(
@@ -514,7 +546,9 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } },
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
         },
@@ -529,7 +563,9 @@ describe('create ESO model version', () => {
         throw new Error('encryption failed!');
       });
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       expect(() => {
         unsafeTransforms[0].transformFn(
@@ -578,11 +614,13 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } },
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
         },
-        shouldTransformIfDecryptionFails: true
+        shouldTransformIfDecryptionFails: true,
       });
 
       const attributes = {
@@ -594,7 +632,9 @@ describe('create ESO model version', () => {
         throw new Error('encryption failed!');
       });
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       expect(() => {
         unsafeTransforms[0].transformFn(
@@ -632,9 +672,7 @@ describe('create ESO model version', () => {
   describe('transformation from a legacy type', () => {
     it('uses the input type for decryption', async () => {
       const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
-      const instantiateServiceWithLegacyType = jest.fn(() =>
-        serviceWithLegacyType
-      );
+      const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
 
       const mvCreator = getCreateEsoModelVersion(
         encryptionSavedObjectService,
@@ -646,7 +684,9 @@ describe('create ESO model version', () => {
           changes: [
             {
               type: 'unsafe_transform',
-              transformFn: (document) => { return { document } }
+              transformFn: (document) => {
+                return { document };
+              },
             },
           ],
         },
@@ -660,7 +700,9 @@ describe('create ESO model version', () => {
       serviceWithLegacyType.decryptAttributesSync.mockReturnValueOnce(attributes);
       encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
 
-      const unsafeTransforms = esoModelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoModelVersion.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       unsafeTransforms[0].transformFn(
         {
@@ -721,7 +763,7 @@ describe('create ESO model version', () => {
                   document.attributes.encryptedAttr = document.attributes.nonEncryptedAttr;
                   delete document.attributes.nonEncryptedAttr;
                 }
-                return { document }
+                return { document };
               },
             },
           ],
@@ -747,7 +789,9 @@ describe('create ESO model version', () => {
         encryptedAttr: `#####`,
       });
 
-      const unsafeTransforms = esoMv.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
+      const unsafeTransforms = esoMv.changes.filter(
+        (change) => change.type === 'unsafe_transform'
+      ) as SavedObjectsModelUnsafeTransformChange[];
       expect(unsafeTransforms.length === 1);
       const result = unsafeTransforms[0].transformFn(
         {

@@ -12,8 +12,11 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
-import { getCreateMigration, type CreateEncryptedSavedObjectsMigrationFn} from './create_migration';
-import { getCreateEsoModelVersion, type CreateEsoModelVersionFn } from './create_model_version';
+import {
+  type CreateEncryptedSavedObjectsMigrationFn,
+  getCreateMigration,
+} from './create_migration';
+import { type CreateEsoModelVersionFn, getCreateEsoModelVersion } from './create_model_version';
 import type { EncryptedSavedObjectTypeRegistration } from './crypto';
 import {
   EncryptedSavedObjectsService,
