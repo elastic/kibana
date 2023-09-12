@@ -1484,4 +1484,48 @@ export const tasks: TelemetryTask[] = [
       };
     },
   },
+  {
+    name: 'top_traces',
+    executor: async ({ indices, telemetryClient }) => {
+      const response = await telemetryClient.search({
+        index: indices.transaction,
+        body: {
+          size: 0,
+          track_total_hits: false,
+          timeout,
+          query: {
+            bool: {
+              filter: [range1d],
+            },
+          },
+          aggs: {
+            top_traces: {
+              terms: {
+                field: 'trace.id',
+                size: 100,
+              },
+            },
+            max: {
+              max_bucket: {
+                buckets_path: 'top_traces>_count',
+              },
+            },
+            median: {
+              percentiles_bucket: {
+                buckets_path: 'top_traces>_count',
+                percents: [50],
+              },
+            },
+          },
+        },
+      });
+
+      return {
+        top_traces: {
+          max: response.aggregations?.max.value ?? 0,
+          median: response.aggregations?.median.values['50.0'] ?? 0,
+        },
+      };
+    },
+  },
 ];
