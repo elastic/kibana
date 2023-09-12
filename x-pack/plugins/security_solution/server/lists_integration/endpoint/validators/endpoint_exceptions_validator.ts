@@ -37,4 +37,24 @@ export class EndpointExceptionsValidator extends BaseValidator {
   async validatePreDeleteItem(): Promise<void> {
     await this.validateHasWritePrivilege();
   }
+
+  async validatePreGetOneItem(): Promise<void> {
+    await this.validateHasReadPrivilege();
+  }
+
+  async validatePreMultiListFind(): Promise<void> {
+    await this.validateHasReadPrivilege();
+  }
+
+  async validatePreExport(): Promise<void> {
+    await this.validateHasReadPrivilege();
+  }
+
+  async validatePreSingleListFind(): Promise<void> {
+    await this.validateHasReadPrivilege();
+  }
+
+  async validatePreGetListSummary(): Promise<void> {
+    await this.validateHasReadPrivilege();
+  }
 }
