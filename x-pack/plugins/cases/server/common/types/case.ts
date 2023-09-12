@@ -51,7 +51,11 @@ export interface CasePersistedAttributes {
   customFields?: CasePersistedCustomFields;
 }
 
-type CasePersistedCustomFields = Array<{ key: string; type: string; field: { value: unknown } }>;
+type CasePersistedCustomFields = Array<{
+  key: string;
+  type: string;
+  field: { value: null | unknown[] };
+}>;
 
 export type CaseTransformedAttributes = CaseAttributes;
 

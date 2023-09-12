@@ -11,6 +11,7 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
@@ -455,6 +456,20 @@ describe('create', () => {
           id: expect.any(String),
           refresh: false,
         })
+      );
+    });
+
+    it('throws error when the customFields array is too long', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill(theCustomFields[0]),
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to create case: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
       );
     });
   });

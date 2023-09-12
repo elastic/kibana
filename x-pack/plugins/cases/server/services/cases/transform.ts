@@ -78,7 +78,9 @@ export function transformUpdateResponseToExternalModel(
       ...(transformedConnector && { connector: transformedConnector }),
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
-      ...(customFields !== undefined && (customFields as unknown as CaseCustomFields)),
+      ...(customFields !== undefined && {
+        customFields: customFields as CaseTransformedAttributes['customFields'],
+      }),
     },
   };
 }
@@ -95,8 +97,7 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;
 } {
-  const { connector, external_service, severity, status, customFields, ...restAttributes } =
-    caseAttributes;
+  const { connector, external_service, severity, status, ...restAttributes } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
 
   const transformedConnector = {
@@ -124,7 +125,6 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       ...transformedExternalService,
       ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
       ...(status && { status: STATUS_EXTERNAL_TO_ESMODEL[status] }),
-      ...(customFields !== undefined && (customFields as unknown as CaseCustomFields)),
     },
     referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };

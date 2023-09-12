@@ -881,7 +881,35 @@ describe('update', () => {
       });
     });
 
-    it('does not throw error with regular customFields', async () => {
+    it('can update customFields', async () => {
+      const customFields = [
+        {
+          key: 'string_custom_field_1',
+          type: 'text' as const,
+          field: { value: ['this is a text field value', 'this is second'] },
+        },
+        {
+          key: 'string_custom_field_2',
+          type: 'text' as const,
+          field: { value: null },
+        },
+        {
+          key: 'boolean_custom_field_1',
+          type: 'toggle' as const,
+          field: { value: [true] },
+        },
+        {
+          key: 'boolean_custom_field_2',
+          type: 'toggle' as const,
+          field: { value: null },
+        },
+        {
+          key: 'list_custom_field_1',
+          type: 'list' as const,
+          field: { value: ['this is a text field value'] },
+        },
+      ];
+
       clientArgs.services.caseService.patchCases.mockResolvedValue({
         saved_objects: [{ ...mockCases[0] }],
       });
@@ -893,39 +921,33 @@ describe('update', () => {
               {
                 id: mockCases[0].id,
                 version: mockCases[0].version ?? '',
-                customFields: [
-                  {
-                    key: 'string_custom_field_1',
-                    type: 'text',
-                    field: { value: ['this is a text field value', 'this is second'] },
-                  },
-                  {
-                    key: 'string_custom_field_2',
-                    type: 'text',
-                    field: { value: null },
-                  },
-                  {
-                    key: 'boolean_custom_field_1',
-                    type: 'toggle',
-                    field: { value: [true] },
-                  },
-                  {
-                    key: 'boolean_custom_field_2',
-                    type: 'toggle',
-                    field: { value: null },
-                  },
-                  {
-                    key: 'list_custom_field_1',
-                    type: 'list',
-                    field: { value: ['this is a text field value'] },
-                  },
-                ],
+                customFields,
               },
             ],
           },
           clientArgs
         )
       ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                customFields,
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
     });
 
     it('throws error when the customFields array is too long', async () => {
