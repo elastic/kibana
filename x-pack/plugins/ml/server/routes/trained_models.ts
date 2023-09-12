@@ -138,9 +138,11 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
 
                 model.pipelines = ingestPipelinesFromModelAliases.reduce<
                   Record<string, PipelineDefinition>
-                >((allPipelines, pipelineDefinitions) => {
-                  for (const [, value] of pipelineDefinitions?.entries()) {
-                    allPipelines = { ...allPipelines, ...(value ?? {}) };
+                >((allPipelines, modelsToPipelines) => {
+                  for (const [, pipelinesObj] of modelsToPipelines?.entries()) {
+                    Object.entries(pipelinesObj).forEach(([pipelineId, pipelineInfo]) => {
+                      allPipelines[pipelineId] = pipelineInfo;
+                    });
                   }
                   return allPipelines;
                 }, {});
