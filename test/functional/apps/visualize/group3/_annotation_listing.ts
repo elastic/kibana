@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'annotationEditor']);
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('annotation listing page', function () {
     before(async function () {
@@ -106,9 +108,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('individual annotations', () => {
-        it('edits an existing annotation', async function () {});
-        it('adds a new annotation', async function () {});
-        it('removes an annotation', async function () {});
+        it('edits an existing annotation', async function () {
+          await listingTable.clickItemLink('eventAnnotation', 'edited title');
+          expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(1);
+
+          await PageObjects.annotationEditor.openAnnotation();
+          await PageObjects.annotationEditor.configureAnnotation({
+            query: 'my query',
+            lineThickness: 5,
+            color: '#FF0000',
+          });
+        });
+
+        it('adds a new annotation', async function () {
+          await PageObjects.annotationEditor.addAnnotation({
+            query: 'other query',
+            lineThickness: 3,
+            color: '#00FF00',
+          });
+
+          retry.try(async () => {
+            expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(2);
+          });
+        });
+
+        it('removes an annotation', async function () {
+          await PageObjects.annotationEditor.removeAnnotation();
+
+          await retry.try(async () => {
+            expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(1);
+          });
+        });
       });
 
       describe('data view switching', () => {

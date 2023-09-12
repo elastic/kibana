@@ -10,6 +10,7 @@ import { FtrService } from '../ftr_provider_context';
 
 export class AnnotationEditorPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly retry = this.ctx.getService('retry');
 
   /**
    * Fills out group metadata
@@ -31,6 +32,51 @@ export class AnnotationEditorPageObject extends FtrService {
       await this.testSubjects.setValue('annotationDataViewSelection', metadata.dataView);
     }
 
+    await this.saveGroup();
+  }
+
+  public async saveGroup() {
     await this.testSubjects.click('saveAnnotationGroup');
+  }
+
+  public async getAnnotationCount() {
+    const triggers = await this.testSubjects.findAll('lns-dimensionTrigger');
+    return triggers.length;
+  }
+
+  public async openAnnotation() {
+    await this.testSubjects.click('lns-dimensionTrigger');
+  }
+
+  public async configureAnnotation(config: {
+    query: string;
+    lineThickness: number;
+    color: string;
+  }) {
+    await this.testSubjects.click('lnsXY_annotation_query');
+
+    const queryInput = await this.testSubjects.find('annotation-query-based-query-input');
+    await queryInput.type(config.query);
+
+    await this.testSubjects.setValue('lnsXYThickness', '' + config.lineThickness);
+
+    await this.testSubjects.setValue(
+      'euiColorPickerAnchor indexPattern-dimension-colorPicker',
+      config.color
+    );
+
+    await this.retry.waitFor('annotation editor UI to close', async () => {
+      await this.testSubjects.click('backToGroupSettings');
+      return !(await this.testSubjects.exists('backToGroupSettings'));
+    });
+  }
+
+  public async addAnnotation(config: { query: string; lineThickness: number; color: string }) {
+    await this.testSubjects.click('addAnnotation');
+    await this.configureAnnotation(config);
+  }
+
+  public async removeAnnotation() {
+    await this.testSubjects.click('indexPattern-dimension-remove');
   }
 }
