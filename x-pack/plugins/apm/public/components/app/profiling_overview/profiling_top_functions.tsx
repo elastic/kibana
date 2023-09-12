@@ -84,7 +84,7 @@ export function ProfilingTopNFunctions({
                 kuery: hostNamesKueryFormat,
               })}
             >
-              {i18n.translate('xpack.apm.profiling.flamegraph.link', {
+              {i18n.translate('xpack.apm.profiling.topnFunctions.link', {
                 defaultMessage: 'Go to Universal Profiling Functions',
               })}
             </EuiLink>
