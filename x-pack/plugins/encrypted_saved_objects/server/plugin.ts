@@ -12,8 +12,8 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
-import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
-import { getCreateMigration } from './create_migration';
+import { getCreateMigration, type CreateEncryptedSavedObjectsMigrationFn} from './create_migration';
+import { getCreateEsoModelVersion, type CreateEsoModelVersionFn } from './create_model_version';
 import type { EncryptedSavedObjectTypeRegistration } from './crypto';
 import {
   EncryptedSavedObjectsService,
@@ -35,6 +35,7 @@ export interface EncryptedSavedObjectsPluginSetup {
   canEncrypt: boolean;
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
+  createModelVersion: CreateEsoModelVersionFn;
 }
 
 export interface EncryptedSavedObjectsPluginStart {
@@ -114,6 +115,18 @@ export class EncryptedSavedObjectsPlugin
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
       createMigration: getCreateMigration(
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService({
+            primaryCrypto,
+            decryptionOnlyCryptos,
+            logger: this.logger,
+          });
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
+      ),
+      createModelVersion: getCreateEsoModelVersion(
         service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService({
