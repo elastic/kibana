@@ -10,6 +10,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
 
 import {
+  calculateEndpointExceptionsPrivilegesFromCapabilities,
   calculatePackagePrivilegesFromCapabilities,
   calculatePackagePrivilegesFromKibanaPrivileges,
 } from './authz';
@@ -68,6 +69,31 @@ describe('fleet authz', () => {
         catalogue: {},
         siem: endpointCapabilities,
         transform: transformCapabilities,
+      });
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('#calculateEndpointExceptionsPrivilegesFromCapabilities', () => {
+    it('calculates endpoint exceptions privileges correctly', () => {
+      const endpointExceptionsCapabilities = {
+        showEndpointExceptions: true,
+        crudEndpointExceptions: true,
+      };
+
+      const expected = {
+        actions: {
+          showEndpointExceptions: true,
+          crudEndpointExceptions: true,
+        },
+      };
+
+      const actual = calculateEndpointExceptionsPrivilegesFromCapabilities({
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        siem: endpointExceptionsCapabilities,
       });
 
       expect(actual).toEqual(expected);

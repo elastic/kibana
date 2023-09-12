@@ -49,6 +49,13 @@ export interface FleetAuthz {
       };
     };
   };
+
+  endpointExceptionsPrivileges?: {
+    actions: {
+      crudEndpointExceptions: boolean;
+      showEndpointExceptions: boolean;
+    };
+  };
 }
 
 interface CalculateParams {
@@ -133,6 +140,26 @@ export function calculatePackagePrivilegesFromCapabilities(
       actions: transformActions,
     },
   };
+}
+
+export function calculateEndpointExceptionsPrivilegesFromCapabilities(
+  capabilities: Capabilities | undefined
+): FleetAuthz['endpointExceptionsPrivileges'] {
+  if (!capabilities) {
+    return;
+  }
+
+  const endpointExceptionsActions = Object.keys(capabilities.siem).reduce<Record<string, boolean>>(
+    (acc, privilegeName) => {
+      acc[privilegeName] = (capabilities.siem[privilegeName] as boolean) || false;
+      return acc;
+    },
+    {}
+  );
+
+  return {
+    actions: endpointExceptionsActions,
+  } as FleetAuthz['endpointExceptionsPrivileges'];
 }
 
 function getAuthorizationFromPrivileges(

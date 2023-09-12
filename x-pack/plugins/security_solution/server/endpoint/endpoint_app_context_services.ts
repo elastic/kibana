@@ -6,27 +6,27 @@
  */
 
 import type {
+  ElasticsearchClient,
   KibanaRequest,
   Logger,
-  ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
 import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
+  FleetFromHostFileClientInterface,
   FleetStartContract,
   MessageSigningServiceInterface,
-  FleetFromHostFileClientInterface,
 } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import {
   getPackagePolicyCreateCallback,
-  getPackagePolicyUpdateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
+  getPackagePolicyUpdateCallback,
 } from '../fleet_integration/fleet_integration';
 import type { ManifestManager } from './services/artifacts';
 import type { ConfigType } from '../config';
@@ -275,5 +275,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.createFleetActionsClient('endpoint');
+  }
+
+  public async getAppFeaturesService(): Promise<AppFeaturesService> {
+    if (!this.startDependencies?.appFeaturesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.appFeaturesService;
   }
 }
