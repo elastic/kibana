@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-import { RawRule } from '../../../../types';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -18,26 +17,27 @@ import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/co
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  getAlertFromRaw,
   migrateLegacyActions,
 } from '../../../../rules_client/lib';
-import {
-  retryIfBulkOperationConflicts,
-  buildKueryNodeFilter,
-} from '../../../../rules_client/common';
+import { retryIfBulkDeleteConflicts, buildKueryNodeFilter } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type {
   BulkOperationError,
-  BulkDeleteRulesResponse,
+  BulkDeleteRulesResult,
   BulkDeleteRulesRequestParams,
-} from '../../../../../common/routes/rule/apis/bulk_delete';
+} from './types';
 import { bulkDeleteRulesRequestParamsSchema } from '../../../../../common/routes/rule/apis/bulk_delete';
-import { RuleAttributes } from '../../../../data/rule/types';
+import type { RuleAttributes } from '../../../../data/rule/types';
+import { bulkDeleteRulesSo } from '../../../../data/rule';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { ruleDomainSchema } from '../../schemas';
+import type { RuleParams, RuleDomain } from '../../types';
+import type { RawRule, SanitizedRule } from '../../../../types';
 
-export const bulkDeleteRules = async (
+export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
   options: BulkDeleteRulesRequestParams
-): Promise<BulkDeleteRulesResponse> => {
+): Promise<BulkDeleteRulesResult<Params>> => {
   try {
     bulkDeleteRulesRequestParamsSchema.validate(options);
   } catch (error) {
@@ -62,7 +62,7 @@ export const bulkDeleteRules = async (
   const { rules, errors, accListSpecificForBulkOperation } = await withSpan(
     { name: 'retryIfBulkOperationConflicts', type: 'rules' },
     () =>
-      retryIfBulkOperationConflicts({
+      retryIfBulkDeleteConflicts({
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
@@ -87,20 +87,35 @@ export const bulkDeleteRules = async (
   ]);
 
   const deletedRules = rules.map(({ id, attributes, references }) => {
-    return getAlertFromRaw(
-      context,
+    // TODO (http-versioning): alertTypeId should never be null, but we need to
+    // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
+    // when we are doing the bulk create and this should fix itself
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
       id,
-      attributes.alertTypeId as string,
-      attributes as RawRule,
+      logger: context.logger,
+      ruleType,
       references,
-      false
-    );
+      omitGeneratedValues: false,
+    });
+
+    try {
+      ruleDomainSchema.validate(ruleDomain);
+    } catch (e) {
+      context.logger.warn(`Error validating bulk edited rule domain object for id: ${id}, ${e}`);
+    }
+    return ruleDomain;
   });
 
+  // // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
+  const deletedPublicRules = deletedRules.map((rule: RuleDomain<Params>) => {
+    return transformRuleDomainToRule<Params>(rule);
+  }) as Array<SanitizedRule<Params>>;
+
   if (result.status === 'fulfilled') {
-    return { errors, total, rules: deletedRules, taskIdsFailedToBeDeleted: result.value };
+    return { errors, total, rules: deletedPublicRules, taskIdsFailedToBeDeleted: result.value };
   } else {
-    return { errors, total, rules: deletedRules, taskIdsFailedToBeDeleted: [] };
+    return { errors, total, rules: deletedPublicRules, taskIdsFailedToBeDeleted: [] };
   }
 };
 
@@ -160,7 +175,11 @@ const bulkDeleteWithOCC = async (
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
-    () => context.unsecuredSavedObjectsClient.bulkDelete(rulesToDelete)
+    () =>
+      bulkDeleteRulesSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        ids: rulesToDelete.map(({ id }) => id),
+      })
   );
 
   const deletedRuleIds: string[] = [];
@@ -191,6 +210,7 @@ const bulkDeleteWithOCC = async (
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
   // migrate legacy actions only for SIEM rules
+  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
   await pMap(
     rules,
     async (rule) => {

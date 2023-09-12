@@ -13,24 +13,24 @@ import { withSpan } from '@kbn/apm-utils';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
-import { RawRule } from '../../types';
+import { RuleAttributes } from '../../data/rule/types';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 
 interface BulkOperationResult {
   errors: BulkOperationError[];
-  rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  rules: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
   accListSpecificForBulkOperation: string[][];
 }
 
-export const retryIfBulkOperationConflicts = async ({
+export const retryIfBulkDeleteConflicts = async ({
   action,
   logger,
   bulkOperation,
   filter,
   retries = RETRY_IF_CONFLICTS_ATTEMPTS,
 }: {
-  action: 'ENABLE' | 'DISABLE';
+  action: 'DELETE';
   logger: Logger;
   bulkOperation: (filter: KueryNode | null) => Promise<BulkOperationResult>;
   filter: KueryNode | null;
@@ -57,13 +57,13 @@ const handler = async ({
   accRules = [],
   retries = RETRY_IF_CONFLICTS_ATTEMPTS,
 }: {
-  action: 'ENABLE' | 'DISABLE';
+  action: 'DELETE';
   logger: Logger;
   bulkOperation: (filter: KueryNode | null) => Promise<BulkOperationResult>;
   filter: KueryNode | null;
   accListSpecificForBulkOperation?: string[][];
   accErrors?: BulkOperationError[];
-  accRules?: Array<SavedObjectsBulkUpdateObject<RawRule>>;
+  accRules?: Array<SavedObjectsBulkUpdateObject<RuleAttributes>>;
   retries?: number;
 }): Promise<BulkOperationResult> => {
   try {
