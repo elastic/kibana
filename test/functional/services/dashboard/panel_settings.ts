@@ -57,7 +57,11 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickToggleQuickMenuButton() {
       log.debug('clickToggleQuickMenuButton');
-      const button = await this.findToggleQuickMenuButton();
+      let button;
+      await retry.waitFor('the button', async () => {
+        button = await this.findToggleQuickMenuButton();
+        return Boolean(button);
+      });
       await button.click();
     }
 
