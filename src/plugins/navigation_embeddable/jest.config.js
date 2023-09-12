@@ -15,4 +15,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/src/plugins/navigation_embeddable/{common,public,server}/**/*.{ts,tsx}',
   ],
+  setupFiles: ['<rootDir>/src/plugins/navigation_embeddable/jest_setup.ts'],
 };

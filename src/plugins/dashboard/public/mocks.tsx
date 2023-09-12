@@ -12,6 +12,8 @@ import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/publ
 import { DashboardStart } from './plugin';
 import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
+import { pluginServices } from './services/plugin_services';
+import { registry } from './services/plugin_services.stub';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -119,4 +121,8 @@ export function getSampleDashboardPanel<TEmbeddableInput extends EmbeddableInput
     },
     ...overrides,
   };
+}
+
+export function setStubDashboardServices() {
+  pluginServices.setRegistry(registry.start({}));
 }
