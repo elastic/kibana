@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createFrameGroupID, FrameGroupID } from './frame_group';
@@ -20,24 +21,48 @@ import {
 
 type NodeID = number;
 
+/**
+ * Callee tree
+ */
 export interface CalleeTree {
+  /** size */
   Size: number;
+  /** edges */
   Edges: Array<Map<FrameGroupID, NodeID>>;
-
+  /** file ids */
   FileID: string[];
+  /** frame types */
   FrameType: number[];
+  /** inlines */
   Inline: boolean[];
+  /** executable file names */
   ExeFilename: string[];
+  /** address or lines */
   AddressOrLine: number[];
+  /** function names */
   FunctionName: string[];
+  /** function offsets */
   FunctionOffset: number[];
+  /** source file names */
   SourceFilename: string[];
+  /** source lines */
   SourceLine: number[];
-
+  /** total cpu */
   CountInclusive: number[];
+  /** self cpu */
   CountExclusive: number[];
 }
 
+/**
+ * Create a callee tree
+ * @param events Map<StackTraceID, number>
+ * @param stackTraces Map<StackTraceID, StackTrace>
+ * @param stackFrames Map<StackFrameID, StackFrame>
+ * @param executables Map<FileID, Executable>
+ * @param totalFrames number
+ * @param samplingRate number
+ * @returns
+ */
 export function createCalleeTree(
   events: Map<StackTraceID, number>,
   stackTraces: Map<StackTraceID, StackTrace>,
