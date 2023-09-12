@@ -194,7 +194,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
         } catch (e) {
           const error = extractErrorMessage(e);
           const errorMessage = i18n.translate(
-            'xpack.ml.dataframe.analyticsList.deleteAnalyticsPrivilegeErrorMessage',
+            'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.indexPrivilegeErrorMessage',
             {
               defaultMessage: 'User does not have required permissions to reindex {index}. {error}',
               values: { error, index: selectedIndex[0].label },
@@ -367,7 +367,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
             'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexStartedMessage',
             {
               defaultMessage: 'Reindexing of {sourceIndex} to {destinationIndex} has started.',
-              values: { sourceIndex, destinationIndex, pipelineName },
+              values: { sourceIndex, destinationIndex },
             }
           )}
           color="success"
