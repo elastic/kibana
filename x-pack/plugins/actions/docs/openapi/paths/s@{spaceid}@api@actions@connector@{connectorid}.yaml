@@ -172,10 +172,10 @@ put:
             - $ref: '../components/schemas/update_connector_request_slack_api.yaml'
             - $ref: '../components/schemas/update_connector_request_slack_webhook.yaml'
             - $ref: '../components/schemas/update_connector_request_swimlane.yaml' 
-#            - $ref: '../components/schemas/update_connector_request_teams.yaml'
+            - $ref: '../components/schemas/update_connector_request_teams.yaml'
 #            - $ref: '../components/schemas/update_connector_request_tines.yaml'
 #            - $ref: '../components/schemas/update_connector_request_webhook.yaml'
-#            - $ref: '../components/schemas/update_connector_request_xmatters.yaml'
+            - $ref: '../components/schemas/update_connector_request_xmatters.yaml'
         examples:
           updateIndexConnectorRequest:
             $ref: '../components/examples/update_index_connector_request.yaml'
