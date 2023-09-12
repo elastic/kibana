@@ -91,7 +91,7 @@ interface DataDriftPageProps extends PageProps {
   mode: 'data_drift_index_select' | 'data_drift_custom';
 }
 const PageWrapper: FC<DataDriftPageProps> = ({ mode }) => {
-  const { context } = useRouteResolver('basic', [], basicResolvers());
+  const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (
     <PageLoader context={context}>
