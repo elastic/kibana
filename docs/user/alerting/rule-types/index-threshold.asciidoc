@@ -39,11 +39,9 @@ After you choose a connector, you must choose an action group, which affects whe
 The valid action groups for an index threshold rule are: `Threshold met` and `Recovered`.
 Each connector supports a specific set of actions for each action group. For more details, refer to <<action-types>>.
 
-//TBD: Add screenshot
-
 [float]
 [[action-variables-index-threshold]]
-=== Action variables
+=== Add action variables
 
 The following action variables are specific to the index threshold rule.
 You can also specify <<rule-action-variables,variables common to all rules>>.

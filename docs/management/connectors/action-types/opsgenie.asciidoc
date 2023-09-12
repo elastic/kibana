@@ -12,7 +12,7 @@ An {opsgenie} connector enables you to create and close alerts in {opsgenie}.
 In particular, it uses the https://docs.opsgenie.com/docs/alert-api[{opsgenie} alert API].
 
 To create this connector, you must have a valid {opsgenie} URL and API key.
-For configuration tips, refer to <<configuring-opsgenie>>
+For configuration tips, refer to <<configuring-opsgenie>>.
 
 [float]
 [[define-opsgenie-ui]]
