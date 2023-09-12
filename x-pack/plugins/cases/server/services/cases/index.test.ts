@@ -210,6 +210,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "owner": "securitySolution",
@@ -721,6 +722,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "external_service": Object {
