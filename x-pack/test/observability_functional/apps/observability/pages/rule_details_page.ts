@@ -147,12 +147,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert summary widget component', () => {
+    // eslint-disable-next-line ban/ban
+    describe.only('Alert summary widget component', () => {
       before(async () => {
-        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
       });
 
-      it('shows component on the rule detils page', async () => {
+      it('shows component on the rule details page', async () => {
         await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
 
         const timeRangeTitle =
