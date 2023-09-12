@@ -22,19 +22,7 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
-
   const loading = hostsLoading || hostCountLoading;
-
-  const getSubtitle = () => {
-    return searchCriteria.limit < (hostCountData?.count.value ?? 0)
-      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-          defaultMessage: 'Average (of {limit} hosts)',
-          values: {
-            limit: searchCriteria.limit,
-          },
-        })
-      : AVERAGE_SUBTITLE;
-  };
 
   const filters = useMemo(() => {
     return shouldUseSearchCriteria
@@ -57,19 +45,33 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
     filters,
   });
 
+  const tooltipComponent = useMemo(() => <TooltipContent description={toolTip} />, [toolTip]);
+  const layerWithSubtitle = useMemo(() => {
+    const subtitle =
+      searchCriteria.limit < (hostCountData?.count.value ?? 0)
+        ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
+            defaultMessage: 'Average (of {limit} hosts)',
+            values: {
+              limit: searchCriteria.limit,
+            },
+          })
+        : AVERAGE_SUBTITLE;
+    return { ...layers, options: { ...layers.options, subtitle } };
+  }, [hostCountData?.count.value, layers, searchCriteria.limit]);
+
   return (
     <LensChart
       id={`hostsViewKPI-${id}`}
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
-      layers={{ ...layers, options: { ...layers.options, subtitle: getSubtitle() } }}
+      layers={layerWithSubtitle}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
       height={height}
       query={afterLoadedState.query}
       title={title}
-      toolTip={<TooltipContent description={toolTip} />}
+      toolTip={tooltipComponent}
       visualizationType="lnsMetric"
       disableTriggers
       hidePanelTitles
