@@ -1016,7 +1016,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     median: {
       type: 'long',
       _meta: {
-        description: 'Median of document in top traces',
+        description: 'Median of documents in top traces',
       },
     },
   },
