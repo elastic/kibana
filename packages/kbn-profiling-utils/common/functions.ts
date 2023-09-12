@@ -5,23 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import * as t from 'io-ts';
 import { sumBy } from 'lodash';
-import {
+import type {
   Executable,
   FileID,
+  FrameGroupID,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
   StackTrace,
   StackTraceID,
+} from '..';
+import {
+  createFrameGroupID,
   createStackFrameMetadata,
   emptyExecutable,
   emptyStackFrame,
   emptyStackTrace,
-} from './profiling';
-import { FrameGroupID, createFrameGroupID } from './frame_group';
+} from '..';
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;

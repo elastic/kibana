@@ -12,14 +12,24 @@ import { HOST_NAME } from '../../../common/es_fields/apm';
 import { toKueryFilterFormat } from '../../../common/utils/to_kuery_filter_format';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import {
+  environmentRt,
+  kueryRt,
+  rangeRt,
+  serviceTransactionDataSourceRt,
+} from '../default_api_types';
 import { getServiceHostNames } from './get_service_host_names';
 
 const profilingFlamegraphRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([rangeRt, kueryRt, environmentRt]),
+    query: t.intersection([
+      rangeRt,
+      kueryRt,
+      environmentRt,
+      serviceTransactionDataSourceRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -35,7 +45,8 @@ const profilingFlamegraphRoute = createApmServerRoute({
         await plugins.profilingDataAccess?.start(),
       ]);
     if (profilingDataAccessStart) {
-      const { start, end, kuery, environment } = params.query;
+      const { start, end, kuery, environment, documentType, rollupInterval } =
+        params.query;
       const { serviceName } = params.path;
 
       const serviceHostNames = await getServiceHostNames({
@@ -45,6 +56,8 @@ const profilingFlamegraphRoute = createApmServerRoute({
         kuery,
         environment,
         serviceName,
+        documentType,
+        rollupInterval,
       });
 
       const flamegraph =
@@ -70,6 +83,7 @@ const profilingFunctionsRoute = createApmServerRoute({
       rangeRt,
       kueryRt,
       environmentRt,
+      serviceTransactionDataSourceRt,
       t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
     ]),
   }),
@@ -85,8 +99,16 @@ const profilingFunctionsRoute = createApmServerRoute({
         await plugins.profilingDataAccess?.start(),
       ]);
     if (profilingDataAccessStart) {
-      const { start, end, kuery, environment, startIndex, endIndex } =
-        params.query;
+      const {
+        start,
+        end,
+        kuery,
+        environment,
+        startIndex,
+        endIndex,
+        documentType,
+        rollupInterval,
+      } = params.query;
       const { serviceName } = params.path;
 
       const serviceHostNames = await getServiceHostNames({
@@ -96,6 +118,8 @@ const profilingFunctionsRoute = createApmServerRoute({
         kuery,
         environment,
         serviceName,
+        documentType,
+        rollupInterval,
       });
 
       const functions = await profilingDataAccessStart?.services.fetchFunction({

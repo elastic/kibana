@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { HOST_HOSTNAME, SERVICE_NAME } from '../../../common/es_fields/apm';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -17,6 +18,8 @@ export async function getServiceHostNames({
   end,
   environment,
   kuery,
+  documentType,
+  rollupInterval,
 }: {
   environment: string;
   kuery: string;
@@ -24,10 +27,12 @@ export async function getServiceHostNames({
   start: number;
   end: number;
   apmEventClient: APMEventClient;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
 }) {
   const response = await apmEventClient.search('get_service_host_names', {
     apm: {
-      events: [ProcessorEvent.metric],
+      sources: [{ documentType, rollupInterval }],
     },
     body: {
       track_total_hits: false,

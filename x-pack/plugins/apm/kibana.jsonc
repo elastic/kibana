@@ -15,7 +15,6 @@
       "controls",
       "embeddable",
       "features",
-      "infra",
       "logsShared",
       "inspector",
       "licensing",
@@ -41,6 +40,7 @@
       "discover",
       "fleet",
       "fieldFormats",
+      "infra",
       "home",
       "ml",
       "security",
@@ -59,7 +59,6 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "esUiShared",
       "maps",
       "observabilityAIAssistant"
     ]
