@@ -106,8 +106,8 @@ export const goToEndpointExceptionsTab = () => {
 };
 
 export const openEditException = (index = 0) => {
-  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click({ force: true });
-  cy.get(EDIT_EXCEPTION_BTN).eq(index).click({ force: true });
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).eq(index).click();
+  cy.get(EDIT_EXCEPTION_BTN).eq(index).click();
 };
 
 export const removeException = () => {

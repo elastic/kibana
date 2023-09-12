@@ -22,7 +22,7 @@ import {
   CUSTOM_QUERY_DETAILS,
 } from '../../../screens/rule_details';
 
-import { goToRuleDetails, editFirstRule } from '../../../tasks/alerts_detection_rules';
+import { editFirstRule, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../tasks/api_calls/saved_queries';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
@@ -35,17 +35,23 @@ import {
   uncheckLoadQueryDynamically,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
-import { login, visit } from '../../../tasks/login';
+import { login, visit, visitWithoutDateRange } from '../../../tasks/login';
 import { assertDetailsNotExist, getDetails } from '../../../tasks/rule_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 
-import { RULE_CREATION, SECURITY_DETECTIONS_RULES_URL } from '../../../urls/navigation';
+import {
+  ruleDetailsUrl,
+  ruleEditUrl,
+  RULE_CREATION,
+  SECURITY_DETECTIONS_RULES_URL,
+} from '../../../urls/navigation';
 
 const savedQueryName = 'custom saved query';
 const savedQueryQuery = 'process.name: test';
 const savedQueryFilterKey = 'testAgent.value';
 
-describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -86,7 +92,7 @@ describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, 
         cy.wrap(response?.body.type).should('equal', 'saved_query');
       });
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
 
@@ -99,50 +105,59 @@ describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, 
 
     context('Non existent saved query', () => {
       const FAILED_TO_LOAD_ERROR = 'Failed to load the saved query';
-      beforeEach(() => {
-        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
-        visit(SECURITY_DETECTIONS_RULES_URL);
-      });
-      it('Shows error toast on details page when saved query can not be loaded', function () {
-        goToRuleDetails();
 
-        cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
-      });
-
-      it('Shows validation error on rule edit when saved query can not be loaded', function () {
-        editFirstRule();
-
-        cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
-      });
-
-      it('Allows to update saved_query rule with non-existent query', () => {
-        editFirstRule();
-
-        cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('exist');
-
-        cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');
-        saveEditedRule();
-
-        cy.wait('@editedRule').then(({ response }) => {
-          // updated rule type shouldn't change
-          cy.wrap(response?.body.type).should('equal', 'saved_query');
+      describe('on rule details page', () => {
+        beforeEach(() => {
+          createRule(
+            getSavedQueryRule({
+              saved_id: 'non-existent',
+              query: undefined,
+            })
+          ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id)));
         });
 
-        cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
+        it('Shows error toast on details page when saved query can not be loaded', function () {
+          cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
+        });
+      });
 
-        assertDetailsNotExist(SAVED_QUERY_NAME_DETAILS);
-        assertDetailsNotExist(SAVED_QUERY_DETAILS);
+      describe('on rule editing page', () => {
+        beforeEach(() => {
+          createRule(
+            getSavedQueryRule({
+              saved_id: 'non-existent',
+              query: undefined,
+            })
+          ).then((rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id)));
+        });
+
+        it('Shows validation error on rule edit when saved query can not be loaded', function () {
+          cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
+        });
+
+        it('Allows to update saved_query rule with non-existent query', () => {
+          cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('exist');
+
+          cy.intercept('PUT', '/api/detection_engine/rules').as('editedRule');
+          saveEditedRule();
+
+          cy.wait('@editedRule').then(({ response }) => {
+            // updated rule type shouldn't change
+            cy.wrap(response?.body.type).should('equal', 'saved_query');
+          });
+
+          cy.get(DEFINE_RULE_PANEL_PROGRESS).should('not.exist');
+
+          assertDetailsNotExist(SAVED_QUERY_NAME_DETAILS);
+          assertDetailsNotExist(SAVED_QUERY_DETAILS);
+        });
       });
     });
 
     context('Editing', () => {
       it('Allows to update query rule as saved_query rule type', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createRule(getNewRule());
-
-        visit(SECURITY_DETECTIONS_RULES_URL);
-
-        editFirstRule();
+        createRule(getNewRule()).then((rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id)));
 
         selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
         checkLoadQueryDynamically();
@@ -165,12 +180,10 @@ describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, 
         const expectedCustomTestQuery = 'random test query';
         createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
           cy.log(JSON.stringify(response.body, null, 2));
-          createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined }));
+          createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined })).then(
+            (rule) => visitWithoutDateRange(ruleEditUrl(rule.body.id))
+          );
         });
-
-        visit(SECURITY_DETECTIONS_RULES_URL);
-
-        editFirstRule();
 
         // query input should be disabled and has value of saved query
         getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
@@ -192,11 +205,10 @@ describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, 
 
       it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
         const expectedCustomTestQuery = 'random test query';
-        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
+        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
+          visitWithoutDateRange(ruleEditUrl(rule.body.id))
+        );
 
-        visit(SECURITY_DETECTIONS_RULES_URL);
-
-        editFirstRule();
         uncheckLoadQueryDynamically();
 
         // type custom query, ensure Load dynamically checkbox is absent, as rule can't be saved win non valid saved query
@@ -216,7 +228,9 @@ describe('Custom saved_query rules', { tags: ['@ess', '@brokenInServerless'] }, 
 
       it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined }));
+        createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
+          visitWithoutDateRange(ruleEditUrl(rule.body.id))
+        );
 
         visit(SECURITY_DETECTIONS_RULES_URL);
 

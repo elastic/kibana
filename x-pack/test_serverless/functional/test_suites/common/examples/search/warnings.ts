@@ -24,7 +24,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  describe('handling warnings with search source fetch', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/165623
+  // FLAKY: https://github.com/elastic/kibana/issues/165379
+  // FLAKY: https://github.com/elastic/kibana/issues/165502
+  // FLAKY: https://github.com/elastic/kibana/issues/165503
+  // FLAKY: https://github.com/elastic/kibana/issues/165624
+  // FLAKY: https://github.com/elastic/kibana/issues/165635
+  describe.skip('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
@@ -119,8 +125,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
       await openShardModalButton.click();
-      const modalHeader = await testSubjects.find('shardFailureModalTitle');
-      expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
+
+      await retry.waitFor('modal title visible', async () => {
+        const modalHeader = await testSubjects.find('shardFailureModalTitle');
+        return (await modalHeader.getVisibleText()) === '2 of 4 shards failed';
+      });
+
       // request
       await testSubjects.click('shardFailuresModalRequestButton');
       const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');
@@ -165,8 +175,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
       await openShardModalButton.click();
-      const modalHeader = await testSubjects.find('shardFailureModalTitle');
-      expect(await modalHeader.getVisibleText()).to.be('2 of 4 shards failed');
+
+      await retry.waitFor('modal title visible', async () => {
+        const modalHeader = await testSubjects.find('shardFailureModalTitle');
+        return (await modalHeader.getVisibleText()) === '2 of 4 shards failed';
+      });
+
       // request
       await testSubjects.click('shardFailuresModalRequestButton');
       const requestBlock = await testSubjects.find('shardsFailedModalRequestBlock');

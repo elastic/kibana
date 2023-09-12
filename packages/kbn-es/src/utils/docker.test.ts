@@ -9,6 +9,7 @@ import mockFs from 'mock-fs';
 
 import { existsSync } from 'fs';
 import { stat } from 'fs/promises';
+import { basename } from 'path';
 
 import {
   DOCKER_IMG,
@@ -27,13 +28,19 @@ import {
   stopServerlessCluster,
   teardownServerlessClusterSync,
   verifyDockerInstalled,
+  getESp12Volume,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ES_P12_PATH } from '@kbn/dev-utils';
-import { ESS_RESOURCES_PATHS } from '../paths';
+import { ESS_CONFIG_PATH, ESS_RESOURCES_PATHS, ESS_SECRETS_PATH, ESS_JWKS_PATH } from '../paths';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
+jest.mock('@elastic/elasticsearch', () => {
+  return {
+    Client: jest.fn(),
+  };
+});
 
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
@@ -63,9 +70,23 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+const essResources = ESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  acc.push(`${path}:${ESS_CONFIG_PATH}${basename(path)}`);
+
+  return acc;
+}, []);
+
 const volumeCmdTest = async (volumeCmd: string[]) => {
-  expect(volumeCmd).toHaveLength(2);
-  expect(volumeCmd).toEqual(expect.arrayContaining(['--volume', `${baseEsPath}:/objectstore:z`]));
+  expect(volumeCmd).toHaveLength(20);
+  expect(volumeCmd).toEqual(
+    expect.arrayContaining([
+      ...getESp12Volume(),
+      ...essResources,
+      `${baseEsPath}:/objectstore:z`,
+      `${ESS_SECRETS_PATH}:${ESS_CONFIG_PATH}secrets/secrets.json:z`,
+      `${ESS_JWKS_PATH}:${ESS_CONFIG_PATH}secrets/jwks.json:z`,
+    ])
+  );
 
   // extract only permission from mode
   // eslint-disable-next-line no-bitwise
@@ -336,13 +357,10 @@ describe('resolveEsArgs()', () => {
     `);
   });
 
-  test('should add SSL args and enable security when SSL is passed', () => {
-    const esArgs = resolveEsArgs([...defaultEsArgs, ['xpack.security.enabled', 'false']], {
-      ssl: true,
-    });
+  test('should add SSL args when SSL is passed', () => {
+    const esArgs = resolveEsArgs(defaultEsArgs, { ssl: true });
 
-    expect(esArgs).toHaveLength(20);
-    expect(esArgs).not.toEqual(expect.arrayContaining(['xpack.security.enabled=false']));
+    expect(esArgs).toHaveLength(10);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -350,21 +368,11 @@ describe('resolveEsArgs()', () => {
         "--env",
         "qux=zip",
         "--env",
-        "xpack.security.enabled=true",
-        "--env",
         "xpack.security.http.ssl.enabled=true",
         "--env",
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
-        "--env",
-        "xpack.security.transport.ssl.enabled=true",
-        "--env",
-        "xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
-        "--env",
-        "xpack.security.transport.ssl.verification_mode=certificate",
-        "--env",
-        "xpack.security.operator_privileges.enabled=true",
       ]
     `);
   });
@@ -464,6 +472,25 @@ describe('runServerlessCluster()', () => {
 
     // setupDocker execa calls then run three nodes and attach logger
     expect(execa.mock.calls).toHaveLength(8);
+  });
+  describe('waitForReady', () => {
+    test('should wait for serverless nodes to be ready to serve requests', async () => {
+      mockFs({
+        [baseEsPath]: {},
+      });
+      execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+      const health = jest.fn();
+      jest
+        .requireMock('@elastic/elasticsearch')
+        .Client.mockImplementation(() => ({ cluster: { health } }));
+
+      health.mockImplementationOnce(() => Promise.reject()); // first call fails
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'red' })); // second call return wrong status
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'green' })); // then succeeds
+
+      await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+      expect(health).toHaveBeenCalledTimes(3);
+    }, 10000);
   });
 });
 
