@@ -7,6 +7,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { bulkDeleteRulesRequestParamsSchemaV1 } from '..';
 import { Rule } from '../../../../../rule';
+import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
 export interface BulkOperationError {
   message: string;
@@ -19,8 +20,8 @@ export interface BulkOperationError {
 
 export type BulkDeleteRulesRequestParams = TypeOf<typeof bulkDeleteRulesRequestParamsSchemaV1>;
 
-export interface BulkDeleteRulesResponse {
-  rules: Rule[];
+export interface BulkDeleteRulesResponse<Params extends RuleParamsV1 = never> {
+  rules: Array<RuleResponseV1<Params>>;
   errors: BulkOperationError[];
   total: number;
   taskIdsFailedToBeDeleted: string[];

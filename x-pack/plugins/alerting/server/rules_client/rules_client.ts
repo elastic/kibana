@@ -8,7 +8,6 @@
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions, MuteOptions } from './types';
-import type { BulkDeleteRulesRequestParamsV1 } from '../../common/routes/rule/apis/bulk_delete';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
 import { get, GetParams } from './methods/get';
@@ -36,7 +35,10 @@ import { find, FindParams } from './methods/find';
 import { aggregate, AggregateParams } from './methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
-import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
+import {
+  bulkDeleteRules,
+  BulkDeleteRulesRequestParams,
+} from '../application/rule/methods/bulk_delete';
 import {
   bulkEditRules,
   BulkEditOptions,
@@ -137,7 +139,7 @@ export class RulesClient {
   public getActionErrorLogWithAuth = (params: GetActionErrorLogByIdParams) =>
     getActionErrorLogWithAuth(this.context, params);
 
-  public bulkDeleteRules = (options: BulkDeleteRulesRequestParamsV1) =>
+  public bulkDeleteRules = (options: BulkDeleteRulesRequestParams) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
