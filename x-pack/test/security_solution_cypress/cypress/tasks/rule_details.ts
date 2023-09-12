@@ -43,7 +43,7 @@ import {
   submitNewExceptionItem,
 } from './exceptions';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
-import { visit } from './login';
+import { visit } from './navigation';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -51,7 +51,7 @@ interface VisitRuleDetailsPageOptions {
 }
 
 export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsPageOptions): void {
-  visit(ruleDetailsUrl(ruleId, options?.tab), options?.role);
+  visit(ruleDetailsUrl(ruleId, options?.tab), { role: options?.role });
 }
 
 export const enablesRule = () => {
