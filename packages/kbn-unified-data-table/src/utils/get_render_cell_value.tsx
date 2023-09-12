@@ -27,7 +27,7 @@ import type {
   ShouldShowFieldInTableHandler,
   FormattedHit,
 } from '@kbn/discover-utils/types';
-import { formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { formatFieldValue, formatHit, isNestedFieldParent } from '@kbn/discover-utils';
 import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import type { DataTableColumnTypes } from '../types';
 import { UnifiedDataTableContext } from '../table_context';
@@ -36,32 +36,34 @@ import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 
-export const getRenderCellValueFn =
-  ({
-    dataView,
-    rows,
-    useNewFieldsApi,
-    shouldShowFieldHandler,
-    closePopover,
-    fieldFormats,
-    maxEntries,
-    externalCustomRenderers,
-    columnTypes,
-  }: {
-    dataView: DataView;
-    rows: DataTableRecord[] | undefined;
-    useNewFieldsApi: boolean;
-    shouldShowFieldHandler: ShouldShowFieldInTableHandler;
-    closePopover: () => void;
-    fieldFormats: FieldFormatsStart;
-    maxEntries: number;
-    externalCustomRenderers?: Record<
-      string,
-      (props: EuiDataGridCellValueElementProps) => React.ReactNode
-    >;
-    columnTypes?: DataTableColumnTypes;
-  }) =>
-  ({
+export const getRenderCellValueFn = ({
+  dataView,
+  rows,
+  useNewFieldsApi,
+  shouldShowFieldHandler,
+  closePopover,
+  fieldFormats,
+  maxEntries,
+  externalCustomRenderers,
+  columnTypes,
+}: {
+  dataView: DataView;
+  rows: DataTableRecord[] | undefined;
+  useNewFieldsApi: boolean;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  closePopover: () => void;
+  fieldFormats: FieldFormatsStart;
+  maxEntries: number;
+  externalCustomRenderers?: Record<
+    string,
+    (props: EuiDataGridCellValueElementProps) => React.ReactNode
+  >;
+  columnTypes?: DataTableColumnTypes;
+}) => {
+  // same icons across all rows
+  const fieldIconsCache = new Map<string, React.ReactNode>();
+
+  return ({
     rowIndex,
     columnId,
     isDetails,
@@ -149,19 +151,32 @@ export const getRenderCellValueFn =
           compressed
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
-          {pairs.map(([key, value]) => (
-            <Fragment key={key}>
-              <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                {field?.type === '_source' &&
-                  renderFieldToken({ dataView, fieldName: key, columnTypes })}
-                {key}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription
-                className="unifiedDataTable__descriptionListDescription"
-                dangerouslySetInnerHTML={{ __html: value }}
-              />
-            </Fragment>
-          ))}
+          {pairs.map(([key, value]) => {
+            let fieldIcon = null;
+
+            // only for "Document" column
+            if (field?.type === '_source') {
+              if (fieldIconsCache.has(key)) {
+                fieldIcon = fieldIconsCache.get(key);
+              } else {
+                fieldIcon = renderFieldToken({ dataView, fieldName: key, columnTypes });
+                fieldIconsCache.set(key, fieldIcon);
+              }
+            }
+
+            return (
+              <Fragment key={key}>
+                <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
+                  {fieldIcon}
+                  {key}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription
+                  className="unifiedDataTable__descriptionListDescription"
+                  dangerouslySetInnerHTML={{ __html: value }}
+                />
+              </Fragment>
+            );
+          })}
         </EuiDescriptionList>
       );
     }
@@ -177,6 +192,7 @@ export const getRenderCellValueFn =
       />
     );
   };
+};
 
 /**
  * Helper function to show top level objects
@@ -222,6 +238,10 @@ function renderFieldToken({
         className="unifiedDataTable__descriptionListToken"
       />
     );
+  }
+
+  if (isNestedFieldParent(fieldName, dataView)) {
+    return <FieldIcon type="nested" className="unifiedDataTable__descriptionListToken" />;
   }
 
   return null;
