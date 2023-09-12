@@ -1122,6 +1122,7 @@ Any modifications made to this file will be overwritten.
     <li><a href="#update_connector_request_slack_webhook"><code>update_connector_request_slack_webhook</code> - Update Slack connector request</a></li>
     <li><a href="#update_connector_request_swimlane"><code>update_connector_request_swimlane</code> - Update Swimlane connector request</a></li>
     <li><a href="#update_connector_request_teams"><code>update_connector_request_teams</code> - Update Microsoft Teams connector request</a></li>
+    <li><a href="#update_connector_request_webhook"><code>update_connector_request_webhook</code> - Update Webhook connector request</a></li>
     <li><a href="#update_connector_request_xmatters"><code>update_connector_request_xmatters</code> - Update xMatters connector request</a></li>
   </ol>
 
@@ -2686,6 +2687,15 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
 <div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_teams">secrets_properties_teams</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_connector_request_webhook"><code>update_connector_request_webhook</code> - Update Webhook connector request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">config </div><div class="param-desc"><span class="param-type"><a href="#config_properties_webhook">config_properties_webhook</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The display name for the connector. </div>
+<div class="param">secrets </div><div class="param-desc"><span class="param-type"><a href="#secrets_properties_webhook">secrets_properties_webhook</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
