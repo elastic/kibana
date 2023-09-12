@@ -33,7 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
 
   const defaultSettings = {
-    'discover:enableSql': true,
+    'discover:enableESQL': true,
   };
 
   async function setDiscoverTimeRange() {
@@ -144,15 +144,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly text based language queries in Discover', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('heatmapChart')).to.be(true);
+      expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
       await PageObjects.discover.chooseLensChart('Donut');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -161,10 +161,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should allow changing dimensions', async () => {
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -186,11 +186,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       assertMatchesExpectedData(data!);
     });
 
-    it('should visualize correctly text based language queries in Lenss', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+    it('should visualize correctly text based language queries in Lens', async () => {
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -201,15 +201,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB';
       });
     });
 
     it('should visualize correctly text based language queries based on index patterns', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+        'from logstash* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -220,15 +220,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
-        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
+        return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'averageB';
       });
     });
 
     it('should save and edit chart in the dashboard on the fly', async () => {
-      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+        'from logstash-* | stats averageB = avg(bytes) by extension'
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();

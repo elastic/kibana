@@ -17,7 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
-  describe('Threshold rule - AVG - PCT - NoData', () => {
+  // Blocked API: index_not_found_exception: no such index [.alerts-observability.threshold.alerts-default]
+  // Issue: https://github.com/elastic/kibana/issues/165138
+  describe.skip('Threshold rule - AVG - PCT - NoData', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id-no-data';
@@ -74,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [0.5],
                 timeSize: 5,
                 timeUnit: 'm',
-                customMetrics: [
+                metrics: [
                   { name: 'A', field: 'system.cpu.user.pct', aggType: Aggregators.AVERAGE },
                 ],
               },
@@ -160,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [0.5],
                 timeSize: 5,
                 timeUnit: 'm',
-                customMetrics: [{ name: 'A', field: 'system.cpu.user.pct', aggType: 'avg' }],
+                metrics: [{ name: 'A', field: 'system.cpu.user.pct', aggType: 'avg' }],
               },
             ],
             alertOnNoData: true,

@@ -32,7 +32,8 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165644
+describe('Enable risk scores', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -55,7 +56,7 @@ describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ENABLE_HOST_RISK_SCORE_BUTTON).should('exist');
   });
 
-  it('should install host risk score successfully', () => {
+  it('should install host risk score successfully', { tags: ['@brokenInServerless'] }, () => {
     interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.host);
     waitForInstallRiskScoreModule();
@@ -89,7 +90,7 @@ describe('Enable risk scores', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(ENABLE_USER_RISK_SCORE_BUTTON).should('exist');
   });
 
-  it('should install user risk score successfully', () => {
+  it('should install user risk score successfully', { tags: ['@brokenInServerless'] }, () => {
     interceptInstallRiskScoreModule();
     clickEnableRiskScore(RiskScoreEntity.user);
     waitForInstallRiskScoreModule();

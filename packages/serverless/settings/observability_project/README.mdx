@@ -1,0 +1,31 @@
+---
+id: serverless/packages/settings/observability_project
+slug: /serverless/packages/settings/observability_project
+title: Serverless Observability Advanced Settings
+description: A package of settings for the Serverless Observability project.
+tags: ['serverless', 'package']
+date: 2023-08-24
+---
+
+This package contains a list of UI settings that are only available in the Serverless Observability project.
+This list is consumed by the `serverless_observability` plugin, which sets up its project settings:
+
+```ts
+export class ServerlessObservabilityPlugin
+  implements
+    Plugin<
+      ServerlessObservabilityPluginSetup,
+      ServerlessObservabilityPluginStart,
+      SetupDependencies,
+      StartDependencies
+    >
+{
+  public setup(_coreSetup: CoreSetup, pluginsSetup: SetupDependencies) {
+    pluginsSetup.serverless.setupProjectSettings(OBSERVABILITY_PROJECT_SETTINGS);
+    return {};
+  }
+}
+```
+
+If you need to register a setting that should be available in the Serverless Observability project, make sure to add
+its Id to this list.

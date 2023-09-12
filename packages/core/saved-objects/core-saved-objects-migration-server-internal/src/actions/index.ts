@@ -136,6 +136,11 @@ export interface IndexNotFound {
   index: string;
 }
 
+export interface OperationNotSupported {
+  type: 'operation_not_supported';
+  operationName: string;
+}
+
 export interface WaitForReindexTaskFailure {
   readonly cause: { type: string; reason: string };
 }
@@ -179,6 +184,7 @@ export interface ActionErrorTypeMap {
   synchronization_failed: SynchronizationFailed;
   actual_mappings_incomplete: ActualMappingsIncomplete;
   compared_mappings_changed: ComparedMappingsChanged;
+  operation_not_supported: OperationNotSupported;
 }
 
 /**
