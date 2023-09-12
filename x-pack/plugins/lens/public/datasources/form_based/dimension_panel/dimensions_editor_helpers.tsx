@@ -16,6 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
   type PercentileIndexPatternColumn,
@@ -34,22 +35,50 @@ export const nonQuickFunctions = new Set([formulaOperationName, staticValueOpera
 
 export type TemporaryState = typeof quickFunctionsName | typeof staticValueOperationName | 'none';
 
-export function hasRiskyColumnRanking(layer: FormBasedLayer) {
-  return Object.values(layer.columns).some((column) => {
-    if (
-      isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
-      column.params?.orderBy.type === 'column' &&
-      column.params.orderBy.columnId != null
-    ) {
-      const rankingColumn = layer.columns[column.params.orderBy.columnId];
+export function isLayerChangingDueToDecimalsPercentile(
+  prevLayer: FormBasedLayer,
+  newLayer: FormBasedLayer
+) {
+  // step 1: find the ranking column in prevState and return its value
+  const termsRiskyColumns = Object.entries(prevLayer.columns)
+    .map(([id, column]) => {
+      if (
+        isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
+        column.params?.orderBy.type === 'column' &&
+        column.params.orderBy.columnId != null
+      ) {
+        const rankingColumn = prevLayer.columns[column.params.orderBy.columnId];
+        if (isColumnOfType<PercentileIndexPatternColumn>('percentile', rankingColumn)) {
+          if (Number.isInteger(rankingColumn.params.percentile)) {
+            return { id, rankId: column.params.orderBy.columnId };
+          }
+        }
+        if (isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', rankingColumn)) {
+          if (Number.isInteger(rankingColumn.params.value)) {
+            return { id, rankId: column.params.orderBy.columnId };
+          }
+        }
+      }
+    })
+    .filter(nonNullable);
+  // now check again the terms risky column in the new layer and verify that at
+  // least one changed due to decimals
+  const hasChangedDueToDecimals = termsRiskyColumns.some(({ id, rankId }) => {
+    const termsColumn = newLayer.columns[id];
+    if (!isColumnOfType<TermsIndexPatternColumn>('terms', termsColumn)) {
+      return false;
+    }
+    if (termsColumn.params.orderBy.type === 'alphabetical') {
+      const rankingColumn = newLayer.columns[rankId];
       if (isColumnOfType<PercentileIndexPatternColumn>('percentile', rankingColumn)) {
-        return Number.isInteger(rankingColumn.params.percentile);
+        return !Number.isInteger(rankingColumn.params.percentile);
       }
       if (isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', rankingColumn)) {
-        return Number.isInteger(rankingColumn.params.value);
+        return !Number.isInteger(rankingColumn.params.value);
       }
     }
   });
+  return hasChangedDueToDecimals;
 }
 
 export function isQuickFunction(operationType: string) {

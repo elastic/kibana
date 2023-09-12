@@ -66,7 +66,7 @@ import {
   DimensionEditorButtonGroups,
   CalloutWarning,
   DimensionEditorGroupsOptions,
-  hasRiskyColumnRanking,
+  isLayerChangingDueToDecimalsPercentile,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
@@ -169,13 +169,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const fireOrResetRankingToast = useCallback(
     (newLayer: FormBasedLayer) => {
-      if (hasRiskyColumnRanking(state.layers[layerId]) && !hasRiskyColumnRanking(newLayer)) {
+      if (isLayerChangingDueToDecimalsPercentile(state.layers[layerId], newLayer)) {
         props.notifications.toasts.add({
           title: i18n.translate('xpack.lens.uiInfo.rankingResetTitle', {
-            defaultMessage: 'Top values ranking reset',
+            defaultMessage: 'Ranking changed to alphabetical',
           }),
           text: i18n.translate('xpack.lens.uiInfo.rankingResetToAlphabetical', {
-            defaultMessage: 'The use of decimals for this function is not supported for ranking.',
+            defaultMessage: 'To rank by percentile, use whole numbers only.',
           }),
         });
       }
