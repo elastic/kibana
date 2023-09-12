@@ -13,7 +13,7 @@ import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../..
 import { login, visit } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { getNewRule } from '../../../../../objects/rule';
-import { ruleDetailsUrl, ruleEditUrl } from '../../../../../urls/navigation';
+import { ruleEditUrl } from '../../../../../urls/navigation';
 import { internalAlertingSnoozeRule } from '../../../../../urls/routes';
 import { RULES_MANAGEMENT_TABLE, RULE_NAME } from '../../../../../screens/alerts_detection_rules';
 import {
@@ -35,7 +35,7 @@ import {
   importRules,
 } from '../../../../../tasks/alerts_detection_rules';
 import { goToActionsStepTab } from '../../../../../tasks/create_new_rule';
-import { goToRuleEditSettings } from '../../../../../tasks/rule_details';
+import { goToRuleEditSettings, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 import { addEmailConnectorAndRuleAction } from '../../../../../tasks/common/rule_actions';
 import { saveEditedRule } from '../../../../../tasks/edit_rule';
@@ -228,7 +228,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }
           statusCode: 500,
         });
 
-        visit(ruleDetailsUrl(rule.id));
+        visitRuleDetailsPage(rule.id);
       });
 
       cy.get(DISABLED_SNOOZE_BADGE).trigger('mouseover');
@@ -240,7 +240,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }
       createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('POST', internalAlertingSnoozeRule(rule.id), { forceNetworkError: true });
 
-        visit(ruleDetailsUrl(rule.id));
+        visitRuleDetailsPage(rule.id);
       });
 
       snoozeRule('3 days');

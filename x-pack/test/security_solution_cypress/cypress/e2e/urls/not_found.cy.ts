@@ -16,11 +16,11 @@ import {
   EXCEPTIONS_URL,
   CREATE_RULE_URL,
   ruleEditUrl,
-  ruleDetailsUrl,
 } from '../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 
 import { NOT_FOUND } from '../../screens/common/page';
+import { ruleDetailsUrl } from '../../urls/rule_details';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 

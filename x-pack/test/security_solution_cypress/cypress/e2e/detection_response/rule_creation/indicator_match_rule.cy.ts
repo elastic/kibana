@@ -106,9 +106,10 @@ import {
   goBackToRulesTable,
   getDetails,
   waitForTheRuleToBeExecuted,
+  visitRuleDetailsPage,
 } from '../../../tasks/rule_details';
 
-import { ruleDetailsUrl, CREATE_RULE_URL } from '../../../urls/navigation';
+import { CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
@@ -501,7 +502,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
         loadPrepackagedTimelineTemplates();
         createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })).then(
-          (rule) => visit(ruleDetailsUrl(rule.body.id))
+          (rule) => visitRuleDetailsPage(rule.body.id)
         );
 
         waitForAlertsToPopulate();
@@ -562,7 +563,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       describe('on rule details page', () => {
         beforeEach(() => {
           createRule(getNewThreatIndicatorRule(TESTED_RULE_DATA)).then((rule) =>
-            visit(ruleDetailsUrl(rule.body.id))
+            visitRuleDetailsPage(rule.body.id)
           );
         });
 

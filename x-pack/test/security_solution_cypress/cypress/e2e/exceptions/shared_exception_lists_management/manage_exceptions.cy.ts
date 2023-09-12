@@ -20,7 +20,7 @@ import {
   submitNewExceptionItem,
   deleteFirstExceptionItemInListDetailPage,
 } from '../../../tasks/exceptions';
-import { EXCEPTIONS_URL, ruleDetailsUrl } from '../../../urls/navigation';
+import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
 import {
   CONFIRM_BTN,
@@ -36,6 +36,7 @@ import {
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../tasks/exceptions_table';
+import { visitRuleDetailsPage } from '../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165795
@@ -87,7 +88,7 @@ describe(
 
         // Navigate to Rule details page
         cy.get<Cypress.Response<RuleResponse>>('@createdRule').then((rule) =>
-          visit(ruleDetailsUrl(rule.body.id, 'rule_exceptions'))
+          visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' })
         );
 
         // Only one Exception should generated

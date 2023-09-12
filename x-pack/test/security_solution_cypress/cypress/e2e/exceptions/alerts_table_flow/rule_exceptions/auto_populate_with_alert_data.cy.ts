@@ -23,10 +23,9 @@ import {
   validateHighlightedFieldsPopulatedAsExceptionConditions,
   validateEmptyExceptionConditionField,
 } from '../../../../tasks/exceptions';
-import { login, visit } from '../../../../tasks/login';
-import { goToExceptionsTab } from '../../../../tasks/rule_details';
+import { login } from '../../../../tasks/login';
+import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../tasks/rule_details';
 
-import { ruleDetailsUrl } from '../../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../../tasks/common';
 import {
   ADD_AND_BTN,
@@ -52,7 +51,7 @@ describe.skip(
       cy.task('esArchiverResetKibana');
       cy.task('esArchiverLoad', { archiveName: 'endpoint' });
       login();
-      createRule(getEndpointRule()).then((rule) => visit(ruleDetailsUrl(rule.body.id)));
+      createRule(getEndpointRule()).then((rule) => visitRuleDetailsPage(rule.body.id));
 
       waitForAlertsToPopulate();
     });

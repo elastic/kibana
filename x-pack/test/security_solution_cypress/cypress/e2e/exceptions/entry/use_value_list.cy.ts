@@ -12,11 +12,13 @@ import {
   addExceptionFlyoutItemName,
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
-import { openExceptionFlyoutFromEmptyViewerPrompt } from '../../../tasks/rule_details';
+import {
+  openExceptionFlyoutFromEmptyViewerPrompt,
+  visitRuleDetailsPage,
+} from '../../../tasks/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
-import { ruleDetailsUrl } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,
@@ -65,7 +67,7 @@ describe(
           rule_id: '2',
           enabled: false,
         })
-      ).then((rule) => visit(ruleDetailsUrl(rule.body.id, 'rule_exceptions')));
+      ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     });
 
     afterEach(() => {

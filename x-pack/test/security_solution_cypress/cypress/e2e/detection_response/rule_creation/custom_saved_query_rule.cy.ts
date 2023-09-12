@@ -36,10 +36,14 @@ import {
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
 import { login, visitWithDateRange, visit } from '../../../tasks/login';
-import { assertDetailsNotExist, getDetails } from '../../../tasks/rule_details';
+import {
+  assertDetailsNotExist,
+  getDetails,
+  visitRuleDetailsPage,
+} from '../../../tasks/rule_details';
 import { createRule } from '../../../tasks/api_calls/rules';
 
-import { ruleDetailsUrl, ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
+import { ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
 const savedQueryName = 'custom saved query';
@@ -109,7 +113,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
               saved_id: 'non-existent',
               query: undefined,
             })
-          ).then((rule) => visit(ruleDetailsUrl(rule.body.id)));
+          ).then((rule) => visitRuleDetailsPage(rule.body.id));
         });
 
         it('Shows error toast on details page when saved query can not be loaded', function () {

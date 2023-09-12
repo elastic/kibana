@@ -107,8 +107,13 @@ import {
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../tasks/edit_rule';
 import { login, visitWithDateRange, visit } from '../../../tasks/login';
-import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
-import { ruleDetailsUrl, ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
+import {
+  enablesRule,
+  getDetails,
+  visitRuleDetailsPage,
+  waitForTheRuleToBeExecuted,
+} from '../../../tasks/rule_details';
+import { ruleEditUrl, CREATE_RULE_URL } from '../../../urls/navigation';
 import { visitRulesManagementTable } from '../../../tasks/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
@@ -352,7 +357,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
           deleteConnectors();
           login();
           createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((rule) =>
-            visit(ruleDetailsUrl(rule.body.id))
+            visitRuleDetailsPage(rule.body.id)
           );
         });
 

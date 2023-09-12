@@ -29,12 +29,15 @@ import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visitWithDateRange, visit } from '../../../tasks/login';
 import { getNewRule, getUnmappedRule } from '../../../objects/rule';
-import { ALERTS_URL, ruleDetailsUrl } from '../../../urls/navigation';
+import { ALERTS_URL } from '../../../urls/navigation';
 import { tablePageSelector } from '../../../screens/table_pagination';
 import { ALERTS_TABLE_COUNT } from '../../../screens/timeline';
 import { ALERT_SUMMARY_SEVERITY_DONUT_CHART } from '../../../screens/alerts';
 import { getLocalstorageEntryAsObject } from '../../../helpers/common';
-import { waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded } from '../../../tasks/rule_details';
+import {
+  visitRuleDetailsPage,
+  waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
+} from '../../../tasks/rule_details';
 
 describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Basic functions', () => {
@@ -236,7 +239,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     it('should remove the flyout state from localstorage when navigating away without closing the flyout', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
 
-      visit(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      visitRuleDetailsPage(ARCHIVED_RULE_ID);
       waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
       const localStorageCheck = () =>
@@ -251,7 +254,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     it('should not reopen the flyout when navigating away from the alerts page and returning to it', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
 
-      visit(ruleDetailsUrl(ARCHIVED_RULE_ID));
+      visitRuleDetailsPage(ARCHIVED_RULE_ID);
       waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
       visitWithDateRange(ALERTS_URL);

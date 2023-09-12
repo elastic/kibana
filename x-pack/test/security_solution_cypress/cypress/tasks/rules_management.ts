@@ -10,7 +10,7 @@ import { RULES_MANAGEMENT_URL } from '../urls/rules_management';
 import { resetRulesTableState } from './common';
 import { visit } from './login';
 
-export const visitRulesManagementTable = (role?: ROLES) => {
+export function visitRulesManagementTable(role?: ROLES): void {
   resetRulesTableState(); // Clear persistent rules filter data before page loading
   visit(RULES_MANAGEMENT_URL, role);
-};
+}
