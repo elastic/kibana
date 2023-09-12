@@ -140,30 +140,28 @@ export function usePermissionCheck<T extends MlCapabilitiesKey | MlCapabilitiesK
 export function checkGetManagementMlJobsResolver({ mlCapabilities }: MlGlobalServices) {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      firstValueFrom(mlCapabilities.getCapabilities$().pipe(filter((c) => !!c)))
-        .then((capabilities) => {
-          if (capabilities === null) {
-            return reject();
-          }
-          _capabilities = capabilities;
-          const isManageML =
-            (capabilities.isADEnabled && capabilities.canCreateJob) ||
-            (capabilities.isDFAEnabled && capabilities.canCreateDataFrameAnalytics) ||
-            (capabilities.isNLPEnabled && capabilities.canCreateTrainedModels);
-          if (isManageML === true) {
-            return resolve();
-          } else {
-            // reject with possible reasons why capabilities are false
-            return reject({
-              capabilities,
-              isPlatinumOrTrialLicense: mlCapabilities.isPlatinumOrTrialLicense(),
-              mlFeatureEnabledInSpace: mlCapabilities.mlFeatureEnabledInSpace(),
-            });
-          }
-        })
-        .catch((e) => {
-          return reject();
+      const capabilities = await firstValueFrom(
+        mlCapabilities.getCapabilities$().pipe(filter((c) => !!c))
+      );
+
+      if (capabilities === null) {
+        return reject();
+      }
+      _capabilities = capabilities;
+      const isManageML =
+        (capabilities.isADEnabled && capabilities.canCreateJob) ||
+        (capabilities.isDFAEnabled && capabilities.canCreateDataFrameAnalytics) ||
+        (capabilities.isNLPEnabled && capabilities.canCreateTrainedModels);
+      if (isManageML === true) {
+        return resolve();
+      } else {
+        // reject with possible reasons why capabilities are false
+        return reject({
+          capabilities,
+          isPlatinumOrTrialLicense: mlCapabilities.isPlatinumOrTrialLicense(),
+          mlFeatureEnabledInSpace: mlCapabilities.mlFeatureEnabledInSpace(),
         });
+      }
     } catch (error) {
       reject(error);
     }
