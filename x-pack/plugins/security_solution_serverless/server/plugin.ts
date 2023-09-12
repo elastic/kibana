@@ -13,6 +13,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -89,6 +90,9 @@ export class SecuritySolutionServerlessPlugin
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloudSetup,
     });
+
+    pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
+
     return {};
   }
 
