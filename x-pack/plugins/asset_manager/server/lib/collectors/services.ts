@@ -7,17 +7,17 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
-import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { ServicesCollectorOptions, QUERY_MAX_SIZE } from '.';
 
 export async function collectServices({
   client,
   from,
   to,
-  sourceIndices,
+  apmIndices,
   afterKey,
   filters = [],
-}: CollectorOptions) {
-  const { traces, serviceMetrics, serviceLogs } = sourceIndices;
+}: ServicesCollectorOptions) {
+  const { transaction, error, metric } = apmIndices;
   const musts: estypes.QueryDslQueryContainer[] = [
     ...filters,
     {
@@ -28,7 +28,7 @@ export async function collectServices({
   ];
 
   const dsl: estypes.SearchRequest = {
-    index: [traces, serviceMetrics, serviceLogs],
+    index: [transaction, error, metric],
     size: 0,
     _source: false,
     query: {

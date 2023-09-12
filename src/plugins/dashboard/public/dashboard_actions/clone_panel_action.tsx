@@ -91,7 +91,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
           explicitInput: {
             ...(await embeddable.getInputAsValueType()),
             hidePanelTitles: panelToClone.explicitInput.hidePanelTitles,
-            title: newTitle,
+            ...(newTitle ? { title: newTitle } : {}),
             id,
           },
         };
