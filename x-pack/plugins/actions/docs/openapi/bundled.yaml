@@ -2754,6 +2754,7 @@ components:
         - .servicenow-sir
         - .server-log
         - .slack
+        - .slack_api
         - .swimlane
         - .teams
         - .tines
