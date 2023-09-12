@@ -6,6 +6,11 @@
   width: $euiSize * 19;
   height: 100%;
 
+  &--collapsed {
+    width: auto;
+    padding: $euiSizeS $euiSizeS 0;
+  }
+
   @include euiBreakpoint('xs', 's') {
     width: 100%;
     padding: $euiSize;
@@ -14,7 +19,7 @@
 }
 
 .unifiedFieldListSidebar__list {
-  padding: $euiSizeS 0 $euiSizeS $euiSizeS;
+  padding: $euiSizeS $euiSizeS 0;
 
   @include euiBreakpoint('xs', 's') {
     padding: $euiSizeS 0 0 0;
@@ -37,4 +42,19 @@
 
 .unifiedFieldListSidebar__flyoutHeader {
   align-items: center;
+}
+
+.unifiedFieldListSidebar .unifiedFieldListItemButton {
+  &.kbnFieldButton {
+    margin-bottom: $euiSizeXS / 2;
+  }
+
+  &.domDragDrop-isDraggable {
+    box-shadow: none;
+  }
+
+  &:not(.unifiedFieldListItemButton__dragging) {
+    padding: 0;
+    background: none;
+  }
 }

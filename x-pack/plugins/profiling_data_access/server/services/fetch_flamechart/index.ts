@@ -6,31 +6,33 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { RegisterServicesParams } from '../register_services';
+import { createBaseFlameGraph, createCalleeTree } from '@kbn/profiling-utils';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
+import { RegisterServicesParams } from '../register_services';
 import { searchStackTraces } from '../search_stack_traces';
-import { createCalleeTree } from '../../../common/callee';
-import { createBaseFlameGraph } from '../../../common/flamegraph';
 
-interface FetchFlamechartParams {
+export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
-  rangeFrom: number;
-  rangeTo: number;
+  rangeFromMs: number;
+  rangeToMs: number;
   kuery: string;
 }
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
-  return async ({ esClient, rangeFrom, rangeTo, kuery }: FetchFlamechartParams) => {
+  return async ({ esClient, rangeFromMs, rangeToMs, kuery }: FetchFlamechartParams) => {
+    const rangeFromSecs = rangeFromMs / 1000;
+    const rangeToSecs = rangeToMs / 1000;
+
     const profilingEsClient = createProfilingEsClient({ esClient });
     const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
-    const totalSeconds = rangeTo - rangeFrom;
+    const totalSeconds = rangeToSecs - rangeFromSecs;
 
     const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
       await searchStackTraces({
         client: profilingEsClient,
-        rangeFrom,
-        rangeTo,
+        rangeFrom: rangeFromSecs,
+        rangeTo: rangeToSecs,
         kuery,
         sampleSize: targetSampleSize,
       });
@@ -45,9 +47,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
         samplingRate
       );
 
-      const fg = createBaseFlameGraph(tree, samplingRate, totalSeconds);
-
-      return fg;
+      return createBaseFlameGraph(tree, samplingRate, totalSeconds);
     });
 
     return flamegraph;
