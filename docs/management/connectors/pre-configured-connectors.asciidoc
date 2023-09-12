@@ -106,6 +106,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 [float]
 === Examples
 
+* <<preconfigured-resilient-configuration>>
 * <<preconfigured-index-configuration>>
 * <<preconfigured-jira-configuration>>
 * <<preconfigured-opsgenie-configuration>>
@@ -114,9 +115,34 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-servicenow-itom-configuration>>
 * <<preconfigured-servicenow-configuration>>
 * <<preconfigured-servicenow-sir-configuration>>
+* <<preconfigured-slack-configuration>>
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
+
+[float]
+[[preconfigured-resilient-configuration]]
+==== {ibm-r} connectors
+
+The following example creates a <<resilient-action-type,{ibm-r} connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-resilient:
+    name: preconfigured-resilient-connector-type
+    actionTypeId: .resilient
+    config:
+      apiUrl: https://elastic.resilient.net <1>
+      orgId: ES <2>
+    secrets:
+      apiKeyId: testuser <3>
+      apiKeySecret: tokenkeystorevalue <4>
+--
+<1> The {ibm-r} instance URL.
+<2> The {ibm-r} organization identifier.
+<3> The authentication key ID for HTTP basic authentication.
+<4> The authentication key secret for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 [float]
 [[preconfigured-index-configuration]]
@@ -160,6 +186,23 @@ xpack.actions.preconfigured:
 <2> The Jira project key.
 <3> The account email for HTTP basic authentication.
 <4> The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
+
+[float]
+[[preconfigured-teams-configuration]]
+==== Microsoft Teams connectors
+
+The following example creates a <<teams-action-type,Microsoft Teams connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-teams:
+    name: preconfigured-teams-connector-type
+    actionTypeId: .teams
+    secrets:
+      webhookUrl: 'https://outlook.office.com/webhook/abcd@0123456/IncomingWebhook/abcdefgh/ijklmnopqrstuvwxyz' <1>
+--
+<1> The URL of the incoming webhook.
 
 [float]
 [[preconfigured-opsgenie-configuration]]
@@ -366,6 +409,36 @@ xpack.actions.preconfigured:
 `privateKeyPassword`.
 
 [float]
+[[preconfigured-slack-configuration]]
+==== Slack connectors
+
+The following example creates a <<slack-action-type,Slack connector>> with webhook:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-slack:
+    name: preconfigured-slack-webhook-connector-type
+    actionTypeId: .slack
+    secrets:
+      webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx' <1>
+--
+<1> The Slack webhook URL.
+
+The following example creates a Slack connector with web API:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-slack:
+    name: preconfigured-slack-api-connector-type
+    actionTypeId: .slack_api
+    secrets:
+      token: 'xoxb-xxxx-xxxx-xxxx' <1>
+--
+<1> The Slack bot user OAuth token.
+
+[float]
 [[preconfigured-webhook-configuration]]
 ==== Webhook connectors
 
@@ -396,7 +469,6 @@ xpack.actions.preconfigured:
 <6> A valid password. Required if `hasAuth` is set to `true`. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 NOTE: SSL authentication is not supported in preconfigured webhook connectors.
-
 
 [float]
 [[preconfigured-cases-webhook-configuration]]
