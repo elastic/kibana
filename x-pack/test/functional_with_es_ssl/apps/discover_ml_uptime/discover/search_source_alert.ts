@@ -489,7 +489,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const documentCell = await dataGrid.getCellElement(0, 3);
       const firstRowContent = await documentCell.getVisibleText();
-      expect(firstRowContent.includes('runtime-message-fieldmock-message_id')).to.be.equal(true);
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
 
       expect(await dataGrid.getDocCount()).to.be(5);
     });
