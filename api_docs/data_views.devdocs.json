@@ -109,10 +109,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/components/query_bar/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
@@ -8102,10 +8098,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/components/query_bar/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/rules/use_rule_from_timeline.tsx"
               },
               {
@@ -15153,10 +15145,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/components/query_bar/index.tsx"
               },
               {
                 "plugin": "securitySolution",
