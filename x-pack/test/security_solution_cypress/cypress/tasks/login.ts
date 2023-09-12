@@ -344,10 +344,6 @@ export const visitUserDetailsPage = (userName = 'test') => {
   visitWithTimeRange(userDetailsUrl(userName));
 };
 
-export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url);
-};
-
 export const logout = () => {
   cy.visit(LOGOUT_URL);
 };

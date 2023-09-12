@@ -12,7 +12,7 @@ import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import { login, visit, waitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visit, visit } from '../../tasks/login';
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
   getCallOut,
@@ -23,13 +23,13 @@ import {
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.reader);
-  waitForPageWithoutDateRange(url, ROLES.reader);
+  visit(url, ROLES.reader);
   waitForPageTitleToBeShown();
 };
 
 const loadPageAsPlatformEngineer = (url: string) => {
   login(ROLES.platform_engineer);
-  waitForPageWithoutDateRange(url, ROLES.platform_engineer);
+  visit(url, ROLES.platform_engineer);
   waitForPageTitleToBeShown();
 };
 

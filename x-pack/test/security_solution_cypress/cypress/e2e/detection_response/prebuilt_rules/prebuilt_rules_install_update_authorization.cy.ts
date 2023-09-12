@@ -15,7 +15,7 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import { createAndInstallMockedPrebuiltRules } from '../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules } from '../../../tasks/common';
-import { login, waitForPageWithoutDateRange } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   ADD_ELASTIC_RULES_BTN,
@@ -52,7 +52,7 @@ const UPDATED_RULE_2 = createRuleAssetSavedObject({
 
 const loadPageAsReadOnlyUser = (url: string) => {
   login(ROLES.reader);
-  waitForPageWithoutDateRange(url, ROLES.reader);
+  visit(url, ROLES.reader);
 };
 
 // TODO: https://github.com/elastic/kibana/issues/164451 We should find a way to make this spec work in Serverless

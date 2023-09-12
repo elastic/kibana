@@ -10,7 +10,7 @@ import { expectedExportedExceptionList, getExceptionList } from '../../../../obj
 import { getNewRule } from '../../../../objects/rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { login, visit, waitForPageWithoutDateRange } from '../../../../tasks/login';
+import { login, visit, visit } from '../../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
@@ -133,7 +133,7 @@ describe(
       });
 
       it('Deletes exception list with rule reference', () => {
-        waitForPageWithoutDateRange(EXCEPTIONS_URL);
+        visit(EXCEPTIONS_URL);
         waitForExceptionsTableToBeLoaded();
 
         // Using cy.contains because we do not care about the exact text,
