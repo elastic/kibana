@@ -8,6 +8,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CommonlyUsed } from '../../page_objects/time_picker';
+import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export function DashboardCustomizePanelProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
@@ -57,12 +58,14 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickToggleQuickMenuButton() {
       log.debug('clickToggleQuickMenuButton');
-      let button;
+      let button: WebElementWrapper | undefined;
       await retry.waitFor('the button', async () => {
         button = await this.findToggleQuickMenuButton();
         return Boolean(button);
       });
-      await button.click();
+      if (button) {
+        await button.click();
+      }
     }
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
@@ -118,7 +121,20 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickToggleShowCustomTimeRange() {
       log.debug('clickToggleShowCustomTimeRange');
-      await testSubjects.click(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+      const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+      if (await toggle.isSelected()) {
+        await toggle.click();
+        await retry.waitFor('toggle to switch off', async () => {
+          const nextToggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+          return !(await nextToggle.isSelected());
+        });
+      } else {
+        await toggle.click();
+        await retry.waitFor('toggle to switch on', async () => {
+          const nextToggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+          return await nextToggle.isSelected();
+        });
+      }
     }
   })();
 }
