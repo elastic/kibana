@@ -118,7 +118,7 @@ const assetDetailsFlyoutViewed: InfraTelemetryEvent = {
     componentName: {
       type: 'keyword',
       _meta: {
-        description: 'Asset name for the clicked asset.',
+        description: 'Name of the parent react component for the clicked asset.',
         optional: false,
       },
     },
@@ -145,7 +145,7 @@ const assetDetailsPageViewed: InfraTelemetryEvent = {
     componentName: {
       type: 'keyword',
       _meta: {
-        description: 'Asset name for the clicked asset.',
+        description: 'Name of the parent react component for the clicked asset.',
         optional: false,
       },
     },

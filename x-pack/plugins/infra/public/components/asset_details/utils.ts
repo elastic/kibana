@@ -6,6 +6,7 @@
  */
 
 import type { InfraMetadata } from '../../../common/http_api';
+import { INTEGRATIONS } from './constants';
 
 export const toTimestampRange = ({ from, to }: { from: string; to: string }) => {
   const fromTs = new Date(from).getTime();
@@ -24,22 +25,12 @@ export const getDefaultDateRange = () => {
   };
 };
 
-export enum INTEGRATION_NAME {
-  nginx = 'nginx',
-  kubernetes = 'kubernetes',
-}
-export const INTEGRATIONS = {
-  [INTEGRATION_NAME.nginx]: ['nginx.stubstatus', 'nginx.access'],
-  [INTEGRATION_NAME.kubernetes]: ['kubernetes.node'],
-};
-
-export const getIntegrationAvailable = (
-  integration: INTEGRATION_NAME,
-  metadata?: InfraMetadata | null
-) => {
-  if (metadata) {
-    return metadata?.features?.some((f) => INTEGRATIONS[integration].includes(f.name))
-      ? integration
-      : null;
+export const getIntegrationsAvailable = (metadata?: InfraMetadata | null) => {
+  if (!metadata) {
+    return [];
   }
+
+  return Object.entries(INTEGRATIONS)
+    .filter(([_, fields]) => metadata?.features?.some((f) => fields.includes(f.name)))
+    .map(([name]) => name);
 };

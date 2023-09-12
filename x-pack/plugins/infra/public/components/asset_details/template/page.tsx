@@ -18,8 +18,8 @@ import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_re
 import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
-import type { ContentTemplateProps } from '../types';
-import { INTEGRATION_NAME, getIntegrationAvailable } from '../utils';
+import { ContentTemplateProps } from '../types';
+import { getIntegrationsAvailable } from '../utils';
 
 export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
@@ -39,9 +39,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       return;
     }
     if (!metadataLoading && metadata) {
-      const nginx = getIntegrationAvailable(INTEGRATION_NAME.nginx, metadata) ?? '';
-      const kubernetes = getIntegrationAvailable(INTEGRATION_NAME.kubernetes, metadata) ?? '';
-      const integrations: string[] = [nginx, kubernetes].filter(Boolean);
+      const integrations = getIntegrationsAvailable(metadata);
       const telemetryParams = {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
         assetType,
