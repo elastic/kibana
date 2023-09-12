@@ -118,6 +118,10 @@ export const createExternalService = (
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
+      console.log('incident', {
+        incident,
+        createIncidentJson,
+      });
       const { tags, title, description } = incident;
       const normalizedUrl = validateAndNormalizeUrl(
         `${createIncidentUrl}`,

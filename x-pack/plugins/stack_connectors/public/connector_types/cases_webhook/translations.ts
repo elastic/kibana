@@ -458,6 +458,27 @@ export const CASE_TAGS_DESC = i18n.translate(
   }
 );
 
+export const CASE_ID_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseIdDesc',
+  {
+    defaultMessage: 'Kibana case id',
+  }
+);
+
+export const CASE_SEVERITY_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseSeverityDesc',
+  {
+    defaultMessage: 'Kibana case severity',
+  }
+);
+
+export const CASE_STATUS_DESC = i18n.translate(
+  'xpack.stackConnectors.components.casesWebhook.caseStatusDesc',
+  {
+    defaultMessage: 'Kibana case status',
+  }
+);
+
 export const CASE_COMMENT_DESC = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.caseCommentDesc',
   {
