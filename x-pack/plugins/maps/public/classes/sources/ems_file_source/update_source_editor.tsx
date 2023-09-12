@@ -36,6 +36,8 @@ export function UpdateSourceEditor(props: Props) {
       })
       .catch((err) => {
         if (!ignore) {
+          // When a matching EMS-config cannot be found, the source already will have thrown errors during the data request.
+          // This will propagate to the vector-layer and be displayed in the UX
           setIsLoading(false);
         }
       });
