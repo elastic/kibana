@@ -41,14 +41,19 @@ export const constructLocatorPath = async (params: LocatorPathCosntructionParams
   let path = '/';
 
   if (Object.keys(queryState).length) {
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
+      '_g',
+      queryState,
+      { useHash, storeInHashQuery: false },
+      path
+    );
   }
 
-  path = setStateToKbnUrl('_a', appState, { useHash }, path);
+  path = setStateToKbnUrl('_a', appState, { useHash, storeInHashQuery: false }, path);
 
   return {
     app: 'observability-log-explorer',
-    path: path.replace('#', ''),
+    path,
     state: {},
   };
 };
