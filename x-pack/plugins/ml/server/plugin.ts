@@ -99,6 +99,7 @@ export class MlServerPlugin
     dfa: true,
     nlp: true,
   };
+  private isServerless: boolean = false;
   private registerCases: () => void = () => {};
   private registerSampleDatasetsIntegration: () => void = () => {};
   private registerKibanaSettings: () => void = () => {};
@@ -108,6 +109,7 @@ export class MlServerPlugin
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -221,6 +223,7 @@ export class MlServerPlugin
       ),
       mlLicense: this.mlLicense,
       getEnabledFeatures: () => Object.assign({}, this.enabledFeatures),
+      isServerless: this.isServerless,
     };
 
     annotationRoutes(routeInit, plugins.security);

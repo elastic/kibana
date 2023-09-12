@@ -81,6 +81,7 @@ export interface RouteInitialization {
   mlLicense: MlLicense;
   routeGuard: RouteGuard;
   getEnabledFeatures: () => MlFeatures;
+  isServerless: boolean;
 }
 
 export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;
