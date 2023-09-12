@@ -118,11 +118,7 @@ export const createExternalService = (
     incident,
   }: CreateIncidentParams): Promise<ExternalServiceIncidentResponse> => {
     try {
-      console.log('incident', {
-        incident,
-        createIncidentJson,
-      });
-      const { tags, title, description } = incident;
+      const { description, id, severity, status: incidentStatus, tags, title } = incident;
       const normalizedUrl = validateAndNormalizeUrl(
         `${createIncidentUrl}`,
         configurationUtilities,
@@ -131,9 +127,12 @@ export const createExternalService = (
       const json = renderMustacheStringNoEscape(
         createIncidentJson,
         stringifyObjValues({
-          title,
           description: description ?? '',
+          id: id ?? '',
+          severity: severity ?? '',
+          status: incidentStatus ?? '',
           tags: tags ?? [],
+          title,
         })
       );
 
@@ -201,13 +200,16 @@ export const createExternalService = (
         'Update case URL'
       );
 
-      const { tags, title, description } = incident;
+      const { description, id, severity, status: incidentStatus, tags, title } = incident;
 
       const json = renderMustacheStringNoEscape(updateIncidentJson, {
         ...stringifyObjValues({
-          title,
           description: description ?? '',
+          id: id ?? '',
+          severity: severity ?? '',
+          status: incidentStatus ?? '',
           tags: tags ?? [],
+          title,
         }),
         external: {
           system: {
