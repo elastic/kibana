@@ -462,7 +462,7 @@ xpack.actions.preconfigured:
       token: mytorqtoken <2>
 --
 <1> The endpoint URL of the Elastic Security integration in Torq.
-<2> `token`:: A string that corresponds to **Torq authentication header secret**.
+<2> The secret of the webhook authentication header.
 
 [float]
 [[preconfigured-webhook-configuration]]
