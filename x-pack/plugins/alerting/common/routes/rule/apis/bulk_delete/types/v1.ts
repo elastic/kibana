@@ -6,7 +6,6 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 import { bulkDeleteRulesRequestParamsSchemaV1 } from '..';
-import { Rule } from '../../../../../rule';
 import { RuleParamsV1, RuleResponseV1 } from '../../../response';
 
 export interface BulkOperationError {
