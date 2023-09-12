@@ -21,7 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SloListItems } from './slo_list_items';
 
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-import { SloSelector } from '../../components/burn_rate_rule_editor/slo_selector';
+import { SloSelector } from './slo_selector';
+// import { SloSelector } from '../../components/burn_rate_rule_editor/slo_selector';
 
 export interface SloConfigurationProps {
   onCreate: (props: any) => void;
@@ -31,6 +32,7 @@ export interface SloConfigurationProps {
 export function SloConfiguration({ onCreate, onCancel }) {
   const [selectedSlo, setSelectedSlo] = useState(undefined);
   const { isLoading, isRefetching, isError, sloList } = useFetchSloList();
+  console.log(sloList, '!!sloList embeddable');
   const { results = [] } = sloList || {};
   return (
     <EuiModal onClose={() => {}}>

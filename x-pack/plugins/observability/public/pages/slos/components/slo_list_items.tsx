@@ -21,6 +21,7 @@ export interface Props {
 }
 
 export function SloListItems({ sloList, loading, error }: Props) {
+  sloList.map((slo) => console.log(slo, '!!slo'));
   const sloIdsAndInstanceIds = sloList.map(
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );

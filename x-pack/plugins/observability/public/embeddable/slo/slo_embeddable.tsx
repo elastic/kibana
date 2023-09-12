@@ -6,9 +6,10 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
+import { SloSummary } from './slo_summary';
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
 export class SLOEmbeddable extends Embeddable {
@@ -16,7 +17,7 @@ export class SLOEmbeddable extends Embeddable {
   // to instantiate this kind of embeddable.
   public readonly type = SLO_EMBEDDABLE;
 
-  constructor(initialInput: EmbeddableInput, parent?: IContainer) {
+  constructor(private readonly deps, initialInput: EmbeddableInput, parent?: IContainer) {
     super(
       // Input state is irrelevant to this embeddable, just pass it along.
       initialInput,
@@ -37,9 +38,9 @@ export class SLOEmbeddable extends Embeddable {
     const input = this.getInput();
     console.log(input, '!!input');
     ReactDOM.render(
-      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
-        <EuiFlexItem grow>{input.name}</EuiFlexItem>
-      </EuiFlexGroup>,
+      <KibanaContextProvider services={this.deps}>
+        <SloSummary slo={input} />
+      </KibanaContextProvider>,
       node
     );
   }
