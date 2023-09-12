@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import type {
   RuleFilterArray,
   TimestampOverride,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
 

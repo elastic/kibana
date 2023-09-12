@@ -62,8 +62,6 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
             fields: query.fields,
           });
 
-          console.log('>>>>>>rules', rules.data.length);
-
           const transformed = transformFindAlerts(rules);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });

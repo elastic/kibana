@@ -9,8 +9,8 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { orderBy } from 'lodash';
 
-import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
-import { getEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
+import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import { getEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { deleteAllRules, deleteAllAlerts, getPreviewAlerts, previewRule } from '../../utils';
