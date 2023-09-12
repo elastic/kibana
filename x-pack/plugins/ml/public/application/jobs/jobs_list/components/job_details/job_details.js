@@ -61,7 +61,7 @@ export class JobDetailsUI extends Component {
         </div>
       );
     } else {
-      const { refreshJobList, showClearButton, isServerless } = this.props;
+      const { refreshJobList, showClearButton } = this.props;
 
       const {
         general,
@@ -81,7 +81,7 @@ export class JobDetailsUI extends Component {
         jobTimingStats,
         datafeedTimingStats,
         alertRules,
-      } = extractJobDetails(job, basePath, refreshJobList, isServerless);
+      } = extractJobDetails(job, basePath, refreshJobList);
 
       if (job.blocked === undefined) {
         datafeed.titleAction = (
@@ -280,7 +280,6 @@ JobDetailsUI.propTypes = {
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
   refreshJobList: PropTypes.func,
-  isServerless: PropTypes.bool.isRequired,
 };
 
 export const JobDetails = withKibana(JobDetailsUI);
