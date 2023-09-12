@@ -50,9 +50,8 @@ export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
 type SetupFormatGCP = 'google_cloud_shell' | 'manual';
 const GCPSetupInfoContent = () => (
   <>
-    <EuiHorizontalRule margin="xxl" />
-    <EuiSpacer size="s" />
-    <EuiTitle size="s">
+    <EuiHorizontalRule margin="xl" />
+    <EuiTitle size="xs">
       <h2>
         <FormattedMessage
           id="xpack.csp.gcpIntegration.setupInfoContentTitle"
