@@ -65,9 +65,7 @@ const appDependencies = {
   core: {
     getUrlForApp: () => {},
     executionContext: executionContextServiceMock.createStartContract(),
-    application: {
-      getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
-    },
+    application: applicationServiceMock.createStartContract()
   },
   plugins: {},
   // Default stateful configuration

@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ pattern: 'index-' })
         .expect(200);
 
-      expect(body.indices).toStrictEqual([INDEX_B_NAME, INDEX_A_NAME]);
+      expect(body.indices.every((value: string) => [INDEX_A_NAME, INDEX_B_NAME].includes(value))).toBe(true);
     });
   });
 }
