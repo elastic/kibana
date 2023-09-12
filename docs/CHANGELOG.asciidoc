@@ -185,7 +185,8 @@ Observability::
 
 For more information about the features introduced in 8.10.0, refer to <<whats-new,What's new in 8.10>>.
 
-[[enhancements-and-bug-fixes-v8.10.0]]
+[discrete]
+[[enhancements-and-bug-fixes-v8.10.0-revised]]
 === Enhancements and bug fixes
 
 For detailed information about the 8.10.0 release, review the enhancements and bug fixes.
