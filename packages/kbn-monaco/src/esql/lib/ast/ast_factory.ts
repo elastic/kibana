@@ -127,6 +127,19 @@ export class AstListener implements ESQLParserListener {
 
   private createError(exception: RecognitionException) {
     const token = exception.getOffendingToken();
+    const expectedSymbols = getExpectedSymbols(exception.expectedTokens);
+    if (
+      token &&
+      ['ASTERISK', 'UNQUOTED_IDENTIFIER', 'QUOTED_IDENTIFIER'].every(
+        (s, i) => expectedSymbols[i] === s
+      )
+    ) {
+      return {
+        type: 'error' as const,
+        text: `Unknown column ${token.text}`,
+        location: getPosition(token),
+      };
+    }
     return {
       type: 'error' as const,
       text: token

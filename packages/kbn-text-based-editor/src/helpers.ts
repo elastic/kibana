@@ -18,6 +18,7 @@ export interface MonacoError {
   endColumn: number;
   endLineNumber: number;
   severity: monaco.MarkerSeverity;
+  source?: 'client';
 }
 
 export const useDebounceWithOptions = (

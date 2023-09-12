@@ -56,6 +56,7 @@ import {
   getDocumentationSections,
   MonacoError,
   getWrappedInPipesCode,
+  parseErrors,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -155,7 +156,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(false);
-  const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
+  const [editorErrors, setEditorErrors] = useState<MonacoError[]>(
+    errors ? parseErrors(errors, code) : []
+  );
   const [editorWarning, setEditorWarning] = useState<MonacoError[]>([]);
 
   const [documentationSections, setDocumentationSections] =
@@ -167,7 +170,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     isCompactFocused,
     editorHeight,
     isCodeEditorExpanded,
-    Boolean(errors?.length),
+    Boolean(editorErrors?.length),
     Boolean(warning),
     isCodeEditorExpandedFocused,
     Boolean(documentationSections)
@@ -265,9 +268,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   useDebounceWithOptions(
     () => {
       if (!editorModel.current) return;
-      // Skip highlight server side errors for now and just display them in the workspace
-      // use only client-side highlight for testing
-      if (code && language === 'esql') {
+      if (errors && errors.length && code === queryString) {
+        const parsedErrors = parseErrors(errors, code);
+        setEditorErrors(parsedErrors);
+        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', parsedErrors);
+      } else if (code && language === 'esql') {
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
         const parser = createAstGenerator();
         const { errors: parserErrors } = parser.getAst(
@@ -275,27 +280,26 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           new monaco.Position(0, 1)
         );
 
-        if (parserErrors) {
-          monaco.editor.setModelMarkers(
-            editorModel.current,
-            'Unified search',
-            parserErrors.map((e) => {
-              const startPosition = e.location
-                ? offsetToRowColumn(code, e.location.min)
-                : { column: 0, lineNumber: 0 };
-              const endPosition = e.location
-                ? offsetToRowColumn(code, e.location.max || 0)
-                : { column: 0, lineNumber: 0 };
-              return {
-                message: e.text,
-                startColumn: startPosition.column + 1,
-                startLineNumber: startPosition.lineNumber,
-                endColumn: endPosition.column + 1,
-                endLineNumber: endPosition.lineNumber,
-                severity: monaco.MarkerSeverity.Error,
-              };
-            })
-          );
+        if (parserErrors.length) {
+          const monacoErrors = parserErrors.map((e) => {
+            const startPosition = e.location
+              ? offsetToRowColumn(code, e.location.min)
+              : { column: 0, lineNumber: 0 };
+            const endPosition = e.location
+              ? offsetToRowColumn(code, e.location.max || 0)
+              : { column: 0, lineNumber: 0 };
+            return {
+              message: e.text,
+              startColumn: startPosition.column + 1,
+              startLineNumber: startPosition.lineNumber,
+              endColumn: endPosition.column + 1,
+              endLineNumber: endPosition.lineNumber,
+              severity: monaco.MarkerSeverity.Error,
+              source: 'client' as const,
+            };
+          });
+          monaco.editor.setModelMarkers(editorModel.current, 'Unified search', monacoErrors);
+          setEditorErrors(monacoErrors);
         } else {
           if (warning) {
             const parsedWarning = parseWarning(warning);
@@ -377,8 +381,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [calculateVisibleCode, code, isCompactFocused, queryString]);
 
   useEffect(() => {
-    // const commandPipeRegex = /\|(?\|(?<=["']\|)|(?=["']))/;
-    // const commandPipeNewLineRegex = /(\n)*(\r)*\|(?\|(?<=["']\|)|(?=["']))/;
     if (isCodeEditorExpanded && !isWordWrapped) {
       const pipes = code?.split('|');
       const pipesWithNewLine = code?.split('\n|');
@@ -768,7 +770,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         errors={editorErrors}
                         warning={editorWarning}
                         onErrorClick={onErrorClick}
-                        refreshErrors={onTextLangQuerySubmit}
+                        refreshErrors={() => {
+                          if (editorErrors.some((e) => e.source !== 'client')) {
+                            onTextLangQuerySubmit();
+                          }
+                        }}
                         detectTimestamp={detectTimestamp}
                       />
                     )}
