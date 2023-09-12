@@ -29,6 +29,19 @@ docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
 
 docker push "$TARGET_IMAGE"
 
+docker inspect $TARGET_IMAGE | jq '.[].'
+
+# annotate the build with some info about the docker image that was re-pushed and the hashes that were tested.
+ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
+ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq '.[].Config.Labels["org.opencontainers.image.revision"]')
+
+cat << EOT | buildkite-agent annotate --style "success"
+  Promotion successful!
+  New image: $TARGET_IMAGE
+  Source image: $SOURCE_IMAGE
+  ElasticSearch commit: $ELASTIC_COMMIT_HASH (https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH)
+EOT
+
 docker logout docker.elastic.co
 
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"
