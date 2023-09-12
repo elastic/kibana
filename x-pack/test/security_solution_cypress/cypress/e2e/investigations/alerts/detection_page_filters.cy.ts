@@ -24,7 +24,8 @@ import {
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
   closePageFilterPopover,
@@ -115,7 +116,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(ALERTS_URL);
+    visit(ALERTS_URL);
     waitForAlerts();
     resetFilters();
   });
@@ -127,7 +128,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
   context('Alert Page Filters Customization ', () => {
     beforeEach(() => {
       login();
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlerts();
     });
 

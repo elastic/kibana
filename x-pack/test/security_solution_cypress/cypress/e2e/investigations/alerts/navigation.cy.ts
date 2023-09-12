@@ -8,7 +8,8 @@
 import { expandFirstAlert, waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { getNewRule } from '../../../objects/rule';
 
@@ -34,7 +35,7 @@ describe.skip('Alert Details Page Navigation', { tags: ['@ess', '@serverless'] }
 
     describe('context menu', () => {
       beforeEach(() => {
-        visitWithTimeRange(ALERTS_URL);
+        visit(ALERTS_URL);
         waitForAlerts();
       });
 

@@ -16,7 +16,8 @@ import {
   openAddNewConnectorOption,
   verifyNewConnectorSelected,
 } from '../../../tasks/configure_cases';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { CASES_URL } from '../../../urls/navigation';
 

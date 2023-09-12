@@ -32,7 +32,8 @@ import {
   activateViewSelected,
   activateViewAll,
 } from '../../../tasks/fields_browser';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../../tasks/timeline';
 

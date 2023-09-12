@@ -54,7 +54,8 @@ import {
   selectNewTermsRuleType,
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
@@ -79,7 +80,7 @@ describe('New Terms rules', { tags: ['@ess', '@serverless', '@brokenInServerless
     });
 
     it('Creates and enables a new terms rule', function () {
-      visitWithTimeRange(CREATE_RULE_URL);
+      visit(CREATE_RULE_URL);
       selectNewTermsRuleType();
       fillDefineNewTermsRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);

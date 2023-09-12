@@ -8,7 +8,8 @@
 import { TIMELINE_HEADER, TIMELINE_TABS } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   openTimelineUsingToggle,
   enterFullScreenMode,

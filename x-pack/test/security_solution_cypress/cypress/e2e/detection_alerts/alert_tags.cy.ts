@@ -14,7 +14,8 @@ import {
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
-import { login, visitWithTimeRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {

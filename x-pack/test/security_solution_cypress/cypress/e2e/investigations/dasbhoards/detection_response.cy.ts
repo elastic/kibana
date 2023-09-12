@@ -34,7 +34,8 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
 import { createNewTimeline } from '../../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../../urls/navigation';
@@ -50,7 +51,7 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(DETECTION_AND_RESPONSE_URL);
+    visit(DETECTION_AND_RESPONSE_URL);
   });
 
   context('KQL search bar', () => {

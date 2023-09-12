@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitWithTimeRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 
 import {
   ALERTS_URL,

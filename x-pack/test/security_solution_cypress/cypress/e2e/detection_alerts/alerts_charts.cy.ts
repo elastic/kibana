@@ -16,7 +16,8 @@ import {
 } from '../../tasks/alerts';
 import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { login, visitWithTimeRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,

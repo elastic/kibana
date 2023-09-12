@@ -35,7 +35,8 @@ import {
   deleteAlertsAndRules,
   reload,
 } from '../../../../../tasks/common';
-import { login, visit } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visit } from '../../../../../tasks/navigation';
 
 import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {

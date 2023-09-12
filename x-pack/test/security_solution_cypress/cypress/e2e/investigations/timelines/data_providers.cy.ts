@@ -15,7 +15,8 @@ import {
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   addDataProvider,
   updateDataProviderbyDraggingField,

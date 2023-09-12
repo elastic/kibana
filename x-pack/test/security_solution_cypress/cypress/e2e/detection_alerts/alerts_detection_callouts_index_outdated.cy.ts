@@ -13,7 +13,8 @@ import { ruleDetailsUrl } from '../../urls/rule_details';
 import { getNewRule } from '../../objects/rule';
 import { PAGE_TITLE } from '../../screens/common/page';
 
-import { login, visit, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 
 import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import {
@@ -24,7 +25,7 @@ import {
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
   login(ROLES.soc_manager);
-  visit(url, ROLES.soc_manager);
+  visit(url, { role: ROLES.soc_manager });
   waitForPageTitleToBeShown();
 };
 

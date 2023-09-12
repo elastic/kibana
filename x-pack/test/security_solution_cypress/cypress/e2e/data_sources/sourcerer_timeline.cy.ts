@@ -10,7 +10,8 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/constants';
 
-import { login, visitWithTimeRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visitWithTimeRange } from '../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 import {

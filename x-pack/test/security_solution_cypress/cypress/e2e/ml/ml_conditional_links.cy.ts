@@ -7,7 +7,8 @@
 
 import { KQL_INPUT } from '../../screens/security_header';
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 
 import {
   mlHostMultiHostKqlQuery,

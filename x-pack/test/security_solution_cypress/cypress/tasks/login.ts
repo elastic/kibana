@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
 import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 
 import type { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import { LoginState } from '@kbn/security-plugin/common/login_state';
-import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
+import { LOGOUT_URL } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -165,7 +163,7 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-const loginWithRole = (role: ROLES) => {
+const loginWithRole = async (role: ROLES) => {
   postRoleAndUser(role);
 
   cy.log(`origin: ${Cypress.config().baseUrl}`);
@@ -255,93 +253,6 @@ export const getEnvAuth = (): User => {
 
     return user;
   }
-};
-
-/**
- * For all the new features tours we show in the app, this method disables them
- * by setting their configs in the local storage. It prevents the tours from appearing
- * on the page during test runs and covering other UI elements.
- * @param window - browser's window object
- */
-const disableNewFeaturesTours = (window: Window) => {
-  const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
-  const tourConfig = {
-    isTourActive: false,
-  };
-
-  tourStorageKeys.forEach((key) => {
-    window.localStorage.setItem(key, JSON.stringify(tourConfig));
-  });
-};
-
-export const visitWithTimeRange = (
-  url: string,
-  options: Partial<Cypress.VisitOptions> = {},
-  role?: ROLES
-) => {
-  const timerangeConfig = {
-    from: 1547914976217,
-    fromStr: '2019-01-19T16:22:56.217Z',
-    kind: 'relative',
-    to: 1579537385745,
-    toStr: 'now',
-  };
-
-  const timerange = encode({
-    global: {
-      linkTo: ['timeline'],
-      timerange: timerangeConfig,
-    },
-    timeline: {
-      linkTo: ['global'],
-      timerange: timerangeConfig,
-    },
-  });
-
-  cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    ...options,
-    qs: {
-      ...options.qs,
-      timerange,
-    },
-    onBeforeLoad: (win) => {
-      options.onBeforeLoad?.(win);
-
-      disableNewFeaturesTours(win);
-    },
-    onLoad: (win) => {
-      options.onLoad?.(win);
-    },
-  });
-};
-
-export const visit = (url: string, role?: ROLES) => {
-  cy.visit(role ? getUrlWithRoute(role, url) : url, {
-    onBeforeLoad: disableNewFeaturesTours,
-  });
-};
-
-export const visitWithUser = (url: string, user: User) => {
-  cy.visit(constructUrlWithUser(user, url), {
-    onBeforeLoad: disableNewFeaturesTours,
-  });
-};
-
-export const visitTimeline = (timelineId: string, role?: ROLES) => {
-  const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
-  cy.visit(role ? getUrlWithRoute(role, route) : route, {
-    onBeforeLoad: disableNewFeaturesTours,
-  });
-};
-
-export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
-  visitWithTimeRange(hostDetailsUrl(hostName));
-  cy.get('[data-test-subj="loading-spinner"]').should('exist');
-  cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
-};
-
-export const visitUserDetailsPage = (userName = 'test') => {
-  visitWithTimeRange(userDetailsUrl(userName));
 };
 
 export const logout = () => {

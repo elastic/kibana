@@ -7,7 +7,8 @@
 
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getNewRule } from '../../../objects/rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { createRule } from '../../../tasks/api_calls/rules';
 import {
   addExceptionFlyoutItemName,

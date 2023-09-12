@@ -15,7 +15,8 @@ import {
 } from '../../../screens/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { addEqlToTimeline } from '../../../tasks/timeline';
 
 import { TIMELINES_URL } from '../../../urls/navigation';

@@ -23,7 +23,8 @@ import {
   fillRuleAction,
   fillScheduleRuleAndContinue,
 } from '../../../tasks/create_new_rule';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
 
@@ -53,7 +54,7 @@ describe(
     const expectedJson = JSON.parse(actions.connectors[0].document);
 
     it('Indexes a new document after the index action is triggered', function () {
-      visitWithTimeRange(CREATE_RULE_URL);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);

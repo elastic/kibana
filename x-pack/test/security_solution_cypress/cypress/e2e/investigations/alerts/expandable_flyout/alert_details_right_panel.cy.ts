@@ -60,7 +60,8 @@ import {
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithTimeRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -76,7 +77,7 @@ describe(
       cleanKibana();
       login();
       createRule(rule);
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 

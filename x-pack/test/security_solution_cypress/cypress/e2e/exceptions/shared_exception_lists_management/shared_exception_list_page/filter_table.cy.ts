@@ -18,7 +18,8 @@ import {
   searchForExceptionList,
   clearSearchSelection,
 } from '../../../../tasks/exceptions_table';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 const EXCEPTION_LIST_NAME = 'My test list';

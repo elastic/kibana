@@ -15,7 +15,8 @@ import {
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithTimeRange, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   changeTimelineQueryLanguage,

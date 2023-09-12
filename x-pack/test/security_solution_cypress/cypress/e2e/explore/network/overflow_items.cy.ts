@@ -14,7 +14,8 @@ import {
   SHOW_TOP_FIELD,
 } from '../../../screens/network/flows';
 
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { mouseoverOnToOverflowItem, openHoverActions } from '../../../tasks/network/flows';
 
 import { NETWORK_URL } from '../../../urls/navigation';
@@ -32,7 +33,7 @@ describe.skip('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServer
 
     beforeEach(() => {
       login();
-      visitWithTimeRange(NETWORK_URL);
+      visit(NETWORK_URL);
       cy.get(DESTINATION_DOMAIN).should('not.exist');
       cy.get(FILTER_IN).should('not.exist');
       cy.get(FILTER_OUT).should('not.exist');

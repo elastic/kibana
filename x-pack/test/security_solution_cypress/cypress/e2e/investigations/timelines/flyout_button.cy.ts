@@ -10,7 +10,8 @@ import { CREATE_NEW_TIMELINE, TIMELINE_FLYOUT_HEADER } from '../../../screens/ti
 import { cleanKibana } from '../../../tasks/common';
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeTimelineUsingCloseButton,
   closeTimelineUsingToggle,

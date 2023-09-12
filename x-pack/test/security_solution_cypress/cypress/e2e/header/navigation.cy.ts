@@ -32,7 +32,8 @@ import {
   ENTITY_ANALYTICS,
 } from '../../screens/security_header';
 
-import { login, visitWithTimeRange } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
@@ -202,7 +203,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
-    visitWithTimeRange(KIBANA_HOME);
+    visit(KIBANA_HOME);
     openKibanaNavigation();
   });
 

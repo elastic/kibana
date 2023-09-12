@@ -34,7 +34,8 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
@@ -52,7 +53,7 @@ describe('Changing alert status', { tags: ['@ess', '@brokenInServerless'] }, () 
     beforeEach(() => {
       login();
       createRule(getNewRule());
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
       selectNumberOfAlerts(3);
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);

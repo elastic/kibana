@@ -12,7 +12,8 @@ import {
 } from '../../../tasks/alerts';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 
 describe(
@@ -30,7 +31,7 @@ describe(
 
     beforeEach(() => {
       login();
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
 

@@ -13,7 +13,8 @@ import { openInvestigationTab } from '../../../../tasks/expandable_flyout/alert_
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithTimeRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -27,7 +28,7 @@ describe(
       cleanKibana();
       login();
       createRule(getNewRule());
-      visitWithTimeRange(ALERTS_URL);
+      visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();

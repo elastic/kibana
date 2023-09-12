@@ -23,7 +23,8 @@ import {
   navigateFromKibanaCollapsibleTo,
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { closeTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   addNameAndDescriptionToTimeline,

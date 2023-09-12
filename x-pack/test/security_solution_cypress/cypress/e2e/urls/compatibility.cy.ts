@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit } from '../../tasks/navigation';
 
 import { ALERTS_URL, CREATE_RULE_URL } from '../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';

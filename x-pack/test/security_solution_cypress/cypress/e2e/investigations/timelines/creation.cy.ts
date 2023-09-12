@@ -24,7 +24,8 @@ import {
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
-import { login, visitWithTimeRange, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
@@ -92,7 +93,7 @@ describe('Timelines', (): void => {
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.reader);
-        visitWithTimeRange(OVERVIEW_URL, undefined, ROLES.reader);
+        visitWithTimeRange(OVERVIEW_URL, { role: ROLES.reader });
       });
 
       it('should not be able to create/update timeline ', () => {

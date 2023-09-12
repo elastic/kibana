@@ -8,7 +8,8 @@
 import { ID_HEADER_FIELD, TIMESTAMP_HEADER_FIELD } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   clickIdToggleField,

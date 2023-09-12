@@ -6,7 +6,8 @@
  */
 
 import { reload } from '../../../tasks/common';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { hostsUrl } from '../../../urls/navigation';
 import { openEvents } from '../../../tasks/hosts/main';
 import { DATAGRID_HEADERS, DATAGRID_HEADER } from '../../../screens/timeline';

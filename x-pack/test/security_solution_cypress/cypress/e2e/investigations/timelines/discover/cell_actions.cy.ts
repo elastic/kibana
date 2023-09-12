@@ -14,7 +14,8 @@ import {
 } from '../../../../screens/discover';
 import { waitForDiscoverGridToLoad } from '../../../../tasks/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
-import { login, visitWithTimeRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 

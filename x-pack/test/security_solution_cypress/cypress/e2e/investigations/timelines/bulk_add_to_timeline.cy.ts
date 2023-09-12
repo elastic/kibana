@@ -19,7 +19,8 @@ import {
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL, hostsUrl } from '../../../urls/navigation';
 
 describe('Bulk Investigate in Timeline', { tags: ['@ess', '@serverless'] }, () => {

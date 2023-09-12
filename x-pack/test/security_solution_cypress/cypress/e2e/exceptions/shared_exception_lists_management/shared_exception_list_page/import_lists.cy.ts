@@ -17,7 +17,8 @@ import {
   validateImportExceptionListWentSuccessfully,
   validateImportExceptionListFailedBecauseExistingListFound,
 } from '../../../../tasks/exceptions_table';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539

@@ -20,7 +20,8 @@ import {
 import { findSavedObjects } from '../../../tasks/api_calls/risk_scores/saved_objects';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { clickEnableRiskScore } from '../../../tasks/risk_scores';
 import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 import {

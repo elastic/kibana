@@ -49,7 +49,8 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { loginWithUser, visitWithTimeRange, visit } from '../../../tasks/login';
+import { loginWithUser } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
 

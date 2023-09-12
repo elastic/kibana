@@ -24,7 +24,8 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   markAsFavorite,
   openTimelineById,

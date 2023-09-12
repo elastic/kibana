@@ -18,7 +18,8 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { getNewRule } from '../../../objects/rule';
 
-import { login, visit, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 

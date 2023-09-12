@@ -14,7 +14,8 @@ import {
   findSharedExceptionListItemsByName,
   waitForExceptionsTableToBeLoaded,
 } from '../../../../tasks/exceptions_table';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 import {
   createExceptionList,

@@ -25,7 +25,8 @@ import {
 } from '../../screens/security_header';
 import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../screens/timeline';
 
-import { login, visitWithTimeRange, visit } from '../../tasks/login';
+import { login } from '../../tasks/login';
+import { visit, visitWithTimeRange } from '../../tasks/navigation';
 import {
   updateDates,
   setStartDate,

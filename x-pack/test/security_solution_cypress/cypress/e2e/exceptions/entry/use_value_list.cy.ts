@@ -18,7 +18,8 @@ import {
 } from '../../../tasks/rule_details';
 import { getNewRule } from '../../../objects/rule';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   createListsIndex,

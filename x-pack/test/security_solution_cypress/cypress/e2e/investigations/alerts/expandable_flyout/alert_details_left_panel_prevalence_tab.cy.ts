@@ -25,7 +25,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_DATE_PICKER,
 } from '../../../../screens/expandable_flyout/alert_details_left_panel_prevalence_tab';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithTimeRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -36,7 +37,7 @@ describe('Alert details expandable flyout left panel prevalence', () => {
     cleanKibana();
     login();
     createRule({ ...getNewRule(), investigation_fields: { field_names: ['host.os.name'] } });
-    visitWithTimeRange(ALERTS_URL);
+    visit(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlertExpandableFlyout();
     expandDocumentDetailsExpandableFlyoutLeftSection();

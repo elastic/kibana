@@ -8,7 +8,8 @@
 import { getExceptionList } from '../../../../objects/exception';
 import { getNewRule } from '../../../../objects/rule';
 
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { EXCEPTIONS_URL, exceptionsListDetailsUrl } from '../../../../urls/navigation';
 import {

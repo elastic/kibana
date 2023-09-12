@@ -22,7 +22,8 @@ import {
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
-import { login, visitWithTimeRange } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
 import {
   createNewTimeline,
   gotToDiscoverTab,

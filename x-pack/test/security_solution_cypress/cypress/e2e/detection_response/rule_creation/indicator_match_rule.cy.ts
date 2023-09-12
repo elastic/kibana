@@ -101,7 +101,8 @@ import {
   SCHEDULE_LOOKBACK_UNITS_INPUT,
 } from '../../../screens/create_new_rule';
 import { goBackToRuleDetails } from '../../../tasks/edit_rule';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   goBackToRulesTable,
   getDetails,

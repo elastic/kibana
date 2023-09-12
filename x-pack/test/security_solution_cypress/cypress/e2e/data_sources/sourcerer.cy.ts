@@ -7,7 +7,8 @@
 
 import { DEFAULT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/constants';
 
-import { login, loginWithUser, visitWithTimeRange, visitWithUser } from '../../tasks/login';
+import { login, loginWithUser } from '../../tasks/login';
+import { visitWithTimeRange, visitWithUser } from '../../tasks/navigation';
 
 import { hostsUrl } from '../../urls/navigation';
 import {

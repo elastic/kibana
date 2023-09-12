@@ -62,7 +62,8 @@ import {
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
 
-import { login, visitWithTimeRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
@@ -91,7 +92,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visitWithTimeRange(CREATE_RULE_URL);
+      visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);

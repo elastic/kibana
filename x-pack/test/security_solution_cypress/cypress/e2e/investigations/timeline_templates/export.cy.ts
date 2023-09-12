@@ -6,7 +6,8 @@
  */
 
 import { exportTimeline } from '../../../tasks/timelines';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   expectedExportedTimelineTemplate,
   getTimeline as getTimelineTemplate,

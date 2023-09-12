@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   getCase1,
   getConnectorIds,

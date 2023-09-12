@@ -11,7 +11,8 @@ import {
   selectAllTimelines,
   exportSelectedTimelines,
 } from '../../../tasks/timelines';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
