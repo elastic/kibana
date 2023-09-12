@@ -9,7 +9,7 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 
-interface RiskInputsIndexResponse {
+export interface RiskInputsIndexResponse {
   index: string;
   runtimeMappings: MappingRuntimeFields;
 }

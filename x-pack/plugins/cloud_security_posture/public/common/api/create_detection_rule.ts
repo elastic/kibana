@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
+import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../../../common/constants';
 import { RuleCreateProps, RuleResponse } from '../types';
 
 const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
@@ -18,6 +19,7 @@ export const createDetectionRule = async ({
   rule: RuleCreateProps;
 }): Promise<RuleResponse> => {
   const res = await http.post<RuleCreateProps>(DETECTION_ENGINE_RULES_URL, {
+    version: DETECTION_RULE_RULES_API_CURRENT_VERSION,
     body: JSON.stringify(rule),
   });
 

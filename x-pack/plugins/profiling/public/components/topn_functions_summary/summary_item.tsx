@@ -19,6 +19,7 @@ import {
 import React from 'react';
 
 interface Props {
+  id: string;
   title: string;
   isLoading: boolean;
   baseValue: string;
@@ -39,16 +40,26 @@ function Title({ title }: { title: string }) {
   );
 }
 
-function BaseValue({ value, icon, color }: { value: string; icon?: string; color?: string }) {
+function BaseValue({
+  id,
+  value,
+  icon,
+  color,
+}: {
+  id: string;
+  value: string;
+  icon?: string;
+  color?: string;
+}) {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {icon ? (
         <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EuiIcon type={icon} color={color} size="l" />
+          <EuiIcon data-test-subj={`${id}_${icon}_${color}`} type={icon} color={color} size="l" />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiTextColor style={{ fontWeight: 'bold' }} color={color}>
+        <EuiTextColor style={{ fontWeight: 'bold' }} color={color} data-test-subj={`${id}_value`}>
           {value}
         </EuiTextColor>
       </EuiFlexItem>
@@ -61,6 +72,7 @@ export function getValueLable(value: string, perc?: string) {
 }
 
 export function SummaryItem({
+  id,
   baseValue,
   baseIcon,
   baseColor,
@@ -75,7 +87,7 @@ export function SummaryItem({
   return (
     <EuiPanel hasShadow={false}>
       <EuiStat
-        title={<BaseValue value={baseValue} color={baseColor} icon={baseIcon} />}
+        title={<BaseValue id={id} value={baseValue} color={baseColor} icon={baseIcon} />}
         titleSize="m"
         description={
           <>
@@ -101,8 +113,15 @@ export function SummaryItem({
       >
         {!isLoading && comparisonValue ? (
           <EuiText color={comparisonColor}>
-            {comparisonIcon ? <EuiIcon type={comparisonIcon} /> : null}
-            {getValueLable(comparisonValue, comparisonPerc)}
+            {comparisonIcon ? (
+              <EuiIcon
+                data-test-subj={`${id}_comparison_${comparisonIcon}_${comparisonColor}`}
+                type={comparisonIcon}
+              />
+            ) : null}
+            <span data-test-subj={`${id}_comparison_value`}>
+              {getValueLable(comparisonValue, comparisonPerc)}
+            </span>
           </EuiText>
         ) : null}
       </EuiStat>

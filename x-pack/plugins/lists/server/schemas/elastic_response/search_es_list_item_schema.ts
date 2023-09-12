@@ -11,9 +11,10 @@ import {
   created_by,
   deserializerOrUndefined,
   list_id,
-  metaOrUndefined,
+  nullableMetaOrUndefined,
   serializerOrUndefined,
   tie_breaker_id,
+  timestampOrUndefined,
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -46,6 +47,7 @@ import {
 
 export const searchEsListItemSchema = t.exact(
   t.type({
+    '@timestamp': timestampOrUndefined,
     binary: binaryOrUndefined,
     boolean: booleanOrUndefined,
     byte: byteOrUndefined,
@@ -70,7 +72,7 @@ export const searchEsListItemSchema = t.exact(
     list_id,
     long: longOrUndefined,
     long_range: longRangeOrUndefined,
-    meta: metaOrUndefined,
+    meta: nullableMetaOrUndefined,
     serializer: serializerOrUndefined,
     shape: shapeOrUndefined,
     short: shortOrUndefined,

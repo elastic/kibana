@@ -103,6 +103,7 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
 
@@ -121,6 +122,7 @@ export const loadLiveQuery = (
   payload = {
     agent_all: true,
     query: 'select * from uptime;',
+    kuery: '',
   }
 ) =>
   request<{
@@ -221,6 +223,9 @@ export const loadRule = (includeResponseActions = false) =>
         : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => response.body);
 
 export const cleanupRule = (id: string) => {
@@ -289,8 +294,18 @@ export const loadAgentPolicy = () =>
       monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: 1209600,
     },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
     url: '/api/fleet/agent_policies',
   }).then((response) => response.body.item);
 
 export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });
+  request({
+    method: 'POST',
+    body: { agentPolicyId },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    url: '/api/fleet/agent_policies/delete',
+  });

@@ -185,6 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({ rule_id: ELASTIC_SECURITY_RULE_ID, exceptions_list: [] })
             .expect(200);
 
@@ -209,6 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -238,6 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({ rule_id: ELASTIC_SECURITY_RULE_ID, exceptions_list: [] })
             .expect(200);
 
@@ -267,6 +270,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -330,6 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -386,6 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ruleId,
               exceptions_list: [
@@ -430,6 +436,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [
@@ -470,6 +477,7 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
             .send({
               rule_id: ELASTIC_SECURITY_RULE_ID,
               exceptions_list: [

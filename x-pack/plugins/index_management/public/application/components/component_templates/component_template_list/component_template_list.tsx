@@ -144,7 +144,7 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
 
   if (isLoading) {
     return (
-      <PageLoading data-test-subj="sectionLoading">
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplates.list.loadingMessage"
           defaultMessage="Loading component templates…"

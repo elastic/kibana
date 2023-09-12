@@ -771,7 +771,7 @@
           "\nReturns a user-friendly description of a field type"
         ],
         "signature": [
-          "(type: string | undefined) => any"
+          "(type: string | undefined) => string"
         ],
         "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_description.ts",
         "deprecated": false,
@@ -788,41 +788,6 @@
               "string | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_description.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-common.getFieldTypeName",
-        "type": "Function",
-        "tags": [],
-        "label": "getFieldTypeName",
-        "description": [
-          "\nReturns a user-friendly name of a field type"
-        ],
-        "signature": [
-          "(type: string | undefined) => any"
-        ],
-        "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_name.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-common.getFieldTypeName.$1",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -5518,20 +5483,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-common.KNOWN_FIELD_TYPES",
-        "type": "Enum",
-        "tags": [],
-        "label": "KNOWN_FIELD_TYPES",
-        "description": [
-          "\nField types for which name and description are defined"
-        ],
-        "path": "packages/kbn-unified-field-list/src/utils/field_types/field_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -5687,21 +5638,6 @@
           "FieldStatsWithDslQuery"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_stats/field_stats.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-common.FieldTypeKnown",
-        "type": "Type",
-        "tags": [],
-        "label": "FieldTypeKnown",
-        "description": [],
-        "signature": [
-          "string"
-        ],
-        "path": "packages/kbn-unified-field-list/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

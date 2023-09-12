@@ -8,17 +8,15 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { APMConfig } from '../../../..';
-import { APMRouteHandlerResources } from '../../../../routes/typings';
+import { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
 import {
   callAsyncWithDebug,
   getDebugBody,
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { getApmIndices } from '../../../../routes/settings/apm_indices/get_apm_indices';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
@@ -28,39 +26,35 @@ export type APMInternalESClient = Awaited<
 
 export async function createInternalESClientWithContext({
   debug,
-  config,
+  apmIndices,
   request,
   context,
 }: {
   debug: boolean;
-  config: APMConfig;
+  apmIndices: APMIndices;
   request: APMRouteHandlerResources['request'];
   context: APMRouteHandlerResources['context'];
 }) {
   const coreContext = await context.core;
   const { asInternalUser } = coreContext.elasticsearch.client;
-  const savedObjectsClient = coreContext.savedObjects.client;
 
   return createInternalESClient({
     debug,
-    config,
+    apmIndices,
     request,
-    savedObjectsClient,
     elasticsearchClient: asInternalUser,
   });
 }
 
 export async function createInternalESClient({
   debug,
-  config,
+  apmIndices,
   request,
-  savedObjectsClient,
   elasticsearchClient,
 }: {
   debug: boolean;
-  config: APMConfig;
+  apmIndices: APMIndices;
   request?: APMRouteHandlerResources['request'];
-  savedObjectsClient: SavedObjectsClientContract;
   elasticsearchClient: ElasticsearchClient;
 }) {
   function callEs<T extends { body: any }>(
@@ -98,7 +92,7 @@ export async function createInternalESClient({
   }
 
   return {
-    apmIndices: await getApmIndices({ savedObjectsClient, config }),
+    apmIndices,
     search: async <
       TDocument = unknown,
       TSearchRequest extends ESSearchRequest = ESSearchRequest

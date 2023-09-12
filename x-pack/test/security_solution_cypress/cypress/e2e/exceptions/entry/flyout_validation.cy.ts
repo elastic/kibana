@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { getNewRule } from '../../../objects/rule';
 
 import { RULE_STATUS } from '../../../screens/create_new_rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
@@ -48,8 +46,8 @@ import {
   FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { reload } from '../../../tasks/common';
+import { ruleDetailsUrl } from '../../../urls/navigation';
+import { deleteAlertsAndRules, reload } from '../../../tasks/common';
 import {
   createExceptionList,
   createExceptionListItem,
@@ -58,6 +56,7 @@ import {
 } from '../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../objects/exception';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // Test Skipped until we fix the Flyout rerendering issue
 // https://github.com/elastic/kibana/issues/154994
 
@@ -66,17 +65,21 @@ import { getExceptionList } from '../../../objects/exception';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe.skip('Exceptions flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
-    cy.task('esArchiverLoad', 'exceptions');
+    cy.task('esArchiverLoad', { archiveName: 'exceptions' });
     // Comment the Conflicts here as they are skipped
-    // cy.task('esArchiverLoad', 'conflicts_1');
-    // cy.task('esArchiverLoad', 'conflicts_2');
+    // cy.task('esArchiverLoad',{ archiveName: 'conflicts_1' });
+    // cy.task('esArchiverLoad',{ archiveName: 'conflicts_2' });
+  });
+
+  beforeEach(() => {
     login();
+    deleteAlertsAndRules();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createRule(
         getNewRule({
@@ -91,18 +94,9 @@ describe.skip('Exceptions flyout', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
             },
           ],
         })
-      )
+      ).then((rule) => visitWithoutDateRange(ruleDetailsUrl(rule.body.id, 'rule_exceptions')))
     );
-    login();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-  });
-
-  beforeEach(() => {
-    login();
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
-    goToExceptionsTab();
   });
 
   after(() => {

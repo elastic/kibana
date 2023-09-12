@@ -13,6 +13,7 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
   config: {
     isSecurityEnabled: jest.fn().mockReturnValue(true),
     isLegacyTemplatesEnabled: true,
+    isIndexStatsEnabled: true,
   },
   indexDataEnricher: new IndexDataEnricher(),
   lib: {

@@ -6,7 +6,6 @@
  */
 
 import path from 'path';
-import { tag } from '../../../../../tags';
 
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
@@ -17,7 +16,6 @@ import {
 } from '../../../../../screens/alerts_detection_rules';
 import {
   filterByElasticRules,
-  selectNumberOfRules,
   selectAllRules,
   waitForRuleExecution,
   exportRule,
@@ -57,7 +55,8 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
   });
 });
 
-describe('Export rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {
@@ -74,7 +73,7 @@ describe('Export rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     // Prevent installation of whole prebuilt rules package, use mock prebuilt rules instead
     preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createRule(getNewRule({ name: 'Rule to export' })).as('ruleResponse');
+    createRule(getNewRule({ name: 'Rule to export', enabled: false })).as('ruleResponse');
   });
 
   it('exports a custom rule', function () {
@@ -106,7 +105,7 @@ describe('Export rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
     createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
 
     filterByElasticRules();
-    selectNumberOfRules(prebuiltRules.length);
+    selectAllRules();
     bulkExportRules();
 
     cy.get(MODAL_CONFIRMATION_BODY).contains(
@@ -160,6 +159,7 @@ describe('Export rules', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
               },
             ],
             rule_id: '2',
+            enabled: false,
           })
         )
       );

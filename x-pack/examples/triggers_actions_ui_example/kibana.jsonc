@@ -13,6 +13,9 @@
       "developerExamples",
       "kibanaReact",
       "cases"
-    ]
+    ],
+    "optionalPlugins": [
+      "spaces"
+    ],
   }
 }

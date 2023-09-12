@@ -616,6 +616,10 @@
       }
     }
   },
+  "apm-indices": {
+    "dynamic": false,
+    "properties": {}
+  },
   "tag": {
     "properties": {
       "name": {
@@ -2956,8 +2960,42 @@
   "risk-engine-configuration": {
     "dynamic": false,
     "properties": {
+      "dataViewId": {
+        "type": "keyword"
+      },
       "enabled": {
         "type": "boolean"
+      },
+      "filter": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "identifierType": {
+        "type": "keyword"
+      },
+      "interval": {
+        "type": "keyword"
+      },
+      "pageSize": {
+        "type": "integer"
+      },
+      "range": {
+        "properties": {
+          "start": {
+            "type": "keyword"
+          },
+          "end": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  },
+  "policy-settings-protection-updates-note": {
+    "properties": {
+      "note": {
+        "type": "text",
+        "index": false
       }
     }
   },
@@ -3004,10 +3042,6 @@
         "type": "keyword"
       }
     }
-  },
-  "apm-indices": {
-    "dynamic": false,
-    "properties": {}
   },
   "apm-telemetry": {
     "dynamic": false,

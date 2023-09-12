@@ -10,7 +10,7 @@ import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
 
 export const goDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.goAdvancedConfig,
+  apiReference: docLinks.goApiReference,
   basicConfig: docLinks.goBasicConfig,
   buildSearchQuery: `searchResp, err := es.Search().
   Index("books").
@@ -38,6 +38,12 @@ func main() {
   }
 }`,
   docLink: docLinks.goClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-go',
+    label: i18n.translate('xpack.serverlessSearch.languages.go.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-go',
+    }),
+  },
   iconType: 'go.svg',
   id: Languages.GO,
   ingestData: `ingestResult, err := es.Bulk().

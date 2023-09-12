@@ -41,6 +41,8 @@ type CrawlerCustomScheduleConfig = Pick<
   | 'selectedDomainUrls'
   | 'selectedEntryPointUrls'
   | 'selectedSitemapUrls'
+  | 'entryPointUrls'
+  | 'sitemapUrls'
 >;
 
 interface CrawlCustomSettingsFlyoutSeedUrlsPanelProps {
@@ -50,8 +52,6 @@ interface CrawlCustomSettingsFlyoutSeedUrlsPanelProps {
   onSelectEntryPointUrls: (urls: string[]) => void;
   onSelectSitemapUrls: (urls: string[]) => void;
   toggleIncludeSitemapsInRobotsTxt: () => void;
-  entryPointUrls: string[];
-  sitemapUrls: string[];
 }
 
 export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps: React.FC = () => {
@@ -80,6 +80,8 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps: React.FC = ()
     selectedDomainUrls,
     selectedEntryPointUrls,
     selectedSitemapUrls,
+    entryPointUrls,
+    sitemapUrls,
   };
 
   return (
@@ -90,8 +92,6 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanelWithLogicProps: React.FC = ()
       onSelectEntryPointUrls={onSelectEntryPointUrls}
       onSelectSitemapUrls={onSelectSitemapUrls}
       toggleIncludeSitemapsInRobotsTxt={toggleIncludeSitemapsInRobotsTxt}
-      entryPointUrls={entryPointUrls}
-      sitemapUrls={sitemapUrls}
     />
   );
 };
@@ -105,8 +105,6 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC<
   onSelectEntryPointUrls,
   onSelectSitemapUrls,
   toggleIncludeSitemapsInRobotsTxt,
-  entryPointUrls,
-  sitemapUrls,
 }) => {
   const totalSeedUrls =
     scheduleConfig.customEntryPointUrls.length +
@@ -187,7 +185,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC<
                   </EuiPanel>
                   <SimplifiedSelectable
                     data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
-                    options={sitemapUrls}
+                    options={scheduleConfig.sitemapUrls}
                     selectedOptions={scheduleConfig.selectedSitemapUrls}
                     onChange={onSelectSitemapUrls}
                     emptyMessage={
@@ -229,7 +227,7 @@ export const CrawlCustomSettingsFlyoutSeedUrlsPanel: React.FC<
                   <EuiSpacer size="s" />
                   <SimplifiedSelectable
                     data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomain"
-                    options={entryPointUrls}
+                    options={scheduleConfig.entryPointUrls}
                     selectedOptions={scheduleConfig.selectedEntryPointUrls}
                     onChange={onSelectEntryPointUrls}
                     emptyMessage={
