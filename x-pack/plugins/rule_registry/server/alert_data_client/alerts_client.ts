@@ -397,7 +397,7 @@ export class AlertsClient {
       const bulkUpdateRequest = updateRequests.flat();
 
       const bulkUpdateResponse = await this.esClient.bulk({
-        refresh: 'wait_for',
+        refresh: true,
         body: bulkUpdateRequest,
       });
       return bulkUpdateResponse;
@@ -747,7 +747,7 @@ export class AlertsClient {
             ...fieldToUpdate,
           },
         },
-        refresh: 'wait_for',
+        refresh: true,
       });
 
       return {
@@ -890,7 +890,7 @@ export class AlertsClient {
       }
 
       await this.esClient.bulk({
-        refresh: 'wait_for',
+        refresh: true,
         body: bulkUpdateRequest,
       });
     } catch (error) {
