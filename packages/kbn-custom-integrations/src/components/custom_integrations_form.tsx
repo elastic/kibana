@@ -10,9 +10,15 @@ import React from 'react';
 import { useSelector } from '@xstate/react';
 import { useCustomIntegrations } from '../hooks/use_custom_integrations';
 import { createIsInitializedSelector } from '../state_machines/custom_integrations/selectors';
-import { ConnectedCreateCustomIntegrationForm } from './create/form';
+import { ConnectedCreateCustomIntegrationForm, CreateTestSubjects } from './create/form';
 
-export const ConnectedCustomIntegrationsForm = () => {
+interface Props {
+  testSubjects?: {
+    create?: CreateTestSubjects;
+  };
+}
+
+export const ConnectedCustomIntegrationsForm = ({ testSubjects }: Props) => {
   const { customIntegrationsState, customIntegrationsStateService } = useCustomIntegrations();
 
   const createIsInitialized = useSelector(
@@ -24,6 +30,7 @@ export const ConnectedCustomIntegrationsForm = () => {
     return (
       <ConnectedCreateCustomIntegrationForm
         machineRef={customIntegrationsState.children.createCustomIntegration}
+        testSubjects={testSubjects?.create}
       />
     );
   } else {

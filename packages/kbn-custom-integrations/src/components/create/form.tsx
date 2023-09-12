@@ -33,10 +33,21 @@ import { hasFailedSelector } from '../../state_machines/create/selectors';
 // And also to allow adding multiple datasets.
 const DATASET_TYPE = 'logs' as const;
 
+export interface CreateTestSubjects {
+  integrationName?: string;
+  datasetName?: string;
+  errorCallout?: {
+    callout?: string;
+    retryButton?: string;
+  };
+}
+
 export const ConnectedCreateCustomIntegrationForm = ({
   machineRef,
+  testSubjects,
 }: {
   machineRef: CreateCustomIntegrationActorRef;
+  testSubjects?: CreateTestSubjects;
 }) => {
   const [state, send] = useActor(machineRef);
   const updateIntegrationName = useCallback(
@@ -74,6 +85,7 @@ export const ConnectedCreateCustomIntegrationForm = ({
       touchedFields={state?.context.touchedFields}
       hasFailed={hasFailed}
       onRetry={hasFailed ? retry : undefined}
+      testSubjects={testSubjects}
     />
   );
 };
@@ -87,6 +99,7 @@ interface FormProps {
   updateDatasetName: (integrationName: string) => void;
   hasFailed: boolean;
   onRetry?: () => void;
+  testSubjects?: CreateTestSubjects;
 }
 
 export const CreateCustomIntegrationForm = ({
@@ -97,6 +110,7 @@ export const CreateCustomIntegrationForm = ({
   updateIntegrationName,
   updateDatasetName,
   onRetry,
+  testSubjects,
 }: FormProps) => {
   return (
     <>
@@ -149,6 +163,10 @@ export const CreateCustomIntegrationForm = ({
             onChange={(event) => updateIntegrationName(event.target.value)}
             isInvalid={hasErrors(errors?.fields?.integrationName) && touchedFields.integrationName}
             max={100}
+            data-test-subj={
+              testSubjects?.integrationName ??
+              'customIntegrationsPackageCreateFormIntegrationNameInput'
+            }
           />
         </EuiFormRow>
         <EuiFormRow
@@ -185,13 +203,20 @@ export const CreateCustomIntegrationForm = ({
             onChange={(event) => updateDatasetName(event.target.value)}
             isInvalid={hasErrors(errors?.fields?.datasets?.[0].name) && touchedFields.datasets}
             max={100}
+            data-test-subj={
+              testSubjects?.datasetName ?? 'customIntegrationsPackageCreateFormDatasetNameInput'
+            }
           />
         </EuiFormRow>
       </EuiForm>
       {errors?.general && (
         <>
           <EuiSpacer size="l" />
-          <ErrorCallout error={errors?.general} onRetry={onRetry} />
+          <ErrorCallout
+            error={errors?.general}
+            onRetry={onRetry}
+            testSubjects={testSubjects?.errorCallout}
+          />
         </>
       )}
     </>

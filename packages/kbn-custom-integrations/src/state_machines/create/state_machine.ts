@@ -297,12 +297,12 @@ export const createCreateCustomIntegrationStateMachine = ({
           name: [
             createIsEmptyValidation(
               i18n.translate('customIntegrationsPackage.validations.datasets.requiredError', {
-                defaultMessage: 'Dataset name is required.',
+                defaultMessage: 'A dataset name is required.',
               })
             ),
             createIsLowerCaseValidation(
               i18n.translate('customIntegrationsPackage.validations.datasets.lowerCaseError', {
-                defaultMessage: 'Dataset name should be lowercase.',
+                defaultMessage: 'A dataset name should be lowercase.',
               })
             ),
             createCharacterLimitValidation(

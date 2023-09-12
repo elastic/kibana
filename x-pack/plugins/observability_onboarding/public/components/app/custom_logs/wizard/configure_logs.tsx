@@ -44,6 +44,17 @@ import {
 import { BackButton } from './back_button';
 import { getFilename } from './get_filename';
 
+const customIntegrationsTestSubjects = {
+  create: {
+    integrationName: 'obltOnboardingCustomLogsIntegrationsName',
+    datasetName: 'obltOnboardingCustomLogsDatasetName',
+    errorCallout: {
+      callout: 'obltOnboardingCustomIntegrationErrorCallout',
+    },
+  },
+  button: 'obltOnboardingCustomLogsContinue',
+};
+
 export function ConfigureLogs() {
   const {
     services: { http },
@@ -141,8 +152,13 @@ export function ConfigureLogsContent() {
     if (index === 0) {
       if (updateCreateFields) {
         updateCreateFields({
-          integrationName: getFilename(filepath),
-          datasets: [{ name: getFilename(filepath), type: 'logs' as const }],
+          integrationName: getFilename(filepath).toLowerCase(),
+          datasets: [
+            {
+              name: getFilename(filepath).toLowerCase(),
+              type: 'logs' as const,
+            },
+          ],
         });
       }
     }
@@ -157,6 +173,7 @@ export function ConfigureLogsContent() {
             <ConnectedCustomIntegrationsButton
               isDisabled={logFilePathNotConfigured || !namespace}
               onClick={onContinue}
+              testSubj={customIntegrationsTestSubjects.button}
             />,
           ]}
         />
@@ -439,7 +456,9 @@ export function ConfigureLogsContent() {
           </EuiFlexGroup>
         </EuiForm>
         <EuiSpacer size="l" />
-        <ConnectedCustomIntegrationsForm />
+        <ConnectedCustomIntegrationsForm
+          testSubjects={customIntegrationsTestSubjects}
+        />
       </StepPanelContent>
     </StepPanel>
   );

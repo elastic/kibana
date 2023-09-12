@@ -15,11 +15,13 @@ import { ConnectedCreateCustomIntegrationButton } from './create/button';
 interface ConnectedCustomIntegrationsButtonProps {
   isDisabled?: boolean;
   onClick?: () => void;
+  testSubj?: string;
 }
 
 export const ConnectedCustomIntegrationsButton = ({
   isDisabled,
   onClick,
+  testSubj = 'customIntegrationsPackageConnectedButton',
 }: ConnectedCustomIntegrationsButtonProps) => {
   const { customIntegrationsStateService, customIntegrationsState } = useCustomIntegrations();
 
@@ -34,6 +36,7 @@ export const ConnectedCustomIntegrationsButton = ({
         machine={customIntegrationsState.children.createCustomIntegration}
         isDisabled={isDisabled}
         onClick={onClick}
+        testSubj={testSubj}
       />
     );
   } else {

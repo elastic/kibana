@@ -27,6 +27,7 @@ interface ConnectedCreateCustomIntegrationButtonProps {
   onClick?: () => void;
   submittingText?: string;
   continueText?: string;
+  testSubj: string;
 }
 export const ConnectedCreateCustomIntegrationButton = ({
   machine,
@@ -34,6 +35,7 @@ export const ConnectedCreateCustomIntegrationButton = ({
   onClick: consumerOnClick,
   submittingText = SUBMITTING_TEXT,
   continueText = CONTINUE_TEXT,
+  testSubj,
 }: ConnectedCreateCustomIntegrationButtonProps) => {
   const [, send] = useActor(machine);
 
@@ -55,6 +57,7 @@ export const ConnectedCreateCustomIntegrationButton = ({
       isDisabled={isDisabled}
       submittingText={submittingText}
       continueText={continueText}
+      testSubj={testSubj}
     />
   );
 };
@@ -71,10 +74,11 @@ const CreateCustomIntegrationButton = ({
   isDisabled,
   submittingText,
   continueText,
+  testSubj,
 }: CreateCustomIntegrationButtonProps) => {
   return (
     <EuiButton
-      data-test-subj="customIntegrationsPackageCreateButton"
+      data-test-subj={testSubj}
       color="primary"
       fill
       onClick={onClick}

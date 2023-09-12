@@ -15,6 +15,7 @@ import {
   IntegrationNotInstalledError,
   UnknownError,
 } from '../../types';
+import { CreateTestSubjects } from './form';
 
 const TITLE = i18n.translate('customIntegrationsPackage.create.errorCallout.title', {
   defaultMessage: 'Sorry, there was an error',
@@ -27,9 +28,11 @@ const RETRY_TEXT = i18n.translate('customIntegrationsPackage.create.errorCallout
 export const ErrorCallout = ({
   error,
   onRetry,
+  testSubjects,
 }: {
   error: IntegrationError;
   onRetry?: () => void;
+  testSubjects?: CreateTestSubjects['errorCallout'];
 }) => {
   if (error instanceof AuthorizationError) {
     const authorizationDescription = i18n.translate(
@@ -38,22 +41,46 @@ export const ErrorCallout = ({
         defaultMessage: 'This user does not have permissions to create an integration.',
       }
     );
-    return <BaseErrorCallout message={authorizationDescription} onRetry={onRetry} />;
+    return (
+      <BaseErrorCallout
+        message={authorizationDescription}
+        onRetry={onRetry}
+        testSubjects={testSubjects}
+      />
+    );
   } else if (error instanceof UnknownError || error instanceof IntegrationNotInstalledError) {
-    return <BaseErrorCallout message={error.message} onRetry={onRetry} />;
+    return (
+      <BaseErrorCallout message={error.message} onRetry={onRetry} testSubjects={testSubjects} />
+    );
   } else {
     return null;
   }
 };
 
-const BaseErrorCallout = ({ message, onRetry }: { message: string; onRetry?: () => void }) => {
+const BaseErrorCallout = ({
+  message,
+  onRetry,
+  testSubjects,
+}: {
+  message: string;
+  onRetry?: () => void;
+  testSubjects?: CreateTestSubjects['errorCallout'];
+}) => {
   return (
-    <EuiCallOut title={TITLE} color="danger" iconType="error">
+    <EuiCallOut
+      title={TITLE}
+      color="danger"
+      iconType="error"
+      data-test-subj={testSubjects?.callout ?? 'customIntegrationsPackageCreateFormErrorCallout'}
+    >
       <>
         <p>{message}</p>
         {onRetry ? (
           <EuiButton
-            data-test-subj="customIntegrationsPackageRetryButton"
+            data-test-subj={
+              testSubjects?.retryButton ??
+              'customIntegrationsPackageCreateFormErrorCalloutRetryButton'
+            }
             color="danger"
             size="s"
             onClick={onRetry}
