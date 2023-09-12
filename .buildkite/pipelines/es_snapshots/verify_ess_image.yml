@@ -2,12 +2,15 @@ agents:
   queue: kibana-default
 
 steps:
-  - label: "Ensure required ENV variable ESS_IMAGE_URL_OR_TAG"
-    command: echo "Please provide the env variable ESS_IMAGE_URL_OR_TAG for the build." && exit 1
-    if: "build.env('ESS_IMAGE_URL_OR_TAG') == null"
     # It's easier to do this through a required env var, than an input.
     #  Inputs are not accessible in the pipeline code,
     #  so you'd have to get a script to dig up the meta-data, then emit a build step to buildkite
+  - label: "Ensure required ENV variable ESS_IMAGE_URL_OR_TAG"
+    if: "build.env('ESS_IMAGE_URL_OR_TAG') == null"
+    command: |
+      echo "Please provide the env variable ESS_IMAGE_URL_OR_TAG for the build."
+      buildkite-agent annotate --style error "Missing environment variable ESS_IMAGE_URL_OR_TAG"
+      exit 1
 
   - wait: ~
 
