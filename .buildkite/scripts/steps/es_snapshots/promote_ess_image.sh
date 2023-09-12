@@ -29,8 +29,6 @@ docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
 
 docker push "$TARGET_IMAGE"
 
-docker inspect $TARGET_IMAGE | jq '.[].'
-
 # annotate the build with some info about the docker image that was re-pushed and the hashes that were tested.
 ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
 ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq '.[].Config.Labels["org.opencontainers.image.revision"]')
