@@ -296,8 +296,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     },
     {
       // We don't need refreshes on windows focus and reconnects if auto-refresh if off
-      refetchOnWindowFocus: isRefreshOn,
-      refetchOnReconnect: isRefreshOn,
+      refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
+      refetchOnReconnect: isRefreshOn && !isActionInProgress,
       refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
       keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
     }
