@@ -100,6 +100,7 @@ export const AnnotationList = ({
             key={index}
             css={css`
               position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
+              margin-top: ${euiThemeVars.euiSizeS};
             `}
           >
             <DragDrop
