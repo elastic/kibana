@@ -18,6 +18,9 @@ import { RightPanelContext } from '../context';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { TestProviders } from '../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { useGetEndpointDetails } from '../../../management/hooks';
+
+jest.mock('../../../management/hooks');
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -72,6 +75,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render agent status cell if field is agent.status', () => {
+    (useGetEndpointDetails as jest.Mock).mockReturnValue({});
     const { getByTestId } = render(
       <TestProviders>
         <HighlightedFieldsCell values={['value']} field={'agent.status'} />

@@ -46,6 +46,15 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
+const renderSessionView = (contextValue: LeftPanelContext) =>
+  render(
+    <TestProviders>
+      <LeftPanelContext.Provider value={contextValue}>
+        <SessionView />
+      </LeftPanelContext.Provider>
+    </TestProviders>
+  );
+
 describe('<SessionView />', () => {
   it('renders session view correctly', () => {
     const contextValue = {
@@ -53,13 +62,7 @@ describe('<SessionView />', () => {
       indexName: '.ds-logs-endpoint.events.process-default',
     } as unknown as LeftPanelContext;
 
-    const wrapper = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={contextValue}>
-          <SessionView />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
   });
 
@@ -69,13 +72,7 @@ describe('<SessionView />', () => {
       indexName: '.alerts-security', // it should prioritize KIBANA_ANCESTOR_INDEX above indexName
     } as unknown as LeftPanelContext;
 
-    const wrapper = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={contextValue}>
-          <SessionView />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
   });
 
@@ -84,13 +81,7 @@ describe('<SessionView />', () => {
       getFieldsData: () => {},
     } as unknown as LeftPanelContext;
 
-    const wrapper = render(
-      <TestProviders>
-        <LeftPanelContext.Provider value={contextValue}>
-          <SessionView />
-        </LeftPanelContext.Provider>
-      </TestProviders>
-    );
+    const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_ERROR_TEST_ID)).toBeInTheDocument();
     expect(wrapper.getByText('Unable to display session view')).toBeInTheDocument();
     expect(wrapper.getByText('There was an error displaying session view')).toBeInTheDocument();
