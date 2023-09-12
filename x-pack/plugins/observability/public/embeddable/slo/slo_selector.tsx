@@ -9,8 +9,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 
 interface Props {
   initialSlo?: SLOWithSummaryResponse;
@@ -23,6 +24,13 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
   const [searchValue, setSearchValue] = useState<string>('');
   const { isLoading, sloList } = useFetchSloList({ kqlQuery: searchValue });
+  // const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+  //   useFetchHistoricalSummary({
+  //     list: sloList?.results.map((slo) => ({
+  //       sloId: slo.id,
+  //       instanceId: slo.instanceId ?? ALL_VALUE,
+  //     })),
+  //   });
   const hasError = errors !== undefined && errors.length > 0;
 
   useEffect(() => {
@@ -32,8 +40,20 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
   useEffect(() => {
     const isLoadedWithData = !isLoading && sloList!.results !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? sloList!.results!.map((slo) => ({ value: slo.id, label: slo.name }))
+      ? sloList!.results!.map((slo) => ({
+          value: slo.id,
+          label: slo.name,
+          instanceId: slo.instanceId,
+        }))
       : [];
+    // options.map((option) => ({
+    //   ...option,
+    //   summary: historicalSummaries.find(
+    //     (historicalSummary) =>
+    //       historicalSummary.sloId === option?.id &&
+    //       historicalSummary.instanceId === (option?.instanceId ?? ALL_VALUE)
+    //   )?.data,
+    // }));
     setOptions(opts);
   }, [isLoading, sloList]);
 
@@ -41,7 +61,16 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
     setSelectedOptions(opts);
     const selectedSlo =
       opts.length === 1 ? sloList!.results?.find((slo) => slo.id === opts[0].value) : undefined;
-    console.log(selectedSlo, '!!ssss');
+    console.log(selectedSlo, '!!before summary');
+    // selectedSlo = {
+    //   ...selectedSlo,
+    //   summary: historicalSummaries.find(
+    //     (historicalSummary) =>
+    //       historicalSummary.sloId === selectedSlo?.id &&
+    //       historicalSummary.instanceId === (selectedSlo.instanceId ?? ALL_VALUE)
+    //   )?.data,
+    // };
+    console.log(selectedSlo, '!!after summary');
     onSelected(selectedSlo);
   };
 

@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { SloSummary } from './slo_summary';
+import { SloListItem } from './slo_list_item';
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
 export class SLOEmbeddable extends Embeddable {
@@ -37,10 +37,13 @@ export class SLOEmbeddable extends Embeddable {
   public render(node: HTMLElement) {
     const input = this.getInput();
     console.log(input, '!!input');
+    const I18nContext = this.deps.i18n.Context;
     ReactDOM.render(
-      <KibanaContextProvider services={this.deps}>
-        <SloSummary slo={input} />
-      </KibanaContextProvider>,
+      <I18nContext>
+        <KibanaContextProvider services={this.deps}>
+          <SloListItem slo={input} />
+        </KibanaContextProvider>
+      </I18nContext>,
       node
     );
   }

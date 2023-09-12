@@ -50,9 +50,13 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
     try {
-      const [{ uiSettings, application, http }] = await this.getStartServices();
+      const [{ uiSettings, application, http, i18n: i18nService }] = await this.getStartServices();
       console.log(initialInput, '!!Input');
-      return new SLOEmbeddable({ uiSettings, application, http }, initialInput, parent);
+      return new SLOEmbeddable(
+        { uiSettings, application, http, i18n: i18nService },
+        initialInput,
+        parent
+      );
     } catch (e) {
       return new ErrorEmbeddable(e, input, parent);
 
