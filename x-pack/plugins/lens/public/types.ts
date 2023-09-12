@@ -340,6 +340,7 @@ export interface Datasource<T = unknown, P = unknown> {
     getNewId: (id: string) => string
   ) => T;
   getLayers: (state: T) => string[];
+  getCurrentLayersState: (state: T) => unknown;
   removeColumn: (props: {
     prevState: T;
     layerId: string;

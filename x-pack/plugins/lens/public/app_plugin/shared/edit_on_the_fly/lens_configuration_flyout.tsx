@@ -17,6 +17,7 @@ import {
   useEuiTheme,
   EuiCallOut,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -72,16 +73,34 @@ export function LensEditConfigurationFlyout({
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { euiTheme } = useEuiTheme();
+  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+
+  const attributesChanged: boolean = useMemo(() => {
+    const attrs = previousAttributes.current;
+    const prevLayers = datasourceMap[datasourceId].getCurrentLayersState(
+      attrs.state.datasourceStates[datasourceId]
+    );
+
+    const visualizationState = visualization.state;
+    const datasourceLayers = datasourceMap[datasourceId].getCurrentLayersState(
+      datasourceStates[datasourceId].state
+    );
+    return (
+      !isEqual(visualizationState, attrs.state.visualization) ||
+      !isEqual(datasourceLayers, prevLayers)
+    );
+  }, [datasourceId, datasourceMap, datasourceStates, visualization.state]);
 
   const onCancel = useCallback(() => {
     const attrs = previousAttributes.current;
-    updateAll?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
+    if (attributesChanged) {
+      updateAll?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
+    }
     if (savedObjectId) {
       updateByRefInput?.(savedObjectId);
     }
     closeFlyout?.();
-  }, [updateAll, datasourceId, savedObjectId, closeFlyout, updateByRefInput]);
-  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  }, [attributesChanged, savedObjectId, closeFlyout, updateAll, datasourceId, updateByRefInput]);
 
   const onApply = useCallback(() => {
     if (savedObjectId) {
@@ -117,15 +136,15 @@ export function LensEditConfigurationFlyout({
     }
     closeFlyout?.();
   }, [
-    activeVisualization,
     savedObjectId,
     closeFlyout,
-    attributes,
-    datasourceMap,
-    visualization.state,
     datasourceStates,
+    visualization.state,
+    activeVisualization,
+    attributes,
     saveByRef,
     updateByRefInput,
+    datasourceMap,
   ]);
 
   const activeData: Record<string, Datatable> = useMemo(() => {
@@ -224,6 +243,7 @@ export function LensEditConfigurationFlyout({
               })}
               iconType="check"
               data-test-subj="collapseFlyoutButton"
+              isDisabled={!attributesChanged}
             >
               <FormattedMessage
                 id="xpack.lens.config.applyFlyoutLabel"
