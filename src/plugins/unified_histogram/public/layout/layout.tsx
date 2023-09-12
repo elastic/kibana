@@ -275,7 +275,7 @@ export const UnifiedHistogramLayout = ({
           chart={chart}
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
-          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
+          appendHistogram={<EuiSpacer size="s" />}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
