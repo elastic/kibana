@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   CoreSetup,
   CoreStart,
@@ -39,6 +40,7 @@ interface ManagementSetupDependencies {
 
 interface ManagementStartDependencies {
   share: SharePluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export class ManagementPlugin
@@ -120,15 +122,23 @@ export class ManagementPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./application');
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, deps] = await core.getStartServices();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           coreStart,
-          setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          setBreadcrumbs: (newBreadcrumbs) => {
+            if (deps.serverless) {
+              // drop the root management breadcrumb in serverless because it comes from the navigation tree
+              const [, ...trailingBreadcrumbs] = newBreadcrumbs;
+              deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
+            } else {
+              coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
+            }
+          },
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
           landingPageRedirect$: managementPlugin.landingPageRedirect$,
@@ -164,6 +174,8 @@ export class ManagementPlugin
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
       setLandingPageRedirect: (landingPageRedirect: string) =>
         this.landingPageRedirect$.next(landingPageRedirect),
+      setBreadcrumbsUpdatesEnabled: (areBreadcrumbsUpdatesEnabled: boolean) =>
+        this.areBreadcrumbsUpdatesEnabled$.next(areBreadcrumbsUpdatesEnabled),
     };
   }
 }

@@ -59,7 +59,9 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
       const navLinkId = getNavLinkIdFromProjectPageName(id);
 
       if (chrome.navLinks.has(navLinkId)) {
-        const breadcrumbHidden = HIDDEN_BREADCRUMBS.has(id);
+        const breadcrumbHidden =
+          HIDDEN_BREADCRUMBS.has(id) ||
+          id.startsWith('management:'); /* management sub-pages set their breadcrumbs themselves */
         const link: ChromeProjectNavigationNode = {
           id: navLinkId,
           title,
