@@ -99,7 +99,7 @@ export function extractReferences(
   if (attributes.controlGroupInput && extractedState.controlGroupInput) {
     newAttributes.controlGroupInput = {
       ...attributes.controlGroupInput,
-      panelsJSON: JSON.stringify(extractedState.controlGroupInput.panels),
+      panelsJSON: '',
     };
   }
 

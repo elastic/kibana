@@ -13,6 +13,7 @@ import {
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
   controlGroupInputToRawControlGroupAttributes,
+  generateNewControlIds,
 } from '@kbn/controls-plugin/common';
 import { isFilterPinned } from '@kbn/es-query';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
@@ -29,10 +30,11 @@ import {
 } from '../types';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { convertDashboardVersionToNumber } from './dashboard_versioning';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
+import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
-import { convertDashboardVersionToNumber } from './dashboard_versioning';
 
 export const serializeControlGroupInput = (
   controlGroupInput: DashboardContainerInput['controlGroupInput']
@@ -89,12 +91,10 @@ export const saveDashboardState = async ({
     tags,
     query,
     title,
-    panels,
     filters,
     version,
     timeRestore,
     description,
-    controlGroupInput,
 
     // Dashboard options
     useMargins,
@@ -103,6 +103,12 @@ export const saveDashboardState = async ({
     syncTooltips,
     hidePanelTitles,
   } = currentState;
+
+  let { panels, controlGroupInput } = currentState;
+  if (saveOptions.saveAsCopy) {
+    panels = generateNewPanelIds(panels);
+    controlGroupInput = generateNewControlIds(controlGroupInput);
+  }
 
   /**
    * Stringify filters and query into search source JSON
