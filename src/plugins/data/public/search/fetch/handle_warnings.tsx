@@ -73,7 +73,7 @@ export function handleWarnings({
         />
       </EuiTextAlign>,
       { theme$: theme.theme$ }
-    )
+    ),
   });
 }
 

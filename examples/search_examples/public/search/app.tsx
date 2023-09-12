@@ -317,7 +317,7 @@ export const SearchExamplesApp = ({
       );
       setRawResponse(result.rawResponse);
 
-      /* 
+      /*
        * Set disableWarningToasts to true to disable warning toasts and customize warning display.
        * Then use showWarnings to customize warning notification.
        */
