@@ -24,7 +24,7 @@ export const bulkDeleteRulesSo = (
   const { savedObjectsClient, ids, savedObjectsBulkDeleteOptions } = params;
 
   return savedObjectsClient.bulkDelete(
-    ids.map((id) => ({ id, type: 'alerts' })),
+    ids.map((id) => ({ id, type: 'alert' })),
     savedObjectsBulkDeleteOptions
   );
 };
