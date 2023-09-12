@@ -480,7 +480,13 @@ packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
+packages/kbn-management/settings/components/field_input @elastic/platform-deployment-management @elastic/appex-sharedux
+packages/kbn-management/settings/components/field_row @elastic/platform-deployment-management @elastic/appex-sharedux
+packages/kbn-management/settings/field_definition @elastic/platform-deployment-management @elastic/appex-sharedux
+packages/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/platform-deployment-management
 packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/platform-deployment-management
+packages/kbn-management/settings/types @elastic/platform-deployment-management @elastic/appex-sharedux
+packages/kbn-management/settings/utilities @elastic/platform-deployment-management @elastic/appex-sharedux
 packages/kbn-management/storybook/config @elastic/platform-deployment-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-app-services
 packages/kbn-mapbox-gl @elastic/kibana-gis
@@ -547,6 +553,7 @@ examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling_data_access @elastic/profiling-ui
 x-pack/plugins/profiling @elastic/profiling-ui
+packages/kbn-profiling-utils @elastic/profiling-ui
 x-pack/packages/kbn-random-sampling @elastic/kibana-visualizations
 packages/kbn-react-field @elastic/kibana-data-discovery
 packages/react/kibana_context/common @elastic/appex-sharedux
@@ -633,9 +640,13 @@ packages/kbn-securitysolution-utils @elastic/security-detection-engine
 packages/kbn-server-http-tools @elastic/kibana-core
 packages/kbn-server-route-repository @elastic/apm-ui
 x-pack/plugins/serverless @elastic/appex-sharedux
+packages/serverless/settings/common @elastic/appex-sharedux @elastic/platform-deployment-management
 x-pack/plugins/serverless_observability @elastic/appex-sharedux @elastic/apm-ui
+packages/serverless/settings/observability_project @elastic/appex-sharedux @elastic/apm-ui @elastic/platform-deployment-management
 packages/serverless/project_switcher @elastic/appex-sharedux
 x-pack/plugins/serverless_search @elastic/enterprise-search-frontend
+packages/serverless/settings/search_project @elastic/enterprise-search-frontend @elastic/platform-deployment-management
+packages/serverless/settings/security_project @elastic/security-solution @elastic/platform-deployment-management
 packages/serverless/storybook/config @elastic/appex-sharedux
 packages/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
@@ -1012,7 +1023,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /.buildkite/ @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
-catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
+/catalog-info.yaml @elastic/kibana-operations @elastic/kibana-tech-leads
 
 # Appex QA
 /src/dev/code_coverage @elastic/appex-qa
@@ -1316,6 +1327,7 @@ x-pack/test/security_solution_cypress/config.ts @elastic/security-engineering-pr
 x-pack/test/security_solution_cypress/runner.ts @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress/serverless_config.ts @elastic/security-engineering-productivity
 x-pack/test/security_solution_cypress/cypress/tags.ts @elastic/security-engineering-productivity
+x-pack/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @oatkiller @maximpn @banderror
 
 ## Security Solution sub teams - adaptive-workload-protection
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/kibana-cloud-security-posture
