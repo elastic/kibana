@@ -87,6 +87,7 @@ const ServerlessTopNav = ({
       >
         <EuiHeaderSectionItem>
           <EuiBetaBadge
+            size="s"
             iconType="beta"
             label={betaBadgeTitle}
             tooltipContent={betaBadgeDescription}
@@ -107,23 +108,35 @@ const StatefulTopNav = ({
   state$,
   theme$,
 }: LogExplorerTopNavMenuProps) => {
+  const { euiTheme } = useEuiTheme();
+
   useEffect(() => {
     const { chrome, i18n, theme } = services;
 
     if (chrome) {
       chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
-          <EuiBetaBadge
-            iconType="beta"
-            label={betaBadgeTitle}
-            tooltipContent={betaBadgeDescription}
-            alignment="middle"
-          />,
+          <EuiHeaderSection
+            data-test-subj="logExplorerHeaderMenu"
+            css={css`
+              margin-left: ${euiTheme.size.m};
+            `}
+          >
+            <EuiHeaderSectionItem>
+              <EuiBetaBadge
+                size="s"
+                iconType="beta"
+                label={betaBadgeTitle}
+                tooltipContent={betaBadgeDescription}
+                alignment="middle"
+              />
+            </EuiHeaderSectionItem>
+          </EuiHeaderSection>,
           { theme, i18n }
         ),
       });
     }
-  }, [services]);
+  }, [euiTheme, services]);
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
