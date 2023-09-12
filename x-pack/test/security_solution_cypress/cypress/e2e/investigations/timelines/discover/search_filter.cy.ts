@@ -30,7 +30,7 @@ import {
   createAdHocDataView,
 } from '../../../../tasks/discover';
 import { createNewTimeline, gotToDiscoverTab } from '../../../../tasks/timeline';
-import { login, visitWithDateRange } from '../../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../../tasks/login';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
@@ -46,7 +46,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      visitWithDateRange(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);

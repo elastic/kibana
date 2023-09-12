@@ -12,7 +12,7 @@ import { expandFirstAlertActions } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visitWithDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange, waitForPageWithoutDateRange } from '../../../tasks/login';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../../screens/alerts';
@@ -30,7 +30,7 @@ describe('Alerts timeline', { tags: ['@ess', '@serverless', '@brokenInServerless
     cleanKibana();
     login();
     createRule(getNewRule());
-    visitWithDateRange(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 

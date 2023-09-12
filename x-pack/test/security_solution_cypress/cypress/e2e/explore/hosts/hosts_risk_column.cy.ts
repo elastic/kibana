@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 
 import { hostsUrl } from '../../../urls/navigation';
 import { cleanKibana } from '../../../tasks/common';
@@ -28,7 +28,7 @@ describe('All hosts table', { tags: ['@ess', '@serverless', '@brokenInServerless
   });
 
   it('it renders risk column', () => {
-    visitWithDateRange(hostsUrl('allHosts'));
+    visitWithTimeRange(hostsUrl('allHosts'));
     kqlSearch('host.name: "siem-kibana" {enter}');
 
     cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');

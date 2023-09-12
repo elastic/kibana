@@ -6,7 +6,7 @@
  */
 
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { login, visitWithDateRange } from '../../tasks/login';
+import { login, visitWithTimeRange } from '../../tasks/login';
 
 import { ALERTS_URL, TIMELINES_URL } from '../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../screens/alerts';
@@ -36,7 +36,7 @@ describe(
     describe('Ransomware display in Alerts Section', () => {
       beforeEach(() => {
         login();
-        visitWithDateRange(ALERTS_URL);
+        visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
       });
 
@@ -60,7 +60,7 @@ describe(
     describe('Ransomware in Timelines', () => {
       beforeEach(() => {
         login();
-        visitWithDateRange(TIMELINES_URL);
+        visitWithTimeRange(TIMELINES_URL);
 
         createTimeline();
       });

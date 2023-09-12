@@ -18,7 +18,7 @@ import {
   getRulesManagementTableRows,
   waitForRuleToUpdate,
 } from '../../../../tasks/alerts_detection_rules';
-import { login, visitWithDateRange } from '../../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../../tasks/login';
 
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -52,7 +52,7 @@ describe('Rules table: sorting', { tags: ['@ess', '@serverless', '@brokenInServe
   });
 
   it('Sorts by enabled rules', () => {
-    visitWithDateRange(RULES_MANAGEMENT_URL);
+    visitWithTimeRange(RULES_MANAGEMENT_URL);
 
     enableRule(SECOND_RULE);
     waitForRuleToUpdate();
@@ -72,7 +72,7 @@ describe('Rules table: sorting', { tags: ['@ess', '@serverless', '@brokenInServe
     createRule(getNewRule({ name: 'Test a rule', rule_id: '5', enabled: false }));
     createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6', enabled: false }));
 
-    visitWithDateRange(RULES_MANAGEMENT_URL);
+    visitWithTimeRange(RULES_MANAGEMENT_URL);
     setRowsPerPageTo(5);
 
     cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('have.attr', 'aria-current');

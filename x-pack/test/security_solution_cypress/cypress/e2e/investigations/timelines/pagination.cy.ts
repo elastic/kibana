@@ -16,7 +16,7 @@ import {
 } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { populateTimeline } from '../../../tasks/timeline';
 
@@ -32,7 +32,7 @@ describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
-    visitWithDateRange(hostsUrl('allHosts'));
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });

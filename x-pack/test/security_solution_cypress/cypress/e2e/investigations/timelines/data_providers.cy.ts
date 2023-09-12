@@ -15,7 +15,7 @@ import {
 
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import {
   addDataProvider,
   updateDataProviderbyDraggingField,
@@ -40,7 +40,7 @@ describe(
 
     beforeEach(() => {
       login();
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
       waitForAllHostsToBeLoaded();
       scrollToBottom();
       createNewTimeline();

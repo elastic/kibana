@@ -10,7 +10,7 @@ import { openResponseTab } from '../../../../tasks/expandable_flyout/alert_detai
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithDateRange } from '../../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -21,7 +21,7 @@ describe('Alert details expandable flyout left panel investigation', () => {
     cleanKibana();
     login();
     createRule(getNewRule());
-    visitWithDateRange(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlertExpandableFlyout();
     expandDocumentDetailsExpandableFlyoutLeftSection();

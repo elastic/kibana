@@ -22,7 +22,7 @@ import {
   closeFieldsBrowser,
   filterFieldsBrowser,
 } from '../../../tasks/fields_browser';
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import { openEvents } from '../../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -57,7 +57,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Fields rendering', () => {
     beforeEach(() => {
       login();
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -82,7 +82,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events viewer fields behaviour', () => {
     beforeEach(() => {
       login();
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -110,7 +110,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events behavior', () => {
     beforeEach(() => {
       login();
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });

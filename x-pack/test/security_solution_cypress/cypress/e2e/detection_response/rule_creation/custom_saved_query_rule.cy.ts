@@ -35,7 +35,7 @@ import {
   uncheckLoadQueryDynamically,
 } from '../../../tasks/create_new_rule';
 import { saveEditedRule, visitEditRulePage } from '../../../tasks/edit_rule';
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import {
   assertDetailsNotExist,
   getDetails,
@@ -66,7 +66,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
     it('Creates saved query rule', function () {
       const rule = getSavedQueryRule();
       createSavedQuery(savedQueryName, savedQueryQuery, savedQueryFilterKey);
-      visitWithDateRange(CREATE_RULE_URL);
+      visitWithTimeRange(CREATE_RULE_URL);
 
       selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
 
@@ -232,7 +232,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless', '@brokenInServerle
           visitEditRulePage(rule.body.id)
         );
 
-        visitWithDateRange(RULES_MANAGEMENT_URL);
+        visitWithTimeRange(RULES_MANAGEMENT_URL);
 
         editFirstRule();
         uncheckLoadQueryDynamically();

@@ -24,12 +24,12 @@ import {
   getRuleRow,
   setRulesTableAutoRefreshIntervalSetting,
 } from '../../../../tasks/alerts_detection_rules';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
 
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
+import { visitRulesManagementTable } from 'x-pack/test/security_solution_cypress/cypress/tasks/rules_management';
 
 const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 
@@ -54,7 +54,7 @@ describe(
     });
 
     it('gets deactivated when any rule selected and activated after rules unselected', () => {
-      visit(RULES_MANAGEMENT_URL);
+      visitRulesManagementTable();
 
       expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
@@ -75,7 +75,7 @@ describe(
     describe('when enabled', () => {
       beforeEach(() => {
         mockGlobalClock();
-        visit(RULES_MANAGEMENT_URL);
+        visitRulesManagementTable();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -101,7 +101,7 @@ describe(
     describe('when disabled', () => {
       beforeEach(() => {
         mockGlobalClock();
-        visit(RULES_MANAGEMENT_URL);
+        visitRulesManagementTable();
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
 
@@ -148,7 +148,7 @@ describe(
     describe('when one rule is selected', () => {
       it('does NOT refresh after refresh interval has passed', () => {
         mockGlobalClock();
-        visit(RULES_MANAGEMENT_URL);
+        visitRulesManagementTable();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 

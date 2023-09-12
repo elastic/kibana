@@ -26,7 +26,7 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL, DASHBOARDS_URL } from '../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 
 describe('Guided onboarding tour', { tags: ['@ess', '@brokenInServerless'] }, () => {
@@ -39,7 +39,7 @@ describe('Guided onboarding tour', { tags: ['@ess', '@brokenInServerless'] }, ()
     login();
     disableExpandableFlyout();
     startAlertsCasesTour();
-    visitWithDateRange(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 

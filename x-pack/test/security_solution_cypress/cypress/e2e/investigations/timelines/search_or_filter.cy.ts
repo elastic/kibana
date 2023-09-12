@@ -15,7 +15,7 @@ import {
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithDateRange, visit } from '../../../tasks/login';
+import { login, visitWithTimeRange, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
   changeTimelineQueryLanguage,
@@ -34,7 +34,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@brokenInServerless'] 
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       login();
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
     });
 
     it('executes a KQL query', () => {

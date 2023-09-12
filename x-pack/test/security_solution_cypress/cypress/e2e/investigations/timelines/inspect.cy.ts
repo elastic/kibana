@@ -7,7 +7,7 @@
 
 import { INSPECT_MODAL } from '../../../screens/inspect';
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { executeTimelineKQL, openTimelineInspectButton } from '../../../tasks/timeline';
 
@@ -19,7 +19,7 @@ describe('Inspect', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, ()
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';
       login();
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
       openTimelineInspectButton();

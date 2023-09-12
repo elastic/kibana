@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, visitWithDateRange } from '../../tasks/login';
+import { login, visitWithTimeRange } from '../../tasks/login';
 
 import {
   ALERTS_URL,
@@ -28,52 +28,52 @@ const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 describe('Display not found page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
-    visitWithDateRange(TIMELINES_URL);
+    visitWithTimeRange(TIMELINES_URL);
   });
 
   // TODO: We need to determine what we want the behavior to be here
   it.skip('navigates to the alerts page with incorrect link', () => {
-    visitWithDateRange(`${ALERTS_URL}/randomUrl`);
+    visitWithTimeRange(`${ALERTS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the exceptions page with incorrect link', () => {
-    visitWithDateRange(`${EXCEPTIONS_URL}/randomUrl`);
+    visitWithTimeRange(`${EXCEPTIONS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the rules page with incorrect link', () => {
-    visitWithDateRange(`${RULES_MANAGEMENT_URL}/randomUrl`);
+    visitWithTimeRange(`${RULES_MANAGEMENT_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the rules creation page with incorrect link', () => {
-    visitWithDateRange(`${CREATE_RULE_URL}/randomUrl`);
+    visitWithTimeRange(`${CREATE_RULE_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the rules details page with incorrect link', () => {
-    visitWithDateRange(`${ruleDetailsUrl(mockRuleId)}/randomUrl`);
+    visitWithTimeRange(`${ruleDetailsUrl(mockRuleId)}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the edit rules page with incorrect link', () => {
-    visitWithDateRange(`${editRuleUrl(mockRuleId)}/randomUrl`);
+    visitWithTimeRange(`${editRuleUrl(mockRuleId)}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the endpoints page with incorrect link', () => {
-    visitWithDateRange(`${ENDPOINTS_URL}/randomUrl`);
+    visitWithTimeRange(`${ENDPOINTS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the trusted applications page with incorrect link', () => {
-    visitWithDateRange(`${TRUSTED_APPS_URL}/randomUrl`);
+    visitWithTimeRange(`${TRUSTED_APPS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
   it('navigates to the event filters page with incorrect link', () => {
-    visitWithDateRange(`${EVENT_FILTERS_URL}/randomUrl`);
+    visitWithTimeRange(`${EVENT_FILTERS_URL}/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 });

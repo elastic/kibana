@@ -25,7 +25,7 @@ import {
 } from '../../screens/security_header';
 import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../screens/timeline';
 
-import { login, visitWithDateRange, visit } from '../../tasks/login';
+import { login, visitWithTimeRange, visit } from '../../tasks/login';
 import {
   updateDates,
   setStartDate,
@@ -292,7 +292,7 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
   });
 
   it('sets and reads the url state for timeline by id', () => {
-    visitWithDateRange(hostsUrl('allHosts'));
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
 
@@ -303,8 +303,8 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
-      visitWithDateRange('/app/home');
-      visitWithDateRange(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
+      visitWithTimeRange('/app/home');
+      visitWithTimeRange(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE).should('be.visible');

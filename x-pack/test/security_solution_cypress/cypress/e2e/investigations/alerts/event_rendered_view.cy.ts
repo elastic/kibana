@@ -25,7 +25,7 @@ import {
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
   TOP_N_ALERT_HISTOGRAM,
@@ -41,7 +41,7 @@ describe(`Event Rendered View`, () => {
   beforeEach(() => {
     login();
     createRule(getNewRule());
-    visitWithDateRange(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
     switchAlertTableToEventRenderedView();
     waitForAlerts();

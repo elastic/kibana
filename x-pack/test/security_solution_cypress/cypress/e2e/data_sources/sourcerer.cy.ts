@@ -7,7 +7,7 @@
 
 import { DEFAULT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/constants';
 
-import { login, loginWithUser, visitWithDateRange, visitWithUser } from '../../tasks/login';
+import { login, loginWithUser, visitWithTimeRange, visitWithUser } from '../../tasks/login';
 
 import { hostsUrl } from '../../urls/navigation';
 import {
@@ -60,7 +60,7 @@ describe('Sourcerer', { tags: ['@ess', '@serverless', '@skipInServerless'] }, ()
     beforeEach(() => {
       cy.clearLocalStorage();
       login();
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
     });
 
     it('correctly loads SIEM data view', () => {

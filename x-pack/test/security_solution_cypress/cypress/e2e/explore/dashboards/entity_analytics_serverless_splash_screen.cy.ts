@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
@@ -28,7 +28,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      visitWithDateRange(ENTITY_ANALYTICS_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
     it('should display a splash screen when visited with Security essentials PLI ', () => {

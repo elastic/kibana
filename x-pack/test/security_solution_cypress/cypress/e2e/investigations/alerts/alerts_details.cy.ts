@@ -27,7 +27,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
-import { login, visitWithDateRange, visit } from '../../../tasks/login';
+import { login, visitWithTimeRange, visit } from '../../../tasks/login';
 import { getNewRule, getUnmappedRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { tablePageSelector } from '../../../screens/table_pagination';
@@ -144,7 +144,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visitWithDateRange(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
@@ -195,7 +195,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visitWithDateRange(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });
@@ -257,7 +257,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
       visitRuleDetailsPage(ARCHIVED_RULE_ID);
       waitForRuleDetailsPageToBeLoaded(ARCHIVED_RULE_NAME);
 
-      visitWithDateRange(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       cy.get(OVERVIEW_RULE).should('not.exist');
     });
   });

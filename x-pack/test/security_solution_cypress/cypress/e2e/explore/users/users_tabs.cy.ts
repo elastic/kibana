@@ -15,7 +15,7 @@ import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_even
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/user_risk_score';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithDateRange, visitUserDetailsPage } from '../../../tasks/login';
+import { login, visitWithTimeRange, visitUserDetailsPage } from '../../../tasks/login';
 
 import { USERS_URL } from '../../../urls/navigation';
 
@@ -29,7 +29,7 @@ describe('Users stats and tables', () => {
 
   beforeEach(() => {
     login();
-    visitWithDateRange(USERS_URL);
+    visitWithTimeRange(USERS_URL);
   });
 
   after(() => {

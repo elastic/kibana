@@ -274,7 +274,7 @@ const disableNewFeaturesTours = (window: Window) => {
   });
 };
 
-export const visitWithDateRange = (
+export const visitWithTimeRange = (
   url: string,
   options: Partial<Cypress.VisitOptions> = {},
   role?: ROLES
@@ -335,13 +335,13 @@ export const visitTimeline = (timelineId: string, role?: ROLES) => {
 };
 
 export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
-  visitWithDateRange(hostDetailsUrl(hostName));
+  visitWithTimeRange(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]').should('exist');
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
 };
 
 export const visitUserDetailsPage = (userName = 'test') => {
-  visitWithDateRange(userDetailsUrl(userName));
+  visitWithTimeRange(userDetailsUrl(userName));
 };
 
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {

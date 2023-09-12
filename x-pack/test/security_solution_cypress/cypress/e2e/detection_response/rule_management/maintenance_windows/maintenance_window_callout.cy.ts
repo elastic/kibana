@@ -9,7 +9,7 @@ import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '@kbn/alerting-plu
 import type { MaintenanceWindowCreateBody } from '@kbn/alerting-plugin/common';
 import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
 import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithDateRange } from '../../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../../tasks/login';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 // TODO: https://github.com/elastic/kibana/issues/161540
@@ -55,7 +55,7 @@ describe(
     });
 
     it('Displays the callout when there are running maintenance windows', () => {
-      visitWithDateRange(RULES_MANAGEMENT_URL);
+      visitWithTimeRange(RULES_MANAGEMENT_URL);
 
       cy.contains('Maintenance window is running');
     });

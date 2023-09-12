@@ -22,7 +22,7 @@ import {
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
 } from '../../../../screens/discover';
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
-import { login, visitWithDateRange } from '../../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../../tasks/login';
 import {
   createNewTimeline,
   gotToDiscoverTab,
@@ -45,7 +45,7 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      visitWithDateRange(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createNewTimeline();
       gotToDiscoverTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);

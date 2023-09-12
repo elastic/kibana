@@ -62,7 +62,7 @@ import {
   waitForAlertsToPopulate,
 } from '../../../tasks/create_new_rule';
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { CREATE_RULE_URL } from '../../../urls/navigation';
@@ -91,7 +91,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and enables a new rule', function () {
-      visitWithDateRange(CREATE_RULE_URL);
+      visitWithTimeRange(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
@@ -149,7 +149,7 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
     });
 
     it('Creates and edits a new rule with a data view', function () {
-      visitWithDateRange(CREATE_RULE_URL);
+      visitWithTimeRange(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       cy.get(RULE_NAME_INPUT).clear();
       cy.get(RULE_NAME_INPUT).type(rule.name);

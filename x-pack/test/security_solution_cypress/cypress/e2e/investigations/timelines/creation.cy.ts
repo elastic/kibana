@@ -24,7 +24,7 @@ import {
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { cleanKibana, deleteTimelines } from '../../../tasks/common';
-import { login, visitWithDateRange, visit } from '../../../tasks/login';
+import { login, visitWithTimeRange, visit } from '../../../tasks/login';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { selectCustomTemplates } from '../../../tasks/templates';
 import {
@@ -79,7 +79,7 @@ describe('Timelines', (): void => {
     context('Privileges: CRUD', { tags: '@ess' }, () => {
       beforeEach(() => {
         login();
-        visitWithDateRange(OVERVIEW_URL);
+        visitWithTimeRange(OVERVIEW_URL);
       });
 
       it('toggle create timeline ', () => {
@@ -92,7 +92,7 @@ describe('Timelines', (): void => {
     context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.reader);
-        visitWithDateRange(OVERVIEW_URL, undefined, ROLES.reader);
+        visitWithTimeRange(OVERVIEW_URL, undefined, ROLES.reader);
       });
 
       it('should not be able to create/update timeline ', () => {
@@ -115,7 +115,7 @@ describe('Timelines', (): void => {
     () => {
       beforeEach(() => {
         login();
-        visitWithDateRange(OVERVIEW_URL);
+        visitWithTimeRange(OVERVIEW_URL);
         openTimelineUsingToggle();
         addNameAndDescriptionToTimeline(getTimeline());
         populateTimeline();

@@ -9,7 +9,7 @@ import { TOP_N_CONTAINER } from '../../../screens/network/flows';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../screens/search_bar';
 import { DATA_PROVIDERS } from '../../../screens/timeline';
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import { NETWORK_URL } from '../../../urls/navigation';
 import {
   clickOnAddToTimeline,
@@ -41,7 +41,7 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithDateRange(NETWORK_URL, { onBeforeLoad: onBeforeLoadCallback });
+    visitWithTimeRange(NETWORK_URL, { onBeforeLoad: onBeforeLoadCallback });
     openHoverActions();
     mouseoverOnToOverflowItem();
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login, visitWithDateRange } from '../../tasks/login';
+import { login, visitWithTimeRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timeline';
 
@@ -40,7 +40,7 @@ describe(
     });
 
     it('adds field to alert table', () => {
-      visitWithDateRange(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       createRule(getNewRule());
       refreshPage();
       waitForAlertsToPopulate();
@@ -50,7 +50,7 @@ describe(
     });
 
     it('adds field to timeline', () => {
-      visitWithDateRange(hostsUrl('allHosts'));
+      visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();

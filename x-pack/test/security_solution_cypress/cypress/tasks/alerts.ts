@@ -83,7 +83,7 @@ import {
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
-import { visitWithDateRange } from './login';
+import { visitWithTimeRange } from './login';
 import { openFilterGroupContextMenu } from './common/filter_group';
 
 export const addExceptionFromFirstAlert = () => {
@@ -460,7 +460,7 @@ export const selectAllAlerts = () => {
 export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) => {
   const pageFilterUrlVal = encode(formatPageFilterSearchParam(pageFilters));
   const newURL = `${ALERTS_URL}?pageFilters=${pageFilterUrlVal}`;
-  visitWithDateRange(newURL);
+  visitWithTimeRange(newURL);
 };
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {

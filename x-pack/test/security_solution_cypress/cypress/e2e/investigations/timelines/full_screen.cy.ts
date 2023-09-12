@@ -8,7 +8,7 @@
 import { TIMELINE_HEADER, TIMELINE_TABS } from '../../../screens/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-import { login, visitWithDateRange } from '../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../tasks/login';
 import {
   openTimelineUsingToggle,
   enterFullScreenMode,
@@ -26,7 +26,7 @@ describe('Toggle full screen', { tags: ['@ess', '@serverless', '@brokenInServerl
 
   beforeEach(() => {
     login();
-    visitWithDateRange(hostsUrl('allHosts'));
+    visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
     populateTimeline();
   });

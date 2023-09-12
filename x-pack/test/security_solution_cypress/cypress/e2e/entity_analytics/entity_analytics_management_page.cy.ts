@@ -19,7 +19,7 @@ import {
 
 import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/risk_scores';
 import { RiskScoreEntity } from '../../tasks/risk_scores/common';
-import { login, visitWithDateRange } from '../../tasks/login';
+import { login, visitWithTimeRange } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
@@ -58,7 +58,7 @@ describe(
       login();
       createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
       deleteConfiguration();
-      visitWithDateRange(ENTITY_ANALYTICS_MANAGEMENT_URL);
+      visitWithTimeRange(ENTITY_ANALYTICS_MANAGEMENT_URL);
     });
 
     after(() => {
@@ -142,7 +142,7 @@ describe(
 
       it('should update if there legacy risk score installed', () => {
         installRiskScoreModule();
-        visitWithDateRange(ENTITY_ANALYTICS_MANAGEMENT_URL);
+        visitWithTimeRange(ENTITY_ANALYTICS_MANAGEMENT_URL);
 
         cy.get(RISK_SCORE_STATUS).should('not.exist');
 

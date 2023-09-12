@@ -18,7 +18,7 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { getNewRule } from '../../../objects/rule';
 
-import { login, visit, visitWithDateRange } from '../../../tasks/login';
+import { login, visit, visitWithTimeRange } from '../../../tasks/login';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
@@ -35,7 +35,7 @@ describe('Open timeline', { tags: ['@brokenInServerless', '@ess'] }, () => {
     });
 
     createRule(getNewRule());
-    visitWithDateRange(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlertsToPopulate();
   });
 

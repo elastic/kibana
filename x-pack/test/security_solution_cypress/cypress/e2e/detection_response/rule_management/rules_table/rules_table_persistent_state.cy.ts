@@ -8,7 +8,7 @@
 import { encode } from '@kbn/rison';
 
 import { cleanKibana, resetRulesTableState } from '../../../../tasks/common';
-import { login, visitWithDateRange } from '../../../../tasks/login';
+import { login, visitWithTimeRange } from '../../../../tasks/login';
 import { DASHBOARDS_URL, KIBANA_HOME } from '../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL, RULES_MONITORING_URL } from '../../../../urls/rules_management';
 import { getNewRule } from '../../../../objects/rule';
@@ -57,7 +57,7 @@ function createTestRules(): void {
 }
 
 function visitRulesTableWithState(urlTableState: Record<string, unknown>): void {
-  visitWithDateRange(RULES_MANAGEMENT_URL, { qs: { rulesTable: encode(urlTableState) } });
+  visitWithTimeRange(RULES_MANAGEMENT_URL, { qs: { rulesTable: encode(urlTableState) } });
 }
 
 function setStorageState(storageTableState: Record<string, unknown>): void {
@@ -116,7 +116,7 @@ describe(
       { tags: ['@ess', '@serverless', '@brokenInServerless'] },
       () => {
         it('activates management tab by default', () => {
-          visitWithDateRange(RULES_MANAGEMENT_URL);
+          visitWithTimeRange(RULES_MANAGEMENT_URL);
 
           expectRulesManagementTab();
         });
@@ -169,7 +169,7 @@ describe(
             perPage: 10,
           });
 
-          visitWithDateRange(RULES_MANAGEMENT_URL);
+          visitWithTimeRange(RULES_MANAGEMENT_URL);
 
           expectRulesManagementTab();
           expectFilterSearchTerm('test');
@@ -209,7 +209,7 @@ describe(
         describe('and on the rules management tab', () => {
           beforeEach(() => {
             login();
-            visitWithDateRange(RULES_MANAGEMENT_URL);
+            visitWithTimeRange(RULES_MANAGEMENT_URL);
           });
 
           it('persists after reloading the page', () => {
@@ -239,8 +239,8 @@ describe(
             changeRulesTableState();
             goToTablePage(2);
 
-            visitWithDateRange(DASHBOARDS_URL);
-            visitWithDateRange(RULES_MANAGEMENT_URL);
+            visitWithTimeRange(DASHBOARDS_URL);
+            visitWithTimeRange(RULES_MANAGEMENT_URL);
 
             expectRulesManagementTab();
             expectRulesTableState();
@@ -251,8 +251,8 @@ describe(
             changeRulesTableState();
             goToTablePage(2);
 
-            visitWithDateRange(KIBANA_HOME);
-            visitWithDateRange(RULES_MANAGEMENT_URL);
+            visitWithTimeRange(KIBANA_HOME);
+            visitWithTimeRange(RULES_MANAGEMENT_URL);
 
             expectRulesManagementTab();
             expectRulesTableState();
@@ -263,7 +263,7 @@ describe(
         describe('and on the rules monitoring tab', () => {
           beforeEach(() => {
             login();
-            visitWithDateRange(RULES_MONITORING_URL);
+            visitWithTimeRange(RULES_MONITORING_URL);
           });
 
           it('persists the selected tab', () => {
@@ -314,7 +314,7 @@ describe(
             perPage: 5,
           });
 
-          visitWithDateRange(RULES_MANAGEMENT_URL);
+          visitWithTimeRange(RULES_MANAGEMENT_URL);
 
           expectRulesTableState();
           expectTablePage(1);
@@ -326,7 +326,7 @@ describe(
       describe('and on the rules management tab', () => {
         beforeEach(() => {
           login();
-          visitWithDateRange(RULES_MANAGEMENT_URL);
+          visitWithTimeRange(RULES_MANAGEMENT_URL);
         });
 
         it('persists after clearing the session storage', () => {
@@ -347,7 +347,7 @@ describe(
           changeRulesTableState();
           goToTablePage(2);
 
-          visitWithDateRange(RULES_MANAGEMENT_URL);
+          visitWithTimeRange(RULES_MANAGEMENT_URL);
 
           expectRulesManagementTab();
           expectRulesTableState();
@@ -360,7 +360,7 @@ describe(
       describe('and on the rules management tab', () => {
         beforeEach(() => {
           login();
-          visitWithDateRange(RULES_MANAGEMENT_URL);
+          visitWithTimeRange(RULES_MANAGEMENT_URL);
         });
 
         it('persists after corrupting the session storage data', () => {
@@ -381,7 +381,7 @@ describe(
           changeRulesTableState();
           goToTablePage(2);
 
-          visitWithDateRange(RULES_MANAGEMENT_URL, { qs: { rulesTable: '(!invalid)' } });
+          visitWithTimeRange(RULES_MANAGEMENT_URL, { qs: { rulesTable: '(!invalid)' } });
 
           expectRulesManagementTab();
           expectRulesTableState();
@@ -392,7 +392,7 @@ describe(
           changeRulesTableState();
           goToTablePage(2);
 
-          visitWithDateRange(RULES_MANAGEMENT_URL, {
+          visitWithTimeRange(RULES_MANAGEMENT_URL, {
             qs: { rulesTable: '(!invalid)' },
             onBeforeLoad: (win) => {
               win.sessionStorage.setItem('securitySolution.rulesTable', '!invalid');
