@@ -77,12 +77,12 @@ export function LensEditConfigurationFlyout({
 
   const attributesChanged: boolean = useMemo(() => {
     const attrs = previousAttributes.current;
-    const prevLayers = datasourceMap[datasourceId].getCurrentLayersState(
+    const prevLayers = datasourceMap[datasourceId].getCurrentLayersState?.(
       attrs.state.datasourceStates[datasourceId]
     );
 
     const visualizationState = visualization.state;
-    const datasourceLayers = datasourceMap[datasourceId].getCurrentLayersState(
+    const datasourceLayers = datasourceMap[datasourceId].getCurrentLayersState?.(
       datasourceStates[datasourceId].state
     );
     return (
