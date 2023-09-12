@@ -14,7 +14,6 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
-  kueryRt,
   rangeRt,
   serviceTransactionDataSourceRt,
 } from '../default_api_types';
@@ -26,7 +25,6 @@ const profilingFlamegraphRoute = createApmServerRoute({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
       rangeRt,
-      kueryRt,
       environmentRt,
       serviceTransactionDataSourceRt,
     ]),
@@ -45,7 +43,7 @@ const profilingFlamegraphRoute = createApmServerRoute({
         await plugins.profilingDataAccess?.start(),
       ]);
     if (profilingDataAccessStart) {
-      const { start, end, kuery, environment, documentType, rollupInterval } =
+      const { start, end, environment, documentType, rollupInterval } =
         params.query;
       const { serviceName } = params.path;
 
@@ -53,7 +51,6 @@ const profilingFlamegraphRoute = createApmServerRoute({
         apmEventClient,
         start,
         end,
-        kuery,
         environment,
         serviceName,
         documentType,
@@ -81,7 +78,6 @@ const profilingFunctionsRoute = createApmServerRoute({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
       rangeRt,
-      kueryRt,
       environmentRt,
       serviceTransactionDataSourceRt,
       t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
@@ -102,7 +98,6 @@ const profilingFunctionsRoute = createApmServerRoute({
       const {
         start,
         end,
-        kuery,
         environment,
         startIndex,
         endIndex,
@@ -115,7 +110,6 @@ const profilingFunctionsRoute = createApmServerRoute({
         apmEventClient,
         start,
         end,
-        kuery,
         environment,
         serviceName,
         documentType,

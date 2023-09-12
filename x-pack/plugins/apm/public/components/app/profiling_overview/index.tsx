@@ -17,14 +17,23 @@ import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ProfilingFlamegraph } from './profiling_flamegraph';
 import { ProfilingTopNFunctions } from './profiling_top_functions';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
+import { ApmDocumentType } from '../../../../common/document_type';
 
 export function ProfilingOverview() {
   const {
     path: { serviceName },
-    query: { rangeFrom, rangeTo, environment },
+    query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/services/{serviceName}/profiling');
   const { isProfilingAvailable } = useProfilingPlugin();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.TransactionMetric,
+    numBuckets: 20,
+  });
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     return [
@@ -41,6 +50,7 @@ export function ProfilingOverview() {
               start={start}
               end={end}
               environment={environment}
+              dataSource={preferred?.source}
             />
           </>
         ),
@@ -60,12 +70,13 @@ export function ProfilingOverview() {
               environment={environment}
               startIndex={0}
               endIndex={10}
+              dataSource={preferred?.source}
             />
           </>
         ),
       },
     ];
-  }, [end, environment, serviceName, start]);
+  }, [end, environment, preferred?.source, serviceName, start]);
 
   if (!isProfilingAvailable) {
     return null;

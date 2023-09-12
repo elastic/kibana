@@ -14,12 +14,17 @@ import { toKueryFilterFormat } from '../../../../common/utils/to_kuery_filter_fo
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
+import { ApmDataSourceWithSummary } from '../../../../common/data_source';
+import { ApmDocumentType } from '../../../../common/document_type';
 
 interface Props {
   serviceName: string;
   start: string;
   end: string;
   environment: string;
+  dataSource?: ApmDataSourceWithSummary<
+    ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
+  >;
 }
 
 export function ProfilingFlamegraph({
@@ -27,21 +32,31 @@ export function ProfilingFlamegraph({
   end,
   serviceName,
   environment,
+  dataSource,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
-        {
-          params: {
-            path: { serviceName },
-            query: { start, end, kuery: '', environment },
-          },
-        }
-      );
+      if (dataSource) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                start,
+                end,
+                environment,
+                documentType: dataSource.documentType,
+                rollupInterval: dataSource.rollupInterval,
+              },
+            },
+          }
+        );
+      }
     },
-    [serviceName, start, end, environment]
+    [dataSource, serviceName, start, end, environment]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
