@@ -7,6 +7,7 @@
 
 import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'react';
 import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
+import type { NavigateToAppOptions } from '@kbn/core-application-browser';
 import { useGetAppUrl, useNavigateTo } from './navigation';
 
 export interface BaseLinkProps {
@@ -25,12 +26,14 @@ export type WrappedLinkProps = BaseLinkProps & {
    * It does not override the navigation action.
    **/
   onClick?: MouseEventHandler;
+  navigateToAppOptions?: NavigateToAppOptions;
 };
 export type GetLinkProps = (params: WrappedLinkProps) => LinkProps;
 
 export interface LinkProps {
   onClick: MouseEventHandler;
   href: string;
+  navigateToAppOptions?: NavigateToAppOptions;
 }
 
 /**
@@ -60,7 +63,7 @@ export const useGetLinkProps = (): GetLinkProps => {
   const { navigateTo } = useNavigateTo();
 
   const getLinkProps = useCallback<GetLinkProps>(
-    ({ id, path, urlState, onClick: onClickProps }) => {
+    ({ id, path, urlState, navigateToAppOptions, onClick: onClickProps }) => {
       const url = getLinkUrl({ id, path, urlState });
       return {
         href: url,
@@ -72,7 +75,8 @@ export const useGetLinkProps = (): GetLinkProps => {
             onClickProps(ev);
           }
           ev.preventDefault();
-          navigateTo({ url });
+          // TODO ask how to test the url part
+          navigateTo({ url: navigateToAppOptions ? '' : url, ...navigateToAppOptions });
         },
       };
     },
@@ -88,9 +92,22 @@ export const useGetLinkProps = (): GetLinkProps => {
 export const withLink = <T extends Partial<LinkProps>>(
   Component: React.ComponentType<T>
 ): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
-  React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
+  React.memo(function WithLink({
+    id,
+    path,
+    urlState,
+    onClick: _onClick,
+    navigateToAppOptions,
+    ...rest
+  }) {
     const getLink = useGetLinkProps();
-    const { onClick, href } = getLink({ id, path, urlState, onClick: _onClick });
+    const { onClick, href } = getLink({
+      id,
+      path,
+      urlState,
+      navigateToAppOptions,
+      onClick: _onClick,
+    });
     return <Component onClick={onClick} href={href} {...(rest as unknown as T)} />;
   });
 

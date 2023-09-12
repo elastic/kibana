@@ -7,11 +7,9 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiLink } from '@elastic/eui';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
-import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../common/constants';
 
 interface LinkToListDetailsProps {
   linkTitle: string;
@@ -28,36 +26,16 @@ const LinkToListDetailsComponent: FC<LinkToListDetailsProps> = ({
   external,
   dataTestSubj,
 }) => {
-  const {
-    application: { navigateToApp },
-  } = useKibana().services;
-
-  return external ? (
-    // To achieve a consistent user experience similar to an external link,
-    // it's necessary to employ the href attribute in this context.
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      target="_blank"
-      href="#"
-      external={external}
-      data-test-subj={`linToListkEuiLink${dataTestSubj ?? ''}`}
-      onClick={(e) => {
-        e.preventDefault();
-        navigateToApp(APP_UI_ID, {
-          deepLinkId: SecurityPageName.exceptions,
-          path: `/details/${listId}`,
-          openInNewTab: true,
-        });
-      }}
-    >
-      {linkTitle}
-    </EuiLink>
-  ) : (
+  return (
     <SecuritySolutionLinkAnchor
-      data-test-subj={`linkToListSecuritySolutionLinkAnchor${dataTestSubj ?? ''}`}
-      deepLinkId={SecurityPageName.exceptions}
-      path={`/details/${listId}`}
+      data-test-subj={`linkToRuleSecuritySolutionLinkAnchor${dataTestSubj ?? ''}`}
       external={external}
+      deepLinkId={SecurityPageName.rules}
+      navigateToAppOptions={{
+        openInNewTab: !!external,
+        deepLinkId: SecurityPageName.exceptions,
+        path: `/details/${listId}`,
+      }}
     >
       {linkTitle}
     </SecuritySolutionLinkAnchor>

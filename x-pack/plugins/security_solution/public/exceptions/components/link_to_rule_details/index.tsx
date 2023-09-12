@@ -7,13 +7,11 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiLink } from '@elastic/eui';
 
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { RuleDetailTabs } from '../../../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
-import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
+import { SecurityPageName } from '../../../../common/constants';
 import { getRuleDetailsTabUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
-import { useKibana } from '../../../common/lib/kibana';
 
 interface LinkToRuleDetailsProps {
   referenceName: string;
@@ -30,36 +28,16 @@ const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
   external,
   dataTestSubj,
 }) => {
-  const {
-    application: { navigateToApp },
-  } = useKibana().services;
-
-  return external ? (
-    // To achieve a consistent user experience similar to an external link,
-    // it's necessary to employ the href attribute in this context.
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      target="_blank"
-      href="#"
-      external={external}
-      data-test-subj={`linkToRuleEuiLink${dataTestSubj ?? ''}`}
-      onClick={(e) => {
-        e.preventDefault();
-        navigateToApp(APP_UI_ID, {
-          deepLinkId: SecurityPageName.rules,
-          path: getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts),
-          openInNewTab: true,
-        });
-      }}
-    >
-      {referenceName}
-    </EuiLink>
-  ) : (
+  return (
     <SecuritySolutionLinkAnchor
       data-test-subj={`linkToRuleSecuritySolutionLinkAnchor${dataTestSubj ?? ''}`}
-      deepLinkId={SecurityPageName.rules}
-      path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
       external={external}
+      deepLinkId={SecurityPageName.rules}
+      navigateToAppOptions={{
+        openInNewTab: !!external,
+        deepLinkId: SecurityPageName.rules,
+        path: getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts),
+      }}
     >
       {referenceName}
     </SecuritySolutionLinkAnchor>
