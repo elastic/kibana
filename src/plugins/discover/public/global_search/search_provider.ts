@@ -20,7 +20,7 @@ import type { DiscoverAppLocator } from '../../common';
  *
  * It navigates to Discover with a default query extracted from the default dataview
  */
-export const getSearchProvider: (
+export const getESQLSearchProvider: (
   isESQLEnabled: boolean,
   uiCapabilities: Promise<ApplicationStart['capabilities']>,
   data: Promise<DataPublicPluginStart>,
@@ -37,7 +37,7 @@ export const getSearchProvider: (
         if (!navLinks.discover) {
           return [];
         }
-        const title = i18n.translate('discover.globalSearch.searchTitle', {
+        const title = i18n.translate('discover.globalSearch.esqlSearchTitle', {
           defaultMessage: 'Create ES|QL queries',
           description: 'ES|QL is a product name and should not be translated',
         });
@@ -49,7 +49,7 @@ export const getSearchProvider: (
 
         const params = {
           query: {
-            esql: `from ${defaultDataView?.name ?? defaultDataView?.title} | limit 10`,
+            esql: `from ${defaultDataView?.getIndexPattern()} | limit 10`,
           },
           dataViewSpec: defaultDataView?.toSpec(),
         };
@@ -61,7 +61,7 @@ export const getSearchProvider: (
 
         if (term === 'es|ql' || term === 'esql') {
           score = 100;
-        } else if ('es|ql'.includes(term) || 'esql'.includes(term)) {
+        } else if (term && ('es|ql'.includes(term) || 'esql'.includes(term))) {
           score = 90;
         }
 

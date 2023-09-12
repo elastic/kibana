@@ -80,7 +80,7 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
-import { getSearchProvider } from './globar_search/search_provider';
+import { getESQLSearchProvider } from './global_search/search_provider';
 
 /**
  * @public
@@ -239,7 +239,7 @@ export class DiscoverPlugin
     if (plugins.globalSearch) {
       const enableESQL = core.uiSettings.get(ENABLE_ESQL);
       plugins.globalSearch.registerResultProvider(
-        getSearchProvider(
+        getESQLSearchProvider(
           enableESQL,
           core.getStartServices().then(
             ([

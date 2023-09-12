@@ -8,7 +8,7 @@
 import { NEVER, lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
-import { getSearchProvider } from './search_provider';
+import { getESQLSearchProvider } from './search_provider';
 import { createDiscoverDataViewsMock } from '../__mocks__/data_views';
 import type { DiscoverAppLocator } from '../../common';
 
@@ -31,7 +31,7 @@ describe('ES|QL search provider', () => {
     getRedirectUrl: jest.fn(() => ''),
   } as unknown as DiscoverAppLocator;
   test('returns score 100 if term is esql', async () => {
-    const esqlSearchProvider = getSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
     const observable = esqlSearchProvider.find(
       { term: 'esql' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -51,7 +51,7 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns score 90 if user tries to write es|ql', async () => {
-    const esqlSearchProvider = getSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
     const observable = esqlSearchProvider.find(
       { term: 'es|' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -71,7 +71,7 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns empty results if user tries to write something irrelevant', async () => {
-    const esqlSearchProvider = getSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider(true, uiCapabilitiesMock, dataMock, locator);
     const observable = esqlSearchProvider.find(
       { term: 'woof' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -81,7 +81,7 @@ describe('ES|QL search provider', () => {
   });
 
   test('returns empty results if ESQL is disabled', async () => {
-    const esqlSearchProvider = getSearchProvider(false, uiCapabilitiesMock, dataMock, locator);
+    const esqlSearchProvider = getESQLSearchProvider(false, uiCapabilitiesMock, dataMock, locator);
     const observable = esqlSearchProvider.find(
       { term: 'esql' },
       { aborted$: NEVER, maxResults: 100, preference: '' }
@@ -97,7 +97,7 @@ describe('ES|QL search provider', () => {
         dataViews: { ...dataViewMock, getDefaultDataView: jest.fn(() => undefined) },
       } as unknown as DataPublicPluginStart);
     });
-    const esqlSearchProvider = getSearchProvider(
+    const esqlSearchProvider = getESQLSearchProvider(
       true,
       uiCapabilitiesMock,
       updatedDataMock,
