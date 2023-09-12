@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectUnsanitizedDoc,
-} from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { mergeTransformFunctions } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   SavedObjectModelUnsafeTransformFn,
   SavedObjectsModelChange,
   SavedObjectsModelUnsafeTransformChange,
-  SavedObjectsModelVersion
+  SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
-import { mergeTransformFunctions } from '@kbn/core-saved-objects-base-server-internal';
 
 import { EncryptionError } from './crypto';
 import type { EncryptedSavedObjectsService, EncryptedSavedObjectTypeRegistration } from './crypto';
 
 export interface CreateEsoModelVersionFnOpts {
-  modelVersion: SavedObjectsModelVersion
+  modelVersion: SavedObjectsModelVersion;
   shouldTransformIfDecryptionFails?: boolean;
   inputType?: EncryptedSavedObjectTypeRegistration;
   outputType?: EncryptedSavedObjectTypeRegistration;
@@ -31,60 +29,63 @@ export type CreateEsoModelVersionFn = (
 ) => SavedObjectsModelVersion;
 
 export const getCreateEsoModelVersion =
-(
-  encryptedSavedObjectsService: Readonly<EncryptedSavedObjectsService>,
-  instantiateServiceWithLegacyType: (
-    typeRegistration: EncryptedSavedObjectTypeRegistration
-  ) => EncryptedSavedObjectsService
-): CreateEsoModelVersionFn =>
-(opts) => {
-  const {
-    modelVersion,
-    shouldTransformIfDecryptionFails,
-    inputType,
-    outputType,
-  } = opts;
+  (
+    encryptedSavedObjectsService: Readonly<EncryptedSavedObjectsService>,
+    instantiateServiceWithLegacyType: (
+      typeRegistration: EncryptedSavedObjectTypeRegistration
+    ) => EncryptedSavedObjectsService
+  ): CreateEsoModelVersionFn =>
+  (opts) => {
+    const { modelVersion, shouldTransformIfDecryptionFails, inputType, outputType } = opts;
 
-  // If there are no unsafe changes, then there is nothing for us to do but return the model version
-  const incommingUnsafeChanges = modelVersion.changes.filter(change => change.type === 'unsafe_transform') as SavedObjectsModelUnsafeTransformChange[];
-  if (!incommingUnsafeChanges || incommingUnsafeChanges.length === 0) return modelVersion;
+    // If there are no unsafe changes, then there is nothing for us to do but return the model version
+    const incommingUnsafeChanges = modelVersion.changes.filter(
+      (change) => change.type === 'unsafe_transform'
+    ) as SavedObjectsModelUnsafeTransformChange[];
+    if (!incommingUnsafeChanges || incommingUnsafeChanges.length === 0) return modelVersion;
 
-  if (inputType && outputType && inputType.type !== outputType.type) {
-    throw new Error(
-      `An Invalid Encrypted Saved Objects Model Version Transformation is trying to transform across types ("${inputType.type}" => "${outputType.type}"), which isn't permitted`
+    if (inputType && outputType && inputType.type !== outputType.type) {
+      throw new Error(
+        `An Invalid Encrypted Saved Objects Model Version Transformation is trying to transform across types ("${inputType.type}" => "${outputType.type}"), which isn't permitted`
+      );
+    }
+
+    const inputService = inputType
+      ? instantiateServiceWithLegacyType(inputType)
+      : encryptedSavedObjectsService;
+
+    const transformedService = outputType
+      ? instantiateServiceWithLegacyType(outputType)
+      : encryptedSavedObjectsService;
+
+    const transformFn = createMergedUnsafeTransformFn(
+      inputService,
+      transformedService,
+      shouldTransformIfDecryptionFails,
+      incommingUnsafeChanges.map((change) => change.transformFn)
     );
-  }
 
-  const inputService = inputType
-    ? instantiateServiceWithLegacyType(inputType)
-    : encryptedSavedObjectsService;
+    // ToDo: not sure of what the order should be here. I opted to place the merged unsafe transform at the beginning
+    const changes = [
+      { type: 'unsafe_transform', transformFn } as SavedObjectsModelUnsafeTransformChange,
+    ] as SavedObjectsModelChange[];
+    changes.push(...modelVersion.changes.filter((change) => change.type !== 'unsafe_transform'));
 
-  const transformedService = outputType
-    ? instantiateServiceWithLegacyType(outputType)
-    : encryptedSavedObjectsService;
-
-  const transformFn = createMergedUnsafeTransformFn(inputService, transformedService, shouldTransformIfDecryptionFails, incommingUnsafeChanges.map(change => change.transformFn));
-
-  // ToDo: not sure of what the order should be here. I opted to place the merged unsafe transform at the beginning
-  let changes = [{ type: 'unsafe_transform', transformFn } as SavedObjectsModelUnsafeTransformChange] as SavedObjectsModelChange[];
-  changes.push(...modelVersion.changes.filter(change => change.type !== 'unsafe_transform'));
-
-  return { ...modelVersion, changes };
-};
+    return { ...modelVersion, changes };
+  };
 
 function createMergedUnsafeTransformFn(
   inputService: Readonly<EncryptedSavedObjectsService>,
   transformedService: Readonly<EncryptedSavedObjectsService>,
   shouldTransformIfDecryptionFails: boolean | undefined,
   unsafeTransforms: SavedObjectModelUnsafeTransformFn[]
-): SavedObjectModelUnsafeTransformFn
-{
+): SavedObjectModelUnsafeTransformFn {
   // merge all transforms
   const mergedUnsafetransform = mergeTransformFunctions(unsafeTransforms);
 
   return (document, context) => {
     const { type, id, originId } = document;
-    const descriptorNamespace = document.namespace??undefined;
+    const descriptorNamespace = document.namespace ?? undefined;
     const encryptionDescriptor = { id, type, namespace: descriptorNamespace };
 
     // Note about isTypeBeingConverted: false
@@ -119,13 +120,19 @@ function createMergedUnsafeTransformFn(
     const result = mergedUnsafetransform(documentToTransform, context);
 
     // encrypt
-    const transformedDoc = mapAttributes/*<MigratedAttributes>*/(result.document, (transformedAttributes) => {
-        return transformedService.encryptAttributesSync<any>(encryptionDescriptor, transformedAttributes);
-    });
+    const transformedDoc = mapAttributes(
+      /* <MigratedAttributes>*/ result.document,
+      (transformedAttributes) => {
+        return transformedService.encryptAttributesSync<any>(
+          encryptionDescriptor,
+          transformedAttributes
+        );
+      }
+    );
 
     // return encryted doc
     return { document: transformedDoc };
-  }
+  };
 }
 
 function mapAttributes<T>(obj: SavedObjectUnsanitizedDoc<T>, mapper: (attributes: T) => T) {
