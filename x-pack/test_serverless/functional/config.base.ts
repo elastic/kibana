@@ -65,6 +65,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         connectors: {
           pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
         },
+        advancedSettings: {
+          pathname: '/app/management/kibana/settings',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
