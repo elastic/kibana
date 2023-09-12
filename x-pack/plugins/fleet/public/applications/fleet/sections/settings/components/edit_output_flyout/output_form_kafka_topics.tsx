@@ -215,7 +215,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
               <EuiText color="subdued" size="xs">
                 <i>
                   <FormattedMessage
-                    id={'xpack.fleet.settings.editOutputFlyout.kafkaTopicsProcessorsHelpText'}
+                    id="xpack.fleet.settings.editOutputFlyout.kafkaTopicsProcessorsHelpText"
                     defaultMessage={'For more information read the {link}.'}
                     values={{
                       link: (
