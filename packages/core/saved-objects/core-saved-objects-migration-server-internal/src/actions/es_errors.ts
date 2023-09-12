@@ -27,8 +27,10 @@ export const isIndexNotFoundException = (errorCause?: estypes.ErrorCause): boole
 };
 
 export const isClusterShardLimitExceeded = (errorCause?: estypes.ErrorCause): boolean => {
+  // traditional ES: validation_exception. serverless ES: illegal_argument_exception
   return (
-    errorCause?.type === 'validation_exception' &&
+    (errorCause?.type === 'validation_exception' ||
+      errorCause?.type === 'illegal_argument_exception') &&
     errorCause?.reason?.match(
       /this action would add .* shards, but this cluster currently has .* maximum normal shards open/
     ) !== null
