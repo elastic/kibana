@@ -106,6 +106,7 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 [float]
 === Examples
 
+* <<preconfigured-resilient-configuration>>
 * <<preconfigured-index-configuration>>
 * <<preconfigured-jira-configuration>>
 * <<preconfigured-opsgenie-configuration>>
@@ -115,6 +116,30 @@ Index names must start with `kibana-alert-history-` to take advantage of the pre
 * <<preconfigured-webhook-configuration>>
 * <<preconfigured-cases-webhook-configuration>>
 * <<preconfigured-xmatters-configuration>>
+
+[float]
+[[preconfigured-resilient-configuration]]
+==== {ibm-r} connectors
+
+The following example creates a <<resilient-action-type,{ibm-r} connector>>:
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-resilient:
+    name: preconfigured-resilient-connector-type
+    actionTypeId: .resilient
+    config:
+      apiUrl: https://elastic.resilient.net <1>
+      orgId: ES <2>
+    secrets:
+      apiKeyId: testuser <3>
+      apiKeySecret: tokenkeystorevalue <4>
+--
+<1> The {ibm-r} instance URL.
+<2> The {ibm-r} organization identifier.
+<3> The authentication key ID for HTTP basic authentication.
+<4> The authentication key secret for HTTP basic authentication. NOTE: This value should be stored in the <<creating-keystore,{kib} keystore>>.
 
 [float]
 [[preconfigured-index-configuration]]
