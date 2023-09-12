@@ -690,23 +690,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     });
 
-    let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: PolicySecretReference[] | undefined;
     let secretsToDelete: PolicySecretReference[] | undefined;
 
-    try {
-      enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
-        'packagePolicyUpdate',
-        packagePolicyUpdate,
-        soClient,
-        esClient
-      );
-    } catch (error) {
-      const logger = appContextService.getLogger();
-      logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
-      logger.error(error);
-      enrichedPackagePolicy = packagePolicyUpdate;
-    }
+    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
+      'packagePolicyUpdate',
+      packagePolicyUpdate,
+      soClient,
+      esClient
+    );
 
     const packagePolicy = { ...enrichedPackagePolicy, name: enrichedPackagePolicy.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);

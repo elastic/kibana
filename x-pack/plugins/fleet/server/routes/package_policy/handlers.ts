@@ -394,6 +394,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
