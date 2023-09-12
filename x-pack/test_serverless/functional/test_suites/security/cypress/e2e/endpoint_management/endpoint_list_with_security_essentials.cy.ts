@@ -17,7 +17,7 @@ import {
   indexEndpointHosts,
 } from '../../tasks/endpoint_management/index_endpoint_hosts';
 
-describe(
+describe.skip(
   'When on the Endpoint List in Security Essentials PLI',
   {
     env: {

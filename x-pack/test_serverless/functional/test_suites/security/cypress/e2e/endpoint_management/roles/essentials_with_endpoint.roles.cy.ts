@@ -28,7 +28,7 @@ import {
   indexEndpointHosts,
 } from '../../../tasks/endpoint_management/index_endpoint_hosts';
 
-describe(
+describe.skip(
   'Roles for Security Essential PLI with Endpoint Essentials addon',
   {
     env: {

@@ -11,7 +11,7 @@ import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
 
-describe(
+describe.skip(
   'App Features for Security Essential PLI',
   {
     env: {

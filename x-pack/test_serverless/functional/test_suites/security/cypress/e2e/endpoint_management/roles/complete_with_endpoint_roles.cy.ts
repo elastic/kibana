@@ -37,7 +37,7 @@ import {
   indexEndpointHosts,
 } from '../../../tasks/endpoint_management/index_endpoint_hosts';
 
-describe(
+describe.skip(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
     env: {

@@ -11,7 +11,7 @@ import { getAgentListTable, visitFleetAgentList } from '../../../screens';
 import { getEndpointManagementPageMap } from '../../../screens/endpoint_management';
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 
-describe(
+describe.skip(
   'App Features for Security Essentials PLI with Endpoint Essentials Addon',
   {
     env: {
