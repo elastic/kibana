@@ -8,7 +8,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { EuiPageTemplate, EuiPageBody, EuiTitle, EuiBreadcrumbs } from '@elastic/eui';
+import { EuiPageTemplate, EuiTitle, EuiBreadcrumbs } from '@elastic/eui';
 
 interface PageProps {
   title: string;
@@ -39,7 +39,7 @@ export const Page: React.FC<PageProps> = (props) => {
   }
 
   return (
-    <EuiPageBody>
+    <EuiPageTemplate offset={0}>
       <EuiPageTemplate.Header>
         <EuiTitle size="l">
           <h1>{title}</h1>
@@ -47,6 +47,6 @@ export const Page: React.FC<PageProps> = (props) => {
         <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>
-    </EuiPageBody>
+    </EuiPageTemplate>
   );
 };
