@@ -174,8 +174,8 @@ export class EventLogger {
   public startTransaction(
     action: Transactions.SCREENSHOTTING | Transactions.PDF
   ): TransactionEndFn {
-    this.transactions[action] = apm.startTransaction(action, PLUGIN_ID);
-    const transaction = this.transactions[action] as apm.Transaction;
+    const transaction = apm.startTransaction(action, PLUGIN_ID);
+    this.transactions[action] = transaction;
 
     this.startTiming(action);
     this.logEvent(action, 'start', { action });

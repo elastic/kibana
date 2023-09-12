@@ -64,7 +64,7 @@ const agent: jest.Mocked<Agent> = {
   addTransactionFilter: jest.fn(),
   addMetadataFilter: jest.fn(),
   flush: jest.fn(),
-  destroy: jest.fn(),
+  destroy: jest.fn().mockResolvedValue(undefined),
   registerMetric: jest.fn(),
   setTransactionOutcome: jest.fn(),
   setSpanOutcome: jest.fn(),
