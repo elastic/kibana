@@ -249,6 +249,8 @@ export class CaseUserActionService {
         filters: [
           UserActionTypes.comment,
           UserActionTypes.description,
+          UserActionTypes.severity,
+          UserActionTypes.status,
           UserActionTypes.tags,
           UserActionTypes.title,
         ],
