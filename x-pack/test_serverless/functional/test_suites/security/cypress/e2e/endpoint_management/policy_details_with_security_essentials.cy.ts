@@ -9,7 +9,7 @@ import { IndexedFleetEndpointPolicyResponse } from '@kbn/security-solution-plugi
 import { login } from '../../tasks/login';
 import { visitPolicyDetails } from '../../screens/endpoint_management/policy_details';
 
-describe.skip(
+describe(
   'When displaying the Policy Details in Security Essentials PLI',
   {
     env: {

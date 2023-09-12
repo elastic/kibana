@@ -11,7 +11,7 @@ import { getAgentListTable, visitFleetAgentList } from '../../../screens';
 import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
 import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
 
-describe.skip(
+describe(
   'App Features for Security Complete PLI with Endpoint Complete Addon',
   {
     env: {
