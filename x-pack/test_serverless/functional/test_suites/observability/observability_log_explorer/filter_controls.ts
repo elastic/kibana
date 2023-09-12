@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await PageObjects.svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders a filter controls section as part of the unified search bar', async () => {

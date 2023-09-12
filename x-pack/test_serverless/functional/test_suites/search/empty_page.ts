@@ -20,7 +20,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await svlCommonPage.forceLogout();
     });
 
     it('should show search specific empty page in discover', async () => {

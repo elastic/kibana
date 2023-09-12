@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await pageObjects.svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('has serverless side nav', async () => {

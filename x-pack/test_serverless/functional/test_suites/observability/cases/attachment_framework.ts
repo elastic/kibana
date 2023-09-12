@@ -48,7 +48,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
-        await svlCommonPage.forceLogout({ waitForLoginPage: false });
+        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {

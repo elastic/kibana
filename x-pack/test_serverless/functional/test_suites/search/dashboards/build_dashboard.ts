@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await PageObjects.svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('can add a lens panel by value', async () => {

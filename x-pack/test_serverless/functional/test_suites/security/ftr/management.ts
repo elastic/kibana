@@ -17,7 +17,7 @@ export default function ({ getPageObject }: FtrProviderContext) {
     });
 
     after(async () => {
-      await svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await svlCommonPage.forceLogout();
     });
 
     it('redirects from common management url to security specific page', async () => {

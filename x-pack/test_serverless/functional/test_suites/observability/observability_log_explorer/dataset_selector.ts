@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('without installed integrations or uncategorized data streams', () => {

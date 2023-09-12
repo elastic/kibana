@@ -36,7 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await clearAllApiKeys(es, log);
-      await pageObjects.svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('should create and delete API keys correctly', async () => {

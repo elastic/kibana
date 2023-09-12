@@ -30,7 +30,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     after(async () => {
       await cases.api.deleteAllCases();
-      await svlCommonPage.forceLogout({ waitForLoginPage: false });
+      await svlCommonPage.forceLogout();
     });
 
     describe('Closure options', function () {
