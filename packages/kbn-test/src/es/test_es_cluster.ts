@@ -234,10 +234,11 @@ export function createTestEsCluster<
           port,
           clean: true,
           teardown: true,
-          ssl: true,
           background: true,
           files,
+          ssl,
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
+          waitForReady: true,
         });
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
