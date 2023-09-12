@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import chroma from 'chroma-js';
+
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { scaleSequential } from 'd3-scale';
-import { interpolateLab, piecewise } from 'd3-interpolate';
+
 import { changeAlpha, getValidColor, combineColors } from '../../color/color_math';
 
 import { ColorMapping } from '../../config';
@@ -47,12 +48,12 @@ export function Gradient({
         : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode))
       : [];
 
-  const gradientColorScale = scaleSequential(piecewise(interpolateLab, gradientColorSteps));
+  const gradientColorScale = chroma.scale(gradientColorSteps).mode('lab');
   const gradientCSSBackground =
     colorMode.type === 'gradient'
       ? colorMode.steps.length === 1
         ? gradientColorSteps.join(',')
-        : Array.from({ length: 10 }, (d, i) => gradientColorScale(i / 10))
+        : Array.from({ length: 10 }, (d, i) => gradientColorScale(i / 10).hex())
             .sort(() => (colorMode.sort === 'asc' ? -1 : 1))
             .join(',')
       : '';

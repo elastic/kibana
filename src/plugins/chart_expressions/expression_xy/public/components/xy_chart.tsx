@@ -281,6 +281,7 @@ export function XYChart({
   const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
     datatables: cursorSyncLayers.map(({ table }) => table),
   });
+  console.log(data);
 
   const onRenderChange = useCallback(
     (isRendered: boolean = true) => {
@@ -390,6 +391,7 @@ export function XYChart({
     timeZone,
     xAxisConfig?.extent
   );
+  console.log(dataLayers);
 
   const axisTitlesVisibilitySettings = {
     yLeft: yAxesMap?.left?.showTitle ?? true,

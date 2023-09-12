@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { scaleSequential } from 'd3-scale';
-import { interpolateLab, piecewise } from 'd3-interpolate';
+import chroma from 'chroma-js';
+// import { scaleSequential } from 'd3-scale';
+// import { interpolateLab, piecewise } from 'd3-interpolate';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors } from './color_math';
 import { generateAutoAssignmentsForCategories } from '../config/assignment_from_categories';
@@ -44,8 +44,13 @@ export function getAssignmentColor(
             ]
           : colorMode.steps.map((d) => getColor(d, getPaletteFn, isDarkMode));
       steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
-      const colorScale = scaleSequential(piecewise(interpolateLab, steps));
-      return total === 0 ? 'red' : total === 1 ? colorScale(0) : colorScale(index / (total - 1));
+      // const colorScale = scaleSequential(piecewise(interp`olateLab, steps));
+      const colorScale = chroma.scale(steps).mode('lab');
+      return total === 0
+        ? 'red'
+        : total === 1
+        ? colorScale(0).hex()
+        : colorScale(index / (total - 1)).hex();
     }
   }
 }
