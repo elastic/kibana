@@ -16,7 +16,7 @@ const taskTypeGrouping = new Set<string>(['alerting:', 'actions:']);
 
 enum TaskRunKeys {
   SUCCESS = 'success',
-  RUN_WITHIN_TIMEOUT = 'on_time',
+  NOT_TIMED_OUT = 'not_timed_out',
   TOTAL = 'total',
 }
 
@@ -27,7 +27,7 @@ enum TaskRunMetricKeys {
 
 interface TaskRunCounts extends JsonObject {
   [TaskRunKeys.SUCCESS]: number;
-  [TaskRunKeys.RUN_WITHIN_TIMEOUT]: number;
+  [TaskRunKeys.NOT_TIMED_OUT]: number;
   [TaskRunKeys.TOTAL]: number;
 }
 
@@ -72,7 +72,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
 
     // increment expired counters
     if (!isExpired) {
-      this.incrementCounters(TaskRunKeys.RUN_WITHIN_TIMEOUT, taskType, taskTypeGroup);
+      this.incrementCounters(TaskRunKeys.NOT_TIMED_OUT, taskType, taskTypeGroup);
     }
   }
 
