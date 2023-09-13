@@ -437,11 +437,9 @@ class TutorialUi extends React.Component {
 
     return (
       <KibanaPageTemplate template="empty">
-        <KibanaPageTemplate.Section>
-          {content}
-        </KibanaPageTemplate.Section>
+        <KibanaPageTemplate.Section>{content}</KibanaPageTemplate.Section>
       </KibanaPageTemplate>
-    )
+    );
   }
 }
 
