@@ -14,8 +14,6 @@ import {
   BulkDeleteRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_delete';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { transformRuleToRuleResponseV1 } from '../../transforms';
-import type { Rule } from '../../../../application/rule/types';
 
 export const bulkDeleteRulesRoute = ({
   router,
@@ -38,23 +36,13 @@ export const bulkDeleteRulesRoute = ({
           const { filter, ids } = req.body;
 
           try {
-            const bulkDeleteResults = await rulesClient.bulkDeleteRules({
-              filter,
-              ids,
-            });
+            const bulkDeleteResults: BulkDeleteRulesResponseV1<RuleParamsV1> =
+              await rulesClient.bulkDeleteRules({
+                filter,
+                ids,
+              });
 
-            const result: { body: BulkDeleteRulesResponseV1<RuleParamsV1> } = {
-              body: {
-                ...bulkDeleteResults,
-                rules: bulkDeleteResults.rules.map((rule) => {
-                  // TODO (http-versioning): Remove this cast, this enables us to move forward
-                  // without fixing all of other solution types
-                  return transformRuleToRuleResponseV1<RuleParamsV1>(rule as Rule<RuleParamsV1>);
-                }),
-              },
-            };
-
-            return res.ok({ body: result });
+            return res.ok({ body: bulkDeleteResults });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);
