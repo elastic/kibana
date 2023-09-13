@@ -47,7 +47,7 @@ export const DocumentStatus: FC = () => {
         eventId,
         contextId: scopeId,
         scopeId,
-        browserFields: browserFields || {},
+        browserFields,
         item,
       })
     );

@@ -554,7 +554,15 @@
             "section": "def-common.UiSettingsScope",
             "text": "UiSettingsScope"
           },
-          " | undefined; order?: number | undefined; name?: string | undefined; description?: string | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; order?: number | undefined; name?: string | undefined; description?: string | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; readonlyMode?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.ReadonlyModeType",
+            "text": "ReadonlyModeType"
+          },
+          " | undefined; sensitive?: boolean | undefined; deprecation?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",
