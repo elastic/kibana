@@ -125,7 +125,7 @@ export const GroupPreview = ({
           </EuiFlexItem>
           <EuiFlexItem
             css={css`
-              width: 310px;
+              width: 336px;
               margin-top: -5px;
               margin-bottom: -5px;
             `}
@@ -166,7 +166,6 @@ export const GroupPreview = ({
                 },
               ]}
             />
-            {/* </div> */}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
