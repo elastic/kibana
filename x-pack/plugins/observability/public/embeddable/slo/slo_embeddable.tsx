@@ -6,21 +6,25 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
+import {
+  Embeddable as AbstractEmbeddable,
+  EmbeddableOutput,
+  IContainer,
+} from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { SloListItem } from './slo_list_item';
-import type { SloEmbeddableDeps } from './types';
+import type { SloEmbeddableDeps, SloEmbeddableInput } from './types';
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
-export class SLOEmbeddable extends Embeddable {
+export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
   // The type of this embeddable. This will be used to find the appropriate factory
   // to instantiate this kind of embeddable.
   public readonly type = SLO_EMBEDDABLE;
 
   constructor(
     private readonly deps: SloEmbeddableDeps,
-    initialInput: EmbeddableInput,
+    initialInput: SloEmbeddableInput,
     parent?: IContainer
   ) {
     super(

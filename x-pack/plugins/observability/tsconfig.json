@@ -88,7 +88,7 @@
     "@kbn/content-management-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/react-kibana-mount",
-
+    "@kbn/aiops-plugin",
   ],
   "exclude": [
     "target/**/*"

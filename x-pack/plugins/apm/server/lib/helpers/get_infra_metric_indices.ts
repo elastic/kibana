@@ -15,6 +15,9 @@ export async function getInfraMetricIndices({
   infraPlugin: Required<APMRouteHandlerResources['plugins']['infra']>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string> {
+  if (!infraPlugin) {
+    throw new Error('Infra Plugin needs to be setup');
+  }
   const infra = await infraPlugin.start();
   const infraMetricIndices = await infra.getMetricIndices(savedObjectsClient);
 

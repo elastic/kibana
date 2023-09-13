@@ -21,7 +21,7 @@ export interface SuppressedAlertsProps {
   /**
    * An object with top level fields from the ECS object
    */
-  dataAsNestedObject: Ecs | null;
+  dataAsNestedObject: Ecs;
   /**
    * Value of the kibana.alert.suppression.doc_count field
    */
