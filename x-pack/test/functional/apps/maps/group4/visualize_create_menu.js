@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'header', 'maps']);
-
+  const listingTable = getService('listingTable');
   const security = getService('security');
 
   describe('visualize create menu', () => {
@@ -83,6 +83,38 @@ export default function ({ getService, getPageObjects }) {
       it('should not show legacy tilemap map visualizion in create menu', async () => {
         const hasLegecyViz = await PageObjects.visualize.hasVisType('tile_map');
         expect(hasLegecyViz).to.equal(false);
+      });
+    });
+    describe('edit meta-data', () => {
+      before(async () => {
+        await security.testUser.setRoles(
+          ['global_maps_all', 'global_visualize_all', 'test_logstash_reader'],
+          {
+            skipBrowserRefresh: true,
+          }
+        );
+
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('should allow to change meta-data on a map visualization', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickMapsApp();
+        await PageObjects.maps.waitForLayersToLoad();
+        await PageObjects.maps.saveMap('myTestMap');
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.searchForItemWithName('myTestMap');
+        await listingTable.inspectVisualization();
+        await listingTable.editVisualizationDetails({
+          title: 'AnotherTestMap',
+          description: 'new description',
+        });
+        await listingTable.searchForItemWithName('AnotherTestMap');
+        await listingTable.expectItemsCount('visualize', 1);
       });
     });
   });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { CustomIntegrationOptions } from '@kbn/custom-integrations';
 import { i18n } from '@kbn/i18n';
-import { IntegrationOptions } from '../../../../hooks/use_create_integration';
 import {
   createWizardContext,
   Step,
@@ -18,7 +18,7 @@ import { SelectLogs } from './select_logs';
 
 interface WizardState {
   integrationName: string;
-  lastCreatedIntegration?: IntegrationOptions;
+  lastCreatedIntegrationOptions?: CustomIntegrationOptions;
   datasetName: string;
   serviceName: string;
   logFilePaths: string[];
