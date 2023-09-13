@@ -60,6 +60,7 @@ export enum RuleExecutionStatusErrorReasons {
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
+  MAX_QUEUED_ACTIONS = 'maxQueuedActions',
 }
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';

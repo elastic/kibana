@@ -62,23 +62,25 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   }
 
   return (
-    <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
-      <EuiButtonIcon
-        id={rowIndex === 0 ? tourStep : undefined}
-        size="xs"
-        iconSize="s"
-        aria-label={buttonLabel}
-        data-test-subj={testSubj}
-        onClick={() => {
-          const nextHit = isCurrentRowExpanded ? undefined : current;
-          toolTipRef.current?.hideToolTip();
-          setPressed(Boolean(nextHit));
-          setExpanded?.(nextHit);
-        }}
-        color={isCurrentRowExpanded ? 'primary' : 'text'}
-        iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
-        isSelected={isCurrentRowExpanded}
-      />
-    </EuiToolTip>
+    <div className="unifiedDataTable__rowControl">
+      <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
+        <EuiButtonIcon
+          id={rowIndex === 0 ? tourStep : undefined}
+          size="xs"
+          iconSize="s"
+          aria-label={buttonLabel}
+          data-test-subj={testSubj}
+          onClick={() => {
+            const nextHit = isCurrentRowExpanded ? undefined : current;
+            toolTipRef.current?.hideToolTip();
+            setPressed(Boolean(nextHit));
+            setExpanded?.(nextHit);
+          }}
+          color={isCurrentRowExpanded ? 'primary' : 'text'}
+          iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
+          isSelected={isCurrentRowExpanded}
+        />
+      </EuiToolTip>
+    </div>
   );
 };

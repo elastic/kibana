@@ -35,6 +35,7 @@ import {
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
+import { useSidebarToggle } from '../../hooks/use_sidebar_toggle';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,
@@ -71,11 +72,6 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
    * Return static configuration options which don't need to change
    */
   getCreationOptions: () => UnifiedFieldListSidebarContainerCreationOptions;
-
-  /**
-   * In case if you have a sidebar toggle button
-   */
-  isSidebarCollapsed?: boolean;
 
   /**
    * Custom content to render at the top of field list in the flyout (for example a data view picker)
@@ -115,7 +111,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     services,
     dataView,
     workspaceSelectedFieldNames,
-    isSidebarCollapsed, // TODO later: pull the logic of collapsing the sidebar to this component
     prependInFlyout,
     variant = 'responsive',
     onFieldEdited,
@@ -125,6 +120,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   );
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
+  const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
 
   const canEditDataView =
     Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
@@ -250,7 +246,14 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     isAffectedByGlobalFilter,
     onEditField: editField,
     onDeleteField: deleteField,
+    compressed: stateService.creationOptions.compressed ?? false,
+    buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
   };
+
+  if (stateService.creationOptions.showSidebarToggleButton) {
+    commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
+    commonSidebarProps.onToggleSidebar = onToggleSidebar;
+  }
 
   const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
 
@@ -319,6 +322,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
               <UnifiedFieldListSidebar
                 {...commonSidebarProps}
                 alwaysShowActionButton={true}
+                buttonAddFieldVariant="primary" // always for the flyout
+                isSidebarCollapsed={undefined}
                 prepend={prependInFlyout?.()}
               />
             </EuiFlyout>
@@ -333,12 +338,12 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   }
 
   if (variant === 'list-always') {
-    return (!isSidebarCollapsed && renderListVariant()) || null;
+    return renderListVariant();
   }
 
   return (
     <>
-      {!isSidebarCollapsed && <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>}
+      <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>
       <EuiShowFor sizes={['xs', 's']}>{renderButtonVariant()}</EuiShowFor>
     </>
   );

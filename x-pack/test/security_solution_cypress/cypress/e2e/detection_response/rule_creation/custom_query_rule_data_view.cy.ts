@@ -50,7 +50,7 @@ import {
 
 import {
   getRulesManagementTableRows,
-  goToRuleDetails,
+  goToRuleDetailsOf,
 } from '../../../tasks/alerts_detection_rules';
 import { postDataView } from '../../../tasks/common';
 import {
@@ -67,7 +67,8 @@ import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_deta
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');
@@ -104,7 +105,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
       cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
@@ -160,7 +161,7 @@ describe('Custom query rules', { tags: ['@ess', '@brokenInServerless'] }, () => 
       fillScheduleRuleAndContinue(rule);
       createRuleWithoutEnabling();
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(EDIT_RULE_SETTINGS_LINK).click();
 
