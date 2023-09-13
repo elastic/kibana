@@ -10,7 +10,6 @@ import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plug
 
 type TextBasedColumnTypes = Record<string, DatatableColumnType>;
 
-
 /**
  * Column types for text based searches
  * @param textBasedColumns
