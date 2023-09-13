@@ -20,6 +20,7 @@
     "@kbn/utility-types",
     "@kbn/shared-ux-utility",
     "@kbn/test-jest-helpers",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",
