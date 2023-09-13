@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import createContainer from 'constate';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -21,14 +21,20 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
   const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
+  const [refetch, setRefetch] = useState(false);
 
   const { loading, error, metadata } = useMetadata(
     asset.id,
     assetType,
     inventoryModel.requiredMetrics,
     sourceId,
-    getDateRangeInTimestamp()
+    getDateRangeInTimestamp(),
+    refetch
   );
+
+  const shouldRefetch = useCallback(() => {
+    setRefetch(!refetch);
+  }, [refetch]);
 
   useEffect(() => {
     if (metadata?.name) {
@@ -40,6 +46,7 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
     loading,
     error,
     metadata,
+    shouldRefetch,
   };
 }
 

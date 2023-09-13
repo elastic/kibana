@@ -23,7 +23,8 @@ export function useMetadata(
   timeRange: {
     from: number;
     to: number;
-  }
+  },
+  refetch?: boolean
 ) {
   const decodeResponse = (response: any) => {
     return pipe(InfraMetadataRT.decode(response), fold(throwErrors(createPlainError), identity));
@@ -44,7 +45,7 @@ export function useMetadata(
     (async () => {
       await makeRequest();
     })();
-  }, [makeRequest]);
+  }, [makeRequest, refetch]);
 
   return {
     name: (response && response.name) || '',

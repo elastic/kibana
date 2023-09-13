@@ -28,6 +28,7 @@ export const Metadata = () => {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
+    shouldRefetch,
   } = useMetadataStateProviderContext();
   const { showActionsColumn = false } = overrides?.metadata ?? {};
 
@@ -40,7 +41,7 @@ export const Metadata = () => {
     [setUrlState]
   );
 
-  if (fetchMetadataError) {
+  if (fetchMetadataError && !metadataLoading) {
     return (
       <EuiCallOut
         title={i18n.translate('xpack.infra.metadataEmbeddable.errorTitle', {
@@ -52,15 +53,12 @@ export const Metadata = () => {
       >
         <FormattedMessage
           id="xpack.infra.metadataEmbeddable.errorMessage"
-          defaultMessage="There was an error loading your data. Try to {reload} and open the host details again."
+          defaultMessage="There was an error loading your data. Try to {refetch} and open the host details again."
           values={{
-            reload: (
-              <EuiLink
-                data-test-subj="infraMetadataReloadPageLink"
-                onClick={() => window.location.reload()}
-              >
+            refetch: (
+              <EuiLink data-test-subj="infraMetadataReloadPageLink" onClick={shouldRefetch}>
                 {i18n.translate('xpack.infra.metadataEmbeddable.errorAction', {
-                  defaultMessage: 'reload the page',
+                  defaultMessage: 'refetch metadata',
                 })}
               </EuiLink>
             ),
