@@ -16,7 +16,6 @@ import {
   SummarizedAlerts,
   RawAlertInstance,
   RuleAlertData,
-  RuleNotifyWhenType,
   WithoutReservedActionGroups,
 } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -83,7 +82,7 @@ export interface ProcessAndLogAlertsOpts {
   shouldLogAlerts: boolean;
   ruleRunMetricsStore: RuleRunMetricsStore;
   flappingSettings: RulesSettingsFlappingProperties;
-  notifyWhen: RuleNotifyWhenType | null;
+  notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
 }
 

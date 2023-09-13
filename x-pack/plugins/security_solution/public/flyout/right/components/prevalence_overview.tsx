@@ -27,14 +27,8 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
-  const {
-    eventId,
-    indexName,
-    browserFields,
-    dataFormattedForFieldBrowser,
-    scopeId,
-    investigationFields,
-  } = useRightPanelContext();
+  const { eventId, indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
+    useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToCorrelationsTab = useCallback(() => {
@@ -72,10 +66,6 @@ export const PrevalenceOverview: FC = () => {
       ),
     [data]
   );
-
-  if (!eventId || !browserFields || !dataFormattedForFieldBrowser) {
-    return null;
-  }
 
   return (
     <ExpandablePanel
