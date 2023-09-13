@@ -287,3 +287,18 @@ export const waitForKibana = async (kbnUrl: string): Promise<void> => {
     { maxTimeout: 10000 }
   );
 };
+
+export const isServerlessKibanaFlavor = async (kbnClient: KbnClient): Promise<boolean> => {
+  const kbnStatus = await fetchKibanaStatus(kbnClient);
+
+  // If we don't have status for plugins, then error
+  // the Status API will always return something (its an open API), but if auth was successful,
+  // it will also return more data.
+  if (!kbnStatus.status.plugins) {
+    throw new Error(
+      `Unable to retrieve Kibana plugins status (likely an auth issue with the username being used for kibana)`
+    );
+  }
+
+  return kbnStatus.status.plugins?.serverless?.level === 'available';
+};
