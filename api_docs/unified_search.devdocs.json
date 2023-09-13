@@ -603,7 +603,7 @@
               },
               "[] | undefined; refreshInterval?: number | undefined; iconType?: ",
               "IconType",
-              " | undefined; dataTestSubj?: string | undefined; timeHistory?: ",
+              " | undefined; showQueryInput?: boolean | undefined; dataTestSubj?: string | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -611,7 +611,7 @@
                 "section": "def-public.TimeHistoryContract",
                 "text": "TimeHistoryContract"
               },
-              " | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; filtersForSuggestions?: ",
+              " | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; filtersForSuggestions?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
