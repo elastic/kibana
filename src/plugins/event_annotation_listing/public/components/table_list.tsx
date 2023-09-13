@@ -218,7 +218,7 @@ export const EventAnnotationGroupTableList = ({
               <p>
                 <FormattedMessage
                   id="eventAnnotationListing.tableList.emptyPrompt.body"
-                  defaultMessage="ou can create and save annotations for use across multiple visualizations in the Lens editor."
+                  defaultMessage="You can create and save annotations for use across multiple visualizations in the Lens editor."
                 />
               </p>
             }
