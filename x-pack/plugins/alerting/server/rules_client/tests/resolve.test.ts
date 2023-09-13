@@ -180,7 +180,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
-    const result = await rulesClient.resolve({ id: '1', includeLegacyId: true });
+    const result = await rulesClient.resolve({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -266,7 +266,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
-    const result = await rulesClient.resolve({ id: '1', includeSnoozeData: true });
+    const result = await rulesClient.resolve({ id: '1' });
     expect(result.isSnoozedUntil).toBeTruthy();
   });
 

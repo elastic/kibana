@@ -12,7 +12,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { ResolvedSanitizedRule } from '../../../../types';
+import { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -24,7 +24,7 @@ beforeEach(() => {
 });
 
 describe('resolveRuleRoute', () => {
-  const mockedRule: ResolvedSanitizedRule<{
+  const mockedRule: ResolvedRule<{
     bar: boolean;
   }> = {
     id: '1',

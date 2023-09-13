@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ResolvedSanitizedRule } from '../../../../../../../common';
-import { Rule, RuleParams } from '../../../../../../application/rule/types';
+import { ResolvedRule } from '../../../../../../application/rule/methods/resolve/types';
+import { RuleParams } from '../../../../../../application/rule/types';
 import { transformRuleToRuleResponseV1 } from '../../../../transforms';
 
 export const transformResolveResponse = <Params extends RuleParams = never>(
-  rule: ResolvedSanitizedRule<Params> & { outcome: string; alias_target_id?: string }
+  rule: ResolvedRule<Params>
 ) => ({
-  ...transformRuleToRuleResponseV1<Params>(rule as Rule<Params>),
+  ...transformRuleToRuleResponseV1<Params>(rule),
   outcome: rule.outcome,
   alias_target_id: rule.alias_target_id,
 });

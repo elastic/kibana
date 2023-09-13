@@ -6,12 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ResolvedSanitizedRule } from '../../../../../common';
 import { resolveParamsSchemaV1 } from '../../../../../common/routes/rule/apis/resolve';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { transformResolveResponseV1 } from './transforms';
 
 export const resolveRuleRoute = (
@@ -31,10 +29,9 @@ export const resolveRuleRoute = (
         const { id } = req.params;
         const rule = await rulesClient.resolve({
           id,
-          includeSnoozeData: true,
         });
         return res.ok({
-          body: transformResolveResponseV1(rule as ResolvedSanitizedRule<RuleParamsV1>),
+          body: transformResolveResponseV1(rule),
         });
       })
     )

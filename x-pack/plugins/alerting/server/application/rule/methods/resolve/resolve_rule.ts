@@ -16,6 +16,7 @@ import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '
 import { Rule } from '../../types';
 import { ruleSchema } from '../../schemas';
 import { resolveRuleParamsSchema } from './schemas';
+import type { ResolvedRule } from './types';
 
 export interface ResolveParams {
   id: string;
@@ -24,7 +25,7 @@ export interface ResolveParams {
 export async function resolveRule<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { id }: ResolveParams
-): Promise<Rule<Params>> {
+): Promise<ResolvedRule<Params>> {
   try {
     resolveRuleParamsSchema.validate({ id });
   } catch (error) {
