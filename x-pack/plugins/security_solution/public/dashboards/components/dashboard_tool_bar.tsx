@@ -104,8 +104,8 @@ const DashboardToolBarComponent = ({
       redirectTo={redirectTo}
       dashboardContainer={dashboardContainer}
       embedSettings={embedSettings}
-      originatingApp={APP_UI_ID}
-      originatingPath={originatingPath}
+      // originatingApp={APP_UI_ID} get from dashboardContainer getEmbeddableContainerContext
+      // originatingPath={originatingPath}
     />
   ) : null;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import type { DashboardAPI, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
@@ -52,7 +52,7 @@ const DashboardRendererComponent = ({
   const firstSecurityTagId = securityTags?.[0]?.id;
   const isCreateDashboard = !savedObjectId;
 
-  const getCreationOptions = useCallback(
+  const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(
     () =>
       Promise.resolve({
         useSessionStorageIntegration: true,
@@ -66,6 +66,10 @@ const DashboardRendererComponent = ({
         }),
         getIncomingEmbeddable: () =>
           embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_UI_ID, true),
+        getEmbeddableContainerContext: (dashboardId?: string) => ({
+          getCurrentPath: () =>
+            dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`,
+        }),
       }),
     [embeddable, filters, firstSecurityTagId, isCreateDashboard, query, timeRange, viewMode]
   );

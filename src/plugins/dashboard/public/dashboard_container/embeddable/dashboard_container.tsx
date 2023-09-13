@@ -190,6 +190,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.select = reduxTools.select;
   }
 
+  public getEmbeddableContainerContext() {
+    return this.creationOptions?.getEmbeddableContainerContext?.(this.getDashboardSavedObjectId());
+  }
+
   public getDashboardSavedObjectId() {
     return this.getState().componentState.lastSavedId;
   }
