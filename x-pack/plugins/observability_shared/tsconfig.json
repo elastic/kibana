@@ -33,7 +33,9 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/shared-ux-router",
     "@kbn/embeddable-plugin",
-    "@kbn/profiling-utils"
+    "@kbn/profiling-utils",
+    "@kbn/utility-types",
+    "@kbn/share-plugin"
   ],
   "exclude": ["target/**/*"]
 }
