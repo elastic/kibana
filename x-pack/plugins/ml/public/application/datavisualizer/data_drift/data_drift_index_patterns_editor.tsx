@@ -21,8 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, map, Observable } from 'rxjs';
-import { intersectionBy } from 'lodash';
+import { debounce, intersectionBy } from 'lodash';
 import { type DataViewEditorService } from '@kbn/data-view-editor-plugin/public';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { DataViewEditor } from './data_view_editor';
@@ -78,6 +79,7 @@ export function DataDriftIndexPatternsEditor({
   const [foundDataViewId, setFoundDataViewId] = useState<string | undefined>();
   const [refError, setRefError] = useState<string | undefined>();
   const [comparisonError, setComparisonError] = useState<string | undefined>();
+  const toastNotificationService = useToastNotificationService();
 
   // For the purpose of data drift, the two datasets need to have the same common timestamp field if they exist
   // In data view management, creating a data view provides union of all the timestamp fields
@@ -174,7 +176,7 @@ export function DataDriftIndexPatternsEditor({
       unmounted = true;
     };
   }, [referenceIndexPattern, comparisonIndexPattern, timeField, dataViews]);
-  const createDataViewAndRedirectToDataDriftPage = async (createAdHocDV = false) => {
+  const createDataViewAndRedirectToDataDriftPage = debounce(async (createAdHocDV = false) => {
     // Create adhoc data view
     const indicesName = getDefaultIndexPattern(referenceIndexPattern, comparisonIndexPattern);
 
@@ -183,40 +185,44 @@ export function DataDriftIndexPatternsEditor({
 
     let dataView;
 
-    if (!foundDataViewId) {
-      const defaultDataViewName =
-        dataViewMsg === undefined
-          ? indicesName
-          : `${indicesName}${timeFieldName ? '-' + timeFieldName : ''}`;
+    try {
+      if (!foundDataViewId) {
+        const defaultDataViewName =
+          dataViewMsg === undefined
+            ? indicesName
+            : `${indicesName}${timeFieldName ? '-' + timeFieldName : ''}`;
 
-      const modifiedDataViewName = dataViewName === '' ? defaultDataViewName : dataViewName;
-      if (canEditDataView && createAdHocDV === false) {
-        dataView = await dataViews.createAndSave({
-          title: indicesName,
-          name: modifiedDataViewName,
-          timeFieldName,
-        });
-      } else {
-        dataView = await dataViews.create({
-          title: indicesName,
-          name: modifiedDataViewName,
-          timeFieldName,
-        });
+        const modifiedDataViewName = dataViewName === '' ? defaultDataViewName : dataViewName;
+        if (canEditDataView && createAdHocDV === false) {
+          dataView = await dataViews.createAndSave({
+            title: indicesName,
+            name: modifiedDataViewName,
+            timeFieldName,
+          });
+        } else {
+          dataView = await dataViews.create({
+            title: indicesName,
+            name: modifiedDataViewName,
+            timeFieldName,
+          });
+        }
       }
-    }
-    const dataViewId = foundDataViewId ?? dataView?.id;
-    const url = await locator.getUrl({
-      page: ML_PAGES.DATA_DRIFT,
-      pageState: {
-        index: dataViewId,
-        reference: referenceIndexPattern,
-        comparison: comparisonIndexPattern,
-        timeFieldName,
-      },
-    });
+      const dataViewId = foundDataViewId ?? dataView?.id;
+      const url = await locator.getUrl({
+        page: ML_PAGES.DATA_DRIFT,
+        pageState: {
+          index: dataViewId,
+          reference: referenceIndexPattern,
+          comparison: comparisonIndexPattern,
+          timeFieldName,
+        },
+      });
 
-    await navigateToPath(url);
-  };
+      await navigateToPath(url);
+    } catch (e) {
+      toastNotificationService.displayErrorToast(e);
+    }
+  }, 400);
 
   const hasError =
     refError !== undefined ||
