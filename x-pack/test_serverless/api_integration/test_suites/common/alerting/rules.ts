@@ -911,7 +911,8 @@ function validateEventLog(event: any, params: ValidateEventLogParams) {
 
   expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
   expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(1);
-  expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
+  // Sometimes fast enough that it will report 0ms
+  expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms >= 0).to.be.ok();
   expect(
     event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms
   ).to.be.greaterThan(0);
