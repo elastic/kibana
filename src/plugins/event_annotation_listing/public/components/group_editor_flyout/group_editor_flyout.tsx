@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   htmlIdGenerator,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -103,6 +104,8 @@ export const GroupEditorFlyout = ({
   );
   const onClose = () => (selectedAnnotation ? setSelectedAnnotation(undefined) : parentOnClose());
 
+  const showPreview = !useIsWithinBreakpoints(['xs', 's']);
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -121,7 +124,7 @@ export const GroupEditorFlyout = ({
         <EuiFlexItem
           grow={false}
           css={css`
-            width: 360px;
+            ${showPreview ? 'width: 360px;' : ''}
             border-right: 1px solid ${euiThemeVars.euiColorLightShade};
           `}
         >
@@ -204,20 +207,22 @@ export const GroupEditorFlyout = ({
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            background-color: ${euiThemeVars.euiColorLightestShade};
-          `}
-        >
-          <GroupPreview
-            group={group}
-            dataViews={dataViews}
-            LensEmbeddableComponent={LensEmbeddableComponent}
-            searchSessionId={searchSessionId}
-            refreshSearchSession={refreshSearchSession}
-            timePickerQuickRanges={timePickerQuickRanges}
-          />
-        </EuiFlexItem>
+        {showPreview && (
+          <EuiFlexItem
+            css={css`
+              background-color: ${euiThemeVars.euiColorLightestShade};
+            `}
+          >
+            <GroupPreview
+              group={group}
+              dataViews={dataViews}
+              LensEmbeddableComponent={LensEmbeddableComponent}
+              searchSessionId={searchSessionId}
+              refreshSearchSession={refreshSearchSession}
+              timePickerQuickRanges={timePickerQuickRanges}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiFlyout>
   );
