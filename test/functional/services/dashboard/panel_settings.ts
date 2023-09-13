@@ -122,7 +122,7 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
     public async clickToggleShowCustomTimeRange() {
       log.debug('clickToggleShowCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-      if (await toggle.isSelected()) {
+      if ((await toggle.getAttribute('aria-checked')) === 'true') {
         await toggle.click();
         await retry.waitFor('toggle to switch off', async () => {
           const nextToggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
