@@ -25,7 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('tines');
       await testSubjects.setValue('nameInput', 'Tines test connector');
-      // await testSubjects.setValue('secrets.token-input', 'xoxb-XXXX-XXXX-XXXX');
+      await testSubjects.setValue('config.url-input', 'https://tenant.tines.com/webhook/example');
+      await testSubjects.setValue('secrets.email-input', 'test@example.com');
+      await testSubjects.setValue('secrets.token-input', 'tester');
       await commonScreenshots.takeScreenshot('tines-connector', screenshotDirectories);
       // await testSubjects.click('create-connector-flyout-save-test-btn');
       // await testSubjects.click('toastCloseButton');
