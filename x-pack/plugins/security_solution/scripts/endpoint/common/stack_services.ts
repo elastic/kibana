@@ -111,20 +111,31 @@ export const createRuntimeServices = async ({
 
   if (asSuperuser) {
     await waitForKibana(kibanaUrl);
+    const tmpEsClient = createEsClient({
+      url: elasticsearchUrl,
+      username,
+      password,
+      log,
+    });
 
-    const superuserResponse = await createSecuritySuperuser(
-      createEsClient({
-        url: elasticsearchUrl,
-        username,
-        password,
-        log,
-      })
-    );
+    const isServerlessEs = (await tmpEsClient.info()).version.build_flavor === 'serverless';
 
-    ({ username, password } = superuserResponse);
+    if (isServerlessEs) {
+      log?.warning(
+        'Creating Security Superuser is not supported in current environment. ES is running in serverless mode. ' +
+          'Will use username [system_indices_superuser] instead.'
+      );
 
-    if (superuserResponse.created) {
-      log.info(`Kibana user [${username}] was crated with password [${password}]`);
+      username = 'system_indices_superuser';
+      password = 'changeme';
+    } else {
+      const superuserResponse = await createSecuritySuperuser(tmpEsClient);
+
+      ({ username, password } = superuserResponse);
+
+      if (superuserResponse.created) {
+        log.info(`Kibana user [${username}] was crated with password [${password}]`);
+      }
     }
   }
 
