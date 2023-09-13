@@ -185,7 +185,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "https://cloud.elastic.co/support",
+          "https://support.elastic.co/",
         ]
       `);
     });
