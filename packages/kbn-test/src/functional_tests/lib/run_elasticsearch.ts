@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ArtifactLicense } from '@kbn/es';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster, esTestConfig } from '../../es';
 
@@ -35,7 +36,7 @@ function getEsConfig({
   esServerlessImage,
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
-  const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
+  const license: ArtifactLicense = config.get('esTestCluster.license');
   const esArgs: string[] = config.get('esTestCluster.serverArgs');
   const esJavaOpts: string | undefined = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');

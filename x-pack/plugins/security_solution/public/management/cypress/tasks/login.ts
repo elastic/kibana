@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-nodejs-modules */
-
 import * as yaml from 'js-yaml';
-import type { UrlObject } from 'url';
-import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
-import { isLocalhost } from '../../../../scripts/endpoint/common/is_localhost';
+import type { LoginState } from '@kbn/security-plugin/common/login_state';
 import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
 import { getNoResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/without_response_actions_role';
 import { request } from './common';
@@ -90,35 +86,6 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
 const KIBANA_USERNAME = 'KIBANA_USERNAME';
 const KIBANA_PASSWORD = 'KIBANA_PASSWORD';
 
-/**
- * The Kibana server endpoint used for authentication
- */
-const LOGIN_API_ENDPOINT = '/internal/security/login';
-
-/**
- * cy.visit will default to the baseUrl which uses the default kibana test user
- * This function will override that functionality in cy.visit by building the baseUrl
- * directly from the environment variables set up in x-pack/test/security_solution_cypress/runner.ts
- *
- * @param role string role/user to log in with
- * @param route string route to visit
- */
-export const getUrlWithRoute = (role: string, route: string) => {
-  const url = Cypress.config().baseUrl;
-  const kibana = new URL(String(url));
-  const theUrl = `${Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: Cypress.env(ELASTICSEARCH_PASSWORD),
-    protocol: kibana.protocol.replace(':', ''),
-    hostname: kibana.hostname,
-    port: kibana.port,
-  } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
-  cy.log(`origin: ${theUrl}`);
-
-  return theUrl;
-};
-
 export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   // post the role
   request({
@@ -139,31 +106,44 @@ export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role,
   });
 };
 
-export const loginWithRole = async (role: ROLE) => {
+const loginWithUsernameAndPassword = (username: string, password: string) => {
+  const baseUrl = Cypress.config().baseUrl;
+  if (!baseUrl) {
+    throw Error(`Cypress config baseUrl not set!`);
+  }
+
+  // Programmatically authenticate without interacting with the Kibana login page.
+  const headers = { 'kbn-xsrf': 'cypress-creds' };
+  request<LoginState>({ headers, url: `${baseUrl}/internal/security/login_state` }).then(
+    (loginState) => {
+      const basicProvider = loginState.body.selector.providers.find(
+        (provider) => provider.type === 'basic'
+      );
+      return request({
+        url: `${baseUrl}/internal/security/login`,
+        method: 'POST',
+        headers,
+        body: {
+          providerType: basicProvider.type,
+          providerName: basicProvider.name,
+          currentURL: '/',
+          params: { username, password },
+        },
+      });
+    }
+  );
+};
+
+export const loginWithRole = (role: ROLE) => {
   loginWithCustomRole(role, rolesMapping[role]);
 };
 
-export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Role, 'name'>) => {
+export const loginWithCustomRole = (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   createCustomRoleAndUser(role, rolePrivileges);
-  const theUrl = new URL(String(Cypress.config().baseUrl));
-  theUrl.username = role;
-  theUrl.password = Cypress.env(ELASTICSEARCH_PASSWORD);
 
-  cy.log(`origin: ${theUrl}`);
-  request({
-    body: {
-      providerType: 'basic',
-      providerName: 'basic',
-      currentURL: '/',
-      params: {
-        username: role,
-        password: Cypress.env(ELASTICSEARCH_PASSWORD),
-      },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-    method: 'POST',
-    url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
-  });
+  cy.log(`origin: ${Cypress.config().baseUrl}`);
+
+  loginWithUsernameAndPassword(role, Cypress.env(ELASTICSEARCH_PASSWORD));
 };
 
 /**
@@ -199,14 +179,6 @@ const credentialsProvidedByEnvironment = (): boolean =>
  * Kibana's `/internal/security/login` endpoint, bypassing the login page (for speed).
  */
 const loginViaEnvironmentCredentials = () => {
-  const url = Cypress.config().baseUrl;
-
-  if (!url) {
-    throw Error(`Cypress config baseUrl not set!`);
-  }
-
-  const urlObj = new URL(url);
-
   let username: string;
   let password: string;
   let usernameEnvVar: string;
@@ -228,21 +200,7 @@ const loginViaEnvironmentCredentials = () => {
     `Authenticating user [${username}] retrieved via environment credentials from the \`CYPRESS_${usernameEnvVar}\` and \`CYPRESS_${passwordEnvVar}\` environment variables`
   );
 
-  // programmatically authenticate without interacting with the Kibana login page
-  request({
-    body: {
-      providerType: 'basic',
-      providerName: url && !isLocalhost(urlObj.hostname) ? 'cloud-basic' : 'basic',
-      currentURL: '/',
-      params: {
-        username,
-        password,
-      },
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds-via-env' },
-    method: 'POST',
-    url: `${url}${LOGIN_API_ENDPOINT}`,
-  });
+  loginWithUsernameAndPassword(username, password);
 };
 
 /**
@@ -258,22 +216,10 @@ const loginViaConfig = () => {
   // read the login details from `kibana.dev.yaml`
   cy.readFile(KIBANA_DEV_YML_PATH).then((kibanaDevYml) => {
     const config = yaml.safeLoad(kibanaDevYml);
-
-    // programmatically authenticate without interacting with the Kibana login page
-    request({
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: {
-          username: Cypress.env(ELASTICSEARCH_USERNAME),
-          password: config.elasticsearch.password,
-        },
-      },
-      headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
-      method: 'POST',
-      url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
-    });
+    loginWithUsernameAndPassword(
+      Cypress.env(ELASTICSEARCH_USERNAME),
+      config.elasticsearch.password
+    );
   });
 };
 
