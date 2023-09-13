@@ -251,6 +251,7 @@ describe('LogViewsClient class', () => {
         "dataViewReference": DataView {
           "allowNoIndex": false,
           "deleteFieldFormat": [Function],
+          "deleteScriptedFieldInternal": [Function],
           "fieldAttrs": Object {},
           "fieldFormatMap": Object {},
           "fieldFormats": Object {
@@ -273,7 +274,6 @@ describe('LogViewsClient class', () => {
           },
           "fields": FldList [],
           "flattenHit": [Function],
-          "getFieldAttrs": [Function],
           "getIndexPattern": [Function],
           "getName": [Function],
           "getOriginalSavedObjectBody": [Function],
@@ -296,6 +296,7 @@ describe('LogViewsClient class', () => {
               "type": "keyword",
             },
           },
+          "scriptedFields": Array [],
           "setFieldFormat": [Function],
           "setIndexPattern": [Function],
           "shortDotsEnable": false,
@@ -304,6 +305,8 @@ describe('LogViewsClient class', () => {
           "title": "log-indices-*",
           "type": undefined,
           "typeMeta": undefined,
+          "upsertScriptedField": [Function],
+          "upsertScriptedFieldInternal": [Function],
           "version": "1",
         },
         "description": "LOG VIEW DESCRIPTION",

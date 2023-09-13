@@ -21,7 +21,9 @@ import type {
   RuntimeFieldSpec,
   SourceFilter,
   TypeMeta,
+  RuntimeField,
 } from '../types';
+import { removeFieldAttrs } from './utils';
 
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 
@@ -121,8 +123,6 @@ export abstract class AbstractDataView {
    * list of indices that the index pattern matched
    */
   public matchedIndices: string[] = [];
-
-  /** NEW ITEMS */
 
   protected scriptedFields: DataViewFieldBase[];
 
@@ -311,25 +311,19 @@ export abstract class AbstractDataView {
    * Returns index pattern as saved object body for saving
    */
   getAsSavedObjectBody(): DataViewAttributes {
-    // todo need new way to store these
-    // const fieldAttrs = this.getFieldAttrs();
-    const runtimeFieldMap = this.runtimeFieldMap;
+    const stringifyOrUndefined = (obj: any) => (obj ? JSON.stringify(obj) : undefined);
 
     return {
-      fieldAttrs: this.fieldAttrs ? JSON.stringify(this.fieldAttrs) : undefined,
+      fieldAttrs: stringifyOrUndefined(this.fieldAttrs),
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
-      sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      // todo need new way to get scripted fields
-      fields:
-        this.scriptedFields && this.scriptedFields.length
-          ? JSON.stringify(this.scriptedFields)
-          : undefined,
-      fieldFormatMap: this.fieldFormatMap ? JSON.stringify(this.fieldFormatMap) : undefined,
+      sourceFilters: stringifyOrUndefined(this.sourceFilters),
+      fields: stringifyOrUndefined(this.scriptedFields),
+      fieldFormatMap: stringifyOrUndefined(this.fieldFormatMap),
       type: this.type!,
-      typeMeta: JSON.stringify(this.typeMeta ?? {}),
+      typeMeta: stringifyOrUndefined(this.typeMeta),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
-      runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      runtimeFieldMap: stringifyOrUndefined(this.runtimeFieldMap),
       name: this.name,
     };
   }
@@ -358,4 +352,58 @@ export abstract class AbstractDataView {
   protected deleteScriptedFieldInternal = (fieldName: string) => {
     this.scriptedFields = this.scriptedFields.filter((field) => field.name !== fieldName);
   };
+
+  /**
+   * Checks if runtime field exists
+   * @param name field name
+   */
+  hasRuntimeField(name: string): boolean {
+    return !!this.runtimeFieldMap[name];
+  }
+
+  /**
+   * Returns runtime field if exists
+   * @param name Runtime field name
+   */
+  getRuntimeField(name: string): RuntimeField | null {
+    if (!this.runtimeFieldMap[name]) {
+      return null;
+    }
+
+    const { type, script, fields } = { ...this.runtimeFieldMap[name] };
+    const runtimeField: RuntimeField = {
+      type,
+      script,
+    };
+
+    if (type === 'composite') {
+      runtimeField.fields = fields;
+    }
+
+    return runtimeField;
+  }
+
+  /**
+   * Get all runtime field definitions.
+   * NOTE: this does not strip out runtime fields that match mapped field names
+   * @returns map of runtime field definitions by field name
+   */
+
+  getAllRuntimeFields(): Record<string, RuntimeField> {
+    return Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeField>>(
+      (acc, fieldName) => ({
+        ...acc,
+        [fieldName]: this.getRuntimeField(fieldName)!,
+      }),
+      {}
+    );
+  }
+
+  protected removeRuntimeFieldInteral(name: string) {
+    delete this.runtimeFieldMap[name];
+  }
+
+  protected addRuntimeFieldInteral(name: string, runtimeField: RuntimeField) {
+    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
+  }
 }

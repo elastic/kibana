@@ -12,7 +12,6 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
-import type { FieldAttrSet } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -77,34 +76,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
     // set values
     this.fields.replaceAll(Object.values(spec.fields || {}));
   }
-
-  /**
-   * Returns field attributes map
-   */
-  getFieldAttrs = () => {
-    const newFieldAttrs = { ...this.fieldAttrs };
-
-    this.fields.forEach((field) => {
-      const attrs: FieldAttrSet = {};
-      let hasAttr = false;
-      if (field.customLabel) {
-        attrs.customLabel = field.customLabel;
-        hasAttr = true;
-      }
-      if (field.count) {
-        attrs.count = field.count;
-        hasAttr = true;
-      }
-
-      if (hasAttr) {
-        newFieldAttrs[field.name] = attrs;
-      } else {
-        delete newFieldAttrs[field.name];
-      }
-    });
-
-    return newFieldAttrs;
-  };
 
   /**
    * Returns scripted fields
@@ -217,15 +188,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   /**
-   * Get the source filtering configuration for that index.
-   */
-  getSourceFiltering() {
-    return {
-      excludes: (this.sourceFilters && this.sourceFilters.map((filter) => filter.value)) || [],
-    };
-  }
-
-  /**
    * Removes scripted field from field list.
    * @param fieldName name of scripted field to remove
    * @deprecated use runtime field instead
@@ -316,7 +278,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       return this.addCompositeRuntimeField(name, runtimeField);
     }
 
-    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
+    this.addRuntimeFieldInteral(name, runtimeField);
     const field = this.updateOrAddRuntimeField(
       name,
       type,
@@ -329,52 +291,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
     );
 
     return [field];
-  }
-
-  /**
-   * Checks if runtime field exists
-   * @param name field name
-   */
-  hasRuntimeField(name: string): boolean {
-    return !!this.runtimeFieldMap[name];
-  }
-
-  /**
-   * Returns runtime field if exists
-   * @param name Runtime field name
-   */
-  getRuntimeField(name: string): RuntimeField | null {
-    if (!this.runtimeFieldMap[name]) {
-      return null;
-    }
-
-    const { type, script, fields } = { ...this.runtimeFieldMap[name] };
-    const runtimeField: RuntimeField = {
-      type,
-      script,
-    };
-
-    if (type === 'composite') {
-      runtimeField.fields = fields;
-    }
-
-    return runtimeField;
-  }
-
-  /**
-   * Get all runtime field definitions.
-   * NOTE: this does not strip out runtime fields that match mapped field names
-   * @returns map of runtime field definitions by field name
-   */
-
-  getAllRuntimeFields(): Record<string, RuntimeField> {
-    return Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeField>>(
-      (acc, fieldName) => ({
-        ...acc,
-        [fieldName]: this.getRuntimeField(fieldName)!,
-      }),
-      {}
-    );
   }
 
   /**
@@ -443,7 +359,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
         this.fields.remove(field);
       });
     }
-    delete this.runtimeFieldMap[name];
+    this.removeRuntimeFieldInteral(name);
   }
 
   /**
@@ -548,7 +464,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
       })
     );
 
-    this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
+    this.addRuntimeFieldInteral(name, runtimeField);
     return dataViewFields;
   }
 
