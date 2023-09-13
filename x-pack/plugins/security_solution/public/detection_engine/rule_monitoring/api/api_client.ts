@@ -62,7 +62,7 @@ export const api: IRuleMonitoringApiClient = {
         {
           search_term: searchTerm?.length ? searchTerm : undefined,
           event_types: eventTypes?.length ? eventTypes.join(',') : undefined,
-          log_levels: logLevels?.length ? logLevels?.join(',') : undefined,
+          log_levels: logLevels?.length ? logLevels.join(',') : undefined,
           date_start: startDate,
           date_end: endDate,
           sort_order: sortOrder,
