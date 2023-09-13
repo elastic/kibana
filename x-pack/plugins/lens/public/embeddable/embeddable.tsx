@@ -1436,7 +1436,7 @@ export class Embeddable
     });
   }
 
-  private getIsEditable() {
+  public getIsEditable() {
     return (
       this.deps.capabilities.canSaveVisualizations ||
       (!this.inputIsRefType(this.getInput()) &&
