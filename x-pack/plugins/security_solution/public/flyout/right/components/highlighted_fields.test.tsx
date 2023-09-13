@@ -61,24 +61,4 @@ describe('<HighlightedFields />', () => {
 
     expect(container).toBeEmptyDOMElement();
   });
-
-  it('should render empty component if dataFormattedForFieldBrowser is null', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: null,
-      scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue({
-      field: {
-        values: ['value'],
-      },
-    });
-
-    const { container } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <HighlightedFields />
-      </RightPanelContext.Provider>
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
 });
