@@ -16,12 +16,12 @@ export type CloudSecurityUsageCollectorType =
   | 'Alerts';
 
 export interface CspmUsage {
-  indices: CspmIndicesStats | undefined;
-  resources_stats: CspmResourcesStats[] | undefined;
-  accounts_stats: CspmAccountsStats[] | undefined;
-  rules_stats: CspmRulesStats[] | undefined;
-  installation_stats: CloudSecurityInstallationStats[] | undefined;
-  alerts_stats: CloudSecurityAlertsStats[] | undefined;
+  indices: CspmIndicesStats;
+  resources_stats: CspmResourcesStats[];
+  accounts_stats: CspmAccountsStats[];
+  rules_stats: CspmRulesStats[];
+  installation_stats: CloudSecurityInstallationStats[];
+  alerts_stats: CloudSecurityAlertsStats[];
 }
 
 export interface PackageSetupStatus {

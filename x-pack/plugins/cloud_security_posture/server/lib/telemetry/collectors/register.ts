@@ -45,7 +45,7 @@ export function registerCspmUsageCollector(
         } catch (error) {
           logger.error(`${taskName} task failed: ${error.message}`);
           logger.error(error.stack);
-          return undefined;
+          return error;
         }
       };
 
