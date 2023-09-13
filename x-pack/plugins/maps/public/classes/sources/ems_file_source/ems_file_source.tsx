@@ -226,8 +226,8 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       const emsFileLayer = await this.getEMSFileLayer();
       const targetEmsField = emsFileLayer._config.fields.find(({ id }) => id === field.getName());
       const values = targetEmsField?.values ?? [];
-      return query.length 
-        ? values.filter(value => value.toLowerCase().includes(query.toLowerCase()))
+      return query.length
+        ? values.filter((value) => value.toLowerCase().includes(query.toLowerCase()))
         : values;
     } catch (error) {
       // ignore error if EMS layer id could not be found
