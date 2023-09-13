@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
 
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
@@ -117,9 +119,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>
     );
 
-    // TODO only if updating since x hours - single action
-    const isAgentUpdating = agent.upgrade_started_at && !agent.upgraded_at;
-    if (isAgentUpdating) {
+    if (isStuckInUpdating(agent)) {
       menuItems.push(
         <EuiContextMenuItem
           key="agentRestartUpgradeBtn"

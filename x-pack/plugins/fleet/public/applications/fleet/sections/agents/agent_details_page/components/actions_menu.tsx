@@ -10,6 +10,7 @@ import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useKibanaVersion } from '../../../../hooks';
@@ -41,7 +42,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] = useState(false);
   const [isAgentDetailsJsonFlyoutOpen, setIsAgentDetailsJsonFlyoutOpen] = useState<boolean>(false);
   const isUnenrolling = agent.status === 'unenrolling';
-  const isAgentUpdating = Boolean(agent.upgrade_started_at && !agent.upgraded_at);
+  const isAgentUpdating = isStuckInUpdating(agent);
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const onContextMenuChange = useCallback(

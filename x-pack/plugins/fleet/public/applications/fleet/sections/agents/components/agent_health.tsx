@@ -5,16 +5,31 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { EuiBadge, EuiButton, EuiCallOut, EuiIcon, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiCallOut,
+  EuiIcon,
+  EuiPortal,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
-import { getPreviousAgentStatusForOfflineAgents } from '../../../../../../common/services/agent_status';
+import {
+  getPreviousAgentStatusForOfflineAgents,
+  isStuckInUpdating,
+} from '../../../../../../common/services/agent_status';
 
 import type { Agent } from '../../../types';
+
+import { useAgentRefresh } from '../agent_details_page/hooks';
+
+import { AgentUpgradeAgentModal } from './agent_upgrade_modal';
 
 interface Props {
   agent: Agent;
@@ -80,16 +95,6 @@ function getStatusComponent(status: Agent['status']): React.ReactElement {
   }
 }
 
-const AGENT_UPDATING_TIMEOUT = 60 * 60 * 1000; // 1 hour
-
-function isStuckInUpdating(agent: Agent): boolean {
-  return (
-    agent.status === 'updating' &&
-    !!agent.upgrade_started_at &&
-    Date.now() - Date.parse(agent.upgrade_started_at) > AGENT_UPDATING_TIMEOUT
-  );
-}
-
 const WrappedEuiCallOut = styled(EuiCallOut)`
   white-space: wrap !important;
 `;
@@ -130,6 +135,9 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
 
     return getPreviousAgentStatusForOfflineAgents(agent);
   }, [fromDetails, agent]);
+
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const refreshAgent = useAgentRefresh();
 
   return (
     <>
@@ -181,7 +189,12 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
                 defaultMessage="Agent has been updating for a while, and may be stuck. Consider restarting the upgrade."
               />
             </p>
-            <EuiButton href="#" color="warning">
+            <EuiButton
+              color="warning"
+              onClick={() => {
+                setIsUpgradeModalOpen(true);
+              }}
+            >
               <FormattedMessage
                 id="xpack.fleet.agentHealth.restartUpgradeBtn"
                 defaultMessage="Restart upgrade"
@@ -190,6 +203,19 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
           </WrappedEuiCallOut>
         </>
       ) : null}
+      {isUpgradeModalOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            agents={[agent]}
+            agentCount={1}
+            onClose={() => {
+              setIsUpgradeModalOpen(false);
+              refreshAgent();
+            }}
+            isUpdating={true}
+          />
+        </EuiPortal>
+      )}
     </>
   );
 };
