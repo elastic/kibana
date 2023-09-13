@@ -19,6 +19,7 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import useObservable from 'react-use/lib/useObservable';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useTimeBuckets } from '../../common/hooks/use_time_buckets';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../embeddables/grid_embeddable/constants';
 import { filterFields } from '../../common/components/fields_stats_grid/filter_fields';
@@ -61,8 +62,9 @@ export const useDataVisualizerGridData = (
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
 ) => {
+  const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data, security, executionContext } = services;
+  const { uiSettings, data, security, executionContext, analytics } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -498,6 +500,21 @@ export const useDataVisualizerGridData = (
     createNonMetricCards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
+
+  useEffect(() => {
+    if (combinedProgress === 100 && loadIndexDataStartTime.current !== undefined) {
+      const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+
+      // Set this to undefined so reporting the metric gets triggered only once.
+      loadIndexDataStartTime.current = undefined;
+
+      reportPerformanceMetricEvent(analytics, {
+        eventName: 'dataVisualizerDataLoaded',
+        duration: loadIndexDataDuration,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combinedProgress]);
 
   const configs = useMemo(
     () => {

@@ -45,7 +45,7 @@ const migrationSchema = schema.object({
      * The delay that the migrator will wait for, in seconds, when updating the
      * index mapping's meta to let the other nodes pickup the changes.
      */
-    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
+    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 5 }),
     /**
      * The document migration phase will be run from instances with any of the specified roles.
      *

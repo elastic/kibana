@@ -40,7 +40,7 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 
-import { ServerlessPluginSetup } from '@kbn/serverless/server';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import { ActionsConfig, AllowedHosts, EnabledConnectorTypes, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client/actions_client';
@@ -179,7 +179,7 @@ export interface ActionsPluginsStart {
   eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
   security?: SecurityPluginStart;
-  serverless?: ServerlessPluginSetup;
+  serverless?: ServerlessPluginStart;
 }
 
 const includedHiddenTypes = [
@@ -301,7 +301,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core)
+      this.createRouteHandlerContext(core, actionsConfigUtils)
     );
     if (usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
@@ -404,7 +404,10 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       isESOCanEncrypt,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
+      actionsConfig,
     } = this;
+
+    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
@@ -457,12 +460,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
@@ -488,6 +493,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
+          configurationUtilities: actionsConfigUtils,
         }),
       });
     };
@@ -641,7 +647,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   };
 
   private createRouteHandlerContext = (
-    core: CoreSetup<ActionsPluginsStart>
+    core: CoreSetup<ActionsPluginsStart>,
+    actionsConfigUtils: ActionsConfigurationUtilities
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
@@ -687,12 +694,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
+              configurationUtilities: actionsConfigUtils,
             }),
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
               actionTypeRegistry: actionTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
+              configurationUtilities: actionsConfigUtils,
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,

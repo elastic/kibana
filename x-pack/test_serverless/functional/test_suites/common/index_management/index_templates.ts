@@ -15,7 +15,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const retry = getService('retry');
 
-  describe('Index Templates', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/165746
+  describe.skip('Index Templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
