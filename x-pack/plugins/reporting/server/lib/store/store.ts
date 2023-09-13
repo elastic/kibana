@@ -106,11 +106,8 @@ export class ReportingStore {
   }
 
   private async getIlmPolicyManager() {
-    if (!this.ilmPolicyManager) {
-      const client = await this.getClient();
-      this.ilmPolicyManager = IlmPolicyManager.create({ client });
-    }
-    return this.config.statefulSettings.enabled ? this.ilmPolicyManager : null;
+    const client = await this.getClient();
+    return (this.ilmPolicyManager = IlmPolicyManager.create({ client }));
   }
 
   private async createIndex(indexName: string) {
@@ -122,8 +119,7 @@ export class ReportingStore {
     }
 
     const indexSettings = this.config.statefulSettings.enabled
-      ? {}
-      : {
+      ? {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
@@ -131,7 +127,8 @@ export class ReportingStore {
               name: ILM_POLICY_NAME,
             },
           },
-        };
+        }
+      : {};
 
     try {
       await client.indices.create({
@@ -191,14 +188,17 @@ export class ReportingStore {
    * configured for storage of reports.
    */
   public async start() {
+    if (!this.config.statefulSettings.enabled) {
+      return;
+    }
     const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
-      if (this.config.statefulSettings.enabled && (await ilmPolicyManager!.doesIlmPolicyExist())) {
+      if (await ilmPolicyManager.doesIlmPolicyExist()) {
         this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
         return;
       }
       this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
-      if (this.config.statefulSettings.enabled) await ilmPolicyManager!.createIlmPolicy();
+      await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
       this.logger.error(e.body?.error);

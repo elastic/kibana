@@ -125,7 +125,7 @@ export class ReportingPublicPlugin
    */
   private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
     if (!this.apiClient) {
-      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion, this.config);
+      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
     }
     return this.apiClient;
   }

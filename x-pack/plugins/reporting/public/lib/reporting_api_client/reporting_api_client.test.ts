@@ -12,41 +12,16 @@ import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { Job } from '../job';
 import { ReportingAPIClient } from './reporting_api_client';
-import { ClientConfigType } from '../../plugin';
 
 describe('ReportingAPIClient', () => {
   let uiSettingsClient: jest.Mocked<IUiSettingsClient>;
   let httpClient: jest.Mocked<HttpSetup>;
   let apiClient: ReportingAPIClient;
-  let mockConfig: ClientConfigType;
 
   beforeEach(() => {
     uiSettingsClient = uiSettingsServiceMock.createStartContract();
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
-    mockConfig = {
-      poll: {
-        jobsRefresh: {
-          interval: 5000,
-          intervalErrorMultiplier: 3,
-        },
-      },
-      export_types: {
-        pdf: {
-          enabled: true,
-        },
-        png: {
-          enabled: true,
-        },
-        csv: {
-          enabled: true,
-        },
-      },
-      roles: {
-        enabled: false,
-      },
-      statefulSettings: { enabled: true },
-    };
-    apiClient = new ReportingAPIClient(httpClient, uiSettingsClient, 'version', mockConfig);
+    apiClient = new ReportingAPIClient(httpClient, uiSettingsClient, 'version');
   });
 
   describe('getReportURL', () => {
