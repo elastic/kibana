@@ -28,7 +28,7 @@ export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) =
           'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months. UTC time.'
         );
       }
-      if (parsedDate.isAfter(moment())) {
+      if (parsedDate.isAfter(moment.utc())) {
         throw createManifestVersionError(
           'Global manifest version cannot be in the future. UTC time.'
         );
