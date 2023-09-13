@@ -98,7 +98,7 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
-          className="lnsDimensionContainer euiFlyout"
+          className="lnsDimensionContainer"
           onAnimationEnd={() => {
             if (isOpen) {
               // EuiFocusTrap interferes with animating elements with absolute position:
