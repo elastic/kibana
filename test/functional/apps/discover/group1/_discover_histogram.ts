@@ -253,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // go to dashboard
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // go to discover

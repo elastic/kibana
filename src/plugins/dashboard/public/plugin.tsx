@@ -263,26 +263,27 @@ export class DashboardPlugin
       // carry over query if it exists
       return `#/list${tail || ''}`;
     });
-    urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-      const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
-      if (!id && !tail) {
-        // unrecognized sub url
-        return '#/list';
-      }
-      if (!id && tail) {
-        // unsaved dashboard, but probably state in URL
-        return `#/create${tail || ''}`;
-      }
-      // persisted dashboard, probably with url state
-      return `#/view/${id}${tail || ''}`;
-    });
+    // urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
+    //   const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
+    //   if (!id && !tail) {
+    //     // unrecognized sub url
+    //     return '#/list';
+    //   }
+    //   if (!id && tail) {
+    //     // unsaved dashboard, but probably state in URL
+    //     return `#/create${tail || ''}`;
+    //   }
+    //   // persisted dashboard, probably with url state
+    //   return `#/view/${id}${tail || ''}`;
+    // });
+
     const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
     });
 
     if (home) {
       home.featureCatalogue.register({
-        id: LEGACY_DASHBOARD_APP_ID,
+        id: DASHBOARD_APP_ID,
         title: dashboardAppTitle,
         subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
           defaultMessage: 'Analyze data in dashboards.',
@@ -291,7 +292,7 @@ export class DashboardPlugin
           defaultMessage: 'Display and share a collection of visualizations and saved searches.',
         }),
         icon: 'dashboardApp',
-        path: `/app/dashboards#${LANDING_PAGE_PATH}`,
+        path: `/app/${DASHBOARD_APP_ID}#${LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: 'data',
         solutionId: 'kibana',

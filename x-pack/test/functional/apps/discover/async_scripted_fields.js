@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.saveSearch('search with warning');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

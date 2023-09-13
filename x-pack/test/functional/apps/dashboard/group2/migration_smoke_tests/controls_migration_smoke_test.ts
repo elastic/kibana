@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render all panels on the dashboard', async () => {
       await dashboardControls.enableControlsLab();
-      await common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await dashboard.loadSavedDashboard('[8.0.0] Controls Dashboard');
 
       // dashboard should load properly
