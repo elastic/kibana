@@ -141,8 +141,6 @@ export default function ({ getService }: FtrProviderContext) {
             .send({})
             .expect(200);
 
-          log.debug(`resp2: ${JSON.stringify(resp2)}`);
-
           expect(resp2.body.id).not.to.be(undefined);
           expect(resp2.body.isPartial).to.be(false);
           expect(resp2.body.isRunning).to.be(false);
