@@ -19,7 +19,7 @@ export default defineCypressConfig({
   },
 
   env: {
-    grepFilterSpecs: true,
+    grepFilterSpecs: false,
   },
 
   screenshotsFolder: '../../../target/kibana-fleet/cypress/screenshots',
