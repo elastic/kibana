@@ -1,18 +1,13 @@
 agents:
   queue: kibana-default
+env:
+  ES_SERVERLESS_IMAGE: latest
 
 steps:
-  # It's easier to do this through a required env var, than an input.
-  #  Inputs are not accessible in the pipeline code,
-  #  so you'd have to get a script to dig up the meta-data, then emit a build step to buildkite
-  - label: "Ensure required ENV variable ES_SERVERLESS_IMAGE" # TODO: make this default, and not required
-    if: "build.env('ES_SERVERLESS_IMAGE') == null"
+  - label: "Annotate runtime parameters"
     command: |
-      echo "Please provide the env variable ES_SERVERLESS_IMAGE for the build."
-      buildkite-agent annotate --style error "Missing environment variable ES_SERVERLESS_IMAGE"
-      exit 1
-
-  - wait: ~
+      buildkite-agent annotate --context build-params --style info "ES_SERVERLESS_IMAGE: $ES_SERVERLESS_IMAGE"
+      buildkite-agent annotate --context build-params --style info "Kibana build hash: $BUILDKITE_BRANCH / $BUILDKITE_COMMIT"
 
   - group: "(:kibana: x :elastic:) Trigger Kibana Serverless suite"
     if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
