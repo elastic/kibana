@@ -79,14 +79,14 @@ export class ApmConfiguration {
   }
 
   public getConfig(serviceName: string): AgentConfigOptions {
-    const { servicesOverrides = [] } = this.getConfigFromKibanaConfig();
+    const { servicesOverrides = {} } = this.getConfigFromKibanaConfig();
 
     let baseConfig = {
       ...this.getBaseConfig(),
       serviceName,
     };
 
-    const serviceOverride = servicesOverrides.find(({ name }) => name === serviceName);
+    const serviceOverride = servicesOverrides[serviceName];
     if (serviceOverride) {
       baseConfig = merge({}, baseConfig, serviceOverride);
     }

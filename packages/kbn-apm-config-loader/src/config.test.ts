@@ -367,14 +367,13 @@ describe('ApmConfiguration', () => {
             active: true,
             serverUrl: 'http://an.internal.apm.server:port/',
             transactionSampleRate: 0.1,
-            servicesOverrides: [
-              {
-                name: 'externalServiceName',
+            servicesOverrides: {
+              externalServiceName: {
                 active: false,
                 serverUrl: 'http://a.public.apm.server:port/',
                 disableSend: true, // just adding an extra field to prove merging works
               },
-            ],
+            },
           },
         },
       };
@@ -387,6 +386,7 @@ describe('ApmConfiguration', () => {
           active: true,
           serverUrl: 'http://an.internal.apm.server:port/',
           transactionSampleRate: 0.1,
+          serviceName: 'internalServiceName',
         })
       );
       expect(internalService).not.toHaveProperty('disableSend');
@@ -400,6 +400,7 @@ describe('ApmConfiguration', () => {
           serverUrl: 'http://a.public.apm.server:port/',
           transactionSampleRate: 0.1,
           disableSend: true,
+          serviceName: 'externalServiceName',
         })
       );
     });
