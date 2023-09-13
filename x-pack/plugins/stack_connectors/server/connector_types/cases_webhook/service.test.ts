@@ -579,9 +579,9 @@ describe('Cases webhook service', () => {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -596,9 +596,9 @@ describe('Cases webhook service', () => {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -653,9 +653,9 @@ describe('Cases webhook service', () => {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
@@ -670,7 +670,7 @@ describe('Cases webhook service', () => {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
+          id: '10006',
           priority: 'High',
           parent: 'RJ-107',
         },
@@ -733,9 +733,9 @@ describe('Cases webhook service', () => {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
       const res = await service.createIncident(incident);
@@ -751,9 +751,9 @@ describe('Cases webhook service', () => {
           title: 'title',
           description: 'desc',
           tags: ['hello', 'world'],
-          issueType: '10006',
-          priority: 'High',
-          parent: 'RJ-107',
+          id: '10006',
+          severity: 'High',
+          status: 'Open',
         },
       };
 
