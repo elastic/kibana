@@ -9,14 +9,16 @@ import rison from '@kbn/rison';
 import querystring from 'querystring';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const defaultLogColumns = ['@timestamp', 'message'];
+const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
 
-  describe('Columns selection initialization and update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/165915
+  // FLAKY: https://github.com/elastic/kibana/issues/165916
+  describe.skip('Columns selection initialization and update', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
@@ -44,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.observabilityLogExplorer.navigateTo({
           search: querystring.stringify({
             _a: rison.encode({
-              columns: ['message', 'data_stream.namespace'],
+              columns: ['service.name', 'host.name', 'message', 'data_stream.namespace'],
             }),
           }),
         });
