@@ -15,10 +15,14 @@ import nodeFetch from 'node-fetch';
 import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
 import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
+import fs from 'fs';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './localhost_services';
 import { createSecuritySuperuser } from './security_user_services';
+
+const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
 
 export interface RuntimeServices {
   kbnClient: KbnClient;
@@ -64,6 +68,8 @@ interface CreateRuntimeServicesOptions {
   esPassword?: string;
   log?: ToolingLog;
   asSuperuser?: boolean;
+  /** If true, then a certificate will not be used when creating the Kbn/Es clients when url is `https` */
+  noCertForSsl?: boolean;
 }
 
 class KbnClientExtended extends KbnClient {
@@ -105,6 +111,7 @@ export const createRuntimeServices = async ({
   esPassword,
   log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
   asSuperuser = false,
+  noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   let username = _username;
   let password = _password;
@@ -116,6 +123,7 @@ export const createRuntimeServices = async ({
       username,
       password,
       log,
+      noCertForSsl,
     });
 
     const isServerlessEs = (await tmpEsClient.info()).version.build_flavor === 'serverless';
@@ -144,16 +152,17 @@ export const createRuntimeServices = async ({
   const fleetURL = new URL(fleetServerUrl);
 
   return {
-    kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey }),
+    kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey, noCertForSsl }),
     esClient: createEsClient({
       log,
       url: elasticsearchUrl,
       username: esUsername ?? username,
       password: esPassword ?? password,
       apiKey,
+      noCertForSsl,
     }),
     log,
-    localhostRealIp: await getLocalhostRealIp(),
+    localhostRealIp: getLocalhostRealIp(),
     apiKey: apiKey ?? '',
     user: {
       username,
@@ -199,6 +208,7 @@ export const createEsClient = ({
   password,
   apiKey,
   log,
+  noCertForSsl,
 }: {
   url: string;
   username: string;
@@ -206,10 +216,18 @@ export const createEsClient = ({
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
   log?: ToolingLog;
+  noCertForSsl?: boolean;
 }): Client => {
+  const isHttps = new URL(url).protocol.startsWith('https');
   const clientOptions: ClientOptions = {
     node: buildUrlWithCredentials(url, apiKey ? '' : username, apiKey ? '' : password),
   };
+
+  if (isHttps && !noCertForSsl) {
+    clientOptions.tls = {
+      ca: [CA_CERTIFICATE],
+    };
+  }
 
   if (apiKey) {
     clientOptions.auth = { apiKey };
@@ -228,6 +246,7 @@ export const createKbnClient = ({
   password,
   apiKey,
   log = new ToolingLog(),
+  noCertForSsl,
 }: {
   url: string;
   username: string;
@@ -235,16 +254,28 @@ export const createKbnClient = ({
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
   log?: ToolingLog;
+  noCertForSsl?: boolean;
 }): KbnClient => {
-  const kbnUrl = buildUrlWithCredentials(url, username, password);
+  const isHttps = new URL(url).protocol.startsWith('https');
+  const clientOptions: ConstructorParameters<typeof KbnClientExtended>[0] = {
+    log,
+    apiKey,
+    url: buildUrlWithCredentials(url, username, password),
+  };
+
+  if (isHttps && !noCertForSsl) {
+    clientOptions.certificateAuthorities = [CA_CERTIFICATE];
+  }
 
   if (log) {
     log.verbose(
-      `Creating Kibana client with URL: ${kbnUrl} ${apiKey ? ` + ApiKey: ${apiKey}` : ''}`
+      `Creating Kibana client with URL: ${clientOptions.url} ${
+        apiKey ? ` + ApiKey: ${apiKey}` : ''
+      }`
     );
   }
 
-  return new KbnClientExtended({ log, url: kbnUrl, apiKey });
+  return new KbnClientExtended(clientOptions);
 };
 
 /**
