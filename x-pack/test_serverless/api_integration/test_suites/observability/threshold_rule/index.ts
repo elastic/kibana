@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Threshold Rule', function () {
+  describe('Custom Threshold Rule', function () {
     loadTestFile(require.resolve('./avg_pct_fired'));
     loadTestFile(require.resolve('./avg_pct_no_data'));
     loadTestFile(require.resolve('./documents_count_fired'));

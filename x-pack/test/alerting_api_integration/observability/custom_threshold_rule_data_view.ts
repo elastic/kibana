@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const objectRemover = new ObjectRemover(supertest);
   const es = getService('es');
 
-  describe('Threshold rule data view >', () => {
+  describe('Custom Threshold rule data view >', () => {
     const DATA_VIEW_ID = 'data-view-id';
 
     let ruleId: string;

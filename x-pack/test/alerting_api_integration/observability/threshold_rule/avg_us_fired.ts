@@ -33,8 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaUrl = format(kibanaServerConfig);
   const supertest = getService('supertest');
 
-  describe('Threshold rule - AVG - US - FIRED', () => {
-    const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
+  describe('Custom Threshold rule - AVG - US - FIRED', () => {
+    const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
 
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
       await esClient.deleteByQuery({
-        index: THRESHOLD_RULE_ALERT_INDEX,
+        index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
       });
       await esClient.deleteByQuery({
@@ -149,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should set correct information in the alert document', async () => {
         const resp = await waitForAlertInIndex({
           esClient,
-          indexName: THRESHOLD_RULE_ALERT_INDEX,
+          indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
           ruleId,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
@@ -172,7 +172,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.tags')
           .contain('observability');
-        expect(resp.hits.hits[0]._source).property('kibana.alert.action_group', 'threshold.fired');
+        expect(resp.hits.hits[0]._source).property(
+          'kibana.alert.action_group',
+          'custom_threshold.fired'
+        );
         expect(resp.hits.hits[0]._source).property('tags').contain('observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.instance.id', '*');
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
