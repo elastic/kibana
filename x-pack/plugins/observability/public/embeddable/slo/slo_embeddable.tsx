@@ -10,6 +10,7 @@ import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { SloListItem } from './slo_list_item';
+import type { SloEmbeddableDeps } from './types';
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
 export class SLOEmbeddable extends Embeddable {
@@ -17,7 +18,11 @@ export class SLOEmbeddable extends Embeddable {
   // to instantiate this kind of embeddable.
   public readonly type = SLO_EMBEDDABLE;
 
-  constructor(private readonly deps, initialInput: EmbeddableInput, parent?: IContainer) {
+  constructor(
+    private readonly deps: SloEmbeddableDeps,
+    initialInput: EmbeddableInput,
+    parent?: IContainer
+  ) {
     super(
       // Input state is irrelevant to this embeddable, just pass it along.
       initialInput,

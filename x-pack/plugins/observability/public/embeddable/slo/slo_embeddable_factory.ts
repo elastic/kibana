@@ -16,6 +16,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../..';
+import type { SloEmbeddableInput } from './types';
 
 export type SloListFactory = EmbeddableFactory;
 export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
@@ -37,7 +38,7 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
     return true;
   }
 
-  public async getExplicitInput() {
+  public async getExplicitInput(): Promise<Partial<SloEmbeddableInput>> {
     const [coreStart, pluginStart] = await this.getStartServices();
     try {
       const { resolveEmbeddableSloUserInput } = await import('./handle_explicit_input');
@@ -56,7 +57,7 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
         parent
       );
     } catch (e) {
-      return new ErrorEmbeddable(e, input, parent);
+      return new ErrorEmbeddable(e, initialInput, parent);
     }
   }
 
