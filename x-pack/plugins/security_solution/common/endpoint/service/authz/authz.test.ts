@@ -281,6 +281,8 @@ describe('Endpoint Authz service', () => {
         canReadBlocklist: false,
         canWriteEventFilters: false,
         canReadEventFilters: false,
+        canReadEndpointExceptions: false,
+        canWriteEndpointExceptions: false,
       });
     });
   });
