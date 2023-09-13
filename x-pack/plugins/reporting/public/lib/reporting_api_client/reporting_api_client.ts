@@ -69,7 +69,7 @@ export class ReportingAPIClient implements IReportingAPI {
   constructor(
     http: HttpSetup,
     private uiSettings: IUiSettingsClient,
-    private kibanaVersion: string,
+    private kibanaVersion: string
   ) {
     this.http = http;
   }
