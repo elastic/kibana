@@ -807,7 +807,8 @@ export class Embeddable
           attributes={attributes}
           updatePanelState={this.updateVisualization.bind(this)}
           datasourceId={datasourceId}
-          adaptersTables={this.lensInspector.adapters.tables?.tables}
+          lensAdapters={this.lensInspector.adapters}
+          output$={this.getOutput$()}
           panelId={this.id}
           savedObjectId={this.savedVis?.savedObjectId}
           updateByRefInput={this.updateByRefInput.bind(this)}

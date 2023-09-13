@@ -11,12 +11,13 @@ import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
+import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import type { LensEmbeddableOutput } from '../../../embeddable';
 import {
   makeConfigureStore,
   LensRootStore,
@@ -29,6 +30,7 @@ import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import { SavedObjectIndexStore, type Document } from '../../../persistence';
+import type { LensInspector } from '../../../lens_inspector_service';
 import { DOC_TYPE } from '../../../../common/constants';
 
 export interface EditLensConfigurationProps {
@@ -38,8 +40,10 @@ export interface EditLensConfigurationProps {
   updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
   /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
   datasourceId: 'formBased' | 'textBased';
+  /** Embeddable output observable, useful for dashboard flyout  */
+  output$?: Observable<LensEmbeddableOutput>;
   /** Contains the active data, necessary for some panel configuration such as coloring */
-  adaptersTables?: Record<string, Datatable>;
+  lensAdapters?: LensInspector['adapters'];
   /** Optional callback called when updating the by reference embeddable */
   updateByRefInput?: (soId: string) => void;
   /** Callback for closing the edit flyout */
@@ -112,9 +116,10 @@ export async function getEditLensConfiguration(
     closeFlyout,
     wrapInFlyout,
     datasourceId,
-    adaptersTables,
     panelId,
     savedObjectId,
+    output$,
+    lensAdapters,
     updateByRefInput,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
@@ -191,10 +196,11 @@ export async function getEditLensConfiguration(
       updatePanelState,
       closeFlyout,
       datasourceId,
-      adaptersTables,
       coreStart,
       startDependencies,
       visualizationMap,
+      output$,
+      lensAdapters,
       datasourceMap,
       saveByRef,
       savedObjectId,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -18,6 +18,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
+import type { Observable } from 'rxjs';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +31,8 @@ import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame
 
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import type { LensEmbeddableOutput } from '../../../embeddable';
+import type { LensInspector } from '../../../lens_inspector_service';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import { extractReferencesFromState } from '../../../utils';
 import type { Document } from '../../../persistence';
@@ -41,13 +44,26 @@ export interface EditConfigPanelProps {
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
+  output$?: Observable<LensEmbeddableOutput>;
+  lensAdapters?: LensInspector['adapters'];
   closeFlyout?: () => void;
   savedObjectId?: string;
   datasourceId: 'formBased' | 'textBased';
-  adaptersTables?: Record<string, Datatable>;
   saveByRef?: (attrs: Document) => void;
   updateByRefInput?: (soId: string) => void;
 }
+
+const computeActiveData = (layers: string[], lensAdapters?: LensInspector['adapters']) => {
+  const dataTable: Record<string, Datatable> = {};
+  const tables = lensAdapters?.tables?.tables as Record<string, Datatable>;
+  const [table] = Object.values(tables || {});
+  layers.forEach((layer) => {
+    if (table) {
+      dataTable[layer] = table;
+    }
+  });
+  return dataTable;
+};
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -58,17 +74,30 @@ export function LensEditConfigurationFlyout({
   datasourceId,
   updatePanelState,
   closeFlyout,
-  adaptersTables,
   saveByRef,
   savedObjectId,
   updateByRefInput,
+  output$,
+  lensAdapters,
 }: EditConfigPanelProps) {
+  const [activeData, setActiveData] = useState<Record<string, Datatable>>({});
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { euiTheme } = useEuiTheme();
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+
+  useEffect(() => {
+    const layers = activeDatasource.getLayers(datasourceState);
+    const s = output$?.subscribe(() => {
+      setActiveData(computeActiveData(layers, lensAdapters));
+    });
+    if (!output$) {
+      setActiveData(computeActiveData(layers, lensAdapters));
+    }
+    return () => s?.unsubscribe();
+  }, [activeDatasource, lensAdapters, datasourceState, output$]);
 
   const attributesChanged: boolean = useMemo(() => {
     const attrs = previousAttributes.current;
@@ -89,7 +118,6 @@ export function LensEditConfigurationFlyout({
   const onCancel = useCallback(() => {
     const attrs = previousAttributes.current;
     if (attributesChanged) {
-      // needs to be updated with indexPatternId
       updatePanelState?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
     }
     if (savedObjectId) {
@@ -149,16 +177,6 @@ export function LensEditConfigurationFlyout({
     updateByRefInput,
     datasourceMap,
   ]);
-
-  const activeData: Record<string, Datatable> = useMemo(() => {
-    return {};
-  }, []);
-  const layers = activeDatasource.getLayers(datasourceState);
-  layers.forEach((layer) => {
-    if (adaptersTables) {
-      activeData[layer] = Object.values(adaptersTables)[0];
-    }
-  });
 
   const framePublicAPI = useLensSelector((state) => {
     const newState = {

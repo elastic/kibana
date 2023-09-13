@@ -11,13 +11,13 @@ import { isEqual } from 'lodash';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
-import type { UnifiedHistogramServices } from '../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
 import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export function ChartConfigPanel({
   services,
   lensAttributesContext,
-  lensTablesAdapter,
+  lensAdapters,
   currentSuggestion,
   isFlyoutVisible,
   setIsFlyoutVisible,
@@ -29,7 +29,7 @@ export function ChartConfigPanel({
   lensAttributesContext: LensAttributesContext;
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   currentSuggestion?: Suggestion;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
@@ -52,17 +52,16 @@ export function ChartConfigPanel({
   );
 
   useEffect(() => {
+    const tablesAdapters = lensAdapters?.tables?.tables;
     const dataHasChanged =
-      Boolean(lensTablesAdapter) &&
-      !isEqual(previousAdapters.current, lensTablesAdapter) &&
-      query !== previousQuery?.current;
+      Boolean(tablesAdapters) && !isEqual(previousAdapters.current, tablesAdapters);
     async function fetchLensConfigComponent() {
       const Component = await services.lens.EditLensConfigPanelApi();
       const panel = (
         <Component
           attributes={lensAttributesContext.attributes}
-          adaptersTables={lensTablesAdapter}
           updatePanelState={updateSuggestion}
+          lensAdapters={lensAdapters}
           closeFlyout={() => {
             setIsFlyoutVisible(false);
           }}
@@ -72,7 +71,7 @@ export function ChartConfigPanel({
       );
       setEditLensConfigPanel(panel);
       previousSuggestion.current = currentSuggestion;
-      previousAdapters.current = lensTablesAdapter;
+      previousAdapters.current = tablesAdapters;
       if (dataHasChanged) {
         previousQuery.current = query;
       }
@@ -91,8 +90,8 @@ export function ChartConfigPanel({
     currentSuggestion,
     query,
     isFlyoutVisible,
-    lensTablesAdapter,
     setIsFlyoutVisible,
+    lensAdapters,
   ]);
 
   return isPlainRecord ? editLensConfigPanel : null;

@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -68,7 +67,7 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   isOnHistogramMode?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
@@ -105,7 +104,7 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  lensTablesAdapter,
+  lensAdapters,
   isOnHistogramMode,
   onResetChartHeight,
   onChartHiddenChange,
@@ -452,7 +451,7 @@ export function Chart({
           {...{
             services,
             lensAttributesContext,
-            lensTablesAdapter,
+            lensAdapters,
             currentSuggestion,
             isFlyoutVisible,
             setIsFlyoutVisible,
