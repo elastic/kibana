@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { CategoricalColorMapping, ColorMappingInputData } from './categorical_color_mapping';
 import { AVAILABLE_PALETTES } from './palettes/available_palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
-import { MULTI_FIELD_VALUES_SEPARATOR } from './components/assignment/match';
+import { MULTI_FIELD_KEY_SEPARATOR } from './components/assignment/match';
 
 const AUTO_ASSIGN_SWITCH = '[data-test-subj="lns-colorMapping-autoAssignSwitch"]';
 const ASSIGNMENTS_LIST = '[data-test-subj="lns-colorMapping-assignmentsList"]';
@@ -104,7 +104,7 @@ describe('color mapping', () => {
     expect(assignment1.text()).toEqual('Other');
 
     const assignment2 = component.find(ASSIGNMENT_ITEM(1)).hostNodes();
-    expect(assignment2.text()).toEqual(`fieldA${MULTI_FIELD_VALUES_SEPARATOR}fieldB`);
+    expect(assignment2.text()).toEqual(`fieldA${MULTI_FIELD_KEY_SEPARATOR}fieldB`);
 
     const assignment3 = component.find(ASSIGNMENT_ITEM(2)).hostNodes();
     expect(assignment3.text()).toEqual('(Empty)');

@@ -11,7 +11,7 @@ import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorMapping } from '../../config';
 // TODO: move this outside or configurable
-export const MULTI_FIELD_VALUES_SEPARATOR = ' › ';
+export const MULTI_FIELD_KEY_SEPARATOR = ' › ';
 
 export const Match: React.FC<{
   index: number;
@@ -33,9 +33,7 @@ export const Match: React.FC<{
       : rule.values.map((value) => {
           const ruleValues = Array.isArray(value) ? value : [value];
           return {
-            label: ruleValues
-              .map((v) => specialTokens.get(v) ?? v)
-              .join(MULTI_FIELD_VALUES_SEPARATOR),
+            label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_KEY_SEPARATOR),
             value,
           };
         });
@@ -43,7 +41,7 @@ export const Match: React.FC<{
   const convertedOptions = options.map((value) => {
     const ruleValues = Array.isArray(value) ? value : [value];
     return {
-      label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_VALUES_SEPARATOR),
+      label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_KEY_SEPARATOR),
       value,
     };
   });
