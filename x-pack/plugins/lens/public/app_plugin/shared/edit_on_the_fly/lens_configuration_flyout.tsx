@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlyoutBody,
@@ -23,6 +23,8 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Observable } from 'rxjs';
+import type { LensInspector } from '../../../lens_inspector_service';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
@@ -30,6 +32,7 @@ import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
+import type { LensEmbeddableOutput } from '../../../embeddable';
 
 export interface EditConfigPanelProps {
   attributes: TypedLensByValueInput['attributes'];
@@ -43,7 +46,8 @@ export interface EditConfigPanelProps {
   wrapInFlyout?: boolean;
   panelId?: string;
   datasourceId: 'formBased' | 'textBased';
-  adaptersTables?: Record<string, Datatable>;
+  output$: Observable<LensEmbeddableOutput>;
+  inspector: LensInspector;
 }
 
 export function LensEditConfigurationFlyout({
@@ -56,7 +60,8 @@ export function LensEditConfigurationFlyout({
   datasourceId,
   updateAll,
   closeFlyout,
-  adaptersTables,
+  output$,
+  inspector,
 }: EditConfigPanelProps) {
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
@@ -66,12 +71,19 @@ export function LensEditConfigurationFlyout({
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);
-  const layers = activeDatasource.getLayers(datasourceState);
-  layers.forEach((layer) => {
-    if (adaptersTables) {
-      activeData[layer] = Object.values(adaptersTables)[0];
-    }
-  });
+  useEffect(() => {
+    const s = output$.subscribe(() => {
+      const layers = activeDatasource.getLayers(datasourceState);
+      const adaptersTables = inspector.adapters?.tables?.tables as Record<string, Datatable>;
+      const [table] = Object.values(adaptersTables || {});
+      layers.forEach((layer) => {
+        if (table) {
+          activeData[layer] = table;
+        }
+      });
+    });
+    return () => s.unsubscribe();
+  }, [activeData, activeDatasource, inspector, datasourceState, output$]);
 
   const framePublicAPI = useLensSelector((state) => {
     const newState = {

@@ -799,8 +799,9 @@ export class Embeddable
           dataView={dataView}
           updateAll={this.updateVisualization.bind(this)}
           datasourceId={datasourceId}
-          adaptersTables={this.lensInspector.adapters.tables?.tables}
+          inspector={this.lensInspector}
           panelId={this.id}
+          output$={this.getOutput$()}
         />
       );
     }

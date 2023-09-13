@@ -91,8 +91,9 @@ export async function getEditLensConfiguration(
     closeFlyout,
     wrapInFlyout,
     datasourceId,
-    adaptersTables,
     panelId,
+    inspector,
+    output$,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
@@ -154,11 +155,12 @@ export async function getEditLensConfiguration(
       updateAll,
       closeFlyout,
       datasourceId,
-      adaptersTables,
       coreStart,
       startDependencies,
       visualizationMap,
       datasourceMap,
+      output$,
+      inspector,
     };
 
     return getWrapper(
