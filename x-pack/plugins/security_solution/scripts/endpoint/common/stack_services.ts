@@ -238,7 +238,7 @@ export const createKbnClient = ({
   return new KbnClientExtended({
     log,
     url: kbnUrl,
-    apiKey
+    apiKey,
     ...(kbnUrl.includes('https')
       ? { certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)] }
       : {}),
