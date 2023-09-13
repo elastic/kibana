@@ -138,7 +138,7 @@ export interface ActionProps {
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened?: () => void;
-  onRowSelected: OnRowSelected;
+  onRowSelected?: OnRowSelected;
   onRuleChange?: () => void;
   refetch?: () => void;
   rowIndex: number;

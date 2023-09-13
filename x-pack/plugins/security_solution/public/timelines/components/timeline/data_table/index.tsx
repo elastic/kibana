@@ -11,14 +11,7 @@ import type {
   EuiDataGridControlColumn,
   EuiDataGridProps,
 } from '@elastic/eui';
-import {
-  logicalCSS,
-  useEuiTheme,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import { logicalCSS, useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { JSXElementConstructor } from 'react';
 import React, { useMemo, useEffect, useCallback, useRef, useState } from 'react';
 import { css } from '@emotion/react';
@@ -33,11 +26,8 @@ import type { UnifiedDataTableSettingsColumn } from '@kbn/unified-data-table';
 import { DataLoadingState, UnifiedDataTable, useColumns } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
-import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../common/constants';
-import { EXIT_FULL_SCREEN } from '../../../../common/components/exit_full_screen/translations';
-import { isActiveTimeline } from '../../../../helpers';
+import { StatefulEventContext } from '../../../../common/components/events_viewer/stateful_event_context';
 import type {
   ExpandedDetailTimeline,
   ExpandedDetailType,
@@ -60,10 +50,6 @@ import type { State, inputsModel } from '../../../../common/store';
 import { appSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import {
-  useGlobalFullScreen,
-  useTimelineFullScreen,
-} from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { getDefaultControlColumn } from '../body/control_columns';
@@ -74,9 +60,7 @@ import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
 import { RowRendererId } from '../../../../../common/api/timeline';
 import { Actions } from '../../../../common/components/header_actions/actions';
 import { plainRowRenderer } from '../body/renderers/plain_row_renderer';
-import { useFieldBrowserOptions } from '../../fields_browser';
 import { getColumnHeader } from '../body/column_headers/helpers';
-import { StatefulRowRenderersBrowser } from '../../row_renderers_browser';
 import { eventIsPinned } from '../body/helpers';
 import { NOTES_BUTTON_CLASS_NAME } from '../properties/helpers';
 import { EventsTrSupplement } from '../styles';
@@ -85,25 +69,12 @@ import type { TimelineResultNote } from '../../open_timeline/types';
 import { getFormattedFields } from '../body/renderers/formatted_field';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineBodySelector } from '../body/selectors';
+import ToolbarAdditionalControls from './toolbar_additional_controls';
 
-export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullScreenButton', {
-  defaultMessage: 'Full screen',
-});
 /** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
 const ARIA_ROW_INDEX_OFFSET = 2;
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
-
-export const isFullScreen = ({
-  globalFullScreen,
-  isActiveTimelines,
-  timelineFullScreen,
-}: {
-  globalFullScreen: boolean;
-  isActiveTimelines: boolean;
-  timelineFullScreen: boolean;
-}) =>
-  (isActiveTimelines && timelineFullScreen) || (isActiveTimelines === false && globalFullScreen);
 
 interface Props {
   columns: ColumnHeaderOptions[];
@@ -121,10 +92,12 @@ interface Props {
   expandedDetail: ExpandedDetailTimeline;
   showExpandedDetails: boolean;
   onChangePage: OnChangePage;
+  activeTab: TimelineTabs;
 }
 
 export const TimelineDataTableComponent: React.FC<Props> = ({
   columns,
+  activeTab,
   timelineId,
   itemsPerPage,
   itemsPerPageOptions,
@@ -141,6 +114,13 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const { euiTheme } = useEuiTheme();
+  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
+  const [activeStatefulEventContext] = useState({
+    timelineID: timelineId,
+    enableHostDetailsFlyout: true,
+    enableIpDetailsFlyout: true,
+    tabType: activeTab,
+  });
 
   const {
     services: {
@@ -152,11 +132,9 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       notifications: { toasts: toastsService },
       application: { capabilities },
       theme,
-      triggersActionsUi,
       data: dataPluginContract,
     },
   } = useKibana();
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const [fetchedPage, setFechedPage] = useState<number>(0);
@@ -169,12 +147,12 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       excludedRowRendererIds,
       isSelectAllChecked,
       loadingEventIds,
-      pinnedEventIds,
       selectedEventIds,
       filterManager,
       show,
       queryFields,
       selectAll,
+      pinnedEventIds,
     } = timelineDefaults,
   } = useSelector((state: State) => timelineBodySelector(state, timelineId));
 
@@ -213,32 +191,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
-
-  const toggleFullScreen = useCallback(() => {
-    if (timelineId === TimelineId.active) {
-      setTimelineFullScreen(!timelineFullScreen);
-    } else {
-      setGlobalFullScreen(!globalFullScreen);
-    }
-  }, [
-    timelineId,
-    setTimelineFullScreen,
-    timelineFullScreen,
-    setGlobalFullScreen,
-    globalFullScreen,
-  ]);
-  const fullScreen = useMemo(
-    () =>
-      isFullScreen({
-        globalFullScreen,
-        isActiveTimelines: isActiveTimeline(timelineId),
-        timelineFullScreen,
-      }),
-    [globalFullScreen, timelineFullScreen, timelineId]
-  );
 
   // const { activeStep, isTourShown, incrementStep } = useTourContext();
 
@@ -330,35 +283,36 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     },
     [dispatch, refetch, timelineId]
   );
-  const noop = () => {};
+
   const leadingControlColumns = useMemo(
     () =>
       getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
         ...x,
         headerCellProps: {
           ...x.headerCellProps,
-          columnHeaders: defaultHeaders ?? [],
-          timelineId: timelineId ?? 'timeline-1',
         },
         rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
           return (
             <Actions
               ariaRowindex={cveProps.rowIndex}
               columnId={cveProps.columnId}
-              width={100}
               data={discoverGridRows[cveProps.rowIndex].data}
               index={cveProps.colIndex}
               rowIndex={cveProps.rowIndex}
               setEventsDeleted={setEventsDeleted}
-              checked={x.id ? Object.keys(selectedEventIds).includes(x.id) : false}
-              isEventPinned={x.id ? eventIsPinned({ eventId: x.id, pinnedEventIds }) : false}
+              checked={Object.keys(selectedEventIds).includes(
+                discoverGridRows[cveProps.rowIndex].id
+              )}
+              isEventPinned={eventIsPinned({
+                eventId: discoverGridRows[cveProps.rowIndex].id,
+                pinnedEventIds,
+              })}
               columnValues={x.columnValues ?? ''}
               ecsData={discoverGridRows[cveProps.rowIndex].ecs}
               eventId={discoverGridRows[cveProps.rowIndex].id}
               eventIdToNoteIds={eventIdToNoteIds}
               loadingEventIds={loadingEventIds}
-              onRowSelected={x.onRowSelected ?? noop}
-              onRuleChange={noop} // TODO: get refreshRule
+              onRowSelected={x.onRowSelected}
               showCheckboxes={x.showCheckboxes ?? false}
               showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
               timelineId={timelineId}
@@ -673,39 +627,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     },
     [onColumnResize]
   );
-  const fieldBrowserOptions = useFieldBrowserOptions({
-    sourcererScope: SourcererScopeName.timeline,
-    upsertColumn: (columnR: ColumnHeaderOptions, indexR: number) =>
-      dispatch(timelineActions.upsertColumn({ column: columnR, id: timelineId, index: indexR })),
-    removeColumn: (columnId: string) =>
-      dispatch(timelineActions.removeColumn({ columnId, id: timelineId })),
-  });
 
-  const onResetColumns = useCallback(() => {
-    dispatch(timelineActions.updateColumns({ id: timelineId, columns }));
-  }, [columns, dispatch, timelineId]);
-
-  const onToggleColumn = useCallback(
-    (columnId: string) => {
-      if (columns.some(({ id }) => id === columnId)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId,
-            id: timelineId,
-          })
-        );
-      } else {
-        dispatch(
-          timelineActions.upsertColumn({
-            column: getColumnHeader(columnId, defaultHeaders),
-            id: timelineId,
-            index: 1,
-          })
-        );
-      }
-    },
-    [columns, dispatch, timelineId]
-  );
   const isTextBasedQuery = false;
 
   const onAddFilter = useCallback(
@@ -767,61 +689,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     ),
     [browserFields, handleOnPanelClosed, runtimeMappings, timelineId]
   );
-  const additionalControls = useMemo(
-    () => (
-      <>
-        {' '}
-        {triggersActionsUi.getFieldBrowser({
-          browserFields,
-          columnIds: defaultColumns ?? [],
-          onResetColumns,
-          onToggleColumn,
-          options: fieldBrowserOptions,
-        })}
-        <StatefulRowRenderersBrowser
-          data-test-subj="row-renderers-browser"
-          timelineId={timelineId}
-        />
-        <>
-          <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
-            <EuiButtonIcon
-              aria-label={
-                isFullScreen({
-                  globalFullScreen,
-                  isActiveTimelines: isActiveTimeline(timelineId),
-                  timelineFullScreen,
-                })
-                  ? EXIT_FULL_SCREEN
-                  : FULL_SCREEN
-              }
-              className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-              color={fullScreen ? 'ghost' : 'primary'}
-              data-test-subj={
-                // a full screen button gets created for timeline and for the host page
-                // this sets the data-test-subj for each case so that tests can differentiate between them
-                isActiveTimeline(timelineId) ? 'full-screen-active' : 'full-screen'
-              }
-              iconType="fullScreen"
-              onClick={toggleFullScreen}
-            />
-          </EuiToolTip>
-        </>
-      </>
-    ),
-    [
-      browserFields,
-      defaultColumns,
-      fieldBrowserOptions,
-      fullScreen,
-      globalFullScreen,
-      onResetColumns,
-      onToggleColumn,
-      timelineFullScreen,
-      timelineId,
-      toggleFullScreen,
-      triggersActionsUi,
-    ]
-  );
+
   const customRenderers = useMemo(
     () =>
       getFormattedFields({
@@ -837,61 +705,70 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     onChangePage(fetchedPage);
   }, [fetchedPage, onChangePage]);
 
+  const additionalControls = useMemo(
+    () => <ToolbarAdditionalControls timelineId={timelineId} columns={columns} />,
+    [columns, timelineId]
+  );
+
   if (!dataView) {
     return null;
   }
   return (
-    <DataGridMemoized
-      ariaLabelledBy="timelineDocumentsAriaLabel"
-      className={'udtTimeline'}
-      columns={defaultColumns}
-      expandedDoc={expandedDoc}
-      dataView={dataView}
-      loadingState={isQueryLoading ? DataLoadingState.loading : DataLoadingState.loaded}
-      onFilter={onAddFilter as DocViewFilterFn}
-      onResize={onResizeDataGrid}
-      onSetColumns={onSetColumns}
-      onSort={!isTextBasedQuery ? onSort : undefined}
-      rows={discoverGridRows}
-      sampleSize={SAMPLE_SIZE_SETTING}
-      setExpandedDoc={onSetExpandedDoc}
-      settings={tableSettings}
-      showTimeCol={showTimeCol}
-      isSortEnabled={true}
-      sort={sortingColumns}
-      rowHeightState={3}
-      onUpdateRowHeight={() => {}}
-      isPlainRecord={isTextBasedQuery}
-      rowsPerPageState={itemsPerPage}
-      onUpdateRowsPerPage={onChangeItemsPerPage}
-      onFieldEdited={() => refetch()}
-      cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-      services={{
-        theme,
-        fieldFormats,
-        storage,
-        toastNotifications: toastsService,
-        uiSettings,
-        dataViewFieldEditor,
-        data: dataPluginContract,
-      }}
-      visibleCellActions={3}
-      externalCustomRenderers={customRenderers}
-      renderDocumentView={renderDetailsPanel}
-      externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
-      externalAdditionalControls={additionalControls}
-      trailingControlColumns={rowDetails}
-      // renderCustomGridBody={renderCustomGridBody}
-      rowsPerPageOptions={itemsPerPageOptions}
-      showFullScreenButton={false}
-      useNewFieldsApi={true}
-      maxDocFieldsDisplayed={50}
-      consumer="timeline"
-      totalHits={totalCount}
-      onFetchMoreRecords={handleChangePageClick}
-      configRowHeight={3}
-      showMultiFields={true}
-    />
+    <div className="unifiedDataTable">
+      <StatefulEventContext.Provider value={activeStatefulEventContext}>
+        <DataGridMemoized
+          ariaLabelledBy="timelineDocumentsAriaLabel"
+          className={'udtTimeline'}
+          columns={defaultColumns}
+          expandedDoc={expandedDoc}
+          dataView={dataView}
+          loadingState={isQueryLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+          onFilter={onAddFilter as DocViewFilterFn}
+          onResize={onResizeDataGrid}
+          onSetColumns={onSetColumns}
+          onSort={!isTextBasedQuery ? onSort : undefined}
+          rows={discoverGridRows}
+          sampleSize={SAMPLE_SIZE_SETTING}
+          setExpandedDoc={onSetExpandedDoc}
+          settings={tableSettings}
+          showTimeCol={showTimeCol}
+          isSortEnabled={true}
+          sort={sortingColumns}
+          rowHeightState={3}
+          onUpdateRowHeight={() => {}}
+          isPlainRecord={isTextBasedQuery}
+          rowsPerPageState={itemsPerPage}
+          onUpdateRowsPerPage={onChangeItemsPerPage}
+          // onFieldEdited={() => refetch()}
+          cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+          services={{
+            theme,
+            fieldFormats,
+            storage,
+            toastNotifications: toastsService,
+            uiSettings,
+            dataViewFieldEditor,
+            data: dataPluginContract,
+          }}
+          visibleCellActions={3}
+          externalCustomRenderers={customRenderers}
+          renderDocumentView={renderDetailsPanel}
+          externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
+          externalAdditionalControls={additionalControls}
+          // trailingControlColumns={rowDetails}
+          // renderCustomGridBody={renderCustomGridBody}
+          rowsPerPageOptions={itemsPerPageOptions}
+          showFullScreenButton={false}
+          useNewFieldsApi={true}
+          maxDocFieldsDisplayed={50}
+          consumer="timeline"
+          totalHits={totalCount}
+          onFetchMoreRecords={handleChangePageClick}
+          configRowHeight={3}
+          showMultiFields={true}
+        />
+      </StatefulEventContext.Provider>
+    </div>
   );
 };
 

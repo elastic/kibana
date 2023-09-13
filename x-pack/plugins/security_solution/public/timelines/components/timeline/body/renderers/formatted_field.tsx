@@ -75,7 +75,7 @@ export const useFormattedFieldProps1 = ({
       data: dataTableRow,
       fieldName: columnId,
     };
-  }, [columnId]);
+  }, [columnId, dataTableRow]);
 
   const values = useGetMappedNonEcsValue({ data: rowData.data.data, fieldName: rowData.fieldName });
   const value = parseValue(head(values));
@@ -116,6 +116,50 @@ export const useFormattedFieldProps1 = ({
   }
 };
 
+const FieldValueCell = (
+  dataTableRows: Array<DataTableRecord & TimelineItem>,
+  scopeId: string,
+  headers?: ColumnHeaderOptions[],
+  closeCellPopover?: () => void
+) => {
+  return function FieldValue(props: EuiDataGridCellValueElementProps) {
+    const header = headers?.find((h) => h.id === props.columnId);
+    const { link, eventId, value, values, title, fieldName, fieldFormat, fieldType, linkValue } =
+      useFormattedFieldProps1({
+        dataTableRow: dataTableRows[props.rowIndex],
+        columnId: props.columnId,
+        header,
+      });
+
+    const showEmpty = useMemo(() => {
+      const hasLink = link !== undefined && values && !isEmpty(value);
+      return hasLink !== true;
+    }, [link, value, values]);
+
+    return showEmpty === false ? (
+      <FormattedFieldValue
+        // Component={Component}
+        contextId={`expanded-value-${props.columnId}-row-${props.rowIndex}-${scopeId}`}
+        eventId={eventId}
+        fieldFormat={fieldFormat}
+        isAggregatable={header?.aggregatable ?? false}
+        fieldName={fieldName}
+        fieldType={fieldType}
+        isButton={false}
+        isDraggable={false}
+        value={value}
+        truncate={false}
+        title={title}
+        linkValue={linkValue}
+        onClick={closeCellPopover}
+      />
+    ) : (
+      // data grid expects each cell action always return an element, it crashes if returns null
+      EmptyComponent
+    );
+  };
+};
+
 export const getFormattedFields = ({
   dataTableRows,
   headers,
@@ -127,8 +171,6 @@ export const getFormattedFields = ({
   scopeId: string;
   closeCellPopover?: () => void;
 }) => {
-  console.log(headers);
-
   return [
     ...PORT_NAMES,
     EVENT_DURATION_FIELD_NAME,
@@ -147,51 +189,7 @@ export const getFormattedFields = ({
       obj: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>,
       field: string
     ) => {
-      obj[field] = (props: EuiDataGridCellValueElementProps) => {
-        const header = headers?.find((h) => h.id === props.columnId);
-        const {
-          link,
-          eventId,
-          value,
-          values,
-          title,
-          fieldName,
-          fieldFormat,
-          fieldType,
-          linkValue,
-        } = useFormattedFieldProps1({
-          dataTableRow: dataTableRows[props.rowIndex],
-          columnId: props.columnId,
-          header,
-        });
-
-        const showEmpty = useMemo(() => {
-          const hasLink = link !== undefined && values && !isEmpty(value);
-          return hasLink !== true;
-        }, [link, value, values]);
-
-        return showEmpty === false ? (
-          <FormattedFieldValue
-            // Component={Component}
-            contextId={`expanded-value-${props.columnId}-row-${props.rowIndex}-${scopeId}`}
-            eventId={eventId}
-            fieldFormat={fieldFormat}
-            isAggregatable={header?.aggregatable ?? false}
-            fieldName={fieldName}
-            fieldType={fieldType}
-            isButton={false}
-            isDraggable={false}
-            value={value}
-            truncate={false}
-            title={title}
-            linkValue={linkValue}
-            onClick={closeCellPopover}
-          />
-        ) : (
-          // data grid expects each cell action always return an element, it crashes if returns null
-          EmptyComponent
-        );
-      };
+      obj[field] = FieldValueCell(dataTableRows, scopeId, headers, closeCellPopover);
       return obj;
     },
     {}

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiFlyoutBody, EuiBadge } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import type { Dispatch } from 'redux';
 import type { ConnectedProps } from 'react-redux';
@@ -50,7 +50,6 @@ import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
-import { StatefulEventContext } from '../../../../common/components/events_viewer/stateful_event_context';
 import { SAMPLE_SIZE_SETTING, TimelineDataTable } from '../data_table';
 
 const TimelineHeaderContainer = styled.div`
@@ -181,13 +180,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   timerangeKind,
 }) => {
   const dispatch = useDispatch();
-  // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-  const [activeStatefulEventContext] = useState({
-    timelineID: timelineId,
-    enableHostDetailsFlyout: true,
-    enableIpDetailsFlyout: true,
-    tabType: activeTab,
-  });
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
@@ -388,28 +380,23 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
               className="timeline-flyout-body"
             >
-              <ScrollableFlexItem>
-                <div className="udtDataTable">
-                  <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                    <TimelineDataTable
-                      columns={columnsHeader}
-                      rowRenderers={rowRenderers}
-                      timelineId={timelineId}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      sort={sort}
-                      events={events}
-                      refetch={refetch}
-                      isQueryLoading={isQueryLoading}
-                      totalCount={totalCount}
-                      onEventClosed={onEventClosed}
-                      expandedDetail={expandedDetail}
-                      showExpandedDetails={showExpandedDetails}
-                      onChangePage={loadPage}
-                    />
-                  </StatefulEventContext.Provider>
-                </div>
-              </ScrollableFlexItem>
+              <TimelineDataTable
+                columns={columnsHeader}
+                rowRenderers={rowRenderers}
+                timelineId={timelineId}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                sort={sort}
+                events={events}
+                refetch={refetch}
+                isQueryLoading={isQueryLoading}
+                totalCount={totalCount}
+                onEventClosed={onEventClosed}
+                expandedDetail={expandedDetail}
+                showExpandedDetails={showExpandedDetails}
+                onChangePage={loadPage}
+                activeTab={activeTab}
+              />
               {showExpandedDetails && (
                 <>
                   <ScrollableFlexItem grow={1}>
