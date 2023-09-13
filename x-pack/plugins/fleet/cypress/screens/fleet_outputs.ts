@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { request } from '@kbn/osquery-plugin/cypress/tasks/common';
-
-import { visit } from '../tasks/common';
+import { request, visit } from '../tasks/common';
 
 import {
   getSpecificSelectorId,
@@ -39,10 +37,9 @@ export const interceptOutputId = (cb: (caseId: string) => void) => {
 };
 
 export const cleanupOutput = (outputId: string) => {
-  cy.request({
+  request({
     method: 'DELETE',
     url: `/api/fleet/outputs/${outputId}`,
-    headers: { 'kbn-xsrf': 'xx' },
   });
 };
 
@@ -51,7 +48,6 @@ const loadOutput = (body: Record<string, unknown>) =>
     method: 'POST',
     body,
     url: `/api/fleet/outputs`,
-    headers: { 'kbn-xsrf': 'xx' },
   }).then((response) => response.body);
 
 export const kafkaOutputBody = {

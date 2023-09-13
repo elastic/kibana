@@ -10,8 +10,13 @@ import { UPDATE_PACKAGE_BTN } from '../screens/integrations';
 import { LOADING_SPINNER, TOAST_CLOSE_BTN } from '../screens/navigation';
 import { AGENT_POLICY_SAVE_INTEGRATION } from '../screens/fleet';
 import { INSTALLED_VERSION, INTEGRATION_POLICIES_UPGRADE_CHECKBOX } from '../screens/integrations';
+import { login } from '../tasks/login';
 
 describe('Add Integration - Mock API', () => {
+  beforeEach(() => {
+    login();
+  });
+
   describe('upgrade package and upgrade package policy', () => {
     const oldVersion = '0.3.3';
     const newVersion = '1.3.4';

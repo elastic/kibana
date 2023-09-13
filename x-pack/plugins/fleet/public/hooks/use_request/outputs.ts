@@ -21,6 +21,7 @@ export function useGetOutputs() {
   return useRequest<GetOutputsResponse>({
     method: 'get',
     path: outputRoutesService.getListPath(),
+    version: API_VERSIONS.public.v1,
   });
 }
 
