@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIconTip,
   EuiTitle,
@@ -112,7 +113,9 @@ export function DiscoverGridFlyout({
     <EuiPortal>
       <EuiFlyout
         onClose={onClose}
+        type="push"
         size="m"
+        pushMinBreakpoint="xl"
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
         ownFocus={false}
@@ -251,6 +254,15 @@ export function DiscoverGridFlyout({
             textBasedHits={isPlainRecord ? hits : undefined}
           />
         </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+                Close
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     </EuiPortal>
   );
