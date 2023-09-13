@@ -69,8 +69,8 @@ export default function OpenIncompleteResultsModalButton({
       data-test-subj="openIncompleteResultsModalBtn"
     >
       <FormattedMessage
-        id="data.search.searchSource.fetch.incompleteResultsModal.showDetails"
-        defaultMessage="Show details"
+        id="data.search.searchSource.fetch.incompleteResultsModal.viewDetails"
+        defaultMessage="View details"
         description="Open the modal to show details"
       />
     </Component>
