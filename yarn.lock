@@ -4122,6 +4122,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-integrations@link:packages/kbn-custom-integrations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cypress-config@link:packages/kbn-cypress-config":
   version "0.0.0"
   uid ""
@@ -6155,6 +6159,10 @@
   uid ""
 
 "@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/xstate-utils@link:packages/kbn-xstate-utils":
   version "0.0.0"
   uid ""
 
