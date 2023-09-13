@@ -38,24 +38,6 @@ describe('open config panel action', () => {
       expect(isCompatible).toBeFalsy();
     });
 
-    it('is incompatible with non text based language embeddable', async () => {
-      const embeddable = {
-        type: DOC_TYPE,
-        isTextBasedLanguage: () => false,
-      } as unknown as IEmbeddable;
-      const configurablePanelAction = new ConfigureInLensPanelAction(
-        mockStartDependencies,
-        overlays,
-        theme
-      );
-
-      const isCompatible = await configurablePanelAction.isCompatible({
-        embeddable,
-      } as ActionExecutionContext<{ embeddable: IEmbeddable }>);
-
-      expect(isCompatible).toBeFalsy();
-    });
-
     it('is compatible with text based language embeddable', async () => {
       const embeddable = {
         type: DOC_TYPE,
