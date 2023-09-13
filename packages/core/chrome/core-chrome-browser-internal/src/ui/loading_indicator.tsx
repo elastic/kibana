@@ -64,7 +64,6 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       ? 'globalLoadingIndicator'
       : 'globalLoadingIndicator-hidden';
 
-
     const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
       defaultMessage: 'Loading content',
     });
