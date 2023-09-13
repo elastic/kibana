@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { omitBy, isUndefined } from 'lodash';
 import dateMath from '@kbn/datemath';
 
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -58,7 +58,7 @@ export const api: IRuleMonitoringApiClient = {
     return http().fetch<GetRuleExecutionEventsResponse>(url, {
       method: 'GET',
       version: '1',
-      query: _.omitBy(
+      query: omitBy(
         {
           search_term: searchTerm?.length ? searchTerm : undefined,
           event_types: eventTypes?.length ? eventTypes.join(',') : undefined,
@@ -69,7 +69,7 @@ export const api: IRuleMonitoringApiClient = {
           page,
           per_page: perPage,
         },
-        _.isUndefined
+        isUndefined
       ),
       signal,
     });
