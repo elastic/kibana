@@ -223,7 +223,7 @@ export class Server {
 
     this.coreApp.preboot(corePreboot, uiPlugins);
 
-    prebootTransaction?.end();
+    prebootTransaction.end();
     this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
     return corePreboot;
   }
@@ -352,7 +352,7 @@ export class Server {
     this.registerCoreContext(coreSetup);
     await this.coreApp.setup(coreSetup, uiPlugins);
 
-    setupTransaction?.end();
+    setupTransaction.end();
     this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
     return coreSetup;
   }
@@ -367,7 +367,7 @@ export class Server {
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
     const deprecationsStart = this.deprecations.start();
-    const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
+    const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
@@ -379,7 +379,7 @@ export class Server {
     soStartSpan?.end();
 
     if (this.nodeRoles?.migrator === true) {
-      startTransaction?.end();
+      startTransaction.end();
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
         'Migrations completed, shutting down Kibana',
@@ -420,7 +420,7 @@ export class Server {
 
     await this.http.start();
 
-    startTransaction?.end();
+    startTransaction.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
     this.reportKibanaStartedEvents(analyticsStart);
