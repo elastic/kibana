@@ -31,6 +31,7 @@ export function ChatActionsMenu({
   connectors,
   connectorsManagementHref,
   conversationId,
+  disabled,
   knowledgeBase,
   modelsManagementHref,
   startedFrom,
@@ -39,6 +40,7 @@ export function ChatActionsMenu({
   connectors: UseGenAIConnectorsResult;
   connectorsManagementHref: string;
   conversationId?: string;
+  disabled: boolean;
   knowledgeBase: UseKnowledgeBaseResult;
   modelsManagementHref: string;
   startedFrom?: StartedFrom;
@@ -54,7 +56,13 @@ export function ChatActionsMenu({
     <EuiPopover
       isOpen={isOpen}
       button={
-        <EuiButtonIcon iconType="boxesVertical" onClick={toggleActionsMenu} aria-label="Menu" />
+        <EuiButtonIcon
+          data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
+          disabled={disabled}
+          iconType="boxesVertical"
+          onClick={toggleActionsMenu}
+          aria-label="Menu"
+        />
       }
       panelPaddingSize="none"
       closePopover={toggleActionsMenu}
@@ -70,7 +78,7 @@ export function ChatActionsMenu({
             items: [
               {
                 name: (
-                  <>
+                  <div className="eui-textTruncate">
                     {i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.connector', {
                       defaultMessage: 'Connector',
                     })}{' '}
@@ -80,7 +88,7 @@ export function ChatActionsMenu({
                           ?.name
                       }
                     </strong>
-                  </>
+                  </div>
                 ),
                 panel: 1,
               },
@@ -134,6 +142,7 @@ export function ChatActionsMenu({
                 <ConnectorSelectorBase {...connectors} />
                 <EuiSpacer size="m" />
                 <EuiButton
+                  data-test-subj="observabilityAiAssistantChatActionsMenuManageConnectorsButton"
                   href={connectorsManagementHref}
                   iconSide="right"
                   iconType="arrowRight"
@@ -170,6 +179,7 @@ export function ChatActionsMenu({
                       }
                     )}{' '}
                     <EuiLink
+                      data-test-subj="observabilityAiAssistantChatActionsMenuLearnMoreLink"
                       external
                       target="_blank"
                       href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html"
@@ -218,7 +228,12 @@ export function ChatActionsMenu({
 
                     <EuiSpacer size="m" />
 
-                    <EuiButton href={modelsManagementHref} fullWidth size="s">
+                    <EuiButton
+                      data-test-subj="observabilityAiAssistantChatActionsMenuGoToMachineLearningButton"
+                      fullWidth
+                      href={modelsManagementHref}
+                      size="s"
+                    >
                       {i18n.translate(
                         'xpack.observabilityAiAssistant.chatHeader.actions.connectorManagement',
                         {

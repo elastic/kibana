@@ -761,5 +761,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
       expect(hasVisualOptionsButton).to.be(false);
     });
+
+    it('should allow edit meta-data for Lens chart on listing page', async () => {
+      await PageObjects.visualize.gotoVisualizationLandingPage();
+      await listingTable.searchForItemWithName('Afancilenstest');
+      await listingTable.inspectVisualization();
+      await listingTable.editVisualizationDetails({
+        title: 'Anewfancilenstest',
+        description: 'new description',
+      });
+      await listingTable.searchForItemWithName('Anewfancilenstest');
+      await listingTable.expectItemsCount('visualize', 1);
+    });
+
+    it('should correctly optimize multiple percentile metrics', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      for (const percentileValue of [90, 95.5, 99.9]) {
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'percentile',
+          field: 'bytes',
+          keepOpen: true,
+        });
+
+        await retry.try(async () => {
+          const value = `${percentileValue}`;
+          // Can not use testSubjects because data-test-subj is placed range input and number input
+          const percentileInput = await PageObjects.lens.getNumericFieldReady(
+            'lns-indexPattern-percentile-input'
+          );
+          await percentileInput.type(value);
+
+          const attrValue = await percentileInput.getAttribute('value');
+          if (attrValue !== value) {
+            throw new Error(`layerPanelTopHitsSize not set to ${value}`);
+          }
+        });
+
+        await PageObjects.lens.closeDimensionEditor();
+      }
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
+    });
   });
 }
