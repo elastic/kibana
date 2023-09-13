@@ -17,6 +17,7 @@ import { ClientConfigType } from '../plugin';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
 import { KibanaContextProvider } from '../shared_imports';
 import { ReportListing } from '.';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
@@ -25,32 +26,34 @@ export async function mountManagementSection(
   config: ClientConfigType,
   apiClient: ReportingAPIClient,
   urlService: SharePluginSetup['url'],
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
 ) {
   render(
-    <I18nProvider>
-      <KibanaContextProvider
-        services={{
-          http: coreSetup.http,
-          application: coreStart.application,
-          uiSettings: coreStart.uiSettings,
-          docLinks: coreStart.docLinks,
-        }}
-      >
-        <InternalApiClientProvider apiClient={apiClient}>
-          <IlmPolicyStatusContextProvider>
-            <ReportListing
-              toasts={coreSetup.notifications.toasts}
-              license$={license$}
-              config={config}
-              redirect={coreStart.application.navigateToApp}
-              navigateToUrl={coreStart.application.navigateToUrl}
-              urlService={urlService}
-            />
-          </IlmPolicyStatusContextProvider>
-        </InternalApiClientProvider>
-      </KibanaContextProvider>
-    </I18nProvider>,
+    <KibanaThemeProvider theme={{theme$: params.theme$}}>
+      <I18nProvider>
+        <KibanaContextProvider
+          services={{
+            http: coreSetup.http,
+            application: coreStart.application,
+            uiSettings: coreStart.uiSettings,
+            docLinks: coreStart.docLinks,
+          }}
+        >
+          <InternalApiClientProvider apiClient={apiClient}>
+            <IlmPolicyStatusContextProvider>
+              <ReportListing
+                toasts={coreSetup.notifications.toasts}
+                license$={license$}
+                config={config}
+                redirect={coreStart.application.navigateToApp}
+                navigateToUrl={coreStart.application.navigateToUrl}
+                urlService={urlService}
+              />
+            </IlmPolicyStatusContextProvider>
+          </InternalApiClientProvider>
+        </KibanaContextProvider>
+      </I18nProvider>
+    </KibanaThemeProvider>,
     params.element
   );
 
