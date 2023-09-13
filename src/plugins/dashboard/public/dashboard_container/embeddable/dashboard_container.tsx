@@ -240,6 +240,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     );
   }
 
+  public updateInput(changes: Partial<DashboardContainerInput>): void {
+    // block the Dashboard from entering edit mode if this Dashboard is managed.
+    if (
+      this.getState().componentState.managed &&
+      changes.viewMode?.toLowerCase() === ViewMode.EDIT?.toLowerCase()
+    ) {
+      const { viewMode, ...rest } = changes;
+      super.updateInput(rest);
+      return;
+    }
+    super.updateInput(changes);
+  }
+
   protected getInheritedInput(id: string): InheritedChildInput {
     const {
       query,
