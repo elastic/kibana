@@ -196,9 +196,9 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqRuleType"
-                title={<TechnicalPreviewBadge label="ES|QL" />}
+                title={<TechnicalPreviewBadge label={i18n.ESQL_TYPE_TITLE} />}
                 titleSize="xs"
-                description="Use The Elasticsearch Query Language (ES|QL) to search or aggregate data"
+                description={i18n.ESQL_TYPE_DESCRIPTION}
                 icon={<EuiIcon type="logoElasticsearch" size="l" />}
                 selectable={esqlSelectableConfig}
                 layout="horizontal"

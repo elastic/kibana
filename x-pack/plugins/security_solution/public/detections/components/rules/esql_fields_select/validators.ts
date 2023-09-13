@@ -17,29 +17,30 @@ import type { ValidationError, ValidationFunc } from '../../../../shared_imports
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import type { FieldValueQueryBar } from '../query_bar';
+import * as i18n from './translations';
 
 export type FieldType = 'string';
 
 export enum ERROR_CODES {
   INVALID_ESQL = 'ERR_INVALID_ESQL',
   ERR_MISSING_ID_FIELD_FROM_RESULT = 'ERR_MISSING_ID_FIELD_FROM_RESULT',
-  INVALID_ESQL_GROUPING_FIELDS = 'INVALID_ESQL_GROUPING_FIELDS',
+  INVALID_ESQL_SUPPRESS_BY_FIELDS = 'INVALID_ESQL_SUPPRESS_BY_FIELDS',
 }
 
 const constructValidationError = (error: Error) => {
   return {
     code: ERROR_CODES.INVALID_ESQL,
     message: error?.message
-      ? `Error validating ES|QL: "${error?.message}"`
-      : 'Unknown error while validating ES|QL',
+      ? i18n.esqlValidationErrorMessage(error.message)
+      : i18n.ESQL_VALIDATION_UNKNOWN_ERROR,
     error,
   };
 };
 
-const constructGroupingFieldsValidationError = (error: Error) => {
+const constructSuppressByFieldsValidationError = (error: Error) => {
   return {
-    code: ERROR_CODES.INVALID_ESQL_GROUPING_FIELDS,
-    message: 'Fields not possible to validate',
+    code: ERROR_CODES.INVALID_ESQL_SUPPRESS_BY_FIELDS,
+    message: i18n.ESQL_VALIDATION_SUPPRESS_BY_GENERAL_ERROR,
     error,
   };
 };
@@ -99,7 +100,6 @@ export const esqlToOptions = (
   return options;
 };
 
-// TODO: implement filter by type
 export const fetchEsqlOptions = async (esqlQuery: string) => {
   try {
     const data = await fetchEsqlFields(esqlQuery);
@@ -137,7 +137,7 @@ export const esqlValidator = async (
     ) {
       return {
         code: ERROR_CODES.ERR_MISSING_ID_FIELD_FROM_RESULT,
-        message: `For non-aggregating rules(that don't use STATS..BY function), please write query that returns _id field from [metadata _id, _version, _index] operator.`,
+        message: i18n.ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR,
       };
     }
   } catch (error) {
@@ -145,16 +145,16 @@ export const esqlValidator = async (
   }
 };
 
-export const esqlGroupingFieldsValidator = async (
+export const esqlSuppressByFieldsValidator = async (
   ...args: Parameters<ValidationFunc>
 ): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
   const [{ value, formData, path }] = args;
-  const groupingFields = (value ?? []) as string[];
+  const suppressByFields = (value ?? []) as string[];
   const query = formData.queryBar?.query?.query as string;
 
   const { ruleType } = formData as DefineStepRule;
 
-  const needsValidation = isEsqlRule(ruleType) && !isEmpty(query) && groupingFields?.length > 0;
+  const needsValidation = isEsqlRule(ruleType) && !isEmpty(query) && suppressByFields?.length > 0;
   if (!needsValidation) {
     return;
   }
@@ -163,7 +163,7 @@ export const esqlGroupingFieldsValidator = async (
     const data = await fetchEsqlFields(query);
 
     if (data && 'error' in data) {
-      return constructGroupingFieldsValidationError(data.error);
+      return constructSuppressByFieldsValidationError(data.error);
     }
 
     const options = (data?.columns ?? []).map(({ id }) => ({ label: id }));
@@ -171,7 +171,7 @@ export const esqlGroupingFieldsValidator = async (
 
     const errorFields: string[] = [];
 
-    groupingFields?.forEach((field) => {
+    suppressByFields?.forEach((field) => {
       if (!optionsSet.has(field)) {
         errorFields.push(field);
       }
@@ -179,12 +179,12 @@ export const esqlGroupingFieldsValidator = async (
 
     if (errorFields.length) {
       return {
-        code: ERROR_CODES.INVALID_ESQL_GROUPING_FIELDS,
+        code: ERROR_CODES.INVALID_ESQL_SUPPRESS_BY_FIELDS,
         path,
-        message: `Fields are not available in ES|QL response: ${errorFields.join(', ')}`,
+        message: i18n.esqlValidationInvalidSuppressByFields(errorFields.join(', ')),
       };
     }
   } catch (error) {
-    return constructGroupingFieldsValidationError(error);
+    return constructSuppressByFieldsValidationError(error);
   }
 };

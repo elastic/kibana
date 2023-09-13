@@ -431,7 +431,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [license, groupByFields]
   );
 
-  // TODO: is this needed in UI?
+  // TODO:ESQL is this needed in UI?
   const isEsqlGrouping = true;
 
   const EsqlDurationOptions = useCallback(
@@ -442,13 +442,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         options={[
           {
             id: GroupByOptions.PerRuleExecution,
-            label: 'Rule interval plus look back time',
+            label: i18n.ESQL_SUPPRESSION_RULE_INTERVAL,
           },
           {
             id: GroupByOptions.PerTimePeriod,
             label: (
               <>
-                {'Configure time window for suppressing possible duplicated ES|QL alerts'}
+                {i18n.ESQL_SUPPRESSION_TIME_WINDOW_OPTION}
                 <DurationInput
                   data-test-subj="esqlSuppressionDurationSelect"
                   durationValueField={esqlSuppressionDurationValue}
@@ -644,7 +644,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       ...schema.queryBar,
       label: (
         <span>
-          {'ES|QL query'} <EsqlInfoIcon />
+          {i18n.ESQL_QUERY} <EsqlInfoIcon />
         </span>
       ) as unknown as string,
     }),
@@ -860,7 +860,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           <IntendedRuleTypeEuiFormRow
             $isVisible={isEsqlRule(ruleType) && isEsqlGrouping}
             data-test-subj="esqlSuppressionDuration"
-            label="Select time interval for suppression"
+            label={i18n.ESQL_SUPPRESSION_TIME_WINDOW_LABEL}
           >
             <UseMultiFields
               fields={{

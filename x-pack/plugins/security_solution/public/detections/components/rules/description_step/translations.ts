@@ -169,6 +169,27 @@ export const ALERT_SUPPRESSION_DO_NOT_SUPPRESS_ON_MISSING_FIELDS = i18n.translat
   }
 );
 
+export const ESQL_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.esqlSuppressionPerRuleExecution',
+  {
+    defaultMessage: 'One rule execution',
+  }
+);
+
+export const ESQL_SUPPRESSED_BY_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.esqlSuppressedByFieldsLabel',
+  {
+    defaultMessage: 'ES|QL suppressed by fields',
+  }
+);
+
+export const ESQL_SUPPRESSION_WINDOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.esqlSuppressionWindowLabel',
+  {
+    defaultMessage: 'ES|QL suppression window',
+  }
+);
+
 export const BUILDING_BLOCK_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.buildingBlockLabel',
   {

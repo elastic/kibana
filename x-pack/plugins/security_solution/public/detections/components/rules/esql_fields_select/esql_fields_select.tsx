@@ -14,6 +14,7 @@ import { Field } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
 import { fetchEsqlOptions } from './validators';
+import * as i18n from './translations';
 
 interface EsqlFieldsSelectProps {
   field: FieldHook;
@@ -24,6 +25,10 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'detectionEngineStepDefineRuleEsqlFieldsSelect';
 
+/**
+ * Select component, that displays all available(returned from ES|QL query) fields
+ * Primary use: is to allow user select fields from result that will be used for suppression of possible duplicated alerts
+ */
 export const EsqlFieldsSelectComponent: React.FC<EsqlFieldsSelectProps> = ({
   field,
   getFormData,
@@ -43,7 +48,7 @@ export const EsqlFieldsSelectComponent: React.FC<EsqlFieldsSelectProps> = ({
       return;
     }
 
-    // most likely result already be taken from react-query cache, since query will be validated once user finishes editing query input
+    // most likely result already will be taken from react-query cache, since query will be validated once user finishes editing query input
     const newOptions = await fetchEsqlOptions(query);
     setOptions(newOptions);
   }, [getFormData]);
@@ -53,7 +58,7 @@ export const EsqlFieldsSelectComponent: React.FC<EsqlFieldsSelectProps> = ({
       fullWidth: true,
       noSuggestions: false,
       options,
-      placeholder: 'all available fields from ES|QL Query',
+      placeholder: i18n.ESQL_FIELDS_SELECT_PLACEHOLDER,
       onCreateOption: undefined,
       style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
       onFocus: onFocusHandler,

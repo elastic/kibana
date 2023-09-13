@@ -640,7 +640,7 @@ export const buildAlertEsqlDescription = (
   const suppressionWindowDescription =
     suppressionMode === GroupByOptions.PerTimePeriod
       ? `${esqlSuppressionDuration?.value}${esqlSuppressionDuration?.unit}`
-      : 'Per rule execution';
+      : i18n.ESQL_SUPPRESSION_PER_RULE_EXECUTION;
 
   const isSuppressionEnabled = esqlGroupByFields.length > 0;
   if (!isSuppressionEnabled) {
@@ -648,11 +648,11 @@ export const buildAlertEsqlDescription = (
   }
   return [
     {
-      title: <TechnicalPreviewBadge label={'ES|QL group by fields'} />,
+      title: <TechnicalPreviewBadge label={i18n.ESQL_SUPPRESSED_BY_FIELDS} />,
       description: esqlGroupByFields?.join(', '),
     },
     {
-      title: <TechnicalPreviewBadge label={'ES|QL suppression window'} />,
+      title: <TechnicalPreviewBadge label={i18n.ESQL_SUPPRESSION_WINDOW} />,
       description: suppressionWindowDescription,
     },
   ];

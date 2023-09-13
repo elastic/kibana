@@ -172,6 +172,33 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
   }
 );
 
+export const ESQL_SUPPRESSION_RULE_INTERVAL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlSuppressionPerRuleIntervalLabel',
+  {
+    defaultMessage: 'Rule interval plus look back time',
+  }
+);
+
+export const ESQL_SUPPRESSION_TIME_WINDOW_OPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlSuppressionTimeWindowOption',
+  {
+    defaultMessage: 'Configure time window for suppressing possible duplicated ES|QL alerts',
+  }
+);
+export const ESQL_SUPPRESSION_TIME_WINDOW_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlSuppressionTimeWindowLabel',
+  {
+    defaultMessage: 'Select time interval for suppression',
+  }
+);
+
+export const ESQL_QUERY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel',
+  {
+    defaultMessage: 'ES|QL query',
+  }
+);
+
 export const GROUP_BY_FIELD_LICENSE_WARNING = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.licenseWarning',
   {
