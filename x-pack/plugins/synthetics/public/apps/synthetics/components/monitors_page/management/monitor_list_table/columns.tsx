@@ -121,7 +121,7 @@ export function useMonitorListColumns({
           <MonitorLocations
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            status={overviewStatus}
+            overviewStatus={overviewStatus}
           />
         ) : null,
     },

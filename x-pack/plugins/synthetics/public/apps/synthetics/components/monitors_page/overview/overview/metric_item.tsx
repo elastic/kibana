@@ -66,10 +66,10 @@ export const MetricItem = ({
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName =
     useLocationName({ locationId: monitor.location.id })?.label || monitor.location?.id;
-  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
-    monitor.configId,
-    monitor.location.id
-  );
+  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
+    configId: monitor.configId,
+    locationId: monitor.location.id,
+  });
   const theme = useTheme();
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
