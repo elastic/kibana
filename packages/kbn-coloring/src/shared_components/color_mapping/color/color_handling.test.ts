@@ -82,14 +82,15 @@ describe('Color mapping - color generation', () => {
     expect(colorFactory('not_available')).toBe(NEUTRAL_COLOR_DARK[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
 
-  it('handles special tokens and multi-field categories', () => {
+  it('handles special tokens, multi-field categories and non-trimmed whitespaces', () => {
     const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, getPaletteFn, false, {
       type: 'categories',
-      categories: ['__other__', ['fieldA', 'fieldB'], '__empty__'],
+      categories: ['__other__', ['fieldA', 'fieldB'], '__empty__', '   with-whitespaces   '],
     });
     expect(colorFactory('__other__')).toBe(EUI_PALETTE_COLORS_LIGHT[0]);
     expect(colorFactory(['fieldA', 'fieldB'])).toBe(EUI_PALETTE_COLORS_LIGHT[1]);
     expect(colorFactory('__empty__')).toBe(EUI_PALETTE_COLORS_LIGHT[2]);
+    expect(colorFactory('   with-whitespaces   ')).toBe(EUI_PALETTE_COLORS_LIGHT[3]);
   });
 
   it('ignores configured assignments in auto mode', () => {

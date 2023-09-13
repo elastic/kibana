@@ -60,7 +60,7 @@ function getColorFactory(
 where given the model, a palette getter, the theme mode (dark/light) and a list of categories, it will return a function that can be used to pick the right color based on the passed category.
 
 
-A `category` can be in the shape of a plain string (trimmed) or an array of strings. Numbers, MultiFieldKey, IP etc needs to be stringified.
+A `category` can be in the shape of a plain string or an array of strings. Numbers, MultiFieldKey, IP etc needs to be stringified.
 
 
 The `CategoricalColorMapping` React component has the following props:

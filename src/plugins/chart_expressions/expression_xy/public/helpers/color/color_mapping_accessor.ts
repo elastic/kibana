@@ -35,13 +35,12 @@ export function getColorSeriesAccessorFn(
     if (splitValue === undefined) {
       return null;
     }
-    // category can be also a number, range, ip, multi-field. We need to stringify it to
-    // be sure we
-    const category = `${splitValue}`;
+
+    // category can be also a number, range, ip, multi-field. We need to stringify it to be sure
+    // we can correctly match it a with user string
     // if the separator exist, we de-construct it into a multifieldkey into values.
-    const categories = category.split(MULTI_FIELD_KEY_SEPARATOR).map((c) => {
-      const trimmedCategory = c.trim();
-      return specialHandlingInverseMap.get(trimmedCategory) ?? trimmedCategory;
+    const categories = `${splitValue}`.split(MULTI_FIELD_KEY_SEPARATOR).map((category) => {
+      return specialHandlingInverseMap.get(category) ?? category;
     });
     // we must keep the array nature of a multi-field key or just use a single string
     // This is required because the rule stored are checked differently for single values or multi-values

@@ -76,12 +76,8 @@ export const Match: React.FC<{
             }, [])
           );
         }}
-        onCreateOption={(e) => {
-          const label = e.trim();
-          if (
-            selectedOptions.findIndex((option) => option.label.trim().toLowerCase() === label) ===
-            -1
-          ) {
+        onCreateOption={(label) => {
+          if (selectedOptions.findIndex((option) => option.label.toLowerCase() === label) === -1) {
             updateValue([...selectedOptions, { label, value: label }].map((d) => d.value));
           }
         }}

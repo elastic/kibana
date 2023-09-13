@@ -76,10 +76,10 @@ describe('color mapping', () => {
     });
   });
 
-  it('handle special tokens and multi-fields keys', () => {
+  it('handle special tokens, multi-fields keys and non-trimmed whitespaces', () => {
     const dataInput: ColorMappingInputData = {
       type: 'categories',
-      categories: ['__other__', ['fieldA', 'fieldB'], '__empty__'],
+      categories: ['__other__', ['fieldA', 'fieldB'], '__empty__', '   with-whitespaces   '],
     };
     const onModelUpdateFn = jest.fn();
     const component = mount(
@@ -108,5 +108,8 @@ describe('color mapping', () => {
 
     const assignment3 = component.find(ASSIGNMENT_ITEM(2)).hostNodes();
     expect(assignment3.text()).toEqual('(Empty)');
+
+    const assignment4 = component.find(ASSIGNMENT_ITEM(3)).hostNodes();
+    expect(assignment4.text()).toEqual('   with-whitespaces   ');
   });
 });
