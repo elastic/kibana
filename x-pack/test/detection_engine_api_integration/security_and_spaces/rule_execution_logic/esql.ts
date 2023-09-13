@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...getEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(
             id
-          )} | where agent.name=="test-1" | keep agent.name | rename custom_named_agent = agent.name`,
+          )} | where agent.name=="test-1" | keep agent.name | rename agent.name as custom_named_agent`,
           from: 'now-1h',
           interval: '1h',
         };
