@@ -48,7 +48,7 @@ const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
 } as unknown as ExpandableFlyoutContext;
 
-const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null) =>
+const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsItem[]) =>
   ({
     eventId: 'event id',
     indexName: 'indexName',
@@ -92,17 +92,6 @@ describe('<Description />', () => {
 
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(DESCRIPTION_TITLE_TEST_ID)).toHaveTextContent(DOCUMENT_DESCRIPTION_TITLE);
-  });
-
-  it('should render null if dataFormattedForFieldBrowser is null', () => {
-    const panelContext = {
-      ...panelContextValue([ruleUuid, ruleDescription, ruleName]),
-      dataFormattedForFieldBrowser: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = renderDescription(panelContext);
-
-    expect(container).toBeEmptyDOMElement();
   });
 
   it('should open preview panel when clicking on button', () => {
