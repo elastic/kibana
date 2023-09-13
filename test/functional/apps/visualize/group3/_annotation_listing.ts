@@ -13,19 +13,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'annotationEditor']);
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
+  const find = getService('find');
   const retry = getService('retry');
+  const log = getService('log');
 
   describe('annotation listing page', function () {
     before(async function () {
+      log.info(`loading sample index...`);
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+
+      log.info(`loading annotations and data views`);
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
       );
+
+      // we need to test the missing data view scenario, so delete one of them
+      // (can't just omit it from the archive because Kibana won't import with broken references)
+      log.info(`deleting one data view to replicate missing data view scenario...`);
+      await kibanaServer.request({
+        method: 'DELETE',
+        path: `/api/data_views/data_view/data-view-to-delete`,
+      });
 
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.visualize.selectAnnotationsTab();
     });
 
     after(async function () {
+      log.info(`unloading sample index...`);
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+
+      log.info(`unloading annotations and data views`);
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
       );
@@ -96,10 +115,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('edit', function () {
       it('edits group metadata', async function () {
         await listingTable.clickItemLink('eventAnnotation', 'group 3');
-        PageObjects.annotationEditor.editGroupMetadata({
+        await PageObjects.annotationEditor.editGroupMetadata({
           title: 'edited title',
           description: 'edited description',
         });
+        await PageObjects.annotationEditor.saveGroup();
 
         await listingTable.searchForItemWithName('edited title');
         await listingTable.expectItemsCount('eventAnnotation', 1);
@@ -139,11 +159,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(1);
           });
+
+          await PageObjects.annotationEditor.saveGroup();
+          await listingTable.clearSearchFilter();
         });
       });
 
       describe('data view switching', () => {
-        it('recovers from missing data view', () => {});
+        it('recovers from missing data view', async () => {
+          await listingTable.clickItemLink('eventAnnotation', 'missing data view');
+
+          retry.try(async () => {
+            expect(await PageObjects.annotationEditor.showingMissingDataViewPrompt()).to.be(true);
+          });
+
+          await PageObjects.annotationEditor.editGroupMetadata({
+            dataView: 'logs*',
+          });
+
+          await retry.try(async () => {
+            expect(await PageObjects.annotationEditor.showingMissingDataViewPrompt()).to.be(false);
+            expect(await find.byCssSelector('canvas')).to.be.ok();
+          });
+
+          await PageObjects.annotationEditor.saveGroup();
+        });
+
         it('recovers from missing field in data view', () => {});
       });
     });

@@ -219,6 +219,7 @@ export const GroupPreview = ({
               <EuiEmptyPrompt
                 iconType="error"
                 color="danger"
+                data-test-subj="missingDataViewPrompt"
                 title={
                   <h2>
                     <FormattedMessage

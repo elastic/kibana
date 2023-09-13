@@ -1,9 +1,32 @@
 {
   "attributes": {
     "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "logs*",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "logs*",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-07T17:23:20.906Z",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-11T15:50:59.227Z",
+  "version": "WzIyNywxXQ=="
+}
+
+{
+  "attributes": {
+    "fieldAttrs": "{}",
     "fieldFormatMap": "{\"hour_of_day\":{}}",
     "fields": "[]",
-    "name": "Kibana Sample Data Logs",
+    "name": "To Delete!",
     "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
     "sourceFilters": "[]",
     "timeFieldName": "timestamp",
@@ -12,7 +35,7 @@
   },
   "coreMigrationVersion": "8.8.0",
   "created_at": "2023-09-07T17:23:20.906Z",
-  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "id": "data-view-to-delete",
   "managed": false,
   "references": [],
   "type": "index-pattern",
@@ -248,7 +271,7 @@
     "dataViewSpec": null,
     "description": "",
     "ignoreGlobalFilters": true,
-    "title": "group 15"
+    "title": "missing data view"
   },
   "coreMigrationVersion": "8.8.0",
   "created_at": "2023-09-12T13:59:36.447Z",
@@ -256,8 +279,8 @@
   "managed": false,
   "references": [
     {
-      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
-      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "id": "data-view-to-delete",
+      "name": "event-annotation-group_dataView-ref-data-view-to-delete",
       "type": "index-pattern"
     }
   ],

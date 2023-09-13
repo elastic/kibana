@@ -31,8 +31,6 @@ export class AnnotationEditorPageObject extends FtrService {
     if (metadata.dataView) {
       await this.testSubjects.setValue('annotationDataViewSelection', metadata.dataView);
     }
-
-    await this.saveGroup();
   }
 
   public async saveGroup() {
@@ -78,5 +76,9 @@ export class AnnotationEditorPageObject extends FtrService {
 
   public async removeAnnotation() {
     await this.testSubjects.click('indexPattern-dimension-remove');
+  }
+
+  public async showingMissingDataViewPrompt() {
+    return await this.testSubjects.exists('missingDataViewPrompt');
   }
 }
