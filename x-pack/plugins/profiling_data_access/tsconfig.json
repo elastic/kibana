@@ -18,5 +18,7 @@
     "@kbn/apm-utils",
     "@kbn/profiling-utils",
     "@kbn/fleet-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/spaces-plugin",
   ]
 }
