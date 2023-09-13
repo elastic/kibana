@@ -31,6 +31,7 @@ import {
 } from '@kbn/observability-alert-details';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
+import { CustomThresholdExpressionMetric } from '../../../../common/threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
@@ -135,16 +136,6 @@ export default function AlertDetailsAppSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource]);
 
-  const relatedEventsTimeRange = (criterion: MetricExpression): TimeRange => {
-    return {
-      from: moment(alert.start)
-        .subtract((criterion.timeSize ?? 5) * 2, criterion.timeUnit ?? 'minutes')
-        .toISOString(),
-      to: moment(alert.lastUpdated).toISOString(),
-      mode: 'absolute',
-    };
-  };
-
   const overviewTab = !!ruleParams.criteria ? (
     <>
       <EuiSpacer size="l" />
@@ -208,24 +199,78 @@ export default function AlertDetailsAppSection({
     </>
   ) : null;
 
+  const cpuMetricPrefix = 'system.cpu';
+  const memoryMetricPrefix = 'system.memory';
+  const relatedMetrics = ['system.cpu.user.pct', 'system.load.1', 'system.memory.actual.used.pct'];
+  const fnList = ['avg', 'sum', 'min', 'max'];
+
+  const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
+    criterion.metrics?.some(
+      (metric: CustomThresholdExpressionMetric) =>
+        metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
+    );
+
+  const relatedMetricsPerCriteria = () => {
+    const hasCpuOrMemoryCriteria = ruleParams.criteria.some((criterion) =>
+      isCpuOrMemoryCriterion(criterion)
+    );
+
+    const relatedMetricsInDataView = hasCpuOrMemoryCriteria
+      ? dataView?.fields
+          .map((field) => field.name)
+          .filter((fieldName) => relatedMetrics.includes(fieldName))
+      : [];
+
+    const aggType = ruleParams.criteria
+      .find((criterion) => isCpuOrMemoryCriterion(criterion))
+      ?.metrics?.find(
+        (metric) =>
+          metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
+      )?.aggType;
+
+    const metricAggType = fnList.includes(aggType || '') ? aggType : 'avg';
+
+    return { relatedMetricsInDataView, metricAggType };
+  };
+
+  const relatedEventsTimeRange = (): TimeRange => {
+    return {
+      from: moment(alert.start)
+        .subtract(
+          (ruleParams.criteria[0].timeSize ?? 5) * 2,
+          ruleParams.criteria[0].timeUnit ?? 'minutes'
+        )
+        .toISOString(),
+      to: moment(alert.lastUpdated).toISOString(),
+      mode: 'absolute',
+    };
+  };
+
+  const { relatedMetricsInDataView, metricAggType } = relatedMetricsPerCriteria();
+
   const relatedEventsTab = !!ruleParams.criteria ? (
     <>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" data-test-subj="thresholdAlertRelatedEventsSection">
-        {ruleParams.criteria.map((criterion, criterionIndex) =>
-          criterion.metrics?.map(
-            (metric, metricIndex) =>
-              dataView &&
-              dataView.id && (
+        {relatedMetricsInDataView?.map(
+          (relatedMetric, relatedMetricIndex) =>
+            dataView &&
+            dataView.id && (
+              <>
+                <EuiTitle size="xs">
+                  <h4>
+                    {metricAggType}({relatedMetric})
+                  </h4>
+                </EuiTitle>
                 <EmbeddableChangePointChart
-                  key={`embeddableChart-criterion${criterionIndex}-metric${metricIndex}`}
+                  key={`relatedMetric${relatedMetricIndex}`}
                   dataViewId={dataView.id}
-                  timeRange={relatedEventsTimeRange(criterion)}
-                  fn={metric.aggType ?? ''}
-                  metricField={metric.field ?? ''}
+                  timeRange={relatedEventsTimeRange()}
+                  fn={metricAggType || 'avg'}
+                  metricField={relatedMetric}
                 />
-              )
-          )
+              </>
+            )
         )}
       </EuiFlexGroup>
     </>
