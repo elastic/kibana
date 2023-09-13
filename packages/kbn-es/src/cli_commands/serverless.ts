@@ -11,8 +11,14 @@ import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { Cluster, type ServerlessOptions } from '../cluster';
-import { SERVERLESS_REPO, SERVERLESS_TAG, SERVERLESS_IMG, DEFAULT_PORT } from '../utils';
+import { Cluster } from '../cluster';
+import {
+  SERVERLESS_REPO,
+  SERVERLESS_TAG,
+  SERVERLESS_IMG,
+  DEFAULT_PORT,
+  ServerlessOptions,
+} from '../utils';
 import { Command } from './types';
 
 export const serverless: Command = {
