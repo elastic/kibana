@@ -88,7 +88,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const automaticUpdatesEnabled = manifestVersion === 'latest';
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
-    const formattedDate = moment(deployedVersion, internalDateFormat).format(displayDateFormat);
+    const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
     const cutoffDate = moment.utc().subtract(18, 'months').add(1, 'day'); // Earliest selectable date
 
     const viewModeSwitchLabel = automaticUpdatesEnabled
@@ -226,7 +226,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         return null;
       }
 
-      const deployedVersionDate = moment(deployedVersion).format(internalDateFormat);
+      const deployedVersionDate = moment.utc(deployedVersion).format(internalDateFormat);
       const daysSinceLastUpdate = today.diff(deployedVersionDate, 'days');
 
       if (daysSinceLastUpdate < 30) {

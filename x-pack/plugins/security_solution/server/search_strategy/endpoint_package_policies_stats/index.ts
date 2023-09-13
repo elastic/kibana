@@ -50,7 +50,7 @@ export const requestEndpointPackagePoliciesStatsSearch = async (
     if (manifestVersion === 'latest') {
       return acc;
     }
-    if (moment(manifestVersion, 'YYYY-MM-DD').isBefore(moment().subtract(1, 'month'))) {
+    if (moment.utc(manifestVersion, 'YYYY-MM-DD').isBefore(moment.utc().subtract(1, 'month'))) {
       return acc + 1;
     }
 

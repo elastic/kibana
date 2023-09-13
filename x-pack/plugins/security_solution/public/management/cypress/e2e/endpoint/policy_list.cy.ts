@@ -17,9 +17,13 @@ describe('Policy List', () => {
   describe('Renders policy list with outdated policies', () => {
     const indexedPolicies: IndexedFleetEndpointPolicyResponse[] = [];
 
-    const monthAgo = moment().subtract(1, 'months').format('YYYY-MM-DD');
-    const threeDaysAgo = moment().subtract(3, 'days').format('YYYY-MM-DD');
-    const eighteenMonthsAgo = moment().subtract(18, 'months').add(1, 'day').format('YYYY-MM-DD');
+    const monthAgo = moment.utc().subtract(1, 'months').format('YYYY-MM-DD');
+    const threeDaysAgo = moment.utc().subtract(3, 'days').format('YYYY-MM-DD');
+    const eighteenMonthsAgo = moment
+      .utc()
+      .subtract(18, 'months')
+      .add(1, 'day')
+      .format('YYYY-MM-DD');
 
     const dates = [monthAgo, threeDaysAgo, eighteenMonthsAgo];
 
@@ -53,7 +57,7 @@ describe('Policy List', () => {
       loadPage('/app/security/administration/policy');
       cy.getByTestSubj('policy-list-outdated-manifests-call-out').should('contain', '2 policies');
       dates.forEach((date) => {
-        cy.contains(moment(date, 'YYYY-MM-DD').format('MMMM DD, YYYY'));
+        cy.contains(moment.utc(date, 'YYYY-MM-DD').format('MMMM DD, YYYY'));
       });
       cy.getByTestSubj('policyDeployedVersion').should('have.length', 4);
     });
