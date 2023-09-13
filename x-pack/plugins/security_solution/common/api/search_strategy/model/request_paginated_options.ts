@@ -9,9 +9,7 @@ import { sort } from '../hosts/model/sort';
 import { pagination } from './pagination';
 import { requestBasicOptionsSchema } from './request_basic_options';
 
-export const requestOptionsPaginatedSchema = requestBasicOptionsSchema
-  .extend({
-    pagination,
-    sort,
-  })
-  .passthrough();
+export const requestOptionsPaginatedSchema = requestBasicOptionsSchema.extend({
+  pagination,
+  sort,
+});

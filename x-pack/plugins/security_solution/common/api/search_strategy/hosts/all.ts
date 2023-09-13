@@ -12,15 +12,13 @@ import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 import { sort } from './model/sort';
 
-export const allHostsSchema = requestBasicOptionsSchema
-  .extend({
-    sort,
-    pagination,
-    timerange,
-    isNewRiskScoreModuleAvailable: z.boolean().default(false),
-    factoryQueryType: z.literal(HostsQueries.hosts),
-  })
-  .passthrough();
+export const allHostsSchema = requestBasicOptionsSchema.extend({
+  sort,
+  pagination,
+  timerange,
+  isNewRiskScoreModuleAvailable: z.boolean().default(false),
+  factoryQueryType: z.literal(HostsQueries.hosts),
+});
 
 export type HostsRequestOptionsInput = z.input<typeof allHostsSchema>;
 

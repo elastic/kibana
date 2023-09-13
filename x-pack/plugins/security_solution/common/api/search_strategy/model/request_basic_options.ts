@@ -9,15 +9,13 @@ import { z } from 'zod';
 import { filterQuery } from './filter_query';
 import { timerange } from './timerange';
 
-export const requestBasicOptionsSchema = z
-  .object({
-    timerange: timerange.optional(),
-    filterQuery,
-    defaultIndex: z.array(z.string()).optional(),
-    id: z.string().optional(),
-    params: z.any().optional(),
-  })
-  .passthrough();
+export const requestBasicOptionsSchema = z.object({
+  timerange: timerange.optional(),
+  filterQuery,
+  defaultIndex: z.array(z.string()).optional(),
+  id: z.string().optional(),
+  params: z.any().optional(),
+});
 
 export type RequestBasicOptionsInput = z.input<typeof requestBasicOptionsSchema>;
 

@@ -17,16 +17,14 @@ export enum UsersFields {
   lastSeen = 'lastSeen',
 }
 
-export const usersSchema = requestOptionsPaginatedSchema
-  .extend({
-    sort: sort.removeDefault().extend({
-      field: z.enum([UsersFields.name, UsersFields.lastSeen]),
-    }),
-    timerange,
-    isNewRiskScoreModuleAvailable: z.boolean().default(false),
-    factoryQueryType: z.literal(UsersQueries.users),
-  })
-  .passthrough();
+export const usersSchema = requestOptionsPaginatedSchema.extend({
+  sort: sort.removeDefault().extend({
+    field: z.enum([UsersFields.name, UsersFields.lastSeen]),
+  }),
+  timerange,
+  isNewRiskScoreModuleAvailable: z.boolean().default(false),
+  factoryQueryType: z.literal(UsersQueries.users),
+});
 
 export type UsersRequestOptionsInput = z.input<typeof usersSchema>;
 
