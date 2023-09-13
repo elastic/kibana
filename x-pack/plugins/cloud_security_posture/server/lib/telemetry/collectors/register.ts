@@ -35,44 +35,40 @@ export function registerCspmUsageCollector(
       return true;
     },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
-      const getPromiseValue = <T>(
+      const awaitPromiseSafe = async <T>(
         taskName: CloudSecurityUsageCollectorType,
-        result: PromiseSettledResult<T>
+        promise: Promise<T>
       ) => {
-        if (result.status === 'fulfilled') {
-          return result.value;
-        } else {
-          logger.error(`${taskName} task failed: ${result.reason}`);
-
+        try {
+          const val = await promise;
+          return val;
+        } catch (error) {
+          logger.error(`${taskName} task failed: ${error.message}`);
+          logger.error(error.stack);
           return undefined;
         }
       };
-      const results = await Promise.allSettled([
-        getIndicesStats(
-          collectorFetchContext.esClient,
-          collectorFetchContext.soClient,
-          coreServices,
-          logger
+
+      const esClient = collectorFetchContext.esClient;
+      const soClient = collectorFetchContext.soClient;
+      const [
+        indicesStats,
+        accountsStats,
+        resourcesStats,
+        rulesStats,
+        installationStats,
+        alertsStats,
+      ] = await Promise.all([
+        awaitPromiseSafe('Indices', getIndicesStats(esClient, soClient, coreServices, logger)),
+        awaitPromiseSafe('Accounts', getAccountsStats(esClient, logger)),
+        awaitPromiseSafe('Resources', getResourcesStats(esClient, logger)),
+        awaitPromiseSafe('Rules', getRulesStats(esClient, logger)),
+        awaitPromiseSafe(
+          'Installation',
+          getInstallationStats(esClient, soClient, coreServices, logger)
         ),
-        getAccountsStats(collectorFetchContext.esClient, logger),
-        getResourcesStats(collectorFetchContext.esClient, logger),
-        getRulesStats(collectorFetchContext.esClient, logger),
-        getInstallationStats(
-          collectorFetchContext.esClient,
-          collectorFetchContext.soClient,
-          coreServices,
-          logger
-        ),
-        getAlertsStats(collectorFetchContext.esClient, logger),
+        awaitPromiseSafe('Alerts', getAlertsStats(esClient, logger)),
       ]);
-
-      const indicesStats = getPromiseValue('Indices', results[0]);
-      const accountsStats = getPromiseValue('Accounts', results[1]);
-      const resourcesStats = getPromiseValue('Resources', results[2]);
-      const rulesStats = getPromiseValue('Rules', results[3]);
-      const installationStats = getPromiseValue('Installation', results[4]);
-      const alertsStats = getPromiseValue('Alerts', results[5]);
-
       return {
         indices: indicesStats,
         accounts_stats: accountsStats,
