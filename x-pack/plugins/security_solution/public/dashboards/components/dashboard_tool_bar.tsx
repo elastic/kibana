@@ -13,7 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { APP_UI_ID, SecurityPageName } from '../../../common';
+import { SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
 
