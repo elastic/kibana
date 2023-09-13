@@ -5,71 +5,29 @@
  * 2.0.
  */
 
-import { readFile } from 'fs/promises';
-
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { getAvailableVersionsHandler } from './handlers';
 
-let mockKibanaVersion = '300.0.0';
-let mockConfig = {};
+jest.mock('../../services/agents/versions', () => {
+  return {
+    getAvailableVersions: jest.fn().mockReturnValue(['8.1.0', '8.0.0', '7.17.0']),
+  };
+});
+
 jest.mock('../../services/app_context', () => {
   const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),
-      getKibanaVersion: () => mockKibanaVersion,
-      getConfig: () => mockConfig,
     },
   };
 });
 
-jest.mock('fs/promises');
-
-const mockedReadFile = readFile as jest.MockedFunction<typeof readFile>;
-
 describe('getAvailableVersionsHandler', () => {
-  it('should return available version and filter version < 7.17', async () => {
-    mockKibanaVersion = '300.0.0';
+  it('should return the value from getAvailableVersions', async () => {
     const ctx = coreMock.createCustomRequestHandlerContext(coreMock.createRequestHandlerContext());
     const response = httpServerMock.createResponseFactory();
-
-    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
-
-    await getAvailableVersionsHandler(ctx, httpServerMock.createKibanaRequest(), response);
-
-    expect(response.ok).toBeCalled();
-    expect(response.ok.mock.calls[0][0]?.body).toEqual({
-      items: ['300.0.0', '8.1.0', '8.0.0', '7.17.0'],
-    });
-  });
-
-  it('should not strip -SNAPSHOT from kibana version', async () => {
-    mockKibanaVersion = '300.0.0-SNAPSHOT';
-    const ctx = coreMock.createCustomRequestHandlerContext(coreMock.createRequestHandlerContext());
-    const response = httpServerMock.createResponseFactory();
-
-    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
-
-    await getAvailableVersionsHandler(ctx, httpServerMock.createKibanaRequest(), response);
-
-    expect(response.ok).toBeCalled();
-    expect(response.ok.mock.calls[0][0]?.body).toEqual({
-      items: ['300.0.0-SNAPSHOT', '8.1.0', '8.0.0', '7.17.0'],
-    });
-  });
-
-  it('should not include the current version if onlyAllowAgentUpgradeToKnownVersions = true', async () => {
-    mockKibanaVersion = '300.0.0-SNAPSHOT';
-    mockConfig = {
-      internal: {
-        onlyAllowAgentUpgradeToKnownVersions: true,
-      },
-    };
-    const ctx = coreMock.createCustomRequestHandlerContext(coreMock.createRequestHandlerContext());
-    const response = httpServerMock.createResponseFactory();
-
-    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
 
     await getAvailableVersionsHandler(ctx, httpServerMock.createKibanaRequest(), response);
 
