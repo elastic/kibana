@@ -467,7 +467,7 @@ describe('IndexPattern', () => {
     });
 
     test('creating from spec does not contain references to spec', () => {
-      const sourceFilters = ['test'];
+      const sourceFilters = [{ value: 'test' }];
       const spec = { sourceFilters };
       const dataView1 = create('test1', spec);
       const dataView2 = create('test2', spec);
