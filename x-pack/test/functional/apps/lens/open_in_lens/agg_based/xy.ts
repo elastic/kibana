@@ -357,5 +357,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       expect(data?.legend?.items.map((item) => item.name)).to.eql(expectedData);
     });
+
+    it('should convert correctly percentiles with decimals', async () => {
+      await visEditor.clickBucket('Y-axis', 'metrics');
+      await visEditor.selectAggregation('Percentiles', 'metrics');
+      await visEditor.selectField('memory', 'metrics');
+      await visEditor.setPercentileValue('99.99', 6);
+      await visEditor.clickGo();
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+      expect(await lens.getWorkspaceErrorCount()).to.eql(0);
+    });
   });
 }
