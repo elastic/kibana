@@ -126,13 +126,13 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
         await toggle.click();
         await retry.waitFor('toggle to switch off', async () => {
           const nextToggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-          return !(await nextToggle.isSelected());
+          return (await nextToggle.getAttribute('aria-checked')) === 'false';
         });
       } else {
         await toggle.click();
         await retry.waitFor('toggle to switch on', async () => {
           const nextToggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-          return await nextToggle.isSelected();
+          return (await nextToggle.getAttribute('aria-checked')) === 'true';
         });
       }
     }
