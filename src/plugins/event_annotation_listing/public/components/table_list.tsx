@@ -16,7 +16,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import type {
@@ -48,21 +48,22 @@ const getCustomColumn = (dataViews: DataView[]) => {
         {record.attributes.dataViewSpec
           ? record.attributes.dataViewSpec.name
           : dataViewNameMap[record.attributes.indexPatternId] ?? (
-              <FormattedMessage
-                id="eventAnnotationListing.tableList.dataView.missing"
-                defaultMessage="{errorIcon} None"
-                values={{
-                  errorIcon: (
-                    <EuiIcon
-                      type="error"
-                      color="danger"
-                      css={css`
-                        margin-bottom: 3px;
-                      `}
-                    />
-                  ),
-                }}
-              />
+              <EuiText size="s" color={'danger'}>
+                <FormattedMessage
+                  id="eventAnnotationListing.tableList.dataView.missing"
+                  defaultMessage="{errorIcon} No longer exists"
+                  values={{
+                    errorIcon: (
+                      <EuiIcon
+                        type="error"
+                        css={css`
+                          margin-top: -3px;
+                        `}
+                      />
+                    ),
+                  }}
+                />
+              </EuiText>
             )}
       </div>
     ),
