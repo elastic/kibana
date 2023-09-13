@@ -254,14 +254,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         await setupProfiling(bettertest, logger);
       });
 
-      // after(async () => {
-      //   await cleanUpProfilingData({
-      //     es,
-      //     bettertest,
-      //     logger,
-      //   });
-      // });
-
       describe('without data', () => {
         describe('Admin user', () => {
           let statusCheck: ProfilingStatusCheck;
