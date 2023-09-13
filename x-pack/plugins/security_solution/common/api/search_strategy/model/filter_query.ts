@@ -80,4 +80,4 @@ export const esQuerySchema = z.union([
   jsonObjectSchema,
 ]);
 
-export const filterQuery = z.union([z.string(), z.undefined(), z.any()]).optional();
+export const filterQuery = z.union([z.string(), z.any()]).optional();
