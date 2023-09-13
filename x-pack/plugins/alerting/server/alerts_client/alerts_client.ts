@@ -7,10 +7,10 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
-  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
+  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, isEmpty, keys } from 'lodash';
@@ -203,29 +203,42 @@ export class AlertsClient<
     return { hits, total };
   }
 
-  public async untrackAlertIdByIndices(indexAlertIdMap: Record<string, string[]>) {
+  public async untrackRuleIdsByIndices(indices: string[], ruleIds: string[]) {
     const esClient = await this.options.elasticsearchClientPromise;
-    for (const [index, alertIds] of Object.entries(indexAlertIdMap)) {
-      for (const alertId of alertIds) {
-        try {
-          await esClient.updateByQuery({
-            index,
-            body: {
-              script: {
-                source: `ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'`,
-                lang: 'painless',
-              },
-              query: {
-                term: {
-                  [ALERT_INSTANCE_ID]: { value: alertId },
-                },
+    const terms: Array<{ term: Record<string, { value: string }> }> = ruleIds.map((ruleId) => ({
+      term: {
+        [ALERT_RULE_UUID]: { value: ruleId },
+      },
+    }));
+    terms.push({
+      term: {
+        [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
+      },
+    });
+    try {
+      // Retry this updateByQuery up to 3 times to make sure the number of documents
+      // updated equals the number of documents matched
+      for (let retryCount = 0; retryCount < 3; retryCount++) {
+        const response = await esClient.updateByQuery({
+          index: indices,
+          allow_no_indices: true,
+          body: {
+            conflicts: 'proceed',
+            script: {
+              source: `ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'`,
+              lang: 'painless',
+            },
+            query: {
+              bool: {
+                must: terms,
               },
             },
-          });
-        } catch (err) {
-          this.options.logger.error(`Error marking ${alertId} as untracked - ${err.message}`);
-        }
+          },
+        });
+        if (response.total === response.updated) break;
       }
+    } catch (err) {
+      this.options.logger.error(`Error marking ${ruleIds} as untracked - ${err.message}`);
     }
   }
 

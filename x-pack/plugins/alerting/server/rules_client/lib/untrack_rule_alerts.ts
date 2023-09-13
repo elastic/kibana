@@ -41,11 +41,13 @@ export const untrackRuleAlerts = async (
         isLifecycleAlert: false,
       };
 
+      // Untrack Stack alerts
+      // TODO: Replace this loop with an Alerts As Data implmentation when Stack Rules use Alerts As Data
+      // instead of the Kibana Event Log
       for (const alertId of untrackedAlertIds) {
         const { group: actionGroup } = untrackedAlerts[alertId].getLastScheduledActions() ?? {};
         const instanceState = untrackedAlerts[alertId].getState();
         const message = `instance '${alertId}' has been untracked because the rule was disabled`;
-        const alertUuid = untrackedAlerts[alertId].getUuid();
 
         const event = createAlertEventLogRecordObject({
           ruleId: id,
@@ -54,7 +56,6 @@ export const untrackRuleAlerts = async (
           ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId),
           consumer: attributes.consumer,
           instanceId: alertId,
-          alertUuid,
           action: EVENT_LOG_ACTIONS.untrackedInstance,
           message,
           state: instanceState,
@@ -73,6 +74,7 @@ export const untrackRuleAlerts = async (
         context.eventLogger.logEvent(event);
       }
 
+      // Untrack Lifecycle alerts (Alerts As Data-enabled)
       if (isLifecycleAlert) {
         const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
         const alertsClient = await context.ruleTypeRegistry.createAlertsClient({
@@ -92,11 +94,7 @@ export const untrackRuleAlerts = async (
         });
         if (!alertsClient) throw new Error('Could not create alertsClient');
         const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
-        const indexAlertIdMap = indices.reduce(
-          (result, index) => ({ ...result, [index]: untrackedAlertIds }),
-          {}
-        );
-        await alertsClient.untrackAlertIdByIndices(indexAlertIdMap);
+        await alertsClient.untrackRuleIdsByIndices(indices, [id]);
       }
     } catch (error) {
       // this should not block the rest of the disable process

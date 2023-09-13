@@ -64,7 +64,7 @@ export interface IAlertsClient<
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
   };
-  untrackAlertIdByIndices(indexAlertIdMap: Record<string, string[]>): Promise<void>;
+  untrackRuleIdsByIndices(indices: string[], ruleIds: string[]): Promise<void>;
   factory(): PublicAlertFactory<
     State,
     Context,
