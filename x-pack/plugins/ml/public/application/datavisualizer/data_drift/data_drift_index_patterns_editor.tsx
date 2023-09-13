@@ -212,8 +212,8 @@ export function DataDriftIndexPatternsEditor({
         page: ML_PAGES.DATA_DRIFT,
         pageState: {
           index: dataViewId,
-          reference: referenceIndexPattern,
-          comparison: comparisonIndexPattern,
+          reference: encodeURIComponent(referenceIndexPattern),
+          comparison: encodeURIComponent(comparisonIndexPattern),
           timeFieldName,
         },
       });

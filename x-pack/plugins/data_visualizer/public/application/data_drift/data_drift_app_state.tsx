@@ -42,8 +42,13 @@ export interface DataDriftDetectionAppStateProps {
 
 export type DataDriftSpec = typeof DataDriftDetectionAppState;
 
-const getStr = (arg: string | string[] | null, fallbackStr?: string) =>
-  `${arg ? arg : fallbackStr ?? ''}`;
+const getStr = (arg: string | string[] | null, fallbackStr?: string) => {
+  if (arg === undefined || arg == null) return fallbackStr ?? '';
+
+  if (typeof arg === 'string') return arg.replaceAll(`'`, '');
+
+  if (Array.isArray(arg)) return arg.join(',');
+};
 
 export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = ({
   dataView,
