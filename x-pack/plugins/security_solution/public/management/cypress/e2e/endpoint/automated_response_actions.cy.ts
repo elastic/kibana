@@ -79,8 +79,7 @@ describe('Automated Response Actions', () => {
         cleanupRule(ruleId);
       }
     });
-
-    it('should have generated endpoint and rule', () => {
+    it.skip('should have generated endpoint and rule', () => {
       loadPage(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 

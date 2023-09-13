@@ -13,6 +13,8 @@
     width: 100%;
     position: sticky;
     z-index: $euiZLevel2;
+    top: var(--euiFixedHeadersOffset, 0);
+    background: $euiPageBackgroundColor;
 
     @include getBackgroundColor($showBackgroundColor: true);
 
