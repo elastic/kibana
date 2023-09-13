@@ -1596,10 +1596,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@88.1.0":
-  version "88.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-88.1.0.tgz#0c10173fecd5812b035c349cc8a836fa198d1f59"
-  integrity sha512-0irae9LLl9j2fc11FZePhioPAyus7YGpm0yoiKOnD5JqSskqRlmlmwPCYSIEYfxbwyibA4qrbt7kenJ7PTOt5g==
+"@elastic/eui@88.2.0":
+  version "88.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-88.2.0.tgz#ba29775ceaca27b6c44300bcd58783acf720b420"
+  integrity sha512-h756c4vB6lcyrf5bVZhLeaACWYh2t5Y8rxIX1/0BTQ4kJugBoSwSbSdGgW4G1tUa6hdYEsCzqvAQ2mI6LPSbbw==
   dependencies:
     "@hello-pangea/dnd" "^16.2.0"
     "@types/lodash" "^4.14.194"
@@ -4122,6 +4122,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-integrations@link:packages/kbn-custom-integrations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cypress-config@link:packages/kbn-cypress-config":
   version "0.0.0"
   uid ""
@@ -6151,6 +6155,10 @@
   uid ""
 
 "@kbn/whereis-pkg-cli@link:packages/kbn-whereis-pkg-cli":
+  version "0.0.0"
+  uid ""
+
+"@kbn/xstate-utils@link:packages/kbn-xstate-utils":
   version "0.0.0"
   uid ""
 
