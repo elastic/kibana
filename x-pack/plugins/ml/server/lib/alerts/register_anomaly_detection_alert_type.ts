@@ -15,7 +15,7 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { ALERT_NAMESPACE, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_NAMESPACE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
@@ -196,31 +196,45 @@ export function registerAnomalyDetectionAlertType({
       );
 
       const { alertsClient } = services;
+      if (!alertsClient) return;
 
       const executionResult = await execute(params, spaceId);
 
-      if (executionResult && !executionResult.isHealthy) {
-        alertsClient?.report({
-          id: executionResult.name,
+      if (!executionResult) return;
+
+      const { isHealthy, name, context } = executionResult;
+
+      if (!isHealthy) {
+        alertsClient.report({
+          id: name,
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
-          context: executionResult.context,
+          context,
           payload: expandFlattenedAlert({
-            [ALERT_URL]: executionResult.context.anomalyExplorerUrl,
-            [ALERT_ANOMALY_DETECTION_JOB_ID]: executionResult.context.jobIds[0],
-            [ALERT_ANOMALY_SCORE]: executionResult.context.score,
-            [ALERT_ANOMALY_IS_INTERIM]: executionResult.context.isInterim,
-            [ALERT_ANOMALY_TIMESTAMP]: executionResult.context.timestamp,
-            [ALERT_TOP_RECORDS]: executionResult.context.topRecords,
-            [ALERT_TOP_INFLUENCERS]: executionResult.context.topInfluencers,
+            [ALERT_URL]: context.anomalyExplorerUrl,
+            [ALERT_REASON]: context.message,
+            [ALERT_ANOMALY_DETECTION_JOB_ID]: context.jobIds[0],
+            [ALERT_ANOMALY_SCORE]: context.score,
+            [ALERT_ANOMALY_IS_INTERIM]: context.isInterim,
+            [ALERT_ANOMALY_TIMESTAMP]: context.timestamp,
+            [ALERT_TOP_RECORDS]: context.topRecords,
+            [ALERT_TOP_INFLUENCERS]: context.topInfluencers,
           }),
         });
       }
 
       // Set context for recovered alerts
-      const { getRecoveredAlerts } = services.alertFactory.done();
-      for (const recoveredAlert of getRecoveredAlerts()) {
-        if (!!executionResult?.isHealthy) {
-          recoveredAlert.setContext(executionResult.context);
+      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+        if (isHealthy) {
+          const alertId = recoveredAlert.alert.getId();
+          alertsClient.setAlertData({
+            id: alertId,
+            context,
+            payload: expandFlattenedAlert({
+              [ALERT_URL]: context.anomalyExplorerUrl,
+              [ALERT_REASON]: context.message,
+              [ALERT_ANOMALY_DETECTION_JOB_ID]: context.jobIds[0],
+            }),
+          });
         }
       }
 
