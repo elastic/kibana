@@ -8,9 +8,9 @@
 export const APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE = 'apm-service-dashboard';
 
 export interface ServiceDashboard {
-  id: string;
-  title: string;
-  serviceName?: string;
+  dashboardSavedObjectId: string;
+  dashboardTitle: string;
+  serviceName: string;
   environment?: string;
   kuery: string;
 }

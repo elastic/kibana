@@ -6,8 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-
 import {
   EuiButton,
   EuiModal,
@@ -20,10 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
-import { ServiceDashboard } from '../../../../../common/service_dashboards';
 import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   onClose: () => void;
@@ -37,6 +35,10 @@ export function SelectDashboard({ onClose }: Props) {
   const { data, status } = useDashboardFetcher();
   const [selectedDashboard, setSelectedDashboard] = useState([]);
 
+  const {
+    path: { serviceName },
+  } = useApmParams('/services/{serviceName}/dashboards');
+
   console.log('selectedDashboard', selectedDashboard);
 
   // TODO need to refetch and not reload
@@ -45,18 +47,18 @@ export function SelectDashboard({ onClose }: Props) {
   }, []);
 
   const onSave = useCallback(
-    async function (newDashboard: ServiceDashboard) {
+    async function () {
       const [newDashboard] = selectedDashboard;
       // setIsLoading(true);
       try {
         await callApmApi('POST /internal/apm/service-dashboard', {
           params: {
             body: {
-              title: newDashboard.label,
-              id: newDashboard.value,
+              dashboardTitle: newDashboard.label,
+              dashboardSavedObjectId: newDashboard.value,
               kuery: '',
               environment: '',
-              serviceName: '',
+              serviceName,
             },
           },
           signal: null,

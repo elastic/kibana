@@ -16,8 +16,8 @@ export const apmServiceDashboards: SavedObjectsType = {
   namespaceType: 'multiple',
   mappings: {
     properties: {
-      id: { type: 'keyword' },
-      title: { type: 'text' },
+      dashboardSavedObjectId: { type: 'keyword' },
+      dashboardTitle: { type: 'text' },
       kuery: { type: 'text' },
       serviceName: { type: 'keyword' },
       environment: { type: 'keyword' },
@@ -36,8 +36,8 @@ export const apmServiceDashboards: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({
-          id: schema.string(),
-          title: schema.string(),
+          dashboardSavedObjectId: schema.string(),
+          dashboardTitle: schema.string(),
           kuery: schema.string(),
           serviceName: schema.maybe(schema.string()),
           environment: schema.maybe(schema.string()),

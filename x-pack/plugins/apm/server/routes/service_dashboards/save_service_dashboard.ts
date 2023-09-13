@@ -22,7 +22,11 @@ export async function saveServiceDashbord({
   serviceDashboardId,
   serviceDashboard,
 }: Options): Promise<SavedServiceDashboard> {
-  const { attributes, updated_at: updatedAt } = await (serviceDashboardId
+  const {
+    id,
+    attributes,
+    updated_at: updatedAt,
+  } = await (serviceDashboardId
     ? savedObjectsClient.update(
         APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
         serviceDashboardId,
@@ -33,6 +37,7 @@ export async function saveServiceDashbord({
         serviceDashboard
       ));
   return {
+    id,
     ...(attributes as ServiceDashboard),
     updatedAt: updatedAt ? Date.parse(updatedAt) : 0,
   };

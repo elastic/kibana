@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { saveServiceDashbord } from './save_service_dashboard';
 import { SavedServiceDashboard } from '../../../common/service_dashboards';
+import { getServiceDashboards } from './get_service_dashboards';
 
 const serviceDashboardSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-dashboard',
@@ -20,10 +21,10 @@ const serviceDashboardSaveRoute = createApmServerRoute({
       t.undefined,
     ]),
     body: t.type({
-      id: t.string,
-      title: t.string,
+      dashboardSavedObjectId: t.string,
+      dashboardTitle: t.string,
       kuery: t.string,
-      serviceName: t.union([t.string, t.undefined]),
+      serviceName: t.string,
       environment: t.union([t.string, t.undefined]),
     }),
   }),
@@ -43,6 +44,38 @@ const serviceDashboardSaveRoute = createApmServerRoute({
   },
 });
 
+const serviceDashboardsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/dashboards',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{ serviceSpecificDashboards: SavedServiceDashboard[] }> => {
+    const { context, params } = resources;
+    const { serviceName } = params.path;
+
+    const {
+      savedObjects: { client: savedObjectsClient },
+    } = await context.core;
+
+    const [serviceSpecificDashboards] = await Promise.all([
+      getServiceDashboards({
+        savedObjectsClient,
+        serviceName,
+      }),
+    ]);
+
+    return { serviceSpecificDashboards };
+  },
+});
+
 export const serviceDashboardsRouteRepository = {
   ...serviceDashboardSaveRoute,
+  ...serviceDashboardsRoute,
 };
