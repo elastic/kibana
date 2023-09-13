@@ -1,0 +1,13 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/serverless-search-cypress",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "cypress": "../../../../../../node_modules/.bin/cypress",
+    "cypress:open": "node ../../../../../plugins/security_solution/scripts/start_cypress_parallel open --config-file ../../../x-pack/test_serverless/functional/test_suites/search/cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test_serverless/functional/test_suites/search/cypress/search_config",
+    "cypress:run": "node ../../../../../plugins/security_solution/scripts/start_cypress_parallel run --browser chrome --config-file ../../../x-pack/test_serverless/functional/test_suites/search/cypress/cypress.config.ts --ftr-config-file ../../../../../../x-pack/test_serverless/functional/test_suites/search/cypress/search_config --reporter ../../../../../../node_modules/cypress-multi-reporters --reporter-options configFile=./reporter_config.json; status=$?; yarn junit:merge && exit $status",
+    "junit:merge": "../../../../../../node_modules/.bin/mochawesome-merge ../../../../../../target/kibana-serverless-search/cypress/results/mochawesome*.json > ../../../../../../target/kibana-serverless-search/cypress/results/output.json && ../../../../../../node_modules/.bin/marge ../../../../../../target/kibana-serverless-search/cypress/results/output.json --reportDir ../../../../../../target/kibana-serverless-search/cypress/results && mkdir -p ../../../../../../target/junit && cp ../../../../../../target/kibana-serverless-search/cypress/results/*.xml ../../../../../../target/junit/"
+  }
+}

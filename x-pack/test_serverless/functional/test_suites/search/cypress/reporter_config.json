@@ -1,0 +1,10 @@
+{
+  "reporterEnabled": "mochawesome, mocha-junit-reporter",
+  "reporterOptions": {
+    "html": false,
+    "json": true,
+    "mochaFile": "../../../../../../target/kibana-serverless-search/cypress/results/TEST-serverless-search-cypress-[hash].xml",
+    "overwrite": false,
+    "reportDir": "../../../../../../target/kibana-serverless-search/cypress/results"
+  }
+}
