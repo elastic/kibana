@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { omit } from 'lodash';
