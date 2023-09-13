@@ -9,26 +9,29 @@ import moment from 'moment';
 
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 
-export const validateEndpointPackagePolicy = (input: NewPackagePolicyInput) => {
-  if (input.config?.policy?.value?.global_manifest_version) {
+export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) => {
+  const input = inputs.find((i) => i.type === 'endpoint');
+  if (input?.config?.policy?.value?.global_manifest_version) {
     const globalManifestVersion = input.config.policy.value.global_manifest_version;
 
     if (globalManifestVersion !== 'latest') {
-      const parsedDate = moment(globalManifestVersion, 'YYYY-MM-DD', true);
+      const parsedDate = moment.utc(globalManifestVersion, 'YYYY-MM-DD', true);
       if (!parsedDate.isValid()) {
         throw createManifestVersionError(
-          'Invalid date format. Use "latest" or "YYYY-MM-DD" format.'
+          'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.'
         );
       }
 
-      const maxAllowedDate = moment().subtract(18, 'months');
+      const maxAllowedDate = moment.utc().subtract(18, 'months');
       if (parsedDate.isBefore(maxAllowedDate)) {
         throw createManifestVersionError(
-          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months.'
+          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months. UTC time.'
         );
       }
       if (parsedDate.isAfter(moment())) {
-        throw createManifestVersionError('Global manifest version cannot be in the future.');
+        throw createManifestVersionError(
+          'Global manifest version cannot be in the future. UTC time.'
+        );
       }
     }
   }

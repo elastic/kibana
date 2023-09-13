@@ -103,8 +103,8 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
-    if (newPackagePolicy && newPackagePolicy.inputs[0]) {
-      validateEndpointPackagePolicy(newPackagePolicy.inputs[0]);
+    if (newPackagePolicy?.inputs) {
+      validateEndpointPackagePolicy(newPackagePolicy.inputs);
     }
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
@@ -209,7 +209,7 @@ export const getPackagePolicyUpdateCallback = (
       logger
     );
 
-    validateEndpointPackagePolicy(endpointIntegrationData.inputs[0]);
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
     notifyProtectionFeatureUsage(
       endpointIntegrationData,

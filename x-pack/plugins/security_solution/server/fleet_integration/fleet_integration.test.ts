@@ -438,16 +438,22 @@ describe('ingest_integration tests ', () => {
     });
 
     it.each([
-      { date: 'invalid', message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format.' },
-      { date: '2023-10-1', message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format.' },
+      {
+        date: 'invalid',
+        message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
+      },
+      {
+        date: '2023-10-1',
+        message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
+      },
       {
         date: '2020-10-31',
         message:
-          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months.',
+          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months. UTC time.',
       },
       {
         date: '2100-10-01',
-        message: 'Global manifest version cannot be in the future.',
+        message: 'Global manifest version cannot be in the future. UTC time.',
       },
       {
         date: 'latest',
