@@ -16,7 +16,7 @@ import { createTestEsCluster, esTestConfig } from '../../es';
 interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
-  essImage?: string;
+  esServerlessImage?: string;
   config: Config;
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
@@ -32,7 +32,7 @@ type EsConfig = ReturnType<typeof getEsConfig>;
 function getEsConfig({
   config,
   esFrom = config.get('esTestCluster.from'),
-  essImage,
+  esServerlessImage,
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
   const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
@@ -51,7 +51,7 @@ function getEsConfig({
   const serverless: boolean = config.get('serverless');
   const files: string[] | undefined = config.get('esTestCluster.files');
 
-  const essOptions = extractESSOptions(essImage, config);
+  const esServerlessOptions = getESServerlessOptions(esServerlessImage, config);
 
   return {
     ssl,
@@ -60,7 +60,7 @@ function getEsConfig({
     esJavaOpts,
     isSecurityEnabled,
     esFrom,
-    essOptions,
+    esServerlessOptions,
     port,
     password,
     dataArchive,
@@ -133,7 +133,7 @@ async function startEsNode({
     clusterName: `cluster-${name}`,
     esArgs: config.esArgs,
     esFrom: config.esFrom,
-    essOptions: config.essOptions,
+    esServerlessOptions: config.esServerlessOptions,
     esJavaOpts: config.esJavaOpts,
     license: config.license,
     password: config.password,
@@ -159,20 +159,21 @@ async function startEsNode({
   return cluster;
 }
 
-function extractESSOptions(essImageFromArg: string | undefined, config: Config) {
-  const essImageUrlOrTag =
-    essImageFromArg ||
-    esTestConfig.getESSImage() ||
-    (config.has('esTestCluster.essImage') && config.get('esTestCluster.essImage'));
+function getESServerlessOptions(esServerlessImageFromArg: string | undefined, config: Config) {
+  const esServerlessImageUrlOrTag =
+    esServerlessImageFromArg ||
+    esTestConfig.getESServerlessImage() ||
+    (config.has('esTestCluster.esServerlessImage') &&
+      config.get('esTestCluster.esServerlessImage'));
 
-  if (essImageUrlOrTag) {
-    if (essImageUrlOrTag.includes(':')) {
+  if (esServerlessImageUrlOrTag) {
+    if (esServerlessImageUrlOrTag.includes(':')) {
       return {
-        image: essImageUrlOrTag,
+        image: esServerlessImageUrlOrTag,
       };
     } else {
       return {
-        tag: essImageUrlOrTag,
+        tag: esServerlessImageUrlOrTag,
       };
     }
   }

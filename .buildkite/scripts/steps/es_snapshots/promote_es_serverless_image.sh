@@ -22,12 +22,12 @@ fi
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"
 
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-
 docker pull "$SOURCE_IMAGE"
-
 docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
-
 docker push "$TARGET_IMAGE"
+docker logout docker.elastic.co
+
+echo "Image push to $TARGET_IMAGE successful."
 
 # annotate the build with some info about the docker image that was re-pushed and the hashes that were tested.
 ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
@@ -39,7 +39,5 @@ cat << EOT | buildkite-agent annotate --style "success"
   Source image: $SOURCE_IMAGE
   Elasticsearch commit: $ELASTIC_COMMIT_HASH (https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH)
 EOT
-
-docker logout docker.elastic.co
 
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"

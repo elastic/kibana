@@ -70,7 +70,7 @@ export interface CreateTestEsClusterOptions {
    */
   esArgs?: string[];
   esFrom?: string;
-  essOptions?: {
+  esServerlessOptions?: {
     image?: string;
     tag?: string;
   };
@@ -168,7 +168,7 @@ export function createTestEsCluster<
     writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
-    essOptions,
+    esServerlessOptions,
     dataArchive,
     nodes = [{ name: 'node-01' }],
     esArgs: customEsArgs = [],
@@ -237,8 +237,8 @@ export function createTestEsCluster<
         await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
-          image: essOptions?.image,
-          tag: essOptions?.tag,
+          image: esServerlessOptions?.image,
+          tag: esServerlessOptions?.tag,
           port,
           clean: true,
           teardown: true,

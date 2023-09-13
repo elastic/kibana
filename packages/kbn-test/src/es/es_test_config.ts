@@ -27,8 +27,8 @@ class EsTestConfig {
     return process.env.TEST_ES_FROM || 'snapshot';
   }
 
-  getESSImage() {
-    return process.env.TEST_ESS_IMAGE;
+  getESServerlessImage() {
+    return process.env.TEST_ES_SERVERLESS_IMAGE;
   }
 
   getTransportPort() {

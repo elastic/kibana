@@ -5,11 +5,11 @@ steps:
     # It's easier to do this through a required env var, than an input.
     #  Inputs are not accessible in the pipeline code,
     #  so you'd have to get a script to dig up the meta-data, then emit a build step to buildkite
-  - label: "Ensure required ENV variable ESS_IMAGE_URL_OR_TAG"
-    if: "build.env('ESS_IMAGE_URL_OR_TAG') == null"
+  - label: "Ensure required ENV variable ES_SERVERLESS_IMAGE"
+    if: "build.env('ES_SERVERLESS_IMAGE') == null"
     command: |
-      echo "Please provide the env variable ESS_IMAGE_URL_OR_TAG for the build."
-      buildkite-agent annotate --style error "Missing environment variable ESS_IMAGE_URL_OR_TAG"
+      echo "Please provide the env variable ES_SERVERLESS_IMAGE for the build."
+      buildkite-agent annotate --style error "Missing environment variable ES_SERVERLESS_IMAGE"
       exit 1
 
   - wait: ~
@@ -21,9 +21,9 @@ steps:
       commit: ${BUILDKITE_COMMIT}
       branch: ${BUILDKITE_BRANCH}
       env:
-        TEST_ESS_IMAGE: ${ESS_IMAGE_URL_OR_TAG}
+        TEST_ES_SERVERLESS_IMAGE: ${ES_SERVERLESS_IMAGE}
 
   - wait: ~
 
   - label: ":arrow_up::elastic::arrow_up: Promote docker image"
-    command: .buildkite/scripts/steps/es_snapshots/promote_ess_image.sh $ESS_IMAGE_URL_OR_TAG
+    command: .buildkite/scripts/steps/es_snapshots/promote_es_serverless_image.sh $ES_SERVERLESS_IMAGE
