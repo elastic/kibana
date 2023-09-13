@@ -27,6 +27,7 @@ export type TableListViewApplicationService = DashboardApplicationService & {
 };
 
 export interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  managed?: boolean;
   attributes: {
     title: string;
     description?: string;

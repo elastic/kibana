@@ -107,6 +107,11 @@ export interface TableListViewTableProps<
   withoutPageTemplateWrapper?: boolean;
   contentEditor?: ContentEditorConfig;
 
+  /**
+   * Handler to set read only state for the content editor per item.
+   */
+  contentEditorItemIsReadonly?: (item: T) => boolean;
+
   tableCaption: string;
   /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
   refreshListBouncer?: boolean;
@@ -254,6 +259,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   entityName,
   entityNamePlural,
   initialFilter: initialQuery,
+  contentEditorItemIsReadonly,
   headingId,
   initialPageSize,
   listingLimit,
@@ -457,6 +463,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
+      const isReadonly = contentEditorItemIsReadonly?.(item) ?? contentEditor.isReadonly;
+
       const close = openContentEditor({
         item: {
           id: item.id,
@@ -466,6 +474,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...contentEditor,
+        isReadonly,
         onSave:
           contentEditor.onSave &&
           (async (args) => {
@@ -476,7 +485,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           }),
       });
     },
-    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, fetchItems]
+    [
+      getTagIdsFromReferences,
+      contentEditorItemIsReadonly,
+      contentEditor,
+      openContentEditor,
+      entityName,
+      fetchItems,
+    ]
   );
 
   const tableColumns = useMemo(() => {
