@@ -24,6 +24,7 @@ export type { ObservabilitySloAlert } from './generated/observability_slo_schema
 export type { ObservabilityUptimeAlert } from './generated/observability_uptime_schema';
 export type { SecurityAlert } from './generated/security_schema';
 export type { StackAlert } from './generated/stack_schema';
+export type { MlAnomalyDetectionAlert } from './generated/ml_anomaly_detection_schema';
 
 export type AADAlert =
   | Alert
@@ -32,4 +33,5 @@ export type AADAlert =
   | ObservabilityMetricsAlert
   | ObservabilitySloAlert
   | ObservabilityUptimeAlert
-  | SecurityAlert;
+  | SecurityAlert
+  | MlAnomalyDetectionAlert;

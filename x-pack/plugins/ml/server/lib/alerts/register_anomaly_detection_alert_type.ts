@@ -16,8 +16,9 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { ALERT_NAMESPACE, ALERT_URL } from '@kbn/rule-data-utils';
-import { StackAlert } from '@kbn/alerts-as-data-utils';
-import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils/src/schemas/generated/ml_anomaly_detection_schema';
+import { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -62,13 +63,31 @@ export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
 
 export const ANOMALY_DETECTION_AAD_INDEX_NAME = 'ml.anomaly-detection';
 
-export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ALERT_NAMESPACE}.jobId` as const;
+const ML_ALERT_NAMESPACE = ALERT_NAMESPACE;
 
-export const STACK_ALERTS_AAD_CONFIG: IRuleTypeAlerts<StackAlert> = {
+export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ML_ALERT_NAMESPACE}.jobId` as const;
+
+export const ALERT_ANOMALY_SCORE = `${ML_ALERT_NAMESPACE}.anomalyScore` as const;
+export const ALERT_ANOMALY_IS_INTERIM = `${ML_ALERT_NAMESPACE}.isInterim` as const;
+export const ALERT_ANOMALY_TIMESTAMP = `${ML_ALERT_NAMESPACE}.anomalyTimestamp` as const;
+
+export const ALERT_TOP_RECORDS = `${ML_ALERT_NAMESPACE}.topRecords` as const;
+export const ALERT_TOP_INFLUENCERS = `${ML_ALERT_NAMESPACE}.topInfluencers` as const;
+
+export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAlert> = {
   context: ANOMALY_DETECTION_AAD_INDEX_NAME,
   mappings: {
     fieldMap: {
-      [ALERT_ANOMALY_DETECTION_JOB_ID]: { type: 'keyword', array: false, required: false },
+      [ALERT_ANOMALY_DETECTION_JOB_ID]: {
+        type: ES_FIELD_TYPES.KEYWORD,
+        array: false,
+        required: false,
+      },
+      [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.INTEGER, array: false, required: false },
+      [ALERT_ANOMALY_IS_INTERIM]: { type: ES_FIELD_TYPES.BOOLEAN, array: false, required: false },
+      [ALERT_ANOMALY_TIMESTAMP]: { type: ES_FIELD_TYPES.DATE, array: false, required: false },
+      [ALERT_TOP_RECORDS]: { type: ES_FIELD_TYPES.NESTED, array: true, required: false },
+      [ALERT_TOP_INFLUENCERS]: { type: ES_FIELD_TYPES.NESTED, array: true, required: false },
     },
   },
   shouldWrite: true,
@@ -185,9 +204,15 @@ export function registerAnomalyDetectionAlertType({
           id: executionResult.name,
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
           context: executionResult.context,
-          payload: {
+          payload: expandFlattenedAlert({
             [ALERT_URL]: executionResult.context.anomalyExplorerUrl,
-          },
+            [ALERT_ANOMALY_DETECTION_JOB_ID]: executionResult.context.jobIds[0],
+            [ALERT_ANOMALY_SCORE]: executionResult.context.score,
+            [ALERT_ANOMALY_IS_INTERIM]: executionResult.context.isInterim,
+            [ALERT_ANOMALY_TIMESTAMP]: executionResult.context.timestamp,
+            [ALERT_TOP_RECORDS]: executionResult.context.topRecords,
+            [ALERT_TOP_INFLUENCERS]: executionResult.context.topInfluencers,
+          }),
         });
       }
 
@@ -201,6 +226,6 @@ export function registerAnomalyDetectionAlertType({
 
       return { state: {} };
     },
-    alerts: STACK_ALERTS_AAD_CONFIG,
+    alerts: ANOMALY_DETECTION_AAD_CONFIG,
   });
 }

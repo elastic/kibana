@@ -71,6 +71,9 @@ const MlAnomalyDetectionAlertRequired = rt.type({
 const MlAnomalyDetectionAlertOptional = rt.partial({
   kibana: rt.partial({
     alert: rt.partial({
+      anomalyScore: schemaNumber,
+      anomalyTimestamp: schemaDate,
+      isInterim: schemaBoolean,
       jobId: schemaString,
     }),
   }),
