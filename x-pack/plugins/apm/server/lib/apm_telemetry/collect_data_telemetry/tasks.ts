@@ -39,6 +39,7 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
@@ -1488,7 +1489,7 @@ export const tasks: TelemetryTask[] = [
     name: 'top_traces',
     executor: async ({ indices, telemetryClient }) => {
       const response = await telemetryClient.search({
-        index: indices.transaction,
+        index: [indices.transaction, indices.span, indices.error],
         body: {
           size: 0,
           track_total_hits: false,
@@ -1501,7 +1502,7 @@ export const tasks: TelemetryTask[] = [
           aggs: {
             top_traces: {
               terms: {
-                field: 'trace.id',
+                field: TRACE_ID,
                 size: 100,
               },
             },

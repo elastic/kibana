@@ -1010,13 +1010,15 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     max: {
       type: 'long',
       _meta: {
-        description: 'Max number of documents in top traces',
+        description:
+          'Max number of documents in top 100 traces withing the last day',
       },
     },
     median: {
       type: 'long',
       _meta: {
-        description: 'Median of documents in top traces',
+        description:
+          'Median number of documents in top 100 traces within the last day',
       },
     },
   },
