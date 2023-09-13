@@ -175,7 +175,7 @@ const AwsAccountTypeSelect = ({
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+          defaultMessage="Select between single account or organization."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -227,7 +227,6 @@ const AwsAccountTypeSelect = ({
           </EuiText>
         </>
       )}
-      <EuiSpacer size="l" />
     </>
   );
 };
@@ -248,7 +247,7 @@ const GcpAccountTypeSelect = ({
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+          defaultMessage="Select between single account or organization."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -274,7 +273,6 @@ const GcpAccountTypeSelect = ({
           defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
         />
       </EuiText>
-      <EuiSpacer size="l" />
     </>
   );
 };
@@ -436,6 +434,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
         <EuiSpacer size="l" />
 
+        {/* Defines the name/description */}
+        <IntegrationSettings
+          fields={integrationFields}
+          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
+        />
+        <EuiSpacer size="l" />
+
         {/* AWS account type selection box */}
         {input.type === 'cloudbeat/cis_aws' && (
           <AwsAccountTypeSelect
@@ -455,11 +460,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           />
         )}
 
-        {/* Defines the name/description */}
-        <IntegrationSettings
-          fields={integrationFields}
-          onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
-        />
         {/* Defines the vars of the enabled input of the active policy template */}
         <PolicyTemplateVarsForm
           input={input}

@@ -86,6 +86,8 @@ function createServerlessES() {
         clean: true,
         kill: true,
         waitForReady: true,
+        // security is enabled by default, if needed kibana requires serviceAccountToken
+        esArgs: ['xpack.security.enabled=false'],
       });
       const client = getServerlessESClient({ port: esPort });
 

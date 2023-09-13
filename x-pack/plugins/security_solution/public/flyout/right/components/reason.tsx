@@ -70,10 +70,6 @@ export const Reason: FC = () => {
     [openRulePreview]
   );
 
-  if (!dataFormattedForFieldBrowser) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem data-test-subj={REASON_TITLE_TEST_ID}>

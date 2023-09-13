@@ -175,7 +175,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
       await testSubjects.click('openInventorySwitcher');
-      retry.tryForTime(2 * 1000, async () => {
+      return retry.tryForTime(2 * 1000, async () => {
         return testSubjects.missingOrFail('goToHost');
       });
     },
