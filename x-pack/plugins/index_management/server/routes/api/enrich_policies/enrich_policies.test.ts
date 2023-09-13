@@ -136,6 +136,7 @@ describe('Enrich policies API', () => {
   describe('Create policy - POST /api/index_management/enrich_policies', () => {
     const createPolicyMock = router.getMockESApiFn('enrich.putPolicy');
     const executePolicyMock = router.getMockESApiFn('enrich.executePolicy');
+    const deletePolicyMock = router.getMockESApiFn('enrich.deletePolicy');
 
     it('correctly creates a policy', async () => {
       const mockRequest: RequestMock = {
@@ -191,6 +192,34 @@ describe('Enrich policies API', () => {
       });
 
       expect(executePolicyMock).toHaveBeenCalled();
+    });
+
+    it('if when creating policy and executing the execution fails, the policy should be removed', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addInternalBasePath('/enrich_policies'),
+        query: {
+          executePolicyAfterCreation: true,
+        },
+        body: {
+          policy: {
+            name: 'my-policy',
+            type: 'match',
+            matchField: 'my_field',
+            enrichFields: ['field_1', 'field_2'],
+            sourceIndex: ['index_1'],
+          },
+        },
+      };
+
+      createPolicyMock.mockResolvedValue({ status: { status: 'OK' } });
+      const executeError = new Error('Oh no!');
+      executePolicyMock.mockRejectedValue(executeError);
+      deletePolicyMock.mockResolvedValue({ status: { status: 'OK' } });
+
+      // Expect the API to fail and the policy to be deleted
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError(executeError);
+      expect(deletePolicyMock).toHaveBeenCalled();
     });
 
     it('should return an error if it fails', async () => {
