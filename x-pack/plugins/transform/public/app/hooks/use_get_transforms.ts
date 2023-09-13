@@ -53,14 +53,6 @@ export const useGetTransforms = ({ enabled }: UseGetTransformsOptions = {}) => {
           signal,
         }
       );
-      // const transformStats = await http.get<GetTransformsStatsResponseSchema>(
-      //   addInternalBasePath(`transforms/_stats`),
-      //   {
-      //     version: '1',
-      //     asSystemRequest: true,
-      //     signal,
-      //   }
-      // );
 
       // There might be some errors with fetching certain transforms
       // For example, when task exists and is running but the config is deleted
@@ -79,14 +71,6 @@ export const useGetTransforms = ({ enabled }: UseGetTransformsOptions = {}) => {
       }
 
       update.transforms = transformConfigs.transforms.reduce((reducedtableRows, config) => {
-        // const stats = transformStats.transforms.find((d) => config.id === d.id);
-
-        // A newly created transform might not have corresponding stats yet.
-        // If that's the case we just skip the transform and don't add it to the transform list yet.
-        // if (!isTransformStats(stats)) {
-        //   return reducedtableRows;
-        // }
-
         // Table with expandable rows requires `id` on the outermost level
         reducedtableRows.push({
           id: config.id,
