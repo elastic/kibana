@@ -284,6 +284,7 @@ const createConnectorInfoResult = ({
   connectors,
   pushInfo,
   latestUserAction,
+  latestUserActionCasesWebhook,
 }: {
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
