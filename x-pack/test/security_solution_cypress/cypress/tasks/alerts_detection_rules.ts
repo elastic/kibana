@@ -519,6 +519,16 @@ const unselectRuleByName = (ruleName: string) => {
   getRuleRow(ruleName).find(EUI_CHECKBOX).should('not.be.checked');
 };
 
+/**
+ * Set Kibana `securitySolution:rulesTableRefresh` setting looking like
+ *
+ * ```
+ * { "on": true, "value": 60000 }
+ * ```
+ *
+ * @param enabled whether the auto-refresh is enabled
+ * @param refreshInterval refresh interval in milliseconds
+ */
 export const setRulesTableAutoRefreshIntervalSetting = ({
   enabled,
   refreshInterval,
