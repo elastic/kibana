@@ -12,7 +12,6 @@ import {
   EuiSearchBar,
   EuiEmptyPrompt,
   EuiButton,
-  EuiIconTip,
   EuiTitle,
   Query,
   EuiFlexGroup,
@@ -34,6 +33,7 @@ import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -119,23 +119,7 @@ export const Processes = () => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIconTip
-                aria-label={i18n.translate(
-                  'xpack.infra.metrics.nodeDetails.processesHeader.tooltipLabel',
-                  {
-                    defaultMessage: 'More info',
-                  }
-                )}
-                size="m"
-                type="iInCircle"
-                content={i18n.translate(
-                  'xpack.infra.metrics.nodeDetails.processesHeader.tooltipBody',
-                  {
-                    defaultMessage:
-                      'The table below aggregates the top CPU and top memory consuming processes. It does not display all processes.',
-                  }
-                )}
-              />
+              <TopProcessesTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
