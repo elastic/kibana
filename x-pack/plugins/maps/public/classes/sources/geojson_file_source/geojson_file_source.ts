@@ -79,8 +79,8 @@ export class GeoJsonFileSource extends AbstractVectorSource {
   }
 
   getFieldByName(fieldName: string): IField | null {
-    const fieldDescriptor = this._getFieldDescriptors().find((fieldDescriptor) => {
-      return fieldDescriptor.name === fieldName;
+    const fieldDescriptor = this._getFieldDescriptors().find((findFieldDescriptor) => {
+      return findFieldDescriptor.name === fieldName;
     });
     return fieldDescriptor ? this._createField(fieldDescriptor) : null;
   }
