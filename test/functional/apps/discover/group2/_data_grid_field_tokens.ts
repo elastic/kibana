@@ -12,8 +12,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'dashboard']);
   const esArchiver = getService('esArchiver');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -117,6 +118,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Unknown field',
         'String',
         'String',
+      ]);
+    });
+
+    it('should render field tokens correctly on Dashboard', async function () {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.addSavedSearch('A Saved Search');
+
+      // check the first grid row
+      const cell = await dataGrid.getCellElement(0, 3);
+      expect(await findFirstFieldIcons(cell)).to.eql([
+        'Text',
+        'Text',
+        'Date',
+        'Text',
+        'Number',
+        'IP address',
+        'Text',
+        'Geo point',
+        'Keyword',
+        'Keyword',
+      ]);
+
+      // check in the doc viewer
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const docViewer = await testSubjects.find('docTableDetailsFlyout');
+      expect(await findFirstFieldIcons(docViewer)).to.eql([
+        'Keyword',
+        'Keyword',
+        'Number',
+        'Text',
+        'Text',
+        'Date',
+        'Text',
+        'Number',
+        'IP address',
+        'Text',
       ]);
     });
   });
