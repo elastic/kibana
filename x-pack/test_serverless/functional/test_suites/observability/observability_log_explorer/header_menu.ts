@@ -66,7 +66,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getColumnHeaders()).to.eql(['@timestamp', 'message']);
+          expect(await PageObjects.discover.getColumnHeaders()).to.eql([
+            '@timestamp',
+            'service.name',
+            'host.name',
+            'message',
+          ]);
         });
 
         await retry.try(async () => {
