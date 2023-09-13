@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { duplicatedRuleName } from '../objects/rule';
 import {
   COLLAPSED_ACTION_BTN,
   CUSTOM_RULES_BTN,
@@ -107,8 +106,8 @@ export const duplicateRuleFromMenu = () => {
  * Check that the duplicated rule is on the table
  * and it is disabled (default)
  */
-export const checkDuplicatedRule = () => {
-  cy.contains(RULE_NAME, duplicatedRuleName)
+export const checkDuplicatedRule = (ruleName: string): void => {
+  cy.contains(RULE_NAME, ruleName)
     .parents(RULES_ROW)
     .find(RULE_SWITCH)
     .should('have.attr', 'aria-checked', 'false');
@@ -193,14 +192,7 @@ export const filterByDisabledRules = () => {
   cy.get(DISABLED_RULES_BTN).click();
 };
 
-/**
- * @deprecated use goToTheRuleDetailsOf
- */
-export const goToRuleDetails = () => {
-  cy.get(RULE_NAME).first().click();
-};
-
-export const goToTheRuleDetailsOf = (ruleName: string) => {
+export const goToRuleDetailsOf = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).click();
 
   cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
@@ -502,7 +494,7 @@ export const closeErrorToast = () => {
 };
 
 export const goToEditRuleActionsSettingsOf = (name: string) => {
-  goToTheRuleDetailsOf(name);
+  goToRuleDetailsOf(name);
   goToRuleEditSettings();
   // wait until first step loads completely. Otherwise cypress stuck at the first edit page
   cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');

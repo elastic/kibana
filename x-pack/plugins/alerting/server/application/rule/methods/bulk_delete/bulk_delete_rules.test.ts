@@ -6,7 +6,7 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -53,6 +53,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -67,11 +68,13 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
   logger,
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),

@@ -49,7 +49,8 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('get_module', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/164420
+  describe.skip('get_module', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });

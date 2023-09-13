@@ -29,5 +29,6 @@
     "@kbn/data-plugin",
     "@kbn/observability-plugin",
     "@kbn/io-ts-utils",
+    "@kbn/serverless-observability-settings",
   ]
 }

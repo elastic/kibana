@@ -191,8 +191,13 @@ export class MbMap extends Component<Props, State> {
         }
       });
       mbMap.on('load', () => {
-        emptyImage = new Image();
+        // Map instance automatically resizes when container size changes.
+        // However, issues may arise if container resizes before map finishes loading.
+        // This is occuring when by-value maps are used in dashboard.
+        // To prevent issues, resize container after load
+        mbMap.resize();
 
+        emptyImage = new Image();
         emptyImage.src =
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
         emptyImage.crossOrigin = 'anonymous';
