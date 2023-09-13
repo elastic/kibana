@@ -52,7 +52,7 @@ export function DashboardPicker(props: DashboardPickerProps) {
       if (objects) {
         setDashboardOptions(
           objects
-            .filter((d) => !props.idsToOmit || !props.idsToOmit.includes(d.id))
+            .filter((d) => !d.managed && !(props.idsToOmit ?? []).includes(d.id))
             .map((d) => ({
               value: d.id,
               label: d.attributes.title,
