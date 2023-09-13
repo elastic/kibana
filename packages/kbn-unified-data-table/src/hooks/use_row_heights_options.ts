@@ -29,7 +29,7 @@ interface UseRowHeightProps {
  * Converts rowHeight of EuiDataGrid to rowHeight number (-1 to 20)
  */
 const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): number => {
-  if (rowHeight === 'auto') {
+  if (rowHeight === 'auto' || rowHeight === ROWS_HEIGHT_OPTIONS.auto) {
     return ROWS_HEIGHT_OPTIONS.auto;
   } else if (typeof rowHeight === 'object' && rowHeight.lineCount) {
     return rowHeight.lineCount; // custom
@@ -75,11 +75,16 @@ export const useRowHeightsOptions = ({
       rowHeight = configRowHeight;
     }
 
+    const defaultHeight = deserializeRowHeight(rowHeight);
+
     return {
-      defaultHeight: deserializeRowHeight(rowHeight),
+      defaultHeight,
       lineHeight: '1.6em',
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
-        const newSerializedRowHeight = serializeRowHeight(newRowHeight);
+        const newSerializedRowHeight = serializeRowHeight(
+          // pressing "Reset to default" triggers onChange with the same value
+          newRowHeight === defaultHeight ? configRowHeight : newRowHeight
+        );
         updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage, consumer);
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
