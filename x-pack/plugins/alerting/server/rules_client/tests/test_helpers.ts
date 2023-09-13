@@ -42,10 +42,37 @@ export const defaultRule = {
   version: '1',
 };
 
+export const defaultRuleForBulkDelete = {
+  id: 'id1',
+  type: 'alert',
+  attributes: {
+    name: 'fakeName',
+    consumer: 'fakeConsumer',
+    alertTypeId: 'fakeType',
+    schedule: { interval: '5m' },
+    actions: [] as unknown,
+    executionStatus: {
+      lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+      status: 'pending',
+    },
+  },
+  references: [],
+  version: '1',
+};
+
 export const siemRule1 = {
   ...defaultRule,
   attributes: {
     ...defaultRule.attributes,
+    consumer: AlertConsumers.SIEM,
+  },
+  id: 'siem-id1',
+};
+
+export const siemRuleForBulkDelete1 = {
+  ...defaultRuleForBulkDelete,
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
     consumer: AlertConsumers.SIEM,
   },
   id: 'siem-id1',
@@ -74,6 +101,51 @@ export const enabledRule2 = {
     enabled: true,
     scheduledTaskId: 'id2',
     apiKey: Buffer.from('321:abc').toString('base64'),
+  },
+};
+
+export const enabledRule3 = {
+  ...defaultRule,
+  id: 'id3',
+  attributes: {
+    ...defaultRule.attributes,
+    enabled: true,
+    scheduledTaskId: 'id3',
+    apiKey: Buffer.from('789:ghi').toString('base64'),
+    apiKeyCreatedByUser: true,
+  },
+};
+
+export const enabledRuleForBulkDelete1 = {
+  ...defaultRuleForBulkDelete,
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: true,
+    scheduledTaskId: 'id1',
+    apiKey: Buffer.from('123:abc').toString('base64'),
+  },
+};
+
+export const enabledRuleForBulkDelete2 = {
+  ...defaultRuleForBulkDelete,
+  id: 'id2',
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: true,
+    scheduledTaskId: 'id2',
+    apiKey: Buffer.from('321:abc').toString('base64'),
+  },
+};
+
+export const enabledRuleForBulkDelete3 = {
+  ...defaultRuleForBulkDelete,
+  id: 'id3',
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: true,
+    scheduledTaskId: 'id3',
+    apiKey: Buffer.from('789:ghi').toString('base64'),
+    apiKeyCreatedByUser: true,
   },
 };
 
@@ -163,6 +235,67 @@ export const returnedRule2 = {
     interval: '5m',
   },
   scheduledTaskId: 'id2',
+  snoozeSchedule: [],
+};
+
+export const returnedRuleForBulkDelete1 = {
+  actions: [],
+  alertTypeId: 'fakeType',
+  consumer: 'fakeConsumer',
+  enabled: true,
+  id: 'id1',
+  name: 'fakeName',
+  executionStatus: {
+    lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+    status: 'pending',
+  },
+  createdAt: new Date('2019-02-12T21:01:22.479Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  schedule: {
+    interval: '5m',
+  },
+  scheduledTaskId: 'id1',
+  snoozeSchedule: [],
+};
+
+export const returnedRuleForBulkDelete2 = {
+  actions: [],
+  alertTypeId: 'fakeType',
+  consumer: 'fakeConsumer',
+  enabled: true,
+  id: 'id2',
+  name: 'fakeName',
+  executionStatus: {
+    lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+    status: 'pending',
+  },
+  createdAt: new Date('2019-02-12T21:01:22.479Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  schedule: {
+    interval: '5m',
+  },
+  scheduledTaskId: 'id2',
+  snoozeSchedule: [],
+};
+
+export const returnedRuleForBulkDelete3 = {
+  actions: [],
+  alertTypeId: 'fakeType',
+  apiKeyCreatedByUser: true,
+  consumer: 'fakeConsumer',
+  enabled: true,
+  id: 'id3',
+  name: 'fakeName',
+  executionStatus: {
+    lastExecutionDate: new Date('2019-02-12T21:01:22.000Z'),
+    status: 'pending',
+  },
+  createdAt: new Date('2019-02-12T21:01:22.479Z'),
+  updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+  schedule: {
+    interval: '5m',
+  },
+  scheduledTaskId: 'id3',
   snoozeSchedule: [],
 };
 
