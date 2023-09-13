@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models?with_pipelines=true`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('2'));
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       // Created models + system model
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models?with_pipelines=true&with_indices=true`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(getCommonRequestHeader('2'));
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       // Created models + system model
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(getCommonRequestHeader('2'));
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1);
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
           `/internal/ml/trained_models/dfa_regression_model_n_1?with_pipelines=true&with_indices=false`
         )
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('2'));
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.length).to.eql(1);
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           `/internal/ml/trained_models/dfa_regression_model_n_1?with_pipelines=true&with_indices=true`
         )
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('2'));
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       const sampleModel = body[0];
@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models/not_existing_model`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(getCommonRequestHeader('2'));
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(404, status, body);
     });
 
@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { body, status } = await supertest
         .get(`/internal/ml/trained_models/dfa_regression_model_n_1`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(getCommonRequestHeader('2'));
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
     });
   });
