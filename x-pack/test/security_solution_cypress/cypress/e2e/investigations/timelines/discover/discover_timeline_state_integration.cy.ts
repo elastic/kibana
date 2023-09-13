@@ -43,7 +43,6 @@ import {
   openTimelineFromSettings,
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
-import { enableDiscoverSQL } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
 import {
   GET_SAVED_OBJECTS_TAGS_OPTION,
@@ -109,7 +108,6 @@ describe(
         }
       });
       login();
-      enableDiscoverSQL();
       visit(ALERTS_URL);
       createNewTimeline();
       gotToDiscoverTab();

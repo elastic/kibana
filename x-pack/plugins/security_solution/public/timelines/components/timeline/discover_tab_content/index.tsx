@@ -30,7 +30,7 @@ import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { savedSearchComparator } from './utils';
 import {
-  setDiscoverStateWasUpdated,
+  triggerTimelineDiscoverAutoSave,
   setIsDiscoverSavedSearchLoaded,
 } from '../../../store/timeline/actions';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
@@ -242,7 +242,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       const unsubscribeState = stateContainer.appState.state$.subscribe({
         next: (state) => {
           setDiscoverAppState(state);
-          dispatch(setDiscoverStateWasUpdated({ id: timelineId }));
+          dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
         },
       });
 
@@ -264,6 +264,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         .subscribe({
           next: () => {
             setDiscoverTimerange(discoverDataService.query.timefilter.timefilter.getTime());
+            dispatch(triggerTimelineDiscoverAutoSave({ id: timelineId }));
           },
         });
 
@@ -282,6 +283,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       dataView,
       setDiscoverAppState,
       dispatch,
+      timelineId,
       setDiscoverSavedSearchState,
     ]
   );
