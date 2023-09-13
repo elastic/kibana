@@ -18,6 +18,10 @@ export default defineCypressConfig({
     runMode: 2,
   },
 
+  env: {
+    grepFilterSpecs: true,
+  },
+
   screenshotsFolder: '../../../target/kibana-fleet/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
