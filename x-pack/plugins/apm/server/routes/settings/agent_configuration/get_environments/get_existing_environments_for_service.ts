@@ -11,7 +11,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../../apm_indices/get_apm_indices';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../../apm_indices/apm_system_index_constants';
 
 export async function getExistingEnvironmentsForService({
   serviceName,

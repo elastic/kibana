@@ -38,6 +38,7 @@ import {
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
 import { getDiscoverNavigationParams } from '../../utils';
+import { WindowsInstallStep } from '../../../shared/windows_install_step';
 import { TroubleshootingLink } from '../../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
@@ -210,7 +211,11 @@ export function InstallElasticAgent() {
           : stepStatus === 'complete'
           ? CHECK_LOGS_LABELS.completed
           : CHECK_LOGS_LABELS.incomplete;
-      return { title, status: stepStatus };
+      return {
+        title,
+        status: stepStatus,
+        'data-test-subj': 'obltOnboardingCheckLogsStep',
+      };
     }
     return {
       title: CHECK_LOGS_LABELS.incomplete,
@@ -232,7 +237,10 @@ export function InstallElasticAgent() {
             <BackButton onBack={goBack} />,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onInspect}>
+                <EuiButtonEmpty
+                  data-test-subj="observabilityOnboardingInstallElasticAgentInspectButton"
+                  onClick={onInspect}
+                >
                   {i18n.translate(
                     'xpack.observability_onboarding.steps.inspect',
                     { defaultMessage: 'Inspect' }
@@ -241,6 +249,7 @@ export function InstallElasticAgent() {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="obltOnboardingExploreLogs"
                   color="success"
                   fill
                   iconType="magnifyWithPlus"
@@ -284,6 +293,7 @@ export function InstallElasticAgent() {
               )}
               color="success"
               iconType="check"
+              data-test-subj="obltOnboardingCustomIntegrationInstalled"
             />
             <EuiSpacer size="m" />
           </>
@@ -328,7 +338,10 @@ export function InstallElasticAgent() {
                 { defaultMessage: 'Windows' }
               ),
               id: 'windows',
-              isDisabled: true,
+              disableSteps: true,
+              children: (
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/observability/current/logs-stream.html" />
+              ),
             },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
@@ -387,7 +400,7 @@ const CHECK_LOGS_LABELS = {
   ),
   loading: i18n.translate(
     'xpack.observability_onboarding.installElasticAgent.progress.logsIngest.loadingTitle',
-    { defaultMessage: 'Waiting for Logs to be shipped...' }
+    { defaultMessage: 'Waiting for logs to be shipped...' }
   ),
   completed: i18n.translate(
     'xpack.observability_onboarding.installElasticAgent.progress.logsIngest.completedTitle',

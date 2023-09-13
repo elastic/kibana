@@ -69,13 +69,14 @@ interface UseConversation {
 }
 
 export const useConversation = (): UseConversation => {
-  const { allSystemPrompts, setConversations } = useAssistantContext();
+  const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
 
   /**
    * Append a message to the conversation[] for a given conversationId
    */
   const appendMessage = useCallback(
     ({ conversationId, message }: AppendMessageProps): Message[] => {
+      assistantTelemetry?.reportAssistantMessageSent({ conversationId, role: message.role });
       let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
@@ -86,7 +87,6 @@ export const useConversation = (): UseConversation => {
             ...prevConversation,
             messages,
           };
-
           return {
             ...prev,
             [conversationId]: newConversation,
@@ -97,7 +97,7 @@ export const useConversation = (): UseConversation => {
       });
       return messages;
     },
-    [setConversations]
+    [assistantTelemetry, setConversations]
   );
 
   const appendReplacements = useCallback(

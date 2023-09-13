@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { generateRandomStringName } from '@kbn/osquery-plugin/cypress/tasks/integrations';
 import { disableExpandableFlyoutAdvancedSettings } from '../../../tasks/common';
 import { APP_ALERTS_PATH } from '../../../../../../common/constants';
 import { closeAllToasts } from '../../../tasks/toasts';
 import { fillUpNewRule } from '../../../tasks/response_actions';
 import { login, loginWithRole, ROLE } from '../../../tasks/login';
+import { generateRandomStringName } from '../../../tasks/utils';
 import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';

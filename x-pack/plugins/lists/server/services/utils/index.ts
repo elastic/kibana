@@ -8,6 +8,7 @@
 export * from './calculate_scroll_math';
 export * from './encode_decode_cursor';
 export * from './escape_query';
+export * from './check_version_conflict';
 export * from './find_source_type';
 export * from './find_source_value';
 export * from './get_query_filter_from_type_value';
@@ -21,3 +22,4 @@ export * from './transform_elastic_named_search_to_list_item';
 export * from './transform_elastic_to_list_item';
 export * from './transform_elastic_to_list';
 export * from './transform_list_item_to_elastic_query';
+export * from './wait_until_document_indexed';

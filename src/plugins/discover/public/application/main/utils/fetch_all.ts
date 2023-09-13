@@ -19,13 +19,15 @@ import {
   sendErrorMsg,
   sendErrorTo,
   sendLoadingMsg,
+  sendLoadingMoreMsg,
+  sendLoadingMoreFinishedMsg,
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
 import { DataMsg, RecordRawType, SavedSearchData } from '../services/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { fetchSql } from './fetch_sql';
+import { fetchTextBased } from './fetch_text_based';
 import { InternalState } from '../services/discover_internal_state_container';
 
 export interface FetchDeps {
@@ -68,10 +70,10 @@ export function fetchAll(
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const recordRawType = getRawRecordType(query);
+    const useTextbased = recordRawType === RecordRawType.PLAIN;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
     }
-    const useSql = recordRawType === RecordRawType.PLAIN;
 
     if (recordRawType === RecordRawType.DOCUMENT) {
       // Update the base searchSource, base for all child fetches
@@ -90,14 +92,14 @@ export function fetchAll(
 
     // Start fetching all required requests
     const response =
-      useSql && query
-        ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
+      useTextbased && query
+        ? fetchTextBased(query, dataView, data, services.expressions, inspectorAdapters)
         : fetchDocuments(searchSource, fetchDeps);
-    const fetchType = useSql && query ? 'fetchSql' : 'fetchDocuments';
+    const fetchType = useTextbased && query ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns, interceptedWarnings }) => {
+      .then(({ records, textBasedQueryColumns, interceptedWarnings, textBasedHeaderWarning }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -123,7 +125,7 @@ export function fetchAll(
          * So it takes too long, a bad user experience, also a potential flakniess in tests
          */
         const fetchStatus =
-          useSql && (!prevQuery || !isEqual(query, prevQuery))
+          useTextbased && (!prevQuery || !isEqual(query, prevQuery))
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
 
@@ -131,6 +133,7 @@ export function fetchAll(
           fetchStatus,
           result: records,
           textBasedQueryColumns,
+          textBasedHeaderWarning,
           interceptedWarnings,
           recordRawType,
           query,
@@ -162,6 +165,60 @@ export function fetchAll(
     sendErrorMsg(dataSubjects.main$, error);
     // We also want to return a resolved promise in an error case, since it just indicates we're done with querying.
     return Promise.resolve();
+  }
+}
+
+export async function fetchMoreDocuments(
+  dataSubjects: SavedSearchData,
+  fetchDeps: FetchDeps
+): Promise<void> {
+  try {
+    const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
+    const searchSource = savedSearch.searchSource.createChild();
+
+    const dataView = searchSource.getField('index')!;
+    const query = getAppState().query;
+    const recordRawType = getRawRecordType(query);
+
+    if (recordRawType === RecordRawType.PLAIN) {
+      // not supported yet
+      return;
+    }
+
+    const lastDocuments = dataSubjects.documents$.getValue().result || [];
+    const lastDocumentSort = lastDocuments[lastDocuments.length - 1]?.raw?.sort;
+
+    if (!lastDocumentSort) {
+      return;
+    }
+
+    searchSource.setField('searchAfter', lastDocumentSort);
+
+    // Mark as loading
+    sendLoadingMoreMsg(dataSubjects.documents$);
+
+    // Update the searchSource
+    updateVolatileSearchSource(searchSource, {
+      dataView,
+      services,
+      sort: getAppState().sort as SortOrder[],
+      customFilters: getInternalState().customFilters,
+    });
+
+    // Fetch more documents
+    const { records, interceptedWarnings } = await fetchDocuments(searchSource, fetchDeps);
+
+    // Update the state and finish the loading state
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: records,
+      interceptedWarnings,
+    });
+  } catch (error) {
+    sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
+      moreRecords: [],
+      interceptedWarnings: undefined,
+    });
+    sendErrorTo(dataSubjects.main$)(error);
   }
 }
 

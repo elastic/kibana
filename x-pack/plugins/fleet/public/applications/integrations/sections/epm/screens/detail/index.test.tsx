@@ -67,15 +67,20 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(async () => await render());
+    beforeEach(async () => {
+      await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    });
 
     it('should display agent policy usage count', async () => {
-      await act(() => mockedApi.waitForApi());
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      await act(() => mockedApi.waitForApi());
       expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
@@ -99,27 +104,28 @@ describe('when on integration detail', () => {
     beforeEach(async () => {
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should NOT display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version select if prerelease setting enabled and prererelase version available', async () => {
-      await mockedApi.waitForApi();
       const versionSelect = renderResult.queryByTestId('versionSelect');
       expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
       expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
     });
 
     it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
-      await mockedApi.waitForApi();
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
       const calloutGABtn = renderResult.getByTestId('switchToGABtn');
@@ -136,20 +142,22 @@ describe('when on integration detail', () => {
         item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
       });
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should NOT display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
-      await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
     it('should display version text and no callout if prerelease setting disabled', async () => {
-      await mockedApi.waitForApi();
       expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
       expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
@@ -158,6 +166,11 @@ describe('when on integration detail', () => {
   describe('and a custom UI extension is NOT registered', () => {
     beforeEach(async () => {
       await render();
+      await act(() => mockedApi.waitForApi());
+      // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
     });
 
     it('should show overview and settings tabs', () => {

@@ -73,3 +73,11 @@ export const openRowActionMenu = (options?: ListRowOptions): Cypress.Chainable =
 export const openConsoleFromEndpointList = (options?: ListRowOptions): Cypress.Chainable => {
   return openRowActionMenu(options).findByTestSubj('console').click();
 };
+
+export const getUnIsolateActionMenuItem = (): Cypress.Chainable => {
+  return cy.getByTestSubj('tableRowActionsMenuPanel').findByTestSubj('unIsolateLink');
+};
+
+export const getConsoleActionMenuItem = (): Cypress.Chainable => {
+  return cy.getByTestSubj('tableRowActionsMenuPanel').findByTestSubj('console');
+};

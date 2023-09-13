@@ -668,37 +668,47 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
-    await this.testSubjects.setValue(
-      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
-      value
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue(
+        `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`,
+        value
+      );
+      expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
+    });
   }
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
-    await this.testSubjects.setValue(
-      `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
-      value
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.setValue(
+        `range-slider-control-${controlId} > rangeSlider__upperBoundFieldNumber`,
+        value
+      );
+      expect(await this.rangeSliderGetUpperBoundAttribute(controlId, 'value')).to.be(value);
+    });
   }
 
   public async rangeSliderOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
-    await this.testSubjects.click(`range-slider-control-${controlId}`);
+    // EuiDualRange only opens the popover when one of the number **inputs** is clicked - it does not open when
+    // the delimiter is clicked, so need to ensure we're clicking an input
+    await this.testSubjects.click(
+      `range-slider-control-${controlId} > rangeSlider__lowerBoundFieldNumber`
+    );
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`rangeSlider__popover`);
+      await this.testSubjects.existOrFail(`rangeSlider__slider`);
     });
   }
 
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
-    this.log.debug(`Opening popover for Range Slider: ${controlId}`);
+    this.log.debug(`Closing popover for Range Slider: ${controlId}`);
     const controlLabel = await this.find.byXPath(`//div[@data-control-id='${controlId}']//label`);
     await controlLabel.click();
-    await this.testSubjects.waitForDeleted(`rangeSlider__popover`);
+    await this.testSubjects.waitForDeleted(`rangeSlider__slider`);
   }
 
   public async rangeSliderPopoverAssertOpen() {
     await this.retry.try(async () => {
-      if (!(await this.testSubjects.exists(`rangeSlider__popover`))) {
+      if (!(await this.testSubjects.exists(`rangeSlider__slider`))) {
         throw new Error('range slider popover must be open before calling selectOption');
       }
     });

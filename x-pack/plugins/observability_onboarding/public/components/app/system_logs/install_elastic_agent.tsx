@@ -37,6 +37,8 @@ import {
 } from '../../shared/step_panel';
 import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
 import { getDiscoverNavigationParams } from '../utils';
+import { WindowsInstallStep } from '../../shared/windows_install_step';
+import { SystemIntegrationBanner } from './system_integration_banner';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
@@ -169,7 +171,11 @@ export function InstallElasticAgent() {
           : stepStatus === 'complete'
           ? CHECK_LOGS_LABELS.completed
           : CHECK_LOGS_LABELS.incomplete;
-      return { title, status: stepStatus };
+      return {
+        title,
+        status: stepStatus,
+        'data-test-subj': 'obltOnboardingCheckLogsStep',
+      };
     }
     return {
       title: CHECK_LOGS_LABELS.incomplete,
@@ -188,7 +194,11 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
+            <EuiButton
+              data-test-subj="observabilityOnboardingInstallElasticAgentBackButton"
+              color="text"
+              onClick={onBack}
+            >
               {i18n.translate(
                 'xpack.observability_onboarding.systemLogs.back',
                 { defaultMessage: 'Back' }
@@ -201,6 +211,7 @@ export function InstallElasticAgent() {
                   fill
                   iconType="magnifyWithPlus"
                   onClick={onContinue}
+                  data-test-subj="obltOnboardingExploreLogs"
                 >
                   {i18n.translate(
                     'xpack.observability_onboarding.steps.exploreLogs',
@@ -226,6 +237,8 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        <SystemIntegrationBanner />
+        <EuiSpacer size="m" />
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner
             payload={{ apiKeyEncoded, onboardingId }}
@@ -246,9 +259,31 @@ export function InstallElasticAgent() {
         <EuiSpacer size="m" />
         <InstallElasticAgentSteps
           installAgentPlatformOptions={[
-            { label: 'Linux', id: 'linux-tar', isDisabled: false },
-            { label: 'MacOS', id: 'macos', isDisabled: false },
-            { label: 'Windows', id: 'windows', isDisabled: true },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.linux',
+                { defaultMessage: 'Linux' }
+              ),
+              id: 'linux-tar',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.macOS',
+                { defaultMessage: 'MacOS' }
+              ),
+              id: 'macos',
+            },
+            {
+              label: i18n.translate(
+                'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.windows',
+                { defaultMessage: 'Windows' }
+              ),
+              id: 'windows',
+              disableSteps: true,
+              children: (
+                <WindowsInstallStep docsLink="https://www.elastic.co/guide/en/welcome-to-elastic/current/getting-started-observability.html" />
+              ),
+            },
           ]}
           onSelectPlatform={(id) => setElasticAgentPlatform(id)}
           selectedPlatform={elasticAgentPlatform}

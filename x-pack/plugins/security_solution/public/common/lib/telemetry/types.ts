@@ -28,7 +28,15 @@ import type {
   ReportEntityDetailsClickedParams,
   ReportEntityRiskFilteredParams,
 } from './events/entity_analytics/types';
+import type {
+  AssistantTelemetryEvent,
+  ReportAssistantTelemetryEventParams,
+  ReportAssistantInvokedParams,
+  ReportAssistantQuickPromptParams,
+  ReportAssistantMessageSentParams,
+} from './events/ai_assistant/types';
 
+export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
 export * from './events/data_quality/types';
 export type {
@@ -67,6 +75,7 @@ export interface ReportBreadcrumbClickedParams {
 
 export type TelemetryEventParams =
   | ReportAlertsGroupingTelemetryEventParams
+  | ReportAssistantTelemetryEventParams
   | ReportEntityAnalyticsTelemetryEventParams
   | ReportMLJobUpdateParams
   | ReportCellActionClickedParams
@@ -79,6 +88,10 @@ export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
   reportAlertsGroupingToggled(params: ReportAlertsGroupingToggledParams): void;
   reportAlertsGroupingTakeAction(params: ReportAlertsTakeActionParams): void;
+
+  reportAssistantInvoked(params: ReportAssistantInvokedParams): void;
+  reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
+  reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
 
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
   reportEntityAlertsClicked(params: ReportEntityAlertsClickedParams): void;
@@ -94,6 +107,7 @@ export interface TelemetryClientStart {
 }
 
 export type TelemetryEvent =
+  | AssistantTelemetryEvent
   | AlertsGroupingTelemetryEvent
   | EntityAnalyticsTelemetryEvent
   | DataQualityTelemetryEvents

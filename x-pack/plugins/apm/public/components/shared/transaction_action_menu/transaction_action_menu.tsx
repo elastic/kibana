@@ -79,11 +79,13 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   return (
     <>
-      <CustomLinkFlyout
-        transaction={transaction}
-        isOpen={isCreateEditFlyoutOpen}
-        onClose={() => setIsCreateEditFlyoutOpen(false)}
-      />
+      {hasGoldLicense && (
+        <CustomLinkFlyout
+          transaction={transaction}
+          isOpen={isCreateEditFlyoutOpen}
+          onClose={() => setIsCreateEditFlyoutOpen(false)}
+        />
+      )}
 
       <ActionMenu
         id="transactionActionMenu"
@@ -123,11 +125,7 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const {
-    core,
-    uiActions,
-    infra: { locators },
-  } = useApmPluginContext();
+  const { core, uiActions, infra } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
 
@@ -149,7 +147,7 @@ function ActionMenuSections({
     basePath: core.http.basePath,
     location,
     apmRouter,
-    infraLocators: locators,
+    infraLocators: infra?.locators,
     infraLinksAvailable,
     profilingLocators,
     rangeFrom,

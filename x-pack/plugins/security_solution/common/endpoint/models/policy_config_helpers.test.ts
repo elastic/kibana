@@ -192,7 +192,15 @@ describe('Policy Config helpers', () => {
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
 // the logic for disabling protections is also modified due to type check.
 export const eventsOnlyPolicy = (): PolicyConfig => ({
-  meta: { license: '', cloud: false, license_uid: '', cluster_name: '', cluster_uuid: '' },
+  global_manifest_version: 'latest',
+  meta: {
+    license: '',
+    cloud: false,
+    license_uid: '',
+    cluster_name: '',
+    cluster_uuid: '',
+    serverless: false,
+  },
   windows: {
     events: {
       credential_access: true,

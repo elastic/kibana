@@ -519,6 +519,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",
@@ -590,6 +591,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",
@@ -720,6 +722,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",
@@ -791,6 +794,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",
@@ -858,6 +862,7 @@ Object {
   "branch": Any<String>,
   "buildNumber": Any<Number>,
   "clusterInfo": Object {
+    "cluster_build_flavor": "default",
     "cluster_name": "cluster-name",
     "cluster_uuid": "cluster-uuid",
     "cluster_version": "8.0.0",

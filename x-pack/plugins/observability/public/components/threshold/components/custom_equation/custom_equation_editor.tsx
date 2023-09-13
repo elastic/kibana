@@ -9,6 +9,7 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiIconTip,
   EuiButtonEmpty,
   EuiSpacer,
   EuiExpression,
@@ -24,7 +25,7 @@ import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/t
 import {
   Aggregators,
   CustomMetricAggTypes,
-  MetricExpressionCustomMetric,
+  CustomThresholdExpressionMetric,
 } from '../../../../../common/threshold_rule/types';
 
 import { MetricExpression } from '../../types';
@@ -57,7 +58,7 @@ export function CustomEquationEditor({
   dataView,
 }: CustomEquationEditorProps) {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
-    expression?.customMetrics ?? [NEW_METRIC]
+    expression?.metrics ?? [NEW_METRIC]
   );
   const [customEqPopoverOpen, setCustomEqPopoverOpen] = useState(false);
   const [equation, setEquation] = useState<string | undefined>(expression?.equation || undefined);
@@ -68,7 +69,7 @@ export function CustomEquationEditor({
       const currentVars = previous?.map((m) => m.name) ?? [];
       const name = first(xor(VAR_NAMES, currentVars))!;
       const nextMetrics = [...(previous || []), { ...NEW_METRIC, name }];
-      debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation });
+      debouncedOnChange({ ...expression, metrics: nextMetrics, equation });
       return nextMetrics;
     });
   }, [debouncedOnChange, equation, expression]);
@@ -78,7 +79,7 @@ export function CustomEquationEditor({
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.filter((row) => row.name !== name) ?? [NEW_METRIC];
         const finalMetrics = (nextMetrics.length && nextMetrics) || [NEW_METRIC];
-        debouncedOnChange({ ...expression, customMetrics: finalMetrics, equation });
+        debouncedOnChange({ ...expression, metrics: finalMetrics, equation });
         return finalMetrics;
       });
     },
@@ -86,10 +87,10 @@ export function CustomEquationEditor({
   );
 
   const handleChange = useCallback(
-    (metric: MetricExpressionCustomMetric) => {
+    (metric: CustomThresholdExpressionMetric) => {
       setCustomMetrics((previous) => {
         const nextMetrics = previous?.map((m) => (m.name === metric.name ? metric : m));
-        debouncedOnChange({ ...expression, customMetrics: nextMetrics, equation });
+        debouncedOnChange({ ...expression, metrics: nextMetrics, equation });
         return nextMetrics;
       });
     },
@@ -99,7 +100,7 @@ export function CustomEquationEditor({
   const handleEquationChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setEquation(e.target.value);
-      debouncedOnChange({ ...expression, customMetrics, equation: e.target.value });
+      debouncedOnChange({ ...expression, metrics: customMetrics, equation: e.target.value });
     },
     [debouncedOnChange, expression, customMetrics]
   );
@@ -193,10 +194,23 @@ export function CustomEquationEditor({
         >
           <div>
             <ClosablePopoverTitle onClose={() => setCustomEqPopoverOpen(false)}>
-              <FormattedMessage
-                id="xpack.observability.threshold.rule.alertFlyout.customEquationLabel"
-                defaultMessage="Custom equation"
-              />
+              <span>
+                <FormattedMessage
+                  id="xpack.observability.threshold.rule.alertFlyout.customEquationLabel"
+                  defaultMessage="Custom equation"
+                />
+                &nbsp;
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.observability.threshold.rule.alertFlyout.customEquationTooltip',
+                    {
+                      defaultMessage:
+                        'This supports basic math (A + B / C) and boolean logic (A < B ? A : B).',
+                    }
+                  )}
+                  position="top"
+                />
+              </span>
             </ClosablePopoverTitle>
             <EuiFormRow
               fullWidth

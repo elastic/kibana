@@ -1,17 +1,21 @@
 {
   "indices.disk_usage": {
     "url_params": {
-      "run_expensive_tasks": "__flag__",
-      "flush": "__flag__",
-      "ignore_unavailable": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_indices": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
-      ]
+        "none"
+      ],
+      "flush": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "run_expensive_tasks": "__flag__"
     },
     "methods": [
       "POST"
@@ -19,6 +23,10 @@
     "patterns": [
       "{index}/_disk_usage"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-disk-usage.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-disk-usage.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

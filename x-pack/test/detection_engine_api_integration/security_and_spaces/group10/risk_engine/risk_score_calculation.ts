@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
+import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { deleteAllAlerts, deleteAllRules } from '../../../utils';
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('Risk Engine Scoring - Calculation', () => {
+  describe('Risk Engine - Risk Scoring Calculation API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
           scores_written: 1,
         });
 
-        await waitForRiskScoresToBePresent(es, log);
+        await waitForRiskScoresToBePresent({ es, log });
         const scores = await readRiskScores(es);
 
         expect(scores.length).to.eql(1);
@@ -123,8 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/162736
-      describe.skip('paging through calculationss', () => {
+      describe('paging through calculations', () => {
         let documentId: string;
         beforeEach(async () => {
           documentId = uuidv4();
@@ -163,7 +162,7 @@ export default ({ getService }: FtrProviderContext): void => {
             scores_written: 10,
           });
 
-          await waitForRiskScoresToBePresent(es, log);
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);
@@ -212,7 +211,7 @@ export default ({ getService }: FtrProviderContext): void => {
             scores_written: 5,
           });
 
-          await waitForRiskScoresToBePresent(es, log);
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);
@@ -258,7 +257,7 @@ export default ({ getService }: FtrProviderContext): void => {
             scores_written: 0,
           });
 
-          await waitForRiskScoresToBePresent(es, log);
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);

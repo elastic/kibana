@@ -64,7 +64,7 @@ export const getThreatList = async ({
       runtime_mappings: runtimeMappings,
       sort: getSortForThreatList({
         index,
-        listItemIndex: listClient.getListItemIndex(),
+        listItemIndex: listClient.getListItemName(),
       }),
     },
     track_total_hits: false,

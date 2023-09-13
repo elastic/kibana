@@ -6,10 +6,15 @@
  */
 
 import { useEffect, useState } from 'react';
+import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
 export function useProfilingPlugin() {
-  const { plugins } = useApmPluginContext();
+  const { plugins, core } = useApmPluginContext();
+  const isProfilingIntegrationEnabled = core.uiSettings.get<boolean>(
+    apmEnableProfilingIntegration,
+    false
+  );
   const [isProfilingPluginInitialized, setIsProfilingPluginInitialized] =
     useState<boolean | undefined>();
 
@@ -26,10 +31,15 @@ export function useProfilingPlugin() {
     fetchIsProfilingSetup();
   }, [plugins.profiling]);
 
+  const isProfilingAvailable =
+    isProfilingIntegrationEnabled && isProfilingPluginInitialized;
+
   return {
     isProfilingPluginInitialized,
-    profilingLocators: isProfilingPluginInitialized
+    profilingLocators: isProfilingAvailable
       ? plugins.profiling?.locators
       : undefined,
+    isProfilingIntegrationEnabled,
+    isProfilingAvailable,
   };
 }

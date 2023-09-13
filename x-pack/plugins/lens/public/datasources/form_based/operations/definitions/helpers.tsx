@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEqual } from 'lodash';
-import { LastValueColumn } from '@kbn/visualizations-plugin/common';
+import { Query } from '@kbn/es-query';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -138,11 +138,17 @@ export function getSafeName(name: string, indexPattern: IndexPattern | undefined
       });
 }
 
+function areDecimalsValid(inputValue: string | number, digits: number) {
+  const [, decimals = ''] = `${inputValue}`.split('.');
+  return decimals.length <= digits;
+}
+
 export function isValidNumber(
   inputValue: string | number | null | undefined,
   integer?: boolean,
   upperBound?: number,
-  lowerBound?: number
+  lowerBound?: number,
+  digits: number = 2
 ) {
   const inputValueAsNumber = Number(inputValue);
   return (
@@ -152,7 +158,8 @@ export function isValidNumber(
     Number.isFinite(inputValueAsNumber) &&
     (!integer || Number.isInteger(inputValueAsNumber)) &&
     (upperBound === undefined || inputValueAsNumber <= upperBound) &&
-    (lowerBound === undefined || inputValueAsNumber >= lowerBound)
+    (lowerBound === undefined || inputValueAsNumber >= lowerBound) &&
+    areDecimalsValid(inputValue, integer ? 0 : digits)
   );
 }
 
@@ -192,11 +199,17 @@ export function getFormatFromPreviousColumn(
     : undefined;
 }
 
-export function getExistsFilter(field: string) {
+// Check the escape argument when used for transitioning comparisons
+export function getExistsFilter(field: string, escape: boolean = true) {
   return {
-    query: `${field}: *`,
+    query: escape ? `"${field}": *` : `${field}: *`,
     language: 'kuery',
   };
+}
+
+// Useful utility to compare for escape and unescaped exist filters
+export function comparePreviousColumnFilter(filter: Query | undefined, field: string) {
+  return isEqual(filter, getExistsFilter(field)) || isEqual(filter, getExistsFilter(field, false));
 }
 
 export function getFilter(
@@ -207,7 +220,7 @@ export function getFilter(
   if (
     previousColumn &&
     isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn) &&
-    isEqual(filter, getExistsFilter((previousColumn as LastValueColumn)?.sourceField))
+    comparePreviousColumnFilter(filter, previousColumn.sourceField)
   ) {
     return;
   }

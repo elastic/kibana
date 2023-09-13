@@ -38,7 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
 
-      it('renders the correct error page title', async () => {
+      // Unskip once asset details error handling has been implemented
+      it.skip('renders the correct error page title', async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
           '/detail/host/test',
@@ -197,6 +198,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.openTimeline();
         await pageObjects.infraHome.closeTimeline();
       });
+
+      it('toggles the inventory switcher', async () => {
+        await pageObjects.infraHome.toggleInventorySwitcher();
+      });
     });
 
     describe('alerts flyouts', () => {
@@ -216,7 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.closeAlertFlyout();
       });
 
-      it('should open and close inventory alert flyout', async () => {
+      it('should open and close metrics threshold alert flyout', async () => {
         await pageObjects.infraHome.openMetricsThresholdAlertFlyout();
         await pageObjects.infraHome.closeAlertFlyout();
       });

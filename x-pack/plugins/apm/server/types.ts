@@ -7,7 +7,6 @@
 
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { Observable } from 'rxjs';
-import { KibanaRequest } from '@kbn/core/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -16,6 +15,11 @@ import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
+import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
+
 import {
   SpacesPluginSetup,
   SpacesPluginStart,
@@ -57,29 +61,25 @@ import {
   CustomIntegrationsPluginSetup,
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
+import {
+  ProfilingDataAccessPluginSetup,
+  ProfilingDataAccessPluginStart,
+} from '@kbn/profiling-data-access-plugin/server';
 import { APMConfig } from '.';
-import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
-import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
-import { ApmPluginRequestHandlerContext } from './routes/typings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
-  getApmIndices: () => Promise<ApmIndicesConfig>;
-  createApmEventClient: (params: {
-    debug?: boolean;
-    request: KibanaRequest;
-    context: ApmPluginRequestHandlerContext;
-  }) => Promise<APMEventClient>;
 }
 
 export interface APMPluginSetupDependencies {
   // required dependencies
+  apmDataAccess: ApmDataAccessPluginSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  infra: InfraPluginSetup;
+  infra?: InfraPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
 
@@ -95,9 +95,11 @@ export interface APMPluginSetupDependencies {
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
+  profilingDataAccess?: ProfilingDataAccessPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
+  apmDataAccess: ApmDataAccessPluginStart;
   data: DataPluginStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
@@ -119,4 +121,5 @@ export interface APMPluginStartDependencies {
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
+  profilingDataAccess?: ProfilingDataAccessPluginStart;
 }

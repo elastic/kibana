@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
-import { ProductLine, type ProductTier } from '../../../common/product';
+import { ProductLine, ProductTier } from '../../../common/product';
 
 import type { UsageRecord, MeteringCallbackInput } from '../../types';
 import type { ServerlessSecurityConfig } from '../../config';
@@ -20,6 +20,7 @@ const SAMPLE_PERIOD_SECONDS = 3600;
 const THRESHOLD_MINUTES = 30;
 
 export class EndpointMeteringService {
+  private type: ProductLine.endpoint | `${ProductLine.cloud}_${ProductLine.endpoint}` | undefined;
   private tier: ProductTier | undefined;
 
   public getUsageRecords = async ({
@@ -30,6 +31,11 @@ export class EndpointMeteringService {
     lastSuccessfulReport,
     config,
   }: MeteringCallbackInput): Promise<UsageRecord[]> => {
+    this.setType(config);
+    if (!this.type) {
+      return [];
+    }
+
     this.setTier(config);
 
     const heartbeatsResponse = await this.getHeartbeatsSince(
@@ -40,14 +46,6 @@ export class EndpointMeteringService {
 
     if (!heartbeatsResponse?.hits?.hits) {
       return [];
-    }
-
-    if (!this.tier) {
-      throw new Error(
-        `no product tier information found for heartbeats: ${JSON.stringify(
-          heartbeatsResponse.hits.hits
-        )}`
-      );
     }
 
     return heartbeatsResponse.hits.hits.reduce((acc, { _source }) => {
@@ -108,20 +106,50 @@ export class EndpointMeteringService {
     timestamp.setMilliseconds(0);
 
     return {
+      // keep endpoint instead of this.type as id prefix so
+      // we don't double count in the event of add-on changes
       id: `endpoint-${agentId}-${timestamp}`,
       usage_timestamp: timestampStr,
       creation_timestamp: timestampStr,
       usage: {
-        type: 'security_solution_endpoint',
-        sub_type: this.tier,
+        // type postfix is used to determine the PLI to bill
+        type: `security_solution_${this.type}`,
         period_seconds: SAMPLE_PERIOD_SECONDS,
         quantity: 1,
       },
       source: {
         id: taskId,
         instance_group_id: projectId,
+        metadata: {
+          tier: this.tier,
+        },
       },
     };
+  }
+
+  private setType(config: ServerlessSecurityConfig) {
+    if (this.type) {
+      return;
+    }
+
+    let hasCloudAddOn = false;
+    let hasEndpointAddOn = false;
+    config.productTypes.forEach((productType) => {
+      if (productType.product_line === ProductLine.cloud) {
+        hasCloudAddOn = true;
+      }
+      if (productType.product_line === ProductLine.endpoint) {
+        hasEndpointAddOn = true;
+      }
+    });
+
+    if (hasEndpointAddOn) {
+      this.type = ProductLine.endpoint;
+      return;
+    }
+    if (hasCloudAddOn) {
+      this.type = `${ProductLine.cloud}_${ProductLine.endpoint}`;
+    }
   }
 
   private setTier(config: ServerlessSecurityConfig) {
@@ -129,10 +157,14 @@ export class EndpointMeteringService {
       return;
     }
 
-    const endpoint = config.productTypes.find(
-      (productType) => productType.product_line === ProductLine.endpoint
+    const product = config.productTypes.find(
+      (productType) =>
+        // tiers are always matching so either is fine
+        productType.product_line === ProductLine.endpoint ||
+        productType.product_line === ProductLine.cloud
     );
-    this.tier = endpoint?.product_tier;
+    // default essentials is safe since we only reach tier if add-on exists
+    this.tier = product?.product_tier || ProductTier.essentials;
   }
 }
 

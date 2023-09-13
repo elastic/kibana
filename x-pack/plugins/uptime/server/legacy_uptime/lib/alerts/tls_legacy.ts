@@ -120,7 +120,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
       savedObjectsClient,
       scopedClusterClient.asCurrentUser,
       {
-        isLegacyAlert: true,
+        stackVersion: '8.9.0',
       }
     );
     const { certs, total }: CertResult = await libs.requests.getCerts({
