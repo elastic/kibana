@@ -10,7 +10,6 @@ import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn, OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiCallOut,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -28,10 +27,8 @@ import { useLicense } from '../../../common/hooks/use_license';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/table/investigate_in_timeline_button';
 import type { PrevalenceData } from '../../shared/hooks/use_prevalence';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { ERROR_MESSAGE, ERROR_TITLE } from '../../shared/translations';
 import {
   HOST_TITLE,
-  PREVALENCE_ERROR_MESSAGE,
   PREVALENCE_TABLE_ALERT_COUNT_COLUMN_TITLE,
   PREVALENCE_TABLE_COUNT_COLUMN_TITLE,
   PREVALENCE_TABLE_DOC_COUNT_COLUMN_TITLE,
@@ -49,7 +46,6 @@ import {
   PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
@@ -208,8 +204,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, investigationFields } =
-    useLeftPanelContext();
+  const { dataFormattedForFieldBrowser, investigationFields } = useLeftPanelContext();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 
@@ -273,18 +268,6 @@ export const PrevalenceDetails: React.FC = () => {
     );
   }
 
-  if (!eventId || !dataFormattedForFieldBrowser || !browserFields || error) {
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{ERROR_TITLE(PREVALENCE_ERROR_MESSAGE)}</h2>}
-        body={<p>{ERROR_MESSAGE(PREVALENCE_ERROR_MESSAGE)}</p>}
-        data-test-subj={PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID}
-      />
-    );
-  }
-
   const upsell = (
     <>
       <EuiCallOut data-test-subj={`${PREVALENCE_DETAILS_TABLE_TEST_ID}UpSell`}>
@@ -309,7 +292,7 @@ export const PrevalenceDetails: React.FC = () => {
 
   return (
     <>
-      {!isPlatinumPlus && upsell}
+      {!error && !isPlatinumPlus && upsell}
       <EuiPanel>
         <EuiSuperDatePicker
           start={start}

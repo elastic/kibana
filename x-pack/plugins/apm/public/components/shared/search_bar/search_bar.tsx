@@ -51,7 +51,7 @@ export function SearchBar({
     isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
-    <>
+    <EuiFlexItem grow={false}>
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
@@ -96,6 +96,6 @@ export function SearchBar({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={isMobileAgent ? 's' : 'm'} />
-    </>
+    </EuiFlexItem>
   );
 }
