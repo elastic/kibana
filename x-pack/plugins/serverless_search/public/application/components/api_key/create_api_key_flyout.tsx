@@ -161,6 +161,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
       css={css`
         max-width: calc(${euiTheme.size.xxxxl} * 10);
       `}
+      data-test-subj="create-api-key-flyout"
     >
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
@@ -339,14 +340,24 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty isDisabled={isLoading} onClick={onClose}>
+            <EuiButtonEmpty
+              isDisabled={isLoading}
+              onClick={onClose}
+              data-test-subj="create-api-key-cancel"
+            >
               {CANCEL_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem>
-                <EuiButton fill disabled={!name} isLoading={isLoading} onClick={onCreateClick}>
+                <EuiButton
+                  fill
+                  disabled={!name}
+                  isLoading={isLoading}
+                  onClick={onCreateClick}
+                  data-test-subj="create-api-key-submit"
+                >
                   {i18n.translate('xpack.serverlessSearch.apiKey.flyOutCreateLabel', {
                     defaultMessage: 'Create API Key',
                   })}

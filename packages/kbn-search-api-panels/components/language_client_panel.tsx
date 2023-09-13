@@ -51,6 +51,7 @@ export const LanguageClientPanel: React.FC<SelectClientProps> = ({
           }
           onClick={() => setSelectedLanguage(language)}
           color={isSelectedLanguage ? 'primary' : 'plain'}
+          data-test-subj={`${language.id}-client-panel`}
         >
           <EuiFlexGroup direction="column" justifyContent="center">
             <EuiFlexItem grow={false}>

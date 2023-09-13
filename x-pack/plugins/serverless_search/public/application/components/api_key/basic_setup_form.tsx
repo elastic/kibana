@@ -60,6 +60,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
           isLoading={isLoading}
           value={name}
           onChange={(e) => onChangeName(e.currentTarget.value)}
+          data-test-subj="create-api-key-name"
         />
       </EuiFormRow>
       <EuiFormRow
@@ -71,12 +72,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
           defaultMessage: 'User',
         })}
       >
-        <EuiFieldText
-          fullWidth
-          disabled={true}
-          value={user}
-          onChange={(e) => onChangeName(e.currentTarget.value)}
-        />
+        <EuiFieldText fullWidth disabled={true} value={user} onChange={() => {}} />
       </EuiFormRow>
       <EuiFormRow
         fullWidth
@@ -105,16 +101,19 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
               label: i18n.translate('xpack.serverlessSearch.apiKey.expiresField.neverLabel', {
                 defaultMessage: 'Never',
               }),
+              'data-test-subj': 'create-api-key-expires-never-radio',
             },
             {
               id: 'days',
               label: i18n.translate('xpack.serverlessSearch.apiKey.expiresField.daysLabel', {
                 defaultMessage: 'in days',
               }),
+              'data-test-subj': 'create-api-key-expires-days-radio',
             },
           ]}
           idSelected={expires === null ? 'never' : 'days'}
           onChange={(id) => onChangeExpires(id === 'never' ? null : DEFAULT_EXPIRES_VALUE)}
+          data-test-subj="create-api-key-expires-radio"
         />
       </EuiFormRow>
       {expires !== null && (
@@ -149,6 +148,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
             defaultValue={expires}
             min={1}
             onChange={(e) => onChangeExpires(e.currentTarget.value)}
+            data-test-subj="create-api-key-expires-days-number-field"
           />
         </EuiFormRow>
       )}

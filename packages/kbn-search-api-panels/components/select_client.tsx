@@ -52,7 +52,7 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xs" direction="row">
+      <EuiFlexGroup gutterSize="xs" direction="row" data-test-subj="client-select-container">
         {children}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
