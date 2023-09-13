@@ -231,6 +231,7 @@ export function LensEditConfigurationFlyout({
               aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
                 defaultMessage: 'Cancel applied changes',
               })}
+              data-test-subj="collapseFlyoutButton"
             >
               <FormattedMessage id="xpack.lens.config.cancelFlyoutLabel" defaultMessage="Cancel" />
             </EuiButtonEmpty>
@@ -243,7 +244,6 @@ export function LensEditConfigurationFlyout({
                 defaultMessage: 'Apply changes',
               })}
               iconType="check"
-              data-test-subj="collapseFlyoutButton"
               isDisabled={!attributesChanged}
             >
               <FormattedMessage

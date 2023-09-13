@@ -125,7 +125,7 @@ describe('LensEditConfigurationFlyout', () => {
     } as unknown as EditConfigPanelProps;
   }
 
-  it('should call the closeFlyout callback if collapse button is clicked', async () => {
+  it('should call the closeFlyout callback if cancel button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
     const props = getDefaultProps();
     const newProps = {
