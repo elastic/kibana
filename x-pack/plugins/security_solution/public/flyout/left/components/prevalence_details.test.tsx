@@ -13,9 +13,9 @@ import {
   PREVALENCE_DETAILS_LOADING_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
@@ -218,7 +218,7 @@ describe('PrevalenceDetails', () => {
     expect(getByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render error if call errors out', () => {
+  it('should render no data message if call errors out', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
@@ -231,6 +231,6 @@ describe('PrevalenceDetails', () => {
       </LeftPanelContext.Provider>
     );
 
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(`${PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}Error`)).toBeInTheDocument();
   });
 });

@@ -26,10 +26,6 @@ export const InvestigationGuide: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
-  if (error) {
-    return null;
-  }
-
   if (loading) {
     return (
       <EuiFlexGroup
@@ -45,7 +41,7 @@ export const InvestigationGuide: React.FC = () => {
 
   return (
     <>
-      {basicAlertData.ruleId && ruleNote ? (
+      {!error && basicAlertData.ruleId && ruleNote ? (
         <InvestigationGuideView
           basicData={basicAlertData}
           ruleNote={ruleNote}

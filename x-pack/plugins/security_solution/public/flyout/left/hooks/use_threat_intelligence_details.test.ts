@@ -11,7 +11,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
-import type { LeftPanelContext } from '../context';
 import { useLeftPanelContext } from '../context';
 import { useInvestigationTimeEnrichment } from '../../../common/containers/cti/event_enrichment';
 import { SecurityPageName } from '../../../../common/constants';
@@ -20,6 +19,7 @@ import {
   type GetBasicDataFromDetailsData,
   useBasicDataFromDetailsData,
 } from '../../../timelines/components/side_panel/event_details/helpers';
+import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('../../../timelines/containers/details');
 jest.mock('../../../common/containers/sourcerer');
@@ -64,20 +64,7 @@ describe('useThreatIntelligenceDetails', () => {
         () => {},
       ]);
 
-    jest.mocked(useLeftPanelContext).mockReturnValue({
-      indexName: 'test-index',
-      eventId: 'test-event-id',
-      getFieldsData: () => null,
-      dataFormattedForFieldBrowser: null,
-      scopeId: 'test-scope-id',
-      browserFields: null,
-      searchHit: {
-        _id: 'testId',
-        _index: 'testIndex',
-      },
-      dataAsNestedObject: null,
-      investigationFields: [],
-    } as unknown as LeftPanelContext);
+    jest.mocked(useLeftPanelContext).mockReturnValue(mockContextValue);
   });
 
   afterEach(() => {

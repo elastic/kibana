@@ -67,14 +67,14 @@ describe('<InvestigationGuide />', () => {
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render null when useInvestigationGuide errors out', () => {
+  it('should render no data message when useInvestigationGuide errors out', () => {
     (useInvestigationGuide as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
       show: false,
     });
 
-    const { container } = render(renderInvestigationGuide());
-    expect(container).toBeEmptyDOMElement();
+    const { getByTestId } = render(renderInvestigationGuide());
+    expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
   });
 });
