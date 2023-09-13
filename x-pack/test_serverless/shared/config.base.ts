@@ -119,13 +119,12 @@ export default async () => {
         ])}`,
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
-        // basic: { 'basic': { order: 0 } },
         `--plugin-path=${samlIdPPlugin}`,
         '--xpack.cloud.id=ftr_fake_cloud_id',
         '--xpack.security.authc.selector.enabled=false',
         `--xpack.security.authc.providers=${JSON.stringify({
-          basic: { basic: { order: 0 } },
-          saml: { 'cloud-saml-kibana': { order: 1, realm: 'cloud-saml-kibana' } },
+          saml: { 'cloud-saml-kibana': { order: 0, realm: 'cloud-saml-kibana' } },
+          basic: { 'cloud-basic': { order: 1 } },
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
