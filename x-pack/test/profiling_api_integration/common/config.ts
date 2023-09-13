@@ -50,7 +50,6 @@ export interface ProfilingFtrConfig {
   name: ProfilingFtrConfigName;
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, any>;
-  setupProfiling: boolean;
 }
 
 export interface CreateTest {
