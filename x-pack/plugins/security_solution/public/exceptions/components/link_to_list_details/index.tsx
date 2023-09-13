@@ -29,7 +29,6 @@ const LinkToListDetailsComponent: FC<LinkToListDetailsProps> = ({
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}
-      external={external}
       deepLinkId={SecurityPageName.exceptions}
       path={`/details/${listId}`}
       target={external ? '_blank' : undefined}

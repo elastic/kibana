@@ -31,7 +31,6 @@ const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
   return (
     <SecuritySolutionLinkAnchor
       data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}
-      external={external}
       deepLinkId={SecurityPageName.rules}
       path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
       target={external ? '_blank' : undefined}
