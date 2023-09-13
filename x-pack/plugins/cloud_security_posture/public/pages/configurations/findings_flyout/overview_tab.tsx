@@ -34,6 +34,11 @@ import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter'
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
+const isEmpty = (item) => {
+  if (item === undefined || item === null) return true;
+  if (Array.isArray(item) && item.length === 0) return true;
+  if (typeof item === 'object' && Object.keys(item).length === 0) return true;
+};
 const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
@@ -141,13 +146,13 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
 
 const getEvidenceList = ({ result }: CspFinding) =>
   [
-    result.expected && {
+    !isEmpty(result.expected) && {
       title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.expectedTitle', {
         defaultMessage: 'Expected',
       }),
       description: <CodeBlock>{JSON.stringify(result.expected, null, 2)}</CodeBlock>,
     },
-    {
+    !isEmpty(result.evidence) && {
       title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.actualTitle', {
         defaultMessage: 'Actual',
       }),
@@ -169,6 +174,8 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     [discover.locator, latestFindingsDataView.data?.id]
   );
 
+  const hasEvidence = !isEmpty(data.result.expected) || !isEmpty(data.result.evidence);
+
   const accordions: Accordion[] = useMemo(
     () =>
       [
@@ -188,17 +195,18 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
           id: 'remediationAccordion',
           listItems: getRemediationList(data.rule),
         },
-        INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence && {
-          initialIsOpen: false,
-          title: i18n.translate(
-            'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
-            { defaultMessage: 'Evidence' }
-          ),
-          id: 'evidenceAccordion',
-          listItems: getEvidenceList(data),
-        },
+        INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence &&
+          hasEvidence && {
+            initialIsOpen: false,
+            title: i18n.translate(
+              'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
+              { defaultMessage: 'Evidence' }
+            ),
+            id: 'evidenceAccordion',
+            listItems: getEvidenceList(data),
+          },
       ].filter(truthy),
-    [data, discoverIndexLink]
+    [data, discoverIndexLink, hasEvidence]
   );
 
   return (

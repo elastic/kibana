@@ -80,7 +80,7 @@ export const POSTURE_TYPE_ALL = 'all';
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
   showManageRulesMock: false,
-  showFindingFlyoutEvidence: false,
+  showFindingFlyoutEvidence: true,
 } as const;
 
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
