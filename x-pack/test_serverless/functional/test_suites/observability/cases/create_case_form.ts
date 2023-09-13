@@ -15,7 +15,7 @@ import { navigateToCasesApp } from '../../../../shared/lib/cases';
 const owner = OBSERVABILITY_OWNER;
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
-  describe('Create case', function () {
+  describe('Create Case', function () {
     const find = getService('find');
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
