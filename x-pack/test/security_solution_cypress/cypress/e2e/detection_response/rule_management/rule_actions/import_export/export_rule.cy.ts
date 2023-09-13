@@ -55,7 +55,8 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
   });
 });
 
-describe('Export rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
 
   before(() => {
