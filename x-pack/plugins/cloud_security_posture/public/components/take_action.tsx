@@ -16,7 +16,7 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -40,6 +40,7 @@ export const showSuccessToast = (
     toastLifeTimeMs: 10000,
     color: 'success',
     iconType: '',
+    'data-test-subj': 'completeReportSuccess',
     text: toMountPoint(
       <div>
         <EuiText size="m">
@@ -66,7 +67,8 @@ export const showSuccessToast = (
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </div>,
+      {}
     ),
   });
 };
