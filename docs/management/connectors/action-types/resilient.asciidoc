@@ -1,8 +1,12 @@
 [[resilient-action-type]]
-== IBM Resilient connector and action
+== {ibm-r} connector and action
 ++++
-<titleabbrev>IBM Resilient</titleabbrev>
+<titleabbrev>{ibm-r}</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can create {ibm-r} incidents.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to] 
+:frontmatter-tags-user-goals: [configure]
 
 The IBM Resilient connector uses the https://developer.ibm.com/security/resilient/rest/[RESILIENT REST v2] to create IBM Resilient incidents.
 
@@ -27,38 +31,6 @@ URL::       IBM Resilient instance URL.
 Organization ID:: IBM Resilient organization ID.
 API key ID::  The authentication key ID for HTTP Basic authentication.
 API key secret::  The authentication key secret for HTTP Basic authentication.
-
-[float]
-[[preconfigured-resilient-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,text]
---
-xpack.actions.preconfigured:
-  my-resilient:
-    name: preconfigured-resilient-connector-type
-    actionTypeId: .resilient
-    config:
-      apiUrl: https://elastic.resilient.net
-      orgId: ES
-    secrets:
-      apiKeyId: testuser
-      apiKeySecret: tokenkeystorevalue
---
-
-Config defines information for the connector type.
-
-`apiUrl`:: An address that corresponds to *URL*.
-`orgId`:: An ID that corresponds to *Organization ID*.
-
-Secrets defines sensitive information for the connector type.
-
-`apiKeyId`:: A string that corresponds to *API key ID*.
-`apiKeySecret`:: A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
 [float]
 [[resilient-action-configuration]]
