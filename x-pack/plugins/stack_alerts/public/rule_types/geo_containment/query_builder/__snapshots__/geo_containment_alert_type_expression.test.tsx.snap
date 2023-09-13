@@ -89,7 +89,7 @@ exports[`should render BoundaryIndexExpression 1`] = `
 
 exports[`should render EntityIndexExpression 1`] = `
 <ExpressionWithPopover
-  defaultValue="Select a data view and geo point field"
+  defaultValue="Select a data view and geospatial field"
   expressionDescription="index"
   isInvalid={false}
   popoverContent={
@@ -108,6 +108,7 @@ exports[`should render EntityIndexExpression 1`] = `
           includedGeoTypes={
             Array [
               "geo_point",
+              "geo_shape",
             ]
           }
           indexPatternService={
@@ -183,7 +184,7 @@ exports[`should render EntityIndexExpression 1`] = `
 
 exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
 <ExpressionWithPopover
-  defaultValue="Select a data view and geo point field"
+  defaultValue="Select a data view and geospatial field"
   expressionDescription="index"
   isInvalid={true}
   popoverContent={
@@ -202,6 +203,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
           includedGeoTypes={
             Array [
               "geo_point",
+              "geo_shape",
             ]
           }
           indexPatternService={

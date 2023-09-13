@@ -61,3 +61,36 @@ export const enableAllPolicyProtections = (
     });
   });
 };
+
+export const setCustomProtectionUpdatesManifestVersion = (
+  endpointPolicyId: string,
+  manifestVersion: string
+) => {
+  return request<GetOnePackagePolicyResponse>({
+    method: 'GET',
+    url: packagePolicyRouteService.getInfoPath(endpointPolicyId),
+  }).then(({ body: { item: endpointPolicy } }) => {
+    const {
+      created_by: _createdBy,
+      created_at: _createdAt,
+      updated_at: _updatedAt,
+      updated_by: _updatedBy,
+      id,
+      version,
+      revision,
+      ...restOfPolicy
+    } = endpointPolicy;
+
+    const updatedEndpointPolicy: UpdatePackagePolicy = restOfPolicy;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const policy = updatedEndpointPolicy!.inputs[0]!.config!.policy.value;
+
+    policy.global_manifest_version = manifestVersion;
+
+    return request<UpdatePackagePolicyResponse>({
+      method: 'PUT',
+      url: packagePolicyRouteService.getUpdatePath(endpointPolicyId),
+      body: updatedEndpointPolicy,
+    });
+  });
+};

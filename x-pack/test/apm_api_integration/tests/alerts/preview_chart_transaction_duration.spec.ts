@@ -32,7 +32,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         interval: '5m',
-        kqlFilter: '',
       },
     },
   });
@@ -43,7 +42,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),
         interval: '5m',
-        kqlFilter: 'service.name: synth-go and transaction.type: request',
+        searchConfiguration: JSON.stringify({
+          query: {
+            query: 'service.name: synth-go and transaction.type: request',
+            language: 'kuery',
+          },
+        }),
         serviceName: undefined,
         transactionType: undefined,
         transactionName: undefined,
@@ -322,8 +326,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter:
-                'service.name: synth-go and transaction.type: request and transaction.name: GET /banana',
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query:
+                    'service.name: synth-go and transaction.type: request and transaction.name: GET /banana',
+                  language: 'kuery',
+                },
+              }),
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
             },
           },
@@ -348,8 +357,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter:
-                'service.name: synth-go and transaction.type: request and transaction.name: foo',
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query:
+                    'service.name: synth-go and transaction.type: request and transaction.name: foo',
+                  language: 'kuery',
+                },
+              }),
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
             },
           },
@@ -439,8 +453,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter:
-                'service.name: synth-go and transaction.type: request and transaction.name: GET /apple',
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query:
+                    'service.name: synth-go and transaction.type: request and transaction.name: GET /apple',
+                  language: 'kuery',
+                },
+              }),
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
             },
           },
@@ -466,7 +485,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter: '',
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: '',
+                  language: 'kuery',
+                },
+              }),
             },
           },
         };
@@ -493,7 +517,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           params: {
             query: {
               ...getOptionsWithFilterQuery().params.query,
-              kqlFilter: '',
+              searchConfiguration: JSON.stringify({
+                query: {
+                  query: '',
+                  language: 'kuery',
+                },
+              }),
               groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
             },
           },

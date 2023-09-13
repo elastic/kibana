@@ -22,7 +22,7 @@ export async function mountManagementSection(
   coreSetup: CoreSetup,
   coreStart: CoreStart,
   license$: Observable<ILicense>,
-  pollConfig: ClientConfigType['poll'],
+  config: ClientConfigType,
   apiClient: ReportingAPIClient,
   urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams
@@ -42,7 +42,7 @@ export async function mountManagementSection(
             <ReportListing
               toasts={coreSetup.notifications.toasts}
               license$={license$}
-              pollConfig={pollConfig}
+              config={config}
               redirect={coreStart.application.navigateToApp}
               navigateToUrl={coreStart.application.navigateToUrl}
               urlService={urlService}

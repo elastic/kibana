@@ -17,7 +17,7 @@ import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 const isConcliftOnGetError = (error: any) => {
   return (
-    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
+    isAxiosResponseError(error) && error.config?.method === 'GET' && error.response.status === 409
   );
 };
 

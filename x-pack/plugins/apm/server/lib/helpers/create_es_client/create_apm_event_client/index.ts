@@ -20,12 +20,12 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ApmDataSource } from '../../../../../common/data_source';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   callAsyncWithDebug,
@@ -87,7 +87,7 @@ export interface APMEventClientConfig {
   esClient: ElasticsearchClient;
   debug: boolean;
   request: KibanaRequest;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   options: {
     includeFrozen: boolean;
     forceSyntheticSource: boolean;
@@ -98,7 +98,7 @@ export class APMEventClient {
   private readonly esClient: ElasticsearchClient;
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
-  public readonly indices: ApmIndicesConfig;
+  public readonly indices: APMIndices;
   private readonly includeFrozen: boolean;
   private readonly forceSyntheticSource: boolean;
 

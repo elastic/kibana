@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/enterprise-search-plugin",
     "@kbn/management-plugin",
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/doc-links",
@@ -31,5 +32,7 @@
     "@kbn/management-cards-navigation",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-api-panels",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/react-kibana-context-theme",
   ]
 }

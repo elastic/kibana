@@ -105,7 +105,7 @@ export const LeftPanelProvider = ({ id, indexName, scopeId, children }: LeftPane
             dataAsNestedObject,
             dataFormattedForFieldBrowser,
             searchHit,
-            investigationFields: maybeRule?.investigation_fields ?? [],
+            investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
             getFieldsData,
           }
         : undefined,

@@ -128,6 +128,7 @@ export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 export const MAX_USER_ACTIONS_PER_CASE = 10000 as const;
 export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
+export const MAX_CUSTOM_FIELDS_PER_CASE = 5 as const;
 
 /**
  * Cases features

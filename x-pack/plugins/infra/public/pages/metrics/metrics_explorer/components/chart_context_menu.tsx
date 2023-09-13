@@ -26,7 +26,7 @@ import {
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
-import { getNodeDetailUrl } from '../../../link_to/redirect_to_node_detail';
+import { useNodeDetailsRedirect } from '../../../link_to';
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
@@ -62,20 +62,6 @@ const dateMathExpressionToEpoch = (dateMathExpression: string, roundUp = false):
   return dateObj.valueOf();
 };
 
-export const createNodeDetailLink = (
-  nodeType: InventoryItemType,
-  nodeId: string,
-  from: string,
-  to: string
-) => {
-  return getNodeDetailUrl({
-    nodeType,
-    nodeId,
-    from: dateMathExpressionToEpoch(from),
-    to: dateMathExpressionToEpoch(to, true),
-  });
-};
-
 export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   onFilter,
   options,
@@ -85,6 +71,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   uiCapabilities,
   chartOptions,
 }: Props) => {
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const supportFiltering = options.groupBy != null && onFilter != null;
@@ -120,7 +107,16 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
   const nodeDetailLinkProps = useLinkProps({
     app: 'metrics',
-    ...(nodeType ? createNodeDetailLink(nodeType, series.id, timeRange.from, timeRange.to) : {}),
+    ...(nodeType
+      ? getNodeDetailUrl({
+          nodeType,
+          nodeId: series.id,
+          search: {
+            from: dateMathExpressionToEpoch(timeRange.from),
+            to: dateMathExpressionToEpoch(timeRange.to, true),
+          },
+        })
+      : {}),
   });
   const tsvbLinkProps = useLinkProps({
     ...createTSVBLink(source, options, series, timeRange, chartOptions),
