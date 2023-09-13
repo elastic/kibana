@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const nginxRequestRate: FormulaValueConfig = {
-  label: 'Request Rate',
-  value: 'differences(max(nginx.stubstatus.requests))',
+export const nodeMemoryCapacity: FormulaValueConfig = {
+  label: 'Capacity',
+  value: 'max(kubernetes.node.memory.allocatable.bytes)',
   format: {
-    id: 'number',
+    id: 'bytes',
     params: {
-      decimals: 0,
+      decimals: 1,
     },
   },
-  timeScale: 's',
 };

@@ -28,12 +28,21 @@ interface ChartGridProps {
   timeRange: TimeRange;
   metricsDataView?: DataView;
   logsDataView?: DataView;
+  filterFieldName: string;
   charts: Array<XYConfig & { dependsOn?: string[] }>;
   ['data-test-subj']: string;
 }
 
 export const ChartGrid = React.memo(
-  ({ assetName, metricsDataView, logsDataView, timeRange, charts, ...props }: ChartGridProps) => {
+  ({
+    assetName,
+    metricsDataView,
+    logsDataView,
+    filterFieldName,
+    timeRange,
+    charts,
+    ...props
+  }: ChartGridProps) => {
     const { setDateRange } = useDateRangeProviderContext();
     const getDataView = useCallback(
       (dataViewOrigin: DataViewOrigin) => {
@@ -47,13 +56,13 @@ export const ChartGrid = React.memo(
       (dataViewOrigin: DataViewOrigin) => {
         return [
           buildCombinedHostsFilter({
-            field: 'host.name',
+            field: filterFieldName,
             values: [assetName],
             dataView: getDataView(dataViewOrigin),
           }),
         ];
       },
-      [getDataView, assetName]
+      [filterFieldName, assetName, getDataView]
     );
 
     const handleBrushEnd = useCallback(
@@ -138,7 +147,7 @@ export const Section = ({
   );
 
   return shouldRender ? (
-    <EuiFlexGroup gutterSize="m" direction="column">
+    <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem grow={false}>
         <Title />
       </EuiFlexItem>

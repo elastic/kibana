@@ -8,14 +8,14 @@
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 import { defaultPalette, Color } from '../../../../../../common/color_palette';
 
-export const nginxClientErrorStatusCodes: FormulaValueConfig = {
-  label: '400-499',
-  value: `count(kql='http.response.status_code >= 400 and http.response.status_code <= 499')`,
+export const successStatusCodes: FormulaValueConfig = {
+  label: '200-299',
+  value: `count(kql='http.response.status_code >= 200 and http.response.status_code <= 299')`,
   format: {
     id: 'number',
     params: {
       decimals: 0,
     },
   },
-  color: defaultPalette[Color.color5],
+  color: defaultPalette[Color.color2],
 };

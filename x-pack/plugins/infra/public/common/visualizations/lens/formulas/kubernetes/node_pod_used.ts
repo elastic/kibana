@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const nginxRequestsPerConnection: FormulaValueConfig = {
-  label: 'Requests Per Connection',
-  value: 'max(nginx.stubstatus.requests) / max(nginx.stubstatus.handled)',
+export const nodePodUsed: FormulaValueConfig = {
+  label: 'Used',
+  value: 'unique_count(kubernetes.pod.uid)',
   format: {
     id: 'number',
     params: {

@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './lens/dashboards';
-export * from './lens/formulas';
+export { hostLensFormulas } from './host';
+export { nginxLensFormulas } from './nginx';
+export { kubernetesLensFormulas } from './kubernetes';

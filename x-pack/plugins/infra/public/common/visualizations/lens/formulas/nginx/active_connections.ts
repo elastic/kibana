@@ -6,16 +6,14 @@
  */
 
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
-import { defaultPalette, Color } from '../../../../../../common/color_palette';
 
-export const nginxRedirectStatusCodes: FormulaValueConfig = {
-  label: '300-399',
-  value: `count(kql='http.response.status_code >= 300 and http.response.status_code <= 399')`,
+export const activeConnections: FormulaValueConfig = {
+  label: 'Active Connections',
+  value: 'average(nginx.stubstatus.active)',
   format: {
     id: 'number',
     params: {
       decimals: 0,
     },
   },
-  color: defaultPalette[Color.color0],
 };

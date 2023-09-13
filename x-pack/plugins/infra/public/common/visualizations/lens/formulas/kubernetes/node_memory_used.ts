@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const nginxActiveConnections: FormulaValueConfig = {
-  label: 'Active Connections',
-  value: 'average(nginx.stubstatus.active)',
+export const nodeMemoryUsed: FormulaValueConfig = {
+  label: 'Used',
+  value: 'average(kubernetes.node.memory.usage.bytes)',
   format: {
-    id: 'number',
+    id: 'bytes',
     params: {
-      decimals: 0,
+      decimals: 1,
     },
   },
 };
