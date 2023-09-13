@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import fs from 'fs';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import * as extractConfig from '../utils/extract_config_files';
 import * as dockerUtils from '../utils/docker';
@@ -353,6 +354,18 @@ describe('#start(installPath)', () => {
     mockEsBin({ start: true });
 
     await new Cluster({ log }).start(installPath, esClusterExecOptions);
+  });
+
+  test(`writes logs to file when 'writeLogsToPath' is passed`, async () => {
+    mockEsBin({ start: true });
+    const writeLogsToPath = `${KIBANA_ROOT}/es-cluster.log`;
+
+    await new Cluster({ log }).start(installPath, { writeLogsToPath });
+
+    expect(logWriter.messages[0]).toMatchInlineSnapshot(
+      `" info source[@kbn/es Cluster] Starting and writing logs to `
+    );
+    expect(fs.existsSync(writeLogsToPath)).toBe(true);
   });
 
   test('rejects if #start() was called previously', async () => {
