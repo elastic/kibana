@@ -9,9 +9,8 @@
 import React from 'react';
 import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import { ColorMapping } from '../../config';
-// TODO: move this outside or configurable
-export const MULTI_FIELD_KEY_SEPARATOR = ' › ';
 
 export const Match: React.FC<{
   index: number;
