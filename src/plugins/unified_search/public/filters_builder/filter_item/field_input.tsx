@@ -43,7 +43,8 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   const { disabled, suggestionsAbstraction } = useContext(FiltersBuilderContextType);
   const fields = dataView ? getFilterableFields(dataView) : [];
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
-  const comboBoxRef = useRef<HTMLInputElement>(null);
+  const comboBoxWrapperRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const onFieldChange = useCallback(
     ([selectedField]: DataViewField[]) => {
@@ -77,12 +78,25 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       ({ label }) => fields[optionFields.findIndex((optionField) => optionField.label === label)]
     );
     onFieldChange(newValues);
+
+    setTimeout(() => {
+      // Note: requires a tick skip to correctly blur element focus
+      inputRef?.current?.blur();
+    });
+  };
+
+  const handleFocus: React.FocusEventHandler<HTMLDivElement> = () => {
+    // Force focus on input due to https://github.com/elastic/eui/issues/7170
+    inputRef?.current?.focus();
   };
 
   return (
-    <div ref={comboBoxRef}>
+    <div ref={comboBoxWrapperRef}>
       <EuiComboBox
         id={id}
+        inputRef={(ref) => {
+          inputRef.current = ref;
+        }}
         options={euiOptions}
         selectedOptions={selectedEuiOptions}
         onChange={onComboBoxChange}
@@ -94,6 +108,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
         isClearable={false}
         compressed
         fullWidth
+        onFocus={handleFocus}
         data-test-subj="filterFieldSuggestionList"
         renderOption={(option, searchValue) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -105,7 +120,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
                 defaultComboboxWidth={DEFAULT_COMBOBOX_WIDTH}
                 defaultFont={DEFAULT_FONT}
                 comboboxPaddings={COMBOBOX_PADDINGS}
-                comboBoxRef={comboBoxRef}
+                comboBoxWrapperRef={comboBoxWrapperRef}
                 label={option.label}
                 search={searchValue}
               />

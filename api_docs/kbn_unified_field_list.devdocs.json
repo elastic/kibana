@@ -798,41 +798,6 @@
       },
       {
         "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-common.getFieldTypeName",
-        "type": "Function",
-        "tags": [],
-        "label": "getFieldTypeName",
-        "description": [
-          "\nReturns a user-friendly name of a field type"
-        ],
-        "signature": [
-          "(type: string | undefined) => string"
-        ],
-        "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_name.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-common.getFieldTypeName.$1",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-unified-field-list/src/utils/field_types/get_field_type_name.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
         "id": "def-common.getSearchMode",
         "type": "Function",
         "tags": [],
@@ -1555,7 +1520,7 @@
           },
           " | undefined; }; getCreationOptions: () => ",
           "UnifiedFieldListSidebarContainerCreationOptions",
-          "; isSidebarCollapsed?: boolean | undefined; prependInFlyout?: (() => React.ReactNode) | undefined; variant?: \"responsive\" | \"button-and-flyout-always\" | \"list-always\" | undefined; onSelectedFieldFilter?: ((field: ",
+          "; prependInFlyout?: (() => React.ReactNode) | undefined; variant?: \"responsive\" | \"button-and-flyout-always\" | \"list-always\" | undefined; onSelectedFieldFilter?: ((field: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -3019,6 +2984,20 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.FieldListFiltersProps.compressed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compressed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/components/field_list_filters/field_list_filters.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
@@ -5518,20 +5497,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-common.KNOWN_FIELD_TYPES",
-        "type": "Enum",
-        "tags": [],
-        "label": "KNOWN_FIELD_TYPES",
-        "description": [
-          "\nField types for which name and description are defined"
-        ],
-        "path": "packages/kbn-unified-field-list/src/utils/field_types/field_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -5693,21 +5658,6 @@
       },
       {
         "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-common.FieldTypeKnown",
-        "type": "Type",
-        "tags": [],
-        "label": "FieldTypeKnown",
-        "description": [],
-        "signature": [
-          "string"
-        ],
-        "path": "packages/kbn-unified-field-list/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
         "id": "def-common.GetCustomFieldType",
         "type": "Type",
         "tags": [],
@@ -5797,7 +5747,7 @@
           },
           " | undefined; }; getCreationOptions: () => ",
           "UnifiedFieldListSidebarContainerCreationOptions",
-          "; isSidebarCollapsed?: boolean | undefined; prependInFlyout?: (() => React.ReactNode) | undefined; variant?: \"responsive\" | \"button-and-flyout-always\" | \"list-always\" | undefined; onSelectedFieldFilter?: ((field: ",
+          "; prependInFlyout?: (() => React.ReactNode) | undefined; variant?: \"responsive\" | \"button-and-flyout-always\" | \"list-always\" | undefined; onSelectedFieldFilter?: ((field: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

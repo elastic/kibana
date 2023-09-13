@@ -41,3 +41,60 @@ export const testIndexMappings = {
     },
   },
 };
+
+// Mocking partial index settings response
+export const testIndexSettings = {
+  settings: {
+    index: {
+      routing: {
+        allocation: {
+          include: {
+            _tier_preference: 'data_content',
+          },
+        },
+      },
+      number_of_shards: '1',
+    },
+  },
+  defaults: {
+    index: {
+      flush_after_merge: '512mb',
+      max_script_fields: '32',
+      query: {
+        default_field: ['*'],
+      },
+      priority: '1',
+    },
+  },
+};
+export const testIndexEditableSettings = {
+  'index.priority': '1',
+  'index.query.default_field': ['*'],
+  'index.routing.allocation.include._tier_preference': 'data_content',
+};
+
+// Mocking partial index stats response
+export const testIndexStats = {
+  _shards: {
+    total: 1,
+    successful: 1,
+    failed: 0,
+  },
+  stats: {
+    uuid: 'tQ-n6sriQzC84xn58VYONQ',
+    health: 'green',
+    status: 'open',
+    primaries: {
+      docs: {
+        count: 1000,
+        deleted: 0,
+      },
+    },
+    total: {
+      docs: {
+        count: 1000,
+        deleted: 0,
+      },
+    },
+  },
+};
