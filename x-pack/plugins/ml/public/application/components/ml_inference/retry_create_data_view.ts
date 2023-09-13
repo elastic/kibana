@@ -10,11 +10,12 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import { ml } from '../../services/ml_api_service';
+import type { FormMessage } from '../../data_frame_analytics/pages/analytics_management/hooks/use_create_analytics_form/state';
 
 interface CreateKibanaDataViewResponse {
   success: boolean;
   error?: string;
-  message?: string;
+  message: string;
   dataViewId?: string;
 }
 
@@ -66,9 +67,10 @@ export async function retryIndexExistsCheck(destIndex: string): Promise<{
 export const createKibanaDataView = async (
   destinationIndex: string,
   dataViewsService: DataViewsContract,
-  timeFieldName?: string
+  timeFieldName?: string,
+  callback?: (response: FormMessage) => void
 ) => {
-  const response: CreateKibanaDataViewResponse = { success: false };
+  const response: CreateKibanaDataViewResponse = { success: false, message: '' };
   const dataViewName = destinationIndex;
   const exists = await retryIndexExistsCheck(destinationIndex);
   if (exists?.success === true) {
@@ -149,6 +151,9 @@ export const createKibanaDataView = async (
         }
       );
     }
+  }
+  if (callback !== undefined) {
+    callback({ error: response.error, message: response.message });
   }
   return response;
 };
