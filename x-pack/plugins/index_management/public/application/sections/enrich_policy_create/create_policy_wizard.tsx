@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSteps, EuiStepStatus, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
@@ -93,7 +94,7 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Configuration',
         }),
         status: completionState.configurationStep ? 'complete' : getStepStatus(CONFIGURATION),
-        onClick: () => currentStep !== CONFIGURATION && changeCurrentStepTo(CONFIGURATION),
+        onClick: noop,
         children: currentStep === CONFIGURATION && (
           <ConfigurationStep onNext={() => changeCurrentStepTo(FIELD_SELECTION)} />
         ),
@@ -104,11 +105,7 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Field selection',
         }),
         status: completionState.fieldsSelectionStep ? 'complete' : getStepStatus(FIELD_SELECTION),
-        onClick: () => {
-          if (currentStep !== FIELD_SELECTION && completionState.configurationStep) {
-            changeCurrentStepTo(FIELD_SELECTION);
-          }
-        },
+        onClick: noop,
         children: currentStep === FIELD_SELECTION && (
           <FieldSelectionStep onNext={() => changeCurrentStepTo(CREATE)} />
         ),
@@ -119,15 +116,7 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Create',
         }),
         status: (currentStep === CREATE ? 'current' : 'incomplete') as EuiStepStatus,
-        onClick: () => {
-          if (
-            currentStep !== CREATE &&
-            completionState.configurationStep &&
-            completionState.fieldsSelectionStep
-          ) {
-            changeCurrentStepTo(CREATE);
-          }
-        },
+        onClick: noop,
         children: currentStep === CREATE && (
           <CreateStep onSubmit={onSubmit} isLoading={isLoading} />
         ),
