@@ -16,7 +16,7 @@ export default function ({ loadTestFile }: any) {
       loadTestFile(require.resolve('./custom_threshold_rule/custom_eq_avg_bytes_fired'));
       loadTestFile(require.resolve('./custom_threshold_rule/documents_count_fired'));
       loadTestFile(require.resolve('./custom_threshold_rule/group_by_fired'));
-      loadTestFile(require.resolve('./threshold_rule_data_view'));
+      loadTestFile(require.resolve('./custom_threshold_rule_data_view'));
     });
     describe('Synthetics', () => {
       loadTestFile(require.resolve('./synthetics_rule'));
