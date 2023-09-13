@@ -209,9 +209,9 @@ const getNodeField = (field: HostsFields): string => {
       return 'node.host.name';
     case HostsFields.lastSeen:
       return 'node.lastSeen';
+    default:
+      return '';
   }
-
-  return '';
 };
 
 export const HostsTable = React.memo(HostsTableComponent);
