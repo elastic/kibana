@@ -16,7 +16,12 @@ import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities, useResetTransforms } from '../../../../hooks';
 
-import { resetActionNameText, isResetActionDisabled, ResetActionName } from './reset_action_name';
+import {
+  resetActionNameText,
+  isResetActionDisabled,
+  ResetActionName,
+  getResetActionDisabledMessage,
+} from './reset_action_name';
 
 export type ResetAction = ReturnType<typeof useResetAction>;
 export const useResetAction = (forceDisable: boolean) => {
@@ -62,11 +67,13 @@ export const useResetAction = (forceDisable: boolean) => {
             canResetTransform,
             disabled: isResetActionDisabled([item], forceDisable),
             isBulkAction: false,
+            items: [item],
           }}
         />
       ),
       enabled: (item: TransformListRow) =>
-        !isResetActionDisabled([item], forceDisable) && canResetTransform,
+        getResetActionDisabledMessage({ items: [item], canResetTransform, forceDisable }) ===
+        undefined,
       description: resetActionNameText,
       icon: 'refresh',
       type: 'icon',

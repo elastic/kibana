@@ -88,11 +88,15 @@ export const useDeleteAction = (forceDisable: boolean) => {
             canDeleteTransform,
             disabled: isDeleteActionDisabled([item], forceDisable),
             isBulkAction: false,
+            items: [item],
+            forceDisable,
           }}
         />
       ),
       enabled: (item: TransformListRow) =>
-        !isDeleteActionDisabled([item], forceDisable) && canDeleteTransform,
+        isTransformListRowWithStats(item) &&
+        !isDeleteActionDisabled([item], forceDisable) &&
+        canDeleteTransform,
       description: deleteActionNameText,
       icon: 'trash',
       type: 'icon',

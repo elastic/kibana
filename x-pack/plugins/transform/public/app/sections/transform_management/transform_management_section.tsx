@@ -310,12 +310,12 @@ export const TransformManagement: FC = () => {
               ) : null}
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
-                  isStatsLoading={transformsStatsLoading}
                   isLoading={transformsWithoutStatsLoading}
                   onCreateTransform={onOpenModal}
                   transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
+                  transformsStatsLoading={transformsStatsLoading}
                 />
               )}
               <TransformAlertFlyoutWrapper />

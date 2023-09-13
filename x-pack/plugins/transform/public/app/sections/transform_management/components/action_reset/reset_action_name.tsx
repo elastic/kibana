@@ -11,6 +11,9 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { TransformCapabilities } from '../../../../../../common/types/capabilities';
 import { TransformState, TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
@@ -29,41 +32,73 @@ const transformCanNotBeReseted = (i: TransformListRow) =>
 
 export const isResetActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
   const disabled = items.some(transformCanNotBeReseted);
-  return forceDisable === true || disabled;
+  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
+
+  return forceDisable === true || disabled || hasNoStats;
 };
 
+export const getResetActionDisabledMessage = ({
+  items,
+  canResetTransform,
+  forceDisable,
+}: {
+  items: TransformListRow[];
+  canResetTransform: TransformCapabilities['canResetTransform'];
+  forceDisable: boolean;
+}) => {
+  const isBulkAction = items.length > 1;
+
+  // Disable start for transforms if stats does not exist
+  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
+
+  if (hasNoStats) {
+    return createNoStatsTooltipMessage({
+      actionName: resetActionNameText,
+      count: items.length,
+    });
+  }
+
+  if (!canResetTransform) {
+    return createCapabilityFailureMessage('canResetTransform');
+  }
+
+  if (isResetActionDisabled(items, forceDisable)) {
+    const bulkResetButtonDisabledText = i18n.translate(
+      'xpack.transform.transformList.resetBulkActionDisabledToolTipContent',
+      {
+        defaultMessage: 'One or more selected transforms must be stopped to be reset.',
+      }
+    );
+    const resetButtonDisabledText = i18n.translate(
+      'xpack.transform.transformList.resetActionDisabledToolTipContent',
+      {
+        defaultMessage: 'Stop the transform in order to reset it.',
+      }
+    );
+
+    return isBulkAction ? bulkResetButtonDisabledText : resetButtonDisabledText;
+  }
+};
 export interface ResetActionNameProps {
+  items: TransformListRow[];
+
   canResetTransform: boolean;
   disabled: boolean;
   isBulkAction: boolean;
 }
 
 export const ResetActionName: FC<ResetActionNameProps> = ({
+  items,
   canResetTransform,
   disabled,
-  isBulkAction,
 }) => {
-  const bulkResetButtonDisabledText = i18n.translate(
-    'xpack.transform.transformList.resetBulkActionDisabledToolTipContent',
-    {
-      defaultMessage: 'One or more selected transforms must be stopped to be reset.',
-    }
-  );
-  const resetButtonDisabledText = i18n.translate(
-    'xpack.transform.transformList.resetActionDisabledToolTipContent',
-    {
-      defaultMessage: 'Stop the transform in order to reset it.',
-    }
-  );
+  const content = getResetActionDisabledMessage({
+    items,
+    canResetTransform,
+    forceDisable: disabled,
+  });
 
-  if (disabled || !canResetTransform) {
-    let content;
-    if (disabled) {
-      content = isBulkAction ? bulkResetButtonDisabledText : resetButtonDisabledText;
-    } else {
-      content = createCapabilityFailureMessage('canResetTransform');
-    }
-
+  if (content) {
     return (
       <EuiToolTip position="top" content={content}>
         <>{resetActionNameText}</>

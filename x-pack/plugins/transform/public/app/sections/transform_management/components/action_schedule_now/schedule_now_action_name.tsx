@@ -11,6 +11,8 @@ import { EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
 import { useTransformCapabilities } from '../../../../hooks';
@@ -31,11 +33,15 @@ export const isScheduleNowActionDisabled = (
   // Disable schedule-now for batch transforms which have completed.
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
 
+  // Disable start for transforms if stats does not exist
+  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
+
   return (
     !canScheduleNowTransform ||
     completedBatchTransform ||
     items.length === 0 ||
-    transformNodes === 0
+    transformNodes === 0 ||
+    hasNoStats
   );
 };
 
@@ -92,6 +98,11 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
       content = createCapabilityFailureMessage('canScheduleNowTransform');
     } else if (completedBatchTransform) {
       content = completedBatchTransformMessage;
+    } else if (items.some((i) => !isTransformListRowWithStats(i))) {
+      content = createNoStatsTooltipMessage({
+        actionName: scheduleNowActionNameText,
+        count: items.length,
+      });
     }
   }
 

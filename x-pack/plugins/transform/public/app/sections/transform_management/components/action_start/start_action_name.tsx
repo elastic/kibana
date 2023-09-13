@@ -9,6 +9,8 @@ import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
@@ -34,12 +36,16 @@ export const isStartActionDisabled = (
     (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STARTED
   );
 
+  // Disable start for transforms if stats does not exist
+  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
+
   return (
     !canStartStopTransform ||
     completedBatchTransform ||
     startedTransform ||
     items.length === 0 ||
-    transformNodes === 0
+    transformNodes === 0 ||
+    hasNoStats
   );
 };
 
@@ -107,6 +113,11 @@ export const StartActionName: FC<StartActionNameProps> = ({
       content = completedBatchTransformMessage;
     } else if (startedTransform) {
       content = startedTransformMessage;
+    } else if (items.some((i) => !isTransformListRowWithStats(i))) {
+      content = createNoStatsTooltipMessage({
+        actionName: startActionNameText,
+        count: items.length,
+      });
     }
   }
 

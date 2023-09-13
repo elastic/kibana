@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiToolTip } from '@elastic/eui';
 
-import { TransformState, TRANSFORM_STATE } from '../../../../../../common/constants';
-import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
-
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
+import { TransformCapabilities } from '../../../../../../common/types/capabilities';
 import { TransformListRow } from '../../../../common';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+import { TransformState, TRANSFORM_STATE } from '../../../../../../common/constants';
 
 export const deleteActionNameText = i18n.translate(
   'xpack.transform.transformList.deleteActionNameText',
@@ -29,41 +31,66 @@ const transformCanNotBeDeleted = (i: TransformListRow) =>
 
 export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
   const disabled = items.some(transformCanNotBeDeleted);
-  return forceDisable === true || disabled;
+  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
+
+  return forceDisable === true || disabled || hasNoStats;
 };
 
 export interface DeleteActionNameProps {
+  items: TransformListRow[];
   canDeleteTransform: boolean;
   disabled: boolean;
   isBulkAction: boolean;
+  forceDisable: boolean;
 }
 
+export const getDeleteActionDisabledMessage = ({
+  items,
+  canDeleteTransform,
+  forceDisable,
+}: {
+  items: TransformListRow[];
+  canDeleteTransform: TransformCapabilities['canDeleteTransform'];
+  forceDisable: boolean;
+}) => {
+  const isBulkAction = items.length > 1;
+
+  // Disable start for transforms if stats does not exist
+  const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
+
+  if (hasNoStats) {
+    return createNoStatsTooltipMessage({
+      actionName: deleteActionNameText,
+      count: items.length,
+    });
+  }
+
+  if (!canDeleteTransform) {
+    return createCapabilityFailureMessage('canDeleteTransform');
+  }
+
+  const disabled = items.some(transformCanNotBeDeleted);
+
+  if (disabled || disabled) {
+    return isBulkAction === true
+      ? i18n.translate('xpack.transform.transformList.deleteBulkActionDisabledToolTipContent', {
+          defaultMessage: 'One or more selected transforms must be stopped in order to be deleted.',
+        })
+      : i18n.translate('xpack.transform.transformList.deleteActionDisabledToolTipContent', {
+          defaultMessage: 'Stop the transform in order to delete it.',
+        });
+  }
+};
+
 export const DeleteActionName: FC<DeleteActionNameProps> = ({
+  items,
   canDeleteTransform,
   disabled,
   isBulkAction,
+  forceDisable,
 }) => {
-  const bulkDeleteButtonDisabledText = i18n.translate(
-    'xpack.transform.transformList.deleteBulkActionDisabledToolTipContent',
-    {
-      defaultMessage: 'One or more selected transforms must be stopped in order to be deleted.',
-    }
-  );
-  const deleteButtonDisabledText = i18n.translate(
-    'xpack.transform.transformList.deleteActionDisabledToolTipContent',
-    {
-      defaultMessage: 'Stop the transform in order to delete it.',
-    }
-  );
-
-  if (disabled || !canDeleteTransform) {
-    let content;
-    if (disabled) {
-      content = isBulkAction ? bulkDeleteButtonDisabledText : deleteButtonDisabledText;
-    } else {
-      content = createCapabilityFailureMessage('canDeleteTransform');
-    }
-
+  const content = getDeleteActionDisabledMessage({ items, canDeleteTransform, forceDisable });
+  if (content) {
     return (
       <EuiToolTip position="top" content={content}>
         <>{deleteActionNameText}</>

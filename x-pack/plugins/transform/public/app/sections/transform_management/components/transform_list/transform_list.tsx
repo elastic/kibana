@@ -83,20 +83,20 @@ function getItemIdToExpandedRowMap(
 
 interface TransformListProps {
   isLoading: boolean;
-  isStatsLoading: boolean;
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
   transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
+  transformStatsLoading: boolean;
 }
 
 export const TransformList: FC<TransformListProps> = ({
   isLoading,
-  isStatsLoading,
   onCreateTransform,
   transformNodes,
   transforms,
   transformsLoading,
+  transformStatsLoading,
 }) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
@@ -129,7 +129,7 @@ export const TransformList: FC<TransformListProps> = ({
     setExpandedRowItemIds,
     transformNodes,
     transformSelection,
-    isStatsLoading
+    transformStatsLoading
   );
 
   const searchError = query?.error ? query?.error.message : undefined;
@@ -238,6 +238,7 @@ export const TransformList: FC<TransformListProps> = ({
           canResetTransform={capabilities.canResetTransform}
           disabled={isResetActionDisabled(transformSelection, false)}
           isBulkAction={true}
+          items={transformSelection}
         />
       </EuiButtonEmpty>
     </div>,
@@ -250,6 +251,8 @@ export const TransformList: FC<TransformListProps> = ({
           canDeleteTransform={capabilities.canDeleteTransform}
           disabled={isDeleteActionDisabled(transformSelection, false)}
           isBulkAction={true}
+          items={transformSelection}
+          forceDisable={false}
         />
       </EuiButtonEmpty>
     </div>,
