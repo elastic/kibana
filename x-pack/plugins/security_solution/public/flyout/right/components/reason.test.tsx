@@ -46,17 +46,6 @@ describe('<Reason />', () => {
     expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render null if dataFormattedForFieldBrowser is null', () => {
-    const panelContext = {
-      ...panelContextValue,
-      dataFormattedForFieldBrowser: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = renderReason(panelContext);
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it('should render no reason if the field is null', () => {
     const panelContext = {
       ...panelContextValue,
