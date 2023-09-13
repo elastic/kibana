@@ -2,9 +2,9 @@ agents:
   queue: kibana-default
 
 steps:
-    # It's easier to do this through a required env var, than an input.
-    #  Inputs are not accessible in the pipeline code,
-    #  so you'd have to get a script to dig up the meta-data, then emit a build step to buildkite
+  # It's easier to do this through a required env var, than an input.
+  #  Inputs are not accessible in the pipeline code,
+  #  so you'd have to get a script to dig up the meta-data, then emit a build step to buildkite
   - label: "Ensure required ENV variable ES_SERVERLESS_IMAGE"
     if: "build.env('ES_SERVERLESS_IMAGE') == null"
     command: |
@@ -14,16 +14,52 @@ steps:
 
   - wait: ~
 
-  - label: ":pipeline: (:kibana: x :elastic:) Trigger Kibana Serverless suite"
-    trigger: "kibana-serverless"
+  - group: "(:kibana: x :elastic:) Trigger Kibana Serverless suite"
     if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
-    build:
-      commit: ${BUILDKITE_COMMIT}
-      branch: ${BUILDKITE_BRANCH}
-      env:
-        TEST_ES_SERVERLESS_IMAGE: ${ES_SERVERLESS_IMAGE}
+    steps:
+      - label: "Pre-Build"
+        command: .buildkite/scripts/lifecycle/pre_build.sh
+        key: pre-build
+        timeout_in_minutes: 10
+        agents:
+          queue: kibana-default
+
+      - label: "Build Kibana Distribution and Plugins"
+        command: .buildkite/scripts/steps/build_kibana.sh
+        agents:
+          queue: n2-16-spot
+        key: build
+        depends_on: pre-build
+        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+        timeout_in_minutes: 60
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: "Pick Test Group Run Order"
+        command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+        agents:
+          queue: kibana-default
+        env:
+          TEST_ES_SERVERLESS_IMAGE: ${ES_SERVERLESS_IMAGE}
+          JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+          JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+          FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
+          FTR_CONFIG_PATTERNS: '*serverless*'
+          LIMIT_CONFIG_TYPE: 'functional'
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
 
   - wait: ~
 
   - label: ":arrow_up::elastic::arrow_up: Promote docker image"
     command: .buildkite/scripts/steps/es_snapshots/promote_es_serverless_image.sh $ES_SERVERLESS_IMAGE
+
+  - label: 'Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
