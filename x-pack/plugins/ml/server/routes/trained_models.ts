@@ -54,7 +54,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
     })
     .addVersion(
       {
-        version: '1',
+        version: '2',
         validate: {
           request: {
             params: optionalModelIdSchema,
@@ -65,7 +65,15 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
-          const { with_pipelines: withPipelines, ...query } = request.query;
+          const {
+            with_pipelines: withPipelines,
+            with_indices: withIndicesRaw,
+            ...query
+          } = request.query;
+
+          const withIndices =
+            request.query.with_indices === 'true' || request.query.with_indices === true;
+
           const body = await mlClient.getTrainedModels({
             ...query,
             ...(modelId ? { model_id: modelId } : {}),
@@ -110,7 +118,9 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                 modelIdsAndAliases.map(async (modelIdOrAlias) => {
                   return {
                     modelIdOrAlias,
-                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdOrAlias),
+                    result: await modelsClient.getModelsPipelinesAndIndicesMap(modelIdOrAlias, {
+                      withIndices,
+                    }),
                   };
                 })
               );
@@ -147,7 +157,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
                   return allPipelines;
                 }, {});
 
-                if (modelMap) {
+                if (modelMap && withIndices) {
                   model.indices = modelMap.indices;
                 }
               }

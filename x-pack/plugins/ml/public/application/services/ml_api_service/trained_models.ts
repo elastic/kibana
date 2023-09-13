@@ -31,6 +31,7 @@ export interface InferenceQueryParams {
   tags?: string;
   // Custom kibana endpoint query params
   with_pipelines?: boolean;
+  with_indices?: boolean;
   include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
 }
 
@@ -70,7 +71,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
-        version: '1',
+        version: '2',
       });
     },
 

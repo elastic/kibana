@@ -725,8 +725,6 @@ export const useFetchDataComparisonResult = (
               ...refDataQuery,
             },
           };
-          // eslint-disable-next-line no-console
-          console.log(`--@@baselineRequest`, baselineRequest);
 
           const baselineResponseAggs = await fetchInParallelChunks({
             fields,
@@ -789,8 +787,6 @@ export const useFetchDataComparisonResult = (
               ...prodDataQuery,
             },
           };
-          // eslint-disable-next-line no-console
-          console.log(`--@@driftedRequest`, driftedRequest);
 
           const driftedRespAggs = await fetchInParallelChunks({
             fields,
@@ -831,9 +827,6 @@ export const useFetchDataComparisonResult = (
               ...refDataQuery,
             },
           };
-
-          // eslint-disable-next-line no-console
-          console.log(`--@@referenceHistogramRequest`, referenceHistogramRequest);
 
           const referenceHistogramRespAggs = await fetchInParallelChunks({
             fields,
@@ -876,8 +869,6 @@ export const useFetchDataComparisonResult = (
               ...prodDataQuery,
             },
           };
-          // eslint-disable-next-line no-console
-          console.log(`--@@comparisonHistogramRequest`, comparisonHistogramRequest);
 
           const comparisonHistogramRespAggs = await fetchInParallelChunks({
             fields,

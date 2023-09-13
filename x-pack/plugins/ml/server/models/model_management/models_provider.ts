@@ -183,7 +183,14 @@ export class ModelsProvider {
    * Retrieves the network map and metadata of model ids, pipelines, and indices that are tied to the model ids.
    * @param modelIds - Array of models ids and model aliases.
    */
-  async getModelsPipelinesAndIndicesMap(modelId: string): Promise<ModelMapResult> {
+  async getModelsPipelinesAndIndicesMap(
+    modelId: string,
+    {
+      withIndices,
+    }: {
+      withIndices: boolean;
+    }
+  ): Promise<ModelMapResult> {
     const result: ModelMapResult = {
       ingestPipelines: new Map(),
       indices: [],
@@ -226,146 +233,149 @@ export class ModelsProvider {
             },
           });
         }
-        const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
 
-        let indicesPermissions;
-        try {
-          indicesSettings = await this._client.asInternalUser.indices.getSettings();
-          const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
-            index: [
-              {
-                names: Object.keys(indicesSettings),
-                privileges: ['read'],
-              },
-            ],
-          });
-          indicesPermissions = hasPrivilegesResponse.index;
-        } catch (e) {
-          // Possible that the user doesn't have permissions to view
-          // If so, gracefully exit
-          if (e.meta?.statusCode !== 403) {
-            // eslint-disable-next-line no-console
-            console.error(e);
+        if (withIndices === true) {
+          const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
+
+          let indicesPermissions;
+          try {
+            indicesSettings = await this._client.asInternalUser.indices.getSettings();
+            const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
+              index: [
+                {
+                  names: Object.keys(indicesSettings),
+                  privileges: ['read'],
+                },
+              ],
+            });
+            indicesPermissions = hasPrivilegesResponse.index;
+          } catch (e) {
+            // Possible that the user doesn't have permissions to view
+            // If so, gracefully exit
+            if (e.meta?.statusCode !== 403) {
+              // eslint-disable-next-line no-console
+              console.error(e);
+            }
+            return result;
           }
-          return result;
-        }
 
-        // 2. From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
-        for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
-          if (
-            settings?.index?.default_pipeline &&
-            pipelineIds.has(settings.index.default_pipeline) &&
-            indicesPermissions[indexName]?.read === true
-          ) {
-            if (Array.isArray(pipelineIdsToDestinationIndices[settings.index.default_pipeline])) {
-              pipelineIdsToDestinationIndices[settings.index.default_pipeline].push(indexName);
-            } else {
-              pipelineIdsToDestinationIndices[settings.index.default_pipeline] = [indexName];
+          // 2. From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
+          for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
+            if (
+              settings?.index?.default_pipeline &&
+              pipelineIds.has(settings.index.default_pipeline) &&
+              indicesPermissions[indexName]?.read === true
+            ) {
+              if (Array.isArray(pipelineIdsToDestinationIndices[settings.index.default_pipeline])) {
+                pipelineIdsToDestinationIndices[settings.index.default_pipeline].push(indexName);
+              } else {
+                pipelineIdsToDestinationIndices[settings.index.default_pipeline] = [indexName];
+              }
             }
           }
-        }
 
-        // 3. Grab index information for all the indices found, and add their info to the map
-        for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {
-          const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.INGEST_PIPELINE);
+          // 3. Grab index information for all the indices found, and add their info to the map
+          for (const [pipelineId, indexIds] of Object.entries(pipelineIdsToDestinationIndices)) {
+            const pipelineNodeId = this.getNodeId(pipelineId, JOB_MAP_NODE_TYPES.INGEST_PIPELINE);
 
-          for (const destinationIndexId of indexIds) {
-            const destinationIndexNodeId = this.getNodeId(
-              destinationIndexId,
-              JOB_MAP_NODE_TYPES.INDEX
-            );
+            for (const destinationIndexId of indexIds) {
+              const destinationIndexNodeId = this.getNodeId(
+                destinationIndexId,
+                JOB_MAP_NODE_TYPES.INDEX
+              );
 
-            const destinationIndexDetails = await this.getIndexData(destinationIndexId);
+              const destinationIndexDetails = await this.getIndexData(destinationIndexId);
 
-            result.indices.push(destinationIndexDetails);
+              result.indices.push(destinationIndexDetails);
 
-            result.details[destinationIndexNodeId] = {
-              ...destinationIndexDetails,
-              ml_inference_models: [modelId],
-            };
+              result.details[destinationIndexNodeId] = {
+                ...destinationIndexDetails,
+                ml_inference_models: [modelId],
+              };
 
-            result.elements.push({
-              data: {
-                id: destinationIndexNodeId,
-                label: destinationIndexId,
-                type: JOB_MAP_NODE_TYPES.INDEX,
-              },
-            });
+              result.elements.push({
+                data: {
+                  id: destinationIndexNodeId,
+                  label: destinationIndexId,
+                  type: JOB_MAP_NODE_TYPES.INDEX,
+                },
+              });
 
-            result.elements.push({
-              data: {
-                id: `${pipelineNodeId}~${destinationIndexNodeId}`,
-                source: pipelineNodeId,
-                target: destinationIndexNodeId,
-              },
-            });
+              result.elements.push({
+                data: {
+                  id: `${pipelineNodeId}~${destinationIndexNodeId}`,
+                  source: pipelineNodeId,
+                  target: destinationIndexNodeId,
+                },
+              });
+            }
           }
-        }
 
-        const destinationIndices = flatten(Object.values(pipelineIdsToDestinationIndices));
+          const destinationIndices = flatten(Object.values(pipelineIdsToDestinationIndices));
 
-        // 4. From these destination indices, check if there's any transforms that have the indexId as the source destination index
-        if (destinationIndices.length > 0) {
-          const transforms = await this.initTransformData();
+          // 4. From these destination indices, check if there's any transforms that have the indexId as the source destination index
+          if (destinationIndices.length > 0) {
+            const transforms = await this.initTransformData();
 
-          if (!transforms) return result;
+            if (!transforms) return result;
 
-          for (const destinationIndex of destinationIndices) {
-            const destinationIndexNodeId = `${destinationIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
+            for (const destinationIndex of destinationIndices) {
+              const destinationIndexNodeId = `${destinationIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 
-            const foundTransform = transforms?.find((t) => {
-              const transformSourceIndex = Array.isArray(t.source.index)
-                ? t.source.index[0]
-                : t.source.index;
-              return transformSourceIndex === destinationIndex;
-            });
+              const foundTransform = transforms?.find((t) => {
+                const transformSourceIndex = Array.isArray(t.source.index)
+                  ? t.source.index[0]
+                  : t.source.index;
+                return transformSourceIndex === destinationIndex;
+              });
 
-            // 5. If any of the transforms use these indices as source , find the destination indices to complete the map
-            if (foundTransform) {
-              const transformDestIndex = foundTransform.dest.index;
-              const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
-              const transformDestIndexNodeId = `${transformDestIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
+              // 5. If any of the transforms use these indices as source , find the destination indices to complete the map
+              if (foundTransform) {
+                const transformDestIndex = foundTransform.dest.index;
+                const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
+                const transformDestIndexNodeId = `${transformDestIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 
-              const destIndex = await this.getIndexData(transformDestIndex);
+                const destIndex = await this.getIndexData(transformDestIndex);
 
-              result.indices.push(destIndex);
+                result.indices.push(destIndex);
 
-              result.details[transformNodeId] = foundTransform;
-              result.details[transformDestIndexNodeId] = destIndex;
+                result.details[transformNodeId] = foundTransform;
+                result.details[transformDestIndexNodeId] = destIndex;
 
-              result.elements.push(
-                {
-                  data: {
-                    id: transformNodeId,
-                    label: foundTransform.id,
-                    type: JOB_MAP_NODE_TYPES.TRANSFORM,
+                result.elements.push(
+                  {
+                    data: {
+                      id: transformNodeId,
+                      label: foundTransform.id,
+                      type: JOB_MAP_NODE_TYPES.TRANSFORM,
+                    },
                   },
-                },
-                {
-                  data: {
-                    id: transformDestIndexNodeId,
-                    label: transformDestIndex,
-                    type: JOB_MAP_NODE_TYPES.INDEX,
-                  },
-                }
-              );
+                  {
+                    data: {
+                      id: transformDestIndexNodeId,
+                      label: transformDestIndex,
+                      type: JOB_MAP_NODE_TYPES.INDEX,
+                    },
+                  }
+                );
 
-              result.elements.push(
-                {
-                  data: {
-                    id: `${destinationIndexNodeId}~${transformNodeId}`,
-                    source: destinationIndexNodeId,
-                    target: transformNodeId,
+                result.elements.push(
+                  {
+                    data: {
+                      id: `${destinationIndexNodeId}~${transformNodeId}`,
+                      source: destinationIndexNodeId,
+                      target: transformNodeId,
+                    },
                   },
-                },
-                {
-                  data: {
-                    id: `${transformNodeId}~${transformDestIndexNodeId}`,
-                    source: transformNodeId,
-                    target: transformDestIndexNodeId,
-                  },
-                }
-              );
+                  {
+                    data: {
+                      id: `${transformNodeId}~${transformDestIndexNodeId}`,
+                      source: transformNodeId,
+                      target: transformDestIndexNodeId,
+                    },
+                  }
+                );
+              }
             }
           }
         }
