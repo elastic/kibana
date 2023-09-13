@@ -196,7 +196,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless', '@brokenInServe
     beforeEach(() => {
       login();
       disableExpandableFlyout();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
     });

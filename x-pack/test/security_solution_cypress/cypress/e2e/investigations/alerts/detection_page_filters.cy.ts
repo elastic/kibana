@@ -25,7 +25,7 @@ import {
 import { createRule } from '../../../tasks/api_calls/rules';
 import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import {
   closePageFilterPopover,
@@ -116,7 +116,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
 
   beforeEach(() => {
     login();
-    visit(ALERTS_URL);
+    visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
     resetFilters();
   });
@@ -128,7 +128,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
   context('Alert Page Filters Customization ', () => {
     beforeEach(() => {
       login();
-      visit(ALERTS_URL);
+      visitWithTimeRange(ALERTS_URL);
       waitForAlerts();
     });
 
@@ -197,7 +197,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(formatPageFilterSearchParam(NEW_FILTERS)));
-      visit(currURL.toString());
+      visitWithTimeRange(currURL.toString());
       waitForAlerts();
       assertFilterControlsWithFilterObject(NEW_FILTERS);
     });
@@ -218,7 +218,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@brokenInServerless'] },
       const currURL = new URL(url);
 
       currURL.searchParams.set('pageFilters', encode(pageFilterUrlString));
-      visit(currURL.toString());
+      visitWithTimeRange(currURL.toString());
 
       waitForAlerts();
       cy.get(OPTION_LIST_LABELS).should((sub) => {
