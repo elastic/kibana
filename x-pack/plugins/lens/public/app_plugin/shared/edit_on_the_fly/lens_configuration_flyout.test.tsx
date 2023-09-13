@@ -8,7 +8,6 @@ import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { mountWithProvider } from '../../../mocks';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   mockVisualizationMap,
@@ -111,11 +110,9 @@ describe('LensEditConfigurationFlyout', () => {
       references: [],
     } as unknown as TypedLensByValueInput['attributes'];
 
-    const dataView = { id: 'index1', isPersisted: () => true } as unknown as DataView;
     return {
       attributes: lensAttributes,
-      dataView,
-      updateAll: jest.fn(),
+      updatePanelState: jest.fn(),
       coreStart: coreMock.createStart(),
       startDependencies,
       visualizationMap,

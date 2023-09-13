@@ -13,6 +13,7 @@ import { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -23,19 +24,38 @@ import {
   initExisting,
   initEmpty,
 } from '../../../state_management';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import {
-  LensEditConfigurationFlyout,
-  type EditConfigPanelProps,
-} from './lens_configuration_flyout';
+import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import { SavedObjectIndexStore, type Document } from '../../../persistence';
 import { DOC_TYPE } from '../../../../common/constants';
 
-export type EditLensConfigurationProps = Omit<
-  EditConfigPanelProps,
-  'startDependencies' | 'coreStart' | 'visualizationMap' | 'datasourceMap'
->;
+export interface EditLensConfigurationProps {
+  /** The attributes of the Lens embeddable */
+  attributes: TypedLensByValueInput['attributes'];
+  /** Callback for updating the visualization and datasources state */
+  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
+  /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
+  datasourceId: 'formBased' | 'textBased';
+  /** Contains the active data, necessary for some panel configuration such as coloring */
+  adaptersTables?: Record<string, Datatable>;
+  /** Optional callback called when updating the by reference embeddable */
+  updateByRefInput?: (soId: string) => void;
+  /** Callback for closing the edit flyout */
+  closeFlyout?: () => void;
+  /** Boolean used for adding a flyout wrapper */
+  wrapInFlyout?: boolean;
+  /** Optional parameter for panel identification
+   * If not given, Lens generates a new one
+   */
+  panelId?: string;
+  /** Optional parameter for saved object id
+   * Should be given if the lens embeddable is a by reference one
+   * (saved in the library)
+   */
+  savedObjectId?: string;
+}
 
 function LoadingSpinnerWithOverlay() {
   return (
@@ -88,8 +108,7 @@ export async function getEditLensConfiguration(
 
   return ({
     attributes,
-    dataView,
-    updateAll,
+    updatePanelState,
     closeFlyout,
     wrapInFlyout,
     datasourceId,
@@ -98,9 +117,13 @@ export async function getEditLensConfiguration(
     savedObjectId,
     updateByRefInput,
   }: EditLensConfigurationProps) => {
-    if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
+    if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
     }
+    /**
+     * During inline editing of a by reference panel, the panel is converted to a by value one.
+     * When the user applies the changes we save them to the Lens SO
+     */
     const saveByRef = useCallback(
       async (attrs: Document) => {
         const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement.client);
@@ -125,7 +148,7 @@ export async function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(
       storeDeps,
       undefined,
-      updatingMiddleware(updateAll)
+      updatingMiddleware(updatePanelState)
     );
     lensStore.dispatch(
       loadInitial({
@@ -165,8 +188,7 @@ export async function getEditLensConfiguration(
 
     const configPanelProps = {
       attributes,
-      dataView,
-      updateAll,
+      updatePanelState,
       closeFlyout,
       datasourceId,
       adaptersTables,

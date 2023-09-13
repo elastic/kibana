@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import type { UnifiedHistogramServices } from '../types';
@@ -18,7 +17,6 @@ import type { LensAttributesContext } from './utils/get_lens_attributes';
 export function ChartConfigPanel({
   services,
   lensAttributesContext,
-  dataView,
   lensTablesAdapter,
   currentSuggestion,
   isFlyoutVisible,
@@ -29,7 +27,6 @@ export function ChartConfigPanel({
 }: {
   services: UnifiedHistogramServices;
   lensAttributesContext: LensAttributesContext;
-  dataView: DataView;
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensTablesAdapter?: Record<string, Datatable>;
@@ -64,9 +61,8 @@ export function ChartConfigPanel({
       const panel = (
         <Component
           attributes={lensAttributesContext.attributes}
-          dataView={dataView}
           adaptersTables={lensTablesAdapter}
-          updateAll={updateSuggestion}
+          updatePanelState={updateSuggestion}
           closeFlyout={() => {
             setIsFlyoutVisible(false);
           }}
@@ -90,7 +86,6 @@ export function ChartConfigPanel({
   }, [
     lensAttributesContext.attributes,
     services.lens,
-    dataView,
     updateSuggestion,
     isPlainRecord,
     currentSuggestion,

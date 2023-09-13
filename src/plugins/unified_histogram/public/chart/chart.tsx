@@ -452,7 +452,6 @@ export function Chart({
           {...{
             services,
             lensAttributesContext,
-            dataView,
             lensTablesAdapter,
             currentSuggestion,
             isFlyoutVisible,

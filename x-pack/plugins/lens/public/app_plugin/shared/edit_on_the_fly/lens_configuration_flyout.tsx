@@ -24,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
@@ -37,15 +36,12 @@ import type { Document } from '../../../persistence';
 
 export interface EditConfigPanelProps {
   attributes: TypedLensByValueInput['attributes'];
-  dataView: DataView;
-  updateAll: (datasourceState: unknown, visualizationState: unknown) => void;
+  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
   closeFlyout?: () => void;
-  wrapInFlyout?: boolean;
-  panelId?: string;
   savedObjectId?: string;
   datasourceId: 'formBased' | 'textBased';
   adaptersTables?: Record<string, Datatable>;
@@ -55,13 +51,12 @@ export interface EditConfigPanelProps {
 
 export function LensEditConfigurationFlyout({
   attributes,
-  dataView,
   coreStart,
   startDependencies,
   visualizationMap,
   datasourceMap,
   datasourceId,
-  updateAll,
+  updatePanelState,
   closeFlyout,
   adaptersTables,
   saveByRef,
@@ -95,13 +90,20 @@ export function LensEditConfigurationFlyout({
     const attrs = previousAttributes.current;
     if (attributesChanged) {
       // needs to be updated with indexPatternId
-      updateAll?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
+      updatePanelState?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
     }
     if (savedObjectId) {
       updateByRefInput?.(savedObjectId);
     }
     closeFlyout?.();
-  }, [attributesChanged, savedObjectId, closeFlyout, updateAll, datasourceId, updateByRefInput]);
+  }, [
+    attributesChanged,
+    savedObjectId,
+    closeFlyout,
+    updatePanelState,
+    datasourceId,
+    updateByRefInput,
+  ]);
 
   const onApply = useCallback(() => {
     if (savedObjectId) {

@@ -774,6 +774,11 @@ export class Embeddable
         },
         references,
       };
+
+      /**
+       * SavedObjectId is undefined for by value panels and defined for the by reference ones.
+       * Here we are converting the by reference panels to by value when user is inline editing
+       */
       this.updateInput({ attributes: attrs, savedObjectId: undefined });
     }
   }
@@ -796,13 +801,11 @@ export class Embeddable
       'formBased') as EditLensConfigurationProps['datasourceId'];
 
     const attributes = this.savedVis as TypedLensByValueInput['attributes'];
-    const dataView = this.dataViews[0];
     if (attributes) {
       return (
         <Component
           attributes={attributes}
-          dataView={dataView}
-          updateAll={this.updateVisualization.bind(this)}
+          updatePanelState={this.updateVisualization.bind(this)}
           datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
           panelId={this.id}
