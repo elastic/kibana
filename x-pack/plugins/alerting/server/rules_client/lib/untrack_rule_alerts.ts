@@ -48,6 +48,7 @@ export const untrackRuleAlerts = async (
         const { group: actionGroup } = untrackedAlerts[alertId].getLastScheduledActions() ?? {};
         const instanceState = untrackedAlerts[alertId].getState();
         const message = `instance '${alertId}' has been untracked because the rule was disabled`;
+        const alertUuid = untrackedAlerts[alertId].getUuid();
 
         const event = createAlertEventLogRecordObject({
           ruleId: id,
@@ -56,6 +57,7 @@ export const untrackRuleAlerts = async (
           ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId),
           consumer: attributes.consumer,
           instanceId: alertId,
+          alertUuid,
           action: EVENT_LOG_ACTIONS.untrackedInstance,
           message,
           state: instanceState,
