@@ -233,7 +233,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       const valuesSet = new Set<string>(); // use set to avoid duplicate values
       const featureCollection = await emsFileLayer.getGeoJson();
       featureCollection?.features.forEach(feature => {
-        if (feature.properties && fieldName in feature.properties && feature.properties[fieldName] == null) {
+        if (feature.properties && fieldName in feature.properties && feature.properties[fieldName] != null) {
           valuesSet.add(feature.properties[fieldName].toString());
         }
       });
