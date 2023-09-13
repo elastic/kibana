@@ -39,6 +39,8 @@ import {
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
@@ -969,9 +971,77 @@ export const tasks: TelemetryTask[] = [
                   size,
                 },
               },
+              [SPAN_TYPE]: {
+                terms: {
+                  field: SPAN_TYPE,
+                  size,
+                },
+              },
+              [SPAN_SUBTYPE]: {
+                terms: {
+                  field: SPAN_SUBTYPE,
+                  size,
+                },
+              },
+              ['span.db.subtypes']: {
+                filter: {
+                  bool: {
+                    must: [
+                      { term: { [SPAN_TYPE]: 'db' } },
+                      { exists: { field: SPAN_SUBTYPE } },
+                    ],
+                  },
+                },
+                aggs: {
+                  subtypes: {
+                    terms: {
+                      field: SPAN_SUBTYPE,
+                      size,
+                    },
+                  },
+                },
+              },
+              ['span.messaging.subtypes']: {
+                filter: {
+                  bool: {
+                    must: [
+                      { term: { [SPAN_TYPE]: 'messaging' } },
+                      { exists: { field: SPAN_SUBTYPE } },
+                    ],
+                  },
+                },
+                aggs: {
+                  subtypes: {
+                    terms: {
+                      field: SPAN_SUBTYPE,
+                      size,
+                    },
+                  },
+                },
+              },
+              ['span.composite.count']: {
+                terms: {
+                  field: 'span.composite.count',
+                  size,
+                },
+              },
             },
           },
         });
+
+        const inferredSubtypeBuckets =
+          response.aggregations[SPAN_SUBTYPE]?.buckets || [];
+        const hasInferredSpanType = inferredSubtypeBuckets.some(
+          (bucket) => bucket.key === 'inferred'
+        );
+        const databaseSpanSubtypes = response.aggregations[
+          'span.db.subtypes'
+        ]?.subtypes?.buckets.map((bucket) => bucket.key);
+        const messagingSpanSubtypes = response.aggregations[
+          'span.messaging.subtypes'
+        ]?.subtypes?.buckets.map((bucket) => bucket.key);
+        const hasSpanCompression =
+          !!response.aggregations['span.composite.count']?.buckets.length;
 
         const { aggregations } = response;
 
@@ -988,6 +1058,10 @@ export const tasks: TelemetryTask[] = [
           ...data,
           [agentName]: {
             agent: {
+              inferred: hasInferredSpanType as string,
+              databases: databaseSpanSubtypes as string,
+              messaging: messagingSpanSubtypes as string,
+              span_compression: hasSpanCompression as string,
               activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
                 .map((bucket) => bucket.key as string)
                 .slice(0, size),
