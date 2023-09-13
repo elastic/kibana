@@ -7,12 +7,14 @@
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
+import { RuleAttributes } from '../../../../data/rule/types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RawRule, RuleTypeParams, ResolvedSanitizedRule } from '../../../../types';
+import { RuleTypeParams } from '../../../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
-import { getAlertFromRaw } from '../../../../rules_client/lib/get_alert_from_raw';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { formatLegacyActions } from '../../../../rules_client/lib';
+import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
+import { Rule } from '../../types';
 
 export interface ResolveParams {
   id: string;
@@ -23,9 +25,9 @@ export interface ResolveParams {
 export async function resolveRule<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { id, includeLegacyId, includeSnoozeData = false }: ResolveParams
-): Promise<ResolvedSanitizedRule<Params>> {
+): Promise<Rule<Params>> {
   const { saved_object: result, ...resolveResponse } =
-    await context.unsecuredSavedObjectsClient.resolve<RawRule>('alert', id);
+    await context.unsecuredSavedObjectsClient.resolve<RuleAttributes>('alert', id);
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: result.attributes.alertTypeId,
@@ -50,26 +52,25 @@ export async function resolveRule<Params extends RuleTypeParams = never>(
     })
   );
 
-  const rule = getAlertFromRaw<Params>(
-    context,
-    result.id,
-    result.attributes.alertTypeId,
-    result.attributes,
-    result.references,
-    includeLegacyId,
-    false,
-    includeSnoozeData
-  );
+  const ruleDomain = transformRuleAttributesToRuleDomain(result.attributes, {
+    id: result.id,
+    logger: context.logger,
+    ruleType: context.ruleTypeRegistry.get(result.attributes.alertTypeId),
+    references: result.references,
+  });
+
+  const rule = transformRuleDomainToRule(ruleDomain);
 
   // format legacy actions for SIEM rules
   if (result.attributes.consumer === AlertConsumers.SIEM) {
+    // @ts-expect-error formatLegacyActions uses common Rule type instead of server; wontfix as this function is deprecated
     const [migratedRule] = await formatLegacyActions([rule], {
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       logger: context.logger,
     });
 
     return {
-      ...migratedRule,
+      ...(migratedRule as Rule<never>),
       ...resolveResponse,
     };
   }
