@@ -93,6 +93,12 @@ export const AnnotationList = ({
         background-color: ${euiThemeVars.euiColorLightestShade};
         padding: ${euiThemeVars.euiSizeS};
         border-radius: ${euiThemeVars.euiBorderRadius};
+        overflow: hidden;
+
+        .domDragDrop-isActiveGroup {
+          padding: ${euiThemeVars.euiSizeS};
+          margin: -${euiThemeVars.euiSizeS} -${euiThemeVars.euiSizeS} 0 -${euiThemeVars.euiSizeS};
+        }
       `}
     >
       <ReorderProvider>
