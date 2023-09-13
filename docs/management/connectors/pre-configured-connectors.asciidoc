@@ -153,13 +153,15 @@ xpack.actions.preconfigured:
     actionTypeId: .gen-ai
     config:
       apiUrl: https://api.openai.com/v1/chat/completions <1>
-      apiProvider: 'Azure OpenAI' <2>
+      apiProvider: 'OpenAI' <2>
+      defaultModel: gpt-4 <3>
     secrets:
-      apiKey: superlongapikey <3>
+      apiKey: superlongapikey <4>
 --
 <1> The OpenAI request URL
 <2> The OpenAI API provider, either `OpenAI` or `Azure OpenAI`.
-<3> The OpenAI or Azure OpenAI API key for authentication.
+<3> The default model to use for requests. This setting is optional and applicable only when `apiProvider` is `OpenAI`.
+<4> The OpenAI or Azure OpenAI API key for authentication.
 
 [float]
 [[preconfigured-resilient-configuration]]
