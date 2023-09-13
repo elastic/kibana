@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+
 import {
   EuiButton,
   EuiModal,
@@ -14,15 +16,86 @@ import {
   EuiModalHeaderTitle,
   EuiSwitch,
   EuiModalBody,
+  EuiComboBox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DashboardsDropdownList } from '../dashboards_dropdown_list';
+import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import { ServiceDashboard } from '../../../../../common/service_dashboards';
+import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   onClose: () => void;
 }
 
 export function SelectDashboard({ onClose }: Props) {
+  const {
+    core: { notifications },
+  } = useApmPluginContext();
+
+  const { data, status } = useDashboardFetcher();
+  const [selectedDashboard, setSelectedDashboard] = useState([]);
+
+  console.log('selectedDashboard', selectedDashboard);
+
+  // TODO need to refetch and not reload
+  const reloadServiceDashboards = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const onSave = useCallback(
+    async function (newDashboard: ServiceDashboard) {
+      const [newDashboard] = selectedDashboard;
+      // setIsLoading(true);
+      try {
+        await callApmApi('POST /internal/apm/service-dashboard', {
+          params: {
+            body: {
+              title: newDashboard.label,
+              id: newDashboard.value,
+              kuery: '',
+              environment: '',
+              serviceName: '',
+            },
+          },
+          signal: null,
+        });
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.apm.serviceDashboards.addSuccess.toast.title',
+            {
+              defaultMessage: 'Added "{dashboardName}" dashboard',
+              values: { dashboardName: newDashboard.label },
+            }
+          ),
+          text: i18n.translate(
+            'xpack.apm.serviceDashboards.addSuccess.toast.text',
+            {
+              defaultMessage:
+                'Your dashboard is now visible in the service overview page.',
+            }
+          ),
+        });
+        reloadServiceDashboards();
+      } catch (error) {
+        console.error(error);
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'xpack.apm.serviceDashboards.addFailure.toast.title',
+            {
+              defaultMessage: 'Error while adding "{dashboardName}" dashboard',
+              values: { dashboardName: newDashboard.label },
+            }
+          ),
+          text: error.body.message,
+        });
+      }
+      onClose();
+    },
+    [selectedDashboard, notifications.toasts]
+  );
+
   return (
     <EuiModal onClose={onClose} data-test-subj="apmSelectServiceDashboard">
       <EuiModalHeader>
@@ -38,7 +111,25 @@ export function SelectDashboard({ onClose }: Props) {
       </EuiModalHeader>
 
       <EuiModalBody>
-        <DashboardsDropdownList />
+        <EuiComboBox
+          isLoading={status === FETCH_STATUS.LOADING}
+          isDisabled={status === FETCH_STATUS.LOADING}
+          placeholder={i18n.translate(
+            'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+            {
+              defaultMessage: 'Select dasbboard',
+            }
+          )}
+          singleSelection={{ asPlainText: true }}
+          options={data?.map((dashboardItem) => ({
+            label: dashboardItem.attributes.title,
+            value: dashboardItem.id,
+          }))}
+          selectedOptions={selectedDashboard}
+          onChange={(newSelection) => setSelectedDashboard(newSelection)}
+          isClearable={true}
+        />
+
         <EuiSwitch
           label="Filter by service and environment"
           onChange={() => console.log('r')}
@@ -56,7 +147,7 @@ export function SelectDashboard({ onClose }: Props) {
             }
           )}
         </EuiButton>
-        <EuiButton onClick={onClose} fill>
+        <EuiButton onClick={onSave} fill>
           {i18n.translate('xpack.apm.serviceDashboards.selectDashboard.add', {
             defaultMessage: 'Add dashboard',
           })}
