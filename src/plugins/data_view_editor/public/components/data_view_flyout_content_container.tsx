@@ -68,7 +68,7 @@ const DataViewFlyoutContentContainer = ({
 
         if (persist) {
           const title = i18n.translate('indexPatternEditor.saved', {
-            defaultMessage: "Saved",
+            defaultMessage: 'Saved',
           });
           const text = `'${saveResponse.getName()}'`;
           notifications.toasts.addSuccess({
