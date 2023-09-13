@@ -122,7 +122,7 @@ export class ManagementPlugin
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
-      mount: async (params: AppMountParameters) => {
+      async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, deps] = await core.getStartServices();
 
