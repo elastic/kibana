@@ -223,7 +223,7 @@ describe('Color mapping - color generation', () => {
       }
     );
     expect(toHex(colorFactory('cat1'))).toBe(toHex(EUI_PALETTE_COLORS_LIGHT[0])); // EUI green
-    expect(toHex(colorFactory('cat2'))).toBe('#a3908f'); // red gray green
+    expect(toHex(colorFactory('cat2'))).toBe('#a4908f'); // red gray green
     expect(toHex(colorFactory('cat3'))).toBe(toHex(EUI_PALETTE_COLORS_LIGHT[2])); // EUI pink
   });
 
