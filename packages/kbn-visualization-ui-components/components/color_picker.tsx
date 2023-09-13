@@ -103,6 +103,11 @@ export const ColorPicker = ({
           defaultMessage: 'Auto',
         })
       }
+      onBlur={() => {
+        if (!colorText) {
+          setColorText(overwriteColor ?? defaultColor);
+        }
+      }}
       aria-label={inputLabel}
       showAlpha={showAlpha}
       swatches={
