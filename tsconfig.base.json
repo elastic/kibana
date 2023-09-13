@@ -588,6 +588,8 @@
       "@kbn/crypto-browser/*": ["packages/kbn-crypto-browser/*"],
       "@kbn/custom-branding-plugin": ["x-pack/plugins/custom_branding"],
       "@kbn/custom-branding-plugin/*": ["x-pack/plugins/custom_branding/*"],
+      "@kbn/custom-integrations": ["packages/kbn-custom-integrations"],
+      "@kbn/custom-integrations/*": ["packages/kbn-custom-integrations/*"],
       "@kbn/custom-integrations-plugin": ["src/plugins/custom_integrations"],
       "@kbn/custom-integrations-plugin/*": ["src/plugins/custom_integrations/*"],
       "@kbn/cypress-config": ["packages/kbn-cypress-config"],
@@ -1606,6 +1608,8 @@
       "@kbn/web-worker-stub/*": ["packages/kbn-web-worker-stub/*"],
       "@kbn/whereis-pkg-cli": ["packages/kbn-whereis-pkg-cli"],
       "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
+      "@kbn/xstate-utils": ["packages/kbn-xstate-utils"],
+      "@kbn/xstate-utils/*": ["packages/kbn-xstate-utils/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],
       "@kbn/yarn-lock-validator/*": ["packages/kbn-yarn-lock-validator/*"],
       // END AUTOMATED PACKAGE LISTING
