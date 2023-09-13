@@ -92,7 +92,8 @@ const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
   ) {
     errors.termField.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.overNumberedTermFieldText', {
-        defaultMessage: 'Max. 4 terms can be selected',
+        defaultMessage: `Max. {max} terms can be selected`,
+        values: { max: MAX_SELECTABLE_GROUP_BY_TERMS },
       })
     );
   }
