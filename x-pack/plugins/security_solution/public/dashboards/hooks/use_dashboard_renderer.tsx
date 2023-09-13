@@ -20,16 +20,18 @@ export const useDashboardRenderer = () => {
   const [dashboardContainer, setDashboardContainer] = useState<DashboardAPI>();
   const [hasManagedTag, setHasManagedTag] = useState<boolean>();
 
-  const { fetch: fetchDashboardTags, data: dashboardTags } = useFetch(
-    REQUEST_NAMES.FETCH_DASHBOARD_TAGS,
-    fetchTags
-  );
+  const {
+    fetch: fetchDashboardTags,
+    data: dashboardTags,
+    isLoading,
+    error,
+  } = useFetch(REQUEST_NAMES.FETCH_DASHBOARD_TAGS, fetchTags);
 
   const handleDashboardLoaded = useCallback(
     async (container: DashboardAPI) => {
       setDashboardContainer(container);
       const tagIds = container?.getExplicitInput().tags;
-      if (savedObjectsTagging) {
+      if (savedObjectsTagging && tagIds?.length > 0) {
         await fetchDashboardTags({ tagIds, savedObjectsTaggingClient: savedObjectsTagging.client });
       }
     },
@@ -37,14 +39,14 @@ export const useDashboardRenderer = () => {
   );
 
   useEffect(() => {
-    if (hasManagedTag == null && dashboardTags != null) {
-      if (dashboardTags.some(isManagedTag)) {
+    if (!isLoading) {
+      if (dashboardTags != null && dashboardTags.some(isManagedTag) && !error) {
         setHasManagedTag(true);
       } else {
         setHasManagedTag(false);
       }
     }
-  }, [hasManagedTag, dashboardTags]);
+  }, [hasManagedTag, dashboardTags, error, isLoading]);
 
   return useMemo(
     () => ({
