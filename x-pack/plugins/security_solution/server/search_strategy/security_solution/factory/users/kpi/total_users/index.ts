@@ -23,9 +23,7 @@ import { buildTotalUsersKpiQuery } from './query.build_total_users_kpi.dsl';
 import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
 
 export const totalUsersKpi: SecuritySolutionFactory<UsersQueries.kpiTotalUsers> = {
-  buildDsl: (options) => {
-    return buildTotalUsersKpiQuery(options);
-  },
+  buildDsl: (options) => buildTotalUsersKpiQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

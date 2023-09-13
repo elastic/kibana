@@ -17,9 +17,7 @@ import type { SecuritySolutionFactory } from '../../../types';
 import { buildUniqueFlowsQuery } from './query.network_kpi_unique_flows.dsl';
 
 export const networkKpiUniqueFlows: SecuritySolutionFactory<NetworkKpiQueries.uniqueFlows> = {
-  buildDsl: (options) => {
-    return buildUniqueFlowsQuery(options);
-  },
+  buildDsl: (options) => buildUniqueFlowsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

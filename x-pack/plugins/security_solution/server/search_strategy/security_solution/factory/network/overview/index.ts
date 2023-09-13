@@ -18,9 +18,7 @@ import type { SecuritySolutionFactory } from '../../types';
 import { buildOverviewNetworkQuery } from './query.overview_network.dsl';
 
 export const networkOverview: SecuritySolutionFactory<NetworkQueries.overview> = {
-  buildDsl: (options) => {
-    return buildOverviewNetworkQuery(options);
-  },
+  buildDsl: (options) => buildOverviewNetworkQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<OverviewNetworkHit>

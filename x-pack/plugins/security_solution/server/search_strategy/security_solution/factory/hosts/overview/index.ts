@@ -18,9 +18,7 @@ import type { SecuritySolutionFactory } from '../../types';
 import { buildOverviewHostQuery } from './query.overview_host.dsl';
 
 export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
-  buildDsl: (options) => {
-    return buildOverviewHostQuery(options);
-  },
+  buildDsl: (options) => buildOverviewHostQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<OverviewHostHit>

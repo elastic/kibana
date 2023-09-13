@@ -21,9 +21,7 @@ import { buildRelatedUsersQuery } from './query.related_users.dsl';
 import { getUserRiskData } from '../../users/all';
 
 export const hostsRelatedUsers: SecuritySolutionFactory<RelatedEntitiesQueries.relatedUsers> = {
-  buildDsl: (options) => {
-    return buildRelatedUsersQuery(options);
-  },
+  buildDsl: (options) => buildRelatedUsersQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>,

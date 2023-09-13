@@ -15,9 +15,7 @@ import type { SecuritySolutionFactory } from '../../../types';
 import { buildNetworkEventsQuery } from './query.network_kpi_network_events.dsl';
 
 export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
-  buildDsl: (options) => {
-    return buildNetworkEventsQuery(options);
-  },
+  buildDsl: (options) => buildNetworkEventsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>
