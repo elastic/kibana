@@ -51,6 +51,7 @@ export interface EditConfigPanelProps {
   datasourceId: 'formBased' | 'textBased';
   saveByRef?: (attrs: Document) => void;
   updateByRefInput?: (soId: string) => void;
+  enablesResetButton?: boolean;
 }
 
 const computeActiveData = (layers: string[], lensAdapters?: LensInspector['adapters']) => {
@@ -79,6 +80,7 @@ export function LensEditConfigurationFlyout({
   updateByRefInput,
   output$,
   lensAdapters,
+  enablesResetButton,
 }: EditConfigPanelProps) {
   const [activeData, setActiveData] = useState<Record<string, Datatable>>({});
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -243,36 +245,54 @@ export function LensEditConfigurationFlyout({
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onCancel}
-              flush="left"
-              aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
-                defaultMessage: 'Cancel applied changes',
-              })}
-              data-test-subj="collapseFlyoutButton"
-            >
-              <FormattedMessage id="xpack.lens.config.cancelFlyoutLabel" defaultMessage="Cancel" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onApply}
-              fill
-              aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
-                defaultMessage: 'Apply changes',
-              })}
-              iconType="check"
-              isDisabled={!attributesChanged}
-            >
-              <FormattedMessage
-                id="xpack.lens.config.applyFlyoutLabel"
-                defaultMessage="Apply and close"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {Boolean(enablesResetButton) && (
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onCancel}
+                flush="left"
+                aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
+                  defaultMessage: 'Cancel applied changes',
+                })}
+                data-test-subj="collapseFlyoutButton"
+              >
+                <FormattedMessage
+                  id="xpack.lens.config.cancelFlyoutLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={onApply}
+                fill
+                aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
+                  defaultMessage: 'Apply changes',
+                })}
+                iconType="check"
+                isDisabled={!attributesChanged}
+              >
+                <FormattedMessage
+                  id="xpack.lens.config.applyFlyoutLabel"
+                  defaultMessage="Apply and close"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {!Boolean(enablesResetButton) && (
+          <EuiButtonEmpty
+            onClick={closeFlyout}
+            data-test-subj="collapseFlyoutButton"
+            aria-controls="lens-config-close-button"
+            aria-expanded="true"
+            aria-label={i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
+              defaultMessage: 'Close flyout',
+            })}
+          >
+            <FormattedMessage id="xpack.lens.config.closeFlyoutLabel" defaultMessage="Close" />
+          </EuiButtonEmpty>
+        )}
       </EuiFlyoutFooter>
     </>
   );

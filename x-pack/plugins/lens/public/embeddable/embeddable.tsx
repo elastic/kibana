@@ -808,6 +808,7 @@ export class Embeddable
           updatePanelState={this.updateVisualization.bind(this)}
           datasourceId={datasourceId}
           lensAdapters={this.lensInspector.adapters}
+          enablesResetButton={true}
           output$={this.getOutput$()}
           panelId={this.id}
           savedObjectId={this.savedVis?.savedObjectId}
