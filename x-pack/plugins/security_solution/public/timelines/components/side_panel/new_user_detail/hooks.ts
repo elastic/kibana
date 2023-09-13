@@ -111,7 +111,6 @@ export const useManagedUser = (userName: string) => {
     if (!isInitializing) {
       search({
         defaultIndex: MANAGED_USER_INDEX,
-        factoryQueryType: UsersQueries.managedDetails,
         userName,
       });
     }

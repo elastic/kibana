@@ -14,7 +14,7 @@ import type { EventEnrichmentRequestOptionsInput } from '../../../../../common/a
 import type { CtiEventEnrichmentStrategyResponse } from '../../../../../common/search_strategy/security_solution/cti';
 import { CtiQueries } from '../../../../../common/search_strategy/security_solution/cti';
 
-type GetEventEnrichmentProps = EventEnrichmentRequestOptionsInput & {
+type GetEventEnrichmentProps = Omit<EventEnrichmentRequestOptionsInput, 'factoryQueryType'> & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };

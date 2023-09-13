@@ -22,7 +22,7 @@ import type { GlobalTimeArgs } from '../../../common/containers/use_global_time'
 import { OTHER_DATA_SOURCE_TITLE } from '../../components/overview_cti_links/translations';
 import { OTHER_TI_DATASET_KEY } from '../../../../common/cti/constants';
 
-type GetThreatIntelSourcProps = ThreatIntelSourceRequestOptionsInput & {
+type GetThreatIntelSourceProps = Omit<ThreatIntelSourceRequestOptionsInput, 'factoryQueryType'> & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
@@ -33,7 +33,7 @@ export const getTiDataSources = ({
   defaultIndex,
   timerange,
   signal,
-}: GetThreatIntelSourcProps): Observable<CtiDataSourceStrategyResponse> =>
+}: GetThreatIntelSourceProps): Observable<CtiDataSourceStrategyResponse> =>
   data.search.search<ThreatIntelSourceRequestOptionsInput, CtiDataSourceStrategyResponse>(
     {
       defaultIndex,
@@ -47,7 +47,7 @@ export const getTiDataSources = ({
   );
 
 export const getTiDataSourcesComplete = (
-  props: GetThreatIntelSourcProps
+  props: GetThreatIntelSourceProps
 ): Observable<CtiDataSourceStrategyResponse> => {
   return getTiDataSources(props).pipe(
     filter((response) => {

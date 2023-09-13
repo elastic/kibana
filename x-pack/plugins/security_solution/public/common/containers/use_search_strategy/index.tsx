@@ -58,7 +58,7 @@ export const useSearch = <QueryType extends FactoryQueryTypes>(
 
       const observable = data.search
         .search<StrategyRequestInputType<QueryType>, StrategyResponseType<QueryType>>(
-          { ...request, factoryQueryType } as unknown as StrategyRequestInputType<QueryType>,
+          { ...request, factoryQueryType } as StrategyRequestInputType<QueryType>,
           {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal,
