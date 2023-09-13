@@ -91,10 +91,12 @@ export const untrackRuleAlerts = async (
           logger: context.logger,
         });
         if (!alertsClient) throw new Error('Could not create alertsClient');
-        for (const alertId of untrackedAlertIds) {
-          const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
-          await alertsClient.untrackAlertIdByIndices(alertId, indices);
-        }
+        const indices = context.getAlertIndicesAlias([ruleType.id], context.spaceId);
+        const indexAlertIdMap = indices.reduce(
+          (result, index) => ({ ...result, [index]: untrackedAlertIds }),
+          {}
+        );
+        await alertsClient.untrackAlertIdByIndices(indexAlertIdMap);
       }
     } catch (error) {
       // this should not block the rest of the disable process

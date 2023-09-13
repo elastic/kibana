@@ -203,26 +203,28 @@ export class AlertsClient<
     return { hits, total };
   }
 
-  public async untrackAlertIdByIndices(alertId: string, indices: string[]) {
+  public async untrackAlertIdByIndices(indexAlertIdMap: Record<string, string[]>) {
     const esClient = await this.options.elasticsearchClientPromise;
-    for (const index of indices) {
-      try {
-        await esClient.updateByQuery({
-          index,
-          body: {
-            script: {
-              source: `ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'`,
-              lang: 'painless',
-            },
-            query: {
-              term: {
-                [ALERT_INSTANCE_ID]: { value: alertId },
+    for (const [index, alertIds] of Object.entries(indexAlertIdMap)) {
+      for (const alertId of alertIds) {
+        try {
+          await esClient.updateByQuery({
+            index,
+            body: {
+              script: {
+                source: `ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'`,
+                lang: 'painless',
+              },
+              query: {
+                term: {
+                  [ALERT_INSTANCE_ID]: { value: alertId },
+                },
               },
             },
-          },
-        });
-      } catch (err) {
-        this.options.logger.error(`Error marking ${alertId} as untracked - ${err.message}`);
+          });
+        } catch (err) {
+          this.options.logger.error(`Error marking ${alertId} as untracked - ${err.message}`);
+        }
       }
     }
   }
