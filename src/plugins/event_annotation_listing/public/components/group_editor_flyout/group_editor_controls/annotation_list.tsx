@@ -92,6 +92,7 @@ export const AnnotationList = ({
       css={css`
         background-color: ${euiThemeVars.euiColorLightestShade};
         padding: ${euiThemeVars.euiSizeS};
+        border-radius: ${euiThemeVars.euiBorderRadius};
       `}
     >
       <ReorderProvider>
@@ -100,7 +101,7 @@ export const AnnotationList = ({
             key={index}
             css={css`
               position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
-              margin-top: ${euiThemeVars.euiSizeS};
+              margin-top: ${index === 0 ? '' : euiThemeVars.euiSizeS};
             `}
           >
             <DragDrop
