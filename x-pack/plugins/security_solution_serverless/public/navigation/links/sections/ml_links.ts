@@ -62,12 +62,16 @@ export const mlNavCategories: ProjectLinkCategory[] = [
   {
     type: LinkCategoryType.title,
     label: i18n.MODEL_MANAGEMENT_CATEGORY,
-    linkIds: [ExternalPageName.mlNodesOverview, ExternalPageName.mlNodes],
+    linkIds: [ExternalPageName.mlNodesOverview],
   },
   {
     type: LinkCategoryType.title,
     label: i18n.DATA_VISUALIZER_CATEGORY,
-    linkIds: [ExternalPageName.mlFileUpload, ExternalPageName.mlIndexDataVisualizer],
+    linkIds: [
+      ExternalPageName.mlFileUpload,
+      ExternalPageName.mlIndexDataVisualizer,
+      ExternalPageName.mlDataComparison,
+    ],
   },
   {
     type: LinkCategoryType.title,
@@ -161,10 +165,16 @@ export const mlNavLinks: ProjectNavigationLink[] = [
     description: i18n.INDEX_DATA_VISUALIZER_DESC,
   },
   {
-    id: ExternalPageName.mlExplainLogRateSpikes,
-    title: i18n.EXPLAIN_LOG_RATE_SPIKES_TITLE,
+    id: ExternalPageName.mlDataComparison,
+    title: i18n.DATA_COMPARISON_TITLE,
     landingIcon: IconEndpointLazy,
-    description: i18n.EXPLAIN_LOG_RATE_SPIKES_DESC,
+    description: i18n.DATA_COMPARISON_DESC,
+  },
+  {
+    id: ExternalPageName.mlExplainLogRateSpikes,
+    title: i18n.LOG_RATE_ANALYSIS_TITLE,
+    landingIcon: IconEndpointLazy,
+    description: i18n.LOG_RATE_ANALYSIS_DESC,
   },
   {
     id: ExternalPageName.mlLogPatternAnalysis,

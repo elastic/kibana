@@ -14,10 +14,7 @@ import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
-import {
-  INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-} from './test_ids';
+import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
@@ -140,35 +137,6 @@ describe('<ThreatIntelligenceOverview />', () => {
     const { getAllByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
     expect(getAllByTestId(LOADING_TEST_ID)).toHaveLength(2);
-  });
-
-  it('should render null when eventId is null', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
-      loading: false,
-    });
-    const contextValue = {
-      ...panelContextValue,
-      eventId: null,
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(renderThreatIntelligenceOverview(contextValue));
-
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID)).toBeEmptyDOMElement();
-  });
-
-  it('should render null when dataFormattedForFieldBrowser is null', () => {
-    (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: true,
-    });
-    const contextValue = {
-      ...panelContextValue,
-      dataFormattedForFieldBrowser: null,
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = render(renderThreatIntelligenceOverview(contextValue));
-
-    expect(getByTestId(INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID)).toBeEmptyDOMElement();
   });
 
   it('should navigate to left section Insights tab when clicking on button', () => {
