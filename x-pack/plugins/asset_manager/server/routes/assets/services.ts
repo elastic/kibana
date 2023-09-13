@@ -48,13 +48,15 @@ export function servicesRoutes<T extends RequestHandlerContext>({
     async (context, req, res) => {
       const { from = 'now-24h', to = 'now', parent } = req.query || {};
       const esClient = await getEsClientFromContext(context);
-
+      const coreContext = await context.core;
+      const soClient = coreContext.savedObjects.client;
       try {
         const response = await assetAccessor.getServices({
           from: datemath.parse(from)!.toISOString(),
           to: datemath.parse(to)!.toISOString(),
           parent,
           esClient,
+          soClient,
         });
 
         return res.ok({ body: response });
