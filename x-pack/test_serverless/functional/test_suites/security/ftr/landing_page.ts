@@ -10,8 +10,17 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSecLandingPage = getPageObject('svlSecLandingPage');
   const svlSecNavigation = getService('svlSecNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('landing page', function () {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     it('has serverless side nav', async () => {
       await svlSecNavigation.navigateToLandingPage();
       await svlSecLandingPage.assertSvlSecSideNavExists();
