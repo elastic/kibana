@@ -18,6 +18,7 @@
       "packages/core"
     ],
     "customIntegrations": "src/plugins/custom_integrations",
+    "customIntegrationsPackage": "packages/kbn-custom-integrations",
     "dashboard": "src/plugins/dashboard",
     "domDragDrop": "packages/kbn-dom-drag-drop",
     "controls": "src/plugins/controls",
