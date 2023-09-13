@@ -17,11 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('connectors', function () {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.login();
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('connectors list screenshot', async () => {
