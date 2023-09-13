@@ -5,8 +5,8 @@
 }
 
 .kbnDocViewer__tableRow {
+  font-variant-numeric: tabular-nums;
   font-size: $euiFontSizeXS;
-  font-family: $euiCodeFontFamily;
 
   // set min-width for each column except actions
   .euiTableRowCell:nth-child(n+2) {

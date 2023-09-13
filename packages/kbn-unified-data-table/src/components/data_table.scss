@@ -6,7 +6,7 @@
 }
 
 .unifiedDataTable__cellValue {
-  font-family: $euiCodeFontFamily;
+  font-variant-numeric: tabular-nums;
 }
 
 .unifiedDataTable__cellPopover {
@@ -18,7 +18,7 @@
 }
 
 .unifiedDataTable__cellPopoverValue {
-  font-family: $euiCodeFontFamily;
+  font-variant-numeric: tabular-nums;
   font-size: $euiFontSizeS;
 }
 
