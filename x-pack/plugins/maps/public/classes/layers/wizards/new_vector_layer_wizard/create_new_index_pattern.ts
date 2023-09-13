@@ -17,7 +17,7 @@ export const createNewIndexAndPattern = async ({
   defaultMappings: IndexSourceMappings | {};
 }) => {
   return await getHttp().fetch<CreateDocSourceResp>({
-    path: `/${INDEX_SOURCE_API_PATH}`,
+    path: INDEX_SOURCE_API_PATH,
     method: 'POST',
     version: '1',
     body: JSON.stringify({
