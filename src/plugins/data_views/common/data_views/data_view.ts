@@ -226,6 +226,22 @@ export class DataView extends AbstractDataView implements DataViewBase {
   }
 
   /**
+   * Removes scripted field from field list.
+   * @param fieldName name of scripted field to remove
+   * @deprecated use runtime field instead
+   */
+
+  removeScriptedField(fieldName: string) {
+    this.deleteScriptedFieldInternal(fieldName);
+    const field = this.fields.getByName(fieldName);
+    if (field && field.scripted) {
+      this.fields.remove(field);
+    } else {
+      throw new Error(`Scripted field ${fieldName} does not exist in data view ${this.getName()}`);
+    }
+  }
+
+  /**
    *
    * @deprecated Will be removed when scripted fields are removed.
    */
@@ -593,21 +609,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
       this.fields.update(field);
     } else {
       this.fields.add(field);
-    }
-  };
-
-  /**
-   * Removes scripted field from field list.
-   * @param fieldName name of scripted field to remove
-   * @deprecated use runtime field instead
-   */
-  deleteScriptedField = (fieldName: string) => {
-    this.deleteScriptedFieldInternal(fieldName);
-    const field = this.fields.getByName(fieldName);
-    if (field && field.scripted) {
-      this.fields.remove(field);
-    } else {
-      throw new Error(`Scripted field ${fieldName} does not exist in data view ${this.getName()}`);
     }
   };
 }

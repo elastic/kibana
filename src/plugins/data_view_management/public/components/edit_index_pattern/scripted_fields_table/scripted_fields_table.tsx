@@ -116,7 +116,7 @@ export class ScriptedFieldsTable extends Component<
     const { indexPattern, onRemoveField, saveIndexPattern } = this.props;
     const { fieldToDelete } = this.state;
 
-    indexPattern.deleteScriptedField(fieldToDelete!.name);
+    indexPattern.removeScriptedField(fieldToDelete!.name);
     saveIndexPattern(indexPattern);
 
     if (onRemoveField) {

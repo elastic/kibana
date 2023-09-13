@@ -784,7 +784,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { redirectAway, indexPatternService } = this.props.services;
     const { indexPattern } = this.props;
     const { spec } = this.state;
-    indexPattern.deleteScriptedField(spec.name);
+    indexPattern.removeScriptedField(spec.name);
     indexPatternService.updateSavedObject(indexPattern).then(() => {
       const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
         defaultMessage: "Deleted '{fieldName}'",
