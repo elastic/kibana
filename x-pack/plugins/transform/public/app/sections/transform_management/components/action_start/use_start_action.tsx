@@ -46,7 +46,7 @@ export const useStartAction = (forceDisable: boolean, transformNodes: number) =>
           transformNodes={transformNodes}
         />
       ),
-      available: (item: TransformListRow) => item.stats.state === TRANSFORM_STATE.STOPPED,
+      available: (item: TransformListRow) => item.stats?.state === TRANSFORM_STATE.STOPPED,
       enabled: (item: TransformListRow) =>
         !isStartActionDisabled([item], canStartStopTransform, transformNodes),
       description: startActionNameText,

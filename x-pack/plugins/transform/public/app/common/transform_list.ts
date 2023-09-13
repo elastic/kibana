@@ -20,7 +20,7 @@ export interface TransformListRow {
   id: TransformId;
   config: TransformConfigUnion;
   mode?: string; // added property on client side to allow filtering by this field
-  stats: TransformStats;
+  stats?: TransformStats;
   alerting_rules?: TransformHealthAlertRule[];
 }
 

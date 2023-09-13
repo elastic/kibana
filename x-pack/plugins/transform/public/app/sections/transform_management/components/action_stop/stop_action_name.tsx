@@ -29,7 +29,7 @@ export const isStopActionDisabled = (
 ) => {
   // Disable stop action if one of the transforms is stopped already
   const stoppedTransform = items.some(
-    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STOPPED
+    (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STOPPED
   );
 
   return forceDisable === true || !canStartStopTransform || stoppedTransform === true;
@@ -45,7 +45,7 @@ export const StopActionName: FC<StopActionNameProps> = ({ items, forceDisable })
 
   // Disable stop action if one of the transforms is stopped already
   const stoppedTransform = items.some(
-    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STOPPED
+    (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STOPPED
   );
 
   let stoppedTransformMessage;

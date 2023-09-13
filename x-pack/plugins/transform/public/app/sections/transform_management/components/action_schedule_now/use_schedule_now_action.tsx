@@ -33,7 +33,7 @@ export const useScheduleNowAction = (forceDisable: boolean, transformNodes: numb
           transformNodes={transformNodes}
         />
       ),
-      available: (item: TransformListRow) => item.stats.state === TRANSFORM_STATE.STARTED,
+      available: (item: TransformListRow) => item.stats?.state === TRANSFORM_STATE.STARTED,
       enabled: (item: TransformListRow) =>
         !isScheduleNowActionDisabled([item], canScheduleNowTransform, transformNodes),
       description: scheduleNowActionNameText,

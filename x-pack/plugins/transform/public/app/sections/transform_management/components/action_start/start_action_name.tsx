@@ -31,7 +31,7 @@ export const isStartActionDisabled = (
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
   // Disable start action if one of the transforms is already started or trying to restart will throw error
   const startedTransform = items.some(
-    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STARTED
+    (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STARTED
   );
 
   return (
@@ -60,7 +60,7 @@ export const StartActionName: FC<StartActionNameProps> = ({
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
   // Disable start action if one of the transforms is already started or trying to restart will throw error
   const startedTransform = items.some(
-    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STARTED
+    (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STARTED
   );
 
   let startedTransformMessage;

@@ -24,7 +24,7 @@ export const useResetAction = (forceDisable: boolean) => {
   const [items, setItems] = useState<TransformListRow[]>([]);
 
   const shouldForceReset = useMemo(
-    () => items.some((i: TransformListRow) => i.stats.state === TRANSFORM_STATE.FAILED),
+    () => items.some((i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.FAILED),
     [items]
   );
 
@@ -36,7 +36,7 @@ export const useResetAction = (forceDisable: boolean) => {
     resetTransforms({
       transformsInfo: items.map((i) => ({
         id: i.config.id,
-        state: i.stats.state,
+        state: i.stats?.state,
       })),
     });
   };

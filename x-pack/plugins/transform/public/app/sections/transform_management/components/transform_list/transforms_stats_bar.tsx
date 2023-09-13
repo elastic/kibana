@@ -94,10 +94,12 @@ function createTranformStats(
       transformStats.batch.value++;
     }
 
-    if (transform.stats.state === TRANSFORM_STATE.FAILED) {
-      failedTransforms++;
-    } else if (transform.stats.state === TRANSFORM_STATE.STARTED) {
-      startedTransforms++;
+    if (transform.stats) {
+      if (transform.stats.state === TRANSFORM_STATE.FAILED) {
+        failedTransforms++;
+      } else if (transform.stats.state === TRANSFORM_STATE.STARTED) {
+        startedTransforms++;
+      }
     }
   });
 

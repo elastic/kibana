@@ -22,6 +22,7 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
   EuiIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { useTransformCapabilities } from '../../../../hooks';
@@ -239,10 +240,14 @@ export const useColumns = (
     {
       name: i18n.translate('xpack.transform.status', { defaultMessage: 'Status' }),
       'data-test-subj': 'transformListColumnStatus',
-      sortable: (item: TransformListRow) => item.stats.state,
+      sortable: (item: TransformListRow) => item.stats?.state,
       truncateText: true,
       render(item: TransformListRow) {
-        return <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />;
+        return item.stats ? (
+          <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />
+        ) : (
+          <EuiLoadingSpinner />
+        );
       },
       width: '100px',
     },
@@ -292,7 +297,7 @@ export const useColumns = (
                 </EuiFlexItem>
               </>
             )}
-            {!isBatchTransform && (
+            {!isBatchTransform && item.stats ? (
               <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   {/* If not stopped, failed or waiting show the animated progress bar */}
@@ -312,6 +317,8 @@ export const useColumns = (
                   &nbsp;
                 </EuiFlexItem>
               </>
+            ) : (
+              <EuiLoadingSpinner />
             )}
           </EuiFlexGroup>
         );
@@ -321,10 +328,14 @@ export const useColumns = (
     {
       name: i18n.translate('xpack.transform.health', { defaultMessage: 'Health' }),
       'data-test-subj': 'transformListColumnHealth',
-      sortable: (item: TransformListRow) => item.stats.health.status,
+      sortable: (item: TransformListRow) => item.stats?.health.status,
       truncateText: true,
       render(item: TransformListRow) {
-        return <TransformHealthColoredDot healthStatus={item.stats.health.status} />;
+        return item.stats ? (
+          <TransformHealthColoredDot healthStatus={item.stats.health.status} />
+        ) : (
+          <EuiLoadingSpinner />
+        );
       },
       width: '100px',
     },

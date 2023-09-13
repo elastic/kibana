@@ -44,37 +44,38 @@ interface Props {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
-type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
+type StateValues = Optional<NonNullable<TransformListRow['stats']>, 'stats' | 'checkpointing'>;
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const hideNodeInfo = useIsServerless();
 
-  const stateValues: StateValues = { ...item.stats };
+  const stateValues: StateValues = { ...(item.stats ?? {}) };
   delete stateValues.stats;
   delete stateValues.checkpointing;
 
   const stateItems: Item[] = [];
-  stateItems.push(
-    {
-      title: 'ID',
-      description: item.id,
-    },
-    {
+  stateItems.push({
+    title: 'ID',
+    description: item.id,
+  });
+  if (item.stats) {
+    stateItems.push({
       title: 'state',
       description: item.stats.state,
+    });
+
+    if (!hideNodeInfo && item.stats.node !== undefined) {
+      stateItems.push({
+        title: 'node.name',
+        description: item.stats.node.name,
+      });
     }
-  );
-  if (!hideNodeInfo && item.stats.node !== undefined) {
-    stateItems.push({
-      title: 'node.name',
-      description: item.stats.node.name,
-    });
-  }
-  if (item.stats.health !== undefined) {
-    stateItems.push({
-      title: 'health',
-      description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
-    });
+    if (item.stats.health !== undefined) {
+      stateItems.push({
+        title: 'health',
+        description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
+      });
+    }
   }
 
   const state: SectionConfig = {
@@ -137,67 +138,69 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   };
 
   const checkpointingItems: Item[] = [];
-  if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
-    checkpointingItems.push({
-      title: 'changes_last_detected_at',
-      description: formatHumanReadableDateTimeSeconds(
-        item.stats.checkpointing.changes_last_detected_at
-      ),
-    });
-  }
-
-  if (item.stats.checkpointing.last !== undefined) {
-    checkpointingItems.push({
-      title: 'last.checkpoint',
-      description: item.stats.checkpointing.last.checkpoint,
-    });
-    if (item.stats.checkpointing.last.timestamp_millis !== undefined) {
+  if (item.stats) {
+    if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
       checkpointingItems.push({
-        title: 'last.timestamp',
+        title: 'changes_last_detected_at',
         description: formatHumanReadableDateTimeSeconds(
-          item.stats.checkpointing.last.timestamp_millis
+          item.stats.checkpointing.changes_last_detected_at
         ),
       });
+    }
+
+    if (item.stats.checkpointing.last !== undefined) {
       checkpointingItems.push({
-        title: 'last.timestamp_millis',
-        description: item.stats.checkpointing.last.timestamp_millis,
+        title: 'last.checkpoint',
+        description: item.stats.checkpointing.last.checkpoint,
+      });
+      if (item.stats.checkpointing.last.timestamp_millis !== undefined) {
+        checkpointingItems.push({
+          title: 'last.timestamp',
+          description: formatHumanReadableDateTimeSeconds(
+            item.stats.checkpointing.last.timestamp_millis
+          ),
+        });
+        checkpointingItems.push({
+          title: 'last.timestamp_millis',
+          description: item.stats.checkpointing.last.timestamp_millis,
+        });
+      }
+    }
+
+    if (item.stats.checkpointing.last_search_time !== undefined) {
+      checkpointingItems.push({
+        title: 'last_search_time',
+        description: formatHumanReadableDateTimeSeconds(item.stats.checkpointing.last_search_time),
       });
     }
-  }
 
-  if (item.stats.checkpointing.last_search_time !== undefined) {
-    checkpointingItems.push({
-      title: 'last_search_time',
-      description: formatHumanReadableDateTimeSeconds(item.stats.checkpointing.last_search_time),
-    });
-  }
+    if (item.stats.checkpointing.next !== undefined) {
+      checkpointingItems.push({
+        title: 'next.checkpoint',
+        description: item.stats.checkpointing.next.checkpoint,
+      });
+      if (item.stats.checkpointing.next.checkpoint_progress !== undefined) {
+        checkpointingItems.push({
+          title: 'next.checkpoint_progress.total_docs',
+          description: item.stats.checkpointing.next.checkpoint_progress.total_docs,
+        });
+        checkpointingItems.push({
+          title: 'next.checkpoint_progress.docs_remaining',
+          description: item.stats.checkpointing.next.checkpoint_progress.docs_remaining,
+        });
+        checkpointingItems.push({
+          title: 'next.checkpoint_progress.percent_complete',
+          description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
+        });
+      }
+    }
 
-  if (item.stats.checkpointing.next !== undefined) {
-    checkpointingItems.push({
-      title: 'next.checkpoint',
-      description: item.stats.checkpointing.next.checkpoint,
-    });
-    if (item.stats.checkpointing.next.checkpoint_progress !== undefined) {
+    if (item.stats.checkpointing.operations_behind !== undefined) {
       checkpointingItems.push({
-        title: 'next.checkpoint_progress.total_docs',
-        description: item.stats.checkpointing.next.checkpoint_progress.total_docs,
-      });
-      checkpointingItems.push({
-        title: 'next.checkpoint_progress.docs_remaining',
-        description: item.stats.checkpointing.next.checkpoint_progress.docs_remaining,
-      });
-      checkpointingItems.push({
-        title: 'next.checkpoint_progress.percent_complete',
-        description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
+        title: 'operations_behind',
+        description: item.stats.checkpointing.operations_behind,
       });
     }
-  }
-
-  if (item.stats.checkpointing.operations_behind !== undefined) {
-    checkpointingItems.push({
-      title: 'operations_behind',
-      description: item.stats.checkpointing.operations_behind,
-    });
   }
 
   const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
@@ -236,9 +239,11 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
 
   const stats: SectionConfig = {
     title: 'Stats',
-    items: Object.entries(item.stats.stats).map((s) => {
-      return { title: s[0].toString(), description: getItemDescription(s[1]) };
-    }),
+    items: item.stats
+      ? Object.entries(item.stats.stats).map((s) => {
+          return { title: s[0].toString(), description: getItemDescription(s[1]) };
+        })
+      : [],
     position: 'left',
   };
 
@@ -266,26 +271,26 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
         />
       ),
     },
-    {
-      id: `transform-stats-tab-${tabId}`,
-      'data-test-subj': 'transformStatsTab',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
-        {
-          defaultMessage: 'Stats',
-        }
-      ),
-      content: (
-        <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
-      ),
-    },
+    // {
+    //   id: `transform-stats-tab-${tabId}`,
+    //   'data-test-subj': 'transformStatsTab',
+    //   name: i18n.translate(
+    //     'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
+    //     {
+    //       defaultMessage: 'Stats',
+    //     }
+    //   ),
+    //   content: (
+    //     <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
+    //   ),
+    // },
     {
       id: `transform-json-tab-${tabId}`,
       'data-test-subj': 'transformJsonTab',
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
-    ...(item.stats.health
+    ...(item.stats?.health
       ? [
           {
             id: `transform-health-tab-${tabId}`,

@@ -30,13 +30,16 @@ export const useStopAction = (forceDisable: boolean) => {
   const stopAndCloseModal = useCallback(
     (transformSelection: TransformListRow[]) => {
       setModalVisible(false);
-      stopTransforms(transformSelection.map((t) => ({ id: t.id, state: t.stats.state })));
+      stopTransforms(
+        transformSelection.map((t) => ({ id: t.id, state: t.stats ? t.stats.state : 'waiting' }))
+      );
     },
     [stopTransforms]
   );
 
   const clickHandler = useCallback(
-    (i: TransformListRow) => stopTransforms([{ id: i.id, state: i.stats.state }]),
+    (t: TransformListRow) =>
+      stopTransforms([{ id: t.id, state: t.stats ? t.stats.state : 'waiting' }]),
     [stopTransforms]
   );
 
@@ -45,7 +48,7 @@ export const useStopAction = (forceDisable: boolean) => {
       name: (item: TransformListRow) => (
         <StopActionName items={[item]} forceDisable={forceDisable} />
       ),
-      available: (item: TransformListRow) => item.stats.state !== TRANSFORM_STATE.STOPPED,
+      available: (item: TransformListRow) => item.stats?.state !== TRANSFORM_STATE.STOPPED,
       enabled: (item: TransformListRow) =>
         !isStopActionDisabled([item], canStartStopTransform, forceDisable),
       description: stopActionNameText,

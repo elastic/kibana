@@ -33,8 +33,8 @@ export function isCompletedBatchTransform(item: TransformItem) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
   // then this is a completed batch transform.
   return (
-    item.stats.checkpointing.last.checkpoint === 1 &&
+    item.stats?.checkpointing?.last.checkpoint === 1 &&
     item.config.sync === undefined &&
-    item.stats.state === TRANSFORM_STATE.STOPPED
+    item.stats?.state === TRANSFORM_STATE.STOPPED
   );
 }

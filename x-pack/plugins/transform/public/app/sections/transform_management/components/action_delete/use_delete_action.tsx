@@ -33,7 +33,7 @@ export const useDeleteAction = (forceDisable: boolean) => {
 
   const isBulkAction = items.length > 1;
   const shouldForceDelete = useMemo(
-    () => items.some((i: TransformListRow) => i.stats.state === TRANSFORM_STATE.FAILED),
+    () => items.some((i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.FAILED),
     [items]
   );
 
@@ -59,12 +59,12 @@ export const useDeleteAction = (forceDisable: boolean) => {
     // else, force delete only when the item user picks has failed
     const forceDelete = isBulkAction
       ? shouldForceDelete
-      : items[0] && items[0] && items[0].stats.state === TRANSFORM_STATE.FAILED;
+      : items[0] && items[0] && items[0].stats?.state === TRANSFORM_STATE.FAILED;
 
     deleteTransforms({
       transformsInfo: items.map((i) => ({
         id: i.config.id,
-        state: i.stats.state,
+        state: i.stats?.state,
       })),
       deleteDestIndex: shouldDeleteDestIndex,
       deleteDestDataView: shouldDeleteDestDataView,
