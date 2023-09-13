@@ -12,6 +12,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
@@ -22,6 +23,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   describe('Cases persistable attachments', () => {
     describe('lens visualization', () => {
       before(async () => {
+        await svlCommonPage.login();
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -45,6 +47,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
+
+        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {
