@@ -105,7 +105,7 @@ Array [
       </div>
     </div>
     <div
-      class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-light"
+      class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-light"
       data-test-subj="collapsibleNavGroup-recentlyViewed"
     >
       <div
@@ -223,7 +223,7 @@ Array [
       class="euiFlexItem kbnCollapsibleNav__solutions emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-kibana"
       >
         <div
@@ -355,7 +355,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-observability"
       >
         <div
@@ -470,7 +470,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-securitySolution"
       >
         <div
@@ -568,7 +568,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-management"
       >
         <div
