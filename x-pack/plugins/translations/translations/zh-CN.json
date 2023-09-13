@@ -4164,7 +4164,7 @@
     "indexPatternEditor.rollupDataView.warning.textParagraphOne": "Kibana 基于汇总/打包为数据视图提供公测版支持。将这些视图用于已保存搜索、可视化以及仪表板可能会遇到问题。某些高级功能，如 Timelion 和 Machine Learning，不支持这些模式。",
     "indexPatternEditor.rollupDataView.warning.textParagraphTwo": "可以根据一个汇总/打包索引和零个或更多常规索引匹配汇总/打包数据视图。汇总/打包数据视图的指标、字段、时间间隔和聚合有限。汇总/打包索引仅限于具有一个作业配置或多个作业配置兼容的索引。",
     "indexPatternEditor.rollupIndexPattern.warning.title": "公测版功能",
-    "indexPatternEditor.saved": "已保存“{indexPatternName}”",
+    "indexPatternEditor.saved": "已保存",
     "indexPatternEditor.status.noSystemIndicesLabel": "没有数据流、索引或索引别名匹配您的索引模式。",
     "indexPatternEditor.status.noSystemIndicesWithPromptLabel": "没有数据流、索引或索引别名匹配您的索引模式。",
     "indexPatternEditor.status.notMatchLabel.notMatchNoIndicesDetail": "输入的索引模式不匹配任何数据流、索引或索引别名。",
