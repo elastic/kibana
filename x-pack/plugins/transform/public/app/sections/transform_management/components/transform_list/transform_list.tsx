@@ -87,7 +87,7 @@ interface TransformListProps {
   transformNodes: number;
   transforms: TransformListRow[];
   transformsLoading: boolean;
-  transformStatsLoading: boolean;
+  transformsStatsLoading: boolean;
 }
 
 export const TransformList: FC<TransformListProps> = ({
@@ -96,7 +96,7 @@ export const TransformList: FC<TransformListProps> = ({
   transformNodes,
   transforms,
   transformsLoading,
-  transformStatsLoading,
+  transformsStatsLoading,
 }) => {
   const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
@@ -129,7 +129,7 @@ export const TransformList: FC<TransformListProps> = ({
     setExpandedRowItemIds,
     transformNodes,
     transformSelection,
-    transformStatsLoading
+    transformsStatsLoading
   );
 
   const searchError = query?.error ? query?.error.message : undefined;

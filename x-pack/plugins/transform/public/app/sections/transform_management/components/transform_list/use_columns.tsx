@@ -56,9 +56,9 @@ export const useColumns = (
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
   transformNodes: number,
   transformSelection: TransformListRow[],
-  isStatsLoading: boolean
+  transformsStatsLoading: boolean
 ) => {
-  const StatsFallbackComponent = isStatsLoading ? EuiLoadingSpinner : StatsUnknown;
+  const NoStatsFallbackComponent = transformsStatsLoading ? EuiLoadingSpinner : StatsUnknown;
   const { canStartStopTransform } = useTransformCapabilities();
 
   const { actions, modals } = useActions({
@@ -252,7 +252,7 @@ export const useColumns = (
         return item.stats ? (
           <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />
         ) : (
-          <StatsFallbackComponent />
+          <NoStatsFallbackComponent />
         );
       },
       width: '100px',
@@ -282,6 +282,7 @@ export const useColumns = (
         if (progress === undefined && isBatchTransform === true) {
           return null;
         }
+        if (!item.stats) return NoStatsFallbackComponent;
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -303,7 +304,7 @@ export const useColumns = (
                 </EuiFlexItem>
               </>
             )}
-            {!isBatchTransform && item.stats ? (
+            {!isBatchTransform && item.stats && (
               <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   {/* If not stopped, failed or waiting show the animated progress bar */}
@@ -323,8 +324,6 @@ export const useColumns = (
                   &nbsp;
                 </EuiFlexItem>
               </>
-            ) : (
-              <StatsFallbackComponent />
             )}
           </EuiFlexGroup>
         );
@@ -340,7 +339,7 @@ export const useColumns = (
         return item.stats ? (
           <TransformHealthColoredDot healthStatus={item.stats.health.status} />
         ) : (
-          <StatsFallbackComponent />
+          <NoStatsFallbackComponent />
         );
       },
       width: '100px',
