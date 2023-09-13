@@ -14,7 +14,6 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   Rule,
-  RuleNotifyWhen,
   RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -775,7 +774,7 @@ describe('Task Runner', () => {
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         },
-        notifyWhen: RuleNotifyWhen.ACTIVE,
+        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
       });
       expect(alertsClientNotToUse.processAndLogAlerts).not.toHaveBeenCalled();
