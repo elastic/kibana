@@ -58,19 +58,8 @@ export const openAiConfig: ConfigFieldSchema[] = [
     label: i18n.DEFAULT_MODEL_LABEL,
     helpText: (
       <FormattedMessage
-        defaultMessage='The model can be set on a per request basis by including a "model" parameter in the request body. If no model is provided, the fallback will be the default model. For more information, refer to the {genAiAPIModelDocs}.'
+        defaultMessage="If a request does not include a model, it uses the default."
         id="xpack.stackConnectors.components.genAi.openAiDocumentationModel"
-        values={{
-          genAiAPIModelDocs: (
-            <EuiLink
-              data-test-subj="open-ai-api-doc"
-              href="https://platform.openai.com/docs/api-reference/models"
-              target="_blank"
-            >
-              {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
-        }}
       />
     ),
     defaultValue: DEFAULT_OPENAI_MODEL,
