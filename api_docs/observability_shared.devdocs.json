@@ -272,6 +272,39 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableFlamegraph",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableFlamegraph",
+        "description": [],
+        "signature": [
+          "({ data, height, isLoading }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableFlamegraph.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ data, height, isLoading }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_flamegraph.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.getContextMenuItemsFromActions",
         "type": "Function",
         "tags": [],
@@ -2358,6 +2391,23 @@
           "\"observabilityCases\""
         ],
         "path": "x-pack/plugins/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_FLAMEGRAPH",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_FLAMEGRAPH",
+        "description": [
+          "Profiling flamegraph embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_FLAMEGRAPH\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
