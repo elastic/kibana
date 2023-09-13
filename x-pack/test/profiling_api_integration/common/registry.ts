@@ -18,6 +18,7 @@ const esArchiversPath = Path.posix.join(__dirname, 'fixtures', 'es_archiver', 'p
 
 interface RunCondition {
   config: ProfilingFtrConfigName;
+  skipLoadingData?: boolean;
 }
 
 export function RegistryProvider({ getService }: FtrProviderContext) {
@@ -117,54 +118,60 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
 
       const byConfig = groupBy(groups, 'config');
 
-      Object.keys(byConfig).forEach((config) => {
-        const groupsForConfig = byConfig[config];
+      Object.keys(byConfig)
+        .filter((config) => config === profilingFtrConfig.name)
+        .forEach((config) => {
+          const groupsForConfig = byConfig[config];
 
-        // register suites for other configs, but skip them so tests are marked as such
-        // and their snapshots are not marked as obsolete
-        (config === profilingFtrConfig.name ? describe : describe.skip)(config, () => {
-          groupsForConfig.forEach((group) => {
-            const { runs } = group;
+          // register suites for other configs, but skip them so tests are marked as such
+          // and their snapshots are not marked as obsolete
+          (config === profilingFtrConfig.name ? describe : describe.skip)(config, () => {
+            groupsForConfig.forEach((group) => {
+              const { runs, skipLoadingData } = group;
 
-            const runBefore = async () => {
-              const log = logWithTimer();
-              const content = fs.readFileSync(`${esArchiversPath}/data.json`, 'utf8');
-              log(`Loading profiling data`);
-              await es.bulk({ operations: content.split('\n'), refresh: 'wait_for' });
-              log('Loaded profiling data');
-            };
+              const runBefore = async () => {
+                const log = logWithTimer();
+                if (skipLoadingData === true) {
+                  log(`Skipping Loading profiling data`);
+                } else {
+                  const content = fs.readFileSync(`${esArchiversPath}/data.json`, 'utf8');
+                  log(`Loading profiling data`);
+                  await es.bulk({ operations: content.split('\n'), refresh: 'wait_for' });
+                  log('Loaded profiling data');
+                }
+              };
 
-            const runAfter = async () => {
-              const log = logWithTimer();
-              log(`Unloading Profiling data`);
-              const indices = await es.cat.indices({ format: 'json' });
-              const profilingIndices = indices
-                .filter((index) => index.index !== undefined)
-                .map((index) => index.index)
-                .filter((index) => {
-                  return index!.startsWith('profiling') || index!.startsWith('.profiling');
-                }) as string[];
-              await Promise.all([
-                ...profilingIndices.map((index) => es.indices.delete({ index })),
-                es.indices.deleteDataStream({
-                  name: 'profiling-events*',
-                }),
-              ]);
-              log('Unloaded Profiling data');
-            };
+              const runAfter = async () => {
+                const log = logWithTimer();
+                log(`Unloading Profiling data`);
+                const indices = await es.cat.indices({ format: 'json' });
+                const profilingIndices = indices
+                  .filter((index) => index.index !== undefined)
+                  .map((index) => index.index)
+                  .filter((index) => {
+                    return index!.startsWith('profiling') || index!.startsWith('.profiling');
+                  }) as string[];
+                await Promise.all([
+                  ...profilingIndices.map((index) => es.indices.delete({ index })),
+                  es.indices.deleteDataStream({
+                    name: 'profiling-events*',
+                  }),
+                ]);
+                log('Unloaded Profiling data');
+              };
 
-            describe('Loading profiling data', () => {
-              before(runBefore);
+              describe('Loading profiling data', () => {
+                before(runBefore);
 
-              runs.forEach((run) => {
-                run.cb();
+                runs.forEach((run) => {
+                  run.cb();
+                });
+
+                after(runAfter);
               });
-
-              after(runAfter);
             });
           });
         });
-      });
 
       running = false;
     },

@@ -22,6 +22,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Only run tests',
   })
+  .option('basic', {
+    default: false,
+    type: 'boolean',
+    description: 'Run tests with basic config',
+  })
   .option('grep', {
     alias: 'spec',
     type: 'string',
@@ -57,9 +62,9 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { server, runner, grep, grepFiles, inspect, updateSnapshots } = argv;
+const { server, runner, grep, grepFiles, inspect, updateSnapshots, basic } = argv;
 
-const license = 'cloud';
+const license = basic ? 'basic' : 'cloud';
 
 console.log(`License: ${license}`);
 

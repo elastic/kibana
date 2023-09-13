@@ -18,12 +18,21 @@ const profilingDebugLogger = {
 };
 
 const profilingFtrConfigs = {
+  basic: {
+    license: 'trial' as const,
+    kibanaConfig: {
+      'logging.loggers': [profilingDebugLogger],
+      config: kibanaYamlFilePath,
+    },
+    setupProfiling: false,
+  },
   cloud: {
     license: 'trial' as const,
     kibanaConfig: {
       'logging.loggers': [profilingDebugLogger],
       config: kibanaYamlFilePath,
     },
+    setupProfiling: true,
   },
 };
 

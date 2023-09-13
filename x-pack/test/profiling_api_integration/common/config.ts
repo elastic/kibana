@@ -52,6 +52,7 @@ export interface ProfilingFtrConfig {
   name: ProfilingFtrConfigName;
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, any>;
+  setupProfiling: boolean;
 }
 
 export interface CreateTest {
@@ -115,7 +116,7 @@ export function createTestConfig(
           const result = await adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
           });
-          if (!result.body.has_setup) {
+          if (config.setupProfiling && !result.body.has_setup) {
             // eslint-disable-next-line no-console
             console.log('Setting up Universal Profiling');
             await adminUser({

@@ -7,18 +7,19 @@
 
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { ProfilingStatusCheck } from '@kbn/profiling-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 import { RegisterServicesParams } from '../register_services';
-import { areResourcesSetup, createDefaultSetupState, mergePartialSetupStates } from './setup';
 import { validateMaximumBuckets, validateResourceManagement } from './cluster_settings';
-import { validateSecurityRole } from './security_role';
 import {
   validateCollectorPackagePolicy,
   validateProfilingInApmPackagePolicy,
   validateSymbolizerPackagePolicy,
 } from './fleet_policies';
 import { hasProfilingData } from './has_profiling_data';
+import { validateSecurityRole } from './security_role';
+import { areResourcesSetup, createDefaultSetupState, mergePartialSetupStates } from './setup';
 
 interface HasSetupParams {
   soClient: SavedObjectsClientContract;
@@ -40,7 +41,7 @@ export function createHasSetupService({
   deps,
   logger,
 }: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: HasSetupParams) => {
+  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatusCheck> => {
     try {
       const clientWithDefaultAuth = createProfilingEsClient({
         esClient,
@@ -70,6 +71,7 @@ export function createHasSetupService({
         return {
           has_setup: false,
           has_data: false,
+          pre_8_9_1_data: false,
         };
       }
 
@@ -102,7 +104,7 @@ export function createHasSetupService({
       // to make sure Profiling has been set up and has data
       // for users with monitor privileges. This privileges
       // is needed to call the profiling ES plugin for example.
-      if (error?.meta?.statusCode === 403) {
+      if (error?.meta?.statusCode === 403 || error?.originalError?.meta?.statusCode === 403) {
         return {
           has_setup: true,
           pre_8_9_1_data: false,
