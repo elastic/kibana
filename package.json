@@ -1097,6 +1097,7 @@
     "@jest/reporters": "^29.6.1",
     "@jest/transform": "^29.6.1",
     "@jest/types": "^29.6.1",
+    "@kayahr/text-encoding": "^1.2.0",
     "@kbn/alerting-api-integration-helpers": "link:x-pack/test/alerting_api_integration/packages/helpers",
     "@kbn/ambient-common-types": "link:packages/kbn-ambient-common-types",
     "@kbn/ambient-ftr-types": "link:packages/kbn-ambient-ftr-types",
