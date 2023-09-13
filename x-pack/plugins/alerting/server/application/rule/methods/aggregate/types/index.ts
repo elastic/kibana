@@ -30,7 +30,7 @@ export interface DefaultRuleAggregationParams {
   maxTags?: number;
 }
 
-export interface AggregateRulesResponseBody {
+export interface RuleAggregationFormattedResult {
   ruleExecutionStatus: Record<string, number>;
   ruleLastRunOutcome: Record<string, number>;
   ruleEnabledStatus: {

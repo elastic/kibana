@@ -16,12 +16,11 @@ import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import {
   aggregateRulesRequestBodySchemaV1,
   AggregateRulesRequestBodyV1,
-  AggregateRulesResponseBodyV1,
   AggregateRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/aggregate';
-import { formatDefaultAggregationResultV1 } from './transforms';
+import { formatDefaultAggregationResult } from './transforms';
 import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
-import { DefaultRuleAggregationResultV1 } from './types';
+import { DefaultRuleAggregationResult } from './types';
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -48,17 +47,13 @@ export const aggregateRulesRoute = (
           usageCounter
         );
 
-        const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResultV1>({
+        const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
           aggs: defaultRuleAggregationFactoryV1(),
           options,
         });
 
-        const responseBody: AggregateRulesResponseBodyV1 = transformAggregateBodyResponseV1(
-          formatDefaultAggregationResultV1(aggregateResult)
-        );
-
         const responsePayload: AggregateRulesResponseV1 = {
-          body: responseBody,
+          body: transformAggregateBodyResponseV1(formatDefaultAggregationResult(aggregateResult)),
         };
 
         return res.ok(responsePayload);

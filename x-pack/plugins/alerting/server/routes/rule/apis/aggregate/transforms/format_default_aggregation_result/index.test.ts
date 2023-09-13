@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatDefaultAggregationResult } from './v1';
+import { formatDefaultAggregationResult } from '.';
 
 describe('formatDefaultAggregationResult', () => {
   it('should format aggregation result', () => {

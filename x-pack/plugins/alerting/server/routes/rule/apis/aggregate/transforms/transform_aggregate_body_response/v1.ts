@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { RewriteResponseCase } from '@kbn/actions-plugin/common';
-import { AggregateRulesResponseBody } from '../../../../../../application/rule/methods/aggregate/types';
+import { RuleAggregationFormattedResult } from '../../../../../../application/rule/methods/aggregate/types';
+import { AggregateRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/aggregate';
 
-export const transformAggregateBodyResponse: RewriteResponseCase<AggregateRulesResponseBody> = ({
+export const transformAggregateBodyResponse = ({
   ruleExecutionStatus,
-  ruleLastRunOutcome,
   ruleEnabledStatus,
+  ruleLastRunOutcome,
   ruleMutedStatus,
   ruleSnoozedStatus,
   ruleTags,
-}) => ({
+}: RuleAggregationFormattedResult): AggregateRulesResponseBodyV1 => ({
   rule_execution_status: ruleExecutionStatus,
   rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,
