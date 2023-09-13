@@ -102,14 +102,6 @@ export const constructUrlWithUser = (user: User, route: string) => {
   return builtUrl.href;
 };
 
-const getProviderName = () => {
-  if (Cypress.env('CLOUD_SERVERLESS')) {
-    return 'cloud-basic';
-  } else {
-    return 'basic';
-  }
-};
-
 const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
@@ -151,8 +143,8 @@ const loginWithUsernameAndPassword = (username: string, password: string) => {
     throw Error(`Cypress config baseUrl not set!`);
   }
 
-  const headers = { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' };
-  // programmatically authenticate without interacting with the Kibana login page
+  // Programmatically authenticate without interacting with the Kibana login page.
+  const headers = { 'kbn-xsrf': 'cypress-creds' };
   cy.request<LoginState>({ headers, url: `${baseUrl}/internal/security/login_state` }).then(
     (loginState) => {
       const basicProvider = loginState.body.selector.providers.find(
@@ -164,7 +156,7 @@ const loginWithUsernameAndPassword = (username: string, password: string) => {
         headers,
         body: {
           providerType: basicProvider.type,
-          providerName: getProviderName(),
+          providerName: basicProvider.name,
           currentURL: '/',
           params: { username, password },
         },
