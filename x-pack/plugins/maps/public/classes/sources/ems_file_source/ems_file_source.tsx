@@ -224,7 +224,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
     try {
       const emsFileLayer = await this.getEMSFileLayer();
-      const targetEmsField = emsFileLayer._config.fields.find(({ id }) => id === field.getName());
+      const targetEmsField = emsFileLayer.getFields().find(({ id }) => id === field.getName());
       const values = targetEmsField?.values ?? [];
       return query.length
         ? values.filter((value) => value.toLowerCase().includes(query.toLowerCase()))
