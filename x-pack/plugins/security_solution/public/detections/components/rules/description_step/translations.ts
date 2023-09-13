@@ -141,13 +141,6 @@ export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSE = i18n.translate(
   }
 );
 
-export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview',
-  {
-    defaultMessage: 'Technical Preview',
-  }
-);
-
 export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution',
   {
@@ -176,10 +169,10 @@ export const ESQL_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
   }
 );
 
-export const ESQL_SUPPRESSED_BY_FIELDS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.esqlSuppressedByFieldsLabel',
+export const ESQL_SUPPRESS_BY_FIELDS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.esqlSuppressByFieldsLabel',
   {
-    defaultMessage: 'ES|QL suppressed by fields',
+    defaultMessage: 'ES|QL suppress by fields',
   }
 );
 

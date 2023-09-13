@@ -648,7 +648,7 @@ export const buildAlertEsqlDescription = (
   }
   return [
     {
-      title: <TechnicalPreviewBadge label={i18n.ESQL_SUPPRESSED_BY_FIELDS} />,
+      title: <TechnicalPreviewBadge label={i18n.ESQL_SUPPRESS_BY_FIELDS} />,
       description: esqlGroupByFields?.join(', '),
     },
     {
