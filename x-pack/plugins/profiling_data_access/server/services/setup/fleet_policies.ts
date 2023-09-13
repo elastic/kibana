@@ -11,8 +11,8 @@ import { ProfilingSetupOptions } from '.';
 import { getApmPolicy } from './get_apm_policy';
 import { PartialSetupState } from './setup';
 
-const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
-const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
+export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
+export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';
 
 async function getPackagePolicy({
   soClient,
