@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
+import { ManagementStart, ManagementSetup } from '@kbn/management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
@@ -31,8 +32,10 @@ export interface ServerlessPluginStart {
 
 export interface ServerlessPluginSetupDependencies {
   cloud: CloudSetup;
+  management: ManagementSetup;
 }
 
 export interface ServerlessPluginStartDependencies {
   cloud: CloudStart;
+  management: ManagementStart;
 }

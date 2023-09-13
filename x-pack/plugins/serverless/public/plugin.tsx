@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
-import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
+import { ProjectType } from '@kbn/serverless-types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
+
 import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
@@ -39,7 +40,7 @@ export class ServerlessPlugin
 
   public setup(
     _core: CoreSetup,
-    _dependencies: ServerlessPluginSetupDependencies
+    _setupDeps: ServerlessPluginSetupDependencies
   ): ServerlessPluginSetup {
     return {};
   }
@@ -89,13 +90,11 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-            <ProjectSwitcher {...{ currentProjectType }} />
-          </ProjectSwitcherKibanaProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+      <KibanaRenderContextProvider {...coreStart}>
+        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+          <ProjectSwitcher {...{ currentProjectType }} />
+        </ProjectSwitcherKibanaProvider>
+      </KibanaRenderContextProvider>,
       targetDomElement
     );
 

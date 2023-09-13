@@ -16,14 +16,15 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
     "@kbn/serverless-project-switcher",
     "@kbn/serverless-types",
     "@kbn/utils",
     "@kbn/core-chrome-browser",
     "@kbn/core-chrome-browser-internal",
-    "@kbn/i18n-react",
     "@kbn/cloud-plugin",
     "@kbn/serverless-common-settings",
+    "@kbn/i18n",
+    "@kbn/react-kibana-context-render",
+    "@kbn/management-settings-application",
   ]
 }

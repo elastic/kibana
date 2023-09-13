@@ -4861,6 +4861,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-settings-application@link:packages/kbn-management/settings/application":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-settings-components-field-input@link:packages/kbn-management/settings/components/field_input":
   version "0.0.0"
   uid ""
