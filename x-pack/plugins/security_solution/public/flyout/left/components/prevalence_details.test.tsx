@@ -112,6 +112,43 @@ describe('PrevalenceDetails', () => {
     expect(queryByTestId(`${PREVALENCE_DETAILS_TABLE_TEST_ID}UpSell`)).not.toBeInTheDocument();
   });
 
+  it('should render formatted numbers for the alert and document count columns', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: 'field1',
+          value: 'value1',
+          alertCount: 1000,
+          docCount: 2000000,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+      ],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <LeftPanelContext.Provider value={panelContextValue}>
+          <PrevalenceDetails />
+        </LeftPanelContext.Provider>
+      </TestProviders>
+    );
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID)).toHaveTextContent('field1');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID)).toHaveTextContent('value1');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID)).toHaveTextContent('1k');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID)).toHaveTextContent('2M');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID)).toHaveTextContent(
+      '5%'
+    );
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID)).toHaveTextContent(
+      '10%'
+    );
+  });
+
   it('should render the table with only basic columns if license is not platinum', () => {
     const field1 = 'field1';
     const field2 = 'field2';
