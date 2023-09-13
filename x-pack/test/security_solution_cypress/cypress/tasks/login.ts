@@ -144,7 +144,7 @@ const loginWithUsernameAndPassword = (username: string, password: string) => {
   }
 
   // Programmatically authenticate without interacting with the Kibana login page.
-  const headers = { 'kbn-xsrf': 'cypress-creds' };
+  const headers = { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' };
   cy.request<LoginState>({ headers, url: `${baseUrl}/internal/security/login_state` }).then(
     (loginState) => {
       const basicProvider = loginState.body.selector.providers.find(
