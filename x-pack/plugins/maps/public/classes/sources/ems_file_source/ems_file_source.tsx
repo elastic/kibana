@@ -221,17 +221,33 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 
-  getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
+  private async _getFieldValues(fieldName: string): Promise<string[]> {
     try {
       const emsFileLayer = await this.getEMSFileLayer();
-      const targetEmsField = emsFileLayer.getFields().find(({ id }) => id === field.getName());
-      const values = targetEmsField?.values ?? [];
-      return query.length
-        ? values.filter((value) => value.toLowerCase().includes(query.toLowerCase()))
-        : values;
+      const targetEmsField = emsFileLayer.getFields().find(({ id }) => id === fieldName);
+      if (targetEmsField?.values?.length) {
+        return targetEmsField.values; 
+      }
+
+      // Fallback to pulling values from feature properties when values are not available in file definition
+      const valuesSet = new Set<string>(); // use set to avoid duplicate values
+      const featureCollection = await emsFileLayer.getGeoJson();
+      featureCollection?.features.forEach(feature => {
+        if (feature?.properties?.[fieldName]) {
+          valuesSet.add(feature.properties[fieldName]);
+        }
+      });
+      return Array.from(valuesSet);
     } catch (error) {
-      // ignore error if EMS layer id could not be found
+      // ignore errors
       return [];
     }
+  }
+
+  getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
+    const values = await this._getFieldValues(field.getName());
+    return query.length
+      ? values.filter((value) => value.toLowerCase().includes(query.toLowerCase()))
+      : values;
   };
 }
