@@ -773,5 +773,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.searchForItemWithName('Anewfancilenstest');
       await listingTable.expectItemsCount('visualize', 1);
     });
+
+    it('should correctly optimize multiple percentile metrics', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      for (const percentileValue of [90, 95.5, 99.9]) {
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'percentile',
+          field: 'bytes',
+          keepOpen: true,
+        });
+
+        await retry.try(async () => {
+          const value = `${percentileValue}`;
+          // Can not use testSubjects because data-test-subj is placed range input and number input
+          const percentileInput = await PageObjects.lens.getNumericFieldReady(
+            'lns-indexPattern-percentile-input'
+          );
+          await percentileInput.type(value);
+
+          const attrValue = await percentileInput.getAttribute('value');
+          if (attrValue !== value) {
+            throw new Error(`layerPanelTopHitsSize not set to ${value}`);
+          }
+        });
+
+        await PageObjects.lens.closeDimensionEditor();
+      }
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
+    });
   });
 }
