@@ -122,6 +122,7 @@ export interface Benchmark {
 
 export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
 export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
+export type RuleSection = CspRuleTemplateMetadata['section'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];

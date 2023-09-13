@@ -87,6 +87,13 @@ const getColumns = ({
   setSelectedRuleId,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspRuleTemplate>> => [
   {
+    field: 'metadata.benchmark.rule_number',
+    name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {
+      defaultMessage: 'Rule Number',
+    }),
+    width: '10%',
+  },
+  {
     field: 'metadata.name',
     name: i18n.translate('xpack.csp.rules.rulesTable.nameColumnLabel', {
       defaultMessage: 'Name',

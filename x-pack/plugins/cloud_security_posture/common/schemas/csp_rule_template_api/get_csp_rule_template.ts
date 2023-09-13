@@ -79,4 +79,9 @@ export const findCspRuleTemplateRequest = schema.object({
    * package_policy_id
    */
   packagePolicyId: schema.maybe(schema.string()),
+
+  /**
+   * rule section
+   */
+  section: schema.maybe(schema.string()),
 });

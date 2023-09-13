@@ -57,7 +57,7 @@ const findCspRuleTemplateHandler = async (
     perPage: options.perPage,
     sortField: options.sortField,
     fields: options?.fields,
-    filter: getBenchmarkTypeFilter(benchmarkId),
+    filter: getBenchmarkTypeFilter(benchmarkId, options.section),
   });
 
   const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
