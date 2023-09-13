@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-
 import { RuleAttributes } from '../../../../data/rule/types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RuleTypeParams } from '../../../../types';
@@ -15,17 +14,22 @@ import { RulesClientContext } from '../../../../rules_client/types';
 import { formatLegacyActions } from '../../../../rules_client/lib';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { Rule } from '../../types';
+import { ruleSchema } from '../../schemas';
+import { resolveRuleParamsSchema } from './schemas';
 
 export interface ResolveParams {
   id: string;
-  includeLegacyId?: boolean;
-  includeSnoozeData?: boolean;
 }
 
 export async function resolveRule<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id, includeLegacyId, includeSnoozeData = false }: ResolveParams
+  { id }: ResolveParams
 ): Promise<Rule<Params>> {
+  try {
+    resolveRuleParamsSchema.validate({ id });
+  } catch (error) {
+    throw Boom.badRequest(`Error validating resolve params - ${error.message}`);
+  }
   const { saved_object: result, ...resolveResponse } =
     await context.unsecuredSavedObjectsClient.resolve<RuleAttributes>('alert', id);
   try {
@@ -60,6 +64,12 @@ export async function resolveRule<Params extends RuleTypeParams = never>(
   });
 
   const rule = transformRuleDomainToRule(ruleDomain);
+
+  try {
+    ruleSchema.validate(rule);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating resolve data - ${error.message}`);
+  }
 
   // format legacy actions for SIEM rules
   if (result.attributes.consumer === AlertConsumers.SIEM) {
