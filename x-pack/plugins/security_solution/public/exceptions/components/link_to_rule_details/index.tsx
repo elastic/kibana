@@ -34,7 +34,7 @@ const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
       external={external}
       deepLinkId={SecurityPageName.rules}
       path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
-      target="_blank"
+      target={external ? '_blank' : undefined}
     >
       {referenceName}
     </SecuritySolutionLinkAnchor>

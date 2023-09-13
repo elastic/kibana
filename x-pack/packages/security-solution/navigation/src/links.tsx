@@ -103,13 +103,12 @@ export const withLink = <T extends Partial<LinkProps>>(
 ): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
   React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
-    const overrideNavigation = rest.target !== '_blank';
     const { onClick, href } = getLink({
       id,
       path,
       urlState,
       onClick: _onClick,
-      overrideNavigation,
+      ...(rest.target === '_blank' && { overrideNavigation: false }),
     });
     return <Component onClick={onClick} href={href} {...(rest as unknown as T)} />;
   });

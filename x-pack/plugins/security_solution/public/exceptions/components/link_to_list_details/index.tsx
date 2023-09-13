@@ -32,7 +32,7 @@ const LinkToListDetailsComponent: FC<LinkToListDetailsProps> = ({
       external={external}
       deepLinkId={SecurityPageName.exceptions}
       path={`/details/${listId}`}
-      target="_blank"
+      target={external ? '_blank' : undefined}
     >
       {linkTitle}
     </SecuritySolutionLinkAnchor>
