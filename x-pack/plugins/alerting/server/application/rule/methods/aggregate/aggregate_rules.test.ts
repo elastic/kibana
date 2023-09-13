@@ -24,7 +24,7 @@ import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/li
 import { RegistryRuleType } from '../../../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../../../../common';
-import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types/v1';
+import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
 
 const taskManager = taskManagerMock.createStart();
