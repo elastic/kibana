@@ -51,7 +51,7 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-const getUrlWithRoute = (role: ROLES, route: string) => {
+export const getUrlWithRoute = (role: ROLES, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -66,7 +66,7 @@ const getUrlWithRoute = (role: ROLES, route: string) => {
   return theUrl;
 };
 
-interface User {
+export interface User {
   username: string;
   password: string;
 }
