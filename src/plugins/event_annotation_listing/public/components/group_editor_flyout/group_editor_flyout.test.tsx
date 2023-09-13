@@ -28,6 +28,7 @@ const SELECTORS = {
   SAVE_BUTTON: '[data-test-subj="saveAnnotationGroup"]',
   CANCEL_BUTTON: '[data-test-subj="cancelGroupEdit"]',
   BACK_BUTTON: '[data-test-subj="backToGroupSettings"]',
+  TOP_BACK_BUTTON: '[data-test-subj="backToGroupSettingsTop"]',
 };
 
 const assertGroupEditingState = (component: ShallowWrapper) => {
@@ -84,6 +85,7 @@ describe('group editor flyout', () => {
         LensEmbeddableComponent={LensEmbeddableComponent}
         searchSessionId={'searchSessionId'}
         refreshSearchSession={jest.fn()}
+        timePickerQuickRanges={[]}
       />
     );
   };
@@ -121,17 +123,20 @@ describe('group editor flyout', () => {
 
     expect(updateGroup).toHaveBeenCalledWith(newGroup);
   });
-  test('specific annotation editing', () => {
-    assertGroupEditingState(component);
+  test.each([SELECTORS.BACK_BUTTON, SELECTORS.TOP_BACK_BUTTON])(
+    'specific annotation editing',
+    (backButtonSelector) => {
+      assertGroupEditingState(component);
 
-    component.find(GroupEditorControls).prop('setSelectedAnnotation')(annotation);
+      component.find(GroupEditorControls).prop('setSelectedAnnotation')(annotation);
 
-    assertAnnotationEditingState(component);
+      assertAnnotationEditingState(component);
 
-    component.find(SELECTORS.BACK_BUTTON).simulate('click');
+      component.find(backButtonSelector).simulate('click');
 
-    assertGroupEditingState(component);
-  });
+      assertGroupEditingState(component);
+    }
+  );
   it('removes active annotation instead of signaling close', () => {
     component.find(GroupEditorControls).prop('setSelectedAnnotation')(annotation);
 

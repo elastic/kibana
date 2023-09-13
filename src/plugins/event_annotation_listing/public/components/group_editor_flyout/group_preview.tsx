@@ -110,7 +110,7 @@ export const GroupPreview = ({
       <EuiFlyoutHeader>
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h4
                 css={css`
                   white-space: nowrap;
@@ -126,6 +126,8 @@ export const GroupPreview = ({
           <EuiFlexItem
             css={css`
               width: 310px;
+              margin-top: -5px;
+              margin-bottom: -5px;
             `}
             grow={false}
           >
@@ -164,6 +166,7 @@ export const GroupPreview = ({
                 },
               ]}
             />
+            {/* </div> */}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

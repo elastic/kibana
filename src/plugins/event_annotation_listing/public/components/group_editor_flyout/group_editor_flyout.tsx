@@ -18,6 +18,7 @@ import {
   EuiButton,
   htmlIdGenerator,
   useIsWithinBreakpoints,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,6 +32,7 @@ import type {
 import { css } from '@emotion/react';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { GroupEditorControls, isGroupValid } from './group_editor_controls';
 import { GroupPreview } from './group_preview';
 
@@ -129,12 +131,35 @@ export const GroupEditorFlyout = ({
           `}
         >
           <EuiFlyoutHeader hasBorder aria-labelledby={flyoutHeadingId}>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h2 id={flyoutHeadingId}>
-                <FormattedMessage
-                  id="eventAnnotationListing.groupEditorFlyout.title"
-                  defaultMessage="Edit annotation group"
-                />
+                {selectedAnnotation ? (
+                  <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="m">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconSize="l"
+                        color="text"
+                        iconType="sortLeft"
+                        aria-label={i18n.translate('eventAnnotationListing.edit.back', {
+                          defaultMessage: 'Back',
+                        })}
+                        onClick={() => setSelectedAnnotation(undefined)}
+                        data-test-subj="backToGroupSettingsTop"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <FormattedMessage
+                        id="eventAnnotationListing.groupEditorFlyout.titleWithAnnotation"
+                        defaultMessage="Date histogram axis annotation"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <FormattedMessage
+                    id="eventAnnotationListing.groupEditorFlyout.title"
+                    defaultMessage="Edit annotation group"
+                  />
+                )}
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
