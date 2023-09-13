@@ -12,6 +12,7 @@ import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import {
   SampleDataContext,
+  SampleDatasetDashboardPanel,
   SampleDatasetProvider,
   SampleDatasetSchema,
 } from '../lib/sample_dataset_registry_types';
@@ -24,6 +25,7 @@ import {
 } from './utils';
 import { SampleDataInstallError } from '../errors';
 import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_beats_tutorial';
+import { SavedObjectsSchema } from '../lib/sample_dataset_schema';
 
 export function createInstallRoute(
   router: IRouter,
@@ -32,7 +34,9 @@ export function createInstallRoute(
   usageTracker: SampleDataUsageTracker,
   analytics: AnalyticsServiceSetup,
   getScopedContext: (req: KibanaRequest) => SampleDataContext,
-  specProviders: Record<string, SampleDatasetProvider>
+  specProviders: Record<string, SampleDatasetProvider>,
+  panelReplacedData: Record<string, SampleDatasetDashboardPanel[]>,
+  additionalSampleDataSavedObjects: Record<string, SavedObjectsSchema>
 ): void {
   router.post(
     {
@@ -58,13 +62,15 @@ export function createInstallRoute(
 
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
-      const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects(
+      const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects({
         sampleDatasets,
-        spaceAwareSampleDataset
-      );
+        spaceAwareSampleDataset,
+        panelReplacedData: panelReplacedData[params.id],
+        additionalSampleDataSavedObjects: additionalSampleDataSavedObjects[params.id],
+      });
 
       const sampleDataInstaller = await getSampleDataInstaller({
-        datasetId: spaceAwareSampleDataset.id,
+        datasetId: sampleDataset.id,
         sampleDatasets: sampleDatasetsWithSpaceAwareSavedObjects,
         logger,
         context,

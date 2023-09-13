@@ -58,6 +58,19 @@ const dataIndexSchema = schema.object({
 
 export type DataIndexSchema = TypeOf<typeof dataIndexSchema>;
 
+const savedObject = schema.object(
+  {
+    id: schema.string(),
+    type: schema.string(),
+    attributes: schema.any(),
+    references: schema.arrayOf(schema.any()),
+    version: schema.maybe(schema.any()),
+  },
+  { unknowns: 'allow' }
+);
+
+const savedObjects = schema.arrayOf(savedObject);
+
 export const sampleDataSchema = schema.object({
   id: schema.string({
     validate(value: string) {
@@ -80,18 +93,7 @@ export const sampleDataSchema = schema.object({
 
   // Kibana saved objects (index patter, visualizations, dashboard, ...)
   // Should provide a nice demo of Kibana's functionality with the sample data set
-  savedObjects: schema.arrayOf(
-    schema.object(
-      {
-        id: schema.string(),
-        type: schema.string(),
-        attributes: schema.any(),
-        references: schema.arrayOf(schema.any()),
-        version: schema.maybe(schema.any()),
-      },
-      { unknowns: 'allow' }
-    )
-  ),
+  savedObjects,
   dataIndices: schema.arrayOf(dataIndexSchema),
 
   status: schema.maybe(schema.string()),
@@ -99,3 +101,6 @@ export const sampleDataSchema = schema.object({
 });
 
 export type SampleDatasetSchema = Writable<TypeOf<typeof sampleDataSchema>>;
+
+export type SavedObjectsSchema = TypeOf<typeof savedObjects>;
+export type SavedObjectSchema = TypeOf<typeof savedObject>;

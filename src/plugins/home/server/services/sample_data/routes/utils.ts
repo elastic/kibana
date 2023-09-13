@@ -8,11 +8,13 @@
 
 import type { RequestHandlerContext, Logger } from '@kbn/core/server';
 import type {
+  SampleDatasetDashboardPanel,
   SampleDatasetProvider,
   SampleDatasetSchema,
 } from '../lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from '../sample_data_installer';
 import { getUniqueObjectTypes } from '../lib/utils';
+import { SavedObjectSchema, SavedObjectsSchema } from '../lib/sample_dataset_schema';
 
 export const SAMPLE_DATA_INSTALLED_EVENT = 'sample_data_installed';
 export const SAMPLE_DATA_UNINSTALLED_EVENT = 'sample_data_uninstalled';
@@ -67,16 +69,95 @@ export const getSpaceAwareSampleDatasets = (
     {}
   );
 
-export const getSampleDatasetsWithSpaceAwareSavedObjects = (
-  sampleDatasets: SampleDatasetSchema[],
-  spaceAwareSampleDataset: SampleDatasetSchema
-) =>
-  sampleDatasets.map((dataset) => ({
-    ...dataset,
-    savedObjects: dataset.savedObjects.map((so) => {
-      const spaceAwareSavedObject = spaceAwareSampleDataset.savedObjects.find(
-        (spaceAwareSO) => spaceAwareSO.id === so.id
-      );
-      return spaceAwareSavedObject ?? so;
-    }),
+export const getReplacedPanelInDashboard = (
+  dashboard: SavedObjectSchema,
+  referenceName: string,
+  embeddableConfig: object
+) => {
+  const panels = JSON.parse(dashboard.attributes.panelsJSON);
+  const panel = panels.find((panelItem: any) => {
+    return panelItem.panelRefName === referenceName;
+  });
+  if (!panel) {
+    throw new Error(`Unable to find panel for reference: ${referenceName}`);
+  }
+  panel.embeddableConfig = embeddableConfig;
+  dashboard.attributes.panelsJSON = JSON.stringify(panels);
+};
+
+export const getDashboardReferenceByIdFromDataset = ({
+  sampleDatasets,
+  sampleDataId,
+  dashboardId,
+  referenceId,
+}: {
+  sampleDatasets: SampleDatasetSchema[];
+  sampleDataId: string;
+  dashboardId: string;
+  referenceId: string;
+}) => {
+  const sampleDataset = sampleDatasets.find((dataset) => {
+    return dataset.id === sampleDataId;
+  });
+  if (!sampleDataset) {
+    throw new Error(`Unable to find sample dataset with id: ${sampleDataId}`);
+  }
+
+  const dashboard = sampleDataset.savedObjects.find((savedObject) => {
+    return savedObject.id === dashboardId && savedObject.type === 'dashboard';
+  }) as SavedObjectSchema;
+  if (!dashboard) {
+    throw new Error(`Unable to find dashboard with id: ${dashboardId}`);
+  }
+
+  const reference = dashboard.references.find((referenceItem: any) => {
+    return referenceItem.id === referenceId;
+  });
+  if (!reference) {
+    throw new Error(`Unable to find reference for embeddable: ${referenceId}`);
+  }
+
+  return { sampleDataset, dashboard, reference };
+};
+
+export const getSampleDatasetsWithSpaceAwareSavedObjects = ({
+  sampleDatasets,
+  spaceAwareSampleDataset,
+  panelReplacedData = [],
+  additionalSampleDataSavedObjects = [],
+}: {
+  sampleDatasets: SampleDatasetSchema[]; // This has the **additional** or **replaced** visualizations from other plugins
+  spaceAwareSampleDataset: SampleDatasetSchema; // This is space aware, but not aware of addition or replacement from other plugins
+  panelReplacedData: SampleDatasetDashboardPanel[];
+  additionalSampleDataSavedObjects: SavedObjectsSchema;
+}) =>
+  sampleDatasets.map((sampleDataset) => ({
+    ...sampleDataset,
+    savedObjects: spaceAwareSampleDataset.savedObjects
+      .concat(additionalSampleDataSavedObjects)
+      .map((savedObject) => {
+        const replacementRecord = panelReplacedData.find(
+          (data) => data.dashboardId === savedObject.id
+        );
+        const replacedDashboard =
+          replacementRecord && savedObject.type === 'dashboard' ? savedObject : undefined;
+
+        if (replacedDashboard != null && replacedDashboard.references != null) {
+          return {
+            ...replacedDashboard,
+            references: replacedDashboard.references.map((dashboardReference) =>
+              replacementRecord && dashboardReference.id === replacementRecord.oldEmbeddableId
+                ? getDashboardReferenceByIdFromDataset({
+                    sampleDatasets,
+                    sampleDataId: replacementRecord.sampleDataId,
+                    dashboardId: replacementRecord.dashboardId,
+                    referenceId: replacementRecord.embeddableId,
+                  }).reference
+                : dashboardReference
+            ),
+          };
+        }
+
+        return savedObject;
+      }),
   }));

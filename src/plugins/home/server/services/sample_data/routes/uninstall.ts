@@ -12,6 +12,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import {
   SampleDataContext,
+  SampleDatasetDashboardPanel,
   SampleDatasetProvider,
   SampleDatasetSchema,
 } from '../lib/sample_dataset_registry_types';
@@ -24,6 +25,7 @@ import {
 } from './utils';
 import { SampleDataInstallError } from '../errors';
 import { getSpaceId } from '../../../tutorials/instructions/get_space_id_for_beats_tutorial';
+import { SavedObjectsSchema } from '../lib/sample_dataset_schema';
 
 export function createUninstallRoute(
   router: IRouter,
@@ -32,7 +34,9 @@ export function createUninstallRoute(
   usageTracker: SampleDataUsageTracker,
   analytics: AnalyticsServiceSetup,
   getScopedContext: (req: KibanaRequest) => SampleDataContext,
-  specProviders: Record<string, SampleDatasetProvider>
+  specProviders: Record<string, SampleDatasetProvider>,
+  panelReplacedData: Record<string, SampleDatasetDashboardPanel[]>,
+  additionalSampleDataSavedObjects: Record<string, SavedObjectsSchema>
 ): void {
   router.delete(
     {
@@ -52,15 +56,17 @@ export function createUninstallRoute(
         return response.notFound();
       }
       const spaceAwareSampleDatasets = getSpaceAwareSampleDatasets(specProviders, spaceId);
-
       const spaceAwareSampleDataset = spaceAwareSampleDatasets[request.params.id];
 
-      const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects(
+      const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects({
         sampleDatasets,
-        spaceAwareSampleDataset
-      );
+        spaceAwareSampleDataset,
+        panelReplacedData: panelReplacedData[request.params.id],
+        additionalSampleDataSavedObjects: additionalSampleDataSavedObjects[request.params.id],
+      });
+
       const sampleDataInstaller = await getSampleDataInstaller({
-        datasetId: spaceAwareSampleDataset.id,
+        datasetId: sampleDataset.id,
         sampleDatasets: sampleDatasetsWithSpaceAwareSavedObjects,
         logger,
         context,
@@ -74,7 +80,7 @@ export function createUninstallRoute(
         reportPerformanceMetricEvent(analytics, {
           eventName: SAMPLE_DATA_UNINSTALLED_EVENT,
           duration: performance.now() - routeStartTime,
-          key1: spaceAwareSampleDataset.id,
+          key1: sampleDataset.id,
         });
         return response.noContent();
       } catch (e) {
