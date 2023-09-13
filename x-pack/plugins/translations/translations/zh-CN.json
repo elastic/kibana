@@ -33160,7 +33160,6 @@
     "xpack.securitySolution.flyout.entities.relatedHostsTitle": "相关主机",
     "xpack.securitySolution.flyout.entities.relatedUsersTitle": "相关用户",
     "xpack.securitySolution.flyout.entities.usersInfoTitle": "用户信息",
-    "xpack.securitySolution.flyout.prevalenceErrorMessage": "普及率",
     "xpack.securitySolution.flyout.prevalenceTableAlertCountColumnTitle": "告警计数",
     "xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitle": "文档计数",
     "xpack.securitySolution.flyout.response.title": "响应",
