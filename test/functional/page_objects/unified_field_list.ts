@@ -84,7 +84,7 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async toggleSidebarSection(sectionName: SidebarSectionName) {
     return await this.find.clickByCssSelector(
-      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__iconButton`
+      `${this.getSidebarSectionSelector(sectionName, true)} .euiAccordion__arrow`
     );
   }
 
