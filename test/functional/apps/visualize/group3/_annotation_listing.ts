@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.deleteItem('to delete 1');
         await listingTable.deleteItem('to delete 2');
         await listingTable.searchForItemWithName('to delete');
-        await listingTable.expectItemsCount('eventAnnotation', 1, 1000);
+        await listingTable.expectItemsCount('eventAnnotation', 0, 1000);
       });
     });
 
