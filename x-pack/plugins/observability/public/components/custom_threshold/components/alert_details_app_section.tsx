@@ -201,7 +201,14 @@ export default function AlertDetailsAppSection({
 
   const cpuMetricPrefix = 'system.cpu';
   const memoryMetricPrefix = 'system.memory';
-  const relatedMetrics = ['system.cpu.user.pct', 'system.load.1', 'system.memory.actual.used.pct'];
+  const relatedMetrics = [
+    'system.cpu.user.pct',
+    'system.load.1',
+    'system.memory.actual.used.pct',
+    'system.filesystem.used.pct',
+    'host.network.ingress.bytes',
+    'host.network.egress.bytes',
+  ];
   const fnList = ['avg', 'sum', 'min', 'max'];
 
   const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
