@@ -85,6 +85,8 @@ module.exports = (_, argv) => {
         '@emotion/react',
         '@hello-pangea/dnd/dist/dnd.js',
         '@reduxjs/toolkit',
+        'redux',
+        'react-redux',
         'immer',
         '@tanstack/react-query',
         '@tanstack/react-query-devtools',

@@ -63,6 +63,8 @@ RUNTIME_DEPS = [
   "@npm//uuid",
   "@npm//io-ts",
   "@npm//@reduxjs/toolkit",
+  "@npm//redux",
+  "@npm//react-redux",
   "@npm//immer",
 ]
 
