@@ -437,6 +437,20 @@ export class DataViewsService {
     }));
   };
 
+  /*
+  getDataViewAsync = async (id: string) => {};
+
+  getAllDataViewAsync = async (refresh: boolean = false) => {
+    if (!this.savedObjectsCache || refresh) {
+      await this.refreshSavedObjectsCache();
+    }
+    if (!this.savedObjectsCache) {
+      return [];
+    }
+    return this.savedObjectsCache.map((obj) => new DataViewAsync(obj));
+  };
+  */
+
   /**
    * Clear index pattern saved objects cache.
    */

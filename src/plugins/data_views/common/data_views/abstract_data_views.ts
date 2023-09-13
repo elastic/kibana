@@ -406,4 +406,6 @@ export abstract class AbstractDataView {
   protected addRuntimeFieldInteral(name: string, runtimeField: RuntimeField) {
     this.runtimeFieldMap[name] = removeFieldAttrs(runtimeField);
   }
+
+  getFieldAttrs = () => cloneDeep(this.fieldAttrs);
 }
