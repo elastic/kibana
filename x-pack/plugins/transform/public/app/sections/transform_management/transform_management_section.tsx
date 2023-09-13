@@ -96,7 +96,6 @@ export const TransformManagement: FC = () => {
   });
 
   const {
-    isInitialLoading: transformsStatsInitialLoading,
     isLoading: transformsStatsLoading,
     error: transformsStatsErrorMessage,
     data: transformsStats,

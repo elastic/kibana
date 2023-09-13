@@ -7,9 +7,10 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import {
   useDeleteIndexAndTargetIndex,
   useDeleteTransforms,
@@ -62,9 +63,9 @@ export const useDeleteAction = (forceDisable: boolean) => {
       : items[0] && items[0] && items[0].stats?.state === TRANSFORM_STATE.FAILED;
 
     deleteTransforms({
-      transformsInfo: items.map((i) => ({
+      transformsInfo: items.filter(isTransformListRowWithStats).map((i) => ({
         id: i.config.id,
-        state: i.stats?.state,
+        state: i.stats.state,
       })),
       deleteDestIndex: shouldDeleteDestIndex,
       deleteDestDataView: shouldDeleteDestDataView,

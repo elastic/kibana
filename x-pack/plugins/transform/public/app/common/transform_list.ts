@@ -24,6 +24,15 @@ export interface TransformListRow {
   alerting_rules?: TransformHealthAlertRule[];
 }
 
+export type TransformListRowWithStats = TransformListRow & {
+  stats: TransformStats;
+};
+
+export function isTransformListRowWithStats(
+  arg: TransformListRow
+): arg is TransformListRowWithStats {
+  return arg.stats !== undefined;
+}
 // The single Action type is not exported as is
 // from EUI so we use that code to get the single
 // Action type from the array of actions.

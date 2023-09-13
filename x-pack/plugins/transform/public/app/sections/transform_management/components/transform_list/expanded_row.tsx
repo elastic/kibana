@@ -11,7 +11,6 @@ import moment from 'moment-timezone';
 
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 
-import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
@@ -44,14 +43,8 @@ interface Props {
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
 }
 
-type StateValues = Optional<NonNullable<TransformListRow['stats']>, 'stats' | 'checkpointing'>;
-
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const hideNodeInfo = useIsServerless();
-
-  const stateValues: StateValues = { ...(item.stats ?? {}) };
-  delete stateValues.stats;
-  delete stateValues.checkpointing;
 
   const stateItems: Item[] = [];
   stateItems.push({
@@ -271,19 +264,19 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
         />
       ),
     },
-    // {
-    //   id: `transform-stats-tab-${tabId}`,
-    //   'data-test-subj': 'transformStatsTab',
-    //   name: i18n.translate(
-    //     'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
-    //     {
-    //       defaultMessage: 'Stats',
-    //     }
-    //   ),
-    //   content: (
-    //     <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
-    //   ),
-    // },
+    {
+      id: `transform-stats-tab-${tabId}`,
+      'data-test-subj': 'transformStatsTab',
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.tabs.transformStatsLabel',
+        {
+          defaultMessage: 'Stats',
+        }
+      ),
+      content: (
+        <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
+      ),
+    },
     {
       id: `transform-json-tab-${tabId}`,
       'data-test-subj': 'transformJsonTab',

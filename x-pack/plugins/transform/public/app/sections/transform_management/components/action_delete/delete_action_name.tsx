@@ -24,7 +24,8 @@ export const deleteActionNameText = i18n.translate(
 );
 
 const transformCanNotBeDeleted = (i: TransformListRow) =>
-  !([TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED] as TransformState[]).includes(i.stats?.state);
+  i.stats &&
+  !([TRANSFORM_STATE.STOPPED, TRANSFORM_STATE.FAILED] as TransformState[]).includes(i.stats.state);
 
 export const isDeleteActionDisabled = (items: TransformListRow[], forceDisable: boolean) => {
   const disabled = items.some(transformCanNotBeDeleted);

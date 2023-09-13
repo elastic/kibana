@@ -7,6 +7,10 @@
 
 import React, { useMemo, useState } from 'react';
 
+import {
+  isTransformListRowWithStats,
+  TransformListRowWithStats,
+} from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
@@ -34,10 +38,12 @@ export const useResetAction = (forceDisable: boolean) => {
     setModalVisible(false);
 
     resetTransforms({
-      transformsInfo: items.map((i) => ({
-        id: i.config.id,
-        state: i.stats?.state,
-      })),
+      transformsInfo: items
+        .filter<TransformListRowWithStats>(isTransformListRowWithStats)
+        .map((i) => ({
+          id: i.config.id,
+          state: i.stats.state,
+        })),
     });
   };
 
