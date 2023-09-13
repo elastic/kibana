@@ -22,9 +22,7 @@ import { getHostRiskData } from '../../hosts/all';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 export const usersRelatedHosts: SecuritySolutionFactory<RelatedEntitiesQueries.relatedHosts> = {
-  buildDsl: (options) => {
-    return buildRelatedHostsQuery(options);
-  },
+  buildDsl: (options) => buildRelatedHostsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>,

@@ -24,9 +24,7 @@ interface AggBucket {
 }
 
 export const kpiRiskScore: SecuritySolutionFactory<RiskQueries.kpiRiskScore> = {
-  buildDsl: (options) => {
-    return buildKpiRiskScoreQuery(options);
-  },
+  buildDsl: (options) => buildKpiRiskScoreQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

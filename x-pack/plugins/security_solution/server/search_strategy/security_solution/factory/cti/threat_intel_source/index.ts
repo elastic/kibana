@@ -15,9 +15,7 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 
 export const dataSource: SecuritySolutionFactory<CtiQueries.dataSource> = {
-  buildDsl: (options) => {
-    return buildTiDataSourceQuery(options);
-  },
+  buildDsl: (options) => buildTiDataSourceQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

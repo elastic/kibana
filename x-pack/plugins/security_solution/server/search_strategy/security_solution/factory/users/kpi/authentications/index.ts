@@ -18,9 +18,7 @@ import type {
 import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
 
 export const usersKpiAuthentications: SecuritySolutionFactory<UsersQueries.kpiAuthentications> = {
-  buildDsl: (options) => {
-    return buildUsersKpiAuthenticationsQuery(options);
-  },
+  buildDsl: (options) => buildUsersKpiAuthenticationsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

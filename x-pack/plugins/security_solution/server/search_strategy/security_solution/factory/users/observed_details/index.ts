@@ -16,9 +16,7 @@ import type { ObservedUserDetailsStrategyResponse } from '../../../../../../comm
 import { formatUserItem } from './helpers';
 
 export const observedUserDetails: SecuritySolutionFactory<UsersQueries.observedDetails> = {
-  buildDsl: (options) => {
-    return buildObservedUserDetailsQuery(options);
-  },
+  buildDsl: (options) => buildObservedUserDetailsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

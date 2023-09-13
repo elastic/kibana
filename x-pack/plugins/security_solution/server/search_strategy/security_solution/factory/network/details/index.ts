@@ -22,9 +22,7 @@ import { buildNetworkDetailsQuery } from './query.details_network.dsl';
 import { unflattenObject } from '../../../../helpers/format_response_object_values';
 
 export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
-  buildDsl: (options) => {
-    return buildNetworkDetailsQuery(options);
-  },
+  buildDsl: (options) => buildNetworkDetailsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

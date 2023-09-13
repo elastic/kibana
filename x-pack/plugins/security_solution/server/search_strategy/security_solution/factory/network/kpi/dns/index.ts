@@ -15,9 +15,7 @@ import type { SecuritySolutionFactory } from '../../../types';
 import { buildDnsQuery } from './query.network_kpi_dns.dsl';
 
 export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
-  buildDsl: (options) => {
-    return buildDnsQuery(options);
-  },
+  buildDsl: (options) => buildDnsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

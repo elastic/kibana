@@ -15,9 +15,7 @@ import type { SecuritySolutionFactory } from '../../../types';
 import { buildTlsHandshakeQuery } from './query.network_kpi_tls_handshakes.dsl';
 
 export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
-  buildDsl: (options) => {
-    return buildTlsHandshakeQuery(options);
-  },
+  buildDsl: (options) => buildTlsHandshakeQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<unknown>

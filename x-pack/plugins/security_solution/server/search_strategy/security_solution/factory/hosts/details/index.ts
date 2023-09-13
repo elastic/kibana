@@ -27,9 +27,7 @@ import { formatHostItem, getHostEndpoint } from './helpers';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
-  buildDsl: (options) => {
-    return buildHostDetailsQuery(options);
-  },
+  buildDsl: (options) => buildHostDetailsQuery(options),
   parse: async (
     options,
     response: IEsSearchResponse<HostAggEsData>,
