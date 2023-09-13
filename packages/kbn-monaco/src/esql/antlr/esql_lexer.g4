@@ -91,6 +91,16 @@ DATE_LITERAL
     | 'second'
     | 'minute'
     | 'hour'
+    | 'week'
+    | 'millisecond'
+    | 'years'
+    | 'months'
+    | 'days'
+    | 'seconds'
+    | 'minutes'
+    | 'hours'
+    | 'weeks'
+    | 'milliseconds'
     ;
 
 AND : 'and';
@@ -156,11 +166,17 @@ MATH_FUNCTION
     | S U B S T R I N G
     | T R I M
     | C O N C A T
+    | C O A L E S C E
+    | G R E A T E S T
+    | L E F T
+    | N O W
+    | R I G H T
     | S T A R T S UNDERSCORE W I T H
     | D A T E UNDERSCORE F O R M A T
     | D A T E UNDERSCORE T R U N C
     | D A T E UNDERSCORE P A R S E
     | A U T O UNDERSCORE B U C K E T
+    | D A T E UNDERSCORE E X T R A C T
     | I S UNDERSCORE F I N I T E
     | I S UNDERSCORE I N F I N I T E
     | C A S E
@@ -184,10 +200,12 @@ MATH_FUNCTION
     | T O UNDERSCORE D T
     | T O UNDERSCORE D B L
     | T O UNDERSCORE D O U B L E
+    | T O UNDERSCORE D E G R E E S
     | T O UNDERSCORE I N T
     | T O UNDERSCORE I N T E G E R
-    | T O UNDERSCORE L O N G
     | T O UNDERSCORE I P
+    | T O UNDERSCORE L O N G
+    | T O UNDERSCORE R A D I A N S
     | T O UNDERSCORE V E R S I O N
     | T O UNDERSCORE U N S I G N E D UNDERSCORE L O N G
     ;
@@ -202,6 +220,20 @@ UNARY_FUNCTION
     | P E R C E N T I L E
     | M E D I A N
     | M E D I A N UNDERSCORE A B S O L U T E UNDERSCORE D E V I A T I O N
+    | A C O S
+    | A S I N
+    | A T A N
+    | A T A N '2'
+    | C E I L
+    | C O S
+    | C O S H
+    | F L O O R
+    | L T R I M
+    | S I N
+    | S I N H
+    | S Q R T
+    | T A N
+    | T A N H
     ;
 
 WHERE_FUNCTIONS
