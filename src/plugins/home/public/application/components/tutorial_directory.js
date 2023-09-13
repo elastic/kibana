@@ -257,9 +257,7 @@ class TutorialDirectoryUi extends React.Component {
           rightSideItems: headerLinks ? [headerLinks] : [],
         }}
       >
-        <KibanaPageTemplate.Section>
-          {this.renderTabContent()}
-        </KibanaPageTemplate.Section>
+        <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }
