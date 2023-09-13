@@ -226,14 +226,18 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       const emsFileLayer = await this.getEMSFileLayer();
       const targetEmsField = emsFileLayer.getFields().find(({ id }) => id === fieldName);
       if (targetEmsField?.values?.length) {
-        return targetEmsField.values; 
+        return targetEmsField.values;
       }
 
       // Fallback to pulling values from feature properties when values are not available in file definition
       const valuesSet = new Set<string>(); // use set to avoid duplicate values
       const featureCollection = await emsFileLayer.getGeoJson();
-      featureCollection?.features.forEach(feature => {
-        if (feature.properties && fieldName in feature.properties && feature.properties[fieldName] != null) {
+      featureCollection?.features.forEach((feature) => {
+        if (
+          feature.properties &&
+          fieldName in feature.properties &&
+          feature.properties[fieldName] != null
+        ) {
           valuesSet.add(feature.properties[fieldName].toString());
         }
       });
