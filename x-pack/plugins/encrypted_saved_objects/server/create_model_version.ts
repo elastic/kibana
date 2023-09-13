@@ -85,7 +85,7 @@ function createMergedUnsafeTransformFn(
 
   return (document, context) => {
     const { type, id, originId } = document;
-    const descriptorNamespace = document.namespace ?? undefined;
+    const descriptorNamespace = document.namespace ?? undefined; // ToDo: this may not be enough to account for agnostic types, see https://github.com/elastic/kibana/issues/161002#issuecomment-1712249597
     const encryptionDescriptor = { id, type, namespace: descriptorNamespace };
 
     // Note about isTypeBeingConverted: false
