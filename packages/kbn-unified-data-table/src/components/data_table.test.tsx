@@ -324,27 +324,36 @@ describe('UnifiedDataTable', () => {
   });
 
   it('should render provided in renderDocumentView DocumentView on expand clicked', async () => {
+    const expandedDoc = {
+      id: 'test',
+      raw: {
+        _index: 'test_i',
+        _id: 'test',
+      },
+      flattened: { test: jest.fn() },
+    };
+    const columnTypesOverride = { testField: 'number ' };
+    const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
+      <div data-test-subj="test-document-view">{hit.id}</div>
+    ));
+
     const component = await getComponent({
       ...getProps(),
-      expandedDoc: {
-        id: 'test',
-        raw: {
-          _index: 'test_i',
-          _id: 'test',
-        },
-        flattened: { test: jest.fn() },
-      },
+      expandedDoc,
       setExpandedDoc: jest.fn(),
-      renderDocumentView: (
-        hit: DataTableRecord,
-        displayedRows: DataTableRecord[],
-        displayedColumns: string[]
-      ) => <div data-test-subj="test-document-view">{hit.id}</div>,
+      columnTypes: columnTypesOverride,
+      renderDocumentView: renderDocumentViewMock,
       externalControlColumns: [testLeadingControlColumn],
     });
 
     findTestSubject(component, 'docTableExpandToggleColumn').first().simulate('click');
     expect(findTestSubject(component, 'test-document-view').exists()).toBeTruthy();
+    expect(renderDocumentViewMock).toHaveBeenLastCalledWith(
+      expandedDoc,
+      getProps().rows,
+      ['_source'],
+      columnTypesOverride
+    );
   });
 
   describe('externalAdditionalControls', () => {
