@@ -26,7 +26,6 @@ jest.mock('../hooks/use_session_preview');
 jest.mock('../../../common/hooks/use_license');
 
 const panelContextValue = {
-  dataAsNestedObject: null,
   getFieldsData: mockGetFieldsData,
 } as unknown as RightPanelContext;
 
