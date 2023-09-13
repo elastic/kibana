@@ -47,12 +47,18 @@ const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
     defaultMessage: 'This transform was created with insufficient permissions.',
   }
 );
+
+const StatsUnknown = () => (
+  <FormattedMessage id="xpack.transform.transformList.statsUnknown" defaultMessage="Unknown" />
+);
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
   transformNodes: number,
-  transformSelection: TransformListRow[]
+  transformSelection: TransformListRow[],
+  isStatsLoading: boolean
 ) => {
+  const StatsFallbackComponent = isStatsLoading ? EuiLoadingSpinner : StatsUnknown;
   const { canStartStopTransform } = useTransformCapabilities();
 
   const { actions, modals } = useActions({
@@ -246,7 +252,7 @@ export const useColumns = (
         return item.stats ? (
           <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />
         ) : (
-          <EuiLoadingSpinner />
+          <StatsFallbackComponent />
         );
       },
       width: '100px',
@@ -318,7 +324,7 @@ export const useColumns = (
                 </EuiFlexItem>
               </>
             ) : (
-              <EuiLoadingSpinner />
+              <StatsFallbackComponent />
             )}
           </EuiFlexGroup>
         );
@@ -334,7 +340,7 @@ export const useColumns = (
         return item.stats ? (
           <TransformHealthColoredDot healthStatus={item.stats.health.status} />
         ) : (
-          <EuiLoadingSpinner />
+          <StatsFallbackComponent />
         );
       },
       width: '100px',

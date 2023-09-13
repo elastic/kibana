@@ -83,6 +83,7 @@ function getItemIdToExpandedRowMap(
 
 interface TransformListProps {
   isLoading: boolean;
+  isStatsLoading: boolean;
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
   transformNodes: number;
   transforms: TransformListRow[];
@@ -91,6 +92,7 @@ interface TransformListProps {
 
 export const TransformList: FC<TransformListProps> = ({
   isLoading,
+  isStatsLoading,
   onCreateTransform,
   transformNodes,
   transforms,
@@ -126,7 +128,8 @@ export const TransformList: FC<TransformListProps> = ({
     expandedRowItemIds,
     setExpandedRowItemIds,
     transformNodes,
-    transformSelection
+    transformSelection,
+    isStatsLoading
   );
 
   const searchError = query?.error ? query?.error.message : undefined;
