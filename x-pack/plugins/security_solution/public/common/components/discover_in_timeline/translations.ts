@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 export const DISCOVER_SEARCH_SAVE_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.timelines.discoverInTimeline.save_saved_search_error',
   {
-    defaultMessage: 'Error while saving the Discover Saved Search',
+    defaultMessage: 'Error while saving the Discover search',
   }
 );
 
 export const DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN = i18n.translate(
   'xpack.securitySolution.timelines.discoverInTimeline.save_saved_search_unknown_error',
   {
-    defaultMessage: 'Unknown Error occurred while saving Discover Search',
+    defaultMessage: 'Unknown error occurred while saving Discover search',
   }
 );

@@ -84,6 +84,7 @@ import {
   showCallOutUnauthorizedMsg,
   saveTimeline,
   updateSavedSearchId,
+  setDiscoverStateWasUpdated,
 } from './actions';
 import type { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -121,6 +122,7 @@ const timelineActionsType = [
   upsertColumn.type,
 
   updateSavedSearchId.type,
+  setDiscoverStateWasUpdated.type,
 ];
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
