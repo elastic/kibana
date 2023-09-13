@@ -474,7 +474,7 @@ describe('runServerlessCluster()', () => {
     expect(execa.mock.calls).toHaveLength(8);
   });
   describe('waitForReady', () => {
-    test('should wait for serverless nodes to be ready to serve requests', async () => {
+    test(`should wait for serverless nodes to be ready and return 'green' status`, async () => {
       mockFs({
         [baseEsPath]: {},
       });
@@ -485,11 +485,12 @@ describe('runServerlessCluster()', () => {
         .Client.mockImplementation(() => ({ cluster: { health } }));
 
       health.mockImplementationOnce(() => Promise.reject()); // first call fails
-      health.mockImplementationOnce(() => Promise.resolve({ status: 'red' })); // second call return wrong status
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'red' })); // second call returns wrong status
+      health.mockImplementationOnce(() => Promise.resolve({ status: 'yellow' })); // third call returns wrong status
       health.mockImplementationOnce(() => Promise.resolve({ status: 'green' })); // then succeeds
 
       await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
-      expect(health).toHaveBeenCalledTimes(3);
+      expect(health).toHaveBeenCalledTimes(4);
     }, 10000);
   });
 });
