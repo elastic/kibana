@@ -28,14 +28,11 @@ const LinkToListDetailsComponent: FC<LinkToListDetailsProps> = ({
 }) => {
   return (
     <SecuritySolutionLinkAnchor
-      data-test-subj={`linkToRuleSecuritySolutionLinkAnchor${dataTestSubj ?? ''}`}
+      data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}
       external={external}
-      deepLinkId={SecurityPageName.rules}
-      navigateToAppOptions={{
-        openInNewTab: !!external,
-        deepLinkId: SecurityPageName.exceptions,
-        path: `/details/${listId}`,
-      }}
+      deepLinkId={SecurityPageName.exceptions}
+      path={`/details/${listId}`}
+      target="_blank"
     >
       {linkTitle}
     </SecuritySolutionLinkAnchor>

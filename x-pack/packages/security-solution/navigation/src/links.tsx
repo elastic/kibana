@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { HTMLAttributeAnchorTarget } from 'react';
 import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'react';
 import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
-import type { NavigateToAppOptions } from '@kbn/core-application-browser';
 import { useGetAppUrl, useNavigateTo } from './navigation';
 
 export interface BaseLinkProps {
   id: string;
   path?: string;
   urlState?: string;
+  target?: HTMLAttributeAnchorTarget | undefined;
 }
 
 export type GetLinkUrlProps = BaseLinkProps & { absolute?: boolean };
@@ -26,14 +27,21 @@ export type WrappedLinkProps = BaseLinkProps & {
    * It does not override the navigation action.
    **/
   onClick?: MouseEventHandler;
-  navigateToAppOptions?: NavigateToAppOptions;
 };
-export type GetLinkProps = (params: WrappedLinkProps) => LinkProps;
+export type GetLinkProps = (
+  params: WrappedLinkProps & {
+    /**
+     * Optional `overrideNavigation` boolean prop.
+     * It overrides the default browser navigation action with history navigation using kibana tools.
+     * It is `true` by default.
+     **/
+    overrideNavigation?: boolean;
+  }
+) => LinkProps;
 
 export interface LinkProps {
   onClick: MouseEventHandler;
   href: string;
-  navigateToAppOptions?: NavigateToAppOptions;
 }
 
 /**
@@ -63,7 +71,7 @@ export const useGetLinkProps = (): GetLinkProps => {
   const { navigateTo } = useNavigateTo();
 
   const getLinkProps = useCallback<GetLinkProps>(
-    ({ id, path, urlState, navigateToAppOptions, onClick: onClickProps }) => {
+    ({ id, path, urlState, onClick: onClickProps, overrideNavigation = true }) => {
       const url = getLinkUrl({ id, path, urlState });
       return {
         href: url,
@@ -74,9 +82,10 @@ export const useGetLinkProps = (): GetLinkProps => {
           if (onClickProps) {
             onClickProps(ev);
           }
-          ev.preventDefault();
-          // TODO ask how to test the url part
-          navigateTo({ url: navigateToAppOptions ? '' : url, ...navigateToAppOptions });
+          if (overrideNavigation) {
+            ev.preventDefault();
+            navigateTo({ url });
+          }
         },
       };
     },
@@ -92,21 +101,15 @@ export const useGetLinkProps = (): GetLinkProps => {
 export const withLink = <T extends Partial<LinkProps>>(
   Component: React.ComponentType<T>
 ): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
-  React.memo(function WithLink({
-    id,
-    path,
-    urlState,
-    onClick: _onClick,
-    navigateToAppOptions,
-    ...rest
-  }) {
+  React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
+    const overrideNavigation = rest.target !== '_blank';
     const { onClick, href } = getLink({
       id,
       path,
       urlState,
-      navigateToAppOptions,
       onClick: _onClick,
+      overrideNavigation,
     });
     return <Component onClick={onClick} href={href} {...(rest as unknown as T)} />;
   });
