@@ -11,6 +11,7 @@ import {
   packagePolicyRouteService,
   agentPolicyRouteService,
 } from '@kbn/fleet-plugin/common';
+import { DATE_VERSION_FOR_PACKAGE_SERVICES } from '../../../common/constants';
 import { type PageUrlParams } from './rules_container';
 import { useKibana } from '../../common/hooks/use_kibana';
 
@@ -20,10 +21,14 @@ export const useCspIntegrationInfo = ({ packagePolicyId, policyId }: PageUrlPara
   return useQuery(['cspRulesInfo', { packagePolicyId, policyId }], () =>
     Promise.all([
       http
-        .get<GetOnePackagePolicyResponse>(packagePolicyRouteService.getInfoPath(packagePolicyId))
+        .get<GetOnePackagePolicyResponse>(packagePolicyRouteService.getInfoPath(packagePolicyId), {
+          version: DATE_VERSION_FOR_PACKAGE_SERVICES,
+        })
         .then((response) => response.item),
       http
-        .get<CopyAgentPolicyResponse>(agentPolicyRouteService.getInfoPath(policyId))
+        .get<CopyAgentPolicyResponse>(agentPolicyRouteService.getInfoPath(policyId), {
+          version: DATE_VERSION_FOR_PACKAGE_SERVICES,
+        })
         .then((response) => response.item),
     ])
   );
