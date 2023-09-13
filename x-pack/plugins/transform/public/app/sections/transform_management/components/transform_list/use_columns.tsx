@@ -49,7 +49,9 @@ const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
 );
 
 const StatsUnknown = () => (
-  <FormattedMessage id="xpack.transform.transformList.statsUnknown" defaultMessage="Unknown" />
+  <EuiText textAlign="center" color="subdued" size="s">
+    <FormattedMessage id="xpack.transform.transformList.statsUnknown" defaultMessage="Unknown" />
+  </EuiText>
 );
 export const useColumns = (
   expandedRowItemIds: TransformId[],

@@ -38,7 +38,7 @@ describe('Transform: Transform List <ExpandedRow />', () => {
 
     render(
       <MlSharedContext.Provider value={mlShared}>
-        <ExpandedRow item={item} onAlertEdit={onAlertEdit} />
+        <ExpandedRow item={item} onAlertEdit={onAlertEdit} transformsStatsLoading={false} />
       </MlSharedContext.Provider>
     );
 

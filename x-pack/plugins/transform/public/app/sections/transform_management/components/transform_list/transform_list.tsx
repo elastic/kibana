@@ -70,12 +70,19 @@ type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 function getItemIdToExpandedRowMap(
   itemIds: TransformId[],
   transforms: TransformListRow[],
-  onAlertEdit: (alertRule: TransformHealthAlertRule) => void
+  onAlertEdit: (alertRule: TransformHealthAlertRule) => void,
+  transformsStatsLoading: boolean
 ): ItemIdToExpandedRowMap {
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
     const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
-      m[transformId] = <ExpandedRow item={item} onAlertEdit={onAlertEdit} />;
+      m[transformId] = (
+        <ExpandedRow
+          item={item}
+          onAlertEdit={onAlertEdit}
+          transformsStatsLoading={transformsStatsLoading}
+        />
+      );
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
@@ -169,7 +176,8 @@ export const TransformList: FC<TransformListProps> = ({
   const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(
     expandedRowItemIds,
     transforms,
-    setEditAlertRule
+    setEditAlertRule,
+    transformsStatsLoading
   );
 
   const bulkActionMenuItems = [

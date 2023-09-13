@@ -9,13 +9,21 @@ import React, { FC, useMemo } from 'react';
 import { css } from '@emotion/react';
 import moment from 'moment-timezone';
 
-import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiLoadingSpinner,
+  EuiTabbedContent,
+  EuiText,
+  EuiFlexGroup,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsServerless } from '../../../../serverless_context';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
@@ -41,9 +49,34 @@ type Item = SectionItem;
 interface Props {
   item: TransformListRow;
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
+  transformsStatsLoading: boolean;
 }
 
-export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
+const NoStatsFallbackTabContent = ({
+  transformsStatsLoading,
+}: {
+  transformsStatsLoading: boolean;
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  const content = transformsStatsLoading ? (
+    <EuiLoadingSpinner />
+  ) : (
+    <EuiText textAlign="center" color="subdued" size="s">
+      <FormattedMessage
+        id="xpack.transform.transformList.noStatsAvailable"
+        defaultMessage="No stats available for this tranform."
+      />
+    </EuiText>
+  );
+  return (
+    <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: euiTheme.size.xxl }}>
+      {content}
+    </EuiFlexGroup>
+  );
+};
+
+export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoading }) => {
   const hideNodeInfo = useIsServerless();
 
   const stateItems: Item[] = [];
@@ -273,8 +306,10 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
           defaultMessage: 'Stats',
         }
       ),
-      content: (
+      content: item.stats ? (
         <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
+      ) : (
+        <NoStatsFallbackTabContent transformsStatsLoading={transformsStatsLoading} />
       ),
     },
     {
