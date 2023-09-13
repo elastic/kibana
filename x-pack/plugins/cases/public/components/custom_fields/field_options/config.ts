@@ -17,6 +17,10 @@ export interface BasicOptions {
   required: Options;
 }
 
+export interface TextOptions extends BasicOptions {
+  multipleValues: Options;
+}
+
 export interface ListOptions extends BasicOptions {
   multipleSelections: Options;
 }
@@ -30,6 +34,16 @@ export const getConfig = (selectedType: CustomFieldTypesUI) => {
   };
 
   switch (selectedType) {
+    case 'Text':
+      config = {
+        ...config,
+        multipleValues: {
+          id: 'multiple_values',
+          label: i18n.MULTIPLE_VALUES,
+        },
+      } as TextOptions;
+
+      return config;
     case 'List':
       config = {
         ...config,

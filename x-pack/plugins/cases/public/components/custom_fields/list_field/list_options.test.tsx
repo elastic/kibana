@@ -15,7 +15,7 @@ import { ListOptions } from './list_options';
 import type { ListOption } from './list_options';
 import * as i18n from '../translations';
 
-describe('FieldTypeDropdown', () => {
+describe('ListOptions', () => {
   let appMockRender: AppMockRenderer;
   const listValues: ListOption[] = [];
 

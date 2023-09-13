@@ -9,7 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import type { CustomFieldTypesUI } from './types';
+import type { CustomFieldBuildType, CustomFieldTypesUI } from './types';
 import { FieldTypeSelector } from './field_type/field_type_selector';
 import { customFieldTypes } from './schema';
 import { builderMap } from './builder';
@@ -27,14 +27,14 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     [setSelectedType]
   );
 
-  const builtCustomFields: React.ReactNode[] = useMemo(() => {
+  const builtCustomFields: CustomFieldBuildType[] = useMemo(() => {
     if (!customFieldTypes) {
       return [];
     }
 
-    let customFieldBuilder: { build: () => React.ReactNode[] } | null = null;
+    let customFieldBuilder: { build: () => CustomFieldBuildType[] } | null = null;
 
-    return customFieldTypes.reduce<React.ReactNode[]>((temp, customFieldType) => {
+    return customFieldTypes.reduce<CustomFieldBuildType[]>((temp, customFieldType) => {
       const builder = builderMap[customFieldType];
 
       if (builder == null) {
@@ -52,14 +52,21 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
 
       return customFieldBuilder ? [...customFieldBuilder.build()] : [];
     }, []);
-  }, [selectedType]);
+  }, [selectedType, isSubmitting]);
 
-  const renderCustomField = (customField: React.ReactNode) => {
+  const renderCustomField = (customField: CustomFieldBuildType, index: number) => {
     if (!customField) {
       return null;
     }
 
-    return Object.values(customField).map((item) => item);
+    const { customFieldType, fieldOptions } = customField;
+
+    return (
+      <React.Fragment key={index}>
+        {customFieldType}
+        {fieldOptions}
+      </React.Fragment>
+    );
   };
 
   return (
@@ -87,7 +94,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
           handleChange: handleTypeChange,
         }}
       />
-      {builtCustomFields.map((customField) => renderCustomField(customField))}
+      {builtCustomFields.map((customField, index) => renderCustomField(customField, index))}
     </>
   );
 };

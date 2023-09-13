@@ -9,8 +9,12 @@ import type React from 'react';
 
 export type CustomFieldTypesUI = 'Text' | 'List' | 'Toggle';
 
+export interface CustomFieldBuildType {
+  customFieldType: JSX.Element | null;
+  fieldOptions: JSX.Element;
+}
+
 export interface CustomFieldBuilderArgs {
-  appId?: string;
   customFieldType: CustomFieldTypesUI;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component?: React.FunctionComponent<any>;
@@ -19,7 +23,7 @@ export interface CustomFieldBuilderArgs {
 }
 
 export type CustomFieldBuilder = (args: CustomFieldBuilderArgs) => {
-  build: () => React.ReactNode[];
+  build: () => CustomFieldBuildType[];
 };
 
 export type CustomFieldBuilderMap = Record<CustomFieldTypesUI, CustomFieldBuilder>;

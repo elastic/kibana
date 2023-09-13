@@ -217,9 +217,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     () =>
       addFieldFlyoutVisible ? (
         <AddFieldFlyout
-          isLoading={false}
+          isLoading={loadingCaseConfigure}
+          disabled={!permissions.create}
           onCloseFlyout={onCloseAddFieldFlyout}
-          onSaveAndAddAnotherField={onCloseAddFieldFlyout}
           onSaveField={onCloseAddFieldFlyout}
         />
       ) : null,

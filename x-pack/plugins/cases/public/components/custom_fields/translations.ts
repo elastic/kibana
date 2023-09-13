@@ -60,6 +60,13 @@ export const FIELD_OPTION_REQUIRED = i18n.translate(
   }
 );
 
+export const MULTIPLE_VALUES = i18n.translate(
+  'xpack.cases.configureCases.fieldOptions.multipleValues',
+  {
+    defaultMessage: 'Allow multiple values',
+  }
+);
+
 export const MULTIPLE_SELECTIONS = i18n.translate(
   'xpack.cases.configureCases.fieldOptions.multipleSelections',
   {

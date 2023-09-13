@@ -23,18 +23,17 @@ import { CustomFieldsForm } from './form';
 import * as i18n from './translations';
 
 export interface AddFieldFlyoutProps {
-  // disabled: boolean;
+  disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
-  onSaveAndAddAnotherField: () => void;
   onSaveField: (data: Record<string, unknown>) => void;
 }
 
 const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
   onCloseFlyout,
-  onSaveAndAddAnotherField,
   onSaveField,
   isLoading,
+  disabled,
 }) => {
   const dataTestSubj = 'add-custom-field-flyout';
 
@@ -49,6 +48,7 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
     const { isValid, data } = await submit();
 
     console.log('handleSaveField', { isValid, data });
+
     if (isValid) {
       onSaveField(data);
     }
@@ -67,7 +67,12 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
       <EuiFlyoutFooter data-test-subj={`${dataTestSubj}-footer`}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCloseFlyout} data-test-subj={`${dataTestSubj}-cancel`}>
+            <EuiButtonEmpty
+              onClick={onCloseFlyout}
+              data-test-subj={`${dataTestSubj}-cancel`}
+              disabled={disabled}
+              isLoading={isLoading}
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -78,7 +83,8 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
                 fill
                 onClick={handleSaveField}
                 data-test-subj={`${dataTestSubj}-save`}
-                disabled={isLoading}
+                disabled={disabled}
+                isLoading={isLoading}
               >
                 {i18n.SAVE_FIELD}
               </EuiButton>

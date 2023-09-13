@@ -64,6 +64,7 @@ const InlineEditComponent: React.FC<Props> = ({
       inputRef.current.focus();
       handleEditingEnabled(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEditingEnabled, inputRef]);
 
   return (
@@ -90,7 +91,6 @@ const InlineEditComponent: React.FC<Props> = ({
             },
             cancelButtonProps: {
               onClick: () => handleEditingEnabled(false),
-              'data-test-subj': 'custom-field-edit-list-cancel-btn',
             },
           }}
           startWithEditOpen={isEditingEnabled}

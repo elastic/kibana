@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 
-import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface Props {
@@ -20,9 +19,8 @@ export interface Props {
   handleAddCustomField: () => void;
 }
 const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAddCustomField }) => {
-  const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
-  const canAddCustomFields = permissions.connectors && actions.read;
+  const canAddCustomFields = permissions.create && permissions.update;
 
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
@@ -33,7 +31,7 @@ const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAdd
           <p>{i18n.DESCRIPTION}</p>
         </>
       }
-      data-test-subj="case-custom-fields-form-group"
+      data-test-subj="custom-fields-form-group"
     >
       <EuiEmptyPrompt
         color="subdued"
@@ -44,11 +42,12 @@ const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAdd
         body={i18n.NO_CUSTOM_FIELDS}
         actions={
           <EuiButtonEmpty
+            isLoading={isLoading}
             isDisabled={disabled}
             size="s"
             onClick={handleAddCustomField}
             iconType="plusInCircle"
-            data-test-subj="cases-add-custom-field"
+            data-test-subj="add-custom-field"
           >
             {i18n.ADD_CUSTOM_FIELD}
           </EuiButtonEmpty>
