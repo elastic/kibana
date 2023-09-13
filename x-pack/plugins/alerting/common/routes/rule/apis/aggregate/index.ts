@@ -6,15 +6,16 @@
  */
 export {
   aggregateRulesRequestBodySchema,
-  ruleAggregationFormattedResponse,
+  aggregateRulesResponseBodySchema,
 } from './schemas/latest';
-export type { AggregateRulesRequestBody, RuleAggregationFormattedResult } from './types/latest';
+export type { AggregateRulesRequestBody, AggregateRulesResponseBody } from './types/latest';
 
 export {
   aggregateRulesRequestBodySchema as aggregateRulesRequestBodySchemaV1,
-  ruleAggregationFormattedResponse as ruleAggregationFormattedResponseV1,
+  aggregateRulesResponseBodySchema as aggregateRulesResponseBodySchemaV1,
 } from './schemas/v1';
 export type {
   AggregateRulesRequestBody as AggregateRulesRequestBodyV1,
-  RuleAggregationFormattedResult as RuleAggregationFormattedResultV1,
+  AggregateRulesResponseBody as AggregateRulesResponseBodyV1,
+  AggregateRulesResponse as AggregateRulesResponseV1,
 } from './types/v1';

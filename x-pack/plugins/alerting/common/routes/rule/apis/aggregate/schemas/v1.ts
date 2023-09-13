@@ -26,19 +26,19 @@ export const aggregateRulesRequestBodySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-export const ruleAggregationFormattedResponse = schema.object({
-  ruleExecutionStatus: schema.recordOf(schema.string(), schema.number()),
-  ruleLastRunOutcome: schema.recordOf(schema.string(), schema.number()),
-  ruleEnabledStatus: schema.object({
+export const aggregateRulesResponseBodySchema = schema.object({
+  rule_execution_status: schema.recordOf(schema.string(), schema.number()),
+  rule_last_run_outcome: schema.recordOf(schema.string(), schema.number()),
+  rule_enabled_status: schema.object({
     enabled: schema.number(),
     disabled: schema.number(),
   }),
-  ruleMutedStatus: schema.object({
+  rule_muted_status: schema.object({
     muted: schema.number(),
     unmuted: schema.number(),
   }),
-  ruleSnoozedStatus: schema.object({
+  rule_snoozed_status: schema.object({
     snoozed: schema.number(),
   }),
-  ruleTags: schema.arrayOf(schema.string()),
+  rule_tags: schema.arrayOf(schema.string()),
 });

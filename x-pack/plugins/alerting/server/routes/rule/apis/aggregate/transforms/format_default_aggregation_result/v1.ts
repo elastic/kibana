@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { RuleAggregationFormattedResult } from '../../../../../../../common/routes/rule/apis/aggregate/types/latest';
+import { AggregateRulesResponseBody } from '../../../../../../application/rule/methods/aggregate/types';
 import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../../../../../../../common';
 import { DefaultRuleAggregationResultV1 } from '../../types';
 
 export const formatDefaultAggregationResult = (
   aggregations: DefaultRuleAggregationResultV1
-): RuleAggregationFormattedResult => {
+): AggregateRulesResponseBody => {
   if (!aggregations) {
     // Return a placeholder with all zeroes
-    const placeholder: RuleAggregationFormattedResult = {
+    const placeholder: AggregateRulesResponseBody = {
       ruleExecutionStatus: {},
       ruleLastRunOutcome: {},
       ruleEnabledStatus: {
@@ -47,7 +47,7 @@ export const formatDefaultAggregationResult = (
   const enabledBuckets = aggregations.enabled.buckets;
   const mutedBuckets = aggregations.muted.buckets;
 
-  const result: RuleAggregationFormattedResult = {
+  const result: AggregateRulesResponseBody = {
     ruleExecutionStatus: ruleExecutionStatus.reduce(
       (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
       {}

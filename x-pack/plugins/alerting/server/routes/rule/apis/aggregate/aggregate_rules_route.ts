@@ -16,6 +16,8 @@ import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import {
   aggregateRulesRequestBodySchemaV1,
   AggregateRulesRequestBodyV1,
+  AggregateRulesResponseBodyV1,
+  AggregateRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/aggregate';
 import { formatDefaultAggregationResultV1 } from './transforms';
 import { transformAggregateQueryRequestV1, transformAggregateBodyResponseV1 } from './transforms';
@@ -50,9 +52,16 @@ export const aggregateRulesRoute = (
           aggs: defaultRuleAggregationFactoryV1(),
           options,
         });
-        return res.ok({
-          body: transformAggregateBodyResponseV1(formatDefaultAggregationResultV1(aggregateResult)),
-        });
+
+        const responseBody: AggregateRulesResponseBodyV1 = transformAggregateBodyResponseV1(
+          formatDefaultAggregationResultV1(aggregateResult)
+        );
+
+        const responsePayload: AggregateRulesResponseV1 = {
+          body: responseBody,
+        };
+
+        return res.ok(responsePayload);
       })
     )
   );

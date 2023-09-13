@@ -29,3 +29,20 @@ export interface AggregateParams<AggregationResult> {
 export interface DefaultRuleAggregationParams {
   maxTags?: number;
 }
+
+export interface AggregateRulesResponseBody {
+  ruleExecutionStatus: Record<string, number>;
+  ruleLastRunOutcome: Record<string, number>;
+  ruleEnabledStatus: {
+    enabled: number;
+    disabled: number;
+  };
+  ruleMutedStatus: {
+    muted: number;
+    unmuted: number;
+  };
+  ruleSnoozedStatus: {
+    snoozed: number;
+  };
+  ruleTags: string[];
+}
