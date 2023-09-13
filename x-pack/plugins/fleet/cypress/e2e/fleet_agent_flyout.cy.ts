@@ -10,6 +10,9 @@ import { cleanupAgentPolicies, deleteFleetServerDocs, deleteAgentDocs } from '..
 import { createAgentDoc } from '../tasks/agents';
 import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
+import { request } from '../tasks/common';
+
+import { login } from '../tasks/login';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
@@ -25,7 +28,7 @@ describe('Fleet add agent flyout', () => {
       cleanUp();
       let policyId: string;
       // Create a Fleet server policy
-      cy.request({
+      request({
         method: 'POST',
         url: '/api/fleet/agent_policies',
         headers: { 'kbn-xsrf': 'xx' },
@@ -59,6 +62,8 @@ describe('Fleet add agent flyout', () => {
         });
         setFleetServerHost();
       });
+
+      login();
     });
 
     afterEach(() => {
