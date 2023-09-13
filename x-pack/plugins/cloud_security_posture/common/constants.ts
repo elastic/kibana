@@ -26,9 +26,6 @@ export const BENCHMARKS_API_CURRENT_VERSION = '1';
 export const FIND_CSP_RULE_TEMPLATE_ROUTE_PATH = '/internal/cloud_security_posture/rules/_find';
 export const FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION = '1';
 
-// Our rules page is using package policy and agent policy services external APIs, which require a version in a date format.
-export const DATE_VERSION_FOR_PACKAGE_SERVICES = '2023-10-31';
-
 export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
