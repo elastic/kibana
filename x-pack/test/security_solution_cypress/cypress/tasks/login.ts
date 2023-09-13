@@ -163,7 +163,7 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-const loginWithRole = async (role: ROLES) => {
+const loginWithRole = (role: ROLES) => {
   postRoleAndUser(role);
 
   cy.log(`origin: ${Cypress.config().baseUrl}`);
