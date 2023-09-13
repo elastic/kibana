@@ -235,7 +235,8 @@ export class CaseUserActionService {
   }
 
   public async getMostRecentUserAction(
-    caseId: string
+    caseId: string,
+    isCasesWebhook = false
   ): Promise<UserActionSavedObjectTransformed | undefined> {
     try {
       this.context.log.debug(
@@ -249,10 +250,9 @@ export class CaseUserActionService {
         filters: [
           UserActionTypes.comment,
           UserActionTypes.description,
-          UserActionTypes.severity,
-          UserActionTypes.status,
           UserActionTypes.tags,
           UserActionTypes.title,
+          ...(isCasesWebhook ? [UserActionTypes.severity, UserActionTypes.status] : []),
         ],
         field: 'type',
         operator: 'or',

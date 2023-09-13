@@ -33,6 +33,7 @@ import type {
   ExternalService,
   UserActionAttributes,
 } from '../../../common/types/domain';
+import { ConnectorTypes } from '../../../common/types/domain';
 
 export const getConnectors = async (
   { caseId }: GetConnectorsRequest,
@@ -142,7 +143,23 @@ const getConnectorsInfo = async ({
     await getActionConnectors(actionsClient, logger, connectorIds),
   ]);
 
-  return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
+  const hasCasesWebhookConnector = actionConnectors.some(
+    (actionConnector) => actionConnector.actionTypeId === ConnectorTypes.casesWebhook
+  );
+  let latestUserActionCasesWebhook: SavedObject<UserActionAttributes> | undefined;
+  if (hasCasesWebhookConnector) {
+    // if cases webhook connector, we need to fetch latestUserAction again because
+    // the cases webhook connector includes extra fields other case connectors do not track
+    latestUserActionCasesWebhook = await userActionService.getMostRecentUserAction(caseId, true);
+  }
+
+  return createConnectorInfoResult({
+    actionConnectors,
+    connectors,
+    pushInfo,
+    latestUserAction,
+    latestUserActionCasesWebhook,
+  });
 };
 
 const getActionConnectors = async (
@@ -272,6 +289,7 @@ const createConnectorInfoResult = ({
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
   latestUserAction?: SavedObject<UserActionAttributes>;
+  latestUserActionCasesWebhook?: SavedObject<UserActionAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
   const actionConnectorsMap = new Map(
@@ -282,7 +300,11 @@ const createConnectorInfoResult = ({
     const connectorDetails = actionConnectorsMap.get(aggregationConnector.connectorId);
     const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
 
-    const latestUserActionCreatedAt = getDate(latestUserAction?.attributes.created_at);
+    const latestUserActionCreatedAt = getDate(
+      connectorDetails?.actionTypeId === ConnectorTypes.casesWebhook
+        ? latestUserActionCasesWebhook?.attributes.created_at
+        : latestUserAction?.attributes.created_at
+    );
 
     if (connector != null) {
       const enrichedPushInfo = pushInfo.get(aggregationConnector.connectorId);
