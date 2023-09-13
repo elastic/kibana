@@ -111,8 +111,8 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
           />{' '}
           <EuiLink onClick={rulePageNavigation}>
             <FormattedMessage
-              id="xpack.csp.findingsFlyout.alerts.ruleCount"
-              defaultMessage="{ruleCount, plural, one {# rule} other {# rules}}"
+              id="xpack.csp.findingsFlyout.alerts.detectionRuleCount"
+              defaultMessage="{ruleCount, plural, one {# detection rule} other {# detection rules}}"
               values={{ ruleCount: rulesData?.total || 0 }}
             />
           </EuiLink>

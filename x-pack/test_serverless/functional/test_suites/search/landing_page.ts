@@ -7,14 +7,22 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const svlSearchLandingPage = getPageObject('svlSearchLandingPage');
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['svlSearchLandingPage', 'svlCommonPage']);
   const svlSearchNavigation = getService('svlSearchNavigation');
 
   describe('landing page', function () {
+    before(async () => {
+      await pageObjects.svlCommonPage.login();
+    });
+
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
+    });
+
     it('has serverless side nav', async () => {
       await svlSearchNavigation.navigateToLandingPage();
-      await svlSearchLandingPage.assertSvlSearchSideNavExists();
+      await pageObjects.svlSearchLandingPage.assertSvlSearchSideNavExists();
     });
   });
 }
