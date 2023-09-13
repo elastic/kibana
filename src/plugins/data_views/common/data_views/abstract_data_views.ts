@@ -126,16 +126,26 @@ export abstract class AbstractDataView {
 
   protected scriptedFields: DataViewFieldBase[];
 
-  // HOW IS THIS SAVED
-  protected fieldAttrsSet?: Record<string, FieldAttrSet>;
-
   constructor(config: AbstractDataViewDeps) {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
     const extractedFieldAttrs = spec?.fields
       ? Object.entries(spec.fields).reduce((acc, [key, value]) => {
+          const attrs: FieldAttrSet = {};
+          let hasAttrs = false;
+
           if (value.count) {
-            acc[key] = { count: value.count };
+            attrs.count = value.count;
+            hasAttrs = true;
+          }
+
+          if (value.customLabel) {
+            attrs.customLabel = value.customLabel;
+            hasAttrs = true;
+          }
+
+          if (hasAttrs) {
+            acc[key] = attrs;
           }
           return acc;
         }, {} as Record<string, FieldAttrSet>)
@@ -343,5 +353,9 @@ export abstract class AbstractDataView {
     } else {
       this.scriptedFields[fieldIndex] = scriptedField;
     }
+  };
+
+  protected deleteScriptedFieldInternal = (fieldName: string) => {
+    this.scriptedFields = this.scriptedFields.filter((field) => field.name !== fieldName);
   };
 }
