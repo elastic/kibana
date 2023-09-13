@@ -129,7 +129,7 @@ export class AnalyticsClient implements IAnalyticsClient {
     const event: Event = {
       timestamp,
       event_type: eventType,
-      context: maskContext(this.context$.value),
+      context: this.context$.value,
       properties: eventData as unknown as Record<string, unknown>,
     };
 
@@ -359,42 +359,4 @@ export class AnalyticsClient implements IAnalyticsClient {
         this.sendToShipper(eventType, events);
       });
   }
-}
-
-/** security paths that contain user data */
-const PATHS_TO_MASK = ['hosts/name/', 'users/name/', 'network/ip/'];
-// this indicates a user query
-const queryMarker = `?`;
-const maskUrl = (url: string) => {
-  if (url.includes(queryMarker)) {
-    url = url.substring(0, url.indexOf(queryMarker) + queryMarker.length);
-  }
-  const matchedPaths = PATHS_TO_MASK.find((path) => url.includes(path));
-
-  if (matchedPaths) {
-    const res = url.split(matchedPaths);
-    const rmArr = res[1].split('/');
-    rmArr.splice(0, 1, 'MASKED');
-    return res[0] + matchedPaths + rmArr.join('/');
-  }
-
-  return url;
-};
-
-export function maskContext(properties: Partial<EventContext>): Record<string, unknown> {
-  const maskedProperties: Partial<EventContext> = {};
-  if (properties.page_url) {
-    maskedProperties.page_url = maskUrl(properties.page_url as string);
-  }
-  if (properties.page) {
-    maskedProperties.page = maskUrl(properties.page as string);
-  }
-  if (properties.pageName) {
-    maskedProperties.pageName = maskUrl(properties.pageName as string);
-  }
-
-  return {
-    ...properties,
-    ...maskedProperties,
-  };
 }
