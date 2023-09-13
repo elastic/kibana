@@ -150,7 +150,7 @@ describe('Spaces plugin', () => {
     });
   });
 
-  it('determines hasOnlyDefaultSpace$ correctly when maxSpaces=1', () => {
+  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1', () => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
 
@@ -162,7 +162,7 @@ describe('Spaces plugin', () => {
     expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
   });
 
-  it('determines hasOnlyDefaultSpace$ correctly when maxSpaces=1000', () => {
+  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1000', () => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
 
