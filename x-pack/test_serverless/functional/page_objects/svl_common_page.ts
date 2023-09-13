@@ -7,10 +7,21 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function SvlCommonPageProvider({ getService }: FtrProviderContext) {
+export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const config = getService('config');
+  const pageObjects = getPageObjects(['security']);
 
   return {
+    async login() {
+      await pageObjects.security.forceLogout({ waitForLoginPage: false });
+      return await pageObjects.security.login(config.get('servers.kibana.username'));
+    },
+
+    async forceLogout() {
+      await pageObjects.security.forceLogout({ waitForLoginPage: false });
+    },
+
     async assertProjectHeaderExists() {
       await testSubjects.existOrFail('kibanaProjectHeader');
     },
