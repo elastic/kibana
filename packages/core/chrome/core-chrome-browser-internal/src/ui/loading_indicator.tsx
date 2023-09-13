@@ -19,6 +19,8 @@ export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
   customLogo?: string;
+  maxAmount?: number;
+  valueAmount?: string | number;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -106,6 +108,8 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       <EuiProgress
         className={className}
         data-test-subj={testSubj}
+        max={this.props.maxAmount}
+        value={this.props.valueAmount}
         position="fixed"
         color="accent"
         size="xs"
