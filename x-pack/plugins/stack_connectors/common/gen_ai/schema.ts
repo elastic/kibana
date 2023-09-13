@@ -35,12 +35,13 @@ export const GenAiStreamActionParamsSchema = schema.object({
 });
 
 export const GenAiStreamingResponseSchema = schema.any();
+
 export const GenAiRunActionResponseSchema = schema.object(
   {
-    id: schema.string(),
-    object: schema.string(),
-    created: schema.number(),
-    model: schema.string(),
+    id: schema.maybe(schema.string()),
+    object: schema.maybe(schema.string()),
+    created: schema.maybe(schema.number()),
+    model: schema.maybe(schema.string()),
     usage: schema.object(
       {
         prompt_tokens: schema.number(),
