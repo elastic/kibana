@@ -85,7 +85,7 @@ exports[`SearchResponseWarnings renders "callout" correctly 1`] = `
           >
             <button
               aria-label="Close"
-              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
+              class="euiButtonIcon emotion-euiButtonIcon-xs-empty-warning"
               type="button"
             >
               <span

@@ -297,6 +297,7 @@ function CalloutTitleWrapper({
           onClick={onCloseCallout}
           type="button"
           iconType="cross"
+          color="warning"
         />
       </EuiFlexItem>
     </EuiFlexGroup>
