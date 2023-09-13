@@ -11,16 +11,13 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { useKibana } from '../../utils/kibana_react';
-import { SloStatusBadge } from '../../components/slo/slo_status_badge';
-import { SloActiveAlertsBadge } from '../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 interface Props {
   slo: SLOWithSummaryResponse;
 }
 
 export function SloSummary({ slo }: Props) {
-  console.log(slo.name, '!!my slo');
-  const { uiSettings, i18n } = useKibana().services;
+  const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
   const titleColor = isSloFailed ? 'danger' : '';

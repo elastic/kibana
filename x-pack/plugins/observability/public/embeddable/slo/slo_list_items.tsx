@@ -9,10 +9,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export function SloListItems({ sloList }) {
-  console.log('!!here');
-  console.log(sloList, '!!list');
-  sloList.map((slo) => console.log(slo, '!!slo'));
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {sloList &&

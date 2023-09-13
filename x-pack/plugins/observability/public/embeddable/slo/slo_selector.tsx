@@ -9,9 +9,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 
 interface Props {
   initialSlo?: SLOWithSummaryResponse;
@@ -61,16 +60,6 @@ export function SloSelector({ initialSlo, onSelected, errors }: Props) {
     setSelectedOptions(opts);
     const selectedSlo =
       opts.length === 1 ? sloList!.results?.find((slo) => slo.id === opts[0].value) : undefined;
-    console.log(selectedSlo, '!!before summary');
-    // selectedSlo = {
-    //   ...selectedSlo,
-    //   summary: historicalSummaries.find(
-    //     (historicalSummary) =>
-    //       historicalSummary.sloId === selectedSlo?.id &&
-    //       historicalSummary.instanceId === (selectedSlo.instanceId ?? ALL_VALUE)
-    //   )?.data,
-    // };
-    console.log(selectedSlo, '!!after summary');
     onSelected(selectedSlo);
   };
 

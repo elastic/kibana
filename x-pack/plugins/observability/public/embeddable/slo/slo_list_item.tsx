@@ -7,11 +7,9 @@
 
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle, EuiPanel } from '@elastic/eui';
-import { useKibana } from '../../utils/kibana_react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPanel } from '@elastic/eui';
 import { SloStatusBadge } from '../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../components/slo/slo_status_badge/slo_active_alerts_badge';
-import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { SloSummary } from './slo_summary';
 
 interface Props {
@@ -19,16 +17,6 @@ interface Props {
 }
 
 export function SloListItem({ slo }: Props) {
-  console.log(slo.name, '!!my slo');
-  const { uiSettings } = useKibana().services;
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
-  const titleColor = isSloFailed ? 'danger' : '';
-  const errorBudgetRemaining =
-    slo.summary.errorBudget.remaining <= 0
-      ? Math.trunc(slo.summary.errorBudget.remaining * 100) / 100
-      : slo.summary.errorBudget.remaining;
-
   return (
     <EuiPanel paddingSize="m" color="transparent">
       <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj="sloList">

@@ -36,7 +36,6 @@ export class SLOEmbeddable extends Embeddable {
    */
   public render(node: HTMLElement) {
     const input = this.getInput();
-    console.log(input, '!!input');
     const I18nContext = this.deps.i18n.Context;
     ReactDOM.render(
       <I18nContext>

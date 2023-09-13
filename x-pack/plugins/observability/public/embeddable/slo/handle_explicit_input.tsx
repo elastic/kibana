@@ -33,7 +33,6 @@ export async function resolveEmbeddableSloUserInput(
             <QueryClientProvider client={queryClient}>
               <SloConfiguration
                 onCreate={(update) => {
-                  console.log(update, '!!update');
                   modalSession.close();
                   resolve(update);
                 }}
