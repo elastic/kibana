@@ -133,6 +133,28 @@ Discover::
 For information about the {kib} 8.9.0 release, review the following information.
 
 [float]
+[[known-issues-8.9.0]]
+=== Known issues
+
+// tag::known-issue-160116[]
+[discrete]
+.Changes to Lens visualizations do not appear in the saved object.
+[%collapsible]
+====
+*Details* +
+Changes to Lens visualizations do not appear in the saved object. 
+
+*Impact* +
+When you remove fields from Lens visualizations, then save your changes, the removed fields continue to appear in the Lens visualization saved objects. 
+For example, when you remove runtime fields from a Lens visualization and {kib}, then inspect the Lens visualization saved object, the runtime fields continue to appear and an error message appears.
+
+*Workaround* +
+In 8.10.0, we are addressing this issue by merging the existing and changed saved object instead of replacing the saved object.
+
+====
+// end::known-issue-161249[]
+
+[float]
 [[breaking-changes-8.9.0]]
 === Breaking changes
 
