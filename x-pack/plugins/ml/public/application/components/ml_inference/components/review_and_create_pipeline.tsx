@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -51,6 +51,10 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
       docLinks: { links },
     },
   } = useMlKibana();
+
+  const [isNextStepsAccordionOpen, setIsNextStepsAccordionOpen] = useState<'open' | 'closed'>(
+    'closed'
+  );
 
   const inferenceProcessorLink =
     modelType === 'regression'
@@ -115,11 +119,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                     defaultMessage="You can use this pipeline to infer against new data or infer against existing data by {reindexLink} with the pipeline."
                     values={{
                       reindexLink: (
-                        <EuiLink
-                          href={links.upgradeAssistant.reindexWithPipeline}
-                          target="_blank"
-                          external
-                        >
+                        <EuiLink onClick={() => setIsNextStepsAccordionOpen('open')}>
                           {'reindexing'}
                         </EuiLink>
                       ),
@@ -213,6 +213,10 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                     defaultMessage="Next steps"
                   />
                 }
+                forceState={isNextStepsAccordionOpen}
+                onToggle={(isOpen) => {
+                  setIsNextStepsAccordionOpen(isOpen ? 'open' : 'closed');
+                }}
               >
                 <ReindexWithPipeline pipelineName={pipelineName} sourceIndex={sourceIndex} />
               </EuiAccordion>

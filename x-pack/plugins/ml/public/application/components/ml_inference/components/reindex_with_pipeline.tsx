@@ -8,6 +8,7 @@
 import React, { type ChangeEvent, FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
   EuiComboBox,
@@ -262,7 +263,9 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
     <EuiButton
       onClick={onReindex}
       disabled={
-        (destinationIndexInvalidMessage !== undefined && selectedIndex.length > 0) || !canReindex
+        (destinationIndexInvalidMessage !== undefined && selectedIndex.length > 0) ||
+        !canReindex ||
+        destinationIndexExists
       }
       size="s"
     >
@@ -278,14 +281,31 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       {reindexingTaskId === undefined ? (
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiText>
-              <h4>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexingTitle"
-                  defaultMessage="Reindex with pipeline"
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexingTitle"
+                      defaultMessage="Reindex with pipeline"
+                    />
+                  </h4>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonIcon
+                  href={links.upgradeAssistant.reindexWithPipeline}
+                  target="_blank"
+                  iconType="iInCircle"
+                  aria-label={i18n.translate(
+                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.linkToReindexingAriaLabel',
+                    {
+                      defaultMessage: 'Link to the reindexing documentation',
+                    }
+                  )}
                 />
-              </h4>
-            </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow
@@ -389,7 +409,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
             {discoverLink !== undefined ? (
               <FormattedMessage
                 id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexedlinkToDiscover"
-                defaultMessage="View {destIndexInDiscover} in Discover."
+                defaultMessage=" View {destIndexInDiscover} in Discover."
                 values={{
                   destIndexInDiscover: (
                     <EuiLink href={`${discoverLink}`} target="_blank" external>
