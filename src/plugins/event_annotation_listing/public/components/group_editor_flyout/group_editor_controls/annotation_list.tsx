@@ -106,6 +106,7 @@ export const AnnotationList = ({
           <div
             key={index}
             css={css`
+              margin-top: ${euiThemeVars.euiSizeS};
               position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
               margin-top: ${index === 0 ? '' : euiThemeVars.euiSizeS};
             `}
@@ -135,10 +136,8 @@ export const AnnotationList = ({
                   defaultMessage: 'Annotations',
                 })}
                 onClick={() => selectAnnotation(annotation)}
-                onRemoveClick={
-                  annotations.length > 1
-                    ? () => updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
-                    : undefined
+                onRemoveClick={() =>
+                  updateAnnotations(annotations.filter(({ id }) => id !== annotation.id))
                 }
                 accessorConfig={getAnnotationAccessor(annotation)}
                 label={annotation.label}

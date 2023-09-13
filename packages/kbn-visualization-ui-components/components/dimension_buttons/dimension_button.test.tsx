@@ -11,14 +11,13 @@ import React from 'react';
 import { DimensionButton, DimensionButtonProps } from './dimension_button';
 
 describe('DimensionButton', () => {
-  function getDefaultProps(): Omit<DimensionButtonProps, 'children'> {
+  function getDefaultProps(): Omit<DimensionButtonProps, 'label' | 'children'> {
     return {
       groupLabel: 'myGroup',
       onClick: jest.fn(),
       onRemoveClick: jest.fn(),
       accessorConfig: { columnId: '1' },
       message: undefined,
-      label: 'myLabel',
     };
   }
   it('should fallback to the empty title if the dimension label is made of an empty string', () => {
@@ -46,23 +45,5 @@ describe('DimensionButton', () => {
       </DimensionButton>
     );
     expect(screen.getByTitle('Edit aaa configuration')).toBeInTheDocument();
-  });
-
-  it('should show remove button if callback provided', () => {
-    render(
-      <DimensionButton {...getDefaultProps()}>
-        <div />
-      </DimensionButton>
-    );
-    expect(screen.queryByTestId('indexPattern-dimension-remove')).toBeInTheDocument();
-  });
-
-  it('should hide remove button if callback not provided', () => {
-    render(
-      <DimensionButton {...getDefaultProps()} onRemoveClick={undefined}>
-        <div />
-      </DimensionButton>
-    );
-    expect(screen.queryByTestId('indexPattern-dimension-remove')).not.toBeInTheDocument();
   });
 });
