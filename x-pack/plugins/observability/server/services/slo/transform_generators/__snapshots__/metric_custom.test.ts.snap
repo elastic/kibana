@@ -233,7 +233,10 @@ Object {
     "deduce_mappings": false,
   },
   "source": Object {
-    "index": "my-index*",
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
     "query": Object {
       "bool": Object {
         "minimum_should_match": 1,
@@ -485,7 +488,10 @@ Object {
     "deduce_mappings": false,
   },
   "source": Object {
-    "index": "my-index*",
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
     "query": Object {
       "bool": Object {
         "minimum_should_match": 1,
