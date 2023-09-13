@@ -31,21 +31,4 @@
     }
   }
 
-  &.kbnBody--noHeaderBanner {
-    &.kbnBody--chromeVisible .dashboardTopNav {
-      top: $kbnHeaderOffset;
-    }
-    &.kbnBody--chromeHidden .dashboardTopNav {
-      top: 0;
-    }
-  }
-
-  &.kbnBody--hasHeaderBanner {
-    &.kbnBody--chromeVisible .dashboardTopNav {
-      top: $kbnHeaderOffsetWithBanner;
-    }
-    &.kbnBody--chromeHidden .dashboardTopNav {
-      top: $kbnHeaderBannerHeight;
-    }
-  }
 }
