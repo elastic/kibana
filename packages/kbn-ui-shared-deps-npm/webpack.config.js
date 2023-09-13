@@ -84,6 +84,7 @@ module.exports = (_, argv) => {
         '@emotion/cache',
         '@emotion/react',
         '@hello-pangea/dnd/dist/dnd.js',
+        '@reduxjs/toolkit',
         '@tanstack/react-query',
         '@tanstack/react-query-devtools',
         'classnames',
