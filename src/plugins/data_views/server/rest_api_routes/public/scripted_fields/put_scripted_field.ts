@@ -71,13 +71,7 @@ export const registerPutScriptedFieldRoute = (
           }
 
           const indexPattern = await indexPatternsService.get(id);
-
-          const oldFieldObject = indexPattern.fields.getByName(field.name);
-          if (!!oldFieldObject) {
-            indexPattern.fields.remove(oldFieldObject);
-          }
-
-          indexPattern.fields.add({
+          indexPattern.upsertScriptedField({
             ...field,
             runtimeField: undefined, // make sure not creating runttime field with scripted field endpoint
             aggregatable: true,

@@ -57,7 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
         '/api/index_patterns/index_pattern/' + response1.body.index_pattern.id
       );
 
-      console.log('HERE HERE HERE', response4.body.index_pattern.fields);
       expect(typeof response4.body.index_pattern.fields.bar2).to.be('undefined');
       await supertest.delete(
         '/api/index_patterns/index_pattern/' + response1.body.index_pattern.id

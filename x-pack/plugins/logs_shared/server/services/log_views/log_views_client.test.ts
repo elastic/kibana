@@ -274,6 +274,7 @@ describe('LogViewsClient class', () => {
           },
           "fields": FldList [],
           "flattenHit": [Function],
+          "getFieldAttrs": [Function],
           "getIndexPattern": [Function],
           "getName": [Function],
           "getOriginalSavedObjectBody": [Function],
