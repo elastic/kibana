@@ -6,6 +6,7 @@ xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.disableProxies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
+xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 
 # Cloud links
 xpack.cloud.base_url: "https://cloud.elastic.co"
@@ -17,11 +18,8 @@ migrations.algorithm: zdt
 # A longer migration time is acceptable due to the ZDT algorithm.
 migrations.batchSize: 250
 
-# temporarily allow to run the migration on UI nodes
-# until the controller is able to spawn the migrator job/pod
 migrations.zdt:
   metaPickupSyncDelaySec: 5
-  runOnRoles: ['ui']
 
 # Ess plugins
 xpack.securitySolutionEss.enabled: false
@@ -93,6 +91,9 @@ elasticsearch.requestHeadersWhitelist: ["authorization", "es-client-authenticati
 # Limit maxSockets to 800 as we do in ESS, which improves reliability under high loads.
 elasticsearch.maxSockets: 800
 
+# Enable dynamic config to be updated via the internal HTTP requests
+coreApp.allowDynamicConfigOverrides: true
+
 # Visualizations editors readonly settings
 vis_type_gauge.readOnly: true
 vis_type_heatmap.readOnly: true
@@ -117,7 +118,14 @@ xpack.alerting.rules.run.ruleTypeOverrides:
   - id: siem.indicatorRule
     timeout: 1m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
+xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
+xpack.actions.queued.max: 10000
+
+# Disables ESQL in advanced settings (hides it from the UI)
+uiSettings:
+  overrides:
+    discover:enableESQL: false
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
