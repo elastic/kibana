@@ -68,6 +68,7 @@ const spawnArgs = [
   `../../../../scripts/${ftrScript}`,
   `--config=${ftrConfig}`,
   `--kibana-install-dir=${argv.kibanaInstallDir}`,
+  '--openssl-legacy-provider',
   ...(argv.bail ? [`--bail`] : []),
 ];
 
@@ -76,11 +77,7 @@ function runTests() {
 
   return childProcess.spawnSync('node', spawnArgs, {
     cwd: e2eDir,
-    env: {
-      ...process.env,
-      CYPRESS_CLI_ARGS: JSON.stringify(cypressCliArgs),
-      NODE_OPTIONS: '--openssl-legacy-provider',
-    },
+    env: { ...process.env, CYPRESS_CLI_ARGS: JSON.stringify(cypressCliArgs) },
     encoding: 'utf8',
     stdio: 'inherit',
   });
