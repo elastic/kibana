@@ -16,6 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
+import {
+  SingleDatasetLocatorParams,
+  SINGLE_DATASET_LOCATOR_ID,
+} from '@kbn/observability-log-explorer-plugin/public';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -41,10 +45,13 @@ import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
   const {
-    services: {
-      observabilityLogExplorer: { locators },
-    },
+    services: { share },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+
+  const singleDatasetLocator =
+    share.url.locators.get<SingleDatasetLocatorParams>(
+      SINGLE_DATASET_LOCATOR_ID
+    );
 
   const { navigateToKibanaUrl } = useKibanaNavigation();
   const { getState, setState } = useWizard();
@@ -58,7 +65,7 @@ export function InstallElasticAgent() {
     navigateToKibanaUrl('/app/observabilityOnboarding');
   }
   async function onContinue() {
-    await locators.singleDatasetLocator.navigate({
+    await singleDatasetLocator!.navigate({
       integration: 'system',
       dataset: 'syslog',
     });
