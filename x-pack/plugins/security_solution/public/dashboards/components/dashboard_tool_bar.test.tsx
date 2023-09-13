@@ -12,7 +12,7 @@ import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { APP_NAME, APP_UI_ID } from '../../../common/constants';
+import { APP_NAME } from '../../../common/constants';
 import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-navigation';
 import { TestProviders } from '../../common/mock';
 import { useNavigateTo } from '../../common/lib/kibana';
@@ -51,18 +51,10 @@ describe('DashboardToolBar', () => {
       select: jest.fn(),
     } as unknown as DashboardAPI;
     const mockOnLoad = jest.fn();
-    const mockDashboardId = 'dashboard123';
 
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={mockDashboardId}
-      />,
-      {
-        wrapper,
-      }
-    );
+    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+      wrapper,
+    });
 
     expect(screen.getByTestId('dashboard-top-nav')).toBeInTheDocument();
   });
@@ -72,18 +64,10 @@ describe('DashboardToolBar', () => {
       select: jest.fn(),
     } as unknown as DashboardAPI;
     const mockOnLoad = jest.fn();
-    const mockDashboardId = 'dashboard123';
 
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={mockDashboardId}
-      />,
-      {
-        wrapper,
-      }
-    );
+    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+      wrapper,
+    });
 
     expect(mockOnLoad).toHaveBeenCalledWith(ViewMode.VIEW);
   });
@@ -94,16 +78,9 @@ describe('DashboardToolBar', () => {
     } as unknown as DashboardAPI;
     const mockOnLoad = jest.fn();
 
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={undefined}
-      />,
-      {
-        wrapper,
-      }
-    );
+    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+      wrapper,
+    });
 
     mockDashboardTopNav.mock.calls[0][0].redirectTo({ destination: 'listing' });
   });
@@ -114,16 +91,9 @@ describe('DashboardToolBar', () => {
     } as unknown as DashboardAPI;
     const mockOnLoad = jest.fn();
 
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={undefined}
-      />,
-      {
-        wrapper,
-      }
-    );
+    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+      wrapper,
+    });
     expect(mockGetSecuritySolutionUrl.mock.calls[1][0].deepLinkId).toEqual(
       SecurityPageName.landing
     );
@@ -136,16 +106,9 @@ describe('DashboardToolBar', () => {
     } as unknown as DashboardAPI;
     const mockOnLoad = jest.fn();
 
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={undefined}
-      />,
-      {
-        wrapper,
-      }
-    );
+    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+      wrapper,
+    });
 
     mockDashboardTopNav.mock.calls[0][0].redirectTo({ destination: 'dashboard' });
 
@@ -162,16 +125,9 @@ describe('DashboardToolBar', () => {
     const mockOnLoad = jest.fn();
     const mockDashboardId = 'dashboard123';
 
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={mockDashboardId}
-      />,
-      {
-        wrapper,
-      }
-    );
+    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+      wrapper,
+    });
 
     mockDashboardTopNav.mock.calls[0][0].redirectTo({
       destination: 'dashboard',
@@ -188,18 +144,10 @@ describe('DashboardToolBar', () => {
       select: jest.fn(),
     } as unknown as DashboardAPI;
     const mockOnLoad = jest.fn();
-    const mockDashboardId = 'dashboard123';
 
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={mockDashboardId}
-      />,
-      {
-        wrapper,
-      }
-    );
+    render(<DashboardToolBar dashboardContainer={mockDashboardContainer} onLoad={mockOnLoad} />, {
+      wrapper,
+    });
 
     expect(mockDashboardTopNav.mock.calls[0][0].embedSettings).toEqual(
       expect.objectContaining({
@@ -217,35 +165,11 @@ describe('DashboardToolBar', () => {
         topNavMenuAlignRight: true,
       })
     );
-    expect(mockDashboardTopNav.mock.calls[0][0].originatingApp).toEqual(APP_UI_ID);
-    expect(mockDashboardTopNav.mock.calls[0][0].originatingPath).toEqual(
-      `dashboards/${mockDashboardId}/edit`
-    );
-  });
-
-  it('should render the DashboardTopNav component with the correct props when no dashboard id', () => {
-    const mockDashboardContainer = {
-      select: jest.fn(),
-    } as unknown as DashboardAPI;
-    const mockOnLoad = jest.fn();
-
-    render(
-      <DashboardToolBar
-        dashboardContainer={mockDashboardContainer}
-        onLoad={mockOnLoad}
-        dashboardId={undefined}
-      />,
-      {
-        wrapper,
-      }
-    );
-
-    expect(mockDashboardTopNav.mock.calls[0][0].originatingPath).toEqual(`dashboards/create`);
   });
 
   it('should render the DashboardToolBar component without DashboardTopNav if dashboardContainer is undefined', () => {
     const { container } = render(
-      <DashboardToolBar dashboardContainer={undefined} onLoad={() => {}} dashboardId={undefined} />,
+      <DashboardToolBar dashboardContainer={undefined} onLoad={() => {}} />,
       {
         wrapper,
       }

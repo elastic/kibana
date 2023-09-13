@@ -13,7 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { APP_UI_ID, SecurityPageName } from '../../../common';
+import { SecurityPageName } from '../../../common';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
 
@@ -22,11 +22,9 @@ import { APP_NAME } from '../../../common/constants';
 const DashboardToolBarComponent = ({
   dashboardContainer,
   onLoad,
-  dashboardId,
 }: {
   dashboardContainer: DashboardAPI | undefined;
   onLoad: (mode: ViewMode) => void;
-  dashboardId: string | undefined;
 }) => {
   const { euiTheme } = useEuiTheme();
   const viewMode =
@@ -61,8 +59,6 @@ const DashboardToolBarComponent = ({
     },
     [dashboardListingUrl, getEditOrCreateDashboardUrl, navigateTo]
   );
-
-  const originatingPath = dashboardId ? `dashboards/${dashboardId}/edit` : `dashboards/create`;
 
   const landingBreadcrumb: ChromeBreadcrumb[] = useMemo(
     () => [
@@ -104,8 +100,6 @@ const DashboardToolBarComponent = ({
       redirectTo={redirectTo}
       dashboardContainer={dashboardContainer}
       embedSettings={embedSettings}
-      // originatingApp={APP_UI_ID} get from dashboardContainer getEmbeddableContainerContext
-      // originatingPath={originatingPath}
     />
   ) : null;
 };

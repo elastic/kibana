@@ -23,15 +23,7 @@ import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
-export function DashboardEditingToolbar({
-  wrapperCss,
-  originatingApp = DASHBOARD_APP_ID,
-  originatingPath,
-}: {
-  wrapperCss?: SerializedStyles;
-  originatingApp?: string;
-  originatingPath?: string;
-}) {
+export function DashboardEditingToolbar({ wrapperCss }: { wrapperCss?: SerializedStyles }) {
   const {
     usageCollection,
     data: { search },
@@ -77,13 +69,13 @@ export function DashboardEditingToolbar({
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
-          originatingApp,
-          originatingPath,
+          originatingApp: dashboard.currentAppId ?? DASHBOARD_APP_ID,
+          originatingPath: dashboard.getEmbeddableContainerContext()?.getCurrentPath?.(),
           searchSessionId: search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, originatingApp, originatingPath, search.session, trackUiMetric]
+    [stateTransferService, dashboard, search.session, trackUiMetric]
   );
 
   const createNewEmbeddable = useCallback(

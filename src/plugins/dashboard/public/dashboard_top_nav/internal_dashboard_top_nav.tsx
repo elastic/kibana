@@ -42,8 +42,6 @@ export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
-  originatingApp?: string;
-  originatingPath?: string;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -52,8 +50,6 @@ export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
   redirectTo,
-  originatingApp,
-  originatingPath,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
@@ -359,11 +355,7 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? (
-        <DashboardEditingToolbar
-          wrapperCss={visibilityProps.editingToolBarCss}
-          originatingApp={originatingApp}
-          originatingPath={originatingPath}
-        />
+        <DashboardEditingToolbar wrapperCss={visibilityProps.editingToolBarCss} />
       ) : null}
       {visibilityProps.showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

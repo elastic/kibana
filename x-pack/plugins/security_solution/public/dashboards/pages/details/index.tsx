@@ -106,7 +106,6 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                 <DashboardToolBar
                   dashboardContainer={dashboardContainer}
                   onLoad={onDashboardToolBarLoad}
-                  dashboardId={savedObjectId}
                 />
               )}
             </HeaderPage>
