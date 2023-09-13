@@ -14,7 +14,7 @@ import {
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
@@ -47,7 +47,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
   private buildSource(slo: SLO, indicator: HistogramIndicator) {
     const filter = getElastichsearchQueryOrThrow(indicator.params.filter);
     return {
-      index: indicator.params.index,
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: filter,
     };
