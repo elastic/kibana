@@ -10,7 +10,7 @@ import { login } from '../../tasks/login';
 
 // remove this file after other tests can run
 describe(
-  'placeholder for running at least one `mocked_data` test case',
+  'placeholder for running at least one `endpoint` test case',
   { tags: '@serverless' },
   () => {
     it('placeholder', () => {
