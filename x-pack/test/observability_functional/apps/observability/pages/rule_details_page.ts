@@ -36,7 +36,6 @@ export default ({ getService }: FtrProviderContext) => {
     return true;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165619
   describe('Observability Rule Details page', function () {
     this.tags('includeFirefox');
 
