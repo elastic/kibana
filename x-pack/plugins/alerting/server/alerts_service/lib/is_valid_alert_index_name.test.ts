@@ -10,6 +10,7 @@ describe('isValidAlertIndexName', () => {
   test('returns true if valid', () => {
     expect(isValidAlertIndexName('.internal.alerts-stack.alerts-default-000001')).toBe(true);
     expect(isValidAlertIndexName('.alerts-stack.alerts-default-000001')).toBe(true);
+    expect(isValidAlertIndexName('.ds-.alerts-stack.alerts-default-000001')).toBe(true);
   });
 
   test('returns false if invalid', () => {

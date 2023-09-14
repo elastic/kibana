@@ -38,7 +38,7 @@ describe('getIndexTemplateAndPattern', () => {
       pattern: '.internal.alerts-test.alerts-default-*',
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-default',
-      validPrefixes: ['.internal.alerts-', '.alerts-'],
+      validPrefixes: ['.ds-.alerts-', '.internal.alerts-', '.alerts-'],
       name: '.internal.alerts-test.alerts-default-000001',
     });
   });
@@ -49,7 +49,7 @@ describe('getIndexTemplateAndPattern', () => {
       pattern: '.internal.alerts-test.alerts-special-*',
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-special',
-      validPrefixes: ['.internal.alerts-', '.alerts-'],
+      validPrefixes: ['.ds-.alerts-', '.internal.alerts-', '.alerts-'],
       name: '.internal.alerts-test.alerts-special-000001',
     });
   });
@@ -67,7 +67,7 @@ describe('getIndexTemplateAndPattern', () => {
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-special',
       name: '.internal.alerts-test.alerts-special-000001',
-      validPrefixes: ['.internal.alerts-', '.alerts-'],
+      validPrefixes: ['.ds-.alerts-', '.internal.alerts-', '.alerts-'],
       secondaryAlias: `siem.signals-special`,
     });
   });

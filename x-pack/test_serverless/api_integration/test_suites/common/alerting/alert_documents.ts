@@ -25,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     afterEach(async () => {
-      await objectRemover.removeAll();
+      objectRemover.removeAll();
     });
 
     it('should generate an alert document for an active alert', async () => {
