@@ -7,6 +7,7 @@
 
 import { partition, uniqBy } from 'lodash';
 import React from 'react';
+import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -163,7 +164,11 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   className?: string;
   noPadding?: boolean;
   onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
-  onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
+  onLoad?: (
+    isLoading: boolean,
+    adapters?: Partial<DefaultInspectorAdapters>,
+    output$?: Observable<LensEmbeddableOutput>
+  ) => void;
   onFilter?: (
     data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
   ) => void;
@@ -901,7 +906,7 @@ export class Embeddable
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
-      this.input.onLoad(false, adapters);
+      this.input.onLoad(false, adapters, this.getOutput$());
     }
 
     const { type, error } = data as { type: string; error: ErrorLike };

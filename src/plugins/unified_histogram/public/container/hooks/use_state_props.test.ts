@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Suggestion } from '@kbn/lens-plugin/public';
@@ -119,6 +118,7 @@ describe('useStateProps', () => {
             },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -198,6 +198,7 @@ describe('useStateProps', () => {
             },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -298,6 +299,7 @@ describe('useStateProps', () => {
             },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -374,6 +376,7 @@ describe('useStateProps', () => {
             },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],

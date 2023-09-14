@@ -14,7 +14,9 @@ import {
   Query,
 } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
+import { Observable } from 'rxjs';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
@@ -24,6 +26,7 @@ import {
   totalHitsResultSelector,
   totalHitsStatusSelector,
   lensAdaptersSelector,
+  lensEmbeddableOutputSelector$,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
@@ -46,6 +49,10 @@ export const useStateProps = ({
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
+  const lensEmbeddableOutput$ = useStateSelector(
+    stateService?.state$,
+    lensEmbeddableOutputSelector$
+  );
   /**
    * Contexts
    */
@@ -137,10 +144,14 @@ export const useStateProps = ({
   );
 
   const onChartLoad = useCallback(
-    (event: UnifiedHistogramChartLoadEvent) => {
+    (
+      event: UnifiedHistogramChartLoadEvent,
+      embeddablelensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+    ) => {
       // We need to store the Lens request adapter in order to inspect its requests
       stateService?.setLensRequestAdapter(event.adapters.requests);
       stateService?.setLensAdapters(event.adapters);
+      stateService?.setlensEmbeddableOutput$(embeddablelensEmbeddableOutput$);
     },
     [stateService]
   );
@@ -177,6 +188,7 @@ export const useStateProps = ({
     request,
     isPlainRecord,
     lensAdapters,
+    lensEmbeddableOutput$,
     onTopPanelHeightChange,
     onTimeIntervalChange,
     onTotalHitsChange,

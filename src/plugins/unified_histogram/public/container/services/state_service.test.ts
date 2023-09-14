@@ -139,6 +139,9 @@ describe('UnifiedHistogramStateService', () => {
     stateService.setLensAdapters(undefined);
     newState = { ...newState, lensAdapters: undefined };
     expect(state).toEqual(newState);
+    stateService.setlensEmbeddableOutput$(undefined);
+    newState = { ...newState, lensEmbeddableOutput$: undefined };
+    expect(state).toEqual(newState);
     stateService.setTotalHits({
       totalHitsStatus: UnifiedHistogramFetchStatus.complete,
       totalHitsResult: 100,

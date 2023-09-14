@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Observable } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
@@ -18,6 +19,7 @@ export function ChartConfigPanel({
   services,
   lensAttributesContext,
   lensAdapters,
+  lensEmbeddableOutput$,
   currentSuggestion,
   isFlyoutVisible,
   setIsFlyoutVisible,
@@ -30,6 +32,7 @@ export function ChartConfigPanel({
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   currentSuggestion?: Suggestion;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
@@ -54,7 +57,9 @@ export function ChartConfigPanel({
   useEffect(() => {
     const tablesAdapters = lensAdapters?.tables?.tables;
     const dataHasChanged =
-      Boolean(tablesAdapters) && !isEqual(previousAdapters.current, tablesAdapters);
+      Boolean(tablesAdapters) &&
+      !isEqual(previousAdapters.current, tablesAdapters) &&
+      query !== previousQuery?.current;
     async function fetchLensConfigComponent() {
       const Component = await services.lens.EditLensConfigPanelApi();
       const panel = (
@@ -62,6 +67,7 @@ export function ChartConfigPanel({
           attributes={lensAttributesContext.attributes}
           updatePanelState={updateSuggestion}
           lensAdapters={lensAdapters}
+          output$={lensEmbeddableOutput$}
           closeFlyout={() => {
             setIsFlyoutVisible(false);
           }}
@@ -92,6 +98,7 @@ export function ChartConfigPanel({
     isFlyoutVisible,
     setIsFlyoutVisible,
     lensAdapters,
+    lensEmbeddableOutput$,
   ]);
 
   return isPlainRecord ? editLensConfigPanel : null;

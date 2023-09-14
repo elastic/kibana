@@ -7,6 +7,7 @@
  */
 
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
+import type { Observable } from 'rxjs';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -16,7 +17,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  Suggestion,
+  LensEmbeddableOutput,
+} from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -68,6 +73,7 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   isOnHistogramMode?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
@@ -75,7 +81,10 @@ export interface ChartProps {
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
-  onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+  onChartLoad?: (
+    event: UnifiedHistogramChartLoadEvent,
+    lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+  ) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
@@ -105,6 +114,7 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensAdapters,
+  lensEmbeddableOutput$,
   isOnHistogramMode,
   onResetChartHeight,
   onChartHiddenChange,
@@ -452,6 +462,7 @@ export function Chart({
             services,
             lensAttributesContext,
             lensAdapters,
+            lensEmbeddableOutput$,
             currentSuggestion,
             isFlyoutVisible,
             setIsFlyoutVisible,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
+import React, { useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -54,18 +54,6 @@ export interface EditConfigPanelProps {
   enablesResetButton?: boolean;
 }
 
-const computeActiveData = (layers: string[], lensAdapters?: LensInspector['adapters']) => {
-  const dataTable: Record<string, Datatable> = {};
-  const tables = lensAdapters?.tables?.tables as Record<string, Datatable>;
-  const [table] = Object.values(tables || {});
-  layers.forEach((layer) => {
-    if (table) {
-      dataTable[layer] = table;
-    }
-  });
-  return dataTable;
-};
-
 export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
@@ -82,24 +70,28 @@ export function LensEditConfigurationFlyout({
   lensAdapters,
   enablesResetButton,
 }: EditConfigPanelProps) {
-  const [activeData, setActiveData] = useState<Record<string, Datatable>>({});
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
   const { euiTheme } = useEuiTheme();
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
-
+  const activeData: Record<string, Datatable> = useMemo(() => {
+    return {};
+  }, []);
   useEffect(() => {
-    const layers = activeDatasource.getLayers(datasourceState);
     const s = output$?.subscribe(() => {
-      setActiveData(computeActiveData(layers, lensAdapters));
+      const layers = activeDatasource.getLayers(datasourceState);
+      const adaptersTables = lensAdapters?.tables?.tables as Record<string, Datatable>;
+      const [table] = Object.values(adaptersTables || {});
+      layers.forEach((layer) => {
+        if (table) {
+          activeData[layer] = table;
+        }
+      });
     });
-    if (!output$) {
-      setActiveData(computeActiveData(layers, lensAdapters));
-    }
     return () => s?.unsubscribe();
-  }, [activeDatasource, lensAdapters, datasourceState, output$]);
+  }, [activeDatasource, lensAdapters, datasourceState, output$, activeData]);
 
   const attributesChanged: boolean = useMemo(() => {
     const attrs = previousAttributes.current;

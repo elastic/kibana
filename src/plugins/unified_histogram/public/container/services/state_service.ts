@@ -7,7 +7,7 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
@@ -44,6 +44,10 @@ export interface UnifiedHistogramState {
    * The current Lens adapters
    */
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  /**
+   * Lens embeddable output observable
+   */
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   /**
    * The current time interval of the chart
    */
@@ -116,6 +120,9 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens adapters
    */
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
+  setlensEmbeddableOutput$: (
+    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+  ) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -200,6 +207,11 @@ export const createStateService = (
 
     setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
       updateState({ lensAdapters });
+    },
+    setlensEmbeddableOutput$: (
+      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
+    ) => {
+      updateState({ lensEmbeddableOutput$ });
     },
 
     setTotalHits: (totalHits: {
