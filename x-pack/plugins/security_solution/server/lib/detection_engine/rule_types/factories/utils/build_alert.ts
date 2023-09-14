@@ -36,6 +36,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEES,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
@@ -248,6 +249,7 @@ export const buildAlert = (
     [ALERT_URL]: alertUrl,
     [ALERT_UUID]: alertUuid,
     [ALERT_WORKFLOW_TAGS]: [],
+    [ALERT_WORKFLOW_ASSIGNEES]: [],
     ...flattenWithPrefix(ALERT_RULE_META, params.meta),
     // These fields don't exist in the mappings, but leaving here for now to limit changes to the alert building logic
     'kibana.alert.rule.risk_score': params.riskScore,
