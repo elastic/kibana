@@ -29,6 +29,14 @@ jest.mock('./use_kibana', () => ({
     },
   }),
 }));
+jest.mock('../api/use_latest_findings_data_view', () => ({
+  useLatestFindingsDataView: jest.fn().mockReturnValue({
+    status: 'success',
+    data: {
+      id: 'data-view-id',
+    },
+  }),
+}));
 
 describe('useNavigateFindings', () => {
   it('creates a URL to findings page with correct path and filter', () => {
@@ -44,7 +52,7 @@ describe('useNavigateFindings', () => {
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/configurations',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,index:data-view-id,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });
@@ -62,7 +70,7 @@ describe('useNavigateFindings', () => {
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/configurations',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!t,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,index:data-view-id,key:foo,negate:!t,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });
@@ -80,7 +88,7 @@ describe('useNavigateFindings', () => {
     expect(push).toHaveBeenCalledWith({
       pathname: '/cloud_security_posture/findings/resource',
       search:
-        "cspq=(filters:!((meta:(alias:!n,disabled:!f,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
+        "cspq=(filters:!((meta:(alias:!n,disabled:!f,index:data-view-id,key:foo,negate:!f,type:phrase),query:(match_phrase:(foo:1)))),query:(language:kuery,query:''))",
     });
     expect(push).toHaveBeenCalledTimes(1);
   });
