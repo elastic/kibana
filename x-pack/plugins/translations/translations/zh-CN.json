@@ -27095,7 +27095,6 @@
     "xpack.observability_onboarding.selectLogs.useOwnShipper.description": "通过生成 API 密钥使用您自己的采集器来收集日志数据。",
     "xpack.observability_onboarding.steps.back": "返回",
     "xpack.observability_onboarding.steps.exploreLogs": "浏览日志",
-    "xpack.observability_onboarding.steps.inspect": "检查",
     "xpack.observability_onboarding.title.collectCustomLogs": "收集定制日志",
     "xpack.observability.apmEnableContinuousRollupsDescription": "{betaLabel} 启用连续汇总/打包时，UI 将以适当分辨率选择指标。在更大时间范围内，将使用分辨率较低的指标，这会缩短加载时间。",
     "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel} 启用服务事务指标，这种是低基数指标，可供某些视图（如服务库存）使用来加快加载速度。",
