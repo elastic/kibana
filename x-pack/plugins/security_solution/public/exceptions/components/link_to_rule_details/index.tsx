@@ -7,34 +7,41 @@
 
 import React from 'react';
 import type { FC } from 'react';
+
+import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { RuleDetailTabs } from '../../../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import { SecurityPageName } from '../../../../common/constants';
 import { getRuleDetailsTabUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
-import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
-interface LinkAnchorProps {
+interface LinkToRuleDetailsProps {
   referenceName: string;
   referenceId: string;
   external?: boolean;
+  dataTestSubj?: string;
 }
 // This component should be removed and moved to @kbn/securitysolution-exception-list-components
 // once all the building components get moved
 
-const LinkAnchor: FC<LinkAnchorProps> = ({ referenceName, referenceId, external }) => {
+const LinkToRuleDetailsComponent: FC<LinkToRuleDetailsProps> = ({
+  referenceName,
+  referenceId,
+  external,
+  dataTestSubj,
+}) => {
   return (
     <SecuritySolutionLinkAnchor
-      data-test-subj="SecuritySolutionLinkAnchor"
+      data-test-subj={`linkToRuleSecuritySolutionLink${dataTestSubj ?? ''}`}
       deepLinkId={SecurityPageName.rules}
       path={getRuleDetailsTabUrl(referenceId, RuleDetailTabs.alerts)}
-      external={external}
+      target={external ? '_blank' : undefined}
     >
       {referenceName}
     </SecuritySolutionLinkAnchor>
   );
 };
 
-LinkAnchor.displayName = 'LinkAnchor';
+LinkToRuleDetailsComponent.displayName = 'LinkToRuleDetailsComponent';
 
-export const ListDetailsLinkAnchor = React.memo(LinkAnchor);
+export const LinkToRuleDetails = React.memo(LinkToRuleDetailsComponent);
 
-ListDetailsLinkAnchor.displayName = 'ListDetailsLinkAnchor';
+LinkToRuleDetails.displayName = 'LinkToRuleDetails';
