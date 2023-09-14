@@ -15,12 +15,15 @@ import { RightPanelContext } from '../context';
 import { InvestigationSection } from './investigation_section';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
 
 const mockUseRuleWithFallback = useRuleWithFallback as jest.Mock;
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
 const flyoutContextValue = {} as unknown as ExpandableFlyoutContext;
-const panelContextValue = {} as unknown as RightPanelContext;
+const panelContextValue = {
+  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+} as unknown as RightPanelContext;
 
 describe('<InvestigationSection />', () => {
   beforeEach(() => {

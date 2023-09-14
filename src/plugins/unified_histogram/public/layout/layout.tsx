@@ -121,6 +121,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   input$?: UnifiedHistogramInput$;
   /**
+   * Flag indicating that the chart is currently loading
+   */
+  isChartLoading: boolean;
+  /**
    * The Lens suggestions API
    */
   lensSuggestionsApi: LensSuggestionsApi;
@@ -174,6 +178,7 @@ export const UnifiedHistogramLayout = ({
   query,
   filters,
   currentSuggestion: originalSuggestion,
+  isChartLoading,
   isPlainRecord,
   timeRange,
   relativeTimeRange,
@@ -217,7 +222,6 @@ export const UnifiedHistogramLayout = ({
     });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
-
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
@@ -270,12 +274,13 @@ export const UnifiedHistogramLayout = ({
           request={request}
           hits={hits}
           currentSuggestion={currentSuggestion}
+          isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
-          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
+          appendHistogram={<EuiSpacer size="s" />}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}

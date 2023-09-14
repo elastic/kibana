@@ -19,7 +19,16 @@ export async function showMapVisToADJobFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
-  dashboardService: DashboardStart
+  dashboardService: DashboardStart,
+  isServerless: boolean
 ): Promise<void> {
-  return createFlyout(GeoJobFlyout, embeddable, coreStart, share, data, dashboardService);
+  return createFlyout(
+    GeoJobFlyout,
+    embeddable,
+    coreStart,
+    share,
+    data,
+    dashboardService,
+    isServerless
+  );
 }
