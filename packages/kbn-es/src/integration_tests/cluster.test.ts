@@ -362,9 +362,7 @@ describe('#start(installPath)', () => {
 
     await new Cluster({ log }).start(installPath, { writeLogsToPath });
 
-    expect(logWriter.messages[0]).toMatchInlineSnapshot(
-      `" info source[@kbn/es Cluster] Starting and writing logs to `
-    );
+    expect(logWriter.messages[0]).toContain(`and writing logs to ${writeLogsToPath}`);
     expect(fs.existsSync(writeLogsToPath)).toBe(true);
   });
 
