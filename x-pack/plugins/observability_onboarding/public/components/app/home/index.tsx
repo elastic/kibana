@@ -139,6 +139,7 @@ export function Home() {
               paddingSize="l"
               display="plain"
               hasBorder
+              onClick={handleClickSystemLogs}
             >
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
@@ -177,6 +178,7 @@ export function Home() {
               paddingSize="l"
               display="plain"
               hasBorder
+              onClick={handleClickCustomLogs}
             >
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
@@ -263,6 +265,7 @@ export function Home() {
               paddingSize="m"
               display="plain"
               hasBorder
+              onClick={handleClickKubernetesSetupGuide}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -355,6 +358,7 @@ export function Home() {
           paddingSize="none"
           display="plain"
           hasBorder
+          onClick={handleClickIntegrations}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
