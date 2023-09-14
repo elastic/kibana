@@ -13,6 +13,15 @@ import { kubernetesCharts } from './host/kubernetes_charts';
 export { type KPIChartProps };
 export const assetDetailsDashboards = {
   host: { hostMetricFlyoutCharts, hostMetricChartsFullPage, hostKPICharts, keyField: 'host.name' },
-  nginx: { nginxStubstatusCharts, nginxAccessCharts, keyField: 'host.name' },
-  kubernetes: { kubernetesCharts, keyField: 'kubernetes.node.name' },
+  nginx: {
+    nginxStubstatusCharts,
+    nginxAccessCharts,
+    keyField: 'host.name',
+    dependsOn: ['nginx.stubstatus', 'nginx.access'],
+  },
+  kubernetes: {
+    kubernetesCharts,
+    keyField: 'kubernetes.node.name',
+    dependsOn: ['kubernetes.node'],
+  },
 };

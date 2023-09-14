@@ -41,7 +41,7 @@ export const MetricsGrid = React.memo(
             data-test-subj="infraAssetDetailsMetricsChart"
           />
         </Section>
-        <Section dependsOn={['kubernetes.node']} title={KubernetesMetricsSectionTitle}>
+        <Section dependsOn={kubernetes.dependsOn} title={KubernetesMetricsSectionTitle}>
           <ChartGrid
             assetName={assetName}
             timeRange={timeRange}
@@ -52,11 +52,11 @@ export const MetricsGrid = React.memo(
             data-test-subj="infraAssetDetailsNginxMetricsChart"
           />
         </Section>
-        <Section dependsOn={['nginx.stubstatus', 'nginx.access']} title={NginxMetricsSectionTitle}>
+        <Section dependsOn={nginx.dependsOn} title={NginxMetricsSectionTitle}>
           <ChartGrid
             assetName={assetName}
             timeRange={timeRange}
-            filterFieldName={host.keyField}
+            filterFieldName={nginx.keyField}
             charts={[
               ...nginx.nginxStubstatusCharts.map((chart) => ({
                 ...chart,
