@@ -103,6 +103,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
   getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 const paramsModifier = jest.fn();
 

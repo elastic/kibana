@@ -79,7 +79,7 @@ export const untrackRuleAlerts = async (
       // Untrack Lifecycle alerts (Alerts As Data-enabled)
       if (isLifecycleAlert) {
         const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
-        const alertsClient = await context.ruleTypeRegistry.createAlertsClient({
+        const alertsClient = await context.alertsService?.createAlertsClient({
           namespace: context.namespace!,
           rule: {
             id,

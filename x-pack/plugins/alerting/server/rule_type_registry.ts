@@ -420,10 +420,6 @@ export class RuleTypeRegistry {
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
   }
-
-  public async createAlertsClient(...args: Parameters<AlertsService['createAlertsClient']>) {
-    return this.alertsService?.createAlertsClient(...args);
-  }
 }
 
 function normalizedActionVariables(actionVariables: RuleType['actionVariables']) {
