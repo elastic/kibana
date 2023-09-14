@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('data view field editor example', function () {
+  describe('data view field editor example', function () {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.login();
