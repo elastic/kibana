@@ -12,4 +12,4 @@ echo "--- Defend Workflows Endpoint Cypress tests on Serverless"
 
 cd x-pack/plugins/security_solution
 
-yarn cypress:dw:endpoint:serverless:run; status=$?; yarn junit:merge && exit $status
+yarn cypress:dw:endpoint:serverless:run; status=$?; yarn junit:merge || :; exit $status
