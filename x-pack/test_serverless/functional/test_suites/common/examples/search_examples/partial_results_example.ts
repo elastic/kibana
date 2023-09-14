@@ -10,12 +10,13 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'svlCommonPage']);
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165763
-  describe.skip('Partial results example', () => {
+  describe('Partial results example', () => {
     before(async () => {
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('searchExamples');
       await testSubjects.click('/search');
     });
