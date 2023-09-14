@@ -12,6 +12,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
+import { createGetSetupState } from './get_setup_state';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {
@@ -30,5 +31,6 @@ export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
     getStatus: createGetStatusService(params),
+    getSetupState: createGetSetupState(params),
   };
 }

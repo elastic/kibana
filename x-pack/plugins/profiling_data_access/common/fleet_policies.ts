@@ -6,10 +6,9 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { ProfilingSetupOptions } from '.';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { getApmPolicy } from './get_apm_policy';
-import { PartialSetupState } from './setup';
+import { PartialSetupState, ProfilingSetupOptions } from './setup';
 
 export const COLLECTOR_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-collector';
 export const SYMBOLIZER_PACKAGE_POLICY_NAME = 'elastic-universal-profiling-symbolizer';

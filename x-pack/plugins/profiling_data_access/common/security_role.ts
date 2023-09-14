@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { ProfilingSetupOptions } from '.';
-import { PartialSetupState } from './setup';
+import { PartialSetupState, ProfilingSetupOptions } from './setup';
 
-const PROFILING_READER_ROLE_NAME = 'profiling-reader';
-const METADATA_VERSION = 1;
+export const PROFILING_READER_ROLE_NAME = 'profiling-reader';
+export const METADATA_VERSION = 1;
 
 export async function validateSecurityRole({
   client,
@@ -22,21 +21,4 @@ export async function validateSecurityRole({
       configured: !!profilingRole && profilingRole.metadata.version === METADATA_VERSION,
     },
   };
-}
-
-export async function setSecurityRole({ client }: ProfilingSetupOptions) {
-  const esClient = client.getEsClient();
-  await esClient.security.putRole({
-    name: PROFILING_READER_ROLE_NAME,
-    indices: [
-      {
-        names: ['profiling-*', '.profiling-*'],
-        privileges: ['read', 'view_index_metadata'],
-      },
-    ],
-    cluster: ['monitor'],
-    metadata: {
-      version: METADATA_VERSION,
-    },
-  });
 }

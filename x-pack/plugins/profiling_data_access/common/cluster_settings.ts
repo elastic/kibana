@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ProfilingSetupOptions } from '.';
-import { PartialSetupState } from './setup';
+import { PartialSetupState, ProfilingSetupOptions } from './setup';
 
-const MAX_BUCKETS = 150000;
+export const MAX_BUCKETS = 150000;
 
 export async function validateMaximumBuckets({
   client,
@@ -20,16 +19,6 @@ export async function validateMaximumBuckets({
       configured: maxBuckets === MAX_BUCKETS.toString(),
     },
   };
-}
-
-export async function setMaximumBuckets({ client }: ProfilingSetupOptions) {
-  await client.getEsClient().cluster.putSettings({
-    persistent: {
-      search: {
-        max_buckets: MAX_BUCKETS,
-      },
-    },
-  });
 }
 
 export async function validateResourceManagement({
@@ -45,18 +34,4 @@ export async function validateResourceManagement({
       pre_8_9_1_data: statusResponse.resources.pre_8_9_1_data,
     },
   };
-}
-
-export async function enableResourceManagement({ client }: ProfilingSetupOptions) {
-  await client.getEsClient().cluster.putSettings({
-    persistent: {
-      xpack: {
-        profiling: {
-          templates: {
-            enabled: true,
-          },
-        },
-      },
-    },
-  });
 }

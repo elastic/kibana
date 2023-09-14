@@ -5,35 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ProfilingStatusCheck } from '@kbn/profiling-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import { getSetupState } from '../get_setup_state';
 import { RegisterServicesParams } from '../register_services';
-import { validateMaximumBuckets, validateResourceManagement } from './cluster_settings';
-import {
-  validateCollectorPackagePolicy,
-  validateProfilingInApmPackagePolicy,
-  validateSymbolizerPackagePolicy,
-} from './fleet_policies';
-import { hasProfilingData } from './has_profiling_data';
-import { validateSecurityRole } from './security_role';
-import { areResourcesSetup, createDefaultSetupState, mergePartialSetupStates } from './setup';
+import { ProfilingSetupOptions, areResourcesSetup } from '../../../common/setup';
 
 interface HasSetupParams {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   spaceId?: string;
-}
-
-export interface ProfilingSetupOptions {
-  client: ProfilingESClient;
-  soClient: SavedObjectsClientContract;
-  packagePolicyClient: PackagePolicyClient;
-  logger: Logger;
-  spaceId: string;
-  isCloudEnabled: boolean;
 }
 
 export function createGetStatusService({
@@ -43,6 +25,16 @@ export function createGetStatusService({
 }: RegisterServicesParams) {
   return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatusCheck> => {
     try {
+      const isCloudEnabled = deps.cloud.isCloudEnabled;
+      if (!isCloudEnabled) {
+        // When not on cloud just return that is has not set up and has no data
+        return {
+          has_setup: false,
+          has_data: false,
+          pre_8_9_1_data: false,
+        };
+      }
+
       const clientWithDefaultAuth = createProfilingEsClient({
         esClient,
         useDefaultAuth: true,
@@ -51,8 +43,6 @@ export function createGetStatusService({
         esClient,
         useDefaultAuth: false,
       });
-
-      const isCloudEnabled = deps.cloud.isCloudEnabled;
 
       const setupOptions: ProfilingSetupOptions = {
         client: clientWithDefaultAuth,
@@ -63,41 +53,12 @@ export function createGetStatusService({
         isCloudEnabled,
       };
 
-      const state = createDefaultSetupState();
-      state.cloud.available = isCloudEnabled;
-
-      if (!state.cloud.available) {
-        // When not on cloud just return that is has not set up and has no data
-        return {
-          has_setup: false,
-          has_data: false,
-          pre_8_9_1_data: false,
-        };
-      }
-
-      const verifyFunctions = [
-        validateMaximumBuckets,
-        validateResourceManagement,
-        validateSecurityRole,
-        validateCollectorPackagePolicy,
-        validateSymbolizerPackagePolicy,
-        validateProfilingInApmPackagePolicy,
-      ];
-
-      const partialStates = await Promise.all([
-        ...verifyFunctions.map((fn) => fn(setupOptions)),
-        hasProfilingData({
-          ...setupOptions,
-          client: clientWithProfilingAuth,
-        }),
-      ]);
-
-      const mergedState = mergePartialSetupStates(state, partialStates);
+      const setupState = await getSetupState(setupOptions, clientWithProfilingAuth);
 
       return {
-        has_setup: areResourcesSetup(mergedState),
-        has_data: mergedState.data.available,
-        pre_8_9_1_data: mergedState.resources.pre_8_9_1_data,
+        has_setup: areResourcesSetup(setupState),
+        has_data: setupState.data.available,
+        pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
       };
     } catch (error) {
       // We cannot fully check the status of all resources

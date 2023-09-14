@@ -4,9 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { merge } from 'lodash';
 import type { RecursivePartial } from '@elastic/eui';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { merge } from 'lodash';
+import { ProfilingESClient } from './profiling_es_client';
+
+export interface ProfilingSetupOptions {
+  client: ProfilingESClient;
+  soClient: SavedObjectsClientContract;
+  packagePolicyClient: PackagePolicyClient;
+  logger: Logger;
+  spaceId: string;
+  isCloudEnabled: boolean;
+}
 
 export interface SetupState {
   cloud: {
