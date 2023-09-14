@@ -42,15 +42,15 @@ describe(
       cleanKibana();
       login();
 
+      setRulesTableAutoRefreshIntervalSetting({
+        enabled: true,
+        refreshInterval: RULES_TABLE_REFRESH_INTERVAL_MS,
+      });
       createRule(getNewRule({ name: 'Test rule 1', rule_id: '1', enabled: false }));
     });
 
     beforeEach(() => {
       login();
-      setRulesTableAutoRefreshIntervalSetting({
-        enabled: true,
-        refreshInterval: RULES_TABLE_REFRESH_INTERVAL_MS,
-      });
     });
 
     it('gets deactivated when any rule selected and activated after rules unselected', () => {
