@@ -21,6 +21,7 @@ import {
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 import type { FeatureKeys } from '../../../endpoint/services/feature_usage/service';
 
 export const BasicEndpointExceptionDataSchema = schema.object(
@@ -88,10 +89,7 @@ export class BaseValidator {
     // for serverless only when Endpoint Exceptions is not enabled
     // verify that the user has the privilege to create/read/update/delete endpoint exceptions
     if (!isEndpointExceptionsFeaturesEnabled && !(await this.endpointAuthzPromise)[privilege]) {
-      throw new EndpointArtifactExceptionValidationError(
-        'Endpoint exceptions authorization failure',
-        403
-      );
+      throw new EndpointExceptionsValidationError('Endpoint exceptions authorization failure', 403);
     }
   }
 
