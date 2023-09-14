@@ -26,6 +26,7 @@ export default defineCypressConfig({
     grepTags: '@serverless --@brokenInServerless --@skipInServerless',
   },
   e2e: {
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
     setupNodeEvents(on, config) {

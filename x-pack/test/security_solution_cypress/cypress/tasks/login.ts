@@ -141,6 +141,7 @@ export const deleteRoleAndUser = (role: ROLES) => {
   });
 };
 
+// Programmatically authenticate without interacting with the Kibana login page.
 export const loginWithUser = (user: User) => {
   cy.session(user, () => {
     cy.request({

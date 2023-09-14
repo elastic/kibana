@@ -36,6 +36,7 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
     specPattern: './cypress/e2e/**/*.cy.ts',
+    experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
