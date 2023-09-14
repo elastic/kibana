@@ -1,7 +1,5 @@
 agents:
   queue: kibana-default
-env:
-  ES_SERVERLESS_IMAGE: latest
 
 steps:
   - label: "Annotate runtime parameters"
