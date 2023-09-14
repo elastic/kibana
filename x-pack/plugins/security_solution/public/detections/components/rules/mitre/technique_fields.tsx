@@ -72,8 +72,8 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setTechniquesOptions(mitreConfig.techniquesOptions);
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
+      setTechniquesOptions(mitreConfig.techniques);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
     }
     getMitre();
   }, []);

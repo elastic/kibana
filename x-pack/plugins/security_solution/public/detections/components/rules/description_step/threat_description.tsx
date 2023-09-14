@@ -48,9 +48,9 @@ export const ThreatEuiFlexGroup = ({ label, threat }: BuildThreatDescription) =>
   useEffect(() => {
     async function getMitre() {
       const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
-      setTechniquesOptions(mitreConfig.techniquesOptions);
-      setTacticsOptions(mitreConfig.tacticsOptions);
+      setSubtechniquesOptions(mitreConfig.subtechniques);
+      setTechniquesOptions(mitreConfig.techniques);
+      setTacticsOptions(mitreConfig.tactics);
     }
     getMitre();
   }, []);
