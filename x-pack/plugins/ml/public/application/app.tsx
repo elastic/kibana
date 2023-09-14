@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 
 import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -41,6 +41,7 @@ interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
   appMountParams: AppMountParameters;
+  isServerless: boolean;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -48,7 +49,11 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
+export function getMlGlobalServices(
+  httpStart: HttpStart,
+  isServerless: boolean,
+  usageCollection?: UsageCollectionSetup
+) {
   const httpService = new HttpService(httpStart);
   const mlApiServices = mlApiServicesProvider(httpService);
 
@@ -58,6 +63,7 @@ export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: Usag
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
     mlLicense: new MlLicense(),
+    isServerless,
   };
 }
 
@@ -67,7 +73,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
@@ -99,9 +105,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
       contentManagement: deps.contentManagement,
       presentationUtil: deps.presentationUtil,
       ...coreStart,
-      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart.http, isServerless, deps.usageCollection),
     };
-  }, [deps, coreStart]);
+  }, [deps, coreStart, isServerless]);
 
   useLifecycles(
     function setupLicenseOnMount() {
@@ -122,9 +128,10 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 
   if (!licenseReady || !mlCapabilities) return null;
 
-  const datePickerDeps = {
+  const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    isServerless,
   };
 
   const I18nContext = coreStart.i18n.Context;
@@ -151,7 +158,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
 export const renderApp = (
   coreStart: CoreStart,
   deps: MlDependencies,
-  appMountParams: AppMountParameters
+  appMountParams: AppMountParameters,
+  isServerless: boolean
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -180,7 +188,12 @@ export const renderApp = (
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
-    <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
+    <App
+      coreStart={coreStart}
+      deps={deps}
+      appMountParams={appMountParams}
+      isServerless={isServerless}
+    />,
     appMountParams.element
   );
 

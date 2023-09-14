@@ -44,8 +44,8 @@ interface AWSSetupInfoContentProps {
 const AWSSetupInfoContent = ({ integrationLink }: AWSSetupInfoContentProps) => {
   return (
     <>
-      <EuiHorizontalRule margin="xxl" />
-      <EuiTitle size="s">
+      <EuiHorizontalRule margin="xl" />
+      <EuiTitle size="xs">
         <h2>
           <FormattedMessage
             id="xpack.csp.awsIntegration.setupInfoContentTitle"

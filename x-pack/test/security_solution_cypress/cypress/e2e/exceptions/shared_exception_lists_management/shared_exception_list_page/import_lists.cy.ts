@@ -20,8 +20,9 @@ import {
 import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 // Flaky in serverless
-describe('Import Lists', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
   before(() => {
     cy.task('esArchiverResetKibana');

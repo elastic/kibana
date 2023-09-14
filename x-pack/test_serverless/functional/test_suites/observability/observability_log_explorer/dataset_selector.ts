@@ -20,14 +20,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['common', 'observabilityLogExplorer', 'svlCommonPage']);
 
   const noIntegrationsTitle = 'No integrations found';
   const noUncategorizedTitle = 'No data streams found';
 
   describe('Dataset Selector', () => {
     before(async () => {
+      await PageObjects.svlCommonPage.login();
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();
+    });
+
+    after(async () => {
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('as consistent behavior', () => {
