@@ -24,6 +24,7 @@ import {
   useFlyoutContext,
   sendGetAgentTags,
   useFleetServerStandalone,
+  sendGetAgentPolicies,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
 import {
@@ -31,7 +32,7 @@ import {
   ExperimentalFeaturesService,
   policyHasFleetServer,
 } from '../../../services';
-import { SO_SEARCH_LIMIT } from '../../../constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
@@ -183,8 +184,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   >();
   const [allTags, setAllTags] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(false);
-  const [totalAgents, setTotalAgents] = useState(0);
+  const [totalAgentsPaginated, setTotalAgentsPaginated] = useState(0);
+  const [totalInactiveAgentsPaginated, setTotalInactiveAgentsPaginated] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
+  const [managedAgentIdsPaginated, setManagedAgentIdsPaginated] = useState<string[]>([]);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
   const getSortFieldForAPI = (field: keyof Agent): string => {
     if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
@@ -236,27 +239,36 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         try {
           setIsLoading(true);
-          const [agentsResponse, totalInactiveAgentsResponse, agentTagsResponse] =
-            await Promise.all([
-              sendGetAgents({
-                page: pagination.currentPage,
-                perPage: pagination.pageSize,
-                kuery: kuery && kuery !== '' ? kuery : undefined,
-                sortField: getSortFieldForAPI(sortField),
-                sortOrder,
-                showInactive,
-                showUpgradeable,
-                getStatusSummary: true,
-                withMetrics: displayAgentMetrics,
-              }),
-              sendGetAgentStatus({
-                kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
-              }),
-              sendGetAgentTags({
-                kuery: kuery && kuery !== '' ? kuery : undefined,
-                showInactive,
-              }),
-            ]);
+          const [
+            agentsResponse,
+            totalInactiveAgentsResponse,
+            managedPoliciesResponse,
+            agentTagsResponse,
+          ] = await Promise.all([
+            sendGetAgents({
+              page: pagination.currentPage,
+              perPage: pagination.pageSize,
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              sortField: getSortFieldForAPI(sortField),
+              sortOrder,
+              showInactive,
+              showUpgradeable,
+              getStatusSummary: true,
+              withMetrics: displayAgentMetrics,
+            }),
+            sendGetAgentStatus({
+              kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
+            }),
+            sendGetAgentPolicies({
+              kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
+              perPage: SO_SEARCH_LIMIT,
+              full: false,
+            }),
+            sendGetAgentTags({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+            }),
+          ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
@@ -296,8 +308,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }
 
           setAgents(agentsResponse.data.items);
-          setTotalAgents(agentsResponse.data.total);
+          setTotalAgentsPaginated(agentsResponse.data.total);
+          setTotalInactiveAgentsPaginated(
+            agentsResponse.data.items.filter((item) => item.status === 'inactive').length
+          );
           setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
+          const managedPolicyIds = managedPoliciesResponse.data?.items.map((item) => item.id);
+          const managedPolicyAgents = agentsResponse.data.items.filter(
+            (item) => item.policy_id && managedPolicyIds?.includes(item.policy_id)
+          );
+          setManagedAgentIdsPaginated(managedPolicyAgents.map((agent) => agent.id));
         } catch (error) {
           notifications.toasts.addError(error, {
             title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
@@ -555,8 +575,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         tags={allTags ?? []}
         selectedTags={selectedTags}
         onSelectedTagsChange={setSelectedTags}
-        totalAgents={totalAgents}
+        totalAgentsPaginated={totalAgentsPaginated}
+        totalInactiveAgentsPaginated={totalInactiveAgentsPaginated}
         totalInactiveAgents={totalInactiveAgents}
+        managedAgentIds={managedAgentIdsPaginated}
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
@@ -571,9 +593,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         showInactive={showInactive}
-        totalAgents={totalAgents}
+        totalAgents={totalAgentsPaginated}
         agentStatus={agentsStatus}
         selectableAgents={agents?.filter(isAgentSelectable).length || 0}
+        managedAgents={managedAgentIdsPaginated.length}
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
         selectedAgents={selectedAgents}
@@ -601,7 +624,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
         pagination={pagination}
-        totalAgents={Math.min(totalAgents, SO_SEARCH_LIMIT)}
+        totalAgents={Math.min(totalAgentsPaginated, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}

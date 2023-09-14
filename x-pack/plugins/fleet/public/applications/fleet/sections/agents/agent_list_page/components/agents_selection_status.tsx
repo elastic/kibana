@@ -34,6 +34,7 @@ const Button = styled(EuiButtonEmpty)`
 export const AgentsSelectionStatus: React.FunctionComponent<{
   totalAgents: number;
   selectableAgents: number;
+  managedAgents: number;
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
   selectedAgents: Agent[];
@@ -41,6 +42,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
 }> = ({
   totalAgents,
   selectableAgents,
+  managedAgents,
   selectionMode,
   setSelectionMode,
   selectedAgents,
@@ -49,7 +51,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
   const showSelectEverything =
     selectionMode === 'manual' &&
     selectedAgents.length === selectableAgents &&
-    selectableAgents < totalAgents;
+    selectableAgents < totalAgents - managedAgents;
 
   return (
     <>
