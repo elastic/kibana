@@ -61,6 +61,7 @@ import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
 import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
+import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -83,7 +84,6 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof dashboardContainerReducers
 >;
 
-const showWriteControls = pluginServices.getServices().dashboardCapabilities.showWriteControls;
 export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
 export const useDashboardContainer = (): DashboardContainer => {
   const dashboard = useContext<DashboardContainer | null>(DashboardContainerContext);
@@ -123,6 +123,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
   private analyticsService: DashboardAnalyticsService;
+  private showWriteControls: DashboardCapabilitiesService['showWriteControls'];
   private theme$;
   private chrome;
   private customBranding;
@@ -156,6 +157,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
       chrome: this.chrome,
       customBranding: this.customBranding,
+      dashboardCapabilities: { showWriteControls: this.showWriteControls },
     } = pluginServices.getServices());
 
     this.creationOptions = creationOptions;
@@ -244,7 +246,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public updateInput(changes: Partial<DashboardContainerInput>): void {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
     if (
-      (this.getState().componentState.managed || !showWriteControls) &&
+      (this.getState().componentState.managed || !this.showWriteControls) &&
       changes.viewMode?.toLowerCase() === ViewMode.EDIT?.toLowerCase()
     ) {
       const { viewMode, ...rest } = changes;
