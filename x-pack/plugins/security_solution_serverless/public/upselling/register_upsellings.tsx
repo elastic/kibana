@@ -21,6 +21,7 @@ import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import {
+  EndpointExceptionsDetailsUpsellingLazy,
   EntityAnalyticsUpsellingLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
@@ -40,7 +41,7 @@ interface UpsellingsMessageConfig {
   id: UpsellingMessageId;
 }
 
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
+type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName; path?: string }>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 type UpsellingMessages = UpsellingsMessageConfig[];
 
@@ -86,7 +87,7 @@ export const registerUpsellings = (
   upselling.setMessages(upsellingMessagesToRegister);
 };
 
-// Upsellings for entire pages, linked to a SecurityPageName
+// Upselling for entire pages, linked to a SecurityPageName
 export const upsellingPages: UpsellingPages = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
@@ -105,9 +106,16 @@ export const upsellingPages: UpsellingPages = [
       <ThreatIntelligencePaywallLazy requiredPLI={AppFeatureKey.threatIntelligence} />
     ),
   },
+  {
+    pageName: SecurityPageName.exceptions,
+    pli: AppFeatureKey.endpointExceptions,
+    component: () => (
+      <EndpointExceptionsDetailsUpsellingLazy requiredPLI={AppFeatureKey.endpointExceptions} />
+    ),
+  },
 ];
 
-// Upsellings for sections, linked by arbitrary ids
+// Upselling for sections, linked by arbitrary ids
 export const upsellingSections: UpsellingSections = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
@@ -126,7 +134,7 @@ export const upsellingSections: UpsellingSections = [
   },
 ];
 
-// Upsellings for sections, linked by arbitrary ids
+// Upselling for sections, linked by arbitrary ids
 export const upsellingMessages: UpsellingMessages = [
   {
     id: 'investigation_guide',
