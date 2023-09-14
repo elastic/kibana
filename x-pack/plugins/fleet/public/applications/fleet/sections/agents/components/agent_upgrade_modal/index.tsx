@@ -326,7 +326,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           />
         ) : isUpdating ? (
           <FormattedMessage
-            id="xpack.fleet.upgradeAgents.confirmMultipleButtonLabel"
+            id="xpack.fleet.upgradeAgents.restartConfirmMultipleButtonLabel"
             defaultMessage="Restart upgrade {count, plural, one {agent} other {{count} agents} =true {all selected agents}}"
             values={{ count: updatingAgents }}
           />
