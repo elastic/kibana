@@ -578,9 +578,8 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - /",
+          "500 Server Error",
           Object {
-            "error": [Error: unexpected error],
             "http": Object {
               "response": Object {
                 "status_code": 500,
@@ -625,7 +624,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - /",
+          "500 Server Error",
           Object {
             "error": [Error: Unauthorized],
             "http": Object {
@@ -655,7 +654,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - /",
+          "500 Server Error",
           Object {
             "error": [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
             "http": Object {
@@ -700,7 +699,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "400 Bad Request - /",
+          "400 Bad Request",
           Object {
             "error": [Error: [request query.page]: expected value of type [number] but got [string]],
             "http": Object {
@@ -1185,7 +1184,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "error": [Error: expected 'location' header to be set],
               "http": Object {
@@ -1599,7 +1598,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "error": [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
               "http": Object {
@@ -1676,7 +1675,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "error": [Error: expected 'location' header to be set],
               "http": Object {
@@ -1824,7 +1823,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "error": [Error: expected error message to be provided],
               "http": Object {
@@ -1858,7 +1857,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "error": [Error: expected error message to be provided],
               "http": Object {
@@ -1891,7 +1890,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "error": [Error: options.statusCode is expected to be set. given options: undefined],
               "http": Object {
@@ -1924,7 +1923,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "error": [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],
               "http": Object {
