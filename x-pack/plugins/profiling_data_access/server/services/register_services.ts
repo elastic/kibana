@@ -8,7 +8,6 @@
 import { CloudStart } from '@kbn/cloud-plugin/server';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
 import { createGetSetupState } from './get_setup_state';
@@ -23,7 +22,6 @@ export interface RegisterServicesParams {
   deps: {
     fleet: FleetStartContract;
     cloud: CloudStart;
-    spaces?: SpacesPluginStart;
   };
 }
 
