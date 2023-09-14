@@ -241,7 +241,6 @@ export function createTestEsCluster<
           esArgs: customEsArgs,
           port,
           clean: true,
-          teardown: true,
           background: true,
           files,
           ssl,

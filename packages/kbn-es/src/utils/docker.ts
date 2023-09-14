@@ -57,8 +57,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
   basePath: string;
-  /** If this process exits, teardown the ES cluster as well */
-  teardown?: boolean;
+  /** If this process exits, leave the ES cluster running in the background */
+  skipTeardown?: boolean;
   /** Start the ES cluster in the background instead of remaining attached: useful for running tests */
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
@@ -626,7 +626,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     log.success('ES is ready');
   }
 
-  if (options.teardown) {
+  if (!options.skipTeardown) {
     // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
     process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
