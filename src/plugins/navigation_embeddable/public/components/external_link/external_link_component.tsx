@@ -63,10 +63,12 @@ export const ExternalLinkComponent = ({
         position: layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
+        'data-test-subj': `externalLink--${link.id}--tooltip`,
       }}
       iconType={error ? 'warning' : undefined}
       id={`externalLink--${link.id}`}
       label={link.label || link.destination}
+      data-test-subj={error ? `externalLink--${link.id}--error` : `externalLink--${link.id}`}
       href={destination}
       onClick={async (event) => {
         if (!destination) return;
