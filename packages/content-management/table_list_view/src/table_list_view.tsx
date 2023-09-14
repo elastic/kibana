@@ -18,7 +18,6 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   TableListViewTableProps<T>,
   | 'entityName'
   | 'entityNamePlural'
-  | 'contentEditorItemIsReadonly'
   | 'initialFilter'
   | 'headingId'
   | 'initialPageSize'
@@ -37,7 +36,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'contentEditor'
   | 'titleColumnName'
   | 'withoutPageTemplateWrapper'
-  | 'showEditActionForItem'
+  | 'itemIsEditable'
 > & {
   title: string;
   description?: string;
@@ -57,7 +56,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
   initialFilter,
   headingId,
   initialPageSize,
-  contentEditorItemIsReadonly,
   listingLimit,
   urlStateEnabled = true,
   customTableColumn,
@@ -75,7 +73,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
-  showEditActionForItem,
+  itemIsEditable,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -121,11 +119,10 @@ export const TableListView = <T extends UserContentCommonSchema>({
           id={listingId}
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}
-          contentEditorItemIsReadonly={contentEditorItemIsReadonly}
+          itemIsEditable={itemIsEditable}
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
           onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}
-          showEditActionForItem={showEditActionForItem}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

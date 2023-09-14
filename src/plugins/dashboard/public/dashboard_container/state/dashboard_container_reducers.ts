@@ -16,6 +16,9 @@ import {
   DashboardStateFromSettingsFlyout,
 } from '../types';
 import { DashboardContainerInput } from '../../../common';
+import { pluginServices } from '../../services/plugin_services';
+
+const showWriteControls = pluginServices.getServices().dashboardCapabilities.showWriteControls;
 
 export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
@@ -91,7 +94,7 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardContainerInput['viewMode']>
   ) => {
     // Managed Dashboards cannot be put into edit mode.
-    if (state.componentState.managed) {
+    if (state.componentState.managed || !showWriteControls) {
       state.explicitInput.viewMode = ViewMode.VIEW;
       return;
     }

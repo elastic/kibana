@@ -83,6 +83,7 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof dashboardContainerReducers
 >;
 
+const showWriteControls = pluginServices.getServices().dashboardCapabilities.showWriteControls;
 export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
 export const useDashboardContainer = (): DashboardContainer => {
   const dashboard = useContext<DashboardContainer | null>(DashboardContainerContext);
@@ -243,7 +244,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public updateInput(changes: Partial<DashboardContainerInput>): void {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
     if (
-      this.getState().componentState.managed &&
+      (this.getState().componentState.managed || !showWriteControls) &&
       changes.viewMode?.toLowerCase() === ViewMode.EDIT?.toLowerCase()
     ) {
       const { viewMode, ...rest } = changes;

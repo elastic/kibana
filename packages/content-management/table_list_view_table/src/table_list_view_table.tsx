@@ -91,9 +91,10 @@ export interface TableListViewTableProps<
    */
   editItem?(item: T): void;
   /**
-   * Handler to set edit action visiblity per item.
+   * Handler to set edit action visiblity, and content editor readonly state per item.
    */
-  showEditActionForItem?(item: T): boolean;
+  itemIsEditable?(item: T): boolean;
+
   /**
    * Name for the column containing the "title" value.
    */
@@ -106,11 +107,6 @@ export interface TableListViewTableProps<
    */
   withoutPageTemplateWrapper?: boolean;
   contentEditor?: ContentEditorConfig;
-
-  /**
-   * Handler to set read only state for the content editor per item.
-   */
-  contentEditorItemIsReadonly?: (item: T) => boolean;
 
   tableCaption: string;
   /** Flag to force a new fetch of the table items. Whenever it changes, the `findItems()` will be called. */
@@ -259,7 +255,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   entityName,
   entityNamePlural,
   initialFilter: initialQuery,
-  contentEditorItemIsReadonly,
   headingId,
   initialPageSize,
   listingLimit,
@@ -270,7 +265,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   findItems,
   createItem,
   editItem,
-  showEditActionForItem,
+  itemIsEditable,
   deleteItems,
   getDetailViewLink,
   onClickTitle,
@@ -463,7 +458,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      const isReadonly = contentEditorItemIsReadonly?.(item) ?? contentEditor.isReadonly;
+      const isReadonly = contentEditor.isReadonly || !itemIsEditable?.(item);
 
       const close = openContentEditor({
         item: {
@@ -487,7 +482,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     },
     [
       getTagIdsFromReferences,
-      contentEditorItemIsReadonly,
+      itemIsEditable,
       contentEditor,
       openContentEditor,
       entityName,
@@ -566,7 +561,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (v) => (showEditActionForItem ? showEditActionForItem(v) : true),
+          available: (v) => itemIsEditable?.(v) ?? true,
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
           'data-test-subj': `edit-action`,
@@ -623,7 +618,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     contentEditor,
     inspectItem,
-    showEditActionForItem,
+    itemIsEditable,
   ]);
 
   const itemsById = useMemo(() => {
