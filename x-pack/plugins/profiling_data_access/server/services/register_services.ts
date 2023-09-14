@@ -11,7 +11,7 @@ import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { createFetchFlamechart } from './fetch_flamechart';
-import { createGetStatusService } from './setup';
+import { createGetStatusService } from './status';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {
