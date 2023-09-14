@@ -12,5 +12,5 @@
  * @returns boolean
  */
 export const computeIsESQLQueryAggregating = (esqlQuery: string): boolean => {
-  return /\sstats\s.*\sby\s/.test(esqlQuery);
+  return /\|\s+stats\s/i.test(esqlQuery);
 };
