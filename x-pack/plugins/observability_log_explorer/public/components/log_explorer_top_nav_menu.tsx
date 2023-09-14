@@ -36,6 +36,7 @@ import {
   discoverLinkTitle,
   onboardingLinkTitle,
 } from '../../common/translations';
+import { getRouterLinkProps } from '../utils/get_router_link_props';
 
 interface LogExplorerTopNavMenuProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -179,13 +180,20 @@ const DiscoverLink = React.memo(
       dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
     };
 
+    const discoverUrl = services.discover.locator?.getRedirectUrl(discoverLinkParams);
+
     const navigateToDiscover = () => {
       services.discover.locator?.navigate(discoverLinkParams);
     };
 
+    const discoverLinkProps = getRouterLinkProps({
+      href: discoverUrl,
+      onClick: navigateToDiscover,
+    });
+
     return (
       <EuiHeaderLink
-        onClick={navigateToDiscover}
+        {...discoverLinkProps}
         color="primary"
         iconType="discoverApp"
         data-test-subj="logExplorerDiscoverFallbackLink"
@@ -203,10 +211,18 @@ const OnboardingLink = React.memo(({ services }: Pick<LogExplorerTopNavMenuProps
 
   const onboardingUrl = locator?.useUrl({});
 
+  const navigateToOnboarding = () => {
+    locator?.navigate({});
+  };
+
+  const onboardingLinkProps = getRouterLinkProps({
+    href: onboardingUrl,
+    onClick: navigateToOnboarding,
+  });
+
   return (
     <EuiButton
-      href={onboardingUrl}
-      target="_blank"
+      {...onboardingLinkProps}
       fill
       size="s"
       iconType="indexOpen"
