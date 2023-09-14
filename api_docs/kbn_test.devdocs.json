@@ -3136,7 +3136,14 @@
               "\nLicense to run your cluster under. Keep in mind that a `trial` license\nhas an expiration date. If you are using a `dataArchive` with your tests,\nyou'll likely need to use `basic` or `gold` to prevent the test from failing\nwhen the license expires."
             ],
             "signature": [
-              "\"basic\" | \"gold\" | \"trial\" | undefined"
+              {
+                "pluginId": "@kbn/es",
+                "scope": "common",
+                "docId": "kibKbnEsPluginApi",
+                "section": "def-common.ArtifactLicense",
+                "text": "ArtifactLicense"
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
