@@ -15,6 +15,10 @@ import { Container } from './components/container/container';
 import { ColorMapping } from './config';
 import { uiReducer } from './state/ui';
 
+/**
+ * A configuration object that is required to populate correctly the visible categories
+ * or the ranges in the CategoricalColorMapping component
+ */
 export type ColorMappingInputData =
   | {
       type: 'categories';
@@ -28,6 +32,9 @@ export type ColorMappingInputData =
       bins: number;
     };
 
+/**
+ * The props of the CategoricalColorMapping component
+ */
 export interface ColorMappingProps {
   /** the initial color mapping model, usually coming from a the visualization saved object */
   model: ColorMapping.Config;

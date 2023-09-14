@@ -20,7 +20,6 @@ import { getPalette } from '../../palette';
 import './gradient.scss';
 
 import { addGradientColorStep, updateGradientColorStep } from '../../state/color_mapping';
-import { ColorCode, CategoricalColor, CategoricalPalette } from '../../config/types';
 import { colorPickerVisibility } from '../../state/ui';
 
 export function Gradient({
@@ -172,9 +171,9 @@ function AddStop({
 }: {
   colorMode: {
     type: 'gradient';
-    steps: Array<(CategoricalColor | ColorCode) & { touched: boolean }>;
+    steps: Array<(ColorMapping.CategoricalColor | ColorMapping.ColorCode) & { touched: boolean }>;
   };
-  currentPalette: CategoricalPalette;
+  currentPalette: ColorMapping.CategoricalPalette;
   at: number;
 }) {
   const dispatch = useDispatch();
@@ -219,12 +218,12 @@ function ColorStop({
 }: {
   colorMode: {
     type: 'gradient';
-    steps: Array<(CategoricalColor | ColorCode) & { touched: boolean }>;
+    steps: Array<(ColorMapping.CategoricalColor | ColorMapping.ColorCode) & { touched: boolean }>;
     sort: 'asc' | 'desc';
   };
-  step: CategoricalColor | ColorCode;
+  step: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
   index: number;
-  currentPalette: CategoricalPalette;
+  currentPalette: ColorMapping.CategoricalPalette;
   getPaletteFn: ReturnType<typeof getPalette>;
   isDarkMode: boolean;
 }) {

@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 import chroma from 'chroma-js';
-// import { scaleSequential } from 'd3-scale';
-// import { interpolateLab, piecewise } from 'd3-interpolate';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors } from './color_math';
 import { generateAutoAssignmentsForCategories } from '../config/assignment_from_categories';
 import { getPalette } from '../palette';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
-
-export type Color = string;
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
@@ -73,7 +69,7 @@ export function getColorFactory(
   getPaletteFn: ReturnType<typeof getPalette>,
   isDarkMode: boolean,
   data: ColorMappingInputData
-): (category: string | string[]) => Color {
+): (category: string | string[]) => string {
   const palette = getPaletteFn(model.paletteId);
   // generate on-the-fly assignments in auto-mode based on current data.
   // This simplify the code by always using assignments, even if there is no real static assigmnets
