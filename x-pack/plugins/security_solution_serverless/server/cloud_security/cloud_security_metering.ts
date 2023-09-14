@@ -4,20 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  CNVM_POLICY_TEMPLATE,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
 import { ProductLine } from '../../common/product';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
-import type { PostureType } from './types';
+import { CLOUD_DEFEND, CNVM, CSPM, KSPM } from './constants';
+import type { CloudSecuritySolutions } from './types';
 import type { MeteringCallbackInput, Tier, UsageRecord } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
-
-export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
-export const AGGREGATION_PRECISION_THRESHOLD = 40000;
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
@@ -36,28 +28,26 @@ export const cloudSecurityMetringCallback = async ({
   const tier: Tier = getCloudProductTier(config);
 
   try {
-    const postureTypes: PostureType[] = [
-      CSPM_POLICY_TEMPLATE,
-      KSPM_POLICY_TEMPLATE,
-      CNVM_POLICY_TEMPLATE,
-    ];
+    const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM, CLOUD_DEFEND];
 
     const cloudSecurityUsageRecords = await Promise.all(
-      postureTypes.map((postureType) =>
+      cloudSecuritySolutions.map((cloudSecuritySolution) =>
         getCloudSecurityUsageRecord({
           esClient,
           projectId,
           logger,
           taskId,
           lastSuccessfulReport,
-          postureType,
+          cloudSecuritySolution,
           tier,
         })
       )
     );
 
     // remove any potential undefined values from the array,
-    return cloudSecurityUsageRecords.filter(Boolean) as UsageRecord[];
+    return cloudSecurityUsageRecords
+      .filter((record) => record !== undefined && record.length > 0)
+      .flatMap((record) => record) as UsageRecord[];
   } catch (err) {
     logger.error(`Failed to fetch Cloud Security metering data ${err}`);
     return [];

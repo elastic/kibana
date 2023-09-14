@@ -76,6 +76,11 @@ export const EsqlQueryExpression: React.FC<
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
     setQuery(esqlQuery ?? { esql: '' });
+    if (esqlQuery && 'esql' in esqlQuery) {
+      if (esqlQuery.esql) {
+        refreshTimeFields(esqlQuery);
+      }
+    }
     if (timeField) {
       setTimeFieldOptions([firstFieldOption, { text: timeField, value: timeField }]);
     }
@@ -150,7 +155,7 @@ export const EsqlQueryExpression: React.FC<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt"
-            defaultMessage="Define your query using ESQL"
+            defaultMessage="Define your query using ES|QL"
           />
         </h5>
       </EuiTitle>

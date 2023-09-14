@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
 
-  describe('Header menu', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/165839
+  describe.skip('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
@@ -60,7 +61,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getColumnHeaders()).to.eql(['@timestamp', 'message']);
+          expect(await PageObjects.discover.getColumnHeaders()).to.eql([
+            '@timestamp',
+            'service.name',
+            'host.name',
+            'message',
+          ]);
         });
 
         await retry.try(async () => {

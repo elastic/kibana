@@ -43,6 +43,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerStandalone: true,
       disableProxies: true,
       activeAgentsSoftLimit: true,
+      onlyAllowAgentUpgradeToKnownVersions: true,
     },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
@@ -174,6 +175,9 @@ export const config: PluginConfigDescriptor = {
           defaultValue: false,
         }),
         fleetServerStandalone: schema.boolean({
+          defaultValue: false,
+        }),
+        onlyAllowAgentUpgradeToKnownVersions: schema.boolean({
           defaultValue: false,
         }),
         activeAgentsSoftLimit: schema.maybe(
