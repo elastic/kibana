@@ -40,6 +40,7 @@ import {
   RuleTypeState,
   SanitizedRule,
   RuleAlertData,
+  RuleNotifyWhen,
 } from '../../common';
 import {
   generateActionHash,
@@ -630,6 +631,15 @@ export class ExecutionHandler<
           this.logger.error(
             `Invalid action group "${actionGroup}" for rule "${this.ruleType.id}".`
           );
+          continue;
+        }
+
+        // only actions with notifyWhen set to "on status change" should return
+        // notifications for flapping pending recovered alerts
+        if (
+          alert.getPendingRecoveredCount() > 0 &&
+          action.frequency?.notifyWhen !== RuleNotifyWhen.CHANGE
+        ) {
           continue;
         }
 
