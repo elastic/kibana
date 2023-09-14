@@ -70,13 +70,13 @@ export const NOTIFICATIONS_DESC = i18n.translate(
   }
 );
 export const MEMORY_USAGE_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.ml.notifications.title',
+  'xpack.securitySolutionServerless.navLinks.ml.memoryUsage.title',
   {
     defaultMessage: 'Memory usage',
   }
 );
 export const MEMORY_USAGE_DESC = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.ml.notifications.desc',
+  'xpack.securitySolutionServerless.navLinks.ml.memoryUsage.desc',
   {
     defaultMessage: 'Memory usage page',
   }
@@ -192,37 +192,49 @@ export const NODES_DESC = i18n.translate(
 export const FILE_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.fileUpload.title',
   {
-    defaultMessage: 'File',
+    defaultMessage: 'File data visualizer',
   }
 );
 export const FILE_UPLOAD_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.fileUpload.desc',
   {
-    defaultMessage: 'File page',
+    defaultMessage: 'File data visualizer page',
   }
 );
 export const INDEX_DATA_VISUALIZER_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.indexDataVisualizer.title',
   {
-    defaultMessage: 'Data view',
+    defaultMessage: 'Data view data visualizer',
   }
 );
 export const INDEX_DATA_VISUALIZER_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.indexDataVisualizer.desc',
   {
-    defaultMessage: 'Data view page',
+    defaultMessage: 'Data view data visualizer page',
   }
 );
-export const EXPLAIN_LOG_RATE_SPIKES_TITLE = i18n.translate(
+export const DATA_COMPARISON_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.datComparison.title',
+  {
+    defaultMessage: 'Data comparison',
+  }
+);
+export const DATA_COMPARISON_DESC = i18n.translate(
+  'xpack.securitySolutionServerless.navLinks.ml.datComparison.desc',
+  {
+    defaultMessage: 'Data comparison page',
+  }
+);
+export const LOG_RATE_ANALYSIS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.explainLogRateSpikes.title',
   {
-    defaultMessage: 'Explain log rate spikes',
+    defaultMessage: 'Log Rate Analysis',
   }
 );
-export const EXPLAIN_LOG_RATE_SPIKES_DESC = i18n.translate(
+export const LOG_RATE_ANALYSIS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.explainLogRateSpikes.desc',
   {
-    defaultMessage: 'Explain log rate spikes page',
+    defaultMessage: 'Log Rate Analysis Page',
   }
 );
 export const LOG_PATTERN_ANALYSIS_TITLE = i18n.translate(
@@ -240,12 +252,12 @@ export const LOG_PATTERN_ANALYSIS_DESC = i18n.translate(
 export const CHANGE_POINT_DETECTIONS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.changePointDetections.title',
   {
-    defaultMessage: 'Change point detections',
+    defaultMessage: 'Change point detection',
   }
 );
 export const CHANGE_POINT_DETECTIONS_DESC = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.ml.changePointDetections.desc',
   {
-    defaultMessage: 'Change point detections page',
+    defaultMessage: 'Change point detection page',
   }
 );

@@ -48,3 +48,9 @@ export const IconReplicationLazy = withSuspenseIcon(
   React.lazy(() => import('./icons/replication'))
 );
 export const IconIntuitiveLazy = withSuspenseIcon(React.lazy(() => import('./icons/intuitive')));
+export const IconRapidBarGraphLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/rapid_bar_graph'))
+);
+export const IconFilebeatChartLazy = withSuspenseIcon(
+  React.lazy(() => import('./icons/filebeat_chart'))
+);
