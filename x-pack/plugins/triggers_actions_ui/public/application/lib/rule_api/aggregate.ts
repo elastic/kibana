@@ -14,6 +14,7 @@ import {
   rewriteBodyRes,
   rewriteTagsBodyRes,
   GetRuleTagsResponse,
+  AggregateRulesResponse,
 } from './aggregate_helpers';
 
 export async function loadRuleTags({
@@ -43,7 +44,7 @@ export async function loadRuleAggregations({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-}: LoadRuleAggregationsProps): Promise<AggregateRulesResponseBody> {
+}: LoadRuleAggregationsProps): Promise<AggregateRulesResponse> {
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,
@@ -51,7 +52,7 @@ export async function loadRuleAggregations({
     ruleStatusesFilter,
     tagsFilter,
   });
-  const res = await http.post<AsApiContract<AggregateRulesResponseBody>>(
+  const res = await http.post<AggregateRulesResponseBody>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       body: JSON.stringify({
