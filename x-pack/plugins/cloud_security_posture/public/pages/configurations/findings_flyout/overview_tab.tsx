@@ -18,6 +18,9 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { XJsonLang } from '@kbn/monaco';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -28,7 +31,7 @@ import {
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CisKubernetesIcons, CspFlyoutMarkdown, CodeBlock } from './findings_flyout';
+import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
@@ -146,17 +149,33 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
 
 const getEvidenceList = ({ result }: CspFinding) =>
   [
-    !isEmpty(result.expected) && {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.expectedTitle', {
-        defaultMessage: 'Expected',
-      }),
-      description: <CodeBlock>{JSON.stringify(result.expected, null, 2)}</CodeBlock>,
-    },
-    !isEmpty(result.evidence) && {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.actualTitle', {
-        defaultMessage: 'Actual',
-      }),
-      description: <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>,
+    {
+      description: (
+        <>
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.csp.findings.findingsFlyout.overviewTab.evidenceDescription"
+              defaultMessage="The specific resource metadata that was evaluated to generate this posture finding"
+            />
+          </EuiText>
+          <EuiSpacer size={'s'} />
+          <div style={{ height: 400 }}>
+            <CodeEditor
+              isCopyable
+              allowFullScreen
+              languageId={XJsonLang.ID}
+              value={JSON.stringify(result.evidence, null, 2)}
+              options={{
+                readOnly: true,
+                lineNumbers: 'on',
+                folding: true,
+                automaticLayout: true,
+              }}
+            />
+            {/* <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>*/}
+          </div>
+        </>
+      ),
     },
   ].filter(truthy);
 
@@ -174,7 +193,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
     [discover.locator, latestFindingsDataView.data?.id]
   );
 
-  const hasEvidence = !isEmpty(data.result.expected) || !isEmpty(data.result.evidence);
+  const hasEvidence = !isEmpty(data.result.evidence);
 
   const accordions: Accordion[] = useMemo(
     () =>
@@ -197,7 +216,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
         },
         INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence &&
           hasEvidence && {
-            initialIsOpen: false,
+            initialIsOpen: true,
             title: i18n.translate(
               'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
               { defaultMessage: 'Evidence' }
