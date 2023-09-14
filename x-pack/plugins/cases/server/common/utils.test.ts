@@ -46,6 +46,7 @@ import {
   createPersistableStateRequests,
   createUserRequests,
 } from './limiter_checker/test_utils';
+import { CustomFieldTypes } from '../../common/types/domain/custom_field/v1';
 
 interface CommentReference {
   ids: string[];
@@ -93,7 +94,7 @@ describe('common utils', () => {
   const customFields = [
     {
       key: 'string_custom_field_1',
-      type: 'text' as const,
+      type: CustomFieldTypes.TEXT as const,
       field: { value: ['this is a text field value', 'this is second'] },
     },
   ];

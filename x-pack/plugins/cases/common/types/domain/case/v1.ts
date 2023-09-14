@@ -11,11 +11,7 @@ import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
-import {
-  CustomFieldListTypeRt,
-  CustomFieldTextTypeRt,
-  CustomFieldToggleTypeRt,
-} from '../custom_field/v1';
+import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
 
 export { CaseStatuses };
 
@@ -71,13 +67,7 @@ const CustomFieldToggle = rt.strict({
   field: customFieldValue(rt.boolean),
 });
 
-const CustomFieldList = rt.strict({
-  key: rt.string,
-  type: CustomFieldListTypeRt,
-  field: customFieldValue(rt.string),
-});
-
-export const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle, CustomFieldList]);
+export const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle]);
 
 const CaseCustomFieldsRt = rt.array(CustomFieldRt);
 

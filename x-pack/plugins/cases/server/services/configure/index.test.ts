@@ -43,6 +43,7 @@ const basicConfigFields = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  customFields: [],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({

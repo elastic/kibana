@@ -19,7 +19,7 @@ export const ClosureTypeRt = rt.union([
   rt.literal('close-by-pushing'),
 ]);
 
-export const CustomFieldRt = rt.strict({
+export const CustomFieldConfigurationRt = rt.strict({
   /**
    * key of custom field
    */
@@ -34,17 +34,19 @@ export const CustomFieldRt = rt.strict({
   required: rt.boolean,
 });
 
-export const TextCustomFieldRt = rt.intersection([
+export const TextCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldTextTypeRt }),
-  CustomFieldRt,
+  CustomFieldConfigurationRt,
 ]);
 
-export const ToggleCustomFieldRt = rt.intersection([
+export const ToggleCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldToggleTypeRt }),
-  CustomFieldRt,
+  CustomFieldConfigurationRt,
 ]);
 
-export const CustomFieldsRt = rt.array(rt.union([TextCustomFieldRt, ToggleCustomFieldRt]));
+export const CustomFieldsRt = rt.array(
+  rt.union([TextCustomFieldConfigurationRt, ToggleCustomFieldConfigurationRt])
+);
 
 export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   /**

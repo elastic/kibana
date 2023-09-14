@@ -12,9 +12,9 @@ import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesRt,
   ConfigurationRt,
-  CustomFieldRt,
-  TextCustomFieldRt,
-  ToggleCustomFieldRt,
+  CustomFieldConfigurationRt,
+  TextCustomFieldConfigurationRt,
+  ToggleCustomFieldConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -172,7 +172,7 @@ describe('configure', () => {
     });
   });
 
-  describe('CustomFieldRt', () => {
+  describe('CustomFieldConfigurationRt', () => {
     const defaultRequest = {
       key: 'custom_field_key',
       label: 'Custom field label',
@@ -180,7 +180,7 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = CustomFieldRt.decode(defaultRequest);
+      const query = CustomFieldConfigurationRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -189,7 +189,7 @@ describe('configure', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CustomFieldRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = CustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -201,12 +201,14 @@ describe('configure', () => {
       const longLabel = 'x'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
 
       expect(
-        PathReporter.report(CustomFieldRt.decode({ ...defaultRequest, label: longLabel }))
+        PathReporter.report(
+          CustomFieldConfigurationRt.decode({ ...defaultRequest, label: longLabel })
+        )
       ).toContain('The length of the label is too long. The maximum length is 50.');
     });
   });
 
-  describe('TextCustomFieldRt', () => {
+  describe('TextCustomFieldConfigurationRt', () => {
     const defaultRequest = {
       key: 'my_text_custom_field',
       label: 'Text Custom Field',
@@ -215,7 +217,7 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = TextCustomFieldRt.decode(defaultRequest);
+      const query = TextCustomFieldConfigurationRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -224,7 +226,7 @@ describe('configure', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = TextCustomFieldRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = TextCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -233,7 +235,7 @@ describe('configure', () => {
     });
   });
 
-  describe('ToggleCustomFieldRt', () => {
+  describe('ToggleCustomFieldConfigurationRt', () => {
     const defaultRequest = {
       key: 'my_toggle_custom_field',
       label: 'Toggle Custom Field',
@@ -242,7 +244,7 @@ describe('configure', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = ToggleCustomFieldRt.decode(defaultRequest);
+      const query = ToggleCustomFieldConfigurationRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -251,7 +253,7 @@ describe('configure', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = ToggleCustomFieldRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = ToggleCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',

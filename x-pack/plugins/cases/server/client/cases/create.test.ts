@@ -20,6 +20,7 @@ import { create } from './create';
 import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 
 describe('create', () => {
   const theCase = {
@@ -387,12 +388,12 @@ describe('create', () => {
     const theCustomFields: CaseCustomFields = [
       {
         key: 'first_customField_key',
-        type: 'text',
+        type: CustomFieldTypes.TEXT,
         field: { value: ['this is a text field value', 'this is second'] },
       },
       {
         key: 'second_customField_key',
-        type: 'toggle',
+        type: CustomFieldTypes.TOGGLE,
         field: { value: [true] },
       },
     ];
