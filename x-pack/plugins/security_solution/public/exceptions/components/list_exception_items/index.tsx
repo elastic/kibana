@@ -19,7 +19,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { Pagination } from '@elastic/eui';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import { getFormattedComments } from '../../utils/ui.helpers';
-import { ListDetailsLinkAnchor } from '../list_details_link_anchor';
+import { LinkToRuleDetails } from '../link_to_rule_details';
 import { ExceptionsUtility } from '../exceptions_utility';
 import * as i18n from '../../translations/list_exception_items';
 
@@ -89,7 +89,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         onEditExceptionItem={onEditExceptionItem}
         onDeleteException={onDeleteException}
         getFormattedComments={getFormattedComments}
-        securityLinkAnchorComponent={ListDetailsLinkAnchor}
+        securityLinkAnchorComponent={LinkToRuleDetails}
         formattedDateComponent={FormattedDate}
         onCreateExceptionListItem={onCreateExceptionListItem}
         exceptionsUtilityComponent={() =>
