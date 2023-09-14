@@ -1,0 +1,50 @@
+{
+  "attributes": {
+    "fieldAttrs":"{}",
+    "fieldFormatMap":"{}",
+    "fields":"[]",
+    "name":"logstash-*",
+    "runtimeFieldMap":"{}",
+    "sourceFilters":"[]",
+    "timeFieldName":"@timestamp",
+    "title":"logstash-*",
+    "typeMeta":"{}"
+  },
+  "coreMigrationVersion":"8.8.0",
+  "created_at":"2023-09-07T14:49:04.891Z",
+  "id":"fd405dbb-002b-4caa-aae1-0893e5ffb75b",
+  "managed":false,
+  "references":[],
+  "type":"index-pattern",
+  "typeMigrationVersion":"8.0.0",
+  "updated_at":"2023-09-07T14:49:04.891Z",
+  "version":"WzEwLDFd"
+}
+
+{
+  "id": "ee65a3b0-4d8d-11ee-a8ed-97fb2d02a957",
+  "type": "map",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2023-09-07T14:50:48.043Z",
+  "created_at": "2023-09-07T14:50:48.043Z",
+  "version": "WzE1LDFd",
+  "attributes": {
+    "title": "mvt documents with labels",
+    "description": "",
+    "layerListJSON": "[{\"sourceDescriptor\":{\"geoField\":\"geo.coordinates\",\"scalingType\":\"MVT\",\"id\":\"57798aca-8a4e-4c35-9225-e8d4133ae8a7\",\"type\":\"ES_SEARCH\",\"applyGlobalQuery\":true,\"applyGlobalTime\":true,\"applyForceRefresh\":true,\"filterByMapBounds\":true,\"tooltipProperties\":[],\"sortField\":\"\",\"sortOrder\":\"desc\",\"topHitsGroupByTimeseries\":false,\"topHitsSplitField\":\"\",\"topHitsSize\":1,\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"id\":\"00c8d672-dc32-42cc-9e11-1c43d3e9a3be\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"alpha\":0.75,\"visible\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}},\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#54B399\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#41937c\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":0}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":6}},\"iconOrientation\":{\"type\":\"STATIC\",\"options\":{\"orientation\":0}},\"labelText\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"bytes\",\"name\":\"bytes\",\"origin\":\"source\",\"type\":\"number\",\"supportsAutoDomain\":true,\"isUnsupported\":false}}},\"labelColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#000000\"}},\"labelSize\":{\"type\":\"STATIC\",\"options\":{\"size\":14}},\"labelZoomRange\":{\"options\":{\"useLayerZoomRange\":true,\"minZoom\":0,\"maxZoom\":24}},\"labelBorderColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"labelBorderSize\":{\"options\":{\"size\":\"SMALL\"}},\"labelPosition\":{\"options\":{\"position\":\"CENTER\"}}},\"isTimeAware\":true},\"includeInFitToBounds\":true,\"type\":\"MVT_VECTOR\",\"joins\":[],\"disableTooltips\":false}]",
+    "mapStateJSON": "{\"adHocDataViews\":[],\"zoom\":2.19,\"center\":{\"lon\":-116.75537,\"lat\":55.05932},\"timeFilters\":{\"from\":\"2015-09-19T21:21:45.309Z\",\"to\":\"2015-09-23T01:33:44.867Z\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":60000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"backgroundColor\":\"#ffffff\",\"customIcons\":[],\"disableInteractive\":false,\"disableTooltipControl\":false,\"hideToolbarOverlay\":false,\"hideLayerControl\":false,\"hideViewControl\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"keydownScrollZoom\":false,\"maxZoom\":24,\"minZoom\":0,\"showScaleControl\":false,\"showSpatialFilters\":true,\"showTimesliderToggleButton\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+    "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"00c8d672-dc32-42cc-9e11-1c43d3e9a3be\"]}"
+  },
+  "references": [
+    {
+      "name": "layer_0_source_index_pattern",
+      "type": "index-pattern",
+      "id": "fd405dbb-002b-4caa-aae1-0893e5ffb75b"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.4.0"
+}

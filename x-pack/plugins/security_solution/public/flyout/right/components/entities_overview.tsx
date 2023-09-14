@@ -42,10 +42,6 @@ export const EntitiesOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  if (!eventId || !indexName || !scopeId) {
-    return null;
-  }
-
   return (
     <>
       <ExpandablePanel
