@@ -59,8 +59,6 @@ export interface EditLensConfigurationProps {
    * (saved in the library)
    */
   savedObjectId?: string;
-  /** When set to true it enables resetting to the previous state */
-  enablesResetButton?: boolean;
 }
 
 function LoadingSpinnerWithOverlay() {
@@ -123,7 +121,6 @@ export async function getEditLensConfiguration(
     output$,
     lensAdapters,
     updateByRefInput,
-    enablesResetButton,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -208,7 +205,6 @@ export async function getEditLensConfiguration(
       saveByRef,
       savedObjectId,
       updateByRefInput,
-      enablesResetButton,
     };
 
     return getWrapper(
