@@ -7,7 +7,7 @@
  */
 
 import { EuiGlobalToastList, EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import React, { useEffect, useState, type FunctionComponent } from 'react';
+import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
@@ -42,29 +42,34 @@ export const GlobalToastList: FunctionComponent<Props> = ({
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
 
   useEffect(() => {
-    const { unsubscribe } = toasts$.subscribe((redundantToastList) => {
+    const subscription = toasts$.subscribe((redundantToastList) => {
       const { toasts: reducedToasts, idToToasts: reducedIdToasts } =
         deduplicateToasts(redundantToastList);
+
       setIdToToasts(reducedIdToasts);
       setToasts(reducedToasts);
     });
 
-    return unsubscribe;
+    return () => subscription.unsubscribe();
   }, [toasts$]);
 
-  const closeToastsRepresentedById = (id: string) => {
-    const representedToasts = idToToasts[id];
-    if (representedToasts) {
-      representedToasts.forEach((toast) => dismissToast(toast.id));
+  const closeToastsRepresentedById = useCallback(
+    ({ id }: EuiToast) => {
+      const representedToasts = idToToasts[id];
 
-      if (representedToasts.length > 1) {
-        reportEvent.onDismissToast({
-          recurrenceCount: representedToasts.length,
-          toastMessage: representedToasts[0].title!,
-        });
+      if (representedToasts) {
+        representedToasts.forEach((toast) => dismissToast(toast.id));
+
+        if (representedToasts.length > 1) {
+          reportEvent.onDismissToast({
+            toastMessage: representedToasts[0].title!,
+            recurrenceCount: representedToasts.length,
+          });
+        }
       }
-    }
-  };
+    },
+    [dismissToast, idToToasts, reportEvent]
+  );
 
   return (
     <EuiGlobalToastList
@@ -73,7 +78,7 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       })}
       data-test-subj="globalToastList"
       toasts={toasts.map(convertToEui)}
-      dismissToast={({ id }) => closeToastsRepresentedById(id)}
+      dismissToast={closeToastsRepresentedById}
       /**
        * This prop is overridden by the individual toasts that are added.
        * Use `Infinity` here so that it's obvious a timeout hasn't been

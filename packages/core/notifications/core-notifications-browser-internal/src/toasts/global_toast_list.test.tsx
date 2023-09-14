@@ -6,22 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@kbn/core-notifications-browser/src/types';
-import { shallow } from 'enzyme';
-import React from 'react';
-import { Observable, from, EMPTY } from 'rxjs';
+import React, { type ComponentProps } from 'react';
+import { Observable, from, EMPTY, BehaviorSubject } from 'rxjs';
+import { screen, render, fireEvent } from '@testing-library/react';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { EventReporter } from './telemetry';
 
 import { GlobalToastList } from './global_toast_list';
+import { act } from 'react-dom/test-utils';
 
-const mockDismissToast = jest.fn();
+const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
 
-function render(props: Partial<GlobalToastList['props']> = {}) {
-  return <GlobalToastList dismissToast={mockDismissToast} toasts$={EMPTY} {...props} />;
+const sharedProps = {
+  toasts$: EMPTY,
+  dismissToast: jest.fn(),
+  reportEvent: new EventReporter({ analytics: mockAnalytics }),
+};
+
+function RenderToastList(props: Partial<ComponentProps<typeof GlobalToastList>> = {}) {
+  return <GlobalToastList {...sharedProps} {...props} />;
 }
 
 it('renders matching snapshot', () => {
-  expect(shallow(render())).toMatchSnapshot();
+  const { container } = render(<RenderToastList />);
+  expect(container).toMatchSnapshot();
 });
 
 it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
@@ -31,77 +40,98 @@ it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
     return unsubscribeSpy;
   });
 
-  const component = render({
-    toasts$: new Observable<any>(subscribeSpy),
-  });
+  const { unmount } = render(<RenderToastList toasts$={new Observable<any>(subscribeSpy)} />);
 
-  expect(subscribeSpy).not.toHaveBeenCalled();
-
-  const el = shallow(component);
   expect(subscribeSpy).toHaveBeenCalledTimes(1);
   expect(unsubscribeSpy).not.toHaveBeenCalled();
 
-  el.unmount();
+  unmount();
+
   expect(subscribeSpy).toHaveBeenCalledTimes(1);
   expect(unsubscribeSpy).toHaveBeenCalledTimes(1);
 });
 
-it('passes latest value from toasts$ to <EuiGlobalToastList />', () => {
-  const el = shallow(
-    render({
-      toasts$: from([[], [{ id: '1' }], [{ id: '1' }, { id: '2' }]]) as any,
-    })
-  );
+it('uses the latest value from toasts$ passed to <EuiGlobalToastList /> to render the right number of toasts', () => {
+  const toastObservable$ = new BehaviorSubject([{ id: '1' }, { id: '2' }]);
 
-  expect(el.find(EuiGlobalToastList).prop('toasts')).toEqual([{ id: '1' }, { id: '2' }]);
+  render(<RenderToastList toasts$={toastObservable$.asObservable() as any} />);
+
+  expect(screen.getAllByLabelText('Notification')).toHaveLength(2);
+
+  act(() => {
+    toastObservable$.next([...toastObservable$.getValue(), { id: '3' }]);
+  });
+
+  expect(screen.getAllByLabelText('Notification')).toHaveLength(3);
 });
 
 describe('global_toast_list with duplicate elements', () => {
   const dummyText = `You've got mail!`;
   const dummyTitle = `AOL Notifications`;
-  const toast = (id: any): Toast => ({
+  const createMockToast = (id: any): Toast => ({
     id: id.toString(),
     text: dummyText,
     title: dummyTitle,
     toastLifeTimeMs: 5000,
   });
 
-  const globalToastList = shallow(
-    render({
-      toasts$: from([[toast(0), toast(1), toast(2), toast(3)]]) as any,
-    })
-  );
+  function ToastListWithDuplicates() {
+    return (
+      <RenderToastList
+        toasts$={from([Array.from(new Array(4)).map((_, idx) => createMockToast(idx))]) as any}
+      />
+    );
+  }
 
-  const euiToastList = globalToastList.find(EuiGlobalToastList);
-  const toastsProp = euiToastList.prop('toasts');
-
-  it('renders the list with a single element', () => {
-    expect(toastsProp).toBeDefined();
-    expect(toastsProp).toHaveLength(1);
-    expect(euiToastList).toMatchSnapshot();
+  beforeEach(() => {
+    jest.useFakeTimers();
   });
 
-  it('renders the single toast with the common text', () => {
-    const firstRenderedToast = toastsProp![0];
-    expect(firstRenderedToast.text).toBe(dummyText);
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
-  it(`calls all toast's dismiss when closed`, () => {
-    const firstRenderedToast = toastsProp![0];
-    const dismissToast = globalToastList.prop('dismissToast');
-    dismissToast(firstRenderedToast);
+  it('renders the toast list with a single element', () => {
+    render(<ToastListWithDuplicates />);
 
-    expect(mockDismissToast).toHaveBeenCalledTimes(4);
-    expect(mockDismissToast).toHaveBeenCalledWith('0');
-    expect(mockDismissToast).toHaveBeenCalledWith('1');
-    expect(mockDismissToast).toHaveBeenCalledWith('2');
-    expect(mockDismissToast).toHaveBeenCalledWith('3');
+    expect(screen.getAllByLabelText('Notification')).toHaveLength(1);
+  });
+
+  it('renders a single toast in the toast list with the common text', () => {
+    render(<ToastListWithDuplicates />);
+
+    expect(screen.getByLabelText('Notification message list')).toMatchSnapshot();
+
+    expect(screen.getAllByText(dummyText)).toHaveLength(1);
+  });
+
+  it(`when a represented toast is closed,the provided dismiss action is called for all its internal toasts`, () => {
+    render(<ToastListWithDuplicates />);
+
+    const { 0: toastDismissButton, length: toastDismissButtonLength } =
+      screen.getAllByLabelText('Dismiss toast');
+
+    expect(toastDismissButtonLength).toEqual(1);
+
+    fireEvent.click(toastDismissButton);
+
+    act(() => {
+      // This is so that toast fade out animation has succesfully ran,
+      // only after this is the dismiss method invoked
+      jest.runAllTimers();
+    });
+
+    expect(sharedProps.dismissToast).toHaveBeenCalledTimes(4);
+    expect(sharedProps.dismissToast).toHaveBeenCalledWith('0');
+    expect(sharedProps.dismissToast).toHaveBeenCalledWith('1');
+    expect(sharedProps.dismissToast).toHaveBeenCalledWith('2');
+    expect(sharedProps.dismissToast).toHaveBeenCalledWith('3');
   });
 });
 
 describe('global_toast_list with duplicate elements, using MountPoints', () => {
   const dummyText = `You've got mail!`;
-  const toast = (id: any): Toast => ({
+  const createMockToastWithMountPoints = (id: any): Toast => ({
     id: id.toString(),
     text: dummyText,
     title: (element) => {
@@ -114,19 +144,20 @@ describe('global_toast_list with duplicate elements, using MountPoints', () => {
     toastLifeTimeMs: 5000,
   });
 
-  const globalToastList = shallow(
-    render({
-      toasts$: from([[toast(0), toast(1), toast(2), toast(3)]]) as any,
-    })
-  );
-
-  const euiToastList = globalToastList.find(EuiGlobalToastList);
-  const toastsProp = euiToastList.prop('toasts');
-
   it('renders the all separate elements element', () => {
-    expect(toastsProp).toBeDefined();
-    expect(toastsProp).toHaveLength(4);
-    expect(euiToastList).toMatchSnapshot('euiToastList');
-    expect(globalToastList).toMatchSnapshot('globalToastList');
+    render(
+      <RenderToastList
+        toasts$={
+          from([
+            Array.from(new Array(4)).map((_, idx) => createMockToastWithMountPoints(idx)),
+          ]) as any
+        }
+      />
+    );
+
+    const renderedToasts = screen.getAllByText(dummyText);
+
+    expect(renderedToasts).toHaveLength(4);
+    expect(renderedToasts).toMatchSnapshot('euiToastList');
   });
 });
