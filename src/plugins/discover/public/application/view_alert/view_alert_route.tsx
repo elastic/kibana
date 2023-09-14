@@ -20,7 +20,7 @@ const isActualAlert = (queryParams: QueryParams): queryParams is NonNullableEntr
 };
 
 export function ViewAlertRoute() {
-  const { core, data, locator, toastNotifications } = useDiscoverServices();
+  const { core, data, locator, toastNotifications, dataViews } = useDiscoverServices();
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const { search } = useLocation();
@@ -46,7 +46,8 @@ export function ViewAlertRoute() {
       queryParams,
       toastNotifications,
       core,
-      data
+      data,
+      dataViews
     );
 
     const navigateWithDiscoverState = (state: DiscoverAppLocatorParams) => {
@@ -63,7 +64,17 @@ export function ViewAlertRoute() {
       .then(buildLocatorParams)
       .then(navigateWithDiscoverState)
       .catch(navigateToDiscoverRoot);
-  }, [core, data, history, id, locator, openActualAlert, queryParams, toastNotifications]);
+  }, [
+    core,
+    data,
+    dataViews,
+    history,
+    id,
+    locator,
+    openActualAlert,
+    queryParams,
+    toastNotifications,
+  ]);
 
   return null;
 }
