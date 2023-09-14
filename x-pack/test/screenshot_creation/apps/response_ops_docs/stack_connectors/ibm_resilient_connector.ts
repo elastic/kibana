@@ -19,13 +19,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  describe('ibm resilient connector', function () {
-    let resilientSimulatorURL: string = '<could not determine kibana url>';
+  let resilientSimulatorUrl: string = '<could not determine kibana url>';
+  let smallUrl: string;
 
+  describe('ibm resilient connector', function () {
     before(async () => {
-      resilientSimulatorURL = kibanaServer.resolveUrl(
+      resilientSimulatorUrl = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT)
       );
+      smallUrl = resilientSimulatorUrl.replace('/elastic:changeme@', '/');
     });
 
     beforeEach(async () => {
@@ -39,16 +41,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await actions.common.openNewConnectorForm('resilient');
       await testSubjects.setValue('nameInput', 'IBM Resilient test connector');
       // await testSubjects.setValue('config.apiUrl-input', 'https://example.com');
-      await testSubjects.setValue('config.apiUrl-input', resilientSimulatorURL);
+      await testSubjects.setValue('config.apiUrl-input', smallUrl);
       await testSubjects.setValue('config.orgId-input', '201');
       await testSubjects.setValue('secrets.apiKeyId-input', 'tester');
       await testSubjects.setValue('secrets.apiKeySecret-input', 'testkey');
       await commonScreenshots.takeScreenshot('resilient-connector', screenshotDirectories);
-      // await testSubjects.click('create-connector-flyout-save-test-btn');
+      await testSubjects.click('create-connector-flyout-save-test-btn');
       // Close all toasts since it is unable to get incident types from example site
-      // await pageObjects.common.clearAllToasts();
-      // await pageObjects.header.waitUntilLoadingHasFinished();
-      // await commonScreenshots.takeScreenshot('resilient-params-test', screenshotDirectories);
+      await pageObjects.common.clearAllToasts();
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot('resilient-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
   });
