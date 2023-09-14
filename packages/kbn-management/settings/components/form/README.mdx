@@ -1,0 +1,26 @@
+---
+id: management/settings/components/form
+slug: /management/settings/components/form
+title: Management Settings form Component
+description: A package containing a component for rendering and manipulating the form in the Advanced Settings UI.
+tags: ['management', 'settings']
+date: 2023-09-12
+---
+
+## Description
+
+This package contains a component for rendering and manipulating the form containing the setting fields in the Advanced Settings UI.
+
+
+## Usage
+
+```tsx
+const saveConfig = async (changes: Record<string, UnsavedFieldChange<SettingType>>) => {
+  const arr = Object.entries(changes).map(([key, value]) => {
+    settingsStart.client.set(key, value.unsavedValue);
+  });
+  return Promise.all(arr);
+};
+
+return <Form fields={fields} save={saveConfig} />;
+```

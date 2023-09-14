@@ -1,0 +1,1843 @@
+{
+  "accessibility:disableAnimations": {
+    "name": "Disable Animations",
+    "value": false,
+    "description": "Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.",
+    "category": [
+      "accessibility"
+    ],
+    "requiresPageReload": true
+  },
+  "hideAnnouncements": {
+    "name": "Hide announcements",
+    "value": false,
+    "description": "Stop showing messages and tours that highlight new features."
+  },
+  "dateFormat": {
+    "name": "Date format",
+    "value": "MMM D, YYYY @ HH:mm:ss.SSS",
+    "description": "The <a href=\"https://momentjs.com/docs/#/displaying/format/\" target=\"_blank\" rel=\"noopener noreferrer\">format</a> for pretty formatted dates."
+  },
+  "dateFormat:tz": {
+    "name": "Time zone",
+    "value": "Browser",
+    "description": "The default time zone.",
+    "type": "select",
+    "options": [
+      "Browser",
+      "Africa/Abidjan",
+      "Africa/Accra",
+      "Africa/Addis_Ababa",
+      "Africa/Algiers",
+      "Africa/Asmara",
+      "Africa/Asmera",
+      "Africa/Bamako",
+      "Africa/Bangui",
+      "Africa/Banjul",
+      "Africa/Bissau",
+      "Africa/Blantyre",
+      "Africa/Brazzaville",
+      "Africa/Bujumbura",
+      "Africa/Cairo",
+      "Africa/Casablanca",
+      "Africa/Ceuta",
+      "Africa/Conakry",
+      "Africa/Dakar",
+      "Africa/Dar_es_Salaam",
+      "Africa/Djibouti",
+      "Africa/Douala",
+      "Africa/El_Aaiun",
+      "Africa/Freetown",
+      "Africa/Gaborone",
+      "Africa/Harare",
+      "Africa/Johannesburg",
+      "Africa/Juba",
+      "Africa/Kampala",
+      "Africa/Khartoum",
+      "Africa/Kigali",
+      "Africa/Kinshasa",
+      "Africa/Lagos",
+      "Africa/Libreville",
+      "Africa/Lome",
+      "Africa/Luanda",
+      "Africa/Lubumbashi",
+      "Africa/Lusaka",
+      "Africa/Malabo",
+      "Africa/Maputo",
+      "Africa/Maseru",
+      "Africa/Mbabane",
+      "Africa/Mogadishu",
+      "Africa/Monrovia",
+      "Africa/Nairobi",
+      "Africa/Ndjamena",
+      "Africa/Niamey",
+      "Africa/Nouakchott",
+      "Africa/Ouagadougou",
+      "Africa/Porto-Novo",
+      "Africa/Sao_Tome",
+      "Africa/Timbuktu",
+      "Africa/Tripoli",
+      "Africa/Tunis",
+      "Africa/Windhoek",
+      "America/Adak",
+      "America/Anchorage",
+      "America/Anguilla",
+      "America/Antigua",
+      "America/Araguaina",
+      "America/Argentina/Buenos_Aires",
+      "America/Argentina/Catamarca",
+      "America/Argentina/ComodRivadavia",
+      "America/Argentina/Cordoba",
+      "America/Argentina/Jujuy",
+      "America/Argentina/La_Rioja",
+      "America/Argentina/Mendoza",
+      "America/Argentina/Rio_Gallegos",
+      "America/Argentina/Salta",
+      "America/Argentina/San_Juan",
+      "America/Argentina/San_Luis",
+      "America/Argentina/Tucuman",
+      "America/Argentina/Ushuaia",
+      "America/Aruba",
+      "America/Asuncion",
+      "America/Atikokan",
+      "America/Atka",
+      "America/Bahia",
+      "America/Bahia_Banderas",
+      "America/Barbados",
+      "America/Belem",
+      "America/Belize",
+      "America/Blanc-Sablon",
+      "America/Boa_Vista",
+      "America/Bogota",
+      "America/Boise",
+      "America/Buenos_Aires",
+      "America/Cambridge_Bay",
+      "America/Campo_Grande",
+      "America/Cancun",
+      "America/Caracas",
+      "America/Catamarca",
+      "America/Cayenne",
+      "America/Cayman",
+      "America/Chicago",
+      "America/Chihuahua",
+      "America/Ciudad_Juarez",
+      "America/Coral_Harbour",
+      "America/Cordoba",
+      "America/Costa_Rica",
+      "America/Creston",
+      "America/Cuiaba",
+      "America/Curacao",
+      "America/Danmarkshavn",
+      "America/Dawson",
+      "America/Dawson_Creek",
+      "America/Denver",
+      "America/Detroit",
+      "America/Dominica",
+      "America/Edmonton",
+      "America/Eirunepe",
+      "America/El_Salvador",
+      "America/Ensenada",
+      "America/Fort_Nelson",
+      "America/Fort_Wayne",
+      "America/Fortaleza",
+      "America/Glace_Bay",
+      "America/Godthab",
+      "America/Goose_Bay",
+      "America/Grand_Turk",
+      "America/Grenada",
+      "America/Guadeloupe",
+      "America/Guatemala",
+      "America/Guayaquil",
+      "America/Guyana",
+      "America/Halifax",
+      "America/Havana",
+      "America/Hermosillo",
+      "America/Indiana/Indianapolis",
+      "America/Indiana/Knox",
+      "America/Indiana/Marengo",
+      "America/Indiana/Petersburg",
+      "America/Indiana/Tell_City",
+      "America/Indiana/Vevay",
+      "America/Indiana/Vincennes",
+      "America/Indiana/Winamac",
+      "America/Indianapolis",
+      "America/Inuvik",
+      "America/Iqaluit",
+      "America/Jamaica",
+      "America/Jujuy",
+      "America/Juneau",
+      "America/Kentucky/Louisville",
+      "America/Kentucky/Monticello",
+      "America/Knox_IN",
+      "America/Kralendijk",
+      "America/La_Paz",
+      "America/Lima",
+      "America/Los_Angeles",
+      "America/Louisville",
+      "America/Lower_Princes",
+      "America/Maceio",
+      "America/Managua",
+      "America/Manaus",
+      "America/Marigot",
+      "America/Martinique",
+      "America/Matamoros",
+      "America/Mazatlan",
+      "America/Mendoza",
+      "America/Menominee",
+      "America/Merida",
+      "America/Metlakatla",
+      "America/Mexico_City",
+      "America/Miquelon",
+      "America/Moncton",
+      "America/Monterrey",
+      "America/Montevideo",
+      "America/Montreal",
+      "America/Montserrat",
+      "America/Nassau",
+      "America/New_York",
+      "America/Nipigon",
+      "America/Nome",
+      "America/Noronha",
+      "America/North_Dakota/Beulah",
+      "America/North_Dakota/Center",
+      "America/North_Dakota/New_Salem",
+      "America/Ojinaga",
+      "America/Panama",
+      "America/Pangnirtung",
+      "America/Paramaribo",
+      "America/Phoenix",
+      "America/Port-au-Prince",
+      "America/Port_of_Spain",
+      "America/Porto_Acre",
+      "America/Porto_Velho",
+      "America/Puerto_Rico",
+      "America/Punta_Arenas",
+      "America/Rainy_River",
+      "America/Rankin_Inlet",
+      "America/Recife",
+      "America/Regina",
+      "America/Resolute",
+      "America/Rio_Branco",
+      "America/Rosario",
+      "America/Santa_Isabel",
+      "America/Santarem",
+      "America/Santiago",
+      "America/Santo_Domingo",
+      "America/Sao_Paulo",
+      "America/Scoresbysund",
+      "America/Shiprock",
+      "America/Sitka",
+      "America/St_Barthelemy",
+      "America/St_Johns",
+      "America/St_Kitts",
+      "America/St_Lucia",
+      "America/St_Thomas",
+      "America/St_Vincent",
+      "America/Swift_Current",
+      "America/Tegucigalpa",
+      "America/Thule",
+      "America/Thunder_Bay",
+      "America/Tijuana",
+      "America/Toronto",
+      "America/Tortola",
+      "America/Vancouver",
+      "America/Virgin",
+      "America/Whitehorse",
+      "America/Winnipeg",
+      "America/Yakutat",
+      "America/Yellowknife",
+      "Antarctica/Casey",
+      "Antarctica/Davis",
+      "Antarctica/DumontDUrville",
+      "Antarctica/Macquarie",
+      "Antarctica/Mawson",
+      "Antarctica/McMurdo",
+      "Antarctica/Palmer",
+      "Antarctica/Rothera",
+      "Antarctica/South_Pole",
+      "Antarctica/Syowa",
+      "Antarctica/Troll",
+      "Antarctica/Vostok",
+      "Arctic/Longyearbyen",
+      "Asia/Aden",
+      "Asia/Almaty",
+      "Asia/Amman",
+      "Asia/Anadyr",
+      "Asia/Aqtau",
+      "Asia/Aqtobe",
+      "Asia/Ashgabat",
+      "Asia/Ashkhabad",
+      "Asia/Atyrau",
+      "Asia/Baghdad",
+      "Asia/Bahrain",
+      "Asia/Baku",
+      "Asia/Bangkok",
+      "Asia/Barnaul",
+      "Asia/Beirut",
+      "Asia/Bishkek",
+      "Asia/Brunei",
+      "Asia/Calcutta",
+      "Asia/Chita",
+      "Asia/Choibalsan",
+      "Asia/Chongqing",
+      "Asia/Chungking",
+      "Asia/Colombo",
+      "Asia/Dacca",
+      "Asia/Damascus",
+      "Asia/Dhaka",
+      "Asia/Dili",
+      "Asia/Dubai",
+      "Asia/Dushanbe",
+      "Asia/Famagusta",
+      "Asia/Gaza",
+      "Asia/Harbin",
+      "Asia/Hebron",
+      "Asia/Ho_Chi_Minh",
+      "Asia/Hong_Kong",
+      "Asia/Hovd",
+      "Asia/Irkutsk",
+      "Asia/Istanbul",
+      "Asia/Jakarta",
+      "Asia/Jayapura",
+      "Asia/Jerusalem",
+      "Asia/Kabul",
+      "Asia/Kamchatka",
+      "Asia/Karachi",
+      "Asia/Kashgar",
+      "Asia/Kathmandu",
+      "Asia/Katmandu",
+      "Asia/Khandyga",
+      "Asia/Kolkata",
+      "Asia/Krasnoyarsk",
+      "Asia/Kuala_Lumpur",
+      "Asia/Kuching",
+      "Asia/Kuwait",
+      "Asia/Macao",
+      "Asia/Macau",
+      "Asia/Magadan",
+      "Asia/Makassar",
+      "Asia/Manila",
+      "Asia/Muscat",
+      "Asia/Nicosia",
+      "Asia/Novokuznetsk",
+      "Asia/Novosibirsk",
+      "Asia/Omsk",
+      "Asia/Oral",
+      "Asia/Phnom_Penh",
+      "Asia/Pontianak",
+      "Asia/Pyongyang",
+      "Asia/Qatar",
+      "Asia/Qostanay",
+      "Asia/Qyzylorda",
+      "Asia/Rangoon",
+      "Asia/Riyadh",
+      "Asia/Saigon",
+      "Asia/Sakhalin",
+      "Asia/Samarkand",
+      "Asia/Seoul",
+      "Asia/Shanghai",
+      "Asia/Singapore",
+      "Asia/Srednekolymsk",
+      "Asia/Taipei",
+      "Asia/Tashkent",
+      "Asia/Tbilisi",
+      "Asia/Tehran",
+      "Asia/Tel_Aviv",
+      "Asia/Thimbu",
+      "Asia/Thimphu",
+      "Asia/Tokyo",
+      "Asia/Tomsk",
+      "Asia/Ujung_Pandang",
+      "Asia/Ulaanbaatar",
+      "Asia/Ulan_Bator",
+      "Asia/Urumqi",
+      "Asia/Ust-Nera",
+      "Asia/Vientiane",
+      "Asia/Vladivostok",
+      "Asia/Yakutsk",
+      "Asia/Yangon",
+      "Asia/Yekaterinburg",
+      "Asia/Yerevan",
+      "Atlantic/Azores",
+      "Atlantic/Bermuda",
+      "Atlantic/Canary",
+      "Atlantic/Cape_Verde",
+      "Atlantic/Faeroe",
+      "Atlantic/Faroe",
+      "Atlantic/Jan_Mayen",
+      "Atlantic/Madeira",
+      "Atlantic/Reykjavik",
+      "Atlantic/South_Georgia",
+      "Atlantic/St_Helena",
+      "Atlantic/Stanley",
+      "Australia/ACT",
+      "Australia/Adelaide",
+      "Australia/Brisbane",
+      "Australia/Broken_Hill",
+      "Australia/Canberra",
+      "Australia/Currie",
+      "Australia/Darwin",
+      "Australia/Eucla",
+      "Australia/Hobart",
+      "Australia/LHI",
+      "Australia/Lindeman",
+      "Australia/Lord_Howe",
+      "Australia/Melbourne",
+      "Australia/NSW",
+      "Australia/North",
+      "Australia/Perth",
+      "Australia/Queensland",
+      "Australia/South",
+      "Australia/Sydney",
+      "Australia/Tasmania",
+      "Australia/Victoria",
+      "Australia/West",
+      "Australia/Yancowinna",
+      "Brazil/Acre",
+      "Brazil/DeNoronha",
+      "Brazil/East",
+      "Brazil/West",
+      "CET",
+      "CST6CDT",
+      "Canada/Atlantic",
+      "Canada/Central",
+      "Canada/Eastern",
+      "Canada/Mountain",
+      "Canada/Newfoundland",
+      "Canada/Pacific",
+      "Canada/Saskatchewan",
+      "Canada/Yukon",
+      "Chile/Continental",
+      "Chile/EasterIsland",
+      "Cuba",
+      "EET",
+      "EST5EDT",
+      "Egypt",
+      "Eire",
+      "Etc/GMT",
+      "Etc/GMT+0",
+      "Etc/GMT+1",
+      "Etc/GMT+10",
+      "Etc/GMT+11",
+      "Etc/GMT+12",
+      "Etc/GMT+2",
+      "Etc/GMT+3",
+      "Etc/GMT+4",
+      "Etc/GMT+5",
+      "Etc/GMT+6",
+      "Etc/GMT+7",
+      "Etc/GMT+8",
+      "Etc/GMT+9",
+      "Etc/GMT-0",
+      "Etc/GMT-1",
+      "Etc/GMT-10",
+      "Etc/GMT-11",
+      "Etc/GMT-12",
+      "Etc/GMT-13",
+      "Etc/GMT-14",
+      "Etc/GMT-2",
+      "Etc/GMT-3",
+      "Etc/GMT-4",
+      "Etc/GMT-5",
+      "Etc/GMT-6",
+      "Etc/GMT-7",
+      "Etc/GMT-8",
+      "Etc/GMT-9",
+      "Etc/GMT0",
+      "Etc/Greenwich",
+      "Etc/UCT",
+      "Etc/UTC",
+      "Etc/Universal",
+      "Etc/Zulu",
+      "Europe/Amsterdam",
+      "Europe/Andorra",
+      "Europe/Astrakhan",
+      "Europe/Athens",
+      "Europe/Belfast",
+      "Europe/Belgrade",
+      "Europe/Berlin",
+      "Europe/Bratislava",
+      "Europe/Brussels",
+      "Europe/Bucharest",
+      "Europe/Budapest",
+      "Europe/Busingen",
+      "Europe/Chisinau",
+      "Europe/Copenhagen",
+      "Europe/Dublin",
+      "Europe/Gibraltar",
+      "Europe/Guernsey",
+      "Europe/Helsinki",
+      "Europe/Isle_of_Man",
+      "Europe/Istanbul",
+      "Europe/Jersey",
+      "Europe/Kaliningrad",
+      "Europe/Kiev",
+      "Europe/Kirov",
+      "Europe/Kyiv",
+      "Europe/Lisbon",
+      "Europe/Ljubljana",
+      "Europe/London",
+      "Europe/Luxembourg",
+      "Europe/Madrid",
+      "Europe/Malta",
+      "Europe/Mariehamn",
+      "Europe/Minsk",
+      "Europe/Monaco",
+      "Europe/Moscow",
+      "Europe/Nicosia",
+      "Europe/Oslo",
+      "Europe/Paris",
+      "Europe/Podgorica",
+      "Europe/Prague",
+      "Europe/Riga",
+      "Europe/Rome",
+      "Europe/Samara",
+      "Europe/San_Marino",
+      "Europe/Sarajevo",
+      "Europe/Saratov",
+      "Europe/Simferopol",
+      "Europe/Skopje",
+      "Europe/Sofia",
+      "Europe/Stockholm",
+      "Europe/Tallinn",
+      "Europe/Tirane",
+      "Europe/Tiraspol",
+      "Europe/Ulyanovsk",
+      "Europe/Uzhgorod",
+      "Europe/Vaduz",
+      "Europe/Vatican",
+      "Europe/Vienna",
+      "Europe/Vilnius",
+      "Europe/Volgograd",
+      "Europe/Warsaw",
+      "Europe/Zagreb",
+      "Europe/Zaporozhye",
+      "Europe/Zurich",
+      "GB",
+      "GB-Eire",
+      "GMT",
+      "GMT+0",
+      "GMT-0",
+      "GMT0",
+      "Greenwich",
+      "Hongkong",
+      "Iceland",
+      "Indian/Antananarivo",
+      "Indian/Chagos",
+      "Indian/Christmas",
+      "Indian/Cocos",
+      "Indian/Comoro",
+      "Indian/Kerguelen",
+      "Indian/Mahe",
+      "Indian/Maldives",
+      "Indian/Mauritius",
+      "Indian/Mayotte",
+      "Indian/Reunion",
+      "Iran",
+      "Israel",
+      "Jamaica",
+      "Japan",
+      "Kwajalein",
+      "Libya",
+      "MET",
+      "MST7MDT",
+      "Mexico/BajaNorte",
+      "Mexico/BajaSur",
+      "Mexico/General",
+      "NZ",
+      "NZ-CHAT",
+      "Navajo",
+      "PRC",
+      "PST8PDT",
+      "Pacific/Apia",
+      "Pacific/Auckland",
+      "Pacific/Bougainville",
+      "Pacific/Chatham",
+      "Pacific/Chuuk",
+      "Pacific/Easter",
+      "Pacific/Efate",
+      "Pacific/Enderbury",
+      "Pacific/Fakaofo",
+      "Pacific/Fiji",
+      "Pacific/Funafuti",
+      "Pacific/Galapagos",
+      "Pacific/Gambier",
+      "Pacific/Guadalcanal",
+      "Pacific/Guam",
+      "Pacific/Honolulu",
+      "Pacific/Johnston",
+      "Pacific/Kanton",
+      "Pacific/Kiritimati",
+      "Pacific/Kosrae",
+      "Pacific/Kwajalein",
+      "Pacific/Majuro",
+      "Pacific/Marquesas",
+      "Pacific/Midway",
+      "Pacific/Nauru",
+      "Pacific/Niue",
+      "Pacific/Norfolk",
+      "Pacific/Noumea",
+      "Pacific/Pago_Pago",
+      "Pacific/Palau",
+      "Pacific/Pitcairn",
+      "Pacific/Pohnpei",
+      "Pacific/Ponape",
+      "Pacific/Port_Moresby",
+      "Pacific/Rarotonga",
+      "Pacific/Saipan",
+      "Pacific/Samoa",
+      "Pacific/Tahiti",
+      "Pacific/Tarawa",
+      "Pacific/Tongatapu",
+      "Pacific/Truk",
+      "Pacific/Wake",
+      "Pacific/Wallis",
+      "Pacific/Yap",
+      "Poland",
+      "Portugal",
+      "ROK",
+      "Singapore",
+      "Turkey",
+      "UCT",
+      "US/Alaska",
+      "US/Aleutian",
+      "US/Arizona",
+      "US/Central",
+      "US/East-Indiana",
+      "US/Eastern",
+      "US/Hawaii",
+      "US/Indiana-Starke",
+      "US/Michigan",
+      "US/Mountain",
+      "US/Pacific",
+      "US/Samoa",
+      "UTC",
+      "Universal",
+      "W-SU",
+      "WET",
+      "Zulu"
+    ],
+    "requiresPageReload": true
+  },
+  "dateFormat:scaled": {
+    "name": "Scaled date format",
+    "type": "json",
+    "value": "[\n  [\"\", \"HH:mm:ss.SSS\"],\n  [\"PT1S\", \"HH:mm:ss\"],\n  [\"PT1M\", \"HH:mm\"],\n  [\"PT1H\", \"YYYY-MM-DD HH:mm\"],\n  [\"P1DT\", \"YYYY-MM-DD\"],\n  [\"P1YT\", \"YYYY\"]\n]",
+    "description": "Values that define the format used in situations where time-based data is rendered in order, and formatted timestamps should adapt to the interval between measurements. Keys are <a href=\"http://en.wikipedia.org/wiki/ISO_8601#Time_intervals\" target=\"_blank\" rel=\"noopener noreferrer\">ISO8601 intervals</a>."
+  },
+  "dateFormat:dow": {
+    "name": "Day of week",
+    "value": "Sunday",
+    "description": "The day that starts the week.",
+    "type": "select",
+    "options": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ]
+  },
+  "dateNanosFormat": {
+    "name": "Date with nanoseconds format",
+    "value": "MMM D, YYYY @ HH:mm:ss.SSSSSSSSS",
+    "description": "The format for <a href=\"https://www.elastic.co/guide/en/elasticsearch/reference/master/date_nanos.html\" target=\"_blank\" rel=\"noopener noreferrer\">date_nanos</a> data."
+  },
+  "buildNum": {
+    "readonly": true,
+    "userValue": 9007199254740991
+  },
+  "defaultRoute": {
+    "name": "Default route",
+    "value": "/app/home",
+    "description": "This setting specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana. The route must be a relative URL."
+  },
+  "notifications:banner": {
+    "name": "Custom banner notification",
+    "value": "",
+    "type": "markdown",
+    "description": "A custom banner intended for temporary notices to all users. <a href=\"https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax/\"\n            target=\"_blank\" rel=\"noopener\">Markdown supported</a>.",
+    "category": [
+      "notifications"
+    ],
+    "sensitive": true
+  },
+  "notifications:lifetime:banner": {
+    "name": "Banner notification lifetime",
+    "value": 3000000,
+    "description": "The time in milliseconds which a banner notification will be displayed on-screen for. ",
+    "type": "number",
+    "category": [
+      "notifications"
+    ]
+  },
+  "notifications:lifetime:error": {
+    "name": "Error notification lifetime",
+    "value": 300000,
+    "description": "The time in milliseconds which an error notification will be displayed on-screen for. ",
+    "type": "number",
+    "category": [
+      "notifications"
+    ]
+  },
+  "notifications:lifetime:warning": {
+    "name": "Warning notification lifetime",
+    "value": 10000,
+    "description": "The time in milliseconds which a warning notification will be displayed on-screen for. ",
+    "type": "number",
+    "category": [
+      "notifications"
+    ]
+  },
+  "notifications:lifetime:info": {
+    "name": "Info notification lifetime",
+    "value": 5000,
+    "description": "The time in milliseconds which an information notification will be displayed on-screen for. ",
+    "type": "number",
+    "category": [
+      "notifications"
+    ]
+  },
+  "theme:darkMode": {
+    "name": "Dark mode",
+    "value": false,
+    "description": "Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.",
+    "requiresPageReload": true
+  },
+  "theme:version": {
+    "name": "Theme version",
+    "value": "v8",
+    "readonly": true
+  },
+  "state:storeInSessionStorage": {
+    "name": "Store URLs in session storage",
+    "value": false,
+    "description": "The URL can sometimes grow to be too large for some browsers to handle. To counter-act this we are testing if storing parts of the URL in session storage could help. Please let us know how it goes!"
+  },
+  "csv:separator": {
+    "name": "CSV separator",
+    "value": ",",
+    "description": "Separate exported values with this string",
+    "userValue": "|"
+  },
+  "csv:quoteValues": {
+    "name": "Quote CSV values",
+    "value": true,
+    "description": "Should values be quoted in csv exports?"
+  },
+  "banners:placement": {
+    "name": "Banner placement",
+    "description": "Display a top banner above the Elastic header. \n      <a href=\"https://www.elastic.co/subscriptions\" target=\"_blank\" rel=\"noopener noreferrer\">\n        Subscription required.\n      </a>\n  ",
+    "category": [
+      "banner"
+    ],
+    "order": 1,
+    "type": "select",
+    "value": "disabled",
+    "options": [
+      "disabled",
+      "top"
+    ],
+    "optionLabels": {
+      "disabled": "Disabled",
+      "top": "Top"
+    },
+    "requiresPageReload": true
+  },
+  "banners:textContent": {
+    "name": "Banner text",
+    "description": "Add Markdown-formatted text to the banner. \n      <a href=\"https://www.elastic.co/subscriptions\" target=\"_blank\" rel=\"noopener noreferrer\">\n        Subscription required.\n      </a>\n  ",
+    "sensitive": true,
+    "category": [
+      "banner"
+    ],
+    "order": 2,
+    "type": "markdown",
+    "value": "",
+    "requiresPageReload": true
+  },
+  "banners:textColor": {
+    "name": "Banner text color",
+    "description": "Set the color of the banner text. \n      <a href=\"https://www.elastic.co/subscriptions\" target=\"_blank\" rel=\"noopener noreferrer\">\n        Subscription required.\n      </a>\n  ",
+    "category": [
+      "banner"
+    ],
+    "order": 3,
+    "type": "color",
+    "value": "#8A6A0A",
+    "requiresPageReload": true
+  },
+  "banners:backgroundColor": {
+    "name": "Banner background color",
+    "description": "Set the background color for the banner. \n      <a href=\"https://www.elastic.co/subscriptions\" target=\"_blank\" rel=\"noopener noreferrer\">\n        Subscription required.\n      </a>\n  ",
+    "category": [
+      "banner"
+    ],
+    "order": 4,
+    "type": "color",
+    "value": "#FFF9E8",
+    "requiresPageReload": true
+  },
+  "savedObjects:perPage": {
+    "name": "Objects per page",
+    "value": 20,
+    "type": "number",
+    "description": "Number of objects to show per page in the load dialog"
+  },
+  "savedObjects:listingLimit": {
+    "name": "Objects listing limit",
+    "type": "number",
+    "value": 1000,
+    "description": "Number of objects to fetch for the listing pages"
+  },
+  "shortDots:enable": {
+    "name": "Shorten fields",
+    "value": false,
+    "description": "Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz"
+  },
+  "format:defaultTypeMap": {
+    "name": "Field type format name",
+    "value": "{\n  \"ip\": { \"id\": \"ip\", \"params\": {} },\n  \"date\": { \"id\": \"date\", \"params\": {} },\n  \"date_nanos\": { \"id\": \"date_nanos\", \"params\": {}, \"es\": true },\n  \"geo_point\": { \"id\": \"geo_point\", \"params\": { \"transform\": \"wkt\" } },\n  \"number\": { \"id\": \"number\", \"params\": {} },\n  \"boolean\": { \"id\": \"boolean\", \"params\": {} },\n  \"histogram\": { \"id\": \"histogram\", \"params\": {} },\n  \"_source\": { \"id\": \"_source\", \"params\": {} },\n  \"_default_\": { \"id\": \"string\", \"params\": {} }\n}",
+    "type": "json",
+    "description": "Map of the format name to use by default for each field type. \"_default_\" is used if the field type is not mentioned explicitly"
+  },
+  "format:number:defaultPattern": {
+    "name": "Number format",
+    "value": "0,0.[000]",
+    "type": "string",
+    "description": "Default <a href=\"https://www.elastic.co/guide/en/kibana/current/numeral.html\" target=\"_blank\" rel=\"noopener\">numeral format</a> for the \"number\" format"
+  },
+  "format:percent:defaultPattern": {
+    "name": "Percent format",
+    "value": "0,0.[000]%",
+    "type": "string",
+    "description": "Default <a href=\"https://www.elastic.co/guide/en/kibana/current/numeral.html\" target=\"_blank\" rel=\"noopener\">numeral format</a> for the \"percent\" format"
+  },
+  "format:bytes:defaultPattern": {
+    "name": "Bytes format",
+    "value": "0,0.[0]b",
+    "type": "string",
+    "description": "Default <a href=\"https://www.elastic.co/guide/en/kibana/current/numeral.html\" target=\"_blank\" rel=\"noopener\">numeral format</a> for the \"bytes\" format"
+  },
+  "format:currency:defaultPattern": {
+    "name": "Currency format",
+    "value": "($0,0.[00])",
+    "type": "string",
+    "description": "Default <a href=\"https://www.elastic.co/guide/en/kibana/current/numeral.html\" target=\"_blank\" rel=\"noopener\">numeral format</a> for the \"currency\" format"
+  },
+  "format:number:defaultLocale": {
+    "name": "Formatting locale",
+    "value": "en",
+    "type": "select",
+    "options": [
+      "en",
+      "be-nl",
+      "chs",
+      "cs",
+      "da-dk",
+      "de-ch",
+      "de",
+      "en-gb",
+      "es-ES",
+      "es",
+      "et",
+      "fi",
+      "fr-CA",
+      "fr-ch",
+      "fr",
+      "hu",
+      "it",
+      "ja",
+      "nl-nl",
+      "pl",
+      "pt-br",
+      "pt-pt",
+      "ru-UA",
+      "ru",
+      "sk",
+      "th",
+      "tr",
+      "uk-UA"
+    ],
+    "optionLabels": {
+      "be-nl": "Dutch (Belgium)",
+      "chs": "Simplified Chinese",
+      "cs": "Czech",
+      "da-dk": "Danish (Denmark)",
+      "de-ch": "German (Switzerland)",
+      "de": "German",
+      "en-gb": "English (UK)",
+      "es-ES": "Spanish (Spain)",
+      "es": "Spanish",
+      "et": "Estonian",
+      "fi": "Finnish",
+      "fr-CA": "French (Canada)",
+      "fr-ch": "French (Switzerland)",
+      "fr": "French",
+      "hu": "Hungarian",
+      "it": "Italian",
+      "ja": "Japanese",
+      "nl-nl": "Dutch (Netherlands)",
+      "pl": "Polish",
+      "pt-br": "Portuguese (Brazil)",
+      "pt-pt": "Portuguese",
+      "ru-UA": "Russian (Ukraine)",
+      "ru": "Russian",
+      "sk": "Slovak",
+      "th": "Thai",
+      "tr": "Turkish",
+      "uk-UA": "Ukrainian"
+    },
+    "description": "<a href=\"https://www.elastic.co/guide/en/kibana/current/numeral.html\" target=\"_blank\" rel=\"noopener\">Numeral language</a> locale"
+  },
+  "visualization:colorMapping": {
+    "name": "Color mapping",
+    "value": "{\"Count\":\"#00A69B\"}",
+    "type": "json",
+    "description": "Maps values to specific colors in charts using the <strong>Compatibility</strong> palette.",
+    "deprecation": {
+      "message": "This setting is deprecated and will not be supported in a future version.",
+      "docLinksKey": "visualizationSettings"
+    },
+    "category": [
+      "visualization"
+    ]
+  },
+  "visualization:useLegacyTimeAxis": {
+    "name": "Legacy chart time axis",
+    "value": false,
+    "description": "Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB",
+    "deprecation": {
+      "message": "This setting is deprecated and will not be supported in a future version.",
+      "docLinksKey": "visualizationSettings"
+    },
+    "category": [
+      "visualization"
+    ]
+  },
+  "bfetch:disable": {
+    "name": "Disable request batching",
+    "value": false,
+    "description": "Disables requests batching. This increases number of HTTP requests from Kibana, but allows to debug requests individually.",
+    "category": []
+  },
+  "bfetch:disableCompression": {
+    "name": "Disable batch compression",
+    "value": false,
+    "description": "Disable batch compression. This allows you to debug individual requests, but increases response size.",
+    "category": []
+  },
+  "metaFields": {
+    "name": "Meta fields",
+    "value": [
+      "_source",
+      "_id",
+      "_index",
+      "_score"
+    ],
+    "description": "Fields that exist outside of _source to merge into our document when displaying it"
+  },
+  "doc_table:highlight": {
+    "name": "Highlight results",
+    "value": true,
+    "description": "Highlight results in Discover and Saved Searches Dashboard. Highlighting makes requests slow when working on big documents.",
+    "category": [
+      "discover"
+    ]
+  },
+  "query:queryString:options": {
+    "name": "Query string options",
+    "value": "{ \"analyze_wildcard\": true }",
+    "description": "<a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/query-dsl-query-string-query.html target=\"_blank\" rel=\"noopener\">Options</a> for the lucene query string parser. Is only used when \"Query language\" is set to Lucene.",
+    "type": "json"
+  },
+  "query:allowLeadingWildcards": {
+    "name": "Allow leading wildcards in query",
+    "value": true,
+    "description": "When set, * is allowed as the first character in a query clause. To disallow leading wildcards in basic lucene queries, use query:queryString:options."
+  },
+  "search:queryLanguage": {
+    "name": "Query language",
+    "value": "kuery",
+    "description": "Query language used by the query bar. KQL is a new language built specifically for Kibana.",
+    "type": "select",
+    "options": [
+      "lucene",
+      "kuery"
+    ],
+    "optionLabels": {
+      "lucene": "Lucene",
+      "kuery": "KQL"
+    }
+  },
+  "sort:options": {
+    "name": "Sort options",
+    "value": "{ \"unmapped_type\": \"boolean\" }",
+    "description": "<a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/sort-search-results.html target=\"_blank\" rel=\"noopener\">Options</a> for the Elasticsearch sort parameter",
+    "type": "json"
+  },
+  "defaultIndex": {
+    "name": "Default data view",
+    "value": null,
+    "type": "string",
+    "description": "Used by discover and visualizations when a data view is not set."
+  },
+  "courier:ignoreFilterIfFieldNotInIndex": {
+    "name": "Ignore filter(s)",
+    "value": false,
+    "description": "This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. When disabled, all filters are applied to all visualizations. When enabled, filter(s) will be ignored for a visualization when the visualization's index does not contain the filtering field.",
+    "category": [
+      "search"
+    ]
+  },
+  "courier:setRequestPreference": {
+    "name": "Request preference",
+    "value": "sessionId",
+    "options": [
+      "sessionId",
+      "custom",
+      "none"
+    ],
+    "optionLabels": {
+      "sessionId": "Session ID",
+      "custom": "Custom",
+      "none": "None"
+    },
+    "type": "select",
+    "description": "Allows you to set which shards handle your search requests.\n          <ul>\n            <li><strong>Session ID:</strong> restricts operations to execute all search requests on the same shards.\n              This has the benefit of reusing shard caches across requests.</li>\n            <li><strong>Custom:</strong> allows you to define a your own preference.\n              Use <strong>'courier:customRequestPreference'</strong> to customize your preference value.</li>\n            <li><strong>None:</strong> means do not set a preference.\n              This might provide better performance because requests can be spread across all shard copies.\n              However, results might be inconsistent because different shards might be in different refresh states.</li>\n          </ul>",
+    "category": [
+      "search"
+    ]
+  },
+  "courier:customRequestPreference": {
+    "name": "Custom request preference",
+    "value": "_local",
+    "type": "string",
+    "description": "<a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html#search-preference target=\"_blank\" rel=\"noopener\">Request Preference</a> used when <strong>courier:setRequestPreference</strong> is set to \"custom\".",
+    "category": [
+      "search"
+    ]
+  },
+  "courier:maxConcurrentShardRequests": {
+    "name": "Max Concurrent Shard Requests",
+    "value": 0,
+    "type": "number",
+    "description": "Controls the <a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/search-multi-search.html\n            target=\"_blank\" rel=\"noopener\" >max_concurrent_shard_requests</a> setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.",
+    "category": [
+      "search"
+    ]
+  },
+  "search:includeFrozen": {
+    "name": "Search in frozen indices",
+    "description": "Will include <a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html\n        target=\"_blank\" rel=\"noopener\">frozen indices</a> in results if enabled. Searching through frozen indices\n        might increase the search time.",
+    "value": false,
+    "deprecation": {
+      "message": "This setting is deprecated and will be removed in Kibana 9.0.",
+      "docLinksKey": "kibanaSearchSettings"
+    },
+    "category": [
+      "search"
+    ]
+  },
+  "histogram:barTarget": {
+    "name": "Target buckets",
+    "value": 50,
+    "description": "Attempt to generate around this many buckets when using \"auto\" interval in date and numeric histograms"
+  },
+  "histogram:maxBars": {
+    "name": "Maximum buckets",
+    "value": 1000,
+    "description": "\n          Limits the density of date and number histograms across Kibana\n          for better performance using a test query. If the test query would too many buckets,\n          the interval between buckets will be increased. This setting applies separately\n          to each histogram aggregation, and does not apply to other types of aggregation.\n          To find the maximum value of this setting, divide the Elasticsearch 'search.max_buckets'\n          value by the maximum number of aggregations in each visualization.\n        "
+  },
+  "history:limit": {
+    "name": "History limit",
+    "value": 10,
+    "description": "In fields that have history (e.g. query inputs), show this many recent values"
+  },
+  "timepicker:refreshIntervalDefaults": {
+    "name": "Time filter refresh interval",
+    "value": "{\n  \"pause\": true,\n  \"value\": 60000\n}",
+    "type": "json",
+    "description": "The timefilter's default refresh interval. The \"value\" needs to be specified in milliseconds.",
+    "requiresPageReload": true
+  },
+  "timepicker:timeDefaults": {
+    "name": "Time filter defaults",
+    "value": "{\n  \"from\": \"now-15m\",\n  \"to\": \"now\"\n}",
+    "type": "json",
+    "description": "The timefilter selection to use when Kibana is started without one. Must be an object containing \"from\" and \"to\" (see <a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/common-options.html#date-math\n            target=\"_blank\" rel=\"noopener\">accepted formats</a>).",
+    "requiresPageReload": true
+  },
+  "timepicker:quickRanges": {
+    "name": "Time filter quick ranges",
+    "value": "[\n  {\n    \"from\": \"now/d\",\n    \"to\": \"now/d\",\n    \"display\": \"Today\"\n  },\n  {\n    \"from\": \"now/w\",\n    \"to\": \"now/w\",\n    \"display\": \"This week\"\n  },\n  {\n    \"from\": \"now-15m\",\n    \"to\": \"now\",\n    \"display\": \"Last 15 minutes\"\n  },\n  {\n    \"from\": \"now-30m\",\n    \"to\": \"now\",\n    \"display\": \"Last 30 minutes\"\n  },\n  {\n    \"from\": \"now-1h\",\n    \"to\": \"now\",\n    \"display\": \"Last 1 hour\"\n  },\n  {\n    \"from\": \"now-24h/h\",\n    \"to\": \"now\",\n    \"display\": \"Last 24 hours\"\n  },\n  {\n    \"from\": \"now-7d/d\",\n    \"to\": \"now\",\n    \"display\": \"Last 7 days\"\n  },\n  {\n    \"from\": \"now-30d/d\",\n    \"to\": \"now\",\n    \"display\": \"Last 30 days\"\n  },\n  {\n    \"from\": \"now-90d/d\",\n    \"to\": \"now\",\n    \"display\": \"Last 90 days\"\n  },\n  {\n    \"from\": \"now-1y/d\",\n    \"to\": \"now\",\n    \"display\": \"Last 1 year\"\n  }\n]",
+    "type": "json",
+    "description": "The list of ranges to show in the Quick section of the time filter. This should be an array of objects, with each object containing \"from\", \"to\" (see <a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/common-options.html#date-math\n            target=\"_blank\" rel=\"noopener\">accepted formats</a>), and \"display\" (the title to be displayed)."
+  },
+  "filters:pinnedByDefault": {
+    "name": "Pin filters by default",
+    "value": false,
+    "description": "Whether the filters should have a global state (be pinned) by default"
+  },
+  "filterEditor:suggestValues": {
+    "name": "Filter editor suggest values",
+    "value": true,
+    "description": "Set this property to false to prevent the filter editor from suggesting values for fields."
+  },
+  "autocomplete:valueSuggestionMethod": {
+    "name": "Autocomplete value suggestion method",
+    "type": "select",
+    "value": "terms_enum",
+    "description": "The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the Elasticsearch terms enum API for improved autocomplete suggestion performance. (Note that terms_enum is incompatible with Document Level Security.) Select terms_agg to use an Elasticsearch terms aggregation. (Note that terms_agg is incompatible with IP-type fields.) <a href=https://www.elastic.co/guide/en/kibana/master/kibana-concepts-analysts.html#autocomplete-suggestions target=\"_blank\" rel=\"noopener\">Learn more.</a>",
+    "options": [
+      "terms_enum",
+      "terms_agg"
+    ],
+    "category": [
+      "autocomplete"
+    ]
+  },
+  "autocomplete:useTimeRange": {
+    "name": "Use time range",
+    "value": true,
+    "description": "Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. <a href=https://www.elastic.co/guide/en/kibana/master/kibana-concepts-analysts.html#autocomplete-suggestions target=\"_blank\" rel=\"noopener\">Learn more.</a>",
+    "category": [
+      "autocomplete"
+    ]
+  },
+  "search:timeout": {
+    "name": "Search Timeout",
+    "value": 600000,
+    "description": "Change the maximum timeout for a search session or set to 0 to disable the timeout and allow queries to run to completion.",
+    "type": "number",
+    "category": [
+      "search"
+    ]
+  },
+  "fileUpload:maxFileSize": {
+    "name": "Maximum file upload size",
+    "value": "100MB",
+    "description": "Sets the file size limit when importing files. The highest supported value for this setting is 1GB."
+  },
+  "labs:dashboard:deferBelowFold": {
+    "name": "Defer loading panels below \"the fold\"",
+    "value": false,
+    "type": "boolean",
+    "description": "Any panels below \"the fold\"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport",
+    "requiresPageReload": true,
+    "category": [
+      "Presentation Labs"
+    ]
+  },
+  "labs:dashboard:dashboardControls": {
+    "name": "Enable dashboard controls",
+    "value": true,
+    "type": "boolean",
+    "description": "Enables the controls system for dashboard, which allows dashboard authors to more easily build interactive elements for their users.",
+    "requiresPageReload": true,
+    "category": [
+      "Presentation Labs"
+    ]
+  },
+  "labs:canvas:byValueEmbeddable": {
+    "name": "By-Value Embeddables",
+    "value": true,
+    "type": "boolean",
+    "description": "Enables support for by-value embeddables in Canvas",
+    "requiresPageReload": true,
+    "category": [
+      "Presentation Labs"
+    ]
+  },
+  "visualization:heatmap:maxBuckets": {
+    "name": "Heatmap maximum buckets",
+    "value": 50,
+    "type": "number",
+    "description": "The maximum number of buckets a single datasource can return. A higher number might have negative impact on browser rendering performance",
+    "category": [
+      "visualization"
+    ]
+  },
+  "metrics:max_buckets": {
+    "name": "TSVB buckets limit",
+    "value": 2000,
+    "description": "Affects the TSVB histogram density. Must be set higher than \"histogram:maxBars\"."
+  },
+  "metrics:allowStringIndices": {
+    "name": "Allow string indices in TSVB",
+    "value": false,
+    "requiresPageReload": true,
+    "description": "Enables you to query Elasticsearch indices in <strong>TSVB</strong> visualizations."
+  },
+  "metrics:allowCheckingForFailedShards": {
+    "name": "Show TSVB request shard failures",
+    "value": true,
+    "description": "Show warning message for partial data in TSVB charts if the request succeeds for some shards but fails for others."
+  },
+  "timelion:es.timefield": {
+    "name": "Time field",
+    "value": "@timestamp",
+    "description": "Default field containing a timestamp when using .es()",
+    "category": [
+      "timelion"
+    ]
+  },
+  "timelion:es.default_index": {
+    "name": "Default index",
+    "value": "_all",
+    "description": "Default elasticsearch index to search with .es()",
+    "category": [
+      "timelion"
+    ]
+  },
+  "timelion:target_buckets": {
+    "name": "Target buckets",
+    "value": 200,
+    "description": "The number of buckets to shoot for when using auto intervals",
+    "category": [
+      "timelion"
+    ]
+  },
+  "timelion:max_buckets": {
+    "name": "Maximum buckets",
+    "value": 2000,
+    "description": "The maximum number of buckets a single datasource can return",
+    "category": [
+      "timelion"
+    ]
+  },
+  "timelion:min_interval": {
+    "name": "Minimum interval",
+    "value": "1ms",
+    "description": "The smallest interval that will be calculated when using \"auto\"",
+    "category": [
+      "timelion"
+    ]
+  },
+  "visualization:visualize:legacyHeatmapChartsLibrary": {
+    "name": "Heatmap legacy charts library",
+    "requiresPageReload": true,
+    "value": false,
+    "description": "Enables legacy charts library for heatmap charts in visualize.",
+    "deprecation": {
+      "message": "The legacy charts library for heatmap in visualize is deprecated and will not be supported in a future version.",
+      "docLinksKey": "visualizationSettings"
+    },
+    "category": [
+      "visualization"
+    ]
+  },
+  "labs:dashboard:enable_ui": {
+    "name": "Enable labs button in Dashboard",
+    "description": "This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in Dashboard.",
+    "value": false,
+    "type": "boolean",
+    "category": [
+      "Presentation Labs"
+    ],
+    "requiresPageReload": true
+  },
+  "defaultColumns": {
+    "name": "Default columns",
+    "value": [],
+    "description": "Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.",
+    "category": [
+      "discover"
+    ]
+  },
+  "discover:maxDocFieldsDisplayed": {
+    "name": "Maximum document fields displayed",
+    "value": 200,
+    "description": "Maximum number of fields rendered in the document summary",
+    "category": [
+      "discover"
+    ]
+  },
+  "discover:sampleSize": {
+    "name": "Maximum rows per table",
+    "value": 500,
+    "description": "Sets the maximum number of rows for the entire document table.",
+    "category": [
+      "discover"
+    ]
+  },
+  "discover:sampleRowsPerPage": {
+    "name": "Rows per page",
+    "value": 100,
+    "options": [
+      10,
+      25,
+      50,
+      100,
+      250,
+      500
+    ],
+    "type": "select",
+    "description": "Limits the number of rows per page in the document table.",
+    "category": [
+      "discover"
+    ]
+  },
+  "discover:sort:defaultOrder": {
+    "name": "Default sort direction",
+    "value": "desc",
+    "options": [
+      "desc",
+      "asc"
+    ],
+    "optionLabels": {
+      "desc": "Descending",
+      "asc": "Ascending"
+    },
+    "type": "select",
+    "description": "Controls the default sort direction for time based data views in the Discover app.",
+    "category": [
+      "discover"
+    ]
+  },
+  "discover:searchOnPageLoad": {
+    "name": "Search on page load",
+    "value": true,
+    "type": "boolean",
+    "description": "Controls whether a search is executed when Discover first loads. This setting does not have an effect when loading a saved search.",
+    "category": [
+      "discover"
+    ]
+  },
+  "doc_table:hideTimeColumn": {
+    "name": "Hide 'Time' column",
+    "value": false,
+    "description": "Hide the 'Time' column in Discover and in all Saved Searches on Dashboards.",
+    "category": [
+      "discover"
+    ]
+  },
+  "fields:popularLimit": {
+    "name": "Popular fields limit",
+    "value": 10,
+    "description": "The top N most popular fields to show"
+  },
+  "context:defaultSize": {
+    "name": "Context size",
+    "value": 5,
+    "description": "The number of surrounding entries to show in the context view",
+    "category": [
+      "discover"
+    ]
+  },
+  "context:step": {
+    "name": "Context size step",
+    "value": 5,
+    "description": "The step size to increment or decrement the context size by",
+    "category": [
+      "discover"
+    ]
+  },
+  "context:tieBreakerFields": {
+    "name": "Tie breaker fields",
+    "value": [
+      "_doc"
+    ],
+    "description": "A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. From this list the first field that is present and sortable in the current data view is used.",
+    "category": [
+      "discover"
+    ]
+  },
+  "doc_table:legacy": {
+    "name": "Document Explorer or classic view",
+    "value": false,
+    "description": "To use the new <a href=https://www.elastic.co/guide/en/kibana/master/document-explorer.html style=\"font-weight: 600;\"\n            target=\"_blank\" rel=\"noopener\">Document Explorer</a> instead of the classic view, turn off this option. The Document Explorer offers better data sorting, resizable columns, and a full screen view.",
+    "requiresPageReload": true,
+    "category": [
+      "discover"
+    ],
+    "metric": {
+      "type": "click",
+      "name": "discover:useLegacyDataGrid"
+    }
+  },
+  "discover:modifyColumnsOnSwitch": {
+    "name": "Modify columns when changing data views",
+    "value": true,
+    "description": "Remove columns that are not available in the new data view.",
+    "category": [
+      "discover"
+    ],
+    "metric": {
+      "type": "click",
+      "name": "discover:modifyColumnsOnSwitchTitle"
+    }
+  },
+  "discover:searchFieldsFromSource": {
+    "name": "Read fields from _source",
+    "description": "When enabled will load documents directly from `_source`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.",
+    "value": false,
+    "category": [
+      "discover"
+    ]
+  },
+  "discover:showFieldStatistics": {
+    "name": "Show field statistics",
+    "description": "Enable the <a href=https://www.elastic.co/guide/en/kibana/master/show-field-statistics.html\n            target=\"_blank\" rel=\"noopener\">Field statistics view</a> to show details such as the minimum and maximum values of a numeric field or a map of a geo field. This functionality is in beta and is subject to change.",
+    "value": true,
+    "category": [
+      "discover"
+    ],
+    "metric": {
+      "type": "click",
+      "name": "discover:showFieldStatistics"
+    }
+  },
+  "discover:showMultiFields": {
+    "name": "Show multi-fields",
+    "description": "Controls whether <a href=https://www.elastic.co/guide/en/elasticsearch/reference/master/multi-fields.html\n            target=\"_blank\" rel=\"noopener\">multi-fields</a> display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when `searchFieldsFromSource` is off.",
+    "value": false,
+    "category": [
+      "discover"
+    ]
+  },
+  "discover:rowHeightOption": {
+    "name": "Row height in the Document Explorer",
+    "value": 3,
+    "category": [
+      "discover"
+    ],
+    "description": "The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line."
+  },
+  "truncate:maxHeight": {
+    "name": "Maximum cell height in the classic table",
+    "value": 115,
+    "category": [
+      "discover"
+    ],
+    "description": "The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.",
+    "requiresPageReload": true
+  },
+  "discover:enableESQL": {
+    "name": "Enable ES|QL",
+    "value": true,
+    "description": "<em>[technical preview]</em> This tech preview feature is highly experimental--do not rely on this for production saved searches, visualizations or dashboards. This setting enables ES|QL in Discover. If you have feedback on this experience please reach out to us on <a href=\"https://discuss.elastic.co/c/elastic-stack/kibana\" target=\"_blank\" rel=\"noopener\">discuss.elastic.co/c/elastic-stack/kibana</a>",
+    "requiresPageReload": true,
+    "category": [
+      "discover"
+    ]
+  },
+  "xpackReporting:customPdfLogo": {
+    "name": "PDF footer image",
+    "value": null,
+    "description": "Custom image to use in the PDF's footer",
+    "sensitive": true,
+    "type": "image",
+    "category": [
+      "reporting"
+    ]
+  },
+  "labs:canvas:enable_ui": {
+    "name": "Enable labs button in Canvas",
+    "description": "This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in Canvas.",
+    "value": false,
+    "type": "boolean",
+    "category": [
+      "Presentation Labs"
+    ],
+    "requiresPageReload": true
+  },
+  "rollups:enableIndexPatterns": {
+    "name": "Enable rollup data views",
+    "value": true,
+    "description": "Enable the creation of data views that capture rollup indices,\n              which in turn enable visualizations based on rollup data.",
+    "category": [
+      "rollups"
+    ],
+    "requiresPageReload": true
+  },
+  "observability:enableInspectEsQueries": {
+    "category": [
+      "observability"
+    ],
+    "name": "Inspect ES queries",
+    "value": false,
+    "description": "Inspect Elasticsearch queries in API responses.",
+    "requiresPageReload": true
+  },
+  "observability:maxSuggestions": {
+    "category": [
+      "observability"
+    ],
+    "name": "Maximum suggestions",
+    "value": 100,
+    "description": "Maximum number of suggestions fetched in autocomplete selection boxes."
+  },
+  "observability:enableComparisonByDefault": {
+    "category": [
+      "observability"
+    ],
+    "name": "Comparison feature",
+    "value": true,
+    "description": "Determines whether the comparison feature is enabled or disabled by default in the APM app."
+  },
+  "observability:apmDefaultServiceEnvironment": {
+    "category": [
+      "observability"
+    ],
+    "sensitive": true,
+    "name": "Default service environment",
+    "description": "Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.",
+    "value": ""
+  },
+  "observability:apmProgressiveLoading": {
+    "category": [
+      "observability"
+    ],
+    "name": "Use progressive loading of selected APM views",
+    "description": "<em>[technical preview]</em> Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background",
+    "value": "off",
+    "requiresPageReload": false,
+    "type": "select",
+    "options": [
+      "off",
+      "low",
+      "medium",
+      "high"
+    ],
+    "optionLabels": {
+      "off": "Off",
+      "low": "Low sampling rate (fastest, least accurate)",
+      "medium": "Medium sampling rate",
+      "high": "High sampling rate (slower, most accurate)"
+    },
+    "showInLabs": true
+  },
+  "observability:apmServiceInventoryOptimizedSorting": {
+    "category": [
+      "observability"
+    ],
+    "name": "Optimize services list load performance in APM",
+    "description": "<em>[technical preview]</em> Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.",
+    "value": false,
+    "requiresPageReload": false,
+    "type": "boolean",
+    "showInLabs": true
+  },
+  "observability:apmServiceGroupMaxNumberOfServices": {
+    "category": [
+      "observability"
+    ],
+    "name": "Maximum services in a service group",
+    "value": 500,
+    "description": "Limit the number of services in a given service group"
+  },
+  "observability:apmTraceExplorerTab": {
+    "category": [
+      "observability"
+    ],
+    "name": "APM Trace Explorer",
+    "description": "<em>[technical preview]</em> Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. <a href=\"https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer\" target=\"_blank\">Learn more.</a>",
+    "value": true,
+    "requiresPageReload": true,
+    "type": "boolean",
+    "showInLabs": true
+  },
+  "observability:apmLabsButton": {
+    "category": [
+      "observability"
+    ],
+    "name": "Enable labs button in APM",
+    "description": "This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in APM.",
+    "value": false,
+    "requiresPageReload": true,
+    "type": "boolean"
+  },
+  "observability:enableInfrastructureHostsView": {
+    "category": [
+      "observability"
+    ],
+    "name": "Infrastructure Hosts view",
+    "value": true,
+    "description": "<em>[beta]</em> Enable the Hosts view in the Infrastructure app."
+  },
+  "observability:enableAwsLambdaMetrics": {
+    "category": [
+      "observability"
+    ],
+    "name": "AWS Lambda Metrics",
+    "description": "<em>[technical preview]</em> Display Amazon Lambda metrics in the service metrics tab.",
+    "value": true,
+    "requiresPageReload": true,
+    "type": "boolean",
+    "showInLabs": true
+  },
+  "observability:apmAgentExplorerView": {
+    "category": [
+      "observability"
+    ],
+    "name": "Agent explorer",
+    "description": "<em>[beta]</em> Enables Agent explorer view.",
+    "value": true,
+    "requiresPageReload": true,
+    "type": "boolean"
+  },
+  "observability:apmAWSLambdaPriceFactor": {
+    "category": [
+      "observability"
+    ],
+    "name": "AWS lambda price factor",
+    "type": "json",
+    "value": "{\n  \"x86_64\": 0.0000166667,\n  \"arm\": 0.0000133334\n}",
+    "description": "Price per Gb-second."
+  },
+  "observability:apmAWSLambdaRequestCostPerMillion": {
+    "category": [
+      "observability"
+    ],
+    "name": "AWS lambda price per 1M requests",
+    "value": 0.2
+  },
+  "observability:apmEnableServiceMetrics": {
+    "category": [
+      "observability"
+    ],
+    "name": "Service transaction metrics",
+    "value": true,
+    "description": "<em>[beta]</em> Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.",
+    "requiresPageReload": true
+  },
+  "observability:apmEnableContinuousRollups": {
+    "category": [
+      "observability"
+    ],
+    "name": "Continuous rollups",
+    "value": true,
+    "description": "<em>[beta]</em> When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.",
+    "requiresPageReload": true
+  },
+  "observability:apmEnableCriticalPath": {
+    "category": [
+      "observability"
+    ],
+    "name": "Critical path",
+    "description": "<em>[technical preview]</em> Optionally display the critical path of a trace.",
+    "value": false,
+    "requiresPageReload": true,
+    "type": "boolean",
+    "showInLabs": true
+  },
+  "observability:syntheticsThrottlingEnabled": {
+    "category": [
+      "observability"
+    ],
+    "name": "Enable Synthetics throttling (Experimental)",
+    "value": false,
+    "description": "Enable the throttling setting in Synthetics monitor configurations. Note that throttling may still not be available for your monitors even if the setting is active. Intended for internal use only. <a href=\"https://github.com/elastic/synthetics/blob/main/docs/throttling.md\" target=\"_blank\" rel=\"noopener noreferrer\">read notice here.</a>",
+    "requiresPageReload": true
+  },
+  "observability:enableLegacyUptimeApp": {
+    "category": [
+      "observability"
+    ],
+    "name": "Always show legacy Uptime app",
+    "value": false,
+    "description": "By default, the legacy Uptime app is hidden from the interface when it doesn't have any data for more than a week. Enable this option to always show it.",
+    "requiresPageReload": true
+  },
+  "observability:apmEnableProfilingIntegration": {
+    "category": [
+      "observability"
+    ],
+    "name": "Enable Universal Profiling integration in APM",
+    "value": false,
+    "requiresPageReload": false
+  },
+  "ml:anomalyDetection:results:enableTimeDefaults": {
+    "name": "Enable time filter defaults for anomaly detection results",
+    "value": false,
+    "description": "Use the default time filter in the Single Metric Viewer and Anomaly Explorer. If not enabled, the results for the full time range of the job are displayed.",
+    "category": [
+      "machineLearning"
+    ]
+  },
+  "ml:anomalyDetection:results:timeDefaults": {
+    "name": "Time filter defaults for anomaly detection results",
+    "type": "json",
+    "value": "{\n  \"from\": \"now-15m\",\n  \"to\": \"now\"\n}",
+    "description": "The time filter selection to use when viewing anomaly detection job results.",
+    "requiresPageReload": true,
+    "category": [
+      "machineLearning"
+    ]
+  },
+  "securitySolution:refreshIntervalDefaults": {
+    "type": "json",
+    "name": "Time filter refresh interval",
+    "value": "{\n  \"pause\": true,\n  \"value\": 300000\n}",
+    "description": "<p>Default refresh interval for the Security time filter, in milliseconds.</p>",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 0
+  },
+  "securitySolution:timeDefaults": {
+    "type": "json",
+    "name": "Time filter period",
+    "value": "{\n  \"from\": \"now/d\",\n  \"to\": \"now/d\"\n}",
+    "description": "<p>Default period of time in the Security time filter.</p>",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 1
+  },
+  "securitySolution:defaultIndex": {
+    "name": "Elasticsearch indices",
+    "sensitive": true,
+    "value": [
+      "apm-*-transaction*",
+      "auditbeat-*",
+      "endgame-*",
+      "filebeat-*",
+      "logs-*",
+      "packetbeat-*",
+      "traces-apm*",
+      "winlogbeat-*",
+      "-*elastic-cloud-logs-*"
+    ],
+    "description": "<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 2
+  },
+  "securitySolution:defaultThreatIndex": {
+    "name": "Threat indices",
+    "sensitive": true,
+    "value": [
+      "logs-ti_*"
+    ],
+    "description": "<p>Comma-delimited list of Threat Intelligence indices from which the Security app collects indicators.</p>",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 3
+  },
+  "securitySolution:defaultAnomalyScore": {
+    "name": "Anomaly threshold",
+    "value": 50,
+    "type": "number",
+    "description": "<p>Value above which Machine Learning job anomalies are displayed in the Security app.</p><p>Valid values: 0 to 100.</p>",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 4
+  },
+  "securitySolution:enableNewsFeed": {
+    "name": "News feed",
+    "value": true,
+    "description": "<p>Enables the News feed</p>",
+    "type": "boolean",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 5
+  },
+  "securitySolution:enableExpandableFlyout": {
+    "name": "Expandable flyout",
+    "value": true,
+    "description": "<p>Enables the expandable flyout</p>",
+    "type": "boolean",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 6
+  },
+  "securitySolution:rulesTableRefresh": {
+    "name": "Rules auto refresh",
+    "description": "<p>Enables auto refresh on the rules and monitoring tables, in milliseconds</p>",
+    "type": "json",
+    "value": "{\n  \"on\": true,\n  \"value\": 60000\n}",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 7
+  },
+  "securitySolution:newsFeedUrl": {
+    "name": "News feed URL",
+    "value": "https://feeds.elastic.co/security-solution",
+    "sensitive": true,
+    "description": "<p>News feed content will be retrieved from this URL</p>",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 8
+  },
+  "securitySolution:ipReputationLinks": {
+    "name": "IP Reputation Links",
+    "value": "[\n  { \"name\": \"virustotal.com\", \"url_template\": \"https://www.virustotal.com/gui/search/{{ip}}\" },\n  { \"name\": \"talosIntelligence.com\", \"url_template\": \"https://talosintelligence.com/reputation_center/lookup?search={{ip}}\" }\n]",
+    "type": "json",
+    "description": "Array of URL templates to build the list of reputation URLs to be displayed on the IP Details page.",
+    "sensitive": true,
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 9
+  },
+  "securitySolution:enableCcsWarning": {
+    "name": "CCS Rule Privileges Warning",
+    "value": true,
+    "description": "<p>Enables privilege check warnings in rules for CCS indices</p>",
+    "type": "boolean",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": false,
+    "order": 10
+  },
+  "securitySolution:showRelatedIntegrations": {
+    "name": "Related integrations",
+    "value": true,
+    "description": "<p>Shows related integrations on the rules and monitoring tables</p>",
+    "type": "boolean",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 11
+  },
+  "securitySolution:alertTags": {
+    "name": "Alert tagging options",
+    "sensitive": true,
+    "value": [
+      "Duplicate",
+      "False Positive",
+      "Further investigation required"
+    ],
+    "description": "<p>List of tag options for use with alerts generated by Security Solution rules.</p>",
+    "category": [
+      "securitySolution"
+    ],
+    "requiresPageReload": true,
+    "order": 12
+  },
+  "visualization:visualize:legacyGaugeChartsLibrary": {
+    "name": "Gauge legacy charts library",
+    "requiresPageReload": true,
+    "value": true,
+    "description": "Enables legacy charts library for gauge charts in visualize.",
+    "category": [
+      "visualization"
+    ]
+  },
+  "isDefaultIndexMigrated": {
+    "userValue": true
+  }
+}

@@ -960,6 +960,8 @@
       "@kbn/management-settings-components-field-input/*": ["packages/kbn-management/settings/components/field_input/*"],
       "@kbn/management-settings-components-field-row": ["packages/kbn-management/settings/components/field_row"],
       "@kbn/management-settings-components-field-row/*": ["packages/kbn-management/settings/components/field_row/*"],
+      "@kbn/management-settings-components-form": ["packages/kbn-management/settings/components/form"],
+      "@kbn/management-settings-components-form/*": ["packages/kbn-management/settings/components/form/*"],
       "@kbn/management-settings-field-definition": ["packages/kbn-management/settings/field_definition"],
       "@kbn/management-settings-field-definition/*": ["packages/kbn-management/settings/field_definition/*"],
       "@kbn/management-settings-ids": ["packages/kbn-management/settings/setting_ids"],

@@ -4869,6 +4869,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-settings-components-form@link:packages/kbn-management/settings/components/form":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-settings-field-definition@link:packages/kbn-management/settings/field_definition":
   version "0.0.0"
   uid ""
