@@ -87,6 +87,7 @@ export const interceptInstallationRequestToFail = (rules: Array<typeof SAMPLE_PR
         failed: rules.length,
       },
     },
+    delay: 500,
   }).as('installPrebuiltRules');
 };
 
