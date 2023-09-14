@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { bind } from 'lodash';
 import type { ISavedObjectsSerializer, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { VersionedTransformer } from '../../document_migrator';
 import { TransformRawDocs } from '../../types';
@@ -23,7 +24,9 @@ export const createDocumentTransformFn = ({
   return (documents: SavedObjectsRawDoc[]) =>
     migrateRawDocsSafely({
       rawDocs: documents,
-      migrateDoc: documentMigrator.migrateAndConvert,
+      migrateDoc: bind(documentMigrator.migrate, documentMigrator, bind.placeholder, {
+        convertNamespaceTypes: true,
+      }),
       serializer,
     });
 };

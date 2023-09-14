@@ -234,7 +234,7 @@ describe('SavedObjectsRepository', () => {
       });
       it(`accepts custom references array 3`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+          migrator.migrateDocument.mockImplementationOnce((doc) => [{ ...doc, migrated: true }]);
           await updateSuccess(client, repository, registry, type, id, attributes, {
             references,
           });

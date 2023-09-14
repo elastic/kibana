@@ -51,6 +51,10 @@ export interface IKibanaMigrator {
    */
   migrateDocument(
     doc: SavedObjectUnsanitizedDoc,
+    options: MigrateDocumentOptions & { convertNamespaceTypes: true }
+  ): SavedObjectUnsanitizedDoc[];
+  migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
     options?: MigrateDocumentOptions
   ): SavedObjectUnsanitizedDoc;
 }
@@ -66,6 +70,9 @@ export interface MigrateDocumentOptions {
    */
   allowDowngrade?: boolean;
 
+  /**
+   * Defines whether it is allowed to convert multiple-namespace types.
+   */
   convertNamespaceTypes?: boolean;
 }
 
