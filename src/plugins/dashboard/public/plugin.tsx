@@ -61,7 +61,12 @@ import {
   type DashboardAppLocator,
   DashboardAppLocatorDefinition,
 } from './dashboard_app/locator/locator';
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from './dashboard_constants';
+import {
+  DASHBOARD_APP_ID,
+  LANDING_PAGE_PATH,
+  LEGACY_DASHBOARD_APP_ID,
+  SEARCH_SESSION_ID,
+} from './dashboard_constants';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
@@ -258,20 +263,19 @@ export class DashboardPlugin
       // carry over query if it exists
       return `#/list${tail || ''}`;
     });
-    // urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
-    //   const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
-    //   if (!id && !tail) {
-    //     // unrecognized sub url
-    //     return '#/list';
-    //   }
-    //   if (!id && tail) {
-    //     // unsaved dashboard, but probably state in URL
-    //     return `#/create${tail || ''}`;
-    //   }
-    //   // persisted dashboard, probably with url state
-    //   return `#/view/${id}${tail || ''}`;
-    // });
-
+    urlForwarding.forwardApp(LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID, (path) => {
+      const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
+      if (!id && !tail) {
+        // unrecognized sub url
+        return '#/list';
+      }
+      if (!id && tail) {
+        // unsaved dashboard, but probably state in URL
+        return `#/create${tail || ''}`;
+      }
+      // persisted dashboard, probably with url state
+      return `#/view/${id}${tail || ''}`;
+    });
     const dashboardAppTitle = i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
     });
