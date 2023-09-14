@@ -53,6 +53,7 @@ export const getTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
+        isPlainRecord,
       });
     },
     testId: 'discoverAlertsButton',
@@ -232,7 +233,6 @@ export const getTopNavLinks = ({
   if (
     services.triggersActionsUi &&
     services.capabilities.management?.insightsAndAlerting?.triggersActions &&
-    !isPlainRecord &&
     !defaultMenu?.alertsItem?.disabled
   ) {
     entries.push({ data: alerts, order: defaultMenu?.alertsItem?.order ?? 400 });

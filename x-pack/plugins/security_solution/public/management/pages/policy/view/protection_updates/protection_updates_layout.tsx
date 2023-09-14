@@ -68,7 +68,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const deployedVersion = policy.inputs[0].config.policy.value.global_manifest_version;
     const [manifestVersion, setManifestVersion] = useState(deployedVersion);
 
-    const today = moment();
+    const today = moment.utc();
     const [selectedDate, setSelectedDate] = useState<Moment>(today);
 
     const { data: fetchedNote, isLoading: getNoteInProgress } = useGetProtectionUpdatesNote({
@@ -88,8 +88,8 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const automaticUpdatesEnabled = manifestVersion === 'latest';
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
-    const formattedDate = moment(deployedVersion, internalDateFormat).format(displayDateFormat);
-    const cutoffDate = moment().subtract(18, 'months'); // Earliest selectable date
+    const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
+    const cutoffDate = moment.utc().subtract(18, 'months').add(1, 'day'); // Earliest selectable date
 
     const viewModeSwitchLabel = automaticUpdatesEnabled
       ? AUTOMATIC_UPDATES_CHECKBOX_LABEL
@@ -226,7 +226,7 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         return null;
       }
 
-      const deployedVersionDate = moment(deployedVersion).format(internalDateFormat);
+      const deployedVersionDate = moment.utc(deployedVersion).format(internalDateFormat);
       const daysSinceLastUpdate = today.diff(deployedVersionDate, 'days');
 
       if (daysSinceLastUpdate < 30) {

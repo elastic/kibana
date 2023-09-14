@@ -11,7 +11,7 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
 import { MapsListView } from './maps_list_view';
 import { APP_ID } from '../../../common/constants';
-import { mapsClient } from '../../content_management';
+import { getMapClient } from '../../content_management';
 
 interface Props {
   history: ScopedHistory;
@@ -26,7 +26,7 @@ export function LoadListAndRender(props: Props) {
     props.stateTransfer.clearEditorState(APP_ID);
 
     let ignore = false;
-    mapsClient
+    getMapClient()
       .search({ limit: 1 })
       .then((results) => {
         if (!ignore) {
