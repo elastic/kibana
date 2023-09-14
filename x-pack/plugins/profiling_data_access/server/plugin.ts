@@ -52,7 +52,6 @@ export class ProfilingDataAccessPlugin implements Plugin {
       deps: {
         fleet: plugins.fleet,
         cloud: plugins.cloud,
-        spaces: plugins.spaces,
       },
     });
 

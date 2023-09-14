@@ -9,10 +9,10 @@ import { CloudStart } from '@kbn/cloud-plugin/server';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
 import { createGetSetupState } from './get_setup_state';
+import { ProfilingESClient } from '../../common/profiling_es_client';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {

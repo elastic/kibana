@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { decodeStackTraceResponse } from '@kbn/profiling-utils';
-import { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import { ProfilingESClient } from '../../../common/profiling_es_client';
 
 export async function searchStackTraces({
   client,
