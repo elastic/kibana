@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import * as rt from 'io-ts';
+
+import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
+import { limitedStringSchema } from '../../../schema';
 
 export enum CustomFieldTypes {
   TEXT = 'text',
@@ -25,7 +27,7 @@ export const CustomFieldRt = rt.strict({
   /**
    * label of custom field
    */
-  label: rt.string,
+  label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CUSTOM_FIELD_LABEL_LENGTH }),
   /**
    * custom field options - required
    */
@@ -43,7 +45,7 @@ export const ToggleCustomFieldRt = rt.intersection([
 ]);
 
 export const ListCustomFieldRt = rt.intersection([
-  rt.strict({ type: CustomFieldListTypeRt }),
+  rt.strict({ type: CustomFieldListTypeRt, options: rt.array(rt.string) }),
   CustomFieldRt,
 ]);
 

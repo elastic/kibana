@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
 import {
   CustomFieldTypes,
   CustomFieldRt,
@@ -18,6 +20,7 @@ describe('CustomField', () => {
     const defaultRequest = {
       key: 'custom_field_key',
       label: 'Custom field label',
+      required: false,
     };
 
     it('has expected attributes in request', () => {
@@ -25,7 +28,7 @@ describe('CustomField', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, required: undefined },
+        right: { ...defaultRequest },
       });
     });
 
@@ -34,8 +37,16 @@ describe('CustomField', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, required: undefined },
+        right: { ...defaultRequest },
       });
+    });
+
+    it('limits label to 50 characters', () => {
+      const longLabel = 'x'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
+
+      expect(
+        PathReporter.report(CustomFieldRt.decode({ ...defaultRequest, label: longLabel }))
+      ).toContain('The length of the label is too long. The maximum length is 50.');
     });
   });
 
@@ -44,7 +55,6 @@ describe('CustomField', () => {
       key: 'my_text_custom_field',
       label: 'Text Custom Field',
       type: CustomFieldTypes.TEXT,
-      limit: 150,
       required: true,
     };
 
@@ -73,7 +83,7 @@ describe('CustomField', () => {
       label: 'List Custom Field',
       type: CustomFieldTypes.LIST,
       options: ['option 1', 'option 2', 'option 3'],
-      singleSelection: true,
+      required: false,
     };
 
     it('has expected attributes in request', () => {
@@ -81,7 +91,7 @@ describe('CustomField', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, required: undefined },
+        right: { ...defaultRequest },
       });
     });
 
@@ -90,7 +100,7 @@ describe('CustomField', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, required: undefined },
+        right: { ...defaultRequest },
       });
     });
   });
@@ -100,6 +110,7 @@ describe('CustomField', () => {
       key: 'my_toggle_custom_field',
       label: 'Toggle Custom Field',
       type: CustomFieldTypes.TOGGLE,
+      required: false,
     };
 
     it('has expected attributes in request', () => {
@@ -107,7 +118,7 @@ describe('CustomField', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, required: undefined },
+        right: { ...defaultRequest },
       });
     });
 
@@ -116,7 +127,7 @@ describe('CustomField', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, required: undefined },
+        right: { ...defaultRequest },
       });
     });
   });

@@ -12,20 +12,26 @@ import { UserRt } from '../user/v1';
 
 const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
-export const ConfigurationBasicWithoutOwnerRt = rt.strict({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorRt,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeRt,
-  /**
-   * The custom fields configured for the case
-   */
-  customFields: rt.array(rt.union([TextCustomFieldRt, ToggleCustomFieldRt])),
-});
+export const ConfigurationBasicWithoutOwnerRt = rt.intersection([
+  rt.strict({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorRt,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeRt,
+  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * The custom fields configured for the case
+       */
+      customFields: rt.array(rt.union([TextCustomFieldRt, ToggleCustomFieldRt])),
+    })
+  ),
+]);
 
 export const CasesConfigureBasicRt = rt.intersection([
   ConfigurationBasicWithoutOwnerRt,
