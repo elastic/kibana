@@ -15,7 +15,7 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useIsServerless } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -37,6 +37,7 @@ export const IndexDataVisualizerPage: FC = () => {
       },
     },
   } = useMlKibana();
+  const isServerless = useIsServerless();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount();
@@ -188,7 +189,10 @@ export const IndexDataVisualizerPage: FC = () => {
               defaultMessage="Data Visualizer"
             />
           </MlPageHeader>
-          <IndexDataVisualizer getAdditionalLinks={getAdditionalLinks} />
+          <IndexDataVisualizer
+            getAdditionalLinks={getAdditionalLinks}
+            isServerless={isServerless}
+          />
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />
