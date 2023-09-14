@@ -27,7 +27,7 @@ export const getDeprecationsInfo = async (
     elasticsearchClient: esClient.asInternalUser,
   });
 
-  if (migrationStatus !== 'ok' || !reportingCore.getConfig().statefulSettings.enabled) {
+  if (migrationStatus !== 'ok') {
     return [
       {
         title: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionTitle', {

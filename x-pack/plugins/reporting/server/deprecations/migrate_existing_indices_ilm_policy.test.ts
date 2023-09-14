@@ -72,44 +72,14 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
       indexB: createIndexSettings('kibana-reporting'),
     });
 
-    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "correctiveActions": Object {
-            "api": Object {
-              "method": "PUT",
-              "path": "/internal/reporting/deprecations/migrate_ilm_policy",
-            },
-            "manualSteps": Array [
-              "Update all reporting indices to use the \\"kibana-reporting\\" policy using the index settings API.",
-            ],
-          },
-          "level": "warning",
-          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets all indices prefixed with \\".reporting-*\\".",
-          "title": "Found reporting indices managed by custom ILM policy.",
-        },
-      ]
-    `);
+    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
+      `Array []`
+    );
 
     esClient.asInternalUser.indices.getSettings.mockResponse({});
 
-    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "correctiveActions": Object {
-            "api": Object {
-              "method": "PUT",
-              "path": "/internal/reporting/deprecations/migrate_ilm_policy",
-            },
-            "manualSteps": Array [
-              "Update all reporting indices to use the \\"kibana-reporting\\" policy using the index settings API.",
-            ],
-          },
-          "level": "warning",
-          "message": "New reporting indices will be managed by the \\"kibana-reporting\\" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets all indices prefixed with \\".reporting-*\\".",
-          "title": "Found reporting indices managed by custom ILM policy.",
-        },
-      ]
-    `);
+    expect(await getDeprecationsInfo(deprecationsCtx, { reportingCore })).toMatchInlineSnapshot(
+      `Array []`
+    );
   });
 });
