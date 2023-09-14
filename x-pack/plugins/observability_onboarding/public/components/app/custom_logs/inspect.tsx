@@ -11,7 +11,7 @@ import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
-} from '../../../shared/step_panel';
+} from '../../shared/step_panel';
 import { useWizard } from '.';
 import { BackButton } from './back_button';
 
