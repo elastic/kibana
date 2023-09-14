@@ -149,4 +149,28 @@ describe('Spaces plugin', () => {
       expect(coreStart.chrome.navControls.registerLeft).not.toHaveBeenCalled();
     });
   });
+
+  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1', () => {
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+
+    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
+    const spacesSetup = plugin.setup(coreSetup, {});
+    const spacesStart = plugin.start(coreStart);
+
+    expect(spacesSetup.hasOnlyDefaultSpace).toBe(true);
+    expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
+  });
+
+  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1000', () => {
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+
+    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1000 }));
+    const spacesSetup = plugin.setup(coreSetup, {});
+    const spacesStart = plugin.start(coreStart);
+
+    expect(spacesSetup.hasOnlyDefaultSpace).toBe(false);
+    expect(spacesStart.hasOnlyDefaultSpace).toBe(false);
+  });
 });

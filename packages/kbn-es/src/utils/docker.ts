@@ -632,11 +632,24 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     log.success('ES is ready');
   }
 
+  if (options.teardown) {
+    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
+    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
+  }
+
   if (!options.background) {
     // The ESS cluster has to be started detached, so we attach a logger afterwards for output
     await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
+    }).catch((error) => {
+      /**
+       * 255 is a generic exit code which is triggered from docker logs command
+       * if we teardown the cluster since the entrypoint doesn't exit normally
+       */
+      if (error.exitCode !== 255) {
+        log.error(error.message);
+      }
     });
   }
 
