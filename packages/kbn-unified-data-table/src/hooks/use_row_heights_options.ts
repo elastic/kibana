@@ -15,6 +15,7 @@ import {
   getStoredRowHeight,
   updateStoredRowHeight,
 } from '../utils/row_heights';
+import { ROWS_HEIGHT_OPTIONS } from '../constants';
 
 interface UseRowHeightProps {
   rowHeightState?: number;
@@ -25,35 +26,25 @@ interface UseRowHeightProps {
 }
 
 /**
- * Row height might be a value from -1 to 20
- * A value of -1 automatically adjusts the row height to fit the contents.
- * A value of 0 displays the content in a single line.
- * A value from 1 to 20 represents number of lines of Document explorer row to display.
- */
-const SINGLE_ROW_HEIGHT_OPTION = 0;
-const AUTO_ROW_HEIGHT_OPTION = -1;
-const DEFAULT_ROW_HEIGHT_OPTION = 3;
-
-/**
  * Converts rowHeight of EuiDataGrid to rowHeight number (-1 to 20)
  */
 const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): number => {
-  if (rowHeight === 'auto') {
-    return AUTO_ROW_HEIGHT_OPTION;
+  if (rowHeight === 'auto' || rowHeight === ROWS_HEIGHT_OPTIONS.auto) {
+    return ROWS_HEIGHT_OPTIONS.auto;
   } else if (typeof rowHeight === 'object' && rowHeight.lineCount) {
     return rowHeight.lineCount; // custom
   }
 
-  return SINGLE_ROW_HEIGHT_OPTION;
+  return ROWS_HEIGHT_OPTIONS.single;
 };
 
 /**
  * Converts rowHeight number (-1 to 20) of EuiDataGrid rowHeight
  */
 const deserializeRowHeight = (number: number): EuiDataGridRowHeightOption | undefined => {
-  if (number === AUTO_ROW_HEIGHT_OPTION) {
+  if (number === ROWS_HEIGHT_OPTIONS.auto) {
     return 'auto';
-  } else if (number === SINGLE_ROW_HEIGHT_OPTION) {
+  } else if (number === ROWS_HEIGHT_OPTIONS.single) {
     return undefined;
   }
 
@@ -64,7 +55,7 @@ export const useRowHeightsOptions = ({
   rowHeightState,
   onUpdateRowHeight,
   storage,
-  configRowHeight = DEFAULT_ROW_HEIGHT_OPTION,
+  configRowHeight = ROWS_HEIGHT_OPTIONS.default,
   consumer,
 }: UseRowHeightProps) => {
   return useMemo((): EuiDataGridRowHeightsOptions => {
@@ -84,11 +75,16 @@ export const useRowHeightsOptions = ({
       rowHeight = configRowHeight;
     }
 
+    const defaultHeight = deserializeRowHeight(rowHeight);
+
     return {
-      defaultHeight: deserializeRowHeight(rowHeight),
+      defaultHeight,
       lineHeight: '1.6em',
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
-        const newSerializedRowHeight = serializeRowHeight(newRowHeight);
+        const newSerializedRowHeight = serializeRowHeight(
+          // pressing "Reset to default" triggers onChange with the same value
+          newRowHeight === defaultHeight ? configRowHeight : newRowHeight
+        );
         updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage, consumer);
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
