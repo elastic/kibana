@@ -16,7 +16,8 @@ import type { MlStartDependencies } from '../../plugin';
 export function registerManagementSection(
   management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>,
-  deps: { usageCollection?: UsageCollectionSetup }
+  deps: { usageCollection?: UsageCollectionSetup },
+  isServerless: boolean
 ) {
   return management.sections.section.insightsAndAlerting.registerApp({
     id: 'jobsListLink',
@@ -26,7 +27,7 @@ export function registerManagementSection(
     order: 4,
     async mount(params: ManagementAppMountParams) {
       const { mountApp } = await import('./jobs_list');
-      return mountApp(core, params, deps);
+      return mountApp(core, params, deps, isServerless);
     },
   });
 }
