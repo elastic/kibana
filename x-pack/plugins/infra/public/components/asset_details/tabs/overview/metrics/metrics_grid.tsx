@@ -49,7 +49,7 @@ export const MetricsGrid = ({
             {...chartProp}
             assetName={assetName}
             dateRange={dateRange}
-            logsDataView={metricsDataView}
+            logsDataView={logsDataView}
             metricsDataView={metricsDataView}
             data-test-subj={props['data-test-subj']}
           />
