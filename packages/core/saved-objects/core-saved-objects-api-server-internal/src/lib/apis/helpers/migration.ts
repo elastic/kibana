@@ -27,7 +27,7 @@ export class MigrationHelper {
    * This function is meant to be used by write APIs (create, update) for documents provided as input.
    * before storing it in the index. It will therefore throw if the document is in a higher / unknown version.
    */
-  migrateInputDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] {
+  migrateInputDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.migrator.migrateDocument(document, {
       allowDowngrade: false,
       convertNamespaceTypes: true,

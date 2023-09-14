@@ -32,16 +32,12 @@ export interface DocumentMigrateOptions {
    */
   allowDowngrade?: boolean;
 
-  /**
-   * Defines whether it is allowed to convert multiple-namespace types.
-   * @remark This only be used by the savedObject migration during upgrade.
-   */
   convertNamespaceTypes?: boolean;
 }
 
 interface TransformOptions {
-  convertNamespaceTypes: boolean;
-  allowDowngrade: boolean;
+  convertNamespaceTypes?: boolean;
+  allowDowngrade?: boolean;
 }
 
 interface DocumentMigratorOptions {
@@ -74,12 +70,17 @@ export interface VersionedTransformer {
    */
   migrate(
     doc: SavedObjectUnsanitizedDoc,
-    options: DocumentMigrateOptions & { convertNamespaceTypes: true }
-  ): SavedObjectUnsanitizedDoc[];
-  migrate(
-    doc: SavedObjectUnsanitizedDoc,
     options?: DocumentMigrateOptions
   ): SavedObjectUnsanitizedDoc;
+
+  /**
+   * Migrates a document to the latest version and applies type conversions if applicable.
+   * Also returns any additional document(s) that may have been created during the transformation process.
+   *
+   * @remark This only be used by the savedObject migration during upgrade. For all other scenarios,
+   *         {@link VersionedTransformer#migrate} should be used instead.
+   */
+  migrateAndConvert(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[];
 }
 
 /**
@@ -101,6 +102,8 @@ export class DocumentMigrator implements VersionedTransformer {
   constructor(options: DocumentMigratorOptions) {
     this.options = options;
     this.migrate = (...args) => this.constructor.prototype.migrate.apply(this, args);
+    this.migrateAndConvert = (...args) =>
+      this.constructor.prototype.migrateAndConvert.apply(this, args);
   }
 
   /**
@@ -148,31 +151,30 @@ export class DocumentMigrator implements VersionedTransformer {
    */
   public migrate(
     doc: SavedObjectUnsanitizedDoc,
-    options: DocumentMigrateOptions & { convertNamespaceTypes: true }
-  ): SavedObjectUnsanitizedDoc[];
-  public migrate(
-    doc: SavedObjectUnsanitizedDoc,
-    options?: DocumentMigrateOptions
-  ): SavedObjectUnsanitizedDoc;
-  public migrate(
-    doc: SavedObjectUnsanitizedDoc,
     { allowDowngrade = false, convertNamespaceTypes = false }: DocumentMigrateOptions = {}
-  ): SavedObjectUnsanitizedDoc | SavedObjectUnsanitizedDoc[] {
-    const { document, additionalDocs } = this.transform(doc, {
+  ): SavedObjectUnsanitizedDoc {
+    const { document } = this.transform(doc, {
       allowDowngrade,
       convertNamespaceTypes,
     });
-
-    if (convertNamespaceTypes) {
-      return [document, ...additionalDocs];
-    }
-
     return document;
+  }
+
+  /**
+   * Migrates a document to the latest version and applies type conversions if applicable. Also returns any additional document(s) that may
+   * have been created during the transformation process.
+   */
+  public migrateAndConvert(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] {
+    const { document, additionalDocs } = this.transform(doc, {
+      convertNamespaceTypes: true,
+      allowDowngrade: false,
+    });
+    return [document, ...additionalDocs];
   }
 
   private transform(
     doc: SavedObjectUnsanitizedDoc,
-    { convertNamespaceTypes, allowDowngrade }: TransformOptions
+    { convertNamespaceTypes = false, allowDowngrade = false }: TransformOptions = {}
   ) {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');

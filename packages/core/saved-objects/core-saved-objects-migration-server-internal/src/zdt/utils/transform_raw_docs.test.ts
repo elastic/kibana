@@ -39,7 +39,7 @@ describe('createDocumentTransformFn', () => {
     expect(migrateRawDocsSafelyMock).toHaveBeenCalledWith({
       rawDocs: documents,
       serializer,
-      migrateDoc: expect.any(Function),
+      migrateDoc: documentMigrator.migrateAndConvert,
     });
   });
 

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { bind } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
@@ -139,12 +138,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
           transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
             migrateRawDocsSafely({
               serializer: options.serializer,
-              migrateDoc: bind(
-                options.documentMigrator.migrate,
-                options.documentMigrator,
-                bind.placeholder,
-                { convertNamespaceTypes: true }
-              ),
+              migrateDoc: options.documentMigrator.migrateAndConvert,
               rawDocs,
             }),
           coreMigrationVersionPerType: options.documentMigrator.getMigrationVersion({
