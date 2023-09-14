@@ -43,7 +43,7 @@ describe('parse runTest flags', () => {
         "dryRun": false,
         "esFrom": undefined,
         "esVersion": <EsVersion 9.9.9>,
-        "essImage": undefined,
+        "esServerlessImage": undefined,
         "grep": undefined,
         "installDir": undefined,
         "logsDir": undefined,
