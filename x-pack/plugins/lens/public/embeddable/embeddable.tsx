@@ -46,6 +46,7 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import {
+  EmbeddableStateTransfer,
   Embeddable as AbstractEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
@@ -110,7 +111,7 @@ import type {
   AllowedGaugeOverrides,
   AllowedXYOverrides,
 } from '../../common/types';
-import { getEditPath, DOC_TYPE } from '../../common/constants';
+import { getEditPath, DOC_TYPE, APP_ID } from '../../common/constants';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -788,6 +789,27 @@ export class Embeddable
     }
   }
 
+  private async navigateToLensEditor() {
+    const transferState = {
+      // ToDo: this must come from the consumers of the embeddable
+      // Change it to be a prop when we add support for inline editing outside from the dashboard
+      originatingApp: 'dashboards',
+      valueInput: this.getExplicitInput(),
+      embeddableId: this.id,
+      searchSessionId: this.getInput().searchSessionId,
+    };
+    const transfer = new EmbeddableStateTransfer(
+      this.deps.coreStart.application.navigateToApp,
+      this.deps.coreStart.application.currentAppId$
+    );
+    if (transfer) {
+      await transfer.navigateToEditor(APP_ID, {
+        path: this.output.editPath,
+        state: transferState,
+      });
+    }
+  }
+
   public updateByRefInput(savedObjectId: string) {
     const attrs = this.savedVis;
     this.updateInput({ attributes: attrs, savedObjectId });
@@ -817,6 +839,10 @@ export class Embeddable
           panelId={this.id}
           savedObjectId={this.savedVis?.savedObjectId}
           updateByRefInput={this.updateByRefInput.bind(this)}
+          navigateToLensEditor={
+            !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
+          }
+          displayFlyoutHeader={true}
         />
       );
     }

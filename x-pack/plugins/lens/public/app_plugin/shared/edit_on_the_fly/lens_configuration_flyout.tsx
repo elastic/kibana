@@ -11,6 +11,11 @@ import {
   EuiButton,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiLink,
+  EuiIcon,
+  EuiToolTip,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,19 +43,41 @@ import { extractReferencesFromState } from '../../../utils';
 import type { Document } from '../../../persistence';
 
 export interface EditConfigPanelProps {
-  attributes: TypedLensByValueInput['attributes'];
-  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
   coreStart: CoreStart;
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
-  output$?: Observable<LensEmbeddableOutput>;
-  lensAdapters?: LensInspector['adapters'];
-  closeFlyout?: () => void;
-  savedObjectId?: string;
+  /** The attributes of the Lens embeddable */
+  attributes: TypedLensByValueInput['attributes'];
+  /** Callback for updating the visualization and datasources state */
+  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
+  /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
   datasourceId: 'formBased' | 'textBased';
-  saveByRef?: (attrs: Document) => void;
+  /** Embeddable output observable, useful for dashboard flyout  */
+  output$?: Observable<LensEmbeddableOutput>;
+  /** Contains the active data, necessary for some panel configuration such as coloring */
+  lensAdapters?: LensInspector['adapters'];
+  /** Optional callback called when updating the by reference embeddable */
   updateByRefInput?: (soId: string) => void;
+  /** Callback for closing the edit flyout */
+  closeFlyout?: () => void;
+  /** Boolean used for adding a flyout wrapper */
+  wrapInFlyout?: boolean;
+  /** Optional parameter for panel identification
+   * If not given, Lens generates a new one
+   */
+  panelId?: string;
+  /** Optional parameter for saved object id
+   * Should be given if the lens embeddable is a by reference one
+   * (saved in the library)
+   */
+  savedObjectId?: string;
+  /** Callback for saving the embeddable as a SO */
+  saveByRef?: (attrs: Document) => void;
+  /** Optional callback for navigation from the header of the flyout */
+  navigateToLensEditor?: () => void;
+  /** If set to true it displays a header on the flyout */
+  displayFlyoutHeader?: boolean;
 }
 
 export function LensEditConfigurationFlyout({
@@ -67,6 +94,8 @@ export function LensEditConfigurationFlyout({
   updateByRefInput,
   output$,
   lensAdapters,
+  navigateToLensEditor,
+  displayFlyoutHeader,
 }: EditConfigPanelProps) {
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
@@ -193,6 +222,55 @@ export function LensEditConfigurationFlyout({
   };
   return (
     <>
+      {displayFlyoutHeader && (
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h2 id="Edit visualization">
+                      {i18n.translate('xpack.lens.config.editLabel', {
+                        defaultMessage: 'Edit visualization',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate('xpack.lens.config.experimentalLabel', {
+                      defaultMessage: 'Technical preview',
+                    })}
+                  >
+                    <EuiIcon type="beaker" size="m" />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {navigateToLensEditor && (
+              <EuiFlexItem grow={false}>
+                {/* <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="pencil" size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiLink onClick={navigateToLensEditor}>
+                    {i18n.translate('xpack.lens.config.editLinkLabel', {
+                      defaultMessage: 'Edit in Lens',
+                    })}
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup> */}
+                <EuiLink onClick={navigateToLensEditor}>
+                  {i18n.translate('xpack.lens.config.editLinkLabel', {
+                    defaultMessage: 'Edit in Lens',
+                  })}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+      )}
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
