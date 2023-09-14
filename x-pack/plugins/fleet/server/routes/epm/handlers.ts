@@ -85,6 +85,7 @@ import type {
 } from '../../types';
 import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
+import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -448,6 +449,13 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
     if (error instanceof NamingCollisionError) {
       return response.customError({
         statusCode: 409,
+        body: {
+          message: error.message,
+        },
+      });
+    } else if (error instanceof DatasetNamePrefixError) {
+      return response.customError({
+        statusCode: 422,
         body: {
           message: error.message,
         },
