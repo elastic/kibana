@@ -8,11 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
-import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_EVALUATION_VALUE } from '@kbn/rule-data-utils';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
-import { STACK_AAD_INDEX_NAME } from '..';
-import { ALERT_TITLE, ALERT_EVALUATION_CONDITIONS } from './fields';
+import { STACK_ALERTS_AAD_CONFIG } from '..';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
@@ -137,7 +134,7 @@ export function getRuleType(
   const actionVariableEsqlQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextEsqlQueryLabel',
     {
-      defaultMessage: 'ESQL query field used to fetch data from Elasticsearch.',
+      defaultMessage: 'ES|QL query field used to fetch data from Elasticsearch.',
     }
   );
 
@@ -148,18 +145,6 @@ export function getRuleType(
        the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.`,
     }
   );
-
-  const alerts: IRuleTypeAlerts<StackAlert> = {
-    context: STACK_AAD_INDEX_NAME,
-    mappings: {
-      fieldMap: {
-        [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
-        [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
-        [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
-      },
-    },
-    shouldWrite: true,
-  };
 
   return {
     id: ES_QUERY_ID,
@@ -216,6 +201,6 @@ export function getRuleType(
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
-    alerts,
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }
