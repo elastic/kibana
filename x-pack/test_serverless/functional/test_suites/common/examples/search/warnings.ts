@@ -13,7 +13,7 @@ import type { WebElementWrapper } from '../../../../../../../test/functional/ser
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
@@ -24,13 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/165623
-  // FLAKY: https://github.com/elastic/kibana/issues/165379
-  // FLAKY: https://github.com/elastic/kibana/issues/165502
-  // FLAKY: https://github.com/elastic/kibana/issues/165503
-  // FLAKY: https://github.com/elastic/kibana/issues/165624
-  // FLAKY: https://github.com/elastic/kibana/issues/165635
-  describe.skip('handling warnings with search source fetch', function () {
+  describe.only('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
@@ -51,6 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.login();
       // create rollup data
       log.info(`loading ${testIndex} index...`);
       await esArchiver.loadIfNeeded(testArchive);
@@ -163,7 +159,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // wait for toasts - toasts appear after the response is rendered
       let toasts: WebElementWrapper[] = [];
-      await retry.try(async () => {
+      // TODO: Add a longer timeout for Serverless
+      await retry.tryForTime(60000, async () => {
         toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
       });
@@ -175,6 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
       await openShardModalButton.click();
+      await testSubjects.exists('shardFailureModalTitle');
 
       await retry.waitFor('modal title visible', async () => {
         const modalHeader = await testSubjects.find('shardFailureModalTitle');
