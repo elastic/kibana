@@ -4,6 +4,7 @@
     "outDir": "target/types"
   },
   "include": [
+    "common/**/*",
     "server/**/*",
     "jest.config.js"
   ],
