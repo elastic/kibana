@@ -286,4 +286,29 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
+  agents_per_output_type: {
+    type: 'array',
+    items: {
+      properties: {
+        output_type: {
+          type: 'keyword',
+          _meta: {
+            description: 'Output type used by agent',
+          },
+        },
+        count_as_data: {
+          type: 'long',
+          _meta: {
+            description: 'Number of agents enrolled that use this output type as data output',
+          },
+        },
+        count_as_monitoring: {
+          type: 'long',
+          _meta: {
+            description: 'Number of agents enrolled that use this output type as monitoring output',
+          },
+        },
+      },
+    },
+  },
 };
