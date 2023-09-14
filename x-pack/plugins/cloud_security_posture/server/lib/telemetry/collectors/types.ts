@@ -7,6 +7,14 @@
 
 import { CspStatusCode } from '../../../../common/types';
 
+export type CloudSecurityUsageCollectorType =
+  | 'Indices'
+  | 'Accounts'
+  | 'Resources'
+  | 'Rules'
+  | 'Installation'
+  | 'Alerts';
+
 export interface CspmUsage {
   indices: CspmIndicesStats;
   resources_stats: CspmResourcesStats[];

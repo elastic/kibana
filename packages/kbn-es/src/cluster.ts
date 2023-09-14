@@ -12,7 +12,7 @@ import chalk from 'chalk';
 import * as path from 'path';
 import execa from 'execa';
 import { Readable } from 'stream';
-import Rx from 'rxjs';
+import { combineLatest, fromEvent, first } from 'rxjs';
 import { Client } from '@elastic/elasticsearch';
 import { promisify } from 'util';
 import { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } from '@kbn/dev-utils';
@@ -45,7 +45,7 @@ import {
 import { waitUntilClusterReady } from './utils/wait_until_cluster_ready';
 
 // listen to data on stream until map returns anything but undefined
-const first = (stream: Readable, map: (data: Buffer) => string | true | undefined) =>
+const firstResult = (stream: Readable, map: (data: Buffer) => string | true | undefined) =>
   new Promise((resolve) => {
     const onData = (data: any) => {
       const result = map(data);
@@ -204,7 +204,7 @@ export class Cluster {
       await Promise.race([
         // wait for native realm to be setup and es to be started
         Promise.all([
-          first(this.process?.stdout!, (data: Buffer) => {
+          firstResult(this.process?.stdout!, (data: Buffer) => {
             if (/started/.test(data.toString('utf-8'))) {
               return true;
             }
@@ -399,7 +399,7 @@ export class Cluster {
 
     this.setupPromise = Promise.all([
       // parse log output to find http port
-      first(this.process.stdout!, (data: Buffer) => {
+      firstResult(this.process.stdout!, (data: Buffer) => {
         const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
         if (match) {
@@ -480,11 +480,11 @@ export class Cluster {
 
     // close the stdio target if we have one defined
     if (this.stdioTarget) {
-      Rx.combineLatest([
-        Rx.fromEvent(this.process.stderr!, 'end'),
-        Rx.fromEvent(this.process.stdout!, 'end'),
+      combineLatest([
+        fromEvent(this.process.stderr!, 'end'),
+        fromEvent(this.process.stdout!, 'end'),
       ])
-        .pipe(Rx.first())
+        .pipe(first())
         .subscribe(() => {
           this.stdioTarget?.end();
         });
