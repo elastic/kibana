@@ -101,7 +101,6 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/monaco",
-    "@kbn/core-elasticsearch-server-internal"
   ],
   "exclude": ["target/**/*"]
 }
