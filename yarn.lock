@@ -9888,11 +9888,6 @@
   dependencies:
     "@types/jest" "*"
 
-"@types/text-encoding-utf-8@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@types/text-encoding-utf-8/-/text-encoding-utf-8-1.0.3.tgz#65390e81f141cb4fcb274c278a433b8fb7ae865a"
-  integrity sha512-bU5jEQxiSn5YnrB21WB/SnzbMiU3Z5hpk3bWqdKmIyiKdJHnNI0Sp6V74DfwBEB90v9B3n9zA6+jqKOLALrjQw==
-
 "@types/textarea-caret@^3.0.1":
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@types/textarea-caret/-/textarea-caret-3.0.1.tgz#5afd4b1c1b3bacb001d76a1e6ef192c710709a86"
@@ -28718,11 +28713,6 @@ text-diff@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/text-diff/-/text-diff-1.0.1.tgz#6c105905435e337857375c9d2f6ca63e453ff565"
   integrity sha1-bBBZBUNeM3hXN1ydL2ymPkU/9WU=
-
-text-encoding-utf-8@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/text-encoding-utf-8/-/text-encoding-utf-8-1.0.2.tgz#585b62197b0ae437e3c7b5d0af27ac1021e10d13"
-  integrity sha512-8bw4MY9WjdsD2aMtO0OzOCY3pXGYNx2d2FfHRVUKkiCPDWjKuOlhLVASS+pD7VkLTVjW268LYJHwsnPFlBpbAg==
 
 text-hex@1.0.x:
   version "1.0.0"
