@@ -35,7 +35,8 @@ export class AnomalyChartsEmbeddableFactory
   ];
 
   constructor(
-    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+    private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
+    private isServerless: boolean
   ) {}
 
   public async isEditable() {
@@ -61,7 +62,7 @@ export class AnomalyChartsEmbeddableFactory
       const { resolveEmbeddableAnomalyChartsUserInput } = await import(
         './anomaly_charts_setup_flyout'
       );
-      return await resolveEmbeddableAnomalyChartsUserInput(coreStart);
+      return await resolveEmbeddableAnomalyChartsUserInput(coreStart, this.isServerless);
     } catch (e) {
       return Promise.reject();
     }

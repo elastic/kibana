@@ -58,7 +58,7 @@ export const createKQLCustomIndicator = (
 ): Indicator => ({
   type: 'sli.kql.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: 'latency < 300',
     total: '',
@@ -72,7 +72,7 @@ export const createMetricCustomIndicator = (
 ): MetricCustomIndicator => ({
   type: 'sli.metric.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: {
       metrics: [
@@ -95,7 +95,7 @@ export const createHistogramIndicator = (
 ): HistogramIndicator => ({
   type: 'sli.histogram.custom',
   params: {
-    index: 'my-index*',
+    index: 'my-index*,my-other-index*',
     filter: 'labels.groupId: group-3',
     good: {
       field: 'latency',
