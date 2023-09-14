@@ -109,6 +109,7 @@ import {
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
+  INVESTIGATIONS_INPUT,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -292,6 +293,15 @@ export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.reference
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
   });
   return referenceUrls;
+};
+
+export const fillCustomInvestigationFields = (
+  fields: string[] = ruleFields.investigationFields.field_names
+) => {
+  fields.forEach((field) => {
+    cy.get(INVESTIGATIONS_INPUT).type(`${field}{enter}`, { force: true });
+  });
+  return fields;
 };
 
 export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {

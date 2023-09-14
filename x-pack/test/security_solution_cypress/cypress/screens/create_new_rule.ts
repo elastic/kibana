@@ -201,6 +201,9 @@ export const TAGS_INPUT =
 export const TAGS_CLEAR_BUTTON =
   '[data-test-subj="detectionEngineStepAboutRuleTags"] [data-test-subj="comboBoxClearButton"]';
 
+export const INVESTIGATIONS_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleInvestigationFields"] [data-test-subj="comboBoxSearchInput"]';
+
 export const THRESHOLD_INPUT_AREA = '[data-test-subj="thresholdInput"]';
 
 export const THRESHOLD_TYPE = '[data-test-subj="thresholdRuleType"]';
