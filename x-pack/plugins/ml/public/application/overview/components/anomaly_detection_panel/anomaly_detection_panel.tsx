@@ -19,7 +19,7 @@ import {
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { OverviewStatsBar } from '../../../components/collapsible_panel/collapsible_panel';
 import { CollapsiblePanel } from '../../../components/collapsible_panel';
-import { useMlKibana, useMlLink } from '../../../contexts/kibana';
+import { useMlKibana, useMlLink, useIsServerless } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
@@ -57,6 +57,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
   } = useMlKibana();
 
   const { displayErrorToast } = useToastNotificationService();
+  const isServerless = useIsServerless();
 
   const refresh = useRefresh();
 
@@ -91,7 +92,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
         return job;
       });
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
-      const stats = getStatsBarData(jobsSummaryList);
+      const stats = getStatsBarData(jobsSummaryList, isServerless);
 
       const statGroups = groupBy(
         Object.entries(stats)
