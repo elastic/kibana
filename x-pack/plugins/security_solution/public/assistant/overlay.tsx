@@ -5,8 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { AssistantOverlay as ElasticAssistantOverlay } from '@kbn/elastic-assistant';
-import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import {
+  AssistantOverlay as ElasticAssistantOverlay,
+  useAssistantContext,
+} from '@kbn/elastic-assistant';
 
 export const AssistantOverlay: React.FC = () => {
   const { assistantAvailability } = useAssistantContext();
