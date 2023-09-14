@@ -8,14 +8,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AssistantOverlay } from './overlay';
 
-const mockShowAssistantOverlay = jest.fn();
 const mockAssistantAvailability = jest.fn(() => ({
   hasAssistantPrivilege: true,
 }));
 jest.mock('@kbn/elastic-assistant/impl/assistant_context', () => ({
   useAssistantContext: () => ({
     assistantAvailability: mockAssistantAvailability(),
-    showAssistantOverlay: mockShowAssistantOverlay,
   }),
 }));
 jest.mock('@kbn/elastic-assistant', () => ({
