@@ -86,7 +86,7 @@ describe('Data table columns', function () {
                   "id": "extension",
                   "isSortable": false,
                   "schema": "string",
-                  "visibleCellActions": undefined,
+                  "visibleCellActions": 3,
                 },
                 Object {
                   "actions": Object {
@@ -131,7 +131,7 @@ describe('Data table columns', function () {
                   "id": "message",
                   "isSortable": false,
                   "schema": "string",
-                  "visibleCellActions": undefined,
+                  "visibleCellActions": 3,
                 },
               ]
           `);
@@ -221,7 +221,7 @@ describe('Data table columns', function () {
             "initialWidth": 212,
             "isSortable": true,
             "schema": "datetime",
-            "visibleCellActions": undefined,
+            "visibleCellActions": 3,
           },
           Object {
             "actions": Object {
@@ -271,7 +271,7 @@ describe('Data table columns', function () {
             "id": "extension",
             "isSortable": false,
             "schema": "string",
-            "visibleCellActions": undefined,
+            "visibleCellActions": 3,
           },
           Object {
             "actions": Object {
@@ -319,7 +319,7 @@ describe('Data table columns', function () {
             "id": "message",
             "isSortable": false,
             "schema": "string",
-            "visibleCellActions": undefined,
+            "visibleCellActions": 3,
           },
         ]
       `);
@@ -409,7 +409,7 @@ describe('Data table columns', function () {
             "initialWidth": 212,
             "isSortable": true,
             "schema": "datetime",
-            "visibleCellActions": undefined,
+            "visibleCellActions": 3,
           },
           Object {
             "actions": Object {
@@ -459,7 +459,7 @@ describe('Data table columns', function () {
             "id": "extension",
             "isSortable": true,
             "schema": "string",
-            "visibleCellActions": undefined,
+            "visibleCellActions": 3,
           },
           Object {
             "actions": Object {
@@ -507,7 +507,7 @@ describe('Data table columns', function () {
             "id": "message",
             "isSortable": true,
             "schema": "string",
-            "visibleCellActions": undefined,
+            "visibleCellActions": 3,
           },
         ]
       `);
