@@ -8,6 +8,7 @@
 import type { CasesPermissions } from '../../../common';
 import {
   CASES_CONNECTORS_CAPABILITY,
+  CONFIGURE_CASES_CAPABILITY,
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
   PUSH_CASES_CAPABILITY,
@@ -24,7 +25,9 @@ export const getUICapabilities = (
   const deletePriv = !!featureCapabilities?.[DELETE_CASES_CAPABILITY];
   const push = !!featureCapabilities?.[PUSH_CASES_CAPABILITY];
   const connectors = !!featureCapabilities?.[CASES_CONNECTORS_CAPABILITY];
-  const all = create && read && update && deletePriv && push && connectors;
+  const configure = !!featureCapabilities?.[CONFIGURE_CASES_CAPABILITY];
+
+  const all = create && read && update && deletePriv && push && connectors && configure;
 
   return {
     all,
@@ -34,5 +37,6 @@ export const getUICapabilities = (
     delete: deletePriv,
     push,
     connectors,
+    configure,
   };
 };

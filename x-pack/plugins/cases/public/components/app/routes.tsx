@@ -71,7 +71,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCasesConfigurePath(basePath)}>
-          {permissions.update ? (
+          {permissions.update && permissions.configure ? (
             <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />

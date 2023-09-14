@@ -16,7 +16,9 @@ export const noCasesPermissions = () =>
     delete: false,
     push: false,
     connectors: false,
+    configure: false,
   });
+
 export const readCasesPermissions = () =>
   buildCasesPermissions({
     read: true,
@@ -25,6 +27,7 @@ export const readCasesPermissions = () =>
     delete: false,
     push: false,
     connectors: true,
+    configure: false,
   });
 export const noCreateCasesPermissions = () => buildCasesPermissions({ create: false });
 export const noUpdateCasesPermissions = () => buildCasesPermissions({ update: false });
@@ -34,6 +37,7 @@ export const writeCasesPermissions = () => buildCasesPermissions({ read: false }
 export const onlyDeleteCasesPermission = () =>
   buildCasesPermissions({ read: false, create: false, update: false, delete: true, push: false });
 export const noConnectorsCasePermission = () => buildCasesPermissions({ connectors: false });
+export const noConfigureCasePermission = () => buildCasesPermissions({ configure: false });
 
 export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 'all'>> = {}) => {
   const create = overrides.create ?? true;
@@ -42,7 +46,8 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
   const deletePermissions = overrides.delete ?? true;
   const push = overrides.push ?? true;
   const connectors = overrides.connectors ?? true;
-  const all = create && read && update && deletePermissions && push;
+  const configure = overrides.configure ?? true;
+  const all = create && read && update && deletePermissions && push && configure;
 
   return {
     all,
@@ -52,6 +57,7 @@ export const buildCasesPermissions = (overrides: Partial<Omit<CasesPermissions, 
     delete: deletePermissions,
     push,
     connectors,
+    configure,
   };
 };
 

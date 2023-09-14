@@ -50,7 +50,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
   return (
     <EuiFlexItem>
       <ButtonFlexGroup responsive={false}>
-        {permissions.update && (
+        {permissions.update && permissions.configure && (
           <EuiFlexItem grow={false}>
             <ConfigureCaseButton
               label={i18n.CONFIGURE_CASES_BUTTON}
