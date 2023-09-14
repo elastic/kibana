@@ -16,6 +16,7 @@ import {
   MAP_PATH,
   MAP_SAVED_OBJECT_TYPE,
 } from '../common/constants';
+import { getMapClient } from './content_management';
 
 export function getMapsVisTypeAlias() {
   const appDescription = i18n.translate('xpack.maps.visTypeAlias.description', {
@@ -34,6 +35,7 @@ export function getMapsVisTypeAlias() {
       visualizations: {
         docTypes: [MAP_SAVED_OBJECT_TYPE],
         searchFields: ['title^3'],
+        client: getMapClient,
         toListItem(mapItem: MapItem) {
           const { id, type, updatedAt, attributes } = mapItem;
           const { title, description } = attributes;

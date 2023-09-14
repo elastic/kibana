@@ -48,10 +48,6 @@ export const InvestigationGuide: React.FC = () => {
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
 
-  if (!dataFormattedForFieldBrowser || error) {
-    return null;
-  }
-
   if (loading) {
     return (
       <EuiFlexGroup
@@ -73,7 +69,7 @@ export const InvestigationGuide: React.FC = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        {basicAlertData.ruleId && ruleNote ? (
+        {!error && basicAlertData.ruleId && ruleNote ? (
           <EuiButton
             onClick={goToInvestigationsTab}
             iconType="documentation"

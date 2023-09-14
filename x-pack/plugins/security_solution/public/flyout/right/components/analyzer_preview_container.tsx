@@ -31,7 +31,7 @@ export const AnalyzerPreviewContainer: React.FC = () => {
   const { dataAsNestedObject } = useRightPanelContext();
 
   // decide whether to show the analyzer preview or not
-  const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject || undefined);
+  const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
