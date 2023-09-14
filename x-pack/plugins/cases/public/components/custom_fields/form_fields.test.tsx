@@ -15,7 +15,6 @@ import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { FormFields } from './form_fields';
 import { customFieldTypesValues } from './schema';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 
 describe('FormFields ', () => {
   let appMockRender: AppMockRenderer;
