@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('recovers from missing data view', async () => {
           await listingTable.clickItemLink('eventAnnotation', 'missing data view');
 
-          retry.try(async () => {
+          await retry.try(async () => {
             expect(await PageObjects.annotationEditor.showingMissingDataViewPrompt()).to.be(true);
           });
 
