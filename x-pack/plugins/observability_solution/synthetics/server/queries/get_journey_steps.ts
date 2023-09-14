@@ -29,7 +29,6 @@ export const getJourneySteps = async ({
           {
             terms: {
               'synthetics.type': [
-                'cmd/status',
                 'journey/browserconsole',
                 'step/end',
                 'step/screenshot',
