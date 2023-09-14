@@ -29,7 +29,7 @@ const { host, nginx, kubernetes } = assetDetailsDashboards;
 export const MetricsGrid = React.memo(
   ({ assetName, metricsDataView, logsDataView, dateRange: timeRange }: Props) => {
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <Section title={MetricsSectionTitle}>
           <ChartGrid
             assetName={assetName}
