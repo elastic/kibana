@@ -141,7 +141,6 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="xs" />
         <EuiText color="subdued" size="s" data-test-subj="selectedRuleFormTypeDescription">
           {activeFormTypeItem?.description}
         </EuiText>
