@@ -18,15 +18,14 @@ import {
   clickOnFilterIn,
   clickOnFilterOut,
   clickOnShowTopN,
-  mouseoverOnToOverflowItem,
-  openHoverActions,
+  withHoverActionsReady,
 } from '../../../tasks/network/flows';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 
 const testDomain = 'myTest';
 
 // tracked by https://github.com/elastic/kibana/issues/161874
-describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
+describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);
@@ -43,18 +42,16 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visit(NETWORK_URL, { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });
-    openHoverActions();
-    mouseoverOnToOverflowItem();
   });
 
   it('Adds global filter - filter in', () => {
-    clickOnFilterIn();
+    withHoverActionsReady(clickOnFilterIn);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', `destination.domain: ${testDomain}`);
   });
 
   it('Adds global filter - filter out', () => {
-    clickOnFilterOut();
+    withHoverActionsReady(clickOnFilterOut);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'contains.text',
       `NOT destination.domain: ${testDomain}`
@@ -63,7 +60,7 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Adds to timeline', () => {
     const DATA_PROVIDER_ITEM_NUMBER = 1;
-    clickOnAddToTimeline();
+    withHoverActionsReady(clickOnAddToTimeline);
     openTimelineUsingToggle();
 
     cy.get(DATA_PROVIDERS).should('have.length', DATA_PROVIDER_ITEM_NUMBER);
@@ -71,14 +68,14 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Show topN', () => {
-    clickOnShowTopN();
+    withHoverActionsReady(clickOnShowTopN);
     cy.get(TOP_N_CONTAINER).should('exist').should('contain.text', 'Top destination.domain');
   });
 
   it('Copy value', () => {
     cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
 
-    clickOnCopyValue();
+    withHoverActionsReady(clickOnCopyValue);
 
     cy.get('@execCommand').should('have.been.calledOnceWith', 'copy');
   });
