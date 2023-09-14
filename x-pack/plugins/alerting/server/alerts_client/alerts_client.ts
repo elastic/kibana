@@ -236,6 +236,11 @@ export class AlertsClient<
           },
         });
         if (response.total === response.updated) break;
+        this.options.logger.warn(
+          `Attempt ${retryCount + 1}: Failed to untrack ${
+            (response.total ?? 0) - (response.updated ?? 0)
+          } of ${response.total}; indices ${indices}, ruleIds ${ruleIds}`
+        );
       }
     } catch (err) {
       this.options.logger.error(`Error marking ${ruleIds} as untracked - ${err.message}`);
