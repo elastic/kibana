@@ -102,26 +102,24 @@ export const GroupByExpression = ({
     useState<GroupByOverFieldOption[]>(initialTermFieldOptions);
 
   useEffect(() => {
-    const selectedTermFields = selectedTermsFieldsOptions.map((option) => option.label);
-    const termsToSave =
-      Array.isArray(selectedTermFields) && selectedTermFields.length > 1
-        ? selectedTermFields
-        : selectedTermFields[0];
-    if (!!termsToSave) {
-      onChangeSelectedTermField(termsToSave);
-    }
-  }, [selectedTermsFieldsOptions, onChangeSelectedTermField]);
-
-  useEffect(() => {
     // if current field set doesn't contain selected field, clear selection
-    if (
-      termField &&
-      !Array.isArray(termField) &&
-      termField.length > 0 &&
-      fields.length > 0 &&
-      !fields.find((field: FieldOption) => field.name === termField)
-    ) {
-      onChangeSelectedTermField('');
+    if (Array.isArray(termField)) {
+      const hasUnknownField = termField.some(
+        (term) => !fields.some((field) => field.name === term)
+      );
+      if (hasUnknownField) {
+        setSelectedTermsFieldsOptions([]);
+        onChangeSelectedTermField('');
+      }
+    } else {
+      if (
+        termField &&
+        termField.length > 0 &&
+        !fields.find((field: FieldOption) => field.name === termField)
+      ) {
+        setSelectedTermsFieldsOptions([]);
+        onChangeSelectedTermField('');
+      }
     }
   }, [termField, fields, onChangeSelectedTermField]);
 
@@ -235,6 +233,14 @@ export const GroupByExpression = ({
                     onChange={(
                       selectedOptions: Array<EuiComboBoxOptionOption<GroupByOverFieldOption>>
                     ) => {
+                      const selectedTermFields = selectedOptions.map((option) => option.label);
+
+                      const termsToSave =
+                        Array.isArray(selectedTermFields) && selectedTermFields.length > 1
+                          ? selectedTermFields
+                          : selectedTermFields[0];
+
+                      onChangeSelectedTermField(termsToSave);
                       setSelectedTermsFieldsOptions(selectedOptions);
                     }}
                     options={availableFieldOptions}

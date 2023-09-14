@@ -63,6 +63,33 @@ describe('group by expression', () => {
     expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
   });
 
+  it('clears selected agg field if there is unknown field', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'test',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termField={['test', 'unknown']}
+          groupBy={'top'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
+  });
+
   it('calls onChangeSelectedTermField when a termField is selected', async () => {
     const onChangeSelectedTermField = jest.fn();
     render(
