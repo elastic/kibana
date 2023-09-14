@@ -20,17 +20,17 @@ export const buildOSSFeatures = ({
 }: BuildOSSFeaturesParams): KibanaFeatureConfig[] => {
   return [
     {
-      id: 'globalSavedQueries',
-      name: i18n.translate('xpack.features.globalSavedQueriesFeatureName', {
-        defaultMessage: 'Global Saved Queries',
+      id: 'savedQueryManagement',
+      name: i18n.translate('xpack.features.savedQueryManagementFeatureName', {
+        defaultMessage: 'Saved Query Management',
       }),
-      order: 101,
-      category: DEFAULT_APP_CATEGORIES.kibana,
+      order: 1700,
+      category: DEFAULT_APP_CATEGORIES.management,
       app: ['kibana'],
       catalogue: [],
-      privilegesTooltip: i18n.translate('xpack.features.globalSavedQueriesTooltip', {
+      privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
         defaultMessage:
-          'If this is enabled saved queries can be edited or changed across Kibana. When set to None, this depends on the consuming plugin.',
+          'If "All" is set saved queries can be edited or changed across Kibana. This will overwrite any other privileges related to saved queries.',
       }),
       privileges: {
         all: {

@@ -211,7 +211,7 @@ export const DiscoverTopNav = ({
   const showSaveQuery =
     !isPlainRecord &&
     (Boolean(services.capabilities.discover.saveQuery) ||
-      Boolean(services.capabilities.globalSavedQueries.edit));
+      Boolean(services.capabilities.savedQueryManagement.edit));
 
   return (
     <SearchBar

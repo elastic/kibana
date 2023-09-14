@@ -15,6 +15,7 @@ import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-pl
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
@@ -193,6 +194,9 @@ export function createSearchBar({
         true
       );
     }, [query, timeRange, useDefaultBehaviors]);
+    const showSaveQuery =
+      !isOfAggregateQueryType(query) &&
+      (Boolean(core.application.capabilities.savedQueryManagement?.edit) || props.showSaveQuery);
 
     return (
       <KibanaContextProvider
@@ -212,9 +216,7 @@ export function createSearchBar({
             showFilterBar={props.showFilterBar}
             showQueryMenu={props.showQueryMenu}
             showQueryInput={props.showQueryInput}
-            showSaveQuery={
-              Boolean(core.application.capabilities.globalSavedQueries?.edit) || props.showSaveQuery
-            }
+            showSaveQuery={showSaveQuery}
             showSubmitButton={props.showSubmitButton}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
