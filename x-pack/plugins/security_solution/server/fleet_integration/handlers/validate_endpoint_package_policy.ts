@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment from 'moment';
+
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+
+export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) => {
+  const input = inputs.find((i) => i.type === 'endpoint');
+  if (input?.config?.policy?.value?.global_manifest_version) {
+    const globalManifestVersion = input.config.policy.value.global_manifest_version;
+
+    if (globalManifestVersion !== 'latest') {
+      const parsedDate = moment.utc(globalManifestVersion, 'YYYY-MM-DD', true);
+      if (!parsedDate.isValid()) {
+        throw createManifestVersionError(
+          'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.'
+        );
+      }
+
+      const maxAllowedDate = moment.utc().subtract(18, 'months');
+      if (parsedDate.isBefore(maxAllowedDate)) {
+        throw createManifestVersionError(
+          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months. UTC time.'
+        );
+      }
+      if (parsedDate.isAfter(moment.utc())) {
+        throw createManifestVersionError(
+          'Global manifest version cannot be in the future. UTC time.'
+        );
+      }
+    }
+  }
+};
+
+const createManifestVersionError = (
+  message: string
+): Error & { statusCode?: number; apiPassThrough?: boolean } => {
+  const manifestVersionError: Error & { statusCode?: number; apiPassThrough?: boolean } = new Error(
+    message
+  );
+  manifestVersionError.statusCode = 400;
+  manifestVersionError.apiPassThrough = true;
+  return manifestVersionError;
+};

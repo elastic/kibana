@@ -35,12 +35,12 @@ import {
 } from '@kbn/custom-integrations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWizard } from '.';
-import { OptionalFormRow } from '../../../shared/optional_form_row';
+import { OptionalFormRow } from '../../shared/optional_form_row';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
-} from '../../../shared/step_panel';
+} from '../../shared/step_panel';
 import { BackButton } from './back_button';
 import { getFilename } from './get_filename';
 
