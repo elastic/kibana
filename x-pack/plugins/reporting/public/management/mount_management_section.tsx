@@ -40,7 +40,7 @@ export async function mountManagementSection(
           }}
         >
           <InternalApiClientProvider apiClient={apiClient}>
-            <IlmPolicyStatusContextProvider>
+            <IlmPolicyStatusContextProvider statefulSettings={config.statefulSettings.enabled}>
               <ReportListing
                 toasts={coreSetup.notifications.toasts}
                 license$={license$}
