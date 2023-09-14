@@ -15,7 +15,7 @@ import {
   Comparator,
   CustomMetricExpressionParams,
   MetricExpressionParams,
-} from '../../../../common/threshold_rule/types';
+} from '../../../../common/custom_threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 

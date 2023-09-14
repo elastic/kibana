@@ -11,7 +11,7 @@ import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { render } from '@testing-library/react';
 import { Props, Threshold } from './custom_threshold';
 import React from 'react';
-import { Comparator } from '../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../common/custom_threshold_rule/types';
 
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {

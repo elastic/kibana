@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Comparator } from '../../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../../common/custom_threshold_rule/types';
 
 export const createConditionScript = (threshold: number[], comparator: Comparator) => {
   if (comparator === Comparator.BETWEEN && threshold.length === 2) {

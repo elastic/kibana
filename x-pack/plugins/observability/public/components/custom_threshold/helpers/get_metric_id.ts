@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsExplorerOptionsMetric } from '../../../../common/threshold_rule/types';
+import { MetricsExplorerOptionsMetric } from '../../../../common/custom_threshold_rule/types';
 
 export const getMetricId = (metric: MetricsExplorerOptionsMetric, index: string | number) => {
   return `metric_${index}`;

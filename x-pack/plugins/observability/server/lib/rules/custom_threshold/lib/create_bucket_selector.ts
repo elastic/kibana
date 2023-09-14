@@ -9,7 +9,7 @@ import {
   Aggregators,
   Comparator,
   MetricExpressionParams,
-} from '../../../../../common/threshold_rule/types';
+} from '../../../../../common/custom_threshold_rule/types';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 

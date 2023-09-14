@@ -10,7 +10,7 @@ import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { Comparator } from '../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../common/custom_threshold_rule/types';
 
 export interface ChartProps {
   theme: PartialTheme;

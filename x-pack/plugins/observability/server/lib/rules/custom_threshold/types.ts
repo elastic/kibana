@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { validateKQLStringFilter } from './utils';
-import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../../common';
 
 export enum InfraRuleType {

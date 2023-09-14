@@ -27,7 +27,7 @@ import {
   Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from '../../../../common/threshold_rule/types';
+} from '../../../../common/custom_threshold_rule/types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 

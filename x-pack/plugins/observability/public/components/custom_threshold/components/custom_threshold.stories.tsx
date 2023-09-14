@@ -10,7 +10,7 @@ import { ComponentMeta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
-import { Comparator } from '../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { Props, Threshold as Component } from './custom_threshold';
 
 export default {

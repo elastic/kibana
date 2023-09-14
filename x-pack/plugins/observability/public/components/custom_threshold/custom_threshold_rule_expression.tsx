@@ -36,7 +36,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators, Comparator } from '../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';

@@ -9,7 +9,7 @@ import {
   Comparator,
   Aggregators,
   MetricExpressionParams,
-} from '../../../../../common/threshold_rule/types';
+} from '../../../../../common/custom_threshold_rule/types';
 import moment from 'moment';
 import { getElasticsearchMetricQuery } from './metric_query';
 

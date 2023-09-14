@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { InfraFormatterType } from '../../../../common/threshold_rule/types';
+import { InfraFormatterType } from '../../../../common/custom_threshold_rule/types';
 import { createFormatter } from '../../../../common/threshold_rule/formatters';
 import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
 import { metricToFormat } from './metric_to_format';

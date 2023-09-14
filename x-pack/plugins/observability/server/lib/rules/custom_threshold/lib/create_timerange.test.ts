@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Aggregators } from '../../../../../common/threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import moment from 'moment';
 
 import { createTimerange } from './create_timerange';

@@ -32,7 +32,7 @@ import { Color } from '../../../../common/threshold_rule/color_palette';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,
-} from '../../../../common/threshold_rule/types';
+} from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
 import { createFormatterForMetric } from '../helpers/create_formatter_for_metric';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';

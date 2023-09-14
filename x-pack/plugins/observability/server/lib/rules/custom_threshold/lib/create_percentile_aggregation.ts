@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Aggregators } from '../../../../../common/threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 
 export const createPercentileAggregation = (
   type: Aggregators.P95 | Aggregators.P99,

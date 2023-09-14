@@ -6,7 +6,7 @@
  */
 
 import { last } from 'lodash';
-import { InfraFormatterType } from '../../../../common/threshold_rule/types';
+import { InfraFormatterType } from '../../../../common/custom_threshold_rule/types';
 import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
 
 export const metricToFormat = (metric?: MetricsExplorerMetric) => {

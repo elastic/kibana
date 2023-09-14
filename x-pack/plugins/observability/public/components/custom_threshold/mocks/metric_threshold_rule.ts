@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
 import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
 

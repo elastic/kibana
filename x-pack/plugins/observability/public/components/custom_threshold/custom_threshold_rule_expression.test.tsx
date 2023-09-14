@@ -12,8 +12,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import { Comparator } from '../../../common/threshold_rule/types';
-import { MetricsExplorerMetric } from '../../../common/threshold_rule/metrics_explorer';
+import { Comparator } from '../../../common/custom_threshold_rule/types';
+import { MetricsExplorerMetric } from '../../../common/custom_threshold_rule/metrics_explorer';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';

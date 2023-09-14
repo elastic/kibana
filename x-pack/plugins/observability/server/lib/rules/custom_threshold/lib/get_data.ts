@@ -13,7 +13,7 @@ import {
   Aggregators,
   Comparator,
   MetricExpressionParams,
-} from '../../../../../common/threshold_rule/types';
+} from '../../../../../common/custom_threshold_rule/types';
 
 import {
   CONTAINER_ID,

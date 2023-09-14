@@ -24,7 +24,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
-import { Comparator } from '../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { AGGREGATION_TYPES, DerivedIndexPattern, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';

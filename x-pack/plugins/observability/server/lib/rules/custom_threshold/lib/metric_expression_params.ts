@@ -9,7 +9,7 @@ import {
   CustomMetricExpressionParams,
   MetricExpressionParams,
   NonCountMetricExpressionParams,
-} from '../../../../../common/threshold_rule/types';
+} from '../../../../../common/custom_threshold_rule/types';
 
 export const isNotCountOrCustom = (
   metricExpressionParams: MetricExpressionParams

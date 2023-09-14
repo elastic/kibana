@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Color } from '../../../../../common/threshold_rule/color_palette';
-import { Comparator } from '../../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../../common/custom_threshold_rule/types';
 import { shallow } from 'enzyme';
 import React from 'react';
 

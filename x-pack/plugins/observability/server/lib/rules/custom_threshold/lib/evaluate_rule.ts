@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { MetricExpressionParams } from '../../../../../common/threshold_rule/types';
+import { MetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { isCustom } from './metric_expression_params';
 import { AdditionalContext, getIntervalInSeconds } from '../utils';
 import { SearchConfigurationType } from '../custom_threshold_executor';

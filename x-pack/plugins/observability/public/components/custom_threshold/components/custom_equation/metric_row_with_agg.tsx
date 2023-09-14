@@ -21,7 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Aggregators, CustomMetricAggTypes } from '../../../../../common/threshold_rule/types';
+import {
+  Aggregators,
+  CustomMetricAggTypes,
+} from '../../../../../common/custom_threshold_rule/types';
 import { MetricRowControls } from './metric_row_controls';
 import { NormalizedFields, MetricRowBaseProps } from './types';
 import { ClosablePopoverTitle } from '../closable_popover_title';

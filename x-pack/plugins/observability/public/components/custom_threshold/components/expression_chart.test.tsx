@@ -14,7 +14,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
-import { Aggregators, Comparator } from '../../../../common/threshold_rule/types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
 const mockStartServices = mockCoreMock.createStart();
 

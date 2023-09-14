@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sum, min as getMin, max as getMax } from 'lodash';
-import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../../common/threshold_rule/types';
+import { GetLogAlertsChartPreviewDataSuccessResponsePayload } from '../../../../../common/custom_threshold_rule/types';
 import { formatNumber } from '../../../../../common/threshold_rule/formatters/number';
 
 type Series = GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series'];

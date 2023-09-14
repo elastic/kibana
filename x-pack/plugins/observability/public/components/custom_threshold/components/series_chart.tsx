@@ -14,12 +14,12 @@ import {
   AreaSeriesStyle,
   BarSeriesStyle,
 } from '@elastic/charts';
-import { MetricsExplorerSeries } from '../../../../common/threshold_rule/metrics_explorer';
-import { Color, colorTransformer } from '../../../../common/threshold_rule/color_palette';
+import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import { Color, colorTransformer } from '../../../../common/custom_threshold_rule/color_palette';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,
-} from '../../../../common/threshold_rule/types';
+} from '../../../../common/custom_threshold_rule/types';
 
 import { getMetricId } from '../helpers/get_metric_id';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_time_zone_setting';
