@@ -65,14 +65,14 @@ export const ANOMALY_DETECTION_AAD_INDEX_NAME = 'ml.anomaly-detection';
 
 const ML_ALERT_NAMESPACE = ALERT_NAMESPACE;
 
-export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ML_ALERT_NAMESPACE}.jobId` as const;
+export const ALERT_ANOMALY_DETECTION_JOB_ID = `${ML_ALERT_NAMESPACE}.job_id` as const;
 
-export const ALERT_ANOMALY_SCORE = `${ML_ALERT_NAMESPACE}.anomalyScore` as const;
-export const ALERT_ANOMALY_IS_INTERIM = `${ML_ALERT_NAMESPACE}.isInterim` as const;
-export const ALERT_ANOMALY_TIMESTAMP = `${ML_ALERT_NAMESPACE}.anomalyTimestamp` as const;
+export const ALERT_ANOMALY_SCORE = `${ML_ALERT_NAMESPACE}.anomaly_score` as const;
+export const ALERT_ANOMALY_IS_INTERIM = `${ML_ALERT_NAMESPACE}.is_interim` as const;
+export const ALERT_ANOMALY_TIMESTAMP = `${ML_ALERT_NAMESPACE}.anomaly_timestamp` as const;
 
-export const ALERT_TOP_RECORDS = `${ML_ALERT_NAMESPACE}.topRecords` as const;
-export const ALERT_TOP_INFLUENCERS = `${ML_ALERT_NAMESPACE}.topInfluencers` as const;
+export const ALERT_TOP_RECORDS = `${ML_ALERT_NAMESPACE}.top_records` as const;
+export const ALERT_TOP_INFLUENCERS = `${ML_ALERT_NAMESPACE}.top_influencers` as const;
 
 export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAlert> = {
   context: ANOMALY_DETECTION_AAD_INDEX_NAME,
