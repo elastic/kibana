@@ -67,6 +67,7 @@ import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
 import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sameple_data_set_links';
+import { ConfigSchema } from './config_schema';
 
 type SetFeaturesEnabled = (features: MlFeatures) => void;
 
@@ -80,6 +81,7 @@ export type MlPluginStart = void;
 export class MlServerPlugin
   implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart>
 {
+  private initializerContext: PluginInitializerContext<ConfigSchema>;
   private log: Logger;
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
@@ -103,15 +105,17 @@ export class MlServerPlugin
   private registerCases: () => void = () => {};
   private registerSampleDatasetsIntegration: () => void = () => {};
 
-  constructor(ctx: PluginInitializerContext) {
+  constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
     this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
+    this.initializerContext = ctx;
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
+    this.initEnabledFeatures();
     this.spacesPlugin = plugins.spaces;
     this.security = plugins.security;
     this.home = plugins.home;
@@ -342,5 +346,18 @@ export class MlServerPlugin
 
   public stop() {
     this.mlLicense.unsubscribe();
+  }
+
+  private initEnabledFeatures() {
+    const config = this.initializerContext.config.get();
+    if (config.ad?.enabled === false) {
+      this.enabledFeatures.ad = false;
+    }
+    if (config.dfa?.enabled === false) {
+      this.enabledFeatures.dfa = false;
+    }
+    if (config.nlp?.enabled === false) {
+      this.enabledFeatures.nlp = false;
+    }
   }
 }
