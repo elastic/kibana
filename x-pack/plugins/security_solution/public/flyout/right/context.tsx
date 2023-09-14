@@ -117,7 +117,7 @@ export const RightPanelProvider = ({
             dataAsNestedObject,
             dataFormattedForFieldBrowser,
             searchHit,
-            investigationFields: maybeRule?.investigation_fields ?? [],
+            investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
             refetchFlyoutData,
             getFieldsData,
           }

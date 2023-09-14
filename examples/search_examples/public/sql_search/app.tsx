@@ -27,7 +27,6 @@ import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
   isCompleteResponse,
-  isErrorResponse,
 } from '@kbn/data-plugin/public';
 import {
   SQL_SEARCH_STRATEGY,
@@ -70,10 +69,6 @@ export const SqlSearchExampleApp = ({ notifications, data }: SearchExamplesAppDe
           if (isCompleteResponse(res)) {
             setIsLoading(false);
             setResponse(res);
-          } else if (isErrorResponse(res)) {
-            setIsLoading(false);
-            setResponse(res);
-            notifications.toasts.addDanger('An error has occurred');
           }
         },
         error: (e) => {

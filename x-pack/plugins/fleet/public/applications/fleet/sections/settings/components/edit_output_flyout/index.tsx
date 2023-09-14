@@ -107,7 +107,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               defaultMessage="Specify the addresses that your agents will use to connect to Logstash. {guideLink}."
               values={{
                 guideLink: (
-                  <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
+                  <EuiLink href={docLinks.links.fleet.logstashSettings} target="_blank" external>
                     <FormattedMessage
                       id="xpack.fleet.settings.fleetSettingsLink"
                       defaultMessage="Learn more"

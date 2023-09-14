@@ -247,6 +247,7 @@ export const basicCase: CaseUI = {
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
   category: null,
+  customFields: [],
 };
 
 export const basicFileMock: FileJSON = {
@@ -364,6 +365,7 @@ export const mockCase: CaseUI = {
   },
   assignees: [],
   category: null,
+  customFields: [],
 };
 
 export const basicCasePost: CaseUI = {
@@ -537,6 +539,7 @@ export const basicCaseSnake: Case = {
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
+  customFields: [],
 } as Case;
 
 export const caseWithAlertsSnake = {

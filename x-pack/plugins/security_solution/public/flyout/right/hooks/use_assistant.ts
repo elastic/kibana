@@ -9,7 +9,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
-import { getPromptContextFromEventDetailsItem } from '../../../assistant/helpers';
+import { getRawData } from '../../../assistant/helpers';
 import {
   ALERT_SUMMARY_CONTEXT_DESCRIPTION,
   ALERT_SUMMARY_CONVERSATION_ID,
@@ -59,7 +59,7 @@ export const useAssistant = ({
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const getPromptContext = useCallback(
-    async () => getPromptContextFromEventDetailsItem(dataFormattedForFieldBrowser ?? []),
+    async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
   );
   const { promptContextId } = useAssistantHook(

@@ -56,6 +56,7 @@ export async function mountManagementSection({
   enableIndexActions = true,
   enableLegacyTemplates = true,
   enableIndexDetailsPage = false,
+  enableIndexStats = true,
 }: {
   coreSetup: CoreSetup<StartDependencies>;
   usageCollection: UsageCollectionSetup;
@@ -66,6 +67,7 @@ export async function mountManagementSection({
   enableIndexActions?: boolean;
   enableLegacyTemplates?: boolean;
   enableIndexDetailsPage?: boolean;
+  enableIndexStats?: boolean;
 }) {
   const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -111,6 +113,7 @@ export async function mountManagementSection({
       enableIndexActions,
       enableLegacyTemplates,
       enableIndexDetailsPage,
+      enableIndexStats,
     },
     history,
     setBreadcrumbs,

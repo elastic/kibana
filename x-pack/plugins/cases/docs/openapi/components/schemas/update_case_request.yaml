@@ -58,3 +58,5 @@ properties:
         version:
           description: The current version of the case. To determine this value, use the get case or find cases APIs.
           type: string
+        customFields:
+          $ref: 'custom_fields_property.yaml'

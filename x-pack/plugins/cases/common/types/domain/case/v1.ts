@@ -51,6 +51,31 @@ export const CaseSettingsRt = rt.strict({
   syncAlerts: rt.boolean,
 });
 
+const customFieldValue = <C extends rt.Mixed>(codec: C) =>
+  rt.strict({ value: rt.union([rt.array(codec), rt.null]) });
+
+const CustomFieldText = rt.strict({
+  key: rt.string,
+  type: rt.literal('text'),
+  field: customFieldValue(rt.string),
+});
+
+const CustomFieldToggle = rt.strict({
+  key: rt.string,
+  type: rt.literal('toggle'),
+  field: customFieldValue(rt.boolean),
+});
+
+const CustomFieldList = rt.strict({
+  key: rt.string,
+  type: rt.literal('list'),
+  field: customFieldValue(rt.string),
+});
+
+export const CustomFieldRt = rt.union([CustomFieldText, CustomFieldToggle, CustomFieldList]);
+
+const CaseCustomFieldsRt = rt.array(CustomFieldRt);
+
 const CaseBasicRt = rt.strict({
   /**
    * The description of the case
@@ -92,6 +117,11 @@ const CaseBasicRt = rt.strict({
    * The category of the case.
    */
   category: rt.union([rt.string, rt.null]),
+  /**
+   * An array containing the possible,
+   * user-configured custom fields.
+   */
+  customFields: CaseCustomFieldsRt,
 });
 
 export const CaseAttributesRt = rt.intersection([
@@ -139,6 +169,7 @@ export const RelatedCaseRt = rt.strict({
   totals: AttachmentTotalsRt,
 });
 
+export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;

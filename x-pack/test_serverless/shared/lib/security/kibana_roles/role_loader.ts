@@ -15,6 +15,7 @@ import { AxiosError } from 'axios';
 import {
   getServerlessSecurityKibanaRoleDefinitions,
   ServerlessSecurityRoles,
+  YamlRoleDefinitions,
 } from './kibana_roles';
 import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 
@@ -46,19 +47,22 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
     };
   }
 
-  async load(name: keyof R): Promise<LoadedRoleAndUser> {
+  async load(name: keyof R, additionalRoleName?: string): Promise<LoadedRoleAndUser> {
     const role = this.roles[name];
 
     if (!role) {
       throw new Error(
-        `Unknown role: [${name}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
+        `Unknown role: [${String(name)}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
       );
     }
 
     const roleName = role.name;
-
+    const roleNames = [roleName];
+    if (additionalRoleName) {
+      roleNames.push(additionalRoleName);
+    }
     await this.createRole(role);
-    await this.createUser(roleName, 'changeme', [roleName]);
+    await this.createUser(roleName, 'changeme', roleNames);
 
     return {
       role: roleName,
@@ -123,7 +127,11 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
 }
 
 export class SecurityRoleAndUserLoader extends RoleAndUserLoader<ServerlessSecurityRoles> {
-  constructor(kbnClient: KbnClient, logger: ToolingLog) {
-    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions());
+  constructor(
+    kbnClient: KbnClient,
+    logger: ToolingLog,
+    additionalRoleDefinitions?: YamlRoleDefinitions
+  ) {
+    super(kbnClient, logger, getServerlessSecurityKibanaRoleDefinitions(additionalRoleDefinitions));
   }
 }

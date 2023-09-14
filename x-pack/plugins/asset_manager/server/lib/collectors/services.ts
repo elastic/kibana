@@ -15,8 +15,18 @@ export async function collectServices({
   to,
   sourceIndices,
   afterKey,
+  filters = [],
 }: CollectorOptions) {
   const { traces, serviceMetrics, serviceLogs } = sourceIndices;
+  const musts: estypes.QueryDslQueryContainer[] = [
+    ...filters,
+    {
+      exists: {
+        field: 'service.name',
+      },
+    },
+  ];
+
   const dsl: estypes.SearchRequest = {
     index: [traces, serviceMetrics, serviceLogs],
     size: 0,
@@ -33,13 +43,7 @@ export async function collectServices({
             },
           },
         ],
-        must: [
-          {
-            exists: {
-              field: 'service.name',
-            },
-          },
-        ],
+        must: musts,
       },
     },
     aggs: {
@@ -58,6 +62,7 @@ export async function collectServices({
               serviceEnvironment: {
                 terms: {
                   field: 'service.environment',
+                  missing_bucket: true,
                 },
               },
             },
@@ -112,13 +117,13 @@ export async function collectServices({
     }
 
     containerHosts.buckets?.forEach((containerBucket: any) => {
-      const [containerId, hostname] = containerBucket.key;
-      if (containerId) {
-        (service['asset.parents'] as string[]).push(`container:${containerId}`);
-      }
-
+      const [hostname, containerId] = containerBucket.key;
       if (hostname) {
         (service['asset.references'] as string[]).push(`host:${hostname}`);
+      }
+
+      if (containerId) {
+        (service['asset.parents'] as string[]).push(`container:${containerId}`);
       }
     });
 
