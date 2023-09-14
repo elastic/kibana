@@ -131,7 +131,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       <EuiToolTip
         content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
           defaultMessage:
-            'The minimum amount of time the data stream will be stored for. Only applicable for data streams managed by data stream lifecycle.',
+            'The amount of time that a data stream retains its data before it is automatically deleted. Only applies to data streams managed by data stream lifecycle. This value may not apply to all data if Index Lifecycle Management is also configured.',
         })}
       >
         <span>

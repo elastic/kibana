@@ -142,7 +142,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             defaultMessage: 'Data retention',
           }),
           toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
-            defaultMessage: 'The minimum amount of time the data stream will be stored for.',
+            defaultMessage: 'The amount of time to retain the data in the data stream.',
           }),
           content: lifecycle.data_retention,
           dataTestSubj: 'dataRetentionDetail',
@@ -155,7 +155,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             defaultMessage: 'Index lifecycle policy',
           }),
           toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
-            defaultMessage: `The index lifecycle policy that manages the data stream's data`,
+            defaultMessage: `The index lifecycle policy that manages the data in the data stream.`,
           }),
           content: ilmPolicyLink ? (
             <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
@@ -177,7 +177,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Health',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthToolTip', {
-          defaultMessage: `The health of the data stream's current backing indices`,
+          defaultMessage: `The health of the data stream's current backing indices.`,
         }),
         content: <DataHealth health={health} />,
         dataTestSubj: 'healthDetail',
@@ -187,7 +187,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Last updated',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
-          defaultMessage: 'The most recent document to be added to the data stream',
+          defaultMessage: 'The most recent document to be added to the data stream.',
         }),
         content: maxTimeStamp ? (
           humanizeTimeStamp(maxTimeStamp)
@@ -205,7 +205,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Storage size',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
-          defaultMessage: `Total size of all shards in the data stream’s backing indices`,
+          defaultMessage: `The total size of all shards in the data stream’s backing indices.`,
         }),
         content: storageSize,
         dataTestSubj: 'storageSizeDetail',
@@ -215,7 +215,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Indices',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesToolTip', {
-          defaultMessage: `The data stream's current backing indices`,
+          defaultMessage: `The data stream's current backing indices.`,
         }),
         content: (
           <EuiLink
@@ -234,7 +234,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Timestamp field',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip', {
-          defaultMessage: 'Timestamp field shared by all documents in the data stream',
+          defaultMessage: 'The timestamp field shared by all documents in the data stream.',
         }),
         content: timeStampField.name,
         dataTestSubj: 'timestampDetail',
@@ -244,7 +244,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage: 'Generation',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.generationToolTip', {
-          defaultMessage: 'Cumulative count of backing indices created for the data stream',
+          defaultMessage: 'The number of backing indices generated for the data stream.',
         }),
         content: generation,
         dataTestSubj: 'generationDetail',
@@ -255,7 +255,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexTemplateToolTip', {
           defaultMessage:
-            'The index template that configured the data stream and configures its backing indices',
+            'The index template that configured the data stream and configures its backing indices.',
         }),
         content: (
           <EuiLink
