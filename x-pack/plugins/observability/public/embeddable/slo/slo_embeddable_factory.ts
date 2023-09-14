@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/public';
 import {
   IContainer,
-  EmbeddableInput,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
   ErrorEmbeddable,
@@ -48,7 +47,7 @@ export class SloListFactoryDefinition implements EmbeddableFactoryDefinition {
     }
   }
 
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+  public async create(initialInput: SloEmbeddableInput, parent?: IContainer) {
     try {
       const [{ uiSettings, application, http, i18n: i18nService }] = await this.getStartServices();
       return new SLOEmbeddable(

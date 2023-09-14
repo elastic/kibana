@@ -6,18 +6,18 @@
  */
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 
-export interface SloEmbeddableExplicitInput {
+export interface EmbeddableSloProps {
   slo: SLOWithSummaryResponse;
 }
 
 export interface SloConfigurationProps {
-  onCreate: (props: SloEmbeddableExplicitInput) => void;
+  onCreate: (props: EmbeddableSloProps) => void;
   onCancel: () => void;
 }
 
-export type SloEmbeddableInput = EmbeddableInput & SloEmbeddableExplicitInput;
+export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
 
 export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;

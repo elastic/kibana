@@ -13,7 +13,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
-import { SloListItem } from './slo_list_item';
+import { SloOverview } from './slo_overview';
 import type { SloEmbeddableDeps, SloEmbeddableInput } from './types';
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
@@ -49,7 +49,7 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={this.deps}>
-          <SloListItem slo={input} />
+          <SloOverview slo={input} />
         </KibanaContextProvider>
       </I18nContext>,
       node

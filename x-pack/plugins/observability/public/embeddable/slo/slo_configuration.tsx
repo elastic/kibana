@@ -19,10 +19,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SloSelector } from './slo_selector';
-import type { SloConfigurationProps, SloEmbeddableExplicitInput } from './types';
+import type { SloConfigurationProps, EmbeddableSloProps } from './types';
 
 export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
-  const [selectedSlo, setSelectedSlo] = useState<SloEmbeddableExplicitInput>();
+  const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
   return (
     <EuiModal onClose={onCancel}>
       <EuiModalHeader>

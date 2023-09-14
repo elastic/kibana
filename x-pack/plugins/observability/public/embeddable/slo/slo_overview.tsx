@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPanel } from '@elastic/eui';
 import { SloStatusBadge } from '../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { SloSummary } from './slo_summary';
+import { EmbeddableSloProps } from './types';
 
-interface Props {
-  slo: SLOWithSummaryResponse;
-}
-
-export function SloListItem({ slo }: Props) {
+export function SloOverview({ slo }: EmbeddableSloProps) {
   return (
     <EuiPanel paddingSize="m" color="transparent">
       <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj="sloList">
