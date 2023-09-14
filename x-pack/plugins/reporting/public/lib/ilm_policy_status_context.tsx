@@ -9,7 +9,6 @@ import type { FunctionComponent } from 'react';
 import React, { createContext, useContext } from 'react';
 
 import { IlmPolicyStatusResponse } from '../../common/types';
-import { useKibana, useRequest } from '../shared_imports';
 
 import { useCheckIlmPolicyStatus } from './reporting_api_client';
 
@@ -27,32 +26,17 @@ export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSetting
   statefulSettings,
   children,
 }) => {
-  if (statefulSettings) {
-    const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
+  const {
+    isLoading,
+    data,
+    resendRequest: recheckStatus,
+  } = useCheckIlmPolicyStatus(statefulSettings);
 
-    return (
-      <IlmPolicyStatusContext.Provider value={{ isLoading, status: data?.status, recheckStatus }}>
-        {children}
-      </IlmPolicyStatusContext.Provider>
-    );
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-  } else {
-    const useNoIlm = () => {
-      const {
-        services: { http },
-      } = useKibana();
-
-      useRequest(http, { path: '', method: 'get' });
-    };
-
-    return (
-      <IlmPolicyStatusContext.Provider
-        value={{ isLoading: false, status: undefined, recheckStatus: useNoIlm }}
-      >
-        {children}
-      </IlmPolicyStatusContext.Provider>
-    );
-  }
+  return (
+    <IlmPolicyStatusContext.Provider value={{ isLoading, status: data?.status, recheckStatus }}>
+      {children}
+    </IlmPolicyStatusContext.Provider>
+  );
 };
 
 export type UseIlmPolicyStatusReturn = ReturnType<typeof useIlmPolicyStatus>;
