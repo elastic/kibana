@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   createWizardContext,
   Step,
-} from '../../../../context/create_wizard_context';
+} from '../../../context/create_wizard_context';
 import { ConfigureLogs } from './configure_logs';
 import { Inspect } from './inspect';
 import { InstallElasticAgent } from './install_elastic_agent';
