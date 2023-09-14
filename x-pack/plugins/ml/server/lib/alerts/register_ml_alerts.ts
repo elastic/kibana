@@ -19,7 +19,7 @@ export interface RegisterAlertParams {
   mlServicesProviders: MlServicesProviders;
 }
 
-export function registerMlAlerts(params: RegisterAlertParams) {
-  registerAnomalyDetectionAlertType(params);
-  registerJobsMonitoringRuleType(params);
+export function registerMlAlerts(alertParams: RegisterAlertParams) {
+  registerAnomalyDetectionAlertType(alertParams);
+  registerJobsMonitoringRuleType(alertParams);
 }

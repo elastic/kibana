@@ -5,4 +5,22 @@
  * 2.0.
  */
 
-export { initSampleDataSets } from './sample_data_sets';
+export class Counter {
+  private count = 0;
+
+  public initialCount(): number {
+    return 0;
+  }
+
+  public get(): number {
+    return this.count;
+  }
+
+  public increment() {
+    this.count++;
+  }
+
+  public reset() {
+    this.count = 0;
+  }
+}
