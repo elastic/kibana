@@ -14,10 +14,7 @@ import { ProductLine, ProductTier } from '../../../common/product';
 
 import type { UsageRecord, MeteringCallbackInput } from '../../types';
 import type { ServerlessSecurityConfig } from '../../config';
-
-// 1 hour
-const SAMPLE_PERIOD_SECONDS = 3600;
-const THRESHOLD_MINUTES = 30;
+import { METERING_TASK } from '../constants/metering';
 
 export class EndpointMeteringService {
   private type: ProductLine.endpoint | `${ProductLine.cloud}_${ProductLine.endpoint}` | undefined;
@@ -70,7 +67,7 @@ export class EndpointMeteringService {
     abortController: AbortController,
     since?: Date
   ): Promise<SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>> {
-    const thresholdDate = new Date(Date.now() - THRESHOLD_MINUTES * 60 * 1000);
+    const thresholdDate = new Date(Date.now() - METERING_TASK.THRESHOLD_MINUTES * 60 * 1000);
     const searchFrom = since && since > thresholdDate ? since : thresholdDate;
 
     return esClient.search<EndpointHeartbeat>(
@@ -113,8 +110,8 @@ export class EndpointMeteringService {
       creation_timestamp: timestampStr,
       usage: {
         // type postfix is used to determine the PLI to bill
-        type: `security_solution_${this.type}`,
-        period_seconds: SAMPLE_PERIOD_SECONDS,
+        type: `${METERING_TASK.USAGE_TYPE_PREFIX}${this.type}`,
+        period_seconds: METERING_TASK.SAMPLE_PERIOD_SECONDS,
         quantity: 1,
       },
       source: {

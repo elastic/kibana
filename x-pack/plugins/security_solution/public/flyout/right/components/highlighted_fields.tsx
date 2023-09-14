@@ -100,7 +100,7 @@ export const HighlightedFields: FC = () => {
     [highlightedFields, scopeId]
   );
 
-  if (!dataFormattedForFieldBrowser || items.length === 0) {
+  if (items.length === 0) {
     return null;
   }
 

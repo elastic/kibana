@@ -136,6 +136,9 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${INTERNAL_API_BASE_PATH}/indices/${indexName}`, response, error);
 
+  const setCreateIndexResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/indices/create`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -155,6 +158,7 @@ const registerHttpRequestMockHelpers = (
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
     setLoadIndexDetailsResponse,
+    setCreateIndexResponse,
   };
 };
 
