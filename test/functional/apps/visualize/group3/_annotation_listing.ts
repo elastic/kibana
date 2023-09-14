@@ -173,11 +173,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await PageObjects.annotationEditor.showingMissingDataViewPrompt()).to.be(true);
           });
 
-          await PageObjects.annotationEditor.editGroupMetadata({
-            dataView: 'logs*',
-          });
-
           await retry.try(async () => {
+            await PageObjects.annotationEditor.editGroupMetadata({
+              dataView: 'logs*',
+            });
             expect(await PageObjects.annotationEditor.showingMissingDataViewPrompt()).to.be(false);
             expect(await find.byCssSelector('canvas')).to.be.ok();
           });
