@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { ProfilingStatusCheck } from '@kbn/profiling-utils';
+import { ProfilingStatus } from '@kbn/profiling-utils';
 import { getBettertest } from '../common/bettertest';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 import { deletePackagePolicy, getProfilingPackagePolicyIds } from '../utils/fleet';
@@ -26,7 +26,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   registry.when('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
       describe('Admin user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -47,7 +47,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       describe('Viewer user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -88,7 +88,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       describe('Admin user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -109,7 +109,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       describe('Viewer user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -150,7 +150,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       describe('Admin user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -171,7 +171,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       describe('Viewer user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -203,7 +203,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       describe('Admin user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.adminUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -224,7 +224,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       describe('Viewer user', () => {
-        let statusCheck: ProfilingStatusCheck;
+        let statusCheck: ProfilingStatus;
         before(async () => {
           const response = await profilingApiClient.readUser({
             endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -256,7 +256,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('without data', () => {
         describe('Admin user', () => {
-          let statusCheck: ProfilingStatusCheck;
+          let statusCheck: ProfilingStatus;
           before(async () => {
             const response = await profilingApiClient.adminUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -277,7 +277,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         });
 
         describe('Viewer user', () => {
-          let statusCheck: ProfilingStatusCheck;
+          let statusCheck: ProfilingStatus;
           before(async () => {
             const response = await profilingApiClient.readUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -307,7 +307,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           await loadProfilingData(es, logger);
         });
         describe('Admin user', () => {
-          let statusCheck: ProfilingStatusCheck;
+          let statusCheck: ProfilingStatus;
           before(async () => {
             const response = await profilingApiClient.adminUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
@@ -328,7 +328,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         });
 
         describe('Viewer user', () => {
-          let statusCheck: ProfilingStatusCheck;
+          let statusCheck: ProfilingStatus;
           before(async () => {
             const response = await profilingApiClient.readUser({
               endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,

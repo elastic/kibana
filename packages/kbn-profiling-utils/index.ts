@@ -44,4 +44,4 @@ export type {
   StackTrace,
   StackTraceID,
 } from './common/profiling';
-export type { ProfilingStatusCheck } from './common/profiling_status_check';
+export type { ProfilingStatus } from './common/profiling_status';

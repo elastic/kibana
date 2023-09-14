@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { ProfilingStatusCheck } from '@kbn/profiling-utils';
+import { ProfilingStatus } from '@kbn/profiling-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getSetupState } from '../get_setup_state';
 import { RegisterServicesParams } from '../register_services';
@@ -23,7 +23,7 @@ export function createGetStatusService({
   deps,
   logger,
 }: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatusCheck> => {
+  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
     try {
       const isCloudEnabled = deps.cloud.isCloudEnabled;
       if (!isCloudEnabled) {

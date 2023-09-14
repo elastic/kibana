@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export interface ProfilingStatusCheck {
+export interface ProfilingStatus {
   has_setup: boolean;
   has_data: boolean;
   pre_8_9_1_data: boolean;

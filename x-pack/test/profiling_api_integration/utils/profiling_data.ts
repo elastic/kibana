@@ -6,7 +6,7 @@
  */
 import { Client } from '@elastic/elasticsearch';
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { ProfilingStatusCheck } from '@kbn/profiling-utils';
+import { ProfilingStatus } from '@kbn/profiling-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import Path from 'path';
@@ -71,7 +71,7 @@ export async function cleanUpProfilingData({
 
 export async function setupProfiling(bettertest: BetterTest, logger: ToolingLog) {
   const log = logWithTimer(logger);
-  const response = await bettertest<ProfilingStatusCheck>({
+  const response = await bettertest<ProfilingStatus>({
     method: 'get',
     pathname: profilingRoutePaths.HasSetupESResources,
   });
@@ -80,7 +80,7 @@ export async function setupProfiling(bettertest: BetterTest, logger: ToolingLog)
     log(`Skipping Universal Profiling set up, already set up`);
   } else {
     log(`Setting up Universal Profiling`);
-    await bettertest<ProfilingStatusCheck>({
+    await bettertest<ProfilingStatus>({
       method: 'post',
       pathname: profilingRoutePaths.HasSetupESResources,
     });
