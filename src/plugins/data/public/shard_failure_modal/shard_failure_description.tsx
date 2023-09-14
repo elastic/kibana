@@ -99,7 +99,6 @@ export function ShardFailureDescription(props: estypes.ShardFailure) {
           columnWidths={[1, 6]}
           listItems={items}
           compressed
-          className="shardFailureModal__desc"
           titleProps={{ className: 'shardFailureModal__descTitle' }}
           descriptionProps={{ className: 'shardFailureModal__descValue' }}
         />

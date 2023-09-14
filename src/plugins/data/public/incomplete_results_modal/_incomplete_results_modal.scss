@@ -13,9 +13,3 @@
     padding-bottom: 0;
   }
 }
-
-.shardFailureModal__desc {
-  // set for IE11, since without it depending on the content the width of the list
-  // could be much higher than the available screenspace
-  max-width: 686px;
-}
