@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
@@ -297,31 +298,22 @@ export function systemRoutes(
       path: `${ML_INTERNAL_BASE_PATH}/reindex_with_pipeline`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canGetMlInfo'],
+        tags: ['access:ml:canCreateTrainedModels'],
       },
     })
     .addVersion(
       {
         version: '1',
-        validate: {
-          request: {
-            body: schema.object({
-              source: schema.object({ index: schema.string() }),
-              dest: schema.object({
-                index: schema.string(),
-                pipeline: schema.string(),
-              }),
-            }),
-          },
-        },
+        validate: false,
       },
       routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+        const reindexRequest = {
+          body: request.body,
+          // Create a task and return task id instead of blocking until complete
+          wait_for_completion: false,
+        } as estypes.ReindexRequest;
         try {
-          const result = await client.asCurrentUser.reindex({
-            body: request.body,
-            // Create a task and return task id instead of blocking until complete
-            wait_for_completion: false,
-          });
+          const result = await client.asCurrentUser.reindex(reindexRequest);
 
           return response.ok({
             body: result,

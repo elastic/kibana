@@ -26,10 +26,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { debounce } from 'lodash';
 import { useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 
 const destIndexEmpty = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexEmpty',
@@ -68,7 +70,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   const [destinationIndexInvalidMessage, setDestinationIndexInvalidMessage] = useState<
     string | undefined
   >(destIndexEmpty);
-  const [reindexingTaskId, setReindexingTaskId] = useState<string | undefined>();
+  const [reindexingTaskId, setReindexingTaskId] = useState<estypes.TaskId | undefined>();
   const [discoverLink, setDiscoverLink] = useState<string | undefined>();
   const [shouldCreateDataView, setShouldCreateDataView] = useState<boolean>(false);
   const [canReindex, setCanReindex] = useState<boolean>(false);
@@ -78,7 +80,6 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
     services: {
       application: { capabilities },
       share,
-      notifications: { toasts },
       data,
       mlServices: {
         mlApiServices: { getIndices, reindexWithPipeline, hasPrivileges },
@@ -86,6 +87,8 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       docLinks: { links },
     },
   } = useMlKibana();
+
+  const { displayErrorToast } = useToastNotificationService();
 
   const canCreateDataView = useMemo(
     () =>
@@ -122,13 +125,12 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   const debouncedIndexCheck = debounce(async () => {
     const checkResp = await checkIndexExists(destinationIndex);
     if (checkResp.errorMessage !== undefined) {
-      toasts.addDanger(
+      displayErrorToast(
+        checkResp.errorMessage,
         i18n.translate(
           'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.errorCheckingIndexExists',
           {
-            defaultMessage:
-              'The following error occurred getting the existing index names: {error}',
-            values: { error: checkResp.errorMessage },
+            defaultMessage: 'An error occurred getting the existing index names',
           }
         )
       );
@@ -142,13 +144,13 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       const srcIndex = selectedIndex[0].label;
       const result = await reindexWithPipeline(pipelineName, srcIndex, destinationIndex);
       setReindexingTaskId(result.task);
-    } catch (e) {
-      toasts.addDanger(
+    } catch (error) {
+      displayErrorToast(
+        error,
         i18n.translate(
           'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexErrorMessage',
           {
-            defaultMessage: 'An error occurred reindexing: {error}',
-            values: { error: JSON.stringify(e) },
+            defaultMessage: 'An error occurred reindexing',
           }
         )
       );
@@ -186,9 +188,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
               },
             ],
           });
-          if (!privilege) {
-            setCanReindex(false);
-          }
+
           setCanReindex(
             privilege.securityDisabled === true || privilege.has_all_requested === true
           );
@@ -208,7 +208,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
         checkPrivileges();
       }
     },
-    [hasPrivileges, sourceIndex, toasts, destinationIndex, selectedIndex]
+    [hasPrivileges, sourceIndex, destinationIndex, selectedIndex]
   );
 
   useEffect(
