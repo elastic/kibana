@@ -13,6 +13,7 @@ import type { ObservabilityMetricsAlert } from './generated/observability_metric
 import type { ObservabilitySloAlert } from './generated/observability_slo_schema';
 import type { ObservabilityUptimeAlert } from './generated/observability_uptime_schema';
 import type { SecurityAlert } from './generated/security_schema';
+import type { MlAnomalyDetectionAlert } from './generated/ml_anomaly_detection_schema';
 
 export * from './create_schema_from_field_map';
 
