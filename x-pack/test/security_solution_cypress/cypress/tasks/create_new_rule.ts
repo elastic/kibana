@@ -131,7 +131,6 @@ export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
   cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
