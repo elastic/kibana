@@ -12,9 +12,7 @@
       "fleet",
       "cloud"
     ],
-    "optionalPlugins": [
-      "spaces"
-    ],
+    "optionalPlugins": [],
     "requiredBundles": []
   }
 }
