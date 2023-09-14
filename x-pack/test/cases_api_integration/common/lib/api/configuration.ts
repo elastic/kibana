@@ -49,6 +49,7 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
     mappings: [],
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
+    customFields: [],
     ...overwrite,
   };
 };
