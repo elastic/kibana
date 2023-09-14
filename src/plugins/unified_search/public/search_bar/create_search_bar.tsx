@@ -212,7 +212,9 @@ export function createSearchBar({
             showFilterBar={props.showFilterBar}
             showQueryMenu={props.showQueryMenu}
             showQueryInput={props.showQueryInput}
-            showSaveQuery={props.showSaveQuery}
+            showSaveQuery={
+              Boolean(core.application.capabilities.globalSavedQueries?.edit) || props.showSaveQuery
+            }
             showSubmitButton={props.showSubmitButton}
             submitButtonStyle={props.submitButtonStyle}
             isDisabled={props.isDisabled}
