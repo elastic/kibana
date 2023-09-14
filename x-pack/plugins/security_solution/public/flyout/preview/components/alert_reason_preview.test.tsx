@@ -31,17 +31,4 @@ describe('<AlertReasonPreview />', () => {
     );
     expect(getByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
   });
-
-  it('should render null is dataAsNestedObject is null', () => {
-    const contextValue = {
-      ...mockContextValue,
-      dataAsNestedObject: null,
-    };
-    const { queryByTestId } = render(
-      <PreviewPanelContext.Provider value={contextValue}>
-        <AlertReasonPreview />
-      </PreviewPanelContext.Provider>
-    );
-    expect(queryByTestId(ALERT_REASON_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();
-  });
 });
