@@ -20,9 +20,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const dataGrid = getService('dataGrid');
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
-  // Flaky in serverless tests (before hook)
-  // Failing: See https://github.com/elastic/kibana/issues/165396
-  describe.only('Customizations', () => {
+  describe('Customizations', () => {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.login();
