@@ -69,13 +69,7 @@ import { registerCasesPersistableState } from './lib/register_cases';
 import { registerSampleDataSetLinks } from './lib/register_sameple_data_set_links';
 import { ConfigSchema } from './config_schema';
 
-type SetFeaturesEnabled = (features: MlFeatures) => void;
-
-interface MlSetup {
-  setFeaturesEnabled: SetFeaturesEnabled;
-}
-
-export type MlPluginSetup = SharedServices & MlSetup;
+export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
 
 export class MlServerPlugin
@@ -293,19 +287,7 @@ export class MlServerPlugin
       registerCollector(plugins.usageCollection, getIndexForType);
     }
 
-    const setFeaturesEnabled = (features: MlFeatures) => {
-      if (features.ad !== undefined) {
-        this.enabledFeatures.ad = features.ad;
-      }
-      if (features.dfa !== undefined) {
-        this.enabledFeatures.dfa = features.dfa;
-      }
-      if (features.nlp !== undefined) {
-        this.enabledFeatures.nlp = features.nlp;
-      }
-    };
-
-    return { ...sharedServicesProviders, setFeaturesEnabled };
+    return { ...sharedServicesProviders };
   }
 
   public start(coreStart: CoreStart, plugins: PluginsStart): MlPluginStart {
@@ -350,14 +332,14 @@ export class MlServerPlugin
 
   private initEnabledFeatures() {
     const config = this.initializerContext.config.get();
-    if (config.ad?.enabled === false) {
-      this.enabledFeatures.ad = false;
+    if (config.ad?.enabled !== undefined) {
+      this.enabledFeatures.ad = config.ad.enabled;
     }
-    if (config.dfa?.enabled === false) {
-      this.enabledFeatures.dfa = false;
+    if (config.dfa?.enabled !== undefined) {
+      this.enabledFeatures.dfa = config.dfa.enabled;
     }
-    if (config.nlp?.enabled === false) {
-      this.enabledFeatures.nlp = false;
+    if (config.nlp?.enabled !== undefined) {
+      this.enabledFeatures.nlp = config.nlp.enabled;
     }
   }
 }

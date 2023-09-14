@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
