@@ -24,40 +24,38 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
 
-  const filters = useMemo(() => {
-    return shouldUseSearchCriteria
-      ? searchCriteria.filters
-      : [
-          buildCombinedHostsFilter({
-            field: 'host.name',
-            values: hostNodes.map((p) => p.name),
-            dataView,
-          }),
-        ];
-  }, [dataView, hostNodes, searchCriteria.filters, shouldUseSearchCriteria]);
+  const filters = shouldUseSearchCriteria
+    ? searchCriteria.filters
+    : [
+        buildCombinedHostsFilter({
+          field: 'host.name',
+          values: hostNodes.map((p) => p.name),
+          dataView,
+        }),
+      ];
+
+  const subtitle =
+    searchCriteria.limit < (hostCountData?.count.value ?? 0)
+      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
+          defaultMessage: 'Average (of {limit} hosts)',
+          values: {
+            limit: searchCriteria.limit,
+          },
+        })
+      : AVERAGE_SUBTITLE;
 
   // prevents requestTs and searchCriteria state from reloading the chart
-  // we want it to reload only once the table has finished loading
+  // we want it to reload only once the table has finished loading.
+  // attributes passed to useAfterLoadedState don't need to be memoized
   const { afterLoadedState } = useAfterLoadedState(loading, {
     lastReloadRequestTime: requestTs,
     dateRange: parsedDateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
+    subtitle,
   });
 
   const tooltipComponent = useMemo(() => <TooltipContent description={toolTip} />, [toolTip]);
-  const layerWithSubtitle = useMemo(() => {
-    const subtitle =
-      searchCriteria.limit < (hostCountData?.count.value ?? 0)
-        ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-            defaultMessage: 'Average (of {limit} hosts)',
-            values: {
-              limit: searchCriteria.limit,
-            },
-          })
-        : AVERAGE_SUBTITLE;
-    return { ...layers, options: { ...layers.options, subtitle } };
-  }, [hostCountData?.count.value, layers, searchCriteria.limit]);
 
   return (
     <LensChart
@@ -65,12 +63,13 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
-      layers={layerWithSubtitle}
+      layers={layers}
       lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
       height={height}
       query={afterLoadedState.query}
       title={title}
+      subtitle={afterLoadedState.subtitle}
       toolTip={tooltipComponent}
       visualizationType="lnsMetric"
       disableTriggers

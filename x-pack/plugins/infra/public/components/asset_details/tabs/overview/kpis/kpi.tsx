@@ -41,21 +41,18 @@ export const Kpi = ({
   }, [dataView, assetName]);
 
   const tooltipContent = useMemo(() => <TooltipContent description={toolTip} />, [toolTip]);
-  const layersWithSubtitle = useMemo(
-    () => ({ ...layers, options: { ...layers.options, subtitle: AVERAGE_SUBTITLE } }),
-    [layers]
-  );
 
   return (
     <LensChart
       id={`infraAssetDetailsKPI${id}`}
       dataView={dataView}
       dateRange={dateRange}
-      layers={layersWithSubtitle}
+      layers={layers}
       lastReloadRequestTime={refreshTs}
       height={height}
       filters={filters}
       title={title}
+      subtitle={AVERAGE_SUBTITLE}
       toolTip={tooltipContent}
       visualizationType="lnsMetric"
       disableTriggers

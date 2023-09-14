@@ -42,6 +42,7 @@ export interface UseLensAttributesXYChartParams extends UseLensAttributesBasePar
 export interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
   layers: MetricChartLayerParams;
   visualizationType: 'lnsMetric';
+  subtitle?: string;
 }
 
 export type UseLensAttributesParams =
@@ -196,7 +197,7 @@ const chartFactory = ({
         formulaAPI,
         layers: new MetricLayer({
           data: params.layers.data,
-          options: params.layers.options,
+          options: { ...params.layers.options, subtitle: params.subtitle },
         }),
         title: params.title,
       });
