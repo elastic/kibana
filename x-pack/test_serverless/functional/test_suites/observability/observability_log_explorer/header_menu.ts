@@ -99,9 +99,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         onboardingLink.click();
 
         await retry.try(async () => {
+          await browser.switchTab(1);
           const url = await browser.getCurrentUrl();
           expect(url).to.contain(`/app/observabilityOnboarding`);
         });
+
+        await browser.switchTab(0);
       });
     });
   });
