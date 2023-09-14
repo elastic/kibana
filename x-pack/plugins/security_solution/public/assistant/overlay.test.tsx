@@ -11,13 +11,11 @@ import { AssistantOverlay } from './overlay';
 const mockAssistantAvailability = jest.fn(() => ({
   hasAssistantPrivilege: true,
 }));
-jest.mock('@kbn/elastic-assistant/impl/assistant_context', () => ({
+jest.mock('@kbn/elastic-assistant', () => ({
+  AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
   useAssistantContext: () => ({
     assistantAvailability: mockAssistantAvailability(),
   }),
-}));
-jest.mock('@kbn/elastic-assistant', () => ({
-  AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
 }));
 
 describe('AssistantOverlay', () => {
