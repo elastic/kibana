@@ -19,7 +19,7 @@ export const hostDetailsSchema = requestBasicOptionsSchema.extend({
   inspect,
   pagination: pagination.optional(),
   timerange,
-  sort: sort.optional(),
+  sort,
   factoryQueryType: z.literal(HostsQueries.details),
 });
 
