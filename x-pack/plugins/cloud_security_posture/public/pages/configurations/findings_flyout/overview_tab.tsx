@@ -19,8 +19,6 @@ import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -31,7 +29,7 @@ import {
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
+import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
@@ -159,21 +157,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <div style={{ height: 400 }}>
-            <CodeEditor
-              isCopyable
-              allowFullScreen
-              languageId={XJsonLang.ID}
-              value={JSON.stringify(result.evidence, null, 2)}
-              options={{
-                readOnly: true,
-                lineNumbers: 'on',
-                folding: true,
-                automaticLayout: true,
-              }}
-            />
-            {/* <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>*/}
-          </div>
+          <CodeBlock language="json">{JSON.stringify(result.evidence, null, 2)}</CodeBlock>
         </>
       ),
     },
