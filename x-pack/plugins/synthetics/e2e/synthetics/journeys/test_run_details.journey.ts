@@ -51,6 +51,7 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
   });
 
   step('verified overview card contents', async () => {
+    await page.waitForSelector('text=https://www.google.com');
     const cardItem = await page.getByTestId('https://www.google.com-metric-item');
     expect(await cardItem.textContent()).toBe(
       'https://www.google.comNorth America - US CentralDuration155 ms'
