@@ -276,14 +276,18 @@ describe('group editor preview', () => {
       });
     });
 
-    it('handles missing data view', () => {
+    it('handles missing data view', async () => {
       rerender(
         <I18nProvider>
           <GroupPreview {...defaultProps} group={{ ...group, indexPatternId: 'doesnt-exist' }} />
         </I18nProvider>
       );
 
-      expect(screen.getByRole('heading', { name: 'Select a valid data view' })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          screen.getByRole('heading', { name: 'Select a valid data view' })
+        ).toBeInTheDocument();
+      });
       expect(getLensAttributes()).toBeNull(); // chart shouldn't be rendered
     });
   });
