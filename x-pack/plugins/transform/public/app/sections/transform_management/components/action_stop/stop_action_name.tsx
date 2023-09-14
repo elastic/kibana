@@ -36,7 +36,7 @@ export const getStopActionDisabledMessage = ({
 
   const { canStartStopTransform } = capabilities;
 
-  // Disable start for transforms if stats does not exist
+  // Disable transforms if stats does not exist
   const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 
   if (hasNoStats) {
@@ -77,7 +77,7 @@ export const isStopActionDisabled = (
   const stoppedTransform = items.some(
     (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STOPPED
   );
-  // Disable start for transforms if stats does not exist
+  // Disable transforms if stats does not exist
   const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 
   return forceDisable === true || !canStartStopTransform || stoppedTransform === true || hasNoStats;
@@ -89,7 +89,7 @@ export interface StopActionNameProps {
 }
 export const StopActionName: FC<StopActionNameProps> = ({ items, forceDisable }) => {
   const capabilities = useTransformCapabilities();
-  // Disable start for transforms if stats does not exist
+  // Disable transforms if stats does not exist
   const stoppedTransformMessage = getStopActionDisabledMessage({
     items,
     capabilities,

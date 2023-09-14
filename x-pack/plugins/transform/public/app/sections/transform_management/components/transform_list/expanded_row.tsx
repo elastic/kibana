@@ -13,9 +13,10 @@ import {
   EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiTabbedContent,
-  EuiText,
   EuiFlexGroup,
   useEuiTheme,
+  EuiCallOut,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -62,15 +63,22 @@ const NoStatsFallbackTabContent = ({
   const content = transformsStatsLoading ? (
     <EuiLoadingSpinner />
   ) : (
-    <EuiText textAlign="center" color="subdued" size="s">
-      <FormattedMessage
-        id="xpack.transform.transformList.noStatsAvailable"
-        defaultMessage="No stats available for this tranform."
+    <EuiFlexItem grow={true}>
+      <EuiCallOut
+        size="s"
+        color="warning"
+        iconType="iInCircle"
+        title={
+          <FormattedMessage
+            id="xpack.transform.transformList.noStatsAvailable"
+            defaultMessage="No stats available for this tranform."
+          />
+        }
       />
-    </EuiText>
+    </EuiFlexItem>
   );
   return (
-    <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: euiTheme.size.xxl }}>
+    <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: euiTheme.size.xxxxl }}>
       {content}
     </EuiFlexGroup>
   );

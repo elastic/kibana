@@ -16,7 +16,7 @@ export function createNoStatsTooltipMessage({
 }) {
   return i18n.translate('xpack.transform.transformList.actionDisabledNoStatsTooltipMessage', {
     defaultMessage:
-      '{actionName} is disabled because status for {count, plural, one {this transform} other {some transforms}} is unavailable.',
+      '{actionName} is disabled because the status for {count, plural, one {this transform} other {some transforms}} is unavailable.',
     values: { actionName, count },
   });
 }

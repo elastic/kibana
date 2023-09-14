@@ -190,6 +190,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
         async (ctx, req, res) => {
           try {
+            throw Error('error');
             const esClient = (await ctx.core).elasticsearch.client;
             const body = await esClient.asCurrentUser.transform.getTransformStats(
               {
