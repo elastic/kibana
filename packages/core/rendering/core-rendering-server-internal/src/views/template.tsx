@@ -50,6 +50,8 @@ export const Template: FunctionComponent<Props> = ({
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link rel="alternate icon" type="image/png" href={favIconPng} />
         <link rel="icon" type="image/svg+xml" href={favIcon} />
+        {/* Send the full URL (stripped of parameters) for same-origin requests, but only send the origin for other cases */}
+        <meta name="referrer" content="origin-when-cross-origin" />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
         {/* Inject EUI reset and global styles before all other component styles */}
