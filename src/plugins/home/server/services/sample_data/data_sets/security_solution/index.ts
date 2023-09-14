@@ -45,7 +45,7 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
     id: 'securitysolution',
     name: securitysolutionName,
     description: securitysolutionDescription,
-    previewImagePath: '/plugins/home/assets/sample_data_resources/flights/dashboard.webp',
+    previewImagePath: '/plugins/home/assets/sample_data_resources/security_solution/siem.png',
     overviewDashboard: '6b348ca0-4e45-11ee-8ec1-71bbd0b34722',
     defaultIndex: 'c89b196d-d0cd-4cfb-8d95-787e4ce51551',
     savedObjects: getSavedObjects(spaceId),
