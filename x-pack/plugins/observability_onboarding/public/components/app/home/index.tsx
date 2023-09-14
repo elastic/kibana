@@ -358,7 +358,6 @@ export function Home() {
           paddingSize="none"
           display="plain"
           hasBorder
-          onClick={handleClickIntegrations}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
