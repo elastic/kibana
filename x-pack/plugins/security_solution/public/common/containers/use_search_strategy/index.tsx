@@ -158,11 +158,14 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   }, [abort]);
 
   const [formattedResult, inspect] = useMemo(() => {
+    if (!result) {
+      return [initialResult, EMPTY_INSPECT];
+    }
     return [
       omit<StrategyResponseType<QueryType>, 'rawResponse'>('rawResponse', result),
       getInspectResponse(result, EMPTY_INSPECT),
     ];
-  }, [result]);
+  }, [result, initialResult]);
 
   return {
     loading,
