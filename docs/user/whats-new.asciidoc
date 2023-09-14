@@ -16,7 +16,7 @@ Previous versions: {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8
 [[highlights-8.4-release-docs]]
 === Elastic release docs now in one place
 With the new
-https://www.elastic.co/guide/en/welcome-to-elastic/current/new.html[Check out the latest from Elastic] page,
+{estc-welcome-current}/new.html[Check out the latest from Elastic] page,
 you can easily find all the latest information about Elastic features and updates
 in a single location.
 This includes release highlights, breaking changes, bug fixes, and more.
