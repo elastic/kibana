@@ -144,7 +144,7 @@ export function Home() {
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
               <EuiSpacer size="m" />
-              <EuiText color="subdued" size="s" textAlign="left">
+              <EuiText color="subdued" size="s" textAlign="center">
                 <p>
                   {i18n.translate(
                     'xpack.observability_onboarding.card.systemLogs.description1',
@@ -183,7 +183,7 @@ export function Home() {
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
               <EuiSpacer size="m" />
-              <EuiText color="subdued" size="s" textAlign="left">
+              <EuiText color="subdued" size="s" textAlign="center">
                 <p>
                   {i18n.translate(
                     'xpack.observability_onboarding.card.customLogs.description.text',
