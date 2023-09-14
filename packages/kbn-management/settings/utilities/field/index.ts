@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { FieldRow, type FieldRowProps as FieldProps } from './field_row';
-export { FieldRowProvider, FieldRowKibanaProvider } from './services';
-export type { FieldRowServices, FieldRowKibanaDependencies, RowOnChangeFn } from './types';
+export { getFieldInputValue } from './get_input_value';
+export { hasUnsavedChange } from './has_unsaved_change';
+export { isFieldDefaultValue } from './is_default_value';
+export { useUpdate } from './use_update';

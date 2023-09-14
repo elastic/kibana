@@ -14,11 +14,10 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 
-import { OnChangeFn } from '@kbn/management-settings-components-field-input';
-
-import { FieldResetLink } from './reset_link';
+import { InputResetLink } from './reset_link';
 import { ChangeImageLink } from './change_image_link';
 import { FieldOverriddenMessage } from './overridden_message';
+import { useInputFooterStyles } from './input_footer.styles';
 
 export const DATA_TEST_SUBJ_FOOTER_PREFIX = 'field-row-input-footer';
 
@@ -35,8 +34,7 @@ export interface FieldInputFooterProps<T extends SettingType> {
   field: Field<T>;
   /** The {@link UnsavedFieldChange} corresponding to any unsaved change to the field. */
   unsavedChange?: UnsavedFieldChange<T>;
-  /** The {@link OnChangeFn} handler. */
-  onChange: OnChangeFn<T>;
+  onClear: () => void;
   /** A handler for when a field is reset to its default or saved value. */
   onReset: () => void;
   /** True if saving this setting is enabled, false otherwise. */
@@ -47,17 +45,19 @@ export const FieldInputFooter = <T extends SettingType>({
   isSavingEnabled,
   field,
   onReset,
-  ...props
+  unsavedChange,
+  onClear,
 }: FieldInputFooterProps<T>) => {
+  const { footerCSS } = useInputFooterStyles();
   if (field.isOverridden) {
     return <FieldOverriddenMessage {...{ field }} />;
   }
 
   if (isSavingEnabled) {
     return (
-      <span data-test-subj={`${DATA_TEST_SUBJ_FOOTER_PREFIX}-${field.id}`}>
-        <FieldResetLink {...{ /* isLoading,*/ field, onReset }} />
-        <ChangeImageLink {...{ field, ...props }} />
+      <span css={footerCSS} data-test-subj={`${DATA_TEST_SUBJ_FOOTER_PREFIX}-${field.id}`}>
+        <InputResetLink {...{ field, onReset, unsavedChange }} />
+        <ChangeImageLink {...{ field, unsavedChange, onClear }} />
       </span>
     );
   }

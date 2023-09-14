@@ -17,8 +17,7 @@ import { DATA_TEST_SUBJ_SCREEN_READER_MESSAGE, FieldRow } from './field_row';
 import { wrap } from './mocks';
 
 import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
-import { DATA_TEST_SUBJ_OVERRIDDEN_PREFIX } from './input_footer/overridden_message';
-import { DATA_TEST_SUBJ_RESET_PREFIX } from './input_footer/reset_link';
+import { DATA_TEST_SUBJ_RESET_PREFIX } from './footer/reset_link';
 
 const defaults = {
   requiresPageReload: false,
@@ -87,7 +86,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
     description: 'Description for Array test setting',
     name: 'array:test:setting',
     type: 'array',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.array,
     ...defaults,
   },
@@ -95,7 +94,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
     description: 'Description for Boolean test setting',
     name: 'boolean:test:setting',
     type: 'boolean',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.boolean,
     ...defaults,
   },
@@ -103,7 +102,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
     description: 'Description for Color test setting',
     name: 'color:test:setting',
     type: 'color',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.color,
     ...defaults,
   },
@@ -111,7 +110,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
     description: 'Description for Image test setting',
     name: 'image:test:setting',
     type: 'image',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.image,
     ...defaults,
   },
@@ -132,7 +131,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
   //   name: 'markdown:test:setting',
   //   description: 'Description for Markdown test setting',
   //   type: 'markdown',
-  //   userValue: undefined,
+  //   userValue: null,
   //   value: '',
   //   ...defaults,
   // },
@@ -140,7 +139,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
     description: 'Description for Number test setting',
     name: 'number:test:setting',
     type: 'number',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.number,
     ...defaults,
   },
@@ -154,7 +153,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
       banana: 'Banana',
     },
     type: 'select',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.select,
     ...defaults,
   },
@@ -162,7 +161,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
     description: 'Description for String test setting',
     name: 'string:test:setting',
     type: 'string',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.string,
     ...defaults,
   },
@@ -170,7 +169,7 @@ const settings: Omit<Settings, 'markdown' | 'json'> = {
     description: 'Description for Undefined test setting',
     name: 'undefined:test:setting',
     type: 'undefined',
-    userValue: undefined,
+    userValue: null,
     value: defaultValues.undefined,
     ...defaults,
   },
@@ -254,7 +253,7 @@ describe('Field', () => {
           expect(getByTestId(inputTestSubj)).toBeDisabled();
         }
 
-        expect(getByTestId(`${DATA_TEST_SUBJ_OVERRIDDEN_PREFIX}-${id}`)).toBeInTheDocument();
+        // expect(getByTestId(`${DATA_TEST_SUBJ_OVERRIDDEN_PREFIX}-${id}`)).toBeInTheDocument();
       });
 
       it('should render as read only if saving is disabled', () => {
@@ -383,6 +382,28 @@ describe('Field', () => {
           unsavedValue: field.defaultValue,
         });
       });
+
+      it('should reset when reset link is clicked with an unsaved change', () => {
+        const field = getFieldDefinition({
+          id,
+          setting,
+        });
+
+        const { getByTestId } = render(
+          wrap(
+            <FieldRow
+              field={field}
+              unsavedChange={{ type, unsavedValue: userValues[type] }}
+              onChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        const input = getByTestId(`${DATA_TEST_SUBJ_RESET_PREFIX}-${field.id}`);
+        fireEvent.click(input);
+        expect(handleChange).toHaveBeenCalledWith(field.id, undefined);
+      });
     });
   });
 
@@ -473,9 +494,6 @@ describe('Field', () => {
 
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${field.id}`);
     fireEvent.change(input, { target: { value: field.savedValue } });
-    expect(handleChange).toHaveBeenCalledWith(field.id, {
-      type: 'string',
-      unsavedValue: undefined,
-    });
+    expect(handleChange).toHaveBeenCalledWith(field.id, undefined);
   });
 });

@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { SettingType } from './setting_type';
+import { UnsavedFieldChange } from './unsaved_change';
+
 export type {
   ArrayFieldDefinition,
   BooleanFieldDefinition,
@@ -33,6 +36,7 @@ export type {
   UndefinedUiSettingMetadata,
   UiSettingMetadata,
   KnownTypeToMetadata,
+  UiSetting,
 } from './metadata';
 
 export type {
@@ -59,3 +63,17 @@ export type {
   UndefinedSettingType,
   Value,
 } from './setting_type';
+
+/**
+ * A React `ref` that indicates an input can be reset using an
+ * imperative handle.
+ */
+export type ResetInputRef = {
+  reset: () => void;
+} | null;
+
+/**
+ * A function that is called when the value of a {@link FieldInput} changes.
+ * @param params The {@link OnChangeParams} parameters passed to the handler.
+ */
+export type OnChangeFn<T extends SettingType> = (change?: UnsavedFieldChange<T>) => void;
