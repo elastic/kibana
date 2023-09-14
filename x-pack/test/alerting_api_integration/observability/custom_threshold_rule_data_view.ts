@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Aggregators, Comparator } from '@kbn/observability-plugin/common/threshold_rule/types';
+import {
+  Aggregators,
+  Comparator,
+} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 
 import { FtrProviderContext } from '../common/ftr_provider_context';
