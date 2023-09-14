@@ -2,15 +2,12 @@
 
 set -euo pipefail
 
-SOURCE_IMAGE_OR_TAG=$1
-
 source .buildkite/scripts/common/util.sh
 
 BASE_ESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
 
-echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
-
+SOURCE_IMAGE_OR_TAG=$1
 if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z_-]+$ ]]; then
   # $SOURCE_IMAGE_OR_TAG was a full image
   SOURCE_IMAGE=$SOURCE_IMAGE_OR_TAG
@@ -18,6 +15,8 @@ else
   # $SOURCE_IMAGE_OR_TAG was an image tag
   SOURCE_IMAGE="$BASE_ESS_REPO:$SOURCE_IMAGE_OR_TAG"
 fi
+
+echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
 
 echo "Re-tagging $SOURCE_IMAGE -> $TARGET_IMAGE"
 
@@ -41,3 +40,6 @@ cat << EOT | buildkite-agent annotate --style "success"
 EOT
 
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"
+
+echo "--- Uploading latest-verified manifest to GCS"
+

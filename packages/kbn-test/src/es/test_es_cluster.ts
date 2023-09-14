@@ -239,8 +239,7 @@ export function createTestEsCluster<
           })
         ).installPath;
       } else if (esFrom === 'snapshot') {
-        // TODO: there's a mismatch here between the provided (config.license) and the expected ones
-        installPath = (await firstNode.installSnapshot(config as any)).installPath;
+        installPath = (await firstNode.installSnapshot(config)).installPath;
       } else if (esFrom === 'serverless') {
         await firstNode.runServerless({
           basePath,
