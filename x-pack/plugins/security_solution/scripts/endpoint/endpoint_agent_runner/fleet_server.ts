@@ -44,12 +44,14 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { resolve } from 'path';
 import type { FormattedAxiosError } from '../common/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
 import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
 import { fetchFleetServerUrl } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
+const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet-server.yml');
 
 export const runFleetServerIfNeeded = async (): Promise<
   { fleetServerContainerId: string; fleetServerAgentPolicyId: string } | undefined
@@ -218,7 +220,7 @@ export const startFleetServerWithDocker = async ({
       '--add-host',
       'host.docker.internal:host-gateway',
 
-      // '--rm',
+      '--rm',
 
       '--detach',
 
@@ -322,6 +324,9 @@ export const startFleetServerWithDocker = async ({
       'ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
       '--env',
       `FLEET_SERVER_POLICY=${policyId}`,
+
+      '--volume',
+      `${FLEET_SERVER_CUSTOM_CONFIG}:/etc/fleet-server.yml:ro`,
 
       '--publish',
       `${fleetServerPort}:8220`,

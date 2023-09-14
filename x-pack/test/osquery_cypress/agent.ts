@@ -41,10 +41,20 @@ export class AgentManager extends Manager {
       `FLEET_URL=https://host.docker.internal:${this.fleetServerPort}`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${this.policyEnrollmentKey}`,
+      // '--volume',
+      // `${CA_CERT_PATH}:/ca.crt`,
+      //
+      // '--volume',
+      // `${FLEET_SERVER_CERT_PATH}:/fleet-server.crt`,
+      //
+      // '--volume',
+      // `${FLEET_SERVER_KEY_PATH}:/fleet-server.key`,
+      // `--env`,
+      // `FLEET_CA=/ca.crt`,
       '--env',
       'FLEET_INSECURE=true',
       // TODO bring back when we figure out https issue on fleet
-      // '--rm',
+      '--rm',
       artifact,
     ];
 
