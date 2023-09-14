@@ -7,8 +7,6 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 
-import { dataLoaders } from './support/data_loaders';
-
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
   reporter: '../../../../node_modules/cypress-multi-reporters',
@@ -57,7 +55,13 @@ export default defineCypressConfig({
     setupNodeEvents: (on, config) => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
-      return dataLoaders(on, config);
+
+      // skip dataLoaders() because of `NativeResponseError: status_exception`
+      // message: `Native role management is not enabled in this Elasticsearch instance`
+      // related: https://github.com/elastic/security-team/issues/7614
+      // return dataLoaders(on, config);
+
+      return config;
     },
   },
 });
