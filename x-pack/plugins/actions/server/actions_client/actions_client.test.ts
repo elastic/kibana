@@ -37,7 +37,7 @@ import { ActionsAuthorization } from '../authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
   AuthorizationMode,
-  getBulkAuthorizationModeBySource,
+  bulkGetAuthorizationModeBySource,
 } from '../authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
@@ -71,7 +71,7 @@ jest.mock('../authorization/get_authorization_mode_by_source', () => {
     getAuthorizationModeBySource: jest.fn(() => {
       return 1;
     }),
-    getBulkAuthorizationModeBySource: jest.fn(() => {
+    bulkGetAuthorizationModeBySource: jest.fn(() => {
       return 1;
     }),
     AuthorizationMode: {
@@ -3007,8 +3007,8 @@ describe('execute()', () => {
 
 describe('bulkEnqueueExecution()', () => {
   describe('authorization', () => {
-    test('ensures user is authorised to excecute actions', async () => {
-      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+    test('ensures user is authorised to execute actions', async () => {
+      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
       });
       await actionsClient.bulkEnqueueExecution([
@@ -3037,7 +3037,7 @@ describe('bulkEnqueueExecution()', () => {
     });
 
     test('throws when user is not authorised to create the type of action', async () => {
-      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return { [AuthorizationMode.RBAC]: 1, [AuthorizationMode.Legacy]: 0 };
       });
       authorization.ensureAuthorized.mockRejectedValue(
@@ -3073,7 +3073,7 @@ describe('bulkEnqueueExecution()', () => {
     });
 
     test('tracks legacy RBAC', async () => {
-      (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+      (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 2 };
       });
 
@@ -3107,7 +3107,7 @@ describe('bulkEnqueueExecution()', () => {
   });
 
   test('calls the bulkExecutionEnqueuer with the appropriate parameters', async () => {
-    (getBulkAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+    (bulkGetAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
       return { [AuthorizationMode.RBAC]: 0, [AuthorizationMode.Legacy]: 0 };
     });
     const opts = [
