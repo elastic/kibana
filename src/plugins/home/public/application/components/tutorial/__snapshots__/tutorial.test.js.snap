@@ -1,160 +1,166 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`isCloudEnabled is false should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided 1`] = `
-<KibanaPageTemplate
+<_KibanaPageTemplate
   template="empty"
 >
-  <div>
-    <InjectIntl(IntroductionUI)
-      basePath={
-        Object {
-          "prepend": [Function],
-        }
-      }
-      description="tutorial used to drive jest tests"
-      notices={null}
-      title="jest test tutorial"
-    />
-    <EuiSpacer />
-    <InjectIntl(InstructionSetUi)
-      instructionVariants={
-        Array [
+  <_EuiPageSection>
+    <div>
+      <InjectIntl(IntroductionUI)
+        basePath={
           Object {
-            "id": "platform id",
-            "instructions": Array [
-              Object {
-                "title": "onPrem instructions",
-              },
-            ],
-          },
-        ]
-      }
-      isCloudEnabled={false}
-      offset={1}
-      onStatusCheck={[Function]}
-      paramValues={Object {}}
-      replaceTemplateStrings={[Function]}
-      setParameter={[Function]}
-      statusCheckState="NOT_CHECKED"
-      title="Instruction title"
-    />
-  </div>
-</KibanaPageTemplate>
-`;
-
-exports[`isCloudEnabled is false should render ON_PREM instructions with instruction toggle 1`] = `
-<KibanaPageTemplate
-  template="empty"
->
-  <div>
-    <InjectIntl(IntroductionUI)
-      basePath={
-        Object {
-          "prepend": [Function],
+            "prepend": [Function],
+          }
         }
-      }
-      description="tutorial used to drive jest tests"
-      iconType="logoApache"
-      notices={null}
-      title="jest test tutorial"
-    />
-    <EuiSpacer />
-    <EuiFormRow
-      describedByIds={Array []}
-      display="row"
-      hasChildLabel={true}
-      hasEmptyLabelSpace={false}
-      labelType="label"
-    >
-      <EuiButtonGroup
-        buttonSize="m"
-        color="text"
-        idSelected="onPrem"
-        isFullWidth={true}
-        legend="Deployment type"
-        onChange={[Function]}
-        options={
+        description="tutorial used to drive jest tests"
+        notices={null}
+        title="jest test tutorial"
+      />
+      <EuiSpacer />
+      <InjectIntl(InstructionSetUi)
+        instructionVariants={
           Array [
             Object {
-              "data-test-subj": "selfManagedTutorial",
-              "id": "onPrem",
-              "label": "Self managed",
-            },
-            Object {
-              "data-test-subj": "onCloudTutorial",
-              "id": "onPremElasticCloud",
-              "label": "Elastic Cloud",
+              "id": "platform id",
+              "instructions": Array [
+                Object {
+                  "title": "onPrem instructions",
+                },
+              ],
             },
           ]
         }
+        isCloudEnabled={false}
+        offset={1}
+        onStatusCheck={[Function]}
+        paramValues={Object {}}
+        replaceTemplateStrings={[Function]}
+        setParameter={[Function]}
+        statusCheckState="NOT_CHECKED"
+        title="Instruction title"
       />
-    </EuiFormRow>
-    <EuiSpacer />
-    <InjectIntl(InstructionSetUi)
-      instructionVariants={
-        Array [
+    </div>
+  </_EuiPageSection>
+</_KibanaPageTemplate>
+`;
+
+exports[`isCloudEnabled is false should render ON_PREM instructions with instruction toggle 1`] = `
+<_KibanaPageTemplate
+  template="empty"
+>
+  <_EuiPageSection>
+    <div>
+      <InjectIntl(IntroductionUI)
+        basePath={
           Object {
-            "id": "platform id",
-            "instructions": Array [
+            "prepend": [Function],
+          }
+        }
+        description="tutorial used to drive jest tests"
+        iconType="logoApache"
+        notices={null}
+        title="jest test tutorial"
+      />
+      <EuiSpacer />
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
+        <EuiButtonGroup
+          buttonSize="m"
+          color="text"
+          idSelected="onPrem"
+          isFullWidth={true}
+          legend="Deployment type"
+          onChange={[Function]}
+          options={
+            Array [
               Object {
-                "title": "onPrem instructions",
+                "data-test-subj": "selfManagedTutorial",
+                "id": "onPrem",
+                "label": "Self managed",
               },
-            ],
-          },
-        ]
-      }
-      isCloudEnabled={false}
-      offset={1}
-      onStatusCheck={[Function]}
-      paramValues={Object {}}
-      replaceTemplateStrings={[Function]}
-      setParameter={[Function]}
-      statusCheckState="NOT_CHECKED"
-      title="Instruction title"
-    />
-  </div>
-</KibanaPageTemplate>
+              Object {
+                "data-test-subj": "onCloudTutorial",
+                "id": "onPremElasticCloud",
+                "label": "Elastic Cloud",
+              },
+            ]
+          }
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <InjectIntl(InstructionSetUi)
+        instructionVariants={
+          Array [
+            Object {
+              "id": "platform id",
+              "instructions": Array [
+                Object {
+                  "title": "onPrem instructions",
+                },
+              ],
+            },
+          ]
+        }
+        isCloudEnabled={false}
+        offset={1}
+        onStatusCheck={[Function]}
+        paramValues={Object {}}
+        replaceTemplateStrings={[Function]}
+        setParameter={[Function]}
+        statusCheckState="NOT_CHECKED"
+        title="Instruction title"
+      />
+    </div>
+  </_EuiPageSection>
+</_KibanaPageTemplate>
 `;
 
 exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
-<KibanaPageTemplate
+<_KibanaPageTemplate
   template="empty"
 >
-  <div>
-    <InjectIntl(IntroductionUI)
-      basePath={
-        Object {
-          "prepend": [Function],
-        }
-      }
-      description="tutorial used to drive jest tests"
-      iconType="logoApache"
-      notices={null}
-      title="jest test tutorial"
-    />
-    <EuiSpacer />
-    <InjectIntl(InstructionSetUi)
-      instructionVariants={
-        Array [
+  <_EuiPageSection>
+    <div>
+      <InjectIntl(IntroductionUI)
+        basePath={
           Object {
-            "id": "platform id",
-            "instructions": Array [
-              Object {
-                "title": "elasticCloud instructions",
-              },
-            ],
-          },
-        ]
-      }
-      isCloudEnabled={true}
-      offset={1}
-      onStatusCheck={[Function]}
-      paramValues={Object {}}
-      replaceTemplateStrings={[Function]}
-      setParameter={[Function]}
-      statusCheckState="NOT_CHECKED"
-      title="Instruction title"
-    />
-  </div>
-</KibanaPageTemplate>
+            "prepend": [Function],
+          }
+        }
+        description="tutorial used to drive jest tests"
+        iconType="logoApache"
+        notices={null}
+        title="jest test tutorial"
+      />
+      <EuiSpacer />
+      <InjectIntl(InstructionSetUi)
+        instructionVariants={
+          Array [
+            Object {
+              "id": "platform id",
+              "instructions": Array [
+                Object {
+                  "title": "elasticCloud instructions",
+                },
+              ],
+            },
+          ]
+        }
+        isCloudEnabled={true}
+        offset={1}
+        onStatusCheck={[Function]}
+        paramValues={Object {}}
+        replaceTemplateStrings={[Function]}
+        setParameter={[Function]}
+        statusCheckState="NOT_CHECKED"
+        title="Instruction title"
+      />
+    </div>
+  </_EuiPageSection>
+</_KibanaPageTemplate>
 `;
