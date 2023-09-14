@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { MonitorLocations } from '../../common/runtime_types';
+import { selectOverviewState } from '../../../state';
 
-export const useCanEditSynthetics = () => {
-  return !!useKibana().services?.application?.capabilities.uptime.save;
-};
+export const useCanUsePublicLocById = (configId: string) => {
+  const {
+    data: { monitors },
+  } = useSelector(selectOverviewState);
 
-export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
+  const hasManagedLocation = monitors?.filter(
+    (mon) => mon.configId === configId && mon.location.isServiceManaged
+  );
+
   const canUsePublicLocations =
     useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
-  const publicLocations = monLocations?.some((loc) => loc.isServiceManaged);
 
-  if (!publicLocations) {
-    return true;
-  }
-
-  return !!canUsePublicLocations;
+  return hasManagedLocation ? !!canUsePublicLocations : true;
 };
