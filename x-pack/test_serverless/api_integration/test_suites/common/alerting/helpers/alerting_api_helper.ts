@@ -46,8 +46,9 @@ export async function createIndexConnector({
         refresh: true,
       },
       connector_type_id: '.index',
-    });
-  return body.id as string;
+    })
+    .expect(200);
+  return body;
 }
 
 export async function createSlackConnector({
@@ -68,8 +69,9 @@ export async function createSlackConnector({
         webhookUrl: 'http://test',
       },
       connector_type_id: '.slack',
-    });
-  return body.id as string;
+    })
+    .expect(200);
+  return body;
 }
 
 export async function createEsQueryRule({
@@ -110,8 +112,9 @@ export async function createEsQueryRule({
       name,
       rule_type_id: ruleTypeId,
       actions,
-      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '1m' } : {}),
-    });
+      ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
+    })
+    .expect(200);
   return body;
 }
 
@@ -125,7 +128,8 @@ export async function disableRule({
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_disable`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set('x-elastic-internal-origin', 'foo')
+    .expect(204);
   return body;
 }
 
@@ -141,7 +145,8 @@ export async function updateEsQueryRule({
   const { body: r } = await supertest
     .get(`/api/alerting/rule/${ruleId}`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set('x-elastic-internal-origin', 'foo')
+    .expect(200);
   const body = await supertest
     .put(`/api/alerting/rule/${ruleId}`)
     .set('kbn-xsrf', 'foo')
@@ -162,7 +167,8 @@ export async function updateEsQueryRule({
         })),
       },
       ...updates,
-    });
+    })
+    .expect(200);
   return body;
 }
 
@@ -173,11 +179,12 @@ export async function runRule({
   supertest: SuperTest<Test>;
   ruleId: string;
 }) {
-  const { body } = await supertest
+  const response = await supertest
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
-  return body;
+    .set('x-elastic-internal-origin', 'foo')
+    .expect(204);
+  return response;
 }
 
 export async function muteRule({
@@ -190,7 +197,8 @@ export async function muteRule({
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_mute_all`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set('x-elastic-internal-origin', 'foo')
+    .expect(204);
   return body;
 }
 
@@ -204,7 +212,8 @@ export async function enableRule({
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_enable`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set('x-elastic-internal-origin', 'foo')
+    .expect(204);
   return body;
 }
 
@@ -220,7 +229,8 @@ export async function muteAlert({
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set('x-elastic-internal-origin', 'foo')
+    .expect(204);
   return body;
 }
 
@@ -234,6 +244,7 @@ export async function unmuteRule({
   const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_unmute_all`)
     .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo');
+    .set('x-elastic-internal-origin', 'foo')
+    .expect(204);
   return body;
 }

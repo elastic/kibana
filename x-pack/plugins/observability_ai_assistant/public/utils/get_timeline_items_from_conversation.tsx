@@ -30,7 +30,10 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
       args,
     };
   } else {
-    const content = message.content ? JSON.parse(message.content) : undefined;
+    const content =
+      message.role !== MessageRole.Assistant && message.content
+        ? JSON.parse(message.content)
+        : message.content;
     const data = message.data ? JSON.parse(message.data) : undefined;
     value = omitBy(
       {
@@ -50,16 +53,20 @@ function FunctionName({ name: functionName }: { name: string }) {
   return <span style={{ fontFamily: euiTheme.font.familyCode, fontSize: 13 }}>{functionName}</span>;
 }
 
+export type StartedFrom = 'contextualInsight' | 'appTopNavbar' | 'conversationView';
+
 export function getTimelineItemsfromConversation({
-  currentUser,
-  messages,
-  hasConnector,
   chatService,
+  currentUser,
+  hasConnector,
+  messages,
+  startedFrom,
 }: {
-  currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
-  messages: Message[];
-  hasConnector: boolean;
   chatService: ObservabilityAIAssistantChatService;
+  currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
+  hasConnector: boolean;
+  messages: Message[];
+  startedFrom?: StartedFrom;
 }): ChatTimelineItem[] {
   return [
     {
@@ -113,8 +120,15 @@ export function getTimelineItemsfromConversation({
 
           // User executed a function:
           if (message.message.name && prevFunctionCall) {
-            const parsedContent = JSON.parse(message.message.content ?? 'null');
-            const isError = !!(parsedContent && 'error' in parsedContent);
+            let parsedContent;
+            try {
+              parsedContent = JSON.parse(message.message.content ?? 'null');
+            } catch (error) {
+              parsedContent = message.message.content;
+            }
+
+            const isError =
+              parsedContent && typeof parsedContent === 'object' && 'error' in parsedContent;
 
             title = !isError ? (
               <FormattedMessage
@@ -170,6 +184,14 @@ export function getTimelineItemsfromConversation({
 
             actions.canEdit = hasConnector;
             display.collapsed = false;
+
+            if (startedFrom === 'contextualInsight') {
+              const firstUserMessageIndex = messages.findIndex(
+                (el) => el.message.role === MessageRole.User
+              );
+
+              display.collapsed = index === firstUserMessageIndex;
+            }
           }
 
           break;
@@ -177,7 +199,7 @@ export function getTimelineItemsfromConversation({
         case MessageRole.Assistant:
           actions.canRegenerate = hasConnector;
           actions.canCopy = true;
-          actions.canGiveFeedback = true;
+          actions.canGiveFeedback = false;
           display.hide = false;
 
           // is a function suggestion by the assistant
@@ -191,9 +213,19 @@ export function getTimelineItemsfromConversation({
                 }}
               />
             );
-            content = convertMessageToMarkdownCodeBlock(message.message);
+            if (message.message.content) {
+              // TODO: we want to show the content always, and hide
+              // the function request initially, but we don't have a
+              // way to do that yet, so we hide the request here until
+              // we have a fix.
+              // element = message.message.content;
+              content = message.message.content;
+              display.collapsed = false;
+            } else {
+              content = convertMessageToMarkdownCodeBlock(message.message);
+              display.collapsed = true;
+            }
 
-            display.collapsed = true;
             actions.canEdit = true;
           } else {
             // is an assistant response

@@ -17,35 +17,18 @@ import { SurrDocType } from '../services/context';
  */
 export function getEsQuerySearchAfter(
   type: SurrDocType,
-  documents: DataTableRecord[],
-  timeFieldName: string,
-  anchor: DataTableRecord,
-  nanoSeconds: string,
-  useNewFieldsApi?: boolean
+  rows: DataTableRecord[],
+  anchor: DataTableRecord
 ): EsQuerySearchAfter {
-  if (documents.length) {
+  if (rows.length) {
     // already surrounding docs -> first or last record  is used
-    const afterTimeRecIdx =
-      type === SurrDocType.SUCCESSORS && documents.length ? documents.length - 1 : 0;
-    const afterTimeDoc = documents[afterTimeRecIdx];
-    const afterTimeDocRaw = afterTimeDoc.raw;
-    let afterTimeValue = afterTimeDocRaw.sort?.[0] as string | number;
-    if (nanoSeconds) {
-      afterTimeValue = useNewFieldsApi
-        ? afterTimeDocRaw.fields?.[timeFieldName][0]
-        : afterTimeDocRaw._source?.[timeFieldName];
-    }
-    return [afterTimeValue, afterTimeDoc.raw.sort?.[1] as string | number];
+    const afterTimeRecIdx = type === SurrDocType.SUCCESSORS && rows.length ? rows.length - 1 : 0;
+    const afterTimeDocRaw = rows[afterTimeRecIdx].raw;
+    return [
+      afterTimeDocRaw.sort?.[0] as string | number,
+      afterTimeDocRaw.sort?.[1] as string | number,
+    ];
   }
-  // if data_nanos adapt timestamp value for sorting, since numeric value was rounded by browser
   // ES search_after also works when number is provided as string
-  const searchAfter = new Array(2) as EsQuerySearchAfter;
-  searchAfter[0] = anchor.raw.sort?.[0] as string | number;
-  if (nanoSeconds) {
-    searchAfter[0] = useNewFieldsApi
-      ? anchor.raw.fields?.[timeFieldName][0]
-      : anchor.raw._source?.[timeFieldName];
-  }
-  searchAfter[1] = anchor.raw.sort?.[1] as string | number;
-  return searchAfter;
+  return [anchor.raw.sort?.[0] as string | number, anchor.raw.sort?.[1] as string | number];
 }

@@ -70,7 +70,7 @@
             "section": "def-public.ICasesDeepLinkId",
             "text": "ICasesDeepLinkId"
           },
-          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: any; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: any; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: any; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
+          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
         "deprecated": false,
@@ -1091,7 +1091,14 @@
           "\nReturn the UI capabilities for each type of operation. These strings must match the values defined in the UI\nhere: x-pack/plugins/cases/public/client/helpers/capabilities.ts"
         ],
         "signature": [
-          "() => { all: readonly [\"create_cases\", \"read_cases\", \"update_cases\", \"push_cases\", \"cases_connectors\"]; read: readonly [\"read_cases\", \"cases_connectors\"]; delete: readonly [\"delete_cases\"]; }"
+          "() => ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CasesUiCapabilities",
+            "text": "CasesUiCapabilities"
+          }
         ],
         "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
         "deprecated": false,
@@ -1108,7 +1115,14 @@
         "label": "getApiTags",
         "description": [],
         "signature": [
-          "(owner: \"cases\" | \"observability\" | \"securitySolution\") => { all: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", \"casesGetConnectorsConfigure\", string, string]; read: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", \"casesGetConnectorsConfigure\", string]; delete: readonly [string]; }"
+          "(owner: \"cases\" | \"observability\" | \"securitySolution\") => ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CasesApiTags",
+            "text": "CasesApiTags"
+          }
         ],
         "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
         "deprecated": false,
@@ -1238,6 +1252,62 @@
     "interfaces": [
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasesApiTags",
+        "type": "Interface",
+        "tags": [],
+        "label": "CasesApiTags",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesApiTags.all",
+            "type": "Object",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesApiTags.read",
+            "type": "Object",
+            "tags": [],
+            "label": "read",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesApiTags.delete",
+            "type": "Object",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasesPermissions",
         "type": "Interface",
         "tags": [],
@@ -1321,6 +1391,62 @@
             "label": "connectors",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.CasesUiCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "CasesUiCapabilities",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.all",
+            "type": "Object",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.read",
+            "type": "Object",
+            "tags": [],
+            "label": "read",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.delete",
+            "type": "Object",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2033,6 +2159,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CASES_CONNECTORS_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "CASES_CONNECTORS_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"cases_connectors\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CASES_URL",
         "type": "string",
         "tags": [],
@@ -2647,6 +2788,23 @@
           "\"cases\""
         ],
         "path": "x-pack/plugins/cases/common/constants/owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.GET_CONNECTORS_CONFIGURE_API_TAG",
+        "type": "string",
+        "tags": [],
+        "label": "GET_CONNECTORS_CONFIGURE_API_TAG",
+        "description": [
+          "\nThis tag is registered for the connectors (configure) get API"
+        ],
+        "signature": [
+          "\"casesGetConnectorsConfigure\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

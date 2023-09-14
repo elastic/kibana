@@ -10,4 +10,8 @@ export const METERING_TASK = {
   TYPE: 'serverless-security:endpoint-usage-reporting-task',
   VERSION: '1.0.0',
   INTERVAL: '5m',
+  // 1 hour
+  SAMPLE_PERIOD_SECONDS: 3600,
+  THRESHOLD_MINUTES: 30,
+  USAGE_TYPE_PREFIX: 'security_solution_',
 };

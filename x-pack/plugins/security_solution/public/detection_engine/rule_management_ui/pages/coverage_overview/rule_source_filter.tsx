@@ -96,7 +96,6 @@ const RuleSourceFilterComponent = ({
         <EuiPopoverTitle paddingSize="s">{i18n.CoverageOverviewFilterPopoverTitle}</EuiPopoverTitle>
         <EuiSelectable
           data-test-subj="coverageOverviewFilterList"
-          isLoading={isLoading}
           options={options}
           onChange={handleSelectableOnChange}
           renderOption={renderOptionLabel}
@@ -119,7 +118,7 @@ const RuleSourceFilterComponent = ({
             iconType="cross"
             color="danger"
             size="xs"
-            isDisabled={numActiveFilters === 0 || isLoading}
+            isDisabled={numActiveFilters === 0}
             onClick={handleOnClear}
           >
             {i18n.CoverageOverviewFilterPopoverClearAll}

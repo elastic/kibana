@@ -25,7 +25,7 @@ import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
 /**
- * Threat Intelligence section under Insights section, overview tab.
+ * Threat intelligence section under Insights section, overview tab.
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */
@@ -48,16 +48,9 @@ export const ThreatIntelligenceOverview: FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const {
-    loading: threatIntelLoading,
-    error: threatIntelError,
-    threatMatchesCount,
-    threatEnrichmentsCount,
-  } = useFetchThreatIntelligence({
+  const { loading, threatMatchesCount, threatEnrichmentsCount } = useFetchThreatIntelligence({
     dataFormattedForFieldBrowser,
   });
-
-  const error: boolean = !eventId || !dataFormattedForFieldBrowser || threatIntelError;
 
   return (
     <ExpandablePanel
@@ -74,16 +67,14 @@ export const ThreatIntelligenceOverview: FC = () => {
         data-test-subj={`${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}Container`}
       >
         <InsightsSummaryRow
-          loading={threatIntelLoading}
-          error={error}
+          loading={loading}
           icon={'warning'}
           value={threatMatchesCount}
           text={threatMatchesCount <= 1 ? THREAT_MATCH_DETECTED : THREAT_MATCHES_DETECTED}
           data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
         />
         <InsightsSummaryRow
-          loading={threatIntelLoading}
-          error={error}
+          loading={loading}
           icon={'warning'}
           value={threatEnrichmentsCount}
           text={threatEnrichmentsCount <= 1 ? THREAT_ENRICHMENT : THREAT_ENRICHMENTS}

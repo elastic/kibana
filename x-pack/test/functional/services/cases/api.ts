@@ -50,10 +50,10 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
       return createCaseAPI(kbnSupertest, caseData);
     },
 
-    async createNthRandomCases(amount: number = 3) {
+    async createNthRandomCases(amount: number = 3, owner?: string) {
       const cases: CasePostRequest[] = Array.from(
         { length: amount },
-        () => generateRandomCaseWithoutConnector() as CasePostRequest
+        () => generateRandomCaseWithoutConnector(owner) as CasePostRequest
       );
 
       await pMap(cases, async (caseData) => createCaseAPI(kbnSupertest, caseData), {

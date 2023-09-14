@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common';
+import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
@@ -62,14 +62,13 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      testBed = await setup(httpSetup);
-
       await act(async () => {
-        const { component } = testBed;
-
-        await nextTick();
-        component.update();
+        testBed = await setup(httpSetup);
       });
+
+      const { component } = testBed;
+
+      component.update();
     });
 
     test('toggles the include hidden button through URL hash correctly', () => {
@@ -421,6 +420,173 @@ describe('<IndexManagementHome />', () => {
       component.update();
 
       expect(exists('updateIndexSettingsErrorCallout')).toBe(true);
+    });
+  });
+
+  describe('Index stats', () => {
+    const indexName = 'test';
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+
+      const { component } = testBed;
+
+      component.update();
+    });
+
+    test('renders the table column with index stats by default', () => {
+      const { table } = testBed;
+      const { tableCellsValues } = table.getMetaData('indexTable');
+
+      expect(tableCellsValues).toEqual([
+        ['', 'test', 'green', 'open', '1', '1', '10000', '156kb', ''],
+      ]);
+    });
+
+    test('renders index stats in details flyout by default', async () => {
+      const { component, find } = testBed;
+
+      await act(async () => {
+        find('indexTableIndexNameLink').at(0).simulate('click');
+      });
+
+      component.update();
+
+      const descriptions = find('descriptionTitle');
+
+      const descriptionText = descriptions
+        .map((description) => {
+          return description.text();
+        })
+        .sort();
+
+      expect(descriptionText).toEqual([
+        'Aliases',
+        'Docs count',
+        'Docs deleted',
+        'Health',
+        'Primaries',
+        'Primary storage size',
+        'Replicas',
+        'Status',
+        'Storage size',
+      ]);
+    });
+
+    describe('Disabled', () => {
+      beforeEach(async () => {
+        await act(async () => {
+          testBed = await setup(httpSetup, {
+            config: {
+              enableLegacyTemplates: true,
+              enableIndexActions: true,
+              enableIndexStats: false,
+            },
+          });
+        });
+
+        const { component } = testBed;
+
+        component.update();
+      });
+
+      test('hides index stats information from table', async () => {
+        const { table } = testBed;
+        const { tableCellsValues } = table.getMetaData('indexTable');
+
+        expect(tableCellsValues).toEqual([['', 'test', '1', '1', '']]);
+      });
+
+      test('hides index stats information from details panel', async () => {
+        const { component, find } = testBed;
+        await act(async () => {
+          find('indexTableIndexNameLink').at(0).simulate('click');
+        });
+
+        component.update();
+
+        const descriptions = find('descriptionTitle');
+
+        const descriptionText = descriptions
+          .map((description) => {
+            return description.text();
+          })
+          .sort();
+
+        expect(descriptionText).toEqual(['Aliases', 'Primaries', 'Replicas']);
+      });
+    });
+  });
+
+  describe('Create Index', () => {
+    const indexNameA = 'test-index-a';
+    const indexNameB = 'test-index-b';
+    const indexMockA = createNonDataStreamIndex(indexNameA);
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          ...indexMockA,
+        },
+      ]);
+
+      testBed = await setup(httpSetup, {
+        history: createMemoryHistory(),
+      });
+
+      await act(async () => {
+        const { component } = testBed;
+
+        await nextTick();
+        component.update();
+      });
+    });
+
+    test('shows the create index button', async () => {
+      const { exists } = testBed;
+
+      expect(exists('createIndexButton')).toBe(true);
+    });
+
+    test('can open & close the create index modal', async () => {
+      const { exists, actions } = testBed;
+
+      await actions.clickCreateIndexButton();
+
+      expect(exists('createIndexNameFieldText')).toBe(true);
+
+      await await actions.clickCreateIndexCancelButton();
+
+      expect(exists('createIndexNameFieldText')).toBe(false);
+    });
+
+    test('creating an index', async () => {
+      const { component, exists, find, actions } = testBed;
+
+      expect(httpSetup.get).toHaveBeenCalledTimes(1);
+      expect(httpSetup.get).toHaveBeenNthCalledWith(1, '/api/index_management/indices');
+
+      await actions.clickCreateIndexButton();
+
+      expect(exists('createIndexNameFieldText')).toBe(true);
+      await act(async () => {
+        find('createIndexNameFieldText').simulate('change', { target: { value: indexNameB } });
+      });
+      component.update();
+
+      await actions.clickCreateIndexSaveButton();
+
+      // Saves the index with expected name
+      expect(httpSetup.put).toHaveBeenCalledWith(`${INTERNAL_API_BASE_PATH}/indices/create`, {
+        body: '{"indexName":"test-index-b"}',
+      });
+      // It refresh indices after saving
+      expect(httpSetup.get).toHaveBeenCalledTimes(2);
+      expect(httpSetup.get).toHaveBeenNthCalledWith(2, '/api/index_management/indices');
     });
   });
 });

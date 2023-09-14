@@ -1052,7 +1052,7 @@
                 "section": "def-common.EventAnnotationGroupConfig",
                 "text": "EventAnnotationGroupConfig"
               },
-              ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]; }) => ",
+              ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]; }) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -1104,7 +1104,7 @@
                         "section": "def-common.EventAnnotationGroupConfig",
                         "text": "EventAnnotationGroupConfig"
                       },
-                      ", \"annotations\" | \"ignoreGlobalFilters\" | \"indexPatternId\">[]"
+                      ", \"ignoreGlobalFilters\" | \"annotations\" | \"indexPatternId\">[]"
                     ],
                     "path": "packages/kbn-event-annotation-components/types.ts",
                     "deprecated": false,
@@ -1343,13 +1343,10 @@
       {
         "parentPluginId": "@kbn/event-annotation-components",
         "id": "def-public.defaultAnnotationLabel",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "defaultAnnotationLabel",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "packages/kbn-event-annotation-common/util.ts",
         "deprecated": false,
         "trackAdoption": false,

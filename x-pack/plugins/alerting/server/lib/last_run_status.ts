@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleLastRunOutcomeOrderMap, RuleLastRunOutcomes } from '../../common';
+import { RuleLastRunOutcomeOrderMap, RuleLastRunOutcomes } from '../../common';
 import {
   RuleLastRunOutcomeValues,
   RuleExecutionStatusWarningReasons,
@@ -47,8 +48,13 @@ export const lastRunFromState = (
     outcomeMsg.push(translations.taskRunner.warning.maxAlerts);
   } else if (metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     outcome = RuleLastRunOutcomeValues[1];
-    warning = RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS;
-    outcomeMsg.push(translations.taskRunner.warning.maxExecutableActions);
+    if (metrics.hasReachedQueuedActionsLimit) {
+      warning = RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS;
+      outcomeMsg.push(translations.taskRunner.warning.maxQueuedActions);
+    } else {
+      warning = RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS;
+      outcomeMsg.push(translations.taskRunner.warning.maxExecutableActions);
+    }
   }
 
   // Overwrite outcome to be error if last run reported any errors

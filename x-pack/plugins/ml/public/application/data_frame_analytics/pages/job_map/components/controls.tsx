@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
+import React, { FC, useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +37,7 @@ import {
   useNotifications,
   useNavigateToPath,
   useMlKibana,
+  useIsServerless,
 } from '../../../../contexts/kibana';
 import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
@@ -47,34 +48,40 @@ import {
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 
 interface Props {
-  details: any;
+  details: Record<string, any>;
   getNodeData: any;
   modelId?: string;
   updateElements: (nodeId: string, nodeLabel: string, destIndexNode?: string) => void;
   refreshJobsCallback: () => void;
 }
 
-function getListItems(details: object): EuiDescriptionListProps['listItems'] {
-  return Object.entries(details).map(([key, value]) => {
-    let description;
-    if (key === 'create_time') {
-      description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
-    } else {
-      description =
-        typeof value === 'object' ? (
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-            {JSON.stringify(value, null, 2)}
-          </EuiCodeBlock>
-        ) : (
-          value
-        );
+function getListItemsFactory(isServerless: boolean) {
+  return (details: Record<string, any>): EuiDescriptionListProps['listItems'] => {
+    if (isServerless) {
+      delete details.license_level;
     }
 
-    return {
-      title: key,
-      description,
-    };
-  });
+    return Object.entries(details).map(([key, value]) => {
+      let description;
+      if (key === 'create_time') {
+        description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
+      } else {
+        description =
+          typeof value === 'object' ? (
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+              {JSON.stringify(value, null, 2)}
+            </EuiCodeBlock>
+          ) : (
+            value
+          );
+      }
+
+      return {
+        title: key,
+        description,
+      };
+    });
+  };
 }
 
 export const Controls: FC<Props> = React.memo(
@@ -87,6 +94,9 @@ export const Controls: FC<Props> = React.memo(
     const canCreateDataFrameAnalytics: boolean = usePermissionCheck('canCreateDataFrameAnalytics');
     const canDeleteDataFrameAnalytics: boolean = usePermissionCheck('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
+    const isServerless = useIsServerless();
+    const getListItems = useMemo(() => getListItemsFactory(isServerless), [isServerless]);
+
     const {
       closeDeleteJobCheckModal,
       deleteItem,
@@ -140,8 +150,7 @@ export const Controls: FC<Props> = React.memo(
       } else {
         toasts.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
-            defaultMessage:
-              'To create a job from this index please create a data view for {indexTitle}.',
+            defaultMessage: 'To create a job from this index create a data view for {indexTitle}.',
             values: { indexTitle: nodeLabel },
           })
         );

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// @ts-expect-error no definitions in component folder
-import { EuiButton } from '@elastic/eui/lib/components/button';
+import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 

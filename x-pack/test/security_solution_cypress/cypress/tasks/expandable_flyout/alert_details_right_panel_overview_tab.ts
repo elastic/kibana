@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import {
-  INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID,
-  INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID,
-  INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID,
+  INSIGHTS_CORRELATIONS_TEST_ID,
+  INSIGHTS_ENTITIES_TEST_ID,
+  INSIGHTS_PREVALENCE_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
@@ -60,32 +61,36 @@ export const toggleOverviewTabInsightsSection = () => {
  * Click on the header in the right section, Insights, Entities
  */
 export const navigateToEntitiesDetails = () => {
-  cy.get(INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID).scrollIntoView();
-  cy.get(INSIGHTS_ENTITIES_TITLE_LINK_TEST_ID).should('be.visible').click();
+  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_ENTITIES_TEST_ID);
+  cy.get(TEST_ID).scrollIntoView();
+  cy.get(TEST_ID).should('be.visible').click();
 };
 
 /**
  * Click on the header in the right section, Insights, Threat Intelligence
  */
 export const navigateToThreatIntelligenceDetails = () => {
-  cy.get(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID).scrollIntoView();
-  cy.get(INSIGHTS_THREAT_INTELLIGENCE_TITLE_LINK_TEST_ID).should('be.visible').click();
+  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_THREAT_INTELLIGENCE_TEST_ID);
+  cy.get(TEST_ID).scrollIntoView();
+  cy.get(TEST_ID).should('be.visible').click();
 };
 
 /**
  * Click on the header in the right section, Insights, Correlations
  */
 export const navigateToCorrelationsDetails = () => {
-  cy.get(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID).scrollIntoView();
-  cy.get(INSIGHTS_CORRELATIONS_TITLE_LINK_TEST_ID).should('be.visible').click();
+  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_CORRELATIONS_TEST_ID);
+  cy.get(TEST_ID).scrollIntoView();
+  cy.get(TEST_ID).should('be.visible').click();
 };
 
 /**
  * Click on the view all button under the right section, Insights, Prevalence
  */
 export const navigateToPrevalenceDetails = () => {
-  cy.get(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID).scrollIntoView();
-  cy.get(INSIGHTS_PREVALENCE_TITLE_LINK_TEST_ID).should('be.visible').click();
+  const TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(INSIGHTS_PREVALENCE_TEST_ID);
+  cy.get(TEST_ID).scrollIntoView();
+  cy.get(TEST_ID).should('be.visible').click();
 };
 
 /* Visualizations section */

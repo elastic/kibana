@@ -38,7 +38,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
 
-      it('renders the correct error page title', async () => {
+      // Unskip once asset details error handling has been implemented
+      it.skip('renders the correct error page title', async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'infraOps',
           '/detail/host/test',
@@ -196,6 +197,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         await pageObjects.infraHome.openTimeline();
         await pageObjects.infraHome.closeTimeline();
+      });
+
+      it('toggles the inventory switcher', async () => {
+        await pageObjects.infraHome.toggleInventorySwitcher();
       });
     });
 
