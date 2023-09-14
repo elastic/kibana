@@ -187,8 +187,8 @@ export class KibanaMigrator implements IKibanaMigrator {
 
   public migrateDocument(
     doc: SavedObjectUnsanitizedDoc,
-    { allowDowngrade = false, convertNamespaceTypes = false }: MigrateDocumentOptions = {}
+    { allowDowngrade = false }: MigrateDocumentOptions = {}
   ): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc, { allowDowngrade, convertNamespaceTypes });
+    return this.documentMigrator.migrate(doc, { allowDowngrade });
   }
 }
