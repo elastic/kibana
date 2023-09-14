@@ -106,10 +106,10 @@ export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
-export const KIBANA_ES_SERVERLESS_REPO = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch-serverless`;
-export const ELASTICSEARCH_ES_SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const LATEST_VERIFIED_SERVERLESS_TAG = 'latest-verified';
-export const DEFAULT_SERVERLESS_IMG = `${KIBANA_ES_SERVERLESS_REPO}:${LATEST_VERIFIED_SERVERLESS_TAG}`;
+export const ES_SERVERLESS_REPO_KIBANA = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_REPO_ELASTICSEARCH = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_LATEST_VERIFIED_TAG = 'latest-verified';
+export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SERVERLESS_LATEST_VERIFIED_TAG}`;
 
 // See for default cluster settings
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
@@ -523,8 +523,8 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 function getServerlessImage(options: { image?: string; tag?: string }) {
   return resolveDockerImage({
     ...options,
-    repo: ELASTICSEARCH_ES_SERVERLESS_REPO,
-    defaultImg: DEFAULT_SERVERLESS_IMG,
+    repo: ES_SERVERLESS_REPO_ELASTICSEARCH,
+    defaultImg: ES_SERVERLESS_DEFAULT_IMAGE,
   });
 }
 
@@ -686,7 +686,11 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
  * Resolve the Elasticsearch image based on defaults and CLI options
  */
 function getDockerImage(options: { tag?: string; image?: string }) {
-  return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+  return resolveDockerImage({
+    ...options,
+    repo: DOCKER_REPO,
+    defaultImg: DOCKER_IMG,
+  });
 }
 
 /**

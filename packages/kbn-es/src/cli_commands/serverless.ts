@@ -13,8 +13,8 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import {
-  ELASTICSEARCH_ES_SERVERLESS_REPO,
-  DEFAULT_SERVERLESS_IMG,
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+  ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
   ServerlessOptions,
 } from '../utils';
@@ -27,8 +27,8 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ESS to run from ${ELASTICSEARCH_ES_SERVERLESS_REPO}
-      --image             Full path of ESS image to run, has precedence over tag. [default: ${DEFAULT_SERVERLESS_IMG}]
+      --tag               Image tag of ESS to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
+      --image             Full path of ESS image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ESS without attaching to the first node's logs
       --basePath          Path to the directory where the ES cluster will store data
       --clean             Remove existing file system object store before running
@@ -37,7 +37,7 @@ export const serverless: Command = {
       --ssl               Enable HTTP SSL on Elasticsearch
       --teardown          If this process exits, teardown the ES cluster as well
       --waitForReady      Wait for the ES cluster to be ready to serve requests
-      
+
       -E                  Additional key=value settings to pass to Elasticsearch
       -F                  Absolute paths for files to mount into containers
 
