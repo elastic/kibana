@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { CORRELATIONS_SESSION_ALERTS } from '../../shared/translations';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID } from './test_ids';
 
@@ -35,7 +35,13 @@ export const RelatedAlertsBySession: React.VFC<RelatedAlertsBySessionProps> = ({
     entityId,
     scopeId,
   });
-  const text = CORRELATIONS_SESSION_ALERTS(dataCount);
+  const text = (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.insights.correlations.sessionAlertsLabel"
+      defaultMessage="{count, plural, one {alert} other {alerts}} related by session"
+      values={{ count: dataCount }}
+    />
+  );
 
   return (
     <InsightsSummaryRow
