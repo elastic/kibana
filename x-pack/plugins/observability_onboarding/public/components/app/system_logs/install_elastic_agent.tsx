@@ -38,7 +38,7 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../shared/step_panel';
-import { ApiKeyBanner } from '../custom_logs/wizard/api_key_banner';
+import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { WindowsInstallStep } from '../../shared/windows_install_step';
 import { SystemIntegrationBanner } from './system_integration_banner';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';

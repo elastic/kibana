@@ -7,10 +7,7 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
@@ -22,27 +19,27 @@ import {
   SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/observability-log-explorer-plugin/public';
-import { ObservabilityOnboardingPluginSetupDeps } from '../../../../plugin';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
-} from '../../../shared/get_elastic_agent_setup_command';
+} from '../../shared/get_elastic_agent_setup_command';
 import {
   InstallElasticAgentSteps,
   ProgressStepId,
   EuiStepStatus,
-} from '../../../shared/install_elastic_agent_steps';
+} from '../../shared/install_elastic_agent_steps';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
-} from '../../../shared/step_panel';
+} from '../../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { BackButton } from './back_button';
-import { WindowsInstallStep } from '../../../shared/windows_install_step';
-import { TroubleshootingLink } from '../../../shared/troubleshooting_link';
+import { WindowsInstallStep } from '../../shared/windows_install_step';
+import { TroubleshootingLink } from '../../shared/troubleshooting_link';
 
 export function InstallElasticAgent() {
   const {
@@ -54,14 +51,11 @@ export function InstallElasticAgent() {
       SINGLE_DATASET_LOCATOR_ID
     );
 
-  const { goBack, goToStep, getState, setState } = useWizard();
+  const { goBack, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
 
-  function onInspect() {
-    goToStep('inspect');
-  }
   async function onContinue() {
     await singleDatasetLocator!.navigate({
       integration: wizardState.integrationName,
@@ -243,33 +237,18 @@ export function InstallElasticAgent() {
         <StepPanelFooter
           items={[
             <BackButton onBack={goBack} />,
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="observabilityOnboardingInstallElasticAgentInspectButton"
-                  onClick={onInspect}
-                >
-                  {i18n.translate(
-                    'xpack.observability_onboarding.steps.inspect',
-                    { defaultMessage: 'Inspect' }
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="obltOnboardingExploreLogs"
-                  color="success"
-                  fill
-                  iconType="magnifyWithPlus"
-                  onClick={onContinue}
-                >
-                  {i18n.translate(
-                    'xpack.observability_onboarding.steps.exploreLogs',
-                    { defaultMessage: 'Explore logs' }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>,
+            <EuiButton
+              data-test-subj="obltOnboardingExploreLogs"
+              color="success"
+              fill
+              iconType="magnifyWithPlus"
+              onClick={onContinue}
+            >
+              {i18n.translate(
+                'xpack.observability_onboarding.steps.exploreLogs',
+                { defaultMessage: 'Explore logs' }
+              )}
+            </EuiButton>,
           ]}
         />
       }
