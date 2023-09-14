@@ -18,7 +18,7 @@ import {
 
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 
-const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
+const allAlertTypeIds = `alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${ESQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${ML_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${QUERY_RULE_TYPE_ID}
