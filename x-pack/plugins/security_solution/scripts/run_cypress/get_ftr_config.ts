@@ -141,7 +141,7 @@ export const getFTRConfig = ({
         );
 
         if (vars.serverless) {
-          vars.kbnTestServer.serverArgs.push(`--xpack.fleet.internal.fleetServerStandalone=false`);
+          // vars.kbnTestServer.serverArgs.push(`--xpack.fleet.internal.fleetServerStandalone=false`);
         }
       }
 

@@ -43,7 +43,8 @@ export class AgentManager extends Manager {
       `FLEET_ENROLLMENT_TOKEN=${this.policyEnrollmentKey}`,
       '--env',
       'FLEET_INSECURE=true',
-      '--rm',
+      // TODO bring back when we figure out https issue on fleet
+      // '--rm',
       artifact,
     ];
 

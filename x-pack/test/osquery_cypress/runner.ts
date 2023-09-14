@@ -19,20 +19,15 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kbnClient = getService('kibanaServer');
 
-  // todo here?
   const elasticUrl = Url.format(config.get('servers.elasticsearch'));
-  // const elasticUrl = 'https://elastic_serverless:changeme@host.docker.internal:9200';
   const kibanaUrl = Url.format(config.get('servers.kibana'));
   const fleetServerUrl = Url.format({
     protocol: config.get('servers.kibana.protocol'),
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.fleetserver.port'),
   });
-  console.log({ elasticUrl, kibanaUrl, fleetServerUrl });
-  // const username = 'elastic_serverless';
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
-  console.log({ username, password });
 
   await startRuntimeServices({
     log,
@@ -44,14 +39,10 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
     version: await getLatestAvailableAgentVersion(kbnClient),
   });
 
-  console.log('11111111');
   await new FleetManager(log).setup();
-  console.log('222222222');
 
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, 'Default policy');
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, 'Osquery policy');
-
-  console.log('333333333');
 
   await new AgentManager(policyEnrollmentKey, config.get('servers.fleetserver.port'), log).setup();
   await new AgentManager(
@@ -66,7 +57,7 @@ export async function startOsqueryCypress(context: FtrProviderContext) {
 
   await setupFleetAgent(context);
 
-  const osqueryConfig = {
+  return {
     FORCE_COLOR: '1',
     baseUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
@@ -85,7 +76,4 @@ export async function startOsqueryCypress(context: FtrProviderContext) {
       port: config.get('servers.kibana.port'),
     }),
   };
-
-  console.log({ osqueryConfig });
-  return osqueryConfig;
 }
