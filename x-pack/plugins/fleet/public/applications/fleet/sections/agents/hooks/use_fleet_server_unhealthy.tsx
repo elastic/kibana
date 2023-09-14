@@ -37,7 +37,7 @@ export function useFleetServerUnhealthy() {
 
       if (agentPolicyIds.length > 0) {
         const agentStatusesRes = await sendGetAgentStatus({
-          kuery: agentPolicyIds.map((policyId) => `policy_id:"${policyId}"`).join(' or '),
+          kuery: agentPolicyIds.map((policyId) => `policy_id:${policyId}`).join(' or '),
         });
 
         if (agentStatusesRes.error) {

@@ -36,7 +36,7 @@ export const statsContainerCss = css`
 `;
 
 export const groupingContainerCss = css`
-  .groupingAccordionForm .euiAccordion__childWrapper .euiAccordion__padding--m {
+  .groupingAccordionForm .euiAccordion__childWrapper .euiAccordion__children {
     margin-left: 8px;
     margin-right: 8px;
     border-left: ${euiThemeVars.euiBorderThin};
@@ -68,7 +68,7 @@ export const groupingContainerCss = css`
 `;
 
 export const groupingContainerCssLevel = css`
-  .groupingAccordionFormLevel .euiAccordion__childWrapper .euiAccordion__padding--m {
+  .groupingAccordionFormLevel .euiAccordion__childWrapper .euiAccordion__children {
     margin-left: 8px;
     margin-right: 8px;
     border-left: none;

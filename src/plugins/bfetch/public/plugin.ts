@@ -8,11 +8,15 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
 import { DISABLE_BFETCH_COMPRESSION, removeLeadingSlash } from '../common';
 import { createStreamingBatchedFunction, StreamingBatchedFunctionParams } from './batching';
 import { BatchedFunc } from './batching/types';
+import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchPublicSetupDependencies {}
@@ -47,14 +51,19 @@ export class BfetchPublicPlugin
     core: CoreSetup<any, any>,
     plugins: BfetchPublicSetupDependencies
   ): BfetchPublicSetup {
-    const { version } = this.initializerContext.env.packageInfo;
+    const { version: kibanaVersion } = this.initializerContext.env.packageInfo;
     const basePath = core.http.basePath.get();
 
     const startServices = createStartServicesGetter(core.getStartServices);
     const getIsCompressionDisabled = () =>
       startServices().core.uiSettings.get<boolean>(DISABLE_BFETCH_COMPRESSION);
 
-    const fetchStreaming = this.fetchStreaming(version, basePath, getIsCompressionDisabled);
+    const fetchStreaming = this.fetchStreaming(
+      BFETCH_ROUTE_VERSION_LATEST,
+      kibanaVersion,
+      basePath,
+      getIsCompressionDisabled
+    );
     const batchedFunction = this.batchedFunction(fetchStreaming, getIsCompressionDisabled);
 
     this.contract = {
@@ -74,6 +83,7 @@ export class BfetchPublicPlugin
   private fetchStreaming =
     (
       version: string,
+      kibanaVersion: string,
       basePath: string,
       getIsCompressionDisabled: () => boolean
     ): BfetchPublicSetup['fetchStreaming'] =>
@@ -83,8 +93,9 @@ export class BfetchPublicPlugin
         url: `${basePath}/${removeLeadingSlash(params.url)}`,
         headers: {
           'Content-Type': 'application/json',
-          'kbn-version': version,
+          'kbn-version': kibanaVersion,
           [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
+          [ELASTIC_HTTP_VERSION_HEADER]: version,
           ...(params.headers || {}),
         },
         getIsCompressionDisabled,

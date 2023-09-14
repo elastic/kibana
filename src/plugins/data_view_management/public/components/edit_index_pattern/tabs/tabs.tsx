@@ -569,7 +569,7 @@ export function Tabs({
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, relationships.length).map(
+      getTabs(indexPattern, fieldFilter, relationships.length, dataViews.scriptedFieldsEnabled).map(
         (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
           return {
             ...tab,
@@ -577,7 +577,7 @@ export function Tabs({
           };
         }
       ),
-    [fieldFilter, getContent, indexPattern, relationships]
+    [fieldFilter, getContent, indexPattern, relationships, dataViews.scriptedFieldsEnabled]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);

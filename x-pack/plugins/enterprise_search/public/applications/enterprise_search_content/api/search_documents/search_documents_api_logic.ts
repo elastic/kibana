@@ -9,20 +9,32 @@ import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
 
 import { Meta } from '../../../../../common/types';
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
+
+export interface SearchDocumentsApiLogicArgs {
+  docsPerPage?: number;
+  indexName: string;
+  pagination: { pageIndex: number; pageSize: number };
+  query?: string;
+}
+
+export interface SearchDocumentsApiLogicValues {
+  meta: Meta;
+  results: SearchResponseBody;
+}
+
+export type SearchDocumentsApiLogicActions = Actions<
+  SearchDocumentsApiLogicArgs,
+  SearchDocumentsApiLogicValues
+>;
 
 export const searchDocuments = async ({
   docsPerPage,
   indexName,
   pagination,
   query: searchQuery,
-}: {
-  docsPerPage?: number;
-  indexName: string;
-  pagination: { pageIndex: number; pageSize: number };
-  query?: string;
-}) => {
+}: SearchDocumentsApiLogicArgs) => {
   const newIndexName = encodeURIComponent(indexName);
   const route = `/internal/enterprise_search/indices/${newIndexName}/search`;
   const query = {
@@ -30,7 +42,7 @@ export const searchDocuments = async ({
     size: docsPerPage || pagination.pageSize,
   };
 
-  return await HttpLogic.values.http.post<{ meta: Meta; results: SearchResponseBody }>(route, {
+  return await HttpLogic.values.http.post<SearchDocumentsApiLogicValues>(route, {
     body: JSON.stringify({
       searchQuery,
     }),
@@ -38,7 +50,5 @@ export const searchDocuments = async ({
   });
 };
 
-export const SearchDocumentsApiLogic = createApiLogic(
-  ['search_documents_api_logic'],
-  searchDocuments
-);
+export const searchDocumentsApiLogic = (indexName: string) =>
+  createApiLogic(['search_documents_api_logic', indexName], searchDocuments);

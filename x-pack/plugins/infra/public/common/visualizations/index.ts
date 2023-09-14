@@ -7,16 +7,9 @@
 
 export type {
   HostsLensFormulas,
-  LineChartOptions,
-  LensChartConfig,
-  LensLineChartConfig,
-  MetricChartOptions,
   HostsLensMetricChartFormulas,
   HostsLensLineChartFormulas,
-  LensOptions,
-  LensAttributes,
 } from './types';
 
-export { hostLensFormulas, visualizationTypes } from './constants';
-
-export { LensAttributesBuilder } from './lens/lens_attributes_builder';
+export * from './lens/dashboards';
+export { hostLensFormulas } from './constants';

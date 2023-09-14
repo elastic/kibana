@@ -37,6 +37,7 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
@@ -70,6 +71,7 @@ export interface ExploratoryViewPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
 }
 
 export type ExploratoryViewPublicSetup = ReturnType<Plugin['setup']>;

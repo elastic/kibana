@@ -884,8 +884,6 @@
         "description": [],
         "signature": [
           "(mappings: ",
-          "IndexMapping",
-          " | ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
             "scope": "common",
@@ -893,6 +891,8 @@
             "section": "def-common.SavedObjectsFieldMapping",
             "text": "SavedObjectsFieldMapping"
           },
+          " | ",
+          "IndexMapping",
           ", path: string | string[]) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
@@ -915,15 +915,15 @@
             "label": "mappings",
             "description": [],
             "signature": [
-              "IndexMapping",
-              " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
                 "section": "def-common.SavedObjectsFieldMapping",
                 "text": "SavedObjectsFieldMapping"
-              }
+              },
+              " | ",
+              "IndexMapping"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/mappings/lib/get_property.ts",
             "deprecated": false,

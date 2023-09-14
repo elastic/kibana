@@ -16,7 +16,7 @@ import type {
   RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { IEventLogHealthClient } from './event_log/event_log_health_client';
 import type { IRuleObjectsHealthClient } from './rule_objects/rule_objects_health_client';

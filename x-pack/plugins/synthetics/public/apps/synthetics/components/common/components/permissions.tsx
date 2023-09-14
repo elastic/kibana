@@ -58,16 +58,21 @@ export const NEED_PERMISSIONS_PRIVATE_LOCATIONS = i18n.translate(
   }
 );
 
-export const ALL = i18n.translate('xpack.synthetics.monitorManagement.priviledges.all', {
+export const ALL = i18n.translate('xpack.synthetics.monitorManagement.privileges.all', {
   defaultMessage: 'All',
+});
+
+export const READ = i18n.translate('xpack.synthetics.monitorManagement.privileges.read', {
+  defaultMessage: 'Read',
 });
 
 export const NEED_PRIVATE_LOCATIONS_PERMISSION = (
   <FormattedMessage
     id="xpack.synthetics.monitorManagement.privateLocations.needFleetPermission"
-    defaultMessage="In order to create private locations, you need an agent policy. You are not authorized to create Fleet agent policies. It requires the {all} Kibana privilege for Fleet."
+    defaultMessage="In order to create private locations, you need an agent policy. You are not authorized to create Fleet agent policies. It requires the {all} for Fleet and at least {read} for Integerations kibana priviliges."
     values={{
       all: <EuiCode>{`"${ALL}"`}</EuiCode>,
+      read: <EuiCode>{`"${READ}"`}</EuiCode>,
     }}
   />
 );

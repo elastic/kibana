@@ -121,6 +121,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       layout="horizontal"
       color="plain"
       icon={<NoResultsIllustration />}
+      hasBorder
       title={
         <h2 data-test-subj="discoverNoResults">
           <FormattedMessage

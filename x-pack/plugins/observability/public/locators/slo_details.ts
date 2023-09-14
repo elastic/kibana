@@ -8,12 +8,11 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { sloDetailsLocatorID } from '../../common';
-import { SLOS_PATH } from '../routes/paths';
+import { SLOS_PATH } from '../../common/locators/paths';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SloDetailsParams = {
+export interface SloDetailsParams {
   sloId?: string;
-};
+}
 
 export interface SloDetailsLocatorParams extends SloDetailsParams, SerializableRecord {}
 

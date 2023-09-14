@@ -29,7 +29,7 @@ import type { BuildReasonMessage } from '../../utils/reason_formatters';
 import {
   AlertSuppressionMissingFieldsStrategy,
   DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-} from '../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 

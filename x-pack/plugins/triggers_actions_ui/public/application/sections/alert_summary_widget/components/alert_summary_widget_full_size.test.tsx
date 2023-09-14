@@ -56,4 +56,15 @@ describe('AlertSummaryWidgetFullSize', () => {
       '2.02k'
     );
   });
+
+  it('should render AlertSummaryWidgetFullSize without a chart', async () => {
+    const alertSummaryWidget = renderComponent({
+      hideChart: true,
+    });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSize')).toBeTruthy();
+    expect(
+      alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSizeChartContainer')
+    ).not.toBeInTheDocument();
+  });
 });

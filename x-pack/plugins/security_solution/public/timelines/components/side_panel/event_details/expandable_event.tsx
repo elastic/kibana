@@ -22,6 +22,7 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import {
@@ -96,7 +97,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
     ruleName,
     timestamp,
   }) => {
-    const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+    const { hasAssistantPrivilege } = useAssistantAvailability();
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
     const { onClick } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.alerts,
@@ -152,7 +153,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             )}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
-                {isAssistantEnabled && promptContextId != null && (
+                {hasAssistantPrivilege && promptContextId != null && (
                   <EuiFlexItem grow={false}>
                     <NewChatById
                       conversationId={

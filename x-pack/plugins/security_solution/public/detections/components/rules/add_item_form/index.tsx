@@ -42,10 +42,7 @@ const MyEuiFormRow = styled(EuiFormRow)`
 
 export const MyAddItemButton = styled(EuiButtonEmpty)`
   margin: 4px 0px;
-
-  &.euiButtonEmpty--small {
-    font-size: 12px;
-  }
+  font-size: 12px;
 
   .euiIcon {
     width: 12px;

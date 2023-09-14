@@ -18,11 +18,11 @@ import type { Subscription } from 'rxjs';
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { SpacesDescription } from './components/spaces_description';
+import { SpacesMenu } from './components/spaces_menu';
 import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import type { SpacesManager } from '../spaces_manager';
-import { SpacesDescription } from './components/spaces_description';
-import { SpacesMenu } from './components/spaces_menu';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>

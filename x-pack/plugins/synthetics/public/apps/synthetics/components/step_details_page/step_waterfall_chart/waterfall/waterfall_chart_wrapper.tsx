@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiHealth } from '@elastic/eui';
 import { JourneyStep, NetworkEvent } from '../../../../../../../common/runtime_types';
+import { useDateFormat } from '../../../../../../hooks/use_date_format';
 import { getSeriesAndDomain, getSidebarItems } from '../../common/network_data/data_formatting';
 import { SidebarItem, LegendItem } from '../../common/network_data/types';
 import { RenderItem, WaterfallDataEntry } from '../../common/network_data/types';
@@ -54,9 +55,17 @@ export const WaterfallChartWrapper: React.FC<Props> = ({
 
   const hasFilters = activeFilters.length > 0;
 
+  const dateFormatter = useDateFormat();
   const { series, domain, metadata, totalHighlightedRequests } = useMemo(() => {
-    return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters, markerItems);
-  }, [networkData, query, activeFilters, onlyHighlighted, markerItems]);
+    return getSeriesAndDomain(
+      networkData,
+      onlyHighlighted,
+      dateFormatter,
+      query,
+      activeFilters,
+      markerItems
+    );
+  }, [networkData, dateFormatter, query, activeFilters, onlyHighlighted, markerItems]);
 
   const sidebarItems = useMemo(() => {
     return getSidebarItems(networkData, onlyHighlighted ?? false, query, activeFilters);

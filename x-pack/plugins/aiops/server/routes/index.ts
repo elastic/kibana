@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { defineExplainLogRateSpikesRoute } from './explain_log_rate_spikes';
+export { defineLogRateAnalysisRoute } from './log_rate_analysis';

@@ -237,7 +237,6 @@ export class TileStatusTracker extends Component<Props> {
       // Tile meta will never have duplicated features since by their nature, tile meta is a feature contained within a single tile
       const mbFeatures = this.props.mbMap.querySourceFeatures(layer.getMbSourceId(), {
         sourceLayer: ES_MVT_META_LAYER_NAME,
-        filter: [],
       });
 
       const features = mbFeatures

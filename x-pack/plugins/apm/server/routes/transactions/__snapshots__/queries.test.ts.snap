@@ -21,10 +21,20 @@ Object {
               "trace.id": "bar",
             },
           },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
         ],
       },
     },
     "size": 1,
+    "terminate_after": 1,
     "track_total_hits": false,
   },
 }

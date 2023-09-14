@@ -6,4 +6,3 @@
  */
 
 export { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
-export { getSlackApiChannelsRoute } from './get_slack_api_channels';

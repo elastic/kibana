@@ -39,6 +39,12 @@ jest.mock('../../../utils/kibana_react', () => ({
     services: {
       ...mockCoreMock.createStart(),
       charts: mockedChartStartContract,
+      aiops: {
+        EmbeddableChangePointChart: jest.fn(),
+      },
+      data: {
+        search: jest.fn(),
+      },
     },
   }),
 }));
@@ -47,6 +53,7 @@ describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();
   const mockedSetAlertSummaryFields = jest.fn();
   const ruleLink = 'ruleLink';
+
   const renderComponent = () => {
     return render(
       <IntlProvider locale="en">
@@ -69,8 +76,8 @@ describe('AlertDetailsAppSection', () => {
   it('should render rule and alert data', async () => {
     const result = renderComponent();
 
-    expect((await result.findByTestId('metricThresholdAppSection')).children.length).toBe(3);
-    expect(result.getByTestId('threshold-2000-2500')).toBeTruthy();
+    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(3);
+    expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
   it('should render rule link', async () => {
@@ -81,7 +88,7 @@ describe('AlertDetailsAppSection', () => {
       {
         label: 'Rule',
         value: (
-          <EuiLink data-test-subj="alertDetailsAppSectionRuleLink" href={ruleLink}>
+          <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
             Monitoring hosts
           </EuiLink>
         ),
@@ -92,9 +99,9 @@ describe('AlertDetailsAppSection', () => {
   it('should render annotations', async () => {
     const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
     (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
-    renderComponent();
+    const alertDetailsAppSectionComponent = renderComponent();
 
-    expect(mockedExpressionChart).toHaveBeenCalledTimes(3);
+    expect(alertDetailsAppSectionComponent.getAllByTestId('ExpressionChart').length).toBe(3);
     expect(mockedExpressionChart.mock.calls[0]).toMatchSnapshot();
   });
 });

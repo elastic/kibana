@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LayerValue, SeriesIdentifier } from '@elastic/charts';
+import { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ValueClickContext } from '@kbn/embeddable-plugin/public';
@@ -25,6 +25,45 @@ export const canFilter = async (
   const filters = await actions.createFiltersFromValueClickAction(event.data);
   return Boolean(filters.length);
 };
+
+export const getMultiFilterCells = (
+  tooltipSelectedValues: Array<TooltipValue<Record<'key', string | number>, SeriesIdentifier>>,
+  bucketColumns: Array<Partial<BucketColumns>>,
+  visData: Datatable
+) => {
+  const row = visData.rows.findIndex((r) =>
+    tooltipSelectedValues.every(({ valueAccessor, seriesIdentifier }) => {
+      if (typeof valueAccessor !== 'number' || valueAccessor < 1) return;
+      const index = valueAccessor - 1;
+      const bucketColumnId = bucketColumns[index].id;
+      if (!bucketColumnId) return;
+      return r[bucketColumnId] === seriesIdentifier.key;
+    })
+  );
+
+  return tooltipSelectedValues
+    .map(({ valueAccessor }) => {
+      if (typeof valueAccessor !== 'number' || valueAccessor < 1) return;
+      const index = valueAccessor - 1;
+      const bucketColumnId = bucketColumns[index].id;
+      if (!bucketColumnId) return;
+      const column = visData.columns.findIndex((c) => c.id === bucketColumnId);
+
+      if (column === -1) {
+        return;
+      }
+
+      return {
+        column,
+        row,
+      };
+    })
+    .filter(nonNullable);
+};
+
+function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}
 
 export const getFilterClickData = (
   clickedLayers: LayerValue[],

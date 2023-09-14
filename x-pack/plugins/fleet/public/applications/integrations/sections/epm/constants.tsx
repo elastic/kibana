@@ -86,7 +86,7 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   csp_rule_template: i18n.translate(
     'xpack.fleet.epm.assetTitles.cloudSecurityPostureRuleTemplate',
     {
-      defaultMessage: 'Cloud Security Posture rule template',
+      defaultMessage: 'Benchmark rules',
     }
   ),
 };

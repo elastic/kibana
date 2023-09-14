@@ -15,6 +15,7 @@ import { getIndexPatternLoad } from './expressions';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
+import type { ClientConfigType } from '../common/types';
 import {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
@@ -33,8 +34,9 @@ export class DataViewsServerPlugin
     >
 {
   private readonly logger: Logger;
+  private rollupsEnabled: boolean = false;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
   }
 
@@ -46,7 +48,12 @@ export class DataViewsServerPlugin
     core.capabilities.registerProvider(capabilitiesProvider);
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(core.http, core.getStartServices, dataViewRestCounter);
+    registerRoutes(
+      core.http,
+      core.getStartServices,
+      () => this.rollupsEnabled,
+      dataViewRestCounter
+    );
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
@@ -60,22 +67,30 @@ export class DataViewsServerPlugin
       },
     });
 
-    return {};
+    return {
+      enableRollups: () => (this.rollupsEnabled = true),
+    };
   }
 
   public start(
     { uiSettings, capabilities }: CoreStart,
     { fieldFormats }: DataViewsServerPluginStartDependencies
   ) {
+    const config = this.initializerContext.config.get<ClientConfigType>();
+    const scriptedFieldsEnabled = config.scriptedFieldsEnabled === false ? false : true; // accounting for null value
+
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
       capabilities,
+      scriptedFieldsEnabled,
+      rollupsEnabled: this.rollupsEnabled,
     });
 
     return {
       dataViewsServiceFactory: serviceFactory,
+      getScriptedFieldsEnabled: () => scriptedFieldsEnabled,
     };
   }
 

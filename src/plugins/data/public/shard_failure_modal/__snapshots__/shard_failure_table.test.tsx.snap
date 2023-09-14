@@ -5,39 +5,50 @@ exports[`ShardFailureTable renders matching snapshot given valid properties 1`] 
   columns={
     Array [
       Object {
-        "align": "right",
-        "isExpander": true,
-        "render": [Function],
-        "width": "40px",
-      },
-      Object {
-        "field": "shard",
-        "name": "Shard",
-        "sortable": true,
-        "truncateText": true,
-        "width": "80px",
-      },
-      Object {
-        "field": "index",
-        "name": "Index",
-        "sortable": true,
-        "truncateText": true,
-      },
-      Object {
-        "field": "node",
-        "name": "Node",
-        "sortable": true,
-        "truncateText": true,
-      },
-      Object {
-        "field": "reason.type",
+        "mobileOptions": Object {
+          "header": false,
+        },
         "name": "Reason",
-        "truncateText": true,
+        "render": [Function],
       },
     ]
   }
+  css={
+    Object {
+      "map": undefined,
+      "name": "1vv0je1",
+      "next": undefined,
+      "styles": "
+        & .euiTableHeaderCell {
+          
+  /* Take the element out of the layout */
+  position: absolute;
+  /* Keep it vertically inline */
+  inset-block-start: auto;
+  /* Chrome requires a left value, and Selenium (used by Kibana's FTR) requires an off-screen position for its .getVisibleText() to not register SR-only text */
+  inset-inline-start: -10000px;
+  /* The element must have a size (for some screen readers) */
+  
+    inline-size: 1px;
+    block-size: 1px;
+  
+  /* But reduce the visible size to nothing */
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  /* And ensure no overflows occur */
+  overflow: hidden;
+  /* Chrome requires the negative margin to not cause overflows of parent containers */
+  margin: -1px;
+
+        }
+        & .euiTableRowCell {
+          border-top: none;
+        }
+      ",
+      "toString": [Function],
+    }
+  }
   itemId="id"
-  itemIdToExpandedRowMap={Object {}}
   items={
     Array [
       Object {
@@ -62,7 +73,7 @@ exports[`ShardFailureTable renders matching snapshot given valid properties 1`] 
       },
     ]
   }
-  pagination={true}
+  pagination={false}
   responsive={true}
   sorting={
     Object {

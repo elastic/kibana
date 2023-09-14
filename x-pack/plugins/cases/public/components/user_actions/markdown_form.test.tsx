@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { UserActionMarkdown } from './markdown_form';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -56,6 +57,53 @@ describe('UserActionMarkdown ', () => {
 
     expect(screen.getByTestId('editable-save-markdown')).toBeInTheDocument();
     expect(screen.getByTestId('editable-cancel-markdown')).toBeInTheDocument();
+  });
+
+  describe('errors', () => {
+    it('Shows error message and save button disabled if current text is empty', async () => {
+      appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
+
+      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+
+      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
+
+      await waitFor(() => {
+        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
+      });
+    });
+
+    it('Shows error message and save button disabled if current text is of empty characters', async () => {
+      appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
+
+      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+
+      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
+
+      await waitFor(() => {
+        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
+      });
+    });
+
+    it('Shows error message and save button disabled if current text is too long', async () => {
+      const longComment = 'b'.repeat(MAX_COMMENT_LENGTH + 1);
+
+      appMockRenderer.render(<UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />);
+
+      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+
+      userEvent.paste(markdown, longComment);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            'The length of the comment is too long. The maximum length is 30000 characters.'
+          )
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
+      });
+    });
   });
 
   describe('useForm stale state bug', () => {

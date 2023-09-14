@@ -1,0 +1,12 @@
+{
+  "synonyms.put": {
+    "data_autocomplete_rules": {
+      "synonyms_set": [
+        {
+          "id": "",
+          "synonyms": ""
+        }
+      ]
+    }
+  }
+}

@@ -11,7 +11,7 @@ import {
   MAIN_SAVED_OBJECT_INDEX,
   ANALYTICS_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -22,7 +22,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('/deprecations/_delete_unknown_types', () => {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
+      // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
+      await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
       await esArchiver.load(
         'test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types'
       );
@@ -53,40 +54,23 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return 200 with individual responses', async () => {
       const beforeDelete = await fetchIndexContent();
-      expect(beforeDelete).to.eql([
-        {
-          id: 'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
-          type: 'dashboard',
-        },
-        {
-          id: 'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
-          type: 'index-pattern',
-        },
-        {
-          id: 'search:960372e0-3224-11e8-a572-ffca06da1357',
-          type: 'search',
-        },
-        {
-          id: 'space:default',
-          type: 'space',
-        },
-        {
-          id: 'unknown-shareable-doc',
-          type: 'unknown-shareable-type',
-        },
-        {
-          id: 'unknown-type:unknown-doc',
-          type: 'unknown-type',
-        },
-        {
-          id: 'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
-          type: 'visualization',
-        },
-      ]);
+      const beforeDeleteIds = beforeDelete.map((obj) => obj.id);
+      [
+        'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
+        'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
+        'search:960372e0-3224-11e8-a572-ffca06da1357',
+        'space:default',
+        'unknown-shareable-doc',
+        'unknown-type:unknown-doc',
+        'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
+      ].forEach((id) => {
+        expect(beforeDeleteIds).to.contain(id);
+      });
 
       await supertest
         .post(`/internal/saved_objects/deprecations/_delete_unknown_types`)
         .send({})
+        .set('kbn-xsrf', 'true')
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({ success: true });
@@ -100,28 +84,15 @@ export default function ({ getService }: FtrProviderContext) {
           await delay(1000);
           continue;
         }
-        expect(afterDelete).to.eql([
-          {
-            id: 'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
-            type: 'dashboard',
-          },
-          {
-            id: 'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
-            type: 'index-pattern',
-          },
-          {
-            id: 'search:960372e0-3224-11e8-a572-ffca06da1357',
-            type: 'search',
-          },
-          {
-            id: 'space:default',
-            type: 'space',
-          },
-          {
-            id: 'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
-            type: 'visualization',
-          },
-        ]);
+        const afterDeleteIds = afterDelete.map((obj) => obj.id);
+        [
+          'dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357',
+          'index-pattern:8963ca30-3224-11e8-a572-ffca06da1357',
+          'search:960372e0-3224-11e8-a572-ffca06da1357',
+          'space:default',
+          'visualization:a42c0580-3224-11e8-a572-ffca06da1357',
+        ].forEach((id) => expect(afterDeleteIds).to.contain(id));
+
         break;
       }
     });

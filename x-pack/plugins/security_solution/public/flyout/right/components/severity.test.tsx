@@ -14,17 +14,21 @@ import {
 } from './test_ids';
 import { DocumentSeverity } from './severity';
 import { mockGetFieldsData } from '../mocks/mock_context';
+import { TestProviders } from '../../../common/mock';
 
 describe('<DocumentSeverity />', () => {
   it('should render severity information', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <DocumentSeverity />
-      </RightPanelContext.Provider>
+      <TestProviders>
+        <RightPanelContext.Provider value={contextValue}>
+          <DocumentSeverity />
+        </RightPanelContext.Provider>
+      </TestProviders>
     );
 
     expect(getByTestId(FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();
@@ -36,6 +40,7 @@ describe('<DocumentSeverity />', () => {
   it('should render empty component if missing getFieldsData value', () => {
     const contextValue = {
       getFieldsData: jest.fn(),
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
     const { container } = render(
@@ -50,6 +55,7 @@ describe('<DocumentSeverity />', () => {
   it('should render empty component if getFieldsData is invalid array', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(() => ['abc']),
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
     const { container } = render(
@@ -64,6 +70,7 @@ describe('<DocumentSeverity />', () => {
   it('should render empty component if getFieldsData is invalid string', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(() => 'abc'),
+      scopeId: 'scopeId',
     } as unknown as RightPanelContext;
 
     const { container } = render(

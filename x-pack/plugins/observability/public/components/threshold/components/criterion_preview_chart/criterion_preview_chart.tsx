@@ -107,7 +107,7 @@ export const ChartContainer: React.FC = ({ children }) => (
 export function NoDataState() {
   return (
     <EmptyContainer>
-      <EuiText color="subdued" data-test-subj="noChartData">
+      <EuiText color="subdued" data-test-subj="thresholdRuleNoChartData">
         <FormattedMessage
           id="xpack.observability.threshold.rule..charts.noDataMessage"
           defaultMessage="No chart data available"
@@ -120,7 +120,7 @@ export function NoDataState() {
 export function LoadingState() {
   return (
     <EmptyContainer>
-      <EuiText color="subdued" data-test-subj="loadingData">
+      <EuiText color="subdued" data-test-subj="thresholdRuleLoadingData">
         <EuiLoadingChart size="m" />
       </EuiText>
     </EmptyContainer>
@@ -130,7 +130,7 @@ export function LoadingState() {
 export function ErrorState() {
   return (
     <EmptyContainer>
-      <EuiText color="subdued" data-test-subj="chartErrorState">
+      <EuiText color="subdued" data-test-subj="thresholdRuleChartErrorState">
         <FormattedMessage
           id="xpack.observability.threshold.rule..charts.errorMessage"
           defaultMessage="Uh oh, something went wrong"

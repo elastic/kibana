@@ -110,7 +110,10 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.kspm.status).to.be('index-timeout');
+        expect(res.kspm.status).to.eql(
+          'index-timeout',
+          `expected kspm status to be index-timeout but got ${res.kspm.status} instead`
+        );
       });
 
       it(`Should return index-timeout when installed cspm, has findings only on logs-cloud_security_posture.findings-default* and it has been more than 10 minutes since the installation`, async () => {
@@ -137,7 +140,10 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.cspm.status).to.be('index-timeout');
+        expect(res.cspm.status).to.eql(
+          'index-timeout',
+          `expected cspm status to be index-timeout but got ${res.cspm.status} instead`
+        );
       });
 
       it(`Should return index-timeout when installed cnvm, has findings only on logs-cloud_security_posture.vulnerabilities-default* and it has been more than 4 hours minutes since the installation`, async () => {
@@ -164,7 +170,10 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.vuln_mgmt.status).to.be('index-timeout');
+        expect(res.vuln_mgmt.status).to.eql(
+          'index-timeout',
+          `expected vuln_mgmt status to be index-timeout but got ${res.vuln_mgmt.status} instead`
+        );
       });
     });
   });

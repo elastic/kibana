@@ -50,7 +50,6 @@
     "@kbn/core-overlays-browser",
     "@kbn/config-schema",
     "@kbn/usage-collection-plugin",
-    "@kbn/core-http-browser-mocks",
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
@@ -61,7 +60,10 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/content-management-table-list-view-table",
     "@kbn/content-management-tabbed-table-list-view",
-    "@kbn/content-management-table-list-view"
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-utils",
+    "@kbn/serverless",
+    "@kbn/no-data-page-plugin"
   ],
   "exclude": [
     "target/**/*",

@@ -7,7 +7,7 @@
 
 import { upperCase } from 'lodash';
 import type { IconColor } from '@elastic/eui';
-import { LogLevel } from '../../../../../../../common/detection_engine/rule_monitoring';
+import { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 export const getBadgeColor = (logLevel: LogLevel): IconColor => {

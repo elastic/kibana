@@ -38,7 +38,7 @@ describe('serialize', () => {
       selectedFields: [
         {
           color: 'black',
-          icon: { class: 'a', code: '', label: '' },
+          icon: { id: 'a', package: 'eui', label: '', prevName: '' },
           name: 'field1',
           selected: true,
           type: 'string',
@@ -46,7 +46,7 @@ describe('serialize', () => {
         },
         {
           color: 'black',
-          icon: { class: 'b', code: '', label: '' },
+          icon: { id: 'b', package: 'eui', label: '', prevName: '' },
           name: 'field2',
           selected: true,
           type: 'string',
@@ -62,7 +62,7 @@ describe('serialize', () => {
         {
           description: 'Template',
           encoder: outlinkEncoders[0],
-          icon: { class: 'd', code: '', label: '' },
+          icon: { id: 'd', package: 'eui', label: '', prevName: '' },
           url: 'test-url',
         },
       ],
@@ -71,7 +71,7 @@ describe('serialize', () => {
           {
             color: 'black',
             data: { field: 'field1', term: 'A' },
-            icon: { class: 'a', code: '' },
+            icon: { id: 'a', package: 'eui' },
             label: 'A',
             x: 1,
             y: 2,
@@ -81,7 +81,7 @@ describe('serialize', () => {
           {
             color: 'black',
             data: { field: 'field1', term: 'B' },
-            icon: { class: 'a', code: '' },
+            icon: { id: 'a', package: 'eui' },
             label: 'B',
             x: 3,
             y: 4,
@@ -91,7 +91,7 @@ describe('serialize', () => {
           {
             color: 'black',
             data: { field: 'field1', term: 'C' },
-            icon: { class: 'a', code: '' },
+            icon: { id: 'a', package: 'eui' },
             label: 'B',
             x: 5,
             y: 6,
@@ -101,7 +101,7 @@ describe('serialize', () => {
           {
             color: 'black',
             data: { field: 'field2', term: 'D' },
-            icon: { class: 'a', code: '' },
+            icon: { id: 'a', package: 'eui' },
             label: 'D',
             x: 7,
             y: 8,
@@ -111,7 +111,7 @@ describe('serialize', () => {
           {
             color: 'black',
             data: { field: 'field2', term: 'E' },
-            icon: { class: 'a', code: '' },
+            icon: { id: 'a', package: 'eui' },
             label: 'E',
             x: 9,
             y: 10,
@@ -123,7 +123,7 @@ describe('serialize', () => {
           {
             color: 'black',
             data: { field: 'field1', term: 'Z' },
-            icon: { class: 'a', code: '' },
+            icon: { id: 'a', package: 'eui' },
             label: 'Z',
             x: 1,
             y: 2,

@@ -31,7 +31,6 @@ describe('Alert by type chart', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('isAlertTypeEnabled flag is true', () => {

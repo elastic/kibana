@@ -52,7 +52,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >

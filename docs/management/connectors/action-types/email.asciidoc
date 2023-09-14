@@ -8,11 +8,8 @@
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
 
-The email connector uses the SMTP protocol to send mail messages, using an 
-integration of https://nodemailer.com/[Nodemailer]. An exception is Microsoft 
-Exchange, which uses HTTP protocol for sending emails, 
-https://docs.microsoft.com/en-us/graph/api/user-sendmail[Send mail]. Email 
-message text is sent as both plain text and html text.
+The email connector uses the SMTP protocol to send mail messages.
+Email message text is sent as both plain text and html text.
 
 [NOTE]
 ====
@@ -214,11 +211,10 @@ settings. You can set configurations that apply to all your connectors or use
 [[configuring-email]]
 === Configure email accounts for well-known services
 
-The email connector can send email using many popular SMTP email services and 
-the Microsoft Exchange Graph API.
+The email connector uses an integration of https://nodemailer.com/[Nodemailer] to send email from many popular SMTP email services.
+For Microsoft Exchange email, it uses the Microsoft Graph API.
 
-For more information about configuring the email connector to work with 
-different email systems, refer to:
+To configure the email connector to work with common email systems, refer to:
 
 * <<elasticcloud>>
 * <<gmail>>
@@ -337,7 +333,7 @@ at AWS.
 [[exchange-basic-auth]]
 ==== Sending email from Microsoft Exchange with Basic Authentication
 
-deprecated:[This Microsoft Exchange configuration is deprecated in 7.16.0, and will be removed later, because Microsoft is deprecating https://docs.microsoft.com/en-us/lifecycle/announcements/exchange-online-basic-auth-deprecated [Basic Authentication]:
+deprecated:[7.16.0,"This Microsoft Exchange configuration is deprecated and will be removed later because Microsoft is deprecating basic authentication."]
 
 [source,text]
 --------------------------------------------------
@@ -364,6 +360,8 @@ https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client
 [float]
 [[exchange]]
 ==== Sending email from Microsoft Exchange with OAuth 2.0
+
+NOTE: The email connector uses Microsoft Graph REST API v1.0, in particular the https://docs.microsoft.com/en-us/graph/api/user-sendmail[sendMail] endpoint. It supports only the https://learn.microsoft.com/en-us/graph/deployments#microsoft-graph-and-graph-explorer-service-root-endpoints[Microsoft Graph global service] root endpoint (`https://graph.microsoft.com`).
 
 Before you create an email connector for Microsoft Exchange, you must create and 
 register the client integration application on the 

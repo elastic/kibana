@@ -6,17 +6,19 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-
 import {
-  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
   CONNECTORS_INDEX,
-  CONNECTORS_JOBS_INDEX,
-} from '../..';
-import { SyncJobType, SyncStatus, TriggerMethod } from '../../../common/types/connectors';
+  SyncJobType,
+  SyncStatus,
+  TriggerMethod,
+  CURRENT_CONNECTORS_JOB_INDEX,
+} from '@kbn/search-connectors';
+
+import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { startConnectorSync } from './start_sync';
+import { startSync } from './start_sync';
 
 describe('startSync lib function', () => {
   const mockClient = {
@@ -33,7 +35,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start a full sync', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {
@@ -63,11 +65,7 @@ describe('startSync lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
-      startConnectorSync(
-        mockClient as unknown as IScopedClusterClient,
-        'connectorId',
-        SyncJobType.FULL
-      )
+      startSync(mockClient as unknown as IScopedClusterClient, 'connectorId', SyncJobType.FULL)
     ).resolves.toEqual({ _id: 'fakeId' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
@@ -97,11 +95,11 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
-  it('should start a full sync with service type, pipeline and nextSyncConfig', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+  it('should start a full sync with service type, pipeline', async () => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _source: {
           api_key_id: null,
@@ -128,12 +126,7 @@ describe('startSync lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
-      startConnectorSync(
-        mockClient as unknown as IScopedClusterClient,
-        'connectorId',
-        SyncJobType.FULL,
-        'syncConfig'
-      )
+      startSync(mockClient as unknown as IScopedClusterClient, 'connectorId', SyncJobType.FULL)
     ).resolves.toEqual({ _id: 'fakeId' });
     expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
       document: {
@@ -143,7 +136,6 @@ describe('startSync lib function', () => {
         connector: {
           configuration: {
             config: { label: 'label', value: 'haha' },
-            nextSyncConfig: { label: 'nextSyncConfig', value: 'syncConfig' },
           },
           filtering: 'filtering',
           id: 'connectorId',
@@ -166,26 +158,22 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 
   it('should not create index if there is no connector', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({});
     });
     await expect(
-      startConnectorSync(
-        mockClient as unknown as IScopedClusterClient,
-        'connectorId',
-        SyncJobType.FULL
-      )
+      startSync(mockClient as unknown as IScopedClusterClient, 'connectorId', SyncJobType.FULL)
     ).rejects.toEqual(new Error(ErrorCode.RESOURCE_NOT_FOUND));
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
   });
 
   it('should set sync_now for crawler and not index a sync job', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _primary_term: 1,
         _seq_no: 10,
@@ -214,7 +202,7 @@ describe('startSync lib function', () => {
     mockClient.asCurrentUser.update.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
-      startConnectorSync(
+      startSync(
         mockClient as unknown as IScopedClusterClient,
         'connectorId',
         SyncJobType.FULL,
@@ -238,7 +226,7 @@ describe('startSync lib function', () => {
   });
 
   it('should start an incremental sync', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {
@@ -267,7 +255,7 @@ describe('startSync lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
-      startConnectorSync(
+      startSync(
         mockClient as unknown as IScopedClusterClient,
         'connectorId',
         SyncJobType.INCREMENTAL
@@ -301,12 +289,12 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 
   it('should start an access control sync', async () => {
-    mockClient.asCurrentUser.get.mockImplementationOnce(() => {
+    mockClient.asCurrentUser.get.mockImplementation(() => {
       return Promise.resolve({
         _id: 'connectorId',
         _source: {
@@ -334,7 +322,7 @@ describe('startSync lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
 
     await expect(
-      startConnectorSync(
+      startSync(
         mockClient as unknown as IScopedClusterClient,
         'connectorId',
         SyncJobType.ACCESS_CONTROL
@@ -368,7 +356,7 @@ describe('startSync lib function', () => {
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },
-      index: CONNECTORS_JOBS_INDEX,
+      index: CURRENT_CONNECTORS_JOB_INDEX,
     });
   });
 });

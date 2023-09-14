@@ -39,6 +39,7 @@ import {
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
   Rule,
   RuleTableItem,
@@ -169,6 +170,7 @@ export const RulesList = ({
   setHeaderActions,
 }: RulesListProps) => {
   const history = useHistory();
+  const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
     application: { capabilities },
@@ -176,7 +178,7 @@ export const RulesList = ({
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
-  } = useKibana().services;
+  } = kibanaServices;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
@@ -191,6 +193,7 @@ export const RulesList = ({
     searchText: searchFilter || '',
     tags: [],
     types: typeFilter || [],
+    kueryNode: undefined,
   });
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
@@ -721,7 +724,7 @@ export const RulesList = ({
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}

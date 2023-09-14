@@ -10,11 +10,10 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import { DataViewBase } from '../../..';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
+import * as exists from './exists';
+import type { KqlExistsFunctionNode } from './exists';
 
 jest.mock('../grammar');
-
-// @ts-ignore
-import * as exists from './exists';
 
 describe('kuery functions', () => {
   describe('exists', () => {
@@ -50,7 +49,10 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'response' },
         };
-        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const existsNode = nodeTypes.function.buildNode(
+          'exists',
+          'response'
+        ) as KqlExistsFunctionNode;
         const result = exists.toElasticsearchQuery(existsNode, indexPattern);
 
         expect(expected).toEqual(result);
@@ -60,14 +62,20 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'response' },
         };
-        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const existsNode = nodeTypes.function.buildNode(
+          'exists',
+          'response'
+        ) as KqlExistsFunctionNode;
         const result = exists.toElasticsearchQuery(existsNode);
 
         expect(expected).toEqual(result);
       });
 
       test('should throw an error for scripted fields', () => {
-        const existsNode = nodeTypes.function.buildNode('exists', 'script string');
+        const existsNode = nodeTypes.function.buildNode(
+          'exists',
+          'script string'
+        ) as KqlExistsFunctionNode;
         expect(() => exists.toElasticsearchQuery(existsNode, indexPattern)).toThrowError(
           /Exists query does not support scripted fields/
         );
@@ -77,7 +85,10 @@ describe('kuery functions', () => {
         const expected = {
           exists: { field: 'nestedField.response' },
         };
-        const existsNode = nodeTypes.function.buildNode('exists', 'response');
+        const existsNode = nodeTypes.function.buildNode(
+          'exists',
+          'response'
+        ) as KqlExistsFunctionNode;
         const result = exists.toElasticsearchQuery(
           existsNode,
           indexPattern,
@@ -86,6 +97,17 @@ describe('kuery functions', () => {
         );
 
         expect(expected).toEqual(result);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('should return a KQL expression', () => {
+        const existsNode = nodeTypes.function.buildNode(
+          'exists',
+          'response'
+        ) as KqlExistsFunctionNode;
+        const result = exists.toKqlExpression(existsNode);
+        expect(result).toBe('response: *');
       });
     });
   });

@@ -24,23 +24,22 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Empty"
-                  class="euiButtonEmpty css-9t7nyf-empty-primary"
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                   data-test-subj="LinkedRulesMenuEmptyButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonContent__icon"
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
-                    <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       Linked to 1 rules
                     </span>
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
                   </span>
                 </button>
               </div>
@@ -62,7 +61,7 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Icon"
-                  class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                   data-test-subj="MenuActionsButtonIcon"
                   type="button"
                 >
@@ -100,23 +99,22 @@ Object {
             >
               <button
                 aria-label="Header menu Button Empty"
-                class="euiButtonEmpty css-9t7nyf-empty-primary"
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                 data-test-subj="LinkedRulesMenuEmptyButton"
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     Linked to 1 rules
                   </span>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
                 </span>
               </button>
             </div>
@@ -138,7 +136,7 @@ Object {
             >
               <button
                 aria-label="Header menu Button Icon"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                 data-test-subj="MenuActionsButtonIcon"
                 type="button"
               >
@@ -232,7 +230,7 @@ Object {
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
             data-test-subj="LinkRulesButton"
             type="button"
           >
@@ -262,7 +260,7 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Icon"
-                  class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                   data-test-subj="MenuActionsButtonIcon"
                   type="button"
                 >
@@ -299,7 +297,7 @@ Object {
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
           data-test-subj="LinkRulesButton"
           type="button"
         >
@@ -329,7 +327,7 @@ Object {
             >
               <button
                 aria-label="Header menu Button Icon"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                 data-test-subj="MenuActionsButtonIcon"
                 type="button"
               >
@@ -423,7 +421,7 @@ Object {
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
             data-test-subj="LinkRulesButton"
             type="button"
           >
@@ -453,7 +451,7 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Icon"
-                  class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                   data-test-subj="MenuActionsButtonIcon"
                   type="button"
                 >
@@ -590,7 +588,7 @@ Object {
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
           data-test-subj="LinkRulesButton"
           type="button"
         >
@@ -620,7 +618,7 @@ Object {
             >
               <button
                 aria-label="Header menu Button Icon"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                 data-test-subj="MenuActionsButtonIcon"
                 type="button"
               >
@@ -715,23 +713,22 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Empty"
-                  class="euiButtonEmpty css-9t7nyf-empty-primary"
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                   data-test-subj="LinkedRulesMenuEmptyButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonContent__icon"
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
-                    <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       Linked to 1 rules
                     </span>
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
                   </span>
                 </button>
               </div>
@@ -753,7 +750,7 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Icon"
-                  class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                   data-test-subj="MenuActionsButtonIcon"
                   type="button"
                 >
@@ -893,23 +890,22 @@ Object {
             >
               <button
                 aria-label="Header menu Button Empty"
-                class="euiButtonEmpty css-9t7nyf-empty-primary"
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                 data-test-subj="LinkedRulesMenuEmptyButton"
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     Linked to 1 rules
                   </span>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
                 </span>
               </button>
             </div>
@@ -931,7 +927,7 @@ Object {
             >
               <button
                 aria-label="Header menu Button Icon"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                 data-test-subj="MenuActionsButtonIcon"
                 type="button"
               >
@@ -1026,23 +1022,22 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Empty"
-                  class="euiButtonEmpty css-9t7nyf-empty-primary"
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                   data-test-subj="LinkedRulesMenuEmptyButton"
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonContent__icon"
-                      color="inherit"
-                      data-euiicon-type="arrowDown"
-                    />
-                    <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       Linked to 1 rules
                     </span>
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
                   </span>
                 </button>
               </div>
@@ -1053,7 +1048,7 @@ Object {
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
             data-test-subj="LinkRulesButton"
             type="button"
           >
@@ -1083,7 +1078,7 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Icon"
-                  class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                  class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                   data-test-subj="MenuActionsButtonIcon"
                   type="button"
                 >
@@ -1121,23 +1116,22 @@ Object {
             >
               <button
                 aria-label="Header menu Button Empty"
-                class="euiButtonEmpty css-9t7nyf-empty-primary"
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                 data-test-subj="LinkedRulesMenuEmptyButton"
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     Linked to 1 rules
                   </span>
+                  <span
+                    color="inherit"
+                    data-euiicon-type="arrowDown"
+                  />
                 </span>
               </button>
             </div>
@@ -1148,7 +1142,7 @@ Object {
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
           data-test-subj="LinkRulesButton"
           type="button"
         >
@@ -1178,7 +1172,7 @@ Object {
             >
               <button
                 aria-label="Header menu Button Icon"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+                class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                 data-test-subj="MenuActionsButtonIcon"
                 type="button"
               >

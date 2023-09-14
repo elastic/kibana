@@ -85,23 +85,27 @@ export const startTransformIfNotStarted = async (
     const transformStats = await esClient.transform.getTransformStats({
       transform_id: transformId,
     });
+
     if (transformStats.count <= 0) {
       logger.error(`Failed starting transform ${transformId}: couldn't find transform`);
       return;
     }
+
     const fetchedTransformStats = transformStats.transforms[0];
-    if (fetchedTransformStats.state === 'stopped') {
+
+    // trying to restart the transform in case it comes to a full stop or failure
+    if (fetchedTransformStats.state === 'stopped' || fetchedTransformStats.state === 'failed') {
       try {
         return await esClient.transform.startTransform({ transform_id: transformId });
       } catch (startErr) {
         const startError = transformError(startErr);
-        logger.error(`Failed starting transform ${transformId}: ${startError.message}`);
+        logger.error(
+          `Failed to start transform ${transformId}. Transform State: Transform State: ${fetchedTransformStats.state}. Error: ${startError.message}`
+        );
       }
-    } else if (
-      fetchedTransformStats.state === 'stopping' ||
-      fetchedTransformStats.state === 'aborting' ||
-      fetchedTransformStats.state === 'failed'
-    ) {
+    }
+
+    if (fetchedTransformStats.state === 'stopping' || fetchedTransformStats.state === 'aborting') {
       logger.error(
         `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
       );

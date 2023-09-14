@@ -8,10 +8,11 @@
 import {
   GetPrebuiltRulesAndTimelinesStatusResponse,
   PREBUILT_RULES_STATUS_URL,
-} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
+} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 
 /**
+ * (LEGACY)
  * Helper to retrieve the prebuilt rules status
  *
  * @param supertest The supertest deps
@@ -22,6 +23,7 @@ export const getPrebuiltRulesAndTimelinesStatus = async (
   const response = await supertest
     .get(PREBUILT_RULES_STATUS_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send()
     .expect(200);
 

@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n-react';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import {
   ACTIVE_TIMELINE_BUTTON_CLASS_NAME,

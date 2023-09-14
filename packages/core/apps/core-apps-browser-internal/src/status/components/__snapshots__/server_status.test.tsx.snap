@@ -3,9 +3,8 @@
 exports[`ServerStatus renders correctly for green state 2`] = `
 <span
   aria-label="Green"
-  class="euiBadge emotion-euiBadge"
+  class="euiBadge emotion-euiBadge-success"
   data-test-subj="serverStatusTitleBadge"
-  style="background-color: rgb(77, 210, 202); color: rgb(0, 0, 0);"
   title="Green"
 >
   <span
@@ -23,9 +22,8 @@ exports[`ServerStatus renders correctly for green state 2`] = `
 exports[`ServerStatus renders correctly for red state 2`] = `
 <span
   aria-label="Red"
-  class="euiBadge emotion-euiBadge"
+  class="euiBadge emotion-euiBadge-success"
   data-test-subj="serverStatusTitleBadge"
-  style="background-color: rgb(77, 210, 202); color: rgb(0, 0, 0);"
   title="Red"
 >
   <span
@@ -43,9 +41,8 @@ exports[`ServerStatus renders correctly for red state 2`] = `
 exports[`ServerStatus renders correctly for yellow state 2`] = `
 <span
   aria-label="Yellow"
-  class="euiBadge emotion-euiBadge"
+  class="euiBadge emotion-euiBadge-success"
   data-test-subj="serverStatusTitleBadge"
-  style="background-color: rgb(77, 210, 202); color: rgb(0, 0, 0);"
   title="Yellow"
 >
   <span

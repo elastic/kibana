@@ -17,7 +17,7 @@ describe('validateTypeMigrations', () => {
     changes: [
       {
         type: 'data_backfill',
-        transform: jest.fn(),
+        backfillFn: jest.fn().mockReturnValue({ attributes: {} }),
       },
     ],
   };

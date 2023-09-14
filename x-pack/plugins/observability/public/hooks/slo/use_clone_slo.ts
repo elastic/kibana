@@ -77,9 +77,6 @@ export function useCloneSlo() {
           })
         );
       },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
-      },
     }
   );
 }

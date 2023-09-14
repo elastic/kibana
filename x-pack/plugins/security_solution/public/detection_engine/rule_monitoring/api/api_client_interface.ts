@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
+import type { SortOrder } from '../../../../common/api/detection_engine';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -13,7 +13,7 @@ import type {
   RuleExecutionEventType,
   RuleExecutionResult,
   RuleExecutionStatus,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 export interface IRuleMonitoringApiClient {
   /**

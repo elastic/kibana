@@ -5,9 +5,21 @@
  * 2.0.
  */
 
+import {
+  DEFAULT_DURATION_INPUT_FORMAT,
+  DEFAULT_DURATION_OUTPUT_FORMAT,
+} from '@kbn/field-formats-plugin/common';
+import type { FormatColumnArgs } from '.';
+
 export const supportedFormats: Record<
   string,
-  { decimalsToPattern: (decimals?: number, compact?: boolean) => string; formatId: string }
+  {
+    formatId: string;
+    decimalsToPattern: (decimals?: number, compact?: boolean) => string;
+    translateToFormatParams?: (
+      params: Omit<FormatColumnArgs, 'format' | 'columnId' | 'parentFormat'>
+    ) => Record<string, unknown>;
+  }
 > = {
   number: {
     formatId: 'number',
@@ -43,6 +55,20 @@ export const supportedFormats: Record<
         return `0,0bitd`;
       }
       return `0,0.${'0'.repeat(decimals)}bitd`;
+    },
+  },
+  duration: {
+    formatId: 'duration',
+    decimalsToPattern: () => '',
+    translateToFormatParams: (params) => {
+      return {
+        inputFormat: params.fromUnit || DEFAULT_DURATION_INPUT_FORMAT.kind,
+        outputFormat: params.toUnit || DEFAULT_DURATION_OUTPUT_FORMAT.method,
+        outputPrecision: params.decimals,
+        useShortSuffix: Boolean(params.compact),
+        showSuffix: true,
+        includeSpaceWithSuffix: true,
+      };
     },
   },
   custom: {

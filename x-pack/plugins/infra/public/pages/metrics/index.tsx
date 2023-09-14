@@ -14,6 +14,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -21,7 +22,7 @@ import { MetricsExplorerOptionsContainer } from './metrics_explorer/hooks/use_me
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
-import { MetricDetail } from './metric_detail';
+import { NodeDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { HostsLandingPage } from './hosts/hosts_landing_page';
 import { SourceLoadingPage } from '../../components/source_loading_page';
@@ -89,6 +90,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         >
                           {ADD_DATA_LABEL}
                         </EuiHeaderLink>
+                        <ObservabilityAIAssistantActionMenuItem />
                       </EuiHeaderLinks>
                     </HeaderMenuPortal>
                   )}
@@ -107,7 +109,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         )}
                       </MetricsExplorerOptionsContainer>
                     </Route>
-                    <Route path="/detail/:type/:node" component={MetricDetail} />
+                    <Route path="/detail/:type/:node" component={NodeDetail} />
                     <Route path={'/hosts'} component={HostsLandingPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
                     <Route render={() => <NotFoundPage title="Infrastructure" />} />

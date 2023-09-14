@@ -158,11 +158,11 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           index: ES_TEST_INDEX_NAME,
           reference,
           message: `
-alertId: ${alertId},
-alertName: abc,
+ruleId: ${alertId},
+ruleName: abc,
 spaceId: ${space.id},
 tags: tag-A,tag-B,
-alertInstanceId: 1,
+alertId: 1,
 alertActionGroup: default,
 instanceContextValue: true,
 instanceStateValue: true

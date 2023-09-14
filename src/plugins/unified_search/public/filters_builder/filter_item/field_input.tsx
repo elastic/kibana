@@ -40,7 +40,7 @@ interface FieldInputProps {
 }
 
 export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) {
-  const { disabled } = useContext(FiltersBuilderContextType);
+  const { disabled, suggestionsAbstraction } = useContext(FiltersBuilderContextType);
   const fields = dataView ? getFilterableFields(dataView) : [];
   const id = useGeneratedHtmlId({ prefix: 'fieldInput' });
   const comboBoxRef = useRef<HTMLInputElement>(null);
@@ -53,11 +53,17 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
   );
 
   const getLabel = useCallback(
-    (dataViewField: DataViewField) => ({
-      label: dataViewField.customLabel || dataViewField.name,
-      value: dataViewField.type as KBN_FIELD_TYPES,
-    }),
-    []
+    (dataViewField: DataViewField) => {
+      let label = dataViewField.customLabel || dataViewField.name;
+      if (suggestionsAbstraction?.fields[dataViewField.name]) {
+        label = suggestionsAbstraction?.fields[dataViewField.name]?.displayField ?? label;
+      }
+      return {
+        label,
+        value: dataViewField.type as KBN_FIELD_TYPES,
+      };
+    },
+    [suggestionsAbstraction]
   );
 
   const optionFields = fields.map(getLabel);

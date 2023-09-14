@@ -2,21 +2,21 @@
 
 exports[`StatusFilterComponent renders without errors for valid props 1`] = `
 <div
-  class="euiFilterGroup"
+  class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
 >
   <button
-    class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext css-wvaqcf-empty-text"
+    class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext-hasActiveFilters"
     data-test-subj="xpack.synthetics.filterBar.filterStatusAll"
     type="button"
   >
     <span
-      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
       <span
-        class="euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
       >
         <span
-          class="euiFilterButton__textShift"
+          class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
           data-text="All"
           title="All"
         >
@@ -26,18 +26,18 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
     </span>
   </button>
   <button
-    class="euiButtonEmpty euiFilterButton euiFilterButton--withNext css-wvaqcf-empty-text"
+    class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext"
     data-test-subj="xpack.synthetics.filterBar.filterStatusUp"
     type="button"
   >
     <span
-      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
       <span
-        class="euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
       >
         <span
-          class="euiFilterButton__textShift"
+          class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
           data-text="Up"
           title="Up"
         >
@@ -47,18 +47,18 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
     </span>
   </button>
   <button
-    class="euiButtonEmpty euiFilterButton css-wvaqcf-empty-text"
+    class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton"
     data-test-subj="xpack.synthetics.filterBar.filterStatusDown"
     type="button"
   >
     <span
-      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
       <span
-        class="euiButtonEmpty__text"
+        class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
       >
         <span
-          class="euiFilterButton__textShift"
+          class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
           data-text="Down"
           title="Down"
         >

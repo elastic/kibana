@@ -100,7 +100,6 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
     top: ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation};
     height: calc(100% - (${({ theme: { eui } }) => eui.euiHeaderHeightCompensation}));
   }
-
 `;
 
 const setDocumentBodyOverlayIsVisible = () => {
@@ -265,6 +264,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     useEffect(() => {
       if (
         isMounted() &&
+        // @ts-expect-error ts upgrade v4.7.4
         onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&

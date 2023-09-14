@@ -236,6 +236,74 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.createTestServerlessInstances",
+        "type": "Function",
+        "tags": [
+          "note"
+        ],
+        "label": "createTestServerlessInstances",
+        "description": [
+          "\nSee docs in {@link TestUtils}. This function provides the same utilities but\nconfigured for serverless.\n"
+        ],
+        "signature": [
+          "({\n  adjustTimeout,\n}: { adjustTimeout: (timeout: number) => void; }) => ",
+          "TestServerlessUtils"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createTestServerlessInstances.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  adjustTimeout,\n}",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.createTestServerlessInstances.$1.adjustTimeout",
+                "type": "Function",
+                "tags": [],
+                "label": "adjustTimeout",
+                "description": [],
+                "signature": [
+                  "(timeout: number) => void"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                    "id": "def-common.createTestServerlessInstances.$1.adjustTimeout.$1",
+                    "type": "number",
+                    "tags": [],
+                    "label": "timeout",
+                    "description": [],
+                    "signature": [
+                      "number"
+                    ],
+                    "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
         "id": "def-common.createTestServers",
         "type": "Function",
         "tags": [
@@ -685,6 +753,52 @@
           "\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""
         ],
         "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.TestServerlessESUtils",
+        "type": "Type",
+        "tags": [],
+        "label": "TestServerlessESUtils",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/core-test-helpers-kbn-server",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+            "section": "def-common.TestElasticsearchUtils",
+            "text": "TestElasticsearchUtils"
+          },
+          ", \"stop\" | \"es\"> & { getClient: () => ",
+          "default",
+          "; }"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.TestServerlessKibanaUtils",
+        "type": "Type",
+        "tags": [],
+        "label": "TestServerlessKibanaUtils",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-test-helpers-kbn-server",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+            "section": "def-common.TestKibanaUtils",
+            "text": "TestKibanaUtils"
+          }
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

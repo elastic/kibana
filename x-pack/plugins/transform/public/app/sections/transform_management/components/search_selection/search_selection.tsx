@@ -8,7 +8,8 @@
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useAppDependencies } from '../../../../app_dependencies';
 
@@ -19,7 +20,7 @@ interface SearchSelectionProps {
 const fixedPageSize: number = 8;
 
 export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
-  const { uiSettings, http, savedObjectsManagement } = useAppDependencies();
+  const { contentManagement, uiSettings } = useAppDependencies();
 
   return (
     <>
@@ -67,15 +68,10 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
                   defaultMessage: 'Data view',
                 }
               ),
-              defaultSearchField: 'name',
             },
           ]}
           fixedPageSize={fixedPageSize}
-          services={{
-            uiSettings,
-            http,
-            savedObjectsManagement,
-          }}
+          services={{ contentClient: contentManagement.client, uiSettings }}
         />
       </EuiModalBody>
     </>

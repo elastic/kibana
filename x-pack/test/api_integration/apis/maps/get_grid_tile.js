@@ -9,7 +9,10 @@ import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import expect from '@kbn/expect';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 function findFeature(layer, callbackFn) {
   for (let i = 0; i < layer.length; i++) {
@@ -75,6 +78,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -89,6 +93,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -120,6 +125,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -151,6 +157,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -189,6 +196,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -230,6 +238,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -258,6 +267,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + getTileUrlParams(defaultParams))
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(200);
 
@@ -304,6 +314,7 @@ export default function ({ getService }) {
         .get('/internal/maps/mvt/getGridTile/3/2/3.pbf?' + tileUrlParams)
         .set('kbn-xsrf', 'kibana')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .responseType('blob')
         .expect(404);
     });

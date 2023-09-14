@@ -6,9 +6,9 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AttachmentAttributes } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import type { CommentAttributes } from '@kbn/cases-plugin/common/api/cases/comment';
-import { CommentType } from '@kbn/cases-plugin/common/api/cases/comment';
 import type { AlertAggs, EventLogTypeStatusAggs } from '../../types';
 import type { EventLogStatusMetric, SingleEventLogStatusMetric } from './types';
 
@@ -47,7 +47,7 @@ export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<neve
 });
 
 export const getMockAlertCaseCommentsResponse = (): SavedObjectsFindResponse<
-  Partial<CommentAttributes>,
+  Partial<AttachmentAttributes>,
   never
 > => ({
   page: 1,
@@ -58,7 +58,7 @@ export const getMockAlertCaseCommentsResponse = (): SavedObjectsFindResponse<
       type: 'cases-comments',
       id: '3bb5cc10-9249-11eb-85b7-254c8af1a983',
       attributes: {
-        type: CommentType.alert,
+        type: AttachmentType.alert,
         alertId: '54802763917f521249c9f68d0d4be0c26cc538404c26dfed1ae7dcfa94ea2226',
         index: '.siem-signals-default-000001',
         rule: {

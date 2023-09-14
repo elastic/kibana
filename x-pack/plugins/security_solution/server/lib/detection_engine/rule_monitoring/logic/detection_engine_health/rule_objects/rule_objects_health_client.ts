@@ -13,7 +13,7 @@ import type {
   RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   getSpaceHealthAggregation,
   normalizeSpaceHealthAggregationResult,

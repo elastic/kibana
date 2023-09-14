@@ -28,7 +28,8 @@ const Template: ComponentStory<typeof Component> = (props: SloListItemProps) => 
 
 const defaultProps = {
   slo: buildSlo(),
-  historicalSummary: historicalSummaryData[HEALTHY_ROLLING_SLO],
+  historicalSummary: historicalSummaryData.find((datum) => datum.sloId === HEALTHY_ROLLING_SLO)!
+    .data,
 };
 
 export const SloListItem = Template.bind({});

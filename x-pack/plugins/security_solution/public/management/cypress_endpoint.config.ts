@@ -13,6 +13,11 @@ import { responseActionTasks } from './cypress/support/response_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './public/management/reporter_config.json',
+  },
+
   defaultCommandTimeout: 60000,
   execTimeout: 120000,
   pageLoadTimeout: 12000,
@@ -37,6 +42,8 @@ export default defineCypressConfig({
   },
 
   e2e: {
+    experimentalMemoryManagement: true,
+    experimentalInteractiveRunEvents: true,
     baseUrl: 'http://localhost:5620',
     supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',

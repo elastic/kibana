@@ -10,7 +10,8 @@ import type { KbnClient } from '@kbn/test';
 import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
-import type { GetMetadataListRequestQuery } from '../../../common/endpoint/schema/metadata';
+import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import type { GetMetadataListRequestQuery } from '../../../common/api/endpoint';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
 import {
   HOST_METADATA_GET_ROUTE,
@@ -27,13 +28,15 @@ export const fetchEndpointMetadata = async (
   agentId: string
 ): Promise<HostInfo> => {
   return (
-    await kbnClient.request<HostInfo>({
-      method: 'GET',
-      path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-      headers: {
-        'Elastic-Api-Version': '2023-10-31',
-      },
-    })
+    await kbnClient
+      .request<HostInfo>({
+        method: 'GET',
+        path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
+        headers: {
+          'Elastic-Api-Version': '2023-10-31',
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
   ).data;
 };
 
@@ -42,18 +45,20 @@ export const fetchEndpointMetadataList = async (
   { page = 0, pageSize = 100, ...otherOptions }: Partial<GetMetadataListRequestQuery> = {}
 ): Promise<MetadataListResponse> => {
   return (
-    await kbnClient.request<MetadataListResponse>({
-      method: 'GET',
-      path: HOST_METADATA_LIST_ROUTE,
-      headers: {
-        'Elastic-Api-Version': '2023-10-31',
-      },
-      query: {
-        page,
-        pageSize,
-        ...otherOptions,
-      },
-    })
+    await kbnClient
+      .request<MetadataListResponse>({
+        method: 'GET',
+        path: HOST_METADATA_LIST_ROUTE,
+        headers: {
+          'Elastic-Api-Version': '2023-10-31',
+        },
+        query: {
+          page,
+          pageSize,
+          ...otherOptions,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
   ).data;
 };
 

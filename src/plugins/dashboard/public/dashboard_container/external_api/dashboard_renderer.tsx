@@ -96,8 +96,8 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         });
         return;
       }
-      setLoading(true);
 
+      setLoading(true);
       let canceled = false;
       (async () => {
         const creationOptions = await getCreationOptions?.();
@@ -108,20 +108,22 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
 
         const dashboardFactory = embeddable.getEmbeddableFactory(
           DASHBOARD_CONTAINER_TYPE
-        ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
+        ) as DashboardContainerFactory & {
+          create: DashboardContainerFactoryDefinition['create'];
+        };
         const container = await dashboardFactory?.create(
           { id } as unknown as DashboardContainerInput, // Input from creationOptions is used instead.
           undefined,
           creationOptions,
           savedObjectId
         );
+        setLoading(false);
 
-        if (canceled) {
-          container.destroy();
+        if (canceled || !container) {
+          setDashboardContainer(undefined);
+          container?.destroy();
           return;
         }
-
-        setLoading(false);
 
         if (isErrorEmbeddable(container)) {
           setFatalError(container);

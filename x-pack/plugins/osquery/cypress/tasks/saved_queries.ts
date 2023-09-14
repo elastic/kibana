@@ -62,6 +62,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.getBySel('pagination-button-next').click().wait(500).click();
         cy.contains('columns hidden').should('exist');
 
+        // enter fullscreen
         cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
         cy.contains(/Enter fullscreen$/).should('not.exist');
         cy.contains('Exit fullscreen').should('exist');
@@ -86,7 +87,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.contains('Save query');
         findFormFieldByRowsLabelAndType('ID', savedQueryId);
         findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
-        cy.react('EuiButtonDisplay').contains('Save').click();
+        cy.getBySel('savedQueryFlyoutSaveButton').click();
         cy.contains('Successfully saved');
         closeToastIfVisible();
 
@@ -120,10 +121,12 @@ export const getSavedQueriesComplexTest = () =>
           inputQuery('{selectall}{backspace}{selectall}{backspace}');
           cy.contains('Query is a required field');
           inputQuery(BIG_QUERY);
+          cy.contains('Query is a required field').should('not.exist');
         });
 
         // Save edited
-        cy.react('EuiButton').contains('Update query').click();
+        cy.getBySel('euiFlyoutCloseButton').click();
+        cy.getBySel('savedQueryFormUpdateButton').click();
         cy.contains(`${savedQueryDescription} Edited`);
 
         // delete saved query

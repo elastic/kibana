@@ -37,6 +37,7 @@ import {
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
   FleetServerCloudUnhealthyCallout,
+  FleetServerMissingEncryptionKeyCallout,
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
@@ -47,10 +48,11 @@ import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { TagsAddRemove } from './components/tags_add_remove';
-import { AgentActivityFlyout } from './components';
+import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
 import { getKuery } from './utils/get_kuery';
+import { useAgentSoftLimit, useMissingEncryptionKeyCallout } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -391,10 +393,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return policyHasFleetServer(agentPolicy);
   }, [agentToUnenroll, agentPoliciesIndexedById]);
 
+  // Missing Encryption key
+  const [canShowMissingEncryptionKeyCallout, dismissEncryptionKeyCallout] =
+    useMissingEncryptionKeyCallout();
+
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const { isFleetServerStandalone } = useFleetServerStandalone();
   const showUnhealthyCallout = isFleetServerUnhealthy && !isFleetServerStandalone;
+
+  const { shouldDisplayAgentSoftLimit } = useAgentSoftLimit();
 
   const onClickAddFleetServer = useCallback(() => {
     flyoutContext.openFleetServerFlyout();
@@ -410,6 +418,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const isCurrentRequestIncremented = currentRequestRef?.current === 1;
+
   return (
     <>
       {isAgentActivityFlyoutOpen ? (
@@ -516,6 +525,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           ) : (
             <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
           )}
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {canShowMissingEncryptionKeyCallout && (
+        <>
+          <FleetServerMissingEncryptionKeyCallout onClickHandler={dismissEncryptionKeyCallout} />
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {shouldDisplayAgentSoftLimit && (
+        <>
+          <AgentSoftLimitCallout />
           <EuiSpacer size="l" />
         </>
       )}

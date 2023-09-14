@@ -45,6 +45,28 @@ export function getCreateBreadcrumbs({
   ];
 }
 
+export function getCreateServerlessBreadcrumbs({
+  byValue,
+  originatingAppName,
+  redirectToOrigin,
+}: {
+  byValue?: boolean;
+  originatingAppName?: string;
+  redirectToOrigin?: () => void;
+}) {
+  // TODO: https://github.com/elastic/kibana/issues/163488
+  // for now, serverless breadcrumbs only set the title,
+  // the rest of the breadcrumbs are handled by the serverless navigation
+  // the serverless navigation is not yet aware of the byValue/originatingApp context
+  return [
+    {
+      text: i18n.translate('visualizations.editor.createBreadcrumb', {
+        defaultMessage: 'Create',
+      }),
+    },
+  ];
+}
+
 export function getEditBreadcrumbs(
   {
     byValue,
@@ -60,6 +82,29 @@ export function getEditBreadcrumbs(
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
     ...(!byValue ? getLandingBreadcrumbs() : []),
+    {
+      text: title,
+    },
+  ];
+}
+
+export function getEditServerlessBreadcrumbs(
+  {
+    byValue,
+    originatingAppName,
+    redirectToOrigin,
+  }: {
+    byValue?: boolean;
+    originatingAppName?: string;
+    redirectToOrigin?: () => void;
+  },
+  title: string = defaultEditText
+) {
+  // TODO: https://github.com/elastic/kibana/issues/163488
+  // for now, serverless breadcrumbs only set the title,
+  // the rest of the breadcrumbs are handled by the serverless navigation
+  // the serverless navigation is not yet aware of the byValue/originatingApp context
+  return [
     {
       text: title,
     },

@@ -12,7 +12,7 @@ export const ACTION_REF_NAME = `actionRef`;
 
 export function extractSavedObjectReferences(
   actionId: string,
-  isPreconfigured: boolean,
+  isInMemory: boolean,
   relatedSavedObjects?: RelatedSavedObjects
 ): {
   references: SavedObjectReference[];
@@ -21,8 +21,8 @@ export function extractSavedObjectReferences(
   const references: SavedObjectReference[] = [];
   const relatedSavedObjectWithRefs: RelatedSavedObjects = [];
 
-  // Add action saved object to reference if it is not preconfigured
-  if (!isPreconfigured) {
+  // Add action saved object to reference if it is not in-memory action
+  if (!isInMemory) {
     references.push({
       id: actionId,
       name: ACTION_REF_NAME,

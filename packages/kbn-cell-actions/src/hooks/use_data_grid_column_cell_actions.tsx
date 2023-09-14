@@ -192,7 +192,7 @@ const getParentCellElement = (element?: HTMLElement | null): HTMLElement | null 
   if (element == null) {
     return null;
   }
-  if (element.nodeName === 'div' && element.getAttribute('role') === 'gridcell') {
+  if (element.nodeName === 'DIV' && element.getAttribute('role') === 'gridcell') {
     return element;
   }
   return getParentCellElement(element.parentElement);

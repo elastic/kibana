@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { AttachmentRequest } from '../../../../common/types/api';
 import type { AttachmentService } from '../../../services';
-import { CommentType } from '../../../../common/api';
-import type { CommentRequest, CommentRequestAlertType } from '../../../../common/api';
+import type { AlertAttachmentPayload } from '../../../../common/types/domain';
+import { AttachmentType } from '../../../../common/types/domain';
 import { CASE_COMMENT_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../../common/constants';
 import { isCommentRequestTypeAlert } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
@@ -16,7 +17,7 @@ export class AlertLimiter extends BaseLimiter {
   constructor(private readonly attachmentService: AttachmentService) {
     super({
       limit: MAX_ALERTS_PER_CASE,
-      attachmentType: CommentType.alert,
+      attachmentType: AttachmentType.alert,
       attachmentNoun: 'alerts',
       field: 'alertId',
     });
@@ -36,15 +37,15 @@ export class AlertLimiter extends BaseLimiter {
     }>({
       caseId,
       aggregations: limitAggregation,
-      attachmentType: CommentType.alert,
+      attachmentType: AttachmentType.alert,
     });
 
     return itemsAttachedToCase?.limiter?.value ?? 0;
   }
 
-  public countOfItemsInRequest(requests: CommentRequest[]): number {
+  public countOfItemsInRequest(requests: AttachmentRequest[]): number {
     const totalAlertsInReq = requests
-      .filter<CommentRequestAlertType>(isCommentRequestTypeAlert)
+      .filter<AlertAttachmentPayload>(isCommentRequestTypeAlert)
       .reduce((count, attachment) => {
         const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
         return count + ids.length;

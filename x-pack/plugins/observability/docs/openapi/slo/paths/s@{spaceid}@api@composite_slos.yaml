@@ -1,6 +1,6 @@
 post:
   summary: Creates a Composite SLO
-  operationId: createCompositeSlo
+  operationId: createCompositeSloOp
   description: >
     You must have `all` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
@@ -24,16 +24,22 @@ post:
             $ref: '../components/schemas/create_composite_slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
     '409':
       description: Conflict - The Composite SLO id already exists
       content:
@@ -43,7 +49,7 @@ post:
 
 get:
   summary: Retrieves a paginated list of composite SLOs with summary
-  operationId: findCompositeSlo
+  operationId: findCompositeSloOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
@@ -91,19 +97,25 @@ get:
             $ref: '../components/schemas/find_composite_slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
     '404':
       description: Not found response
-      content: 
+      content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'

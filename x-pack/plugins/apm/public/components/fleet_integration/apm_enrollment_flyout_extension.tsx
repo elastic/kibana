@@ -15,7 +15,7 @@ import { ApmPluginStartDeps } from '../../plugin';
 
 function StepComponent() {
   const { http } = useKibana<ApmPluginStartDeps>().services;
-  const installApmAgentLink = http?.basePath.prepend('/app/home#/tutorial/apm');
+  const installApmAgentLink = http?.basePath.prepend('/app/apm/tutorial');
 
   return (
     <>

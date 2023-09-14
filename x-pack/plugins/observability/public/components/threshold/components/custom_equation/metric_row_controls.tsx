@@ -18,10 +18,11 @@ export function MetricRowControls({ onDelete, disableDelete }: MetricRowControlP
     <>
       <EuiFlexItem grow={0}>
         <EuiButtonIcon
+          data-test-subj="o11yMetricRowControlsButton"
           aria-label={DELETE_LABEL}
           iconType="trash"
           color="danger"
-          style={{ marginBottom: '0.2em' }}
+          style={{ marginBottom: '0.6em' }}
           onClick={onDelete}
           disabled={disableDelete}
           title={DELETE_LABEL}

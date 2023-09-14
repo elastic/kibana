@@ -192,7 +192,6 @@ export interface ParamEditorProps<
   paramEditorUpdater: (setter: U) => void;
   ReferenceEditor?: (props: ReferenceEditorProps) => JSX.Element | null;
   toggleFullscreen: () => void;
-  setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
   columnId: string;
   layerId: string;

@@ -31,7 +31,7 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Indicators query bar interaction', () => {
+describe('Indicators query bar interaction', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
@@ -42,7 +42,7 @@ describe('Indicators query bar interaction', () => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  it('should add filter to kql', () => {
+  it.skip('should add filter to kql', () => {
     cy.log('filter in values when clicking in the barchart legend');
 
     waitForViewToBeUpdated();

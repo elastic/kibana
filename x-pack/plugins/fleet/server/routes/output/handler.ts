@@ -66,7 +66,7 @@ export const getOneOuputHandler: RequestHandler<
   }
 };
 
-export const putOuputHandler: RequestHandler<
+export const putOutputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>
@@ -99,7 +99,7 @@ export const putOuputHandler: RequestHandler<
   }
 };
 
-export const postOuputHandler: RequestHandler<
+export const postOutputHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostOutputRequestSchema.body>

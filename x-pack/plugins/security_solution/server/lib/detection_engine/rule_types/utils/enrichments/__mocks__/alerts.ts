@@ -48,7 +48,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { EventsForEnrichment } from '../types';
-import type { BaseFieldsLatest } from '../../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
 
 import {
   ALERT_ANCESTORS,

@@ -17,7 +17,8 @@
       "dataViews",
       "dataViewFieldEditor",
       "charts",
-      "fieldFormats"
+      "fieldFormats",
+      "uiActions"
     ]
   }
 }

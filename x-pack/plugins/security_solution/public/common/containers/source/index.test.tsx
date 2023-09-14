@@ -67,6 +67,7 @@ describe('source/index.tsx', () => {
                 });
               },
               getFieldsForWildcard: async () => Promise.resolve(),
+              getExistingIndices: async (indices: string[]) => Promise.resolve(indices),
             },
             search: {
               search: jest.fn().mockReturnValue({

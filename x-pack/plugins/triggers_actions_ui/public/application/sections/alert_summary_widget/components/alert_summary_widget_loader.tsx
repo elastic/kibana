@@ -6,22 +6,29 @@
  */
 
 import React from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, EuiLoadingSpinner } from '@elastic/eui';
 import { AlertSummaryWidgetProps } from '..';
 
-type Props = Pick<AlertSummaryWidgetProps, 'fullSize'>;
+type Props = { isLoadingWithoutChart: boolean | undefined } & Pick<
+  AlertSummaryWidgetProps,
+  'fullSize'
+>;
 
-export const AlertSummaryWidgetLoader = ({ fullSize }: Props) => {
+export const AlertSummaryWidgetLoader = ({ fullSize, isLoadingWithoutChart }: Props) => {
   return (
     <div
       style={{
-        minHeight: fullSize ? 238 : 224,
+        minHeight: isLoadingWithoutChart ? 44 : fullSize ? 238 : 224,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: isLoadingWithoutChart ? 'flex-start' : 'center',
       }}
     >
-      <EuiLoadingChart size="l" data-test-subj="alertSummaryWidgetLoading" />
+      {isLoadingWithoutChart ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
+        <EuiLoadingChart size="l" data-test-subj="alertSummaryWidgetLoading" />
+      )}
     </div>
   );
 };

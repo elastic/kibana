@@ -11,8 +11,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { routeDefinitionParamsMock } from '../../index.mock';
 import { defineDeleteRolesRoutes } from './delete';
+import { routeDefinitionParamsMock } from '../../index.mock';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;

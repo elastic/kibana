@@ -73,8 +73,12 @@ const createHistoryMock = (): jest.Mocked<History> => {
   };
 };
 
-const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
-  const currentAppId$ = new Subject<string | undefined>();
+const createInternalStartContractMock = (
+  currentAppId?: string
+): jest.Mocked<InternalApplicationStart> => {
+  const currentAppId$ = currentAppId
+    ? new BehaviorSubject<string | undefined>(currentAppId)
+    : new Subject<string | undefined>();
 
   return {
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),

@@ -8,12 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import {
-  RuleExecutorServicesMock,
-  alertsMock,
-  AlertInstanceMock,
-} from '@kbn/alerting-plugin/server/mocks';
+import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getRuleType } from './rule_type';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionContext } from './action_context';
@@ -21,7 +19,11 @@ import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
-import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
+import {
+  OnlyEsqlQueryRuleParams,
+  OnlyEsQueryRuleParams,
+  OnlySearchSourceRuleParams,
+} from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
@@ -29,8 +31,23 @@ import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_set
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
 const ruleType = getRuleType(coreSetup);
+const mockNow = jest.getRealSystemTime();
 
 describe('ruleType', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(mockNow);
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('rule type creation structure is the expected value', async () => {
     expect(ruleType.id).toBe('.es-query');
     expect(ruleType.name).toBe('Elasticsearch query');
@@ -72,19 +89,19 @@ describe('ruleType', () => {
         ],
         "params": Array [
           Object {
-            "description": "The number of hits to retrieve for each query.",
+            "description": "The number of documents to pass to the configured actions when the threshold condition is met.",
             "name": "size",
           },
           Object {
-            "description": "An array of values to use as the threshold. 'between' and 'notBetween' require two values.",
+            "description": "An array of rule threshold values. For between and notBetween thresholds, there are two values.",
             "name": "threshold",
           },
           Object {
-            "description": "A function to determine if the threshold was met.",
+            "description": "The comparison function for the threshold.",
             "name": "thresholdComparator",
           },
           Object {
-            "description": "Serialized search source fields used to fetch the documents from Elasticsearch.",
+            "description": "The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.",
             "name": "searchConfiguration",
           },
           Object {
@@ -92,8 +109,12 @@ describe('ruleType', () => {
             "name": "esQuery",
           },
           Object {
-            "description": "The index the query was run against.",
+            "description": "The indices the rule queries.",
             "name": "index",
+          },
+          Object {
+            "description": "ES|QL query field used to fetch data from Elasticsearch.",
+            "name": "esqlQuery",
           },
         ],
       }
@@ -166,7 +187,7 @@ describe('ruleType', () => {
 
       const result = await invokeExecutor({ params, ruleServices });
 
-      expect(ruleServices.alertFactory.create).not.toHaveBeenCalled();
+      expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
 
       expect(result).toMatchInlineSnapshot(`
         Object {
@@ -213,13 +234,17 @@ describe('ruleType', () => {
 
       const result = await invokeExecutor({ params, ruleServices });
 
-      expect(ruleServices.alertFactory.create).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.replaceState).toHaveBeenCalledWith({
-        latestTimestamp: undefined,
-        dateStart: expect.any(String),
-        dateEnd: expect.any(String),
-      });
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ConditionMetAlertInstanceId,
+          actionGroup: ActionGroupId,
+          state: {
+            latestTimestamp: undefined,
+            dateStart: expect.any(String),
+            dateEnd: expect.any(String),
+          },
+        })
+      );
 
       expect(result).toMatchObject({
         state: {
@@ -267,13 +292,18 @@ describe('ruleType', () => {
         },
       });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.replaceState).toHaveBeenCalledWith({
-        // ensure the invalid "latestTimestamp" in the state is stored as an ISO string going forward
-        latestTimestamp: new Date(previousTimestamp).toISOString(),
-        dateStart: expect.any(String),
-        dateEnd: expect.any(String),
-      });
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ConditionMetAlertInstanceId,
+          actionGroup: ActionGroupId,
+          state: {
+            // ensure the invalid "latestTimestamp" in the state is stored as an ISO string going forward
+            latestTimestamp: new Date(previousTimestamp).toISOString(),
+            dateStart: expect.any(String),
+            dateEnd: expect.any(String),
+          },
+        })
+      );
 
       expect(result).toMatchObject({
         state: {
@@ -316,12 +346,17 @@ describe('ruleType', () => {
 
       const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.replaceState).toHaveBeenCalledWith({
-        latestTimestamp: undefined,
-        dateStart: expect.any(String),
-        dateEnd: expect.any(String),
-      });
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ConditionMetAlertInstanceId,
+          actionGroup: ActionGroupId,
+          state: {
+            latestTimestamp: undefined,
+            dateStart: expect.any(String),
+            dateEnd: expect.any(String),
+          },
+        })
+      );
 
       expect(result).toMatchObject({
         state: {
@@ -361,12 +396,17 @@ describe('ruleType', () => {
 
       const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.replaceState).toHaveBeenCalledWith({
-        latestTimestamp: undefined,
-        dateStart: expect.any(String),
-        dateEnd: expect.any(String),
-      });
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ConditionMetAlertInstanceId,
+          actionGroup: ActionGroupId,
+          state: {
+            latestTimestamp: undefined,
+            dateStart: expect.any(String),
+            dateEnd: expect.any(String),
+          },
+        })
+      );
 
       expect(result?.state).toMatchObject({
         latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
@@ -392,13 +432,17 @@ describe('ruleType', () => {
         state: result?.state as EsQueryRuleState,
       });
 
-      const existingInstance: AlertInstanceMock =
-        ruleServices.alertFactory.create.mock.results[1].value;
-      expect(existingInstance.replaceState).toHaveBeenCalledWith({
-        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
-        dateStart: expect.any(String),
-        dateEnd: expect.any(String),
-      });
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ConditionMetAlertInstanceId,
+          actionGroup: ActionGroupId,
+          state: {
+            latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+            dateStart: expect.any(String),
+            dateEnd: expect.any(String),
+          },
+        })
+      );
 
       expect(secondResult).toMatchObject({
         state: {
@@ -444,12 +488,17 @@ describe('ruleType', () => {
 
       const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.replaceState).toHaveBeenCalledWith({
-        latestTimestamp: undefined,
-        dateStart: expect.any(String),
-        dateEnd: expect.any(String),
-      });
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ConditionMetAlertInstanceId,
+          actionGroup: ActionGroupId,
+          state: {
+            latestTimestamp: undefined,
+            dateStart: expect.any(String),
+            dateEnd: expect.any(String),
+          },
+        })
+      );
 
       expect(result).toMatchObject({
         state: {
@@ -496,12 +545,17 @@ describe('ruleType', () => {
 
       const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.replaceState).toHaveBeenCalledWith({
-        latestTimestamp: undefined,
-        dateStart: expect.any(String),
-        dateEnd: expect.any(String),
-      });
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: ConditionMetAlertInstanceId,
+          actionGroup: ActionGroupId,
+          state: {
+            latestTimestamp: undefined,
+            dateStart: expect.any(String),
+            dateEnd: expect.any(String),
+          },
+        })
+      );
 
       expect(result).toMatchObject({
         state: {
@@ -512,32 +566,31 @@ describe('ruleType', () => {
   });
 
   describe('search source query', () => {
-    const dataViewMock = {
-      id: 'test-id',
-      title: 'test-title',
-      timeFieldName: 'time-field',
-      fields: [
-        {
-          name: 'message',
-          type: 'string',
-          displayName: 'message',
-          scripted: false,
-          filterable: false,
-          aggregatable: false,
+    const dataViewMock = createStubDataView({
+      spec: {
+        id: 'test-id',
+        title: 'test-title',
+        timeFieldName: 'time-field',
+        fields: {
+          message: {
+            name: 'message',
+            type: 'string',
+            scripted: false,
+            searchable: false,
+            aggregatable: false,
+            readFromDocValues: false,
+          },
+          timestamp: {
+            name: 'timestamp',
+            type: 'date',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+            readFromDocValues: false,
+          },
         },
-        {
-          name: 'timestamp',
-          type: 'date',
-          displayName: 'timestamp',
-          scripted: false,
-          filterable: false,
-          aggregatable: false,
-        },
-      ],
-      toSpec: () => {
-        return { id: 'test-id', title: 'test-title', timeFieldName: 'time-field' };
       },
-    };
+    });
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
       timeWindowSize: 5,
@@ -550,10 +603,6 @@ describe('ruleType', () => {
       aggType: 'count',
       groupBy: 'all',
     };
-
-    afterAll(() => {
-      jest.resetAllMocks();
-    });
 
     it('validator succeeds with valid search source params', async () => {
       expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
@@ -583,9 +632,9 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        toSpec: () => dataViewMock.toSpec(),
-      });
+      (ruleServices.dataViews.create as jest.Mock).mockImplementationOnce((spec: DataViewSpec) =>
+        createStubDataView({ spec })
+      );
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
@@ -598,7 +647,7 @@ describe('ruleType', () => {
 
       await invokeExecutor({ params, ruleServices });
 
-      expect(ruleServices.alertFactory.create).not.toHaveBeenCalled();
+      expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
     });
 
     it('rule executor throws an error when index does not have time field', async () => {
@@ -620,9 +669,9 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        toSpec: () => dataViewMock.toSpec(),
-      });
+      (ruleServices.dataViews.create as jest.Mock).mockImplementationOnce((spec: DataViewSpec) =>
+        createStubDataView({ spec })
+      );
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
@@ -636,10 +685,171 @@ describe('ruleType', () => {
         hits: { total: 3, hits: [{}, {}, {}] },
       });
 
+      await invokeExecutor({
+        params,
+        ruleServices,
+        state: { latestTimestamp: new Date(mockNow).toISOString(), dateStart: '', dateEnd: '' },
+      });
+
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledTimes(1);
+
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionGroup: 'query matched',
+          id: 'query matched',
+          payload: expect.objectContaining({
+            kibana: {
+              alert: {
+                url: expect.any(String),
+                reason: expect.any(String),
+                title: "rule 'rule-name' matched query",
+                evaluation: {
+                  conditions: 'Number of matching documents is greater than or equal to 3',
+                  value: 3,
+                },
+              },
+            },
+          }),
+        })
+      );
+    });
+  });
+
+  describe('ESQL query', () => {
+    const dataViewMock = {
+      id: 'test-id',
+      title: 'test-title',
+      timeFieldName: 'time-field',
+      fields: [
+        {
+          name: 'message',
+          type: 'string',
+          displayName: 'message',
+          scripted: false,
+          filterable: false,
+          aggregatable: false,
+        },
+        {
+          name: 'timestamp',
+          type: 'date',
+          displayName: 'timestamp',
+          scripted: false,
+          filterable: false,
+          aggregatable: false,
+        },
+      ],
+      toSpec: () => {
+        return { id: 'test-id', title: 'test-title', timeFieldName: 'timestamp', fields: [] };
+      },
+    };
+    const defaultParams: OnlyEsqlQueryRuleParams = {
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: Comparator.GT,
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      timeField: 'timestamp',
+      searchType: 'esqlQuery',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
+    };
+
+    it('validator succeeds with valid ESQL query params', async () => {
+      expect(ruleType.validate.params.validate(defaultParams)).toBeTruthy();
+    });
+
+    it('validator fails with invalid ESQL query params - esQuery provided', async () => {
+      const paramsSchema = ruleType.validate.params;
+      const params: Partial<Writable<EsQueryRuleParams>> = {
+        size: 100,
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        thresholdComparator: Comparator.LT,
+        threshold: [0],
+        esQuery: '',
+        searchType: 'esqlQuery',
+        aggType: 'count',
+        groupBy: 'all',
+      };
+
+      expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
+        `"[esQuery]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('rule executor handles no documents returned by ES', async () => {
+      const params = defaultParams;
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        ...dataViewMock.toSpec(),
+        toSpec: () => dataViewMock.toSpec(),
+      });
+
+      const searchResult = {
+        columns: [
+          { name: 'timestamp', type: 'date' },
+          { name: 'message', type: 'keyword' },
+        ],
+        values: [],
+      };
+      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        searchResult
+      );
+
+      await invokeExecutor({ params, ruleServices });
+      expect(ruleServices.alertsClient.report).not.toHaveBeenCalled();
+    });
+
+    it('rule executor schedule actions when condition met', async () => {
+      const params = defaultParams;
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
+        ...dataViewMock.toSpec(),
+        toSpec: () => dataViewMock.toSpec(),
+      });
+
+      const searchResult = {
+        columns: [
+          { name: 'timestamp', type: 'date' },
+          { name: 'message', type: 'keyword' },
+        ],
+        values: [
+          ['timestamp', 'message'],
+          ['timestamp', 'message'],
+          ['timestamp', 'message'],
+        ],
+      };
+      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        searchResult
+      );
+
       await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
-      expect(instance.scheduleActions).toHaveBeenCalled();
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledTimes(1);
+
+      expect(ruleServices.alertsClient.report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          actionGroup: 'query matched',
+          id: 'query matched',
+          payload: expect.objectContaining({
+            kibana: {
+              alert: {
+                url: expect.any(String),
+                reason: expect.any(String),
+                title: "rule 'rule-name' matched query",
+                evaluation: {
+                  conditions: 'Query matched documents',
+                  value: 3,
+                },
+              },
+            },
+          }),
+        })
+      );
     });
   });
 });
@@ -688,7 +898,7 @@ async function invokeExecutor({
   ruleServices,
   state,
 }: {
-  params: OnlySearchSourceRuleParams | OnlyEsQueryRuleParams;
+  params: OnlySearchSourceRuleParams | OnlyEsQueryRuleParams | OnlyEsqlQueryRuleParams;
   ruleServices: RuleExecutorServicesMock;
   state?: EsQueryRuleState;
 }) {
@@ -710,7 +920,7 @@ async function invokeExecutor({
     spaceId: uuidv4(),
     rule: {
       id: uuidv4(),
-      name: uuidv4(),
+      name: 'rule-name',
       tags: [],
       consumer: '',
       producer: '',

@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Space } from '@kbn/spaces-plugin/public';
 
+import { SpaceSelector } from './space_selector';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
 import { copyRole } from '../../../../../../../common/model';
@@ -38,7 +39,6 @@ import type { KibanaPrivileges } from '../../../../model';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTable } from '../feature_table';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { SpaceSelector } from './space_selector';
 
 interface Props {
   role: Role;

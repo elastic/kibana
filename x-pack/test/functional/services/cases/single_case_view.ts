@@ -110,7 +110,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async assertCaseTitle(expectedTitle: string) {
-      const actionTitle = await testSubjects.getVisibleText('header-page-title');
+      const actionTitle = await testSubjects.getVisibleText('editable-title-header-value');
       expect(actionTitle).to.eql(
         expectedTitle,
         `Expected case title to be '${expectedTitle}' (got '${actionTitle}')`
@@ -138,10 +138,36 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     async closeAssigneesPopover() {
       await retry.try(async () => {
         // Click somewhere outside the popover
-        await testSubjects.click('header-page-title');
+        await testSubjects.click('editable-title-header-value');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('euiSelectableList');
       });
+    },
+
+    async refresh() {
+      await testSubjects.click('case-refresh');
+    },
+
+    async getReporter() {
+      await testSubjects.existOrFail('case-view-user-list-reporter');
+
+      const reporter = await testSubjects.findAllDescendant(
+        'user-profile-username',
+        await testSubjects.find('case-view-user-list-reporter')
+      );
+
+      return reporter[0];
+    },
+
+    async getParticipants() {
+      await testSubjects.existOrFail('case-view-user-list-participants');
+
+      const participants = await testSubjects.findAllDescendant(
+        'user-profile-username',
+        await testSubjects.find('case-view-user-list-participants')
+      );
+
+      return participants;
     },
   };
 }

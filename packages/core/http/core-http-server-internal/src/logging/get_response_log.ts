@@ -16,7 +16,13 @@ import { getResponsePayloadBytes } from './get_payload_size';
 
 // If you are updating these, consider whether they should also be updated in the
 // elasticsearch service `getEcsResponseLog`
-const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie', 'x-elastic-app-auth'];
+const FORBIDDEN_HEADERS = [
+  'authorization',
+  'cookie',
+  'set-cookie',
+  'x-elastic-app-auth',
+  'es-client-authentication',
+];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
 type HapiHeaders = Record<string, string | string[]>;

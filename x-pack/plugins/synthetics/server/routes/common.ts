@@ -10,7 +10,8 @@ import { SavedObjectsFindResponse } from '@kbn/core/server';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
-import { EncryptedSyntheticsMonitor, ServiceLocations } from '../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
+import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
@@ -63,7 +64,7 @@ export const SEARCH_FIELDS = [
 export const getMonitors = async (
   context: RouteContext<MonitorsQuery>,
   { fields }: { fields?: string[] } = {}
-): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitor>> => {
+): Promise<SavedObjectsFindResponse<EncryptedSyntheticsMonitorAttributes>> => {
   const {
     perPage = 50,
     page,
@@ -80,7 +81,7 @@ export const getMonitors = async (
     monitorQueryIds,
   } = context.request.query;
 
-  const filterStr = await getMonitorFilters({
+  const { filtersStr } = await getMonitorFilters({
     filter,
     monitorTypes,
     tags,
@@ -99,7 +100,7 @@ export const getMonitors = async (
     sortOrder,
     searchFields: SEARCH_FIELDS,
     search: query ? `${query}*` : undefined,
-    filter: filterStr,
+    filter: filtersStr,
     searchAfter,
     fields,
   };
@@ -128,7 +129,7 @@ export const getMonitorFilters = async ({
 }) => {
   const locationFilter = await parseLocationFilter(context, locations);
 
-  return [
+  const filtersStr = [
     filter,
     getKqlFilter({ field: 'tags', values: tags }),
     getKqlFilter({ field: 'project_id', values: projects }),
@@ -139,6 +140,7 @@ export const getMonitorFilters = async ({
   ]
     .filter((f) => !!f)
     .join(' AND ');
+  return { filtersStr, locationFilter };
 };
 
 export const getKqlFilter = ({
@@ -171,7 +173,7 @@ export const getKqlFilter = ({
 
 const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {
   if (!locations || locations?.length === 0) {
-    return '';
+    return;
   }
 
   const { allLocations } = await getAllLocations(context);
@@ -182,10 +184,13 @@ const parseLocationFilter = async (context: RouteContext, locations?: string | s
       .filter((val) => !!val);
   }
 
-  return findLocationItem(locations, allLocations)?.id ?? '';
+  return [findLocationItem(locations, allLocations)?.id ?? ''];
 };
 
-export const findLocationItem = (query: string, locations: ServiceLocations) => {
+export const findLocationItem = (
+  query: string,
+  locations: Array<ServiceLocation | PrivateLocation>
+) => {
   return locations.find(({ id, label }) => query === id || label === query);
 };
 

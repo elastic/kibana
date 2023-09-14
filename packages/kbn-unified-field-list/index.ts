@@ -48,10 +48,10 @@ export type {
   AddFieldFilterHandler,
   FieldListGroups,
   FieldsGroupDetails,
-  FieldTypeKnown,
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
+  SearchMode,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 
@@ -80,14 +80,15 @@ export {
 export {
   useQuerySubscriber,
   hasQuerySubscriberData,
+  getSearchMode,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
 } from './src/hooks/use_query_subscriber';
 
+export { getFieldTypeDescription, getFieldType, getFieldIconType } from './src/utils/field_types';
+
 export {
-  getFieldTypeName,
-  getFieldTypeDescription,
-  KNOWN_FIELD_TYPES,
-  getFieldType,
-  getFieldIconType,
-} from './src/utils/field_types';
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListSidebarContainerProps,
+} from './src/containers/unified_field_list_sidebar';

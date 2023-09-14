@@ -11,6 +11,7 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -20,6 +21,7 @@ import {
   deleteRole,
   deleteUser,
   deleteIndex,
+  assertIndexStatus,
 } from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
@@ -85,9 +87,18 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('unprivileged');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+        );
       });
     });
 
@@ -134,14 +145,27 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('unprivileged');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+        );
 
-        expect(res.indicesDetails[0].status).to.be('empty');
-        expect(res.indicesDetails[1].status).to.be('empty');
-        expect(res.indicesDetails[2].status).to.be('unprivileged');
-        expect(res.indicesDetails[3].status).to.be('unprivileged');
+        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'empty');
+        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
+        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(
+          res.indicesDetails,
+          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+          'unprivileged'
+        );
       });
 
       it(`Return unprivileged when missing access to score index`, async () => {
@@ -165,14 +189,27 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('unprivileged');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+        );
 
-        expect(res.indicesDetails[0].status).to.be('unprivileged');
-        expect(res.indicesDetails[1].status).to.be('empty');
-        expect(res.indicesDetails[2].status).to.be('empty');
-        expect(res.indicesDetails[3].status).to.be('unprivileged');
+        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
+        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'empty');
+        assertIndexStatus(
+          res.indicesDetails,
+          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+          'unprivileged'
+        );
       });
 
       it(`Return unprivileged when missing access to vulnerabilities_latest index`, async () => {
@@ -199,14 +236,23 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('not-installed');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'not-installed',
+          `expected not-installed but got ${res.vuln_mgmt.status} instead`
+        );
 
-        expect(res.indicesDetails[0].status).to.be('unprivileged');
-        expect(res.indicesDetails[1].status).to.be('empty');
-        expect(res.indicesDetails[2].status).to.be('unprivileged');
-        expect(res.indicesDetails[3].status).to.be('empty');
+        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
+        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(res.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, 'empty');
       });
     });
   });

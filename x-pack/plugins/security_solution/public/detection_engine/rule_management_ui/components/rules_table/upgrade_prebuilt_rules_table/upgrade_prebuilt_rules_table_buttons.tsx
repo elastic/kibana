@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
+import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 
@@ -15,6 +16,8 @@ export const UpgradePrebuiltRulesTableButtons = () => {
     state: { rules, selectedRules, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { upgradeAllRules, upgradeSelectedRules },
   } = useUpgradePrebuiltRulesTableContext();
+  const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
+  const canUserEditRules = canUserCRUD && !isUserDataLoading;
 
   const isRulesAvailableForUpgrade = rules.length > 0;
   const numberOfSelectedRules = selectedRules.length ?? 0;
@@ -29,7 +32,7 @@ export const UpgradePrebuiltRulesTableButtons = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={upgradeSelectedRules}
-            disabled={isRequestInProgress}
+            disabled={!canUserEditRules || isRequestInProgress}
             data-test-subj="upgradeSelectedRulesButton"
           >
             <>
@@ -44,7 +47,7 @@ export const UpgradePrebuiltRulesTableButtons = () => {
           fill
           iconType="plusInCircle"
           onClick={upgradeAllRules}
-          disabled={!isRulesAvailableForUpgrade || isRequestInProgress}
+          disabled={!canUserEditRules || !isRulesAvailableForUpgrade || isRequestInProgress}
           data-test-subj="upgradeAllRulesButton"
         >
           {i18n.UPDATE_ALL}

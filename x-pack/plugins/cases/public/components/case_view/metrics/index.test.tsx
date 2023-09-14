@@ -17,6 +17,7 @@ import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../co
 import { TestProviders } from '../../../common/mock';
 import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
 import { useCasesFeatures } from '../../../common/use_cases_features';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 
 jest.mock('../../../containers/use_get_case_metrics');
 jest.mock('../../../common/use_cases_features');
@@ -56,19 +57,19 @@ interface FeatureTest {
 
 const metricsFeaturesTests: FeatureTest[] = [
   {
-    feature: 'alerts.count',
+    feature: CaseMetricsFeature.ALERTS_COUNT,
     items: [{ title: 'Total alerts', value: basicCaseMetrics.alerts!.count! }],
   },
   {
-    feature: 'alerts.users',
+    feature: CaseMetricsFeature.ALERTS_USERS,
     items: [{ title: 'Associated users', value: basicCaseMetrics.alerts!.users!.total! }],
   },
   {
-    feature: 'alerts.hosts',
+    feature: CaseMetricsFeature.ALERTS_HOSTS,
     items: [{ title: 'Associated hosts', value: basicCaseMetrics.alerts!.hosts!.total! }],
   },
   {
-    feature: 'actions.isolateHost',
+    feature: CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
     items: [
       {
         title: 'Isolated hosts',
@@ -79,11 +80,11 @@ const metricsFeaturesTests: FeatureTest[] = [
     ],
   },
   {
-    feature: 'connectors',
+    feature: CaseMetricsFeature.CONNECTORS,
     items: [{ title: 'Total connectors', value: basicCaseMetrics.connectors!.total! }],
   },
   {
-    feature: 'lifespan',
+    feature: CaseMetricsFeature.LIFESPAN,
     items: [
       {
         title: 'Case created',
@@ -187,7 +188,7 @@ describe('CaseViewMetrics', () => {
     };
     const { getByText } = renderCaseMetrics({
       metrics: incosistentMetrics,
-      features: ['actions.isolateHost'],
+      features: [CaseMetricsFeature.ACTIONS_ISOLATE_HOST],
     });
     expect(getByText('Isolated hosts')).toBeInTheDocument();
     expect(getByText('0')).toBeInTheDocument();

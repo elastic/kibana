@@ -20,10 +20,7 @@ import type {
 } from '../../../../common/types/ml_server_info';
 import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import type { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import type {
-  BucketSpanEstimatorData,
-  ResetJobsResponse,
-} from '../../../../common/types/job_service';
+import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
 import type {
   Job,
   JobStats,
@@ -202,14 +199,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
         path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/_update`,
         method: 'POST',
         body,
-        version: '1',
-      });
-    },
-
-    resetJob({ jobId }: { jobId: string }) {
-      return httpService.http<ResetJobsResponse>({
-        path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/${jobId}/_reset`,
-        method: 'POST',
         version: '1',
       });
     },

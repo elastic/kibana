@@ -6,21 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
-
-import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import {
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { UiActionsService } from './lib/ui_actions';
-import { EmbeddablePublicPlugin } from './plugin';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+
 import {
   EmbeddableStart,
   EmbeddableSetup,
@@ -28,57 +25,19 @@ import {
   EmbeddableStartDependencies,
   EmbeddableStateTransfer,
   IEmbeddable,
-  EmbeddablePanel,
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '.';
+import { EmbeddablePublicPlugin } from './plugin';
+import { setKibanaServices } from './kibana_services';
 import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
-
-interface CreateEmbeddablePanelMockArgs {
-  getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
-  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
-  overlays: CoreStart['overlays'];
-  notifications: CoreStart['notifications'];
-  application: CoreStart['application'];
-  inspector: InspectorStart;
-  SavedObjectFinder: React.ComponentType<any>;
-}
-
-const theme = themeServiceMock.createStartContract();
-
-export const createEmbeddablePanelMock = ({
-  getActions,
-  getEmbeddableFactory,
-  getAllEmbeddableFactories,
-  overlays,
-  notifications,
-  application,
-  inspector,
-  SavedObjectFinder,
-}: Partial<CreateEmbeddablePanelMockArgs>) => {
-  return ({ embeddable }: { embeddable: IEmbeddable }) => (
-    <EmbeddablePanel
-      embeddable={embeddable}
-      getActions={getActions || (() => Promise.resolve([]))}
-      getAllEmbeddableFactories={getAllEmbeddableFactories || ((() => []) as any)}
-      getEmbeddableFactory={getEmbeddableFactory || ((() => undefined) as any)}
-      notifications={notifications || ({} as any)}
-      application={application || ({} as any)}
-      overlays={overlays || ({} as any)}
-      inspector={inspector || ({} as any)}
-      SavedObjectFinder={SavedObjectFinder || (() => null)}
-      theme={theme}
-    />
-  );
-};
 
 export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
   return {
@@ -149,7 +108,6 @@ const createStartContract = (): Start => {
     extract: jest.fn(),
     inject: jest.fn(),
     getAllMigrations: jest.fn(),
-    EmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),
   };
@@ -183,6 +141,9 @@ const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {})
       inspector: inspectorPluginMock.createStartContract(),
       savedObjectsManagement:
         savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
+      usageCollection: { reportUiCounter: jest.fn() },
+      contentManagement:
+        startPlugins.contentManagement || contentManagementMock.createStartContract(),
     });
   return {
     plugin,
@@ -198,4 +159,17 @@ export const embeddablePluginMock = {
   mockRefOrValEmbeddable,
   mockSelfStyledEmbeddable,
   mockFilterableEmbeddable,
+};
+
+export const setStubKibanaServices = () => {
+  const core = coreMock.createStart();
+  const selfStart = embeddablePluginMock.createStartContract();
+
+  setKibanaServices(core, selfStart, {
+    uiActions: uiActionsPluginMock.createStartContract(),
+    inspector: inspectorPluginMock.createStartContract(),
+    savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+    usageCollection: { reportUiCounter: jest.fn() },
+    contentManagement: contentManagementMock.createStartContract(),
+  });
 };

@@ -18,14 +18,12 @@ properties:
     description: A name for the composite SLO.
     type: string
   timeWindow:
-    $ref: 'time_window_rolling.yaml'
+    $ref: "time_window.yaml"
   budgetingMethod:
-    $ref: 'budgeting_method.yaml'
+    $ref: "budgeting_method.yaml"
   compositeMethod:
-    $ref: 'composite_method.yaml'
+    $ref: "composite_method.yaml"
   objective:
-    $ref: 'objective.yaml'
+    $ref: "objective.yaml"
   sources:
-    oneOf:
-      - $ref: 'weighted_composite_sources.yaml'
-  
+    - $ref: "weighted_composite_sources.yaml"

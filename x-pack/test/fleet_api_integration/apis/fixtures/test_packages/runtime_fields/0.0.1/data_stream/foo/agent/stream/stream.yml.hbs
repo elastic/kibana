@@ -1,0 +1,7 @@
+paths:
+{{#each paths as |path i|}}
+  - {{path}}
+{{/each}}
+exclude_files: [".gz$"]
+processors:
+  - add_locale: ~

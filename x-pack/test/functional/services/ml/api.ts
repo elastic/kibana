@@ -1065,6 +1065,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async getGroups(space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/internal/ml/jobs/groups`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
+
+      return body;
+    },
+
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
@@ -1489,9 +1498,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return ingestPipeline;
     },
 
-    async deleteIngestPipeline(modelId: string) {
+    async deleteIngestPipeline(modelId: string, usePrefix: boolean = true) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
-      const { body, status } = await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`);
+      const { body, status } = await esSupertest.delete(
+        `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
+      );
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');

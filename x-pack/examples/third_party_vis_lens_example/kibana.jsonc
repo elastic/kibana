@@ -16,9 +16,6 @@
       "developerExamples",
       "expressions",
       "fieldFormats"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
     ]
   }
 }

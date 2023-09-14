@@ -9,17 +9,16 @@
 import React, { FC, ReactElement, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonEmptyProps,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiPopover,
-  IconType,
   PanelPaddingSize,
   PopoverAnchorPosition,
 } from '@elastic/eui';
 
-import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
 import { css } from '@emotion/react';
 
 export interface Action {
@@ -34,8 +33,8 @@ interface HeaderMenuComponentProps {
   disableActions: boolean;
   actions: Action[] | ReactElement[] | null;
   text?: string;
-  iconType?: IconType;
-  iconSide?: ButtonContentIconSide;
+  iconType?: EuiButtonEmptyProps['iconType'];
+  iconSide?: EuiButtonEmptyProps['iconSide'];
   dataTestSubj?: string;
   emptyButton?: boolean;
   useCustomActions?: boolean;

@@ -1,0 +1,11 @@
+title: Output
+oneOf:
+  - $ref: './output_update_request_elasticsearch.yaml'
+  - $ref: './output_update_request_kafka.yaml'
+  - $ref: './output_update_request_logstash.yaml'
+discriminator:
+  propertyName: type
+  mapping:
+    elasticsearch: './output_update_request_elasticsearch.yaml'
+    kafka: './output_update_request_kafka.yaml'
+    logstash: './output_update_request_logstash.yaml'

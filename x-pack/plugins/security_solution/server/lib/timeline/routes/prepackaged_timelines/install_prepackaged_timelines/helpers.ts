@@ -8,7 +8,7 @@
 import path, { join, resolve } from 'path';
 import { Readable } from 'stream';
 
-import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline/api';
+import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
 
 import type { FrameworkRequest } from '../../../../framework';
 

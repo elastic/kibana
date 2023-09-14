@@ -70,11 +70,6 @@ export type UptimeRoute<ClientContract = unknown> = UMRouteDefinition<
 export type UMRestApiRouteFactory<ClientContract = unknown> = (
   libs: UMServerLibs
 ) => UptimeRoute<ClientContract>;
-export type SyntheticsRestApiRouteFactory<
-  ClientContract = any,
-  QueryParams = Record<string, any>
-> = (libs: UMServerLibs) => SyntheticsRoute<ClientContract, QueryParams>;
-export type SyntheticsStreamingRouteFactory = (libs: UMServerLibs) => SyntheticsStreamingRoute;
 
 /**
  * Functions of this type accept our internal route format and output a route
@@ -84,12 +79,6 @@ export type UMKibanaRouteWrapper = (
   uptimeRoute: UptimeRoute<any>,
   server: UptimeServerSetup
 ) => UMKibanaRoute;
-
-export type SyntheticsRoute<
-  ClientContract = unknown,
-  QueryParams = Record<string, any>
-> = UMRouteDefinition<SyntheticsRouteHandler<ClientContract, QueryParams>>;
-export type SyntheticsStreamingRoute = UMRouteDefinition<SyntheticsStreamingRouteHandler>;
 
 export interface UptimeRouteContext {
   uptimeEsClient: UptimeEsClient;
@@ -124,31 +113,3 @@ export interface RouteContext<Query = Record<string, any>> {
   subject?: Subject<unknown>;
   spaceId: string;
 }
-
-export type SyntheticsRouteHandler<ClientContract = unknown, Query = Record<string, any>> = ({
-  uptimeEsClient,
-  context,
-  request,
-  response,
-  server,
-  savedObjectsClient,
-  subject: Subject,
-}: RouteContext<Query>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
-
-export type SyntheticsStreamingRouteHandler = ({
-  uptimeEsClient,
-  context,
-  request,
-  server,
-  savedObjectsClient,
-  subject: Subject,
-  spaceId,
-}: {
-  uptimeEsClient: UptimeEsClient;
-  context: UptimeRequestHandlerContext;
-  request: SyntheticsRequest;
-  savedObjectsClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
-  subject?: Subject<unknown>;
-  spaceId: string;
-}) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

@@ -29,7 +29,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
-import { createMockedDragDropContext } from './mocks';
 import { DataViewsState } from '../../state_management';
 
 const fieldsFromQuery = [
@@ -185,7 +184,6 @@ describe('TextBased Query Languages Data Panel', () => {
           ])
         ),
       },
-      dragDropContext: createMockedDragDropContext(),
       core,
       dateRange: {
         fromDate: 'now-7d',

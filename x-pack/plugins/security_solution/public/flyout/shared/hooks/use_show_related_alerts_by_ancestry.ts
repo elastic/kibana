@@ -6,30 +6,54 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { useMemo } from 'react';
 import { find } from 'lodash/fp';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../common/hooks/use_license';
+import { getField } from '../utils';
+import { ANCESTOR_ID } from '../constants/field_names';
 
 export interface UseShowRelatedAlertsByAncestryParams {
   /**
-   * An array of field objects with category and value
+   * Retrieves searchHit values for the provided field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  getFieldsData: GetFieldsData;
   /**
    * An object with top level fields from the ECS object
    */
   dataAsNestedObject: Ecs | null;
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+}
+
+export interface UseShowRelatedAlertsByAncestryResult {
+  /**
+   * Returns true if the user has at least platinum privilege, and if the document has ancestry data
+   */
+  show: boolean;
+  /**
+   * Value of the kibana.alert.ancestors.id field
+   */
+  documentId?: string;
+  /**
+   * Values of the kibana.alert.rule.parameters.index field
+   */
+  indices?: string[];
 }
 
 /**
  * Returns true if the user has at least platinum privilege, and if the document has ancestry data
  */
 export const useShowRelatedAlertsByAncestry = ({
-  dataFormattedForFieldBrowser,
+  getFieldsData,
   dataAsNestedObject,
-}: UseShowRelatedAlertsByAncestryParams): boolean => {
+  dataFormattedForFieldBrowser,
+}: UseShowRelatedAlertsByAncestryParams): UseShowRelatedAlertsByAncestryResult => {
   const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
     'insightsRelatedAlertsByProcessAncestry'
   );
@@ -37,21 +61,31 @@ export const useShowRelatedAlertsByAncestry = ({
     dataAsNestedObject || undefined
   );
 
-  const originalDocumentId = find(
-    { category: 'kibana', field: 'kibana.alert.ancestors.id' },
-    dataFormattedForFieldBrowser
-  );
-  const originalDocumentIndex = find(
-    { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
-    dataFormattedForFieldBrowser
+  const originalDocumentId = getField(getFieldsData(ANCESTOR_ID));
+
+  // can't use getFieldsData here as the kibana.alert.rule.parameters is different and can be nested
+  const originalDocumentIndex = useMemo(
+    () =>
+      find(
+        { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
+        dataFormattedForFieldBrowser
+      ),
+    [dataFormattedForFieldBrowser]
   );
 
-  const canShowAncestryInsight =
-    isRelatedAlertsByProcessAncestryEnabled &&
-    hasProcessEntityInfo &&
-    originalDocumentId &&
-    originalDocumentIndex;
   const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
 
-  return canShowAncestryInsight != null && canShowAncestryInsight && hasAtLeastPlatinum;
+  const show =
+    isRelatedAlertsByProcessAncestryEnabled &&
+    hasProcessEntityInfo &&
+    originalDocumentId != null &&
+    originalDocumentIndex != null &&
+    hasAtLeastPlatinum;
+
+  return {
+    show,
+    ...(originalDocumentId && { documentId: originalDocumentId }),
+    ...(originalDocumentIndex &&
+      originalDocumentIndex.values && { indices: originalDocumentIndex.values }),
+  };
 };

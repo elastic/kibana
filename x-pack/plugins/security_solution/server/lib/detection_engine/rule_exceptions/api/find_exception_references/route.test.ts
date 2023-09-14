@@ -7,7 +7,7 @@
 
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../../common/detection_engine/rule_exceptions';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import {
   getEmptyFindResult,

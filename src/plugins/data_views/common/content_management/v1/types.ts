@@ -18,6 +18,7 @@ import { DataViewContentType } from './constants';
 interface DataViewCreateOptions {
   id?: SavedObjectCreateOptions['id'];
   initialNamespaces?: SavedObjectCreateOptions['initialNamespaces'];
+  overwrite?: SavedObjectCreateOptions['overwrite'];
 }
 
 interface DataViewUpdateOptions {

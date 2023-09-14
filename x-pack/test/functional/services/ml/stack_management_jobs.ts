@@ -27,7 +27,6 @@ export function MachineLearningStackManagementJobsProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
@@ -144,11 +143,14 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async selectShareToSpacesMode(inputTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId') {
+      // The input element can not be clicked directly.
+      // Instead, we need to click the parent label
+      const getInputLabel = async () => {
+        const input = await testSubjects.find(inputTestSubj, 1000);
+        return await input.findByXpath('./../../..'); // Clicks the parent label 3 levels up
+      };
       await retry.tryForTime(5000, async () => {
-        // The input element can not be clicked directly.
-        // Instead, we need to click the corresponding label
-        const inputId = await testSubjects.getAttribute(inputTestSubj, 'id', 1000);
-        const labelElement = await find.byCssSelector(`[for="${inputId}"]`, 1000);
+        const labelElement = await getInputLabel();
         await labelElement.click();
 
         const checked = await testSubjects.getAttribute(inputTestSubj, 'checked', 1000);
@@ -156,7 +158,7 @@ export function MachineLearningStackManagementJobsProvider({
 
         // sometimes the checked attribute of the input is set but it's not actually
         // selected, so we're also checking the class of the corresponding label
-        const updatedLabelElement = await find.byCssSelector(`[for="${inputId}"]`, 1000);
+        const updatedLabelElement = await getInputLabel();
         const labelClasses = await updatedLabelElement.getAttribute('class');
         expect(labelClasses).to.contain(
           'euiButtonGroupButton-isSelected',

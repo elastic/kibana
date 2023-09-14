@@ -16,6 +16,7 @@ import type {
   RuleAction,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { validateActionFilterQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleActionsFormData } from '../../../../../detection_engine/rule_management_ui/components/rules_table/bulk_actions/forms/rule_actions_form';
 import type { ActionsStepRule } from '../../../../pages/detection_engine/rules/types';
 import type { ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
@@ -29,8 +30,9 @@ export const validateSingleAction = async (
 ): Promise<string[]> => {
   const actionParamsErrors = await validateActionParams(actionItem, actionTypeRegistry);
   const mustacheErrors = validateMustache(actionItem.params);
+  const queryErrors = validateActionFilterQuery(actionItem);
 
-  return [...actionParamsErrors, ...mustacheErrors];
+  return [...actionParamsErrors, ...mustacheErrors, ...(queryErrors ? [queryErrors] : [])];
 };
 
 export const validateRuleActionsField =

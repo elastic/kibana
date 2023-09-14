@@ -134,7 +134,7 @@
             "LiveQueryQueryFieldProps",
             " & { formMethods: ",
             "UseFormReturn",
-            "<{ label: string; query: string; ecs_mapping: Record<string, unknown>; }, any>; }) => JSX.Element) | undefined"
+            "<{ label: string; query: string; ecs_mapping: Record<string, unknown>; }, any, undefined>; }) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",
           "deprecated": false,

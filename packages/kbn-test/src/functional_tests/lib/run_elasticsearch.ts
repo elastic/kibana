@@ -34,7 +34,7 @@ function getEsConfig({
 }: RunElasticsearchOptions) {
   const ssl = !!config.get('esTestCluster.ssl');
   const license: 'basic' | 'trial' | 'gold' = config.get('esTestCluster.license');
-  const esArgs: string[] = config.get('esTestCluster.serverArgs') ?? [];
+  const esArgs: string[] = config.get('esTestCluster.serverArgs');
   const esJavaOpts: string | undefined = config.get('esTestCluster.esJavaOpts');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
@@ -46,6 +46,8 @@ function getEsConfig({
     : config.get('servers.elasticsearch.password');
 
   const dataArchive: string | undefined = config.get('esTestCluster.dataArchive');
+  const serverless: boolean = config.get('serverless');
+  const files: string[] | undefined = config.get('esTestCluster.files');
 
   return {
     ssl,
@@ -58,6 +60,8 @@ function getEsConfig({
     password,
     dataArchive,
     ccsConfig,
+    serverless,
+    files,
   };
 }
 
@@ -140,6 +144,8 @@ async function startEsNode({
     ],
     transportPort: config.transportPort,
     onEarlyExit,
+    serverless: config.serverless,
+    files: config.files,
   });
 
   await cluster.start();

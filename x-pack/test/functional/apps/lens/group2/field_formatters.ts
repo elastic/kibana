@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.confirmDelete();
         await PageObjects.lens.waitForFieldMissing('runtimefield');
       });
-
       it('should display url formatter correctly', async () => {
         await retry.try(async () => {
           await PageObjects.lens.clickAddField();
@@ -194,6 +193,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.lens.waitForVisualization();
         expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('572,732.21%');
+      });
+    });
+    describe('formatter order', () => {
+      before(async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.goToTimeRange();
+        await PageObjects.lens.switchToVisualization('lnsDatatable');
+      });
+
+      after(async () => {
+        await PageObjects.lens.clickField('runtimefield');
+        await PageObjects.lens.removeField('runtimefield');
+        await fieldEditor.confirmDelete();
+        await PageObjects.lens.waitForFieldMissing('runtimefield');
+      });
+      it('should be overridden by Lens formatter', async () => {
+        await retry.try(async () => {
+          await PageObjects.lens.clickAddField();
+          await fieldEditor.setName('runtimefield');
+          await fieldEditor.setFieldType('long');
+          await fieldEditor.enableValue();
+          await fieldEditor.typeScript("emit(doc['bytes'].value)");
+          await fieldEditor.setFormat(FIELD_FORMAT_IDS.BYTES);
+          await fieldEditor.save();
+          await fieldEditor.waitUntilClosed();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        });
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+          operation: 'average',
+          field: 'runtimefield',
+          keepOpen: true,
+        });
+        await PageObjects.lens.editDimensionFormat('Bits (1000)', { decimals: 3, prefix: 'blah' });
+        await PageObjects.lens.closeDimensionEditor();
+        await PageObjects.lens.waitForVisualization();
+        expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('5.727kbitblah');
       });
     });
   });

@@ -30,6 +30,7 @@ export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
  * An `EuiLink` that will use Kibana's `.application.navigateToApp()` to redirect the user to the
  * a given app without causing a full browser refresh
  */
+// eslint-disable-next-line react/display-name
 export const LinkToApp = memo<LinkToAppProps>(
   ({
     appId = APP_UI_ID,

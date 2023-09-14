@@ -125,6 +125,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
     app_target: 'logs-ui',
   },
   sources,
+  enabled: true,
 });
 
 const createRequestContext = (savedObject?: SavedObject<unknown>) => {

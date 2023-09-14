@@ -211,7 +211,7 @@
           "\nPossible values for the ID of a {@link ServiceStatusLevel}\n"
         ],
         "signature": [
-          "\"degraded\" | \"unavailable\" | \"critical\" | \"available\""
+          "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
         ],
         "path": "packages/core/status/core-status-common/src/service_status.ts",
         "deprecated": false,

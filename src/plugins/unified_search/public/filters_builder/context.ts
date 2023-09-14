@@ -10,6 +10,7 @@ import React, { Dispatch } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { FiltersBuilderActions } from './reducer';
+import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 interface FiltersBuilderContextType {
   dataView: DataView;
@@ -22,6 +23,7 @@ interface FiltersBuilderContextType {
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   disabled: boolean;
+  suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
 export const FiltersBuilderContextType = React.createContext<FiltersBuilderContextType>(

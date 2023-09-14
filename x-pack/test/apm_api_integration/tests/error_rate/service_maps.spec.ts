@@ -72,7 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
-  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Maps APIs', { config: 'trial', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;

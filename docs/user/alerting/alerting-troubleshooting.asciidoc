@@ -190,11 +190,29 @@ In addition to the above methods, refer to the following approaches and common i
 * <<testing-connectors,Testing connectors using {connectors-ui} UI and the `kbn-action` tool>>
 
 [discrete]
+[[alerting-kibana-throttle]]
+==== Temporarily throttle all tasks
+
+If cluster performance becomes degraded from excessive or expensive rules and {kib} is sluggish or unresponsive, you can temporarily reduce load to the Task Manager by updating its <<task-manager-settings-kb,settings>>:
+
+[source,txt]
+--------------------------------------------------
+xpack.task_manager.max_workers: 1
+xpack.task_manager.poll_interval: 1h
+--------------------------------------------------
+
+[WARNING]
+====
+This approach should be used only temporarily as a last resort to restore function to {kib} when it is unresponsive and attempts to identify and <<controlling-rules,snooze or disable>> slow-running rules have not fixed the situation.
+It severely throttles all background tasks, not just those relating to {alert-features}. The task manager will run only one task at a time and will look for more work each hour.
+====
+
+[discrete]
 [[alerting-limitations]]
 === Limitations
 
 The following limitations and known problems apply to the {version} release of
-the {kib} {alert-features}. 
+the {kib} {alert-features}:
 
 [discrete]
 ==== Alert visibility
@@ -208,3 +226,4 @@ the `consumer` property.
 include::troubleshooting/alerting-common-issues.asciidoc[]
 include::troubleshooting/event-log-index.asciidoc[]
 include::troubleshooting/testing-connectors.asciidoc[]
+

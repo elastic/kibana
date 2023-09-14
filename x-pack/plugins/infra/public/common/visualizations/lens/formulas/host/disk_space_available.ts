@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const diskSpaceAvailable: LensChartConfig = {
-  title: 'Disk Space Available',
-  formula: {
-    formula: 'average(system.filesystem.free)',
-    format: {
-      id: 'bytes',
-      params: {
-        decimals: 0,
-      },
+export const diskSpaceAvailable: FormulaValueConfig = {
+  label: 'Disk Space Available',
+  value: 'average(system.filesystem.free)',
+  format: {
+    id: 'bytes',
+    params: {
+      decimals: 0,
     },
   },
-  getFilters,
 };

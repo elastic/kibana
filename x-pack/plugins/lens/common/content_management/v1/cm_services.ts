@@ -28,7 +28,7 @@ const referencesSchema = schema.arrayOf(referenceSchema);
 const lensAttributesSchema = schema.object(
   {
     title: schema.string(),
-    description: schema.maybe(schema.string()),
+    description: schema.maybe(schema.nullable(schema.string())),
     visualizationType: schema.maybe(schema.string()),
     state: schema.maybe(schema.any()),
     uiStateJSON: schema.maybe(schema.string()),

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { schema } from '@kbn/config-schema';
@@ -12,6 +13,7 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   getAlertUrl,
+  observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
@@ -119,6 +121,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   name: tlsTranslations.alertFactoryName,
   validate: {
     params: schema.object({
+      stackVersion: schema.maybe(schema.string()),
       search: schema.maybe(schema.string()),
       certExpirationThreshold: schema.maybe(schema.number()),
       certAgeThreshold: schema.maybe(schema.number()),
@@ -155,6 +158,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     spaceId,
     startedAt,
     state,
+    rule,
   }) {
     const { share, basePath } = _server;
     const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
@@ -163,7 +167,10 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 
     const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-      scopedClusterClient.asCurrentUser
+      scopedClusterClient.asCurrentUser,
+      {
+        stackVersion: params.stackVersion ?? '8.9.0',
+      }
     );
 
     const certExpirationThreshold =
@@ -253,4 +260,6 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     return { state: updateState(state, foundCerts) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
+  getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+    observabilityPaths.ruleDetails(rule.id),
 });

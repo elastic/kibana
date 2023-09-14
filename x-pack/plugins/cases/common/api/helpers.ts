@@ -7,7 +7,7 @@
 
 import {
   CASE_DETAILS_URL,
-  CASE_METRICS_DETAILS_URL,
+  INTERNAL_CASE_METRICS_DETAILS_URL,
   CASE_COMMENTS_URL,
   CASE_USER_ACTIONS_URL,
   CASE_PUSH_URL,
@@ -28,7 +28,7 @@ export const getCaseDetailsUrl = (id: string): string => {
 };
 
 export const getCaseDetailsMetricsUrl = (id: string): string => {
-  return CASE_METRICS_DETAILS_URL.replace('{case_id}', id);
+  return INTERNAL_CASE_METRICS_DETAILS_URL.replace('{case_id}', id);
 };
 
 export const getCaseCommentsUrl = (id: string): string => {

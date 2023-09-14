@@ -12,6 +12,10 @@ import type { BucketItem } from '../../../../../common/search_strategy/security_
 import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
 import * as i18n from './translations';
 
+export const formatPercentage = (percent: number): string => {
+  return percent > 0 && percent < 0.01 ? '<1%' : `${(Math.round(percent * 1000) / 10).toString()}%`;
+};
+
 export const parseAlertsGroupingData = (
   response: AlertSearchResponse<{}, AlertsByGroupingAgg>
 ): AlertsProgressBarData[] => {
@@ -31,7 +35,8 @@ export const parseAlertsGroupingData = (
     return {
       key: group.key,
       value: group.doc_count,
-      percentage: Math.round((group.doc_count / total) * 1000) / 10,
+      percentage: group.doc_count / total,
+      percentageLabel: formatPercentage(group.doc_count / total),
       label: group.key,
     };
   });
@@ -40,7 +45,8 @@ export const parseAlertsGroupingData = (
     topAlerts.push({
       key: 'Other',
       value: other,
-      percentage: Math.round((other / total) * 1000) / 10,
+      percentage: other / total,
+      percentageLabel: formatPercentage(other / total),
       label: i18n.OTHER,
     });
   }
@@ -49,7 +55,8 @@ export const parseAlertsGroupingData = (
     topAlerts.push({
       key: '-',
       value: emptyFieldCount,
-      percentage: Math.round((emptyFieldCount / total) * 1000) / 10,
+      percentage: emptyFieldCount / total,
+      percentageLabel: formatPercentage(emptyFieldCount / total),
       label: '-',
     });
   }
@@ -57,8 +64,8 @@ export const parseAlertsGroupingData = (
   return topAlerts;
 };
 
-export const getNonEmptyPercent = (topAlerts: AlertsProgressBarData[]): number => {
-  const consolidated = topAlerts.reduce(
+export const getAggregateData = (topAlerts: AlertsProgressBarData[]): [number, string] => {
+  const { total, nonEmpty } = topAlerts.reduce(
     (ret, cur) => {
       ret.total += cur.value;
       if (cur.key !== '-') {
@@ -68,9 +75,7 @@ export const getNonEmptyPercent = (topAlerts: AlertsProgressBarData[]): number =
     },
     { total: 0, nonEmpty: 0 }
   );
-  return consolidated.total > 0
-    ? Math.round((consolidated.nonEmpty / consolidated.total) * 100)
-    : 0;
+  return [nonEmpty, formatPercentage(total === 0 ? 0 : nonEmpty / total)];
 };
 
 export const getIsAlertsProgressBarData = (

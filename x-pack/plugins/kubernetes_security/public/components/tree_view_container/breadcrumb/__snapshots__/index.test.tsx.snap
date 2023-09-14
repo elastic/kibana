@@ -19,7 +19,7 @@ Object {
             >
               <button
                 aria-label="Click Cluster breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
                 type="button"
               >
@@ -40,7 +40,7 @@ Object {
             >
               <button
                 aria-label="Click Namespace breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
                 type="button"
               >
@@ -61,7 +61,7 @@ Object {
             >
               <button
                 aria-label="Click Pod breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
                 type="button"
               >
@@ -82,7 +82,7 @@ Object {
             >
               <button
                 aria-label="Click Container Image breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
                 type="button"
               >
@@ -102,10 +102,10 @@ Object {
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     selected image
                   </span>
@@ -132,7 +132,7 @@ Object {
           >
             <button
               aria-label="Click Cluster breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
               type="button"
             >
@@ -153,7 +153,7 @@ Object {
           >
             <button
               aria-label="Click Namespace breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
               type="button"
             >
@@ -174,7 +174,7 @@ Object {
           >
             <button
               aria-label="Click Pod breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
               type="button"
             >
@@ -195,7 +195,7 @@ Object {
           >
             <button
               aria-label="Click Container Image breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
               type="button"
             >
@@ -215,10 +215,10 @@ Object {
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   selected image
                 </span>
@@ -302,7 +302,7 @@ Object {
             >
               <button
                 aria-label="Click Cluster breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
                 type="button"
               >
@@ -323,7 +323,7 @@ Object {
             >
               <button
                 aria-label="Click Namespace breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
                 type="button"
               >
@@ -344,7 +344,7 @@ Object {
             >
               <button
                 aria-label="Click Pod breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
                 type="button"
               >
@@ -365,7 +365,7 @@ Object {
             >
               <button
                 aria-label="Click Container Image breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
                 type="button"
               >
@@ -385,10 +385,10 @@ Object {
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     selected image
                   </span>
@@ -415,7 +415,7 @@ Object {
           >
             <button
               aria-label="Click Cluster breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
               type="button"
             >
@@ -436,7 +436,7 @@ Object {
           >
             <button
               aria-label="Click Namespace breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
               type="button"
             >
@@ -457,7 +457,7 @@ Object {
           >
             <button
               aria-label="Click Pod breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
               type="button"
             >
@@ -478,7 +478,7 @@ Object {
           >
             <button
               aria-label="Click Container Image breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
               type="button"
             >
@@ -498,10 +498,10 @@ Object {
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   selected image
                 </span>
@@ -585,7 +585,7 @@ Object {
             >
               <button
                 aria-label="Click Cluster breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
                 type="button"
               >
@@ -606,7 +606,7 @@ Object {
             >
               <button
                 aria-label="Click Namespace breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
                 type="button"
               >
@@ -627,7 +627,7 @@ Object {
             >
               <button
                 aria-label="Click Node breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
                 type="button"
               >
@@ -648,7 +648,7 @@ Object {
             >
               <button
                 aria-label="Click Pod breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
                 type="button"
               >
@@ -669,7 +669,7 @@ Object {
             >
               <button
                 aria-label="Click Container Image breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
                 type="button"
               >
@@ -689,10 +689,10 @@ Object {
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     selected image
                   </span>
@@ -719,7 +719,7 @@ Object {
           >
             <button
               aria-label="Click Cluster breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
               type="button"
             >
@@ -740,7 +740,7 @@ Object {
           >
             <button
               aria-label="Click Namespace breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-namespace"
               type="button"
             >
@@ -761,7 +761,7 @@ Object {
           >
             <button
               aria-label="Click Node breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
               type="button"
             >
@@ -782,7 +782,7 @@ Object {
           >
             <button
               aria-label="Click Pod breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-pod"
               type="button"
             >
@@ -803,7 +803,7 @@ Object {
           >
             <button
               aria-label="Click Container Image breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
               type="button"
             >
@@ -823,10 +823,10 @@ Object {
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   selected image
                 </span>
@@ -910,7 +910,7 @@ Object {
             >
               <button
                 aria-label="Click Cluster breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
                 type="button"
               >
@@ -931,7 +931,7 @@ Object {
             >
               <button
                 aria-label="Click Node breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
                 type="button"
               >
@@ -952,7 +952,7 @@ Object {
             >
               <button
                 aria-label="Click Container Image breadcrumb"
-                class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+                class="euiButtonIcon emotion-EuiButtonIcon"
                 data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
                 type="button"
               >
@@ -972,10 +972,10 @@ Object {
                 type="button"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text"
                   >
                     selected image
                   </span>
@@ -1002,7 +1002,7 @@ Object {
           >
             <button
               aria-label="Click Cluster breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-clusterId"
               type="button"
             >
@@ -1023,7 +1023,7 @@ Object {
           >
             <button
               aria-label="Click Node breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-node"
               type="button"
             >
@@ -1044,7 +1044,7 @@ Object {
           >
             <button
               aria-label="Click Container Image breadcrumb"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-EuiButtonIcon"
+              class="euiButtonIcon emotion-EuiButtonIcon"
               data-test-subj="kubernetesSecurityBreadcrumbIcon-containerImage"
               type="button"
             >
@@ -1064,10 +1064,10 @@ Object {
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   selected image
                 </span>

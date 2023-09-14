@@ -10,8 +10,7 @@ import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { esHits } from '../../../../__mocks__/es_hits';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -21,12 +20,11 @@ import {
 } from '../../services/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { CoreTheme } from '@kbn/core/public';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
@@ -69,7 +67,7 @@ const mountComponent = async ({
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
+    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({
@@ -79,7 +77,7 @@ const mountComponent = async ({
 
   const totalHits$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
+    result: Number(esHitsMock.length),
   }) as DataTotalHits$;
 
   const savedSearchData$ = {
@@ -106,16 +104,14 @@ const mountComponent = async ({
     onAddFilter: jest.fn(),
   };
 
-  const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
-
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
-      <KibanaThemeProvider theme$={coreTheme$}>
+    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
+      <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={stateContainer}>
           <DiscoverMainContent {...props} />
         </DiscoverMainProvider>
-      </KibanaThemeProvider>
-    </KibanaContextProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 
   await act(async () => {

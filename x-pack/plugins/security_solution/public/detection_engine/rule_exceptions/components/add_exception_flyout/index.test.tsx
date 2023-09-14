@@ -31,7 +31,7 @@ import { TestProviders } from '../../../../common/mock';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type { AlertData } from '../../utils/types';
 import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
@@ -144,7 +144,6 @@ describe('When the add exception modal is opened', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {
@@ -662,6 +661,42 @@ describe('When the add exception modal is opened', () => {
         expect(getByTestId('entryOperator')).toHaveTextContent('included');
         expect(getByTestId('entryType')).toHaveTextContent('match');
         expect(getByTestId('entryValue')).toHaveTextContent('test/path');
+      });
+
+      it('should include rule defined custom highlighted fields', () => {
+        const wrapper = render(
+          (() => (
+            <TestProviders>
+              <AddExceptionFlyout
+                rules={[
+                  {
+                    ...getRulesSchemaMock(),
+                    investigation_fields: { field_names: ['foo.bar'] },
+                    exceptions_list: [],
+                  } as Rule,
+                ]}
+                isBulkAction={false}
+                alertData={{ ...alertDataMock, foo: { bar: 'blob' } } as AlertData}
+                isAlertDataLoading={false}
+                alertStatus="open"
+                isEndpointItem={false}
+                showAlertCloseOptions
+                onCancel={jest.fn()}
+                onConfirm={jest.fn()}
+              />
+            </TestProviders>
+          ))()
+        );
+        const { getByTestId, getAllByTestId } = wrapper;
+        expect(getByTestId('alertExceptionBuilder')).toBeInTheDocument();
+        expect(getAllByTestId('entryField')[0]).toHaveTextContent('foo.bar');
+        expect(getAllByTestId('entryOperator')[0]).toHaveTextContent('included');
+        expect(getAllByTestId('entryType')[0]).toHaveTextContent('match');
+        expect(getAllByTestId('entryValue')[0]).toHaveTextContent('blob');
+        expect(getAllByTestId('entryField')[1]).toHaveTextContent('file.path');
+        expect(getAllByTestId('entryOperator')[1]).toHaveTextContent('included');
+        expect(getAllByTestId('entryType')[1]).toHaveTextContent('match');
+        expect(getAllByTestId('entryValue')[1]).toHaveTextContent('test/path');
       });
     });
     describe('bulk closeable alert data is passed in', () => {

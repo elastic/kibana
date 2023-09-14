@@ -1277,7 +1277,7 @@
         "label": "CellActionFieldValue",
         "description": [],
         "signature": [
-          "string[] | undefined[] | boolean[] | ",
+          "string[] | undefined[] | boolean[] | number[] | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1285,7 +1285,7 @@
             "section": "def-common.Serializable",
             "text": "Serializable"
           },
-          " | number[] | null[]"
+          " | null[]"
         ],
         "path": "packages/kbn-cell-actions/src/types.ts",
         "deprecated": false,

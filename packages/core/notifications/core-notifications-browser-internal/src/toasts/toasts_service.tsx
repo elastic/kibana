@@ -11,9 +11,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
 
@@ -42,12 +42,12 @@ export class ToastsService {
     this.targetDomElement = targetDomElement;
 
     render(
-      <CoreContextProvider i18n={i18n} theme={theme}>
+      <KibanaRenderContextProvider i18n={i18n} theme={theme}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
         />
-      </CoreContextProvider>,
+      </KibanaRenderContextProvider>,
       targetDomElement
     );
 

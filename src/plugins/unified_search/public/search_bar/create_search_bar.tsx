@@ -23,7 +23,7 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import type { UnifiedSearchPublicPluginStart } from '../types';
 
-interface StatefulSearchBarDeps {
+export interface StatefulSearchBarDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
   storage: IStorageWrapper;
@@ -247,11 +247,13 @@ export function createSearchBar({
             {...overrideDefaultBehaviors(props)}
             dataViewPickerComponentProps={props.dataViewPickerComponentProps}
             textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
+            textBasedLanguageModeWarning={props.textBasedLanguageModeWarning}
             onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
             displayStyle={props.displayStyle}
             isScreenshotMode={isScreenshotMode}
             dataTestSubj={props.dataTestSubj}
             filtersForSuggestions={props.filtersForSuggestions}
+            prependFilterBar={props.prependFilterBar}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

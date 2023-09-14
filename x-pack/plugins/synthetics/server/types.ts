@@ -58,6 +58,7 @@ export interface SyntheticsServerSetup {
   basePath: IBasePath;
   isDev?: boolean;
   coreStart: CoreStart;
+  pluginsStart: SyntheticsPluginsStartDependencies;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
@@ -77,6 +78,7 @@ export interface SyntheticsPluginsSetupDependencies {
 
 export interface SyntheticsPluginsStartDependencies {
   security: SecurityPluginStart;
+  elasticsearch: SecurityPluginStart;
   fleet: FleetStartContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;

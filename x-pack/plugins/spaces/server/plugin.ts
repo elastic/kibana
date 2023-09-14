@@ -22,7 +22,6 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { SpacesLicenseService } from '../common/licensing';
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
@@ -39,6 +38,7 @@ import { SpacesService } from './spaces_service';
 import type { SpacesRequestHandlerContext } from './types';
 import { registerSpacesUsageCollector } from './usage_collection';
 import { UsageStatsService } from './usage_stats';
+import { SpacesLicenseService } from '../common/licensing';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -103,7 +103,7 @@ export class SpacesPlugin
 
   private defaultSpaceService?: DefaultSpaceService;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
@@ -148,18 +148,21 @@ export class SpacesPlugin
       logger: this.log,
     });
 
-    const externalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
-    initExternalSpacesApi({
-      externalRouter,
-      log: this.log,
-      getStartServices: core.getStartServices,
-      getSpacesService,
-      usageStatsServicePromise,
-    });
+    const router = core.http.createRouter<SpacesRequestHandlerContext>();
 
-    const internalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
+    initExternalSpacesApi(
+      {
+        router,
+        log: this.log,
+        getStartServices: core.getStartServices,
+        getSpacesService,
+        usageStatsServicePromise,
+      },
+      this.initializerContext.env.packageInfo.buildFlavor
+    );
+
     initInternalSpacesApi({
-      internalRouter,
+      router,
       getSpacesService,
     });
 

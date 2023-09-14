@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import type { CalculateRiskScoreAggregations, RiskScoreBucket } from './types';
+import {
+  ALERT_RISK_SCORE,
+  ALERT_RULE_NAME,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { RiskCategories } from '../../../common/risk_engine';
+import type {
+  CalculateRiskScoreAggregations,
+  CalculateScoresResponse,
+  RiskScoreBucket,
+} from './types';
 
-const createRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
-  key: { 'user.name': 'username', category: 'alert' },
+const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
+  key: { 'user.name': 'username' },
   doc_count: 2,
   risk_details: {
     value: {
@@ -16,11 +25,11 @@ const createRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ri
       normalized_score: 30.0,
       level: 'Unknown',
       notes: [],
-      alerts_score: 30,
-      other_score: 0,
+      category_1_score: 30,
+      category_1_count: 1,
     },
   },
-  riskiest_inputs: {
+  inputs: {
     took: 17,
     timed_out: false,
     _shards: {
@@ -34,28 +43,76 @@ const createRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ri
         value: 1,
         relation: 'eq',
       },
-      hits: [{ _id: '_id', _index: '_index', sort: [30] }],
+      hits: [
+        {
+          _id: '_id',
+          _index: '_index',
+          fields: {
+            '@timestamp': ['2023-07-20T20:31:24.896Z'],
+            [ALERT_RISK_SCORE]: [21],
+            [ALERT_RULE_NAME]: ['Rule Name'],
+          },
+          sort: [21],
+        },
+      ],
     },
   },
 
   ...overrides,
 });
 
-const createAggregationResponseMock = (
+const buildAggregationResponseMock = (
   overrides: Partial<CalculateRiskScoreAggregations> = {}
 ): CalculateRiskScoreAggregations => ({
   host: {
     after_key: { 'host.name': 'hostname' },
-    buckets: [createRiskScoreBucketMock(), createRiskScoreBucketMock()],
+    buckets: [
+      buildRiskScoreBucketMock({ key: { 'host.name': 'hostname' } }),
+      buildRiskScoreBucketMock({ key: { 'host.name': 'hostname' } }),
+    ],
   },
   user: {
     after_key: { 'user.name': 'username' },
-    buckets: [createRiskScoreBucketMock(), createRiskScoreBucketMock()],
+    buckets: [buildRiskScoreBucketMock(), buildRiskScoreBucketMock()],
   },
   ...overrides,
 });
 
-export const calculateRiskScoreMock = {
-  createAggregationResponse: createAggregationResponseMock,
-  createRiskScoreBucket: createRiskScoreBucketMock,
+const buildResponseMock = (
+  overrides: Partial<CalculateScoresResponse> = {}
+): CalculateScoresResponse => ({
+  after_keys: { host: { 'host.name': 'hostname' } },
+  scores: {
+    host: [
+      {
+        '@timestamp': '2021-08-19T20:55:59.000Z',
+        id_field: 'host.name',
+        id_value: 'hostname',
+        calculated_level: 'Unknown',
+        calculated_score: 20,
+        calculated_score_norm: 30,
+        category_1_score: 30,
+        category_1_count: 12,
+        notes: [],
+        inputs: [
+          {
+            id: '_id',
+            index: '_index',
+            category: RiskCategories.category_1,
+            description: 'Alert from Rule: My rule',
+            risk_score: 30,
+            timestamp: '2021-08-19T18:55:59.000Z',
+          },
+        ],
+      },
+    ],
+    user: [],
+  },
+  ...overrides,
+});
+
+export const calculateRiskScoresMock = {
+  buildResponse: buildResponseMock,
+  buildAggregationResponse: buildAggregationResponseMock,
+  buildRiskScoreBucket: buildRiskScoreBucketMock,
 };

@@ -27,6 +27,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          ...(options.kbnServerArgs ?? []),
         ],
       },
       testFiles: options.testFiles,
@@ -52,8 +53,14 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
+        observabilityLogExplorer: {
+          pathname: '/app/observability-log-explorer',
+        },
         management: {
           pathname: '/app/management',
+        },
+        indexManagement: {
+          pathname: '/app/management/data/index_management',
         },
       },
       // choose where screenshots should be saved

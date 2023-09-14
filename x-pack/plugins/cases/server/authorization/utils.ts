@@ -9,7 +9,7 @@ import { partition, remove, uniq } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import { OWNER_FIELD } from '../../common/api';
+import { OWNER_FIELD } from '../../common/constants';
 
 export const getOwnersFilter = (
   savedObjectType: string,

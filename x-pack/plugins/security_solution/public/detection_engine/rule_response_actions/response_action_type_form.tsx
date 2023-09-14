@@ -20,8 +20,8 @@ import styled from 'styled-components';
 
 import { useCheckEndpointPermissions } from './endpoint/check_permissions';
 import { EndpointResponseAction } from './endpoint/endpoint_response_action';
-import type { RuleResponseAction } from '../../../common/detection_engine/rule_response_actions/schemas';
-import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
+import type { RuleResponseAction } from '../../../common/api/detection_engine/model/rule_response_actions';
+import { RESPONSE_ACTION_TYPES } from '../../../common/api/detection_engine/model/rule_response_actions';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
 import { getActionDetails } from './constants';
 import { useFormData } from '../../shared_imports';

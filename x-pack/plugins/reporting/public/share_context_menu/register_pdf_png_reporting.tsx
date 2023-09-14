@@ -82,7 +82,6 @@ export const reportingScreenshotShareProvider = ({
     let capabilityHasDashboardScreenshotReporting = false;
     let capabilityHasVisualizeScreenshotReporting = false;
     if (usesUiCapabilities) {
-      // TODO: add abstractions in ExportTypeRegistry to use here?
       capabilityHasDashboardScreenshotReporting =
         application.capabilities.dashboard?.generateScreenshot === true;
       capabilityHasVisualizeScreenshotReporting =
@@ -106,7 +105,11 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
-    if (isSupportedType && !capabilityHasVisualizeScreenshotReporting) {
+    if (
+      isSupportedType &&
+      !capabilityHasVisualizeScreenshotReporting &&
+      !capabilityHasDashboardScreenshotReporting
+    ) {
       return [];
     }
 

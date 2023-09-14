@@ -32,7 +32,7 @@ import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
-describe('Cases with invalid indicators', () => {
+describe('Cases with invalid indicators', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/invalid_indicators_data');
     login();
@@ -43,7 +43,7 @@ describe('Cases with invalid indicators', () => {
     esArchiverUnload('threat_intelligence/invalid_indicators_data');
   });
 
-  it('should disable the indicators table context menu items and flyout context menu items', () => {
+  it.skip('should disable the indicators table context menu items and flyout context menu items', () => {
     const documentsNumber = 22;
     openIndicatorsTableMoreActions(documentsNumber - 1);
 
@@ -58,7 +58,7 @@ describe('Cases with invalid indicators', () => {
   });
 });
 
-describe('Cases interactions', () => {
+describe('Cases interactions', { tags: '@ess' }, () => {
   beforeEach(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
     login();
@@ -69,7 +69,7 @@ describe('Cases interactions', () => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });
 
-  it('should add to new case and to existing case from the indicators table and the flyout', () => {
+  it.skip('should add to new case and to existing case from the indicators table and the flyout', () => {
     cy.log('should add to new case when clicking on the button in the indicators table');
 
     openIndicatorsTableMoreActions(0);

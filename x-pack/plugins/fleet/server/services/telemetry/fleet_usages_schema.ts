@@ -22,6 +22,42 @@ export const fleetAgentsSchema: RootSchema<any> = {
           description: 'Number of agents enrolled that use this version',
         },
       },
+      healthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in a healthy state',
+        },
+      },
+      unhealthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an unhealthy state',
+        },
+      },
+      updating: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an updating state',
+        },
+      },
+      offline: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
     },
   },
 };
@@ -206,6 +242,45 @@ export const fleetUsagesSchema: RootSchema<any> = {
           type: 'text',
           _meta: {
             description: 'Log message containing the word panic',
+          },
+        },
+      },
+    },
+  },
+  agent_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from agent error logs' },
+    },
+  },
+  fleet_server_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from fleet server error logs' },
+    },
+  },
+  agents_per_os: {
+    type: 'array',
+    items: {
+      properties: {
+        name: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS enrolled to this kibana',
+          },
+        },
+        version: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS version enrolled to this kibana',
+          },
+        },
+        count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of agents enrolled that use this OS',
           },
         },
       },

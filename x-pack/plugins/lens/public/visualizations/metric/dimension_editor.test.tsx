@@ -27,7 +27,7 @@ import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/c
 import { createMockFramePublicAPI } from '../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
-import { DebouncedInput } from '@kbn/visualization-ui-components/public';
+import { DebouncedInput } from '@kbn/visualization-ui-components';
 import { DatasourcePublicAPI } from '../..';
 import { CollapseFunction } from '../../../common/expressions';
 

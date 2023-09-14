@@ -22,7 +22,11 @@ import { incidentTypes, severity, choices } from '../connectors/mock';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import {
+  noConnectorsCasePermission,
+  createAppMockRenderer,
+  TestProviders,
+} from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
@@ -181,6 +185,18 @@ describe('Connector', () => {
       ...appMockRender.coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
+
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
+        <Connector {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+    expect(result.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
+    expect(result.queryByTestId('caseConnectors')).toBe(null);
+  });
+
+  it('shows the actions permission message if the user does not have access to case connector', async () => {
+    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     const result = appMockRender.render(
       <MockHookWrapperComponent>

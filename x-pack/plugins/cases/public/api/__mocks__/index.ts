@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CasesFindRequest, CasesMetricsRequest } from '../../../common/api';
 import type { HTTPService } from '..';
 import { casesMetrics, casesStatus } from '../../containers/mock';
 import type { CasesMetrics, CasesStatus } from '../../containers/types';
+import type { CasesFindRequest, CasesMetricsRequest } from '../../../common/types/api';
 
 export const getCasesStatus = async ({
   http,

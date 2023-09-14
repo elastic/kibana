@@ -14,15 +14,10 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import {
-  BrushTriggerEvent,
-  ClickTriggerEvent,
-  MultiClickTriggerEvent,
-} from '@kbn/charts-plugin/public';
-import { emptyTitleText } from '@kbn/visualization-ui-components/public';
+import { emptyTitleText } from '@kbn/visualization-ui-components';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
-import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
+import type { DraggingIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -34,6 +29,10 @@ import {
   DragDropOperation,
   isOperation,
   UserMessage,
+  TriggerEvent,
+  isLensBrushEvent,
+  isLensMultiFilterEvent,
+  isLensFilterEvent,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
@@ -214,17 +213,28 @@ export function getRemoveOperation(
   return layerCount === 1 ? 'clear' : 'remove';
 }
 
-export function inferTimeField(
-  datatableUtilities: DatatableUtilitiesService,
-  context: BrushTriggerEvent['data'] | ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
-) {
-  const tablesAndColumns =
-    'table' in context
-      ? [{ table: context.table, column: context.column }]
-      : !context.negate
-      ? context.data
-      : // if it's a negated filter, never respect bound time field
-        [];
+function getTablesAndColumnsFromContext(event: TriggerEvent) {
+  // if it's a negated filter, never respect bound time field
+  if ('negate' in event.data && event.data.negate) {
+    return [];
+  }
+  if (isLensBrushEvent(event)) {
+    return [{ table: event.data.table, column: event.data.column }];
+  }
+  if (isLensMultiFilterEvent(event)) {
+    return event.data.data.map(({ table, cells }) => ({
+      table,
+      column: cells[0].column,
+    }));
+  }
+  if (isLensFilterEvent(event)) {
+    return event.data.data;
+  }
+  return event.data;
+}
+
+export function inferTimeField(datatableUtilities: DatatableUtilitiesService, event: TriggerEvent) {
+  const tablesAndColumns = getTablesAndColumnsFromContext(event);
   return !Array.isArray(tablesAndColumns)
     ? [tablesAndColumns]
     : tablesAndColumns
@@ -388,4 +398,29 @@ export function getUniqueLabelGenerator() {
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
+}
+
+export function reorderElements<S>(items: S[], targetId: S, sourceId: S) {
+  const result = items.filter((c) => c !== sourceId);
+  const targetIndex = items.findIndex((c) => c === sourceId);
+  const sourceIndex = items.findIndex((c) => c === targetId);
+
+  const targetPosition = result.indexOf(targetId);
+  result.splice(targetIndex < sourceIndex ? targetPosition + 1 : targetPosition, 0, sourceId);
+  return result;
+}
+
+export function shouldRemoveSource(
+  source: unknown,
+  dropType: DropType
+): source is DragDropOperation {
+  return (
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
+  );
 }

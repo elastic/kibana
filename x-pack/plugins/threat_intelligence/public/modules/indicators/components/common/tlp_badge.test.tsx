@@ -27,8 +27,7 @@ describe('TLPBadge', () => {
     expect(asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
         <span
-          class="euiBadge emotion-euiBadge"
-          style="background-color: rgb(189, 39, 30); color: rgb(255, 255, 255);"
+          class="euiBadge emotion-euiBadge-danger"
           title="Red"
         >
           <span
@@ -51,8 +50,7 @@ describe('TLPBadge', () => {
     expect(asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
         <span
-          class="euiBadge emotion-euiBadge"
-          style="background-color: rgb(77, 210, 202); color: rgb(0, 0, 0);"
+          class="euiBadge emotion-euiBadge-success"
           title="Green"
         >
           <span

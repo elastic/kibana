@@ -11,7 +11,7 @@ import type { AppLinkItems } from '../../links';
 import { updateAppLinks } from '../../links';
 import { mockGlobalState } from '../../mock';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { UpsellingService } from '../../lib/upsellings';
+import { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 const defaultAppLinks: AppLinkItems = [
   {

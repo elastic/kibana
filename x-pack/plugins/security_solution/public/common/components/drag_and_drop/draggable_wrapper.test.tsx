@@ -8,7 +8,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import type { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
+import type { DraggableStateSnapshot, DraggingStyle } from '@hello-pangea/dnd';
 
 import '../../mock/match_media';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -265,6 +265,12 @@ describe('ConditionalPortal', () => {
       const snapshot: DraggableStateSnapshot = {
         isDragging: true,
         isDropAnimating: false, // <-- NOT drop animating
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
       };
 
       expect(getStyle(style, snapshot)).not.toHaveProperty('transitionDuration');
@@ -274,6 +280,12 @@ describe('ConditionalPortal', () => {
       const snapshot: DraggableStateSnapshot = {
         isDragging: true,
         isDropAnimating: true, // <-- it is drop animating
+        isClone: false,
+        dropAnimation: null,
+        draggingOver: null,
+        combineWith: null,
+        combineTargetFor: null,
+        mode: null,
       };
 
       expect(getStyle(style, snapshot)).toHaveProperty('transitionDuration', '0.00000001s');

@@ -115,12 +115,6 @@ export enum ES_GEO_FIELD_TYPE {
 // Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IndexPatternField.type is compared to value
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
-export enum ES_SPATIAL_RELATIONS {
-  INTERSECTS = 'INTERSECTS',
-  DISJOINT = 'DISJOINT',
-  WITHIN = 'WITHIN',
-}
-
 export enum GEO_JSON_TYPE {
   POINT = 'Point',
   MULTI_POINT = 'MultiPoint',

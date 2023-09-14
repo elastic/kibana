@@ -57,6 +57,7 @@ describe('connectors_selection', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
   };
 
