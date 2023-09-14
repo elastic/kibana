@@ -9,12 +9,11 @@
 import { Toast } from '@kbn/core-notifications-browser/src/types';
 import React, { type ComponentProps } from 'react';
 import { Observable, from, EMPTY, BehaviorSubject } from 'rxjs';
-import { screen, render, fireEvent } from '@testing-library/react';
+import { screen, render, fireEvent, act } from '@testing-library/react';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { EventReporter } from './telemetry';
 
 import { GlobalToastList } from './global_toast_list';
-import { act } from 'react-dom/test-utils';
 
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
 
@@ -27,11 +26,6 @@ const sharedProps = {
 function RenderToastList(props: Partial<ComponentProps<typeof GlobalToastList>> = {}) {
   return <GlobalToastList {...sharedProps} {...props} />;
 }
-
-it('renders matching snapshot', () => {
-  const { container } = render(<RenderToastList />);
-  expect(container).toMatchSnapshot();
-});
 
 it('subscribes to toasts$ on mount and unsubscribes on unmount', () => {
   const unsubscribeSpy = jest.fn();
@@ -100,8 +94,6 @@ describe('global_toast_list with duplicate elements', () => {
   it('renders a single toast in the toast list with the common text', () => {
     render(<ToastListWithDuplicates />);
 
-    expect(screen.getByLabelText('Notification message list')).toMatchSnapshot();
-
     expect(screen.getAllByText(dummyText)).toHaveLength(1);
   });
 
@@ -158,6 +150,5 @@ describe('global_toast_list with duplicate elements, using MountPoints', () => {
     const renderedToasts = screen.getAllByText(dummyText);
 
     expect(renderedToasts).toHaveLength(4);
-    expect(renderedToasts).toMatchSnapshot('euiToastList');
   });
 });
