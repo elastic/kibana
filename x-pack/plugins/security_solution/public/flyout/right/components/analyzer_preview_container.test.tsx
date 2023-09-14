@@ -35,7 +35,6 @@ jest.mock('react-router-dom', () => {
 });
 
 const panelContextValue = {
-  dataAsNestedObject: null,
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
 } as unknown as RightPanelContext;
 

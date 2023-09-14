@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const FLYOUT_ERROR = i18n.translate('xpack.securitySolution.flyout.documentDetails.error', {
+  defaultMessage: 'data',
+});
+
 export const ERROR_TITLE = (title: string) =>
   i18n.translate('xpack.securitySolution.flyout.errorTitle', {
     values: { title },
