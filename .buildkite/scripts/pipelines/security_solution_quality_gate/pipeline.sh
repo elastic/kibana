@@ -25,6 +25,7 @@ echo "--------------------"
 
 source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
+npm install -g @reportportal/agent-js-cypress
 
 source .buildkite/scripts/steps/functional/common_cypress.sh
 
