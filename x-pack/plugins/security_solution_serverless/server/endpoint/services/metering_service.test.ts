@@ -96,7 +96,7 @@ describe('EndpointMeteringService', () => {
       const usageRecords = await endpointMeteringService.getUsageRecords(args);
 
       expect(usageRecords[0]).toEqual({
-        id: `endpoint-${agentId}-${timestamp}`,
+        id: `endpoint-${agentId}-${timestamp.toISOString()}`,
         usage_timestamp: heartbeatDocSrc!.event.ingested,
         creation_timestamp: heartbeatDocSrc!.event.ingested,
         usage: {
@@ -140,7 +140,7 @@ describe('EndpointMeteringService', () => {
           : `${ProductLine.cloud}_${ProductLine.endpoint}`;
 
       expect(usageRecords[0]).toEqual({
-        id: `endpoint-${agentId}-${timestamp}`,
+        id: `endpoint-${agentId}-${timestamp.toISOString()}`,
         usage_timestamp: heartbeatDocSrc!.event.ingested,
         creation_timestamp: heartbeatDocSrc!.event.ingested,
         usage: {
