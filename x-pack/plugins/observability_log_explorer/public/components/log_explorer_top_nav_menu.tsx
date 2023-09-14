@@ -201,13 +201,12 @@ const OnboardingLink = React.memo(({ services }: Pick<LogExplorerTopNavMenuProps
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
 
-  const navigateToOnboarding = () => {
-    locator?.navigate({});
-  };
+  const onboardingUrl = locator?.useUrl({});
 
   return (
     <EuiButton
-      onClick={navigateToOnboarding}
+      href={onboardingUrl}
+      target="_blank"
       fill
       size="s"
       iconType="indexOpen"
