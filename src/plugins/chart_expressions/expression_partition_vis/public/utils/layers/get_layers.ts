@@ -20,7 +20,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { Color } from '@kbn/coloring/src/shared_components/color_mapping/color/color_handling';
 import { getDistinctSeries } from '..';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
@@ -131,7 +130,7 @@ function getColorFromMappingFactory(
   rows: DatatableRow[],
   isDarkMode: boolean,
   colorMapping?: string
-): undefined | ((category: string | string[]) => Color) {
+): undefined | ((category: string | string[]) => string) {
   if (!colorMapping) {
     // return undefined, we will use the legacy color mapping instead
     return undefined;

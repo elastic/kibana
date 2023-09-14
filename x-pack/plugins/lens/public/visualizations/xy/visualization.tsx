@@ -25,10 +25,7 @@ import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import {
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  getPaletteColors,
-} from '@kbn/coloring/src/shared_components/color_mapping/config/default_color_mapping';
+import { DEFAULT_COLOR_MAPPING_CONFIG, getPaletteColors } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
 import { generateId } from '../../id_generator';
 import {

@@ -26,7 +26,6 @@ import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-comm
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
-import { Color } from '@kbn/coloring/src/shared_components/color_mapping/color/color_handling';
 import { getFormatService } from '../format_service';
 import { TagcloudRendererConfig } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
@@ -313,7 +312,7 @@ function getColorFromMappingFactory(
   rows: DatatableRow[],
   isDarkMode: boolean,
   colorMapping?: string
-): undefined | ((category: string | string[]) => Color) {
+): undefined | ((category: string | string[]) => string) {
   if (!colorMapping) {
     // return undefined, we will use the legacy color mapping instead
     return undefined;
