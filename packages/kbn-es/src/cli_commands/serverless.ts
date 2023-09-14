@@ -13,9 +13,8 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import {
-  SERVERLESS_REPO,
-  SERVERLESS_TAG,
-  SERVERLESS_IMG,
+  ELASTICSEARCH_ES_SERVERLESS_REPO,
+  DEFAULT_SERVERLESS_IMG,
   DEFAULT_PORT,
   ServerlessOptions,
 } from '../utils';
@@ -28,8 +27,8 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ESS to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
-      --image             Full path of ESS image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
+      --tag               Image tag of ESS to run from ${ELASTICSEARCH_ES_SERVERLESS_REPO}
+      --image             Full path of ESS image to run, has precedence over tag. [default: ${DEFAULT_SERVERLESS_IMG}]
       --clean             Remove existing file system object store before running
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Enable HTTP SSL on Elasticsearch
@@ -41,7 +40,7 @@ export const serverless: Command = {
     Examples:
 
       es serverless --tag git-fec36430fba2-x86_64
-      es serverless --image docker.elastic.co/repo:tag
+      es serverless --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
     `;
   },
   run: async (defaults = {}) => {

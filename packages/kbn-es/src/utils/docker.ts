@@ -106,9 +106,10 @@ export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
-export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const SERVERLESS_TAG = 'latest'; // TODO: change this to the latest stable ESS image
-export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
+export const KIBANA_ES_SERVERLESS_REPO = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch-serverless`;
+export const ELASTICSEARCH_ES_SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
+export const LATEST_VERIFIED_SERVERLESS_TAG = 'latest-verified';
+export const DEFAULT_SERVERLESS_IMG = `${KIBANA_ES_SERVERLESS_REPO}:${LATEST_VERIFIED_SERVERLESS_TAG}`;
 
 // See for default cluster settings
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
@@ -354,7 +355,7 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     stdio: ['ignore', 'inherit', 'pipe'],
   }).catch(({ message }) => {
     throw createCliError(
-      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
 Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
 
 ${message}`
@@ -522,8 +523,8 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 function getServerlessImage(options: { image?: string; tag?: string }) {
   return resolveDockerImage({
     ...options,
-    repo: SERVERLESS_REPO,
-    defaultImg: SERVERLESS_IMG,
+    repo: ELASTICSEARCH_ES_SERVERLESS_REPO,
+    defaultImg: DEFAULT_SERVERLESS_IMG,
   });
 }
 
