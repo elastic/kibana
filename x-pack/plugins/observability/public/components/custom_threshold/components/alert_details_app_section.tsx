@@ -32,7 +32,7 @@ import {
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../utils/kibana_react';
-import { metricValueFormatter } from '../../../../common/threshold_rule/metric_value_formatter';
+import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../..';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 

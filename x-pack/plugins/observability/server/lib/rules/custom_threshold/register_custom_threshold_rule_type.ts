@@ -21,7 +21,7 @@ import {
   observabilityFeatureId,
   observabilityPaths,
 } from '../../../../common';
-import { Comparator } from '../../../../common/threshold_rule/types';
+import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
@@ -45,7 +45,7 @@ import {
   NO_DATA_ACTIONS,
 } from './custom_threshold_executor';
 import { ObservabilityConfig } from '../../..';
-import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/threshold_rule/constants';
+import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/custom_threshold_rule/constants';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,

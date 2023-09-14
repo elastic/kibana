@@ -8,8 +8,8 @@
 import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { MetricExplorerCustomMetricAggregations } from '../../../../common/threshold_rule/metrics_explorer';
-import { CustomThresholdExpressionMetric } from '../../../../common/threshold_rule/types';
+import { MetricExplorerCustomMetricAggregations } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 

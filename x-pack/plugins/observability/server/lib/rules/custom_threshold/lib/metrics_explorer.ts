@@ -6,20 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { metricsExplorerCustomMetricAggregationRT } from '../../../../../common/threshold_rule/metrics_explorer';
-
-export const METRIC_EXPLORER_AGGREGATIONS = [
-  'avg',
-  'max',
-  'min',
-  'cardinality',
-  'rate',
-  'count',
-  'sum',
-  'p95',
-  'p99',
-  'custom',
-] as const;
+import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../../common/custom_threshold_rule/constants';
+import { metricsExplorerCustomMetricAggregationRT } from '../../../../../common/custom_threshold_rule/metrics_explorer';
 
 type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
 

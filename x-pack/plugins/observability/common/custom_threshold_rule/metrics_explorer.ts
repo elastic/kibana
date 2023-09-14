@@ -7,19 +7,7 @@
 
 import * as rt from 'io-ts';
 import { xor } from 'lodash';
-
-export const METRIC_EXPLORER_AGGREGATIONS = [
-  'avg',
-  'max',
-  'min',
-  'cardinality',
-  'rate',
-  'count',
-  'sum',
-  'p95',
-  'p99',
-  'custom',
-] as const;
+import { METRIC_EXPLORER_AGGREGATIONS } from './constants';
 
 export const OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS = ['custom', 'rate', 'p95', 'p99'];
 

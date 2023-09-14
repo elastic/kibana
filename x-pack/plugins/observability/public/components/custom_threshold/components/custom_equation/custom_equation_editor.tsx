@@ -21,12 +21,12 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/threshold_rule/metrics_explorer';
+import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/custom_threshold_rule/metrics_explorer';
 import {
   Aggregators,
   CustomMetricAggTypes,
   CustomThresholdExpressionMetric,
-} from '../../../../../common/threshold_rule/types';
+} from '../../../../../common/custom_threshold_rule/types';
 
 import { MetricExpression } from '../../types';
 import { CustomMetrics, AggregationTypes, NormalizedFields } from './types';
