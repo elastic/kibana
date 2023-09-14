@@ -27,6 +27,7 @@ export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSetting
   statefulSettings,
   children,
 }) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   if (statefulSettings) {
     const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
@@ -36,7 +37,7 @@ export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSetting
       </IlmPolicyStatusContext.Provider>
     );
   } else {
-    const noIlm = () => {
+    const useNoIlm = () => {
       const {
         services: { http },
       } = useKibana();
@@ -46,7 +47,7 @@ export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSetting
 
     return (
       <IlmPolicyStatusContext.Provider
-        value={{ isLoading: false, status: undefined, recheckStatus: noIlm }}
+        value={{ isLoading: false, status: undefined, recheckStatus: useNoIlm }}
       >
         {children}
       </IlmPolicyStatusContext.Provider>
