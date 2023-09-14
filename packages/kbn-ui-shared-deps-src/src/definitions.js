@@ -56,6 +56,10 @@ const externals = {
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
   'io-ts': '__kbnSharedDeps__.IoTs',
+  '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
+  'react-redux': '__kbnSharedDeps__.ReactRedux',
+  redux: '__kbnSharedDeps__.Redux',
+  immer: '__kbnSharedDeps__.Immer',
 
   /**
    * big deps which are locked to a single version
