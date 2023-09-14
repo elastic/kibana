@@ -120,7 +120,10 @@ export class CaseConfigureService {
       this.log.debug(`Attempting to POST a new case configuration`);
 
       const decodedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(attributes);
-      const esConfigInfo = transformAttributesToESModel(decodedAttributes);
+      const defaults = {
+        ...(decodedAttributes.customFields === undefined && { customFields: [] }),
+      };
+      const esConfigInfo = transformAttributesToESModel({ ...decodedAttributes, ...defaults });
 
       const createdConfig =
         await unsecuredSavedObjectsClient.create<ConfigurationPersistedAttributes>(

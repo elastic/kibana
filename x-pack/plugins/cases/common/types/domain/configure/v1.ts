@@ -7,31 +7,59 @@
 
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
-import { TextCustomFieldRt, ToggleCustomFieldRt } from '../custom_field/v1';
+
+import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
+import { limitedStringSchema } from '../../../schema';
+
 import { UserRt } from '../user/v1';
+import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
 
-const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
-
-export const ConfigurationBasicWithoutOwnerRt = rt.intersection([
-  rt.strict({
-    /**
-     * The external connector
-     */
-    connector: CaseConnectorRt,
-    /**
-     * Whether to close the case after it has been synced with the external system
-     */
-    closure_type: ClosureTypeRt,
-  }),
-  rt.exact(
-    rt.partial({
-      /**
-       * The custom fields configured for the case
-       */
-      customFields: rt.array(rt.union([TextCustomFieldRt, ToggleCustomFieldRt])),
-    })
-  ),
+export const ClosureTypeRt = rt.union([
+  rt.literal('close-by-user'),
+  rt.literal('close-by-pushing'),
 ]);
+
+export const CustomFieldRt = rt.strict({
+  /**
+   * key of custom field
+   */
+  key: rt.string,
+  /**
+   * label of custom field
+   */
+  label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CUSTOM_FIELD_LABEL_LENGTH }),
+  /**
+   * custom field options - required
+   */
+  required: rt.boolean,
+});
+
+export const TextCustomFieldRt = rt.intersection([
+  rt.strict({ type: CustomFieldTextTypeRt }),
+  CustomFieldRt,
+]);
+
+export const ToggleCustomFieldRt = rt.intersection([
+  rt.strict({ type: CustomFieldToggleTypeRt }),
+  CustomFieldRt,
+]);
+
+export const CustomFieldsRt = rt.array(rt.union([TextCustomFieldRt, ToggleCustomFieldRt]));
+
+export const ConfigurationBasicWithoutOwnerRt = rt.strict({
+  /**
+   * The external connector
+   */
+  connector: CaseConnectorRt,
+  /**
+   * Whether to close the case after it has been synced with the external system
+   */
+  closure_type: ClosureTypeRt,
+  /**
+   * The custom fields configured for the case
+   */
+  customFields: CustomFieldsRt,
+});
 
 export const CasesConfigureBasicRt = rt.intersection([
   ConfigurationBasicWithoutOwnerRt,
