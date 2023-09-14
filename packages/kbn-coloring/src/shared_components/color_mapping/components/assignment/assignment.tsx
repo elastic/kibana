@@ -30,6 +30,7 @@ export function Assignment({
   index,
   total,
   canPickColor,
+  editable,
   palette,
   colorMode,
   getPaletteFn,
@@ -45,6 +46,7 @@ export function Assignment({
   palette: ColorMapping.CategoricalPalette;
   getPaletteFn: ReturnType<typeof getPalette>;
   canPickColor: boolean;
+  editable: boolean;
   isDarkMode: boolean;
   specialTokens: Map<string, string>;
 }) {
@@ -74,7 +76,7 @@ export function Assignment({
       assignment.rule.type === 'matchExactly' ||
       assignment.rule.type === 'matchExactlyCI' ? (
         <Match
-          editable={canPickColor}
+          editable={editable}
           index={index}
           rule={assignment.rule}
           options={data.type === 'categories' ? data.categories : []}
@@ -91,7 +93,7 @@ export function Assignment({
       ) : assignment.rule.type === 'range' ? (
         <Range
           rule={assignment.rule}
-          editable={canPickColor}
+          editable={editable}
           updateValue={(min, max, minInclusive, maxInclusive) => {
             const rule: ColorMapping.RuleRange = {
               type: 'range',
