@@ -92,6 +92,7 @@ export function BurnRate({ threshold, burnRate, slo, isLoading }: BurnRateParams
               titleSize="s"
               textAlign="right"
               isLoading={isLoading}
+              data-test-subj="sloDetailsBurnRateStat"
               description={
                 <EuiTextColor color="default">
                   <span>
