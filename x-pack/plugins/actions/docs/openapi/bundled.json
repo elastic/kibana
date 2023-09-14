@@ -506,6 +506,9 @@
                     "$ref": "#/components/schemas/update_connector_request_teams"
                   },
                   {
+                    "$ref": "#/components/schemas/update_connector_request_webhook"
+                  },
+                  {
                     "$ref": "#/components/schemas/update_connector_request_xmatters"
                   }
                 ]
@@ -4174,6 +4177,27 @@
           },
           "secrets": {
             "$ref": "#/components/schemas/secrets_properties_teams"
+          }
+        }
+      },
+      "update_connector_request_webhook": {
+        "title": "Update Webhook connector request",
+        "type": "object",
+        "required": [
+          "config",
+          "name",
+          "secrets"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/config_properties_webhook"
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name for the connector."
+          },
+          "secrets": {
+            "$ref": "#/components/schemas/secrets_properties_webhook"
           }
         }
       },
