@@ -94,6 +94,7 @@ export enum SecuritySubFeatureId {
 /** Sub-features IDs for Cases */
 export enum CasesSubFeatureId {
   deleteCases = 'deleteCasesSubFeature',
+  configureCases = 'configureCasesSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

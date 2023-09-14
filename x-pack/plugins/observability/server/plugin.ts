@@ -164,6 +164,36 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.cases.features.configureSubFeatureName', {
+            defaultMessage: 'Configure',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_configure',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.configureSubFeatureDetails',
+                    {
+                      defaultMessage: 'Configure cases',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  cases: {
+                    configure: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.configure,
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 

@@ -17,6 +17,7 @@ import type { CasesFeatureParams } from './types';
  */
 export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.deleteCases,
+  CasesSubFeatureId.configureCases,
 ];
 
 /**
@@ -60,7 +61,43 @@ export const getCasesSubFeaturesMap = ({
     ],
   };
 
+  const configureCasesSubFeature: SubFeatureConfig = {
+    name: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.configureSubFeatureName',
+      {
+        defaultMessage: 'Configure',
+      }
+    ),
+    privilegeGroups: [
+      {
+        groupType: 'independent',
+        privileges: [
+          {
+            api: apiTags.delete,
+            id: 'cases_configure',
+            name: i18n.translate(
+              'securitySolutionPackages.features.featureRegistry.configureSubFeatureDetails',
+              {
+                defaultMessage: 'Configure cases',
+              }
+            ),
+            includeIn: 'all',
+            savedObject: {
+              all: [...savedObjects.files],
+              read: [...savedObjects.files],
+            },
+            cases: {
+              configure: [APP_ID],
+            },
+            ui: uiCapabilities.configure,
+          },
+        ],
+      },
+    ],
+  };
+
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
+    [CasesSubFeatureId.configureCases, configureCasesSubFeature],
   ]);
 };

@@ -10,13 +10,13 @@ Array [
   "cases:observability/getTags",
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
+  "cases:observability/findConfigurations",
   "cases:observability/updateCase",
   "cases:observability/updateComment",
   "cases:observability/deleteCase",
   "cases:observability/deleteComment",
   "cases:observability/createConfiguration",
   "cases:observability/updateConfiguration",
-  "cases:observability/findConfigurations",
 ]
 `;
 
@@ -54,6 +54,7 @@ Array [
   "cases:observability/getTags",
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
+  "cases:observability/findConfigurations",
 ]
 `;
 
