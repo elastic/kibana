@@ -8,15 +8,19 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getPageObject, getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const browser = getService('browser');
   const security = getService('security');
+  const svlCommonPage = getPageObject('svlCommonPage');
+  const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   describe('Index Templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
+      // Navigate to the index management page
+      await svlCommonPage.login();
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
       // Navigate to the index templates tab
       await pageObjects.indexManagement.changeTabs('templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
