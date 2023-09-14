@@ -29,16 +29,13 @@ export const AlertReasonPreview: React.FC = () => {
   const { dataAsNestedObject, scopeId } = usePreviewPanelContext();
 
   const renderer = useMemo(
-    () =>
-      dataAsNestedObject != null
-        ? getRowRenderer({ data: dataAsNestedObject, rowRenderers: defaultRowRenderers })
-        : null,
+    () => getRowRenderer({ data: dataAsNestedObject, rowRenderers: defaultRowRenderers }),
     [dataAsNestedObject]
   );
 
   const rowRenderer = useMemo(
     () =>
-      renderer && dataAsNestedObject
+      renderer
         ? renderer.renderRow({
             contextId: 'event-details',
             data: dataAsNestedObject,
@@ -49,7 +46,7 @@ export const AlertReasonPreview: React.FC = () => {
     [renderer, dataAsNestedObject, scopeId]
   );
 
-  if (!dataAsNestedObject || !renderer) {
+  if (!renderer) {
     return null;
   }
 

@@ -185,7 +185,7 @@ export function DashboardApp({
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
   return (
-    <div className="dshAppWrapper">
+    <>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
@@ -210,6 +210,6 @@ export function DashboardApp({
           />
         </>
       )}
-    </div>
+    </>
   );
 }

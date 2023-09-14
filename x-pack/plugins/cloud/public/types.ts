@@ -72,6 +72,11 @@ export interface CloudStart {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectId?: string;
+    /**
+     * The serverless project name.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectName?: string;
   };
 }
 
@@ -172,5 +177,10 @@ export interface CloudSetup {
      * Will always be present if `isServerlessEnabled` is `true`
      */
     projectId?: string;
+    /**
+     * The serverless project name.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectName?: string;
   };
 }
