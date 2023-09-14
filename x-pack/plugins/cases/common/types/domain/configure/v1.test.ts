@@ -6,6 +6,7 @@
  */
 
 import { ConnectorTypes } from '../connector/v1';
+import { CustomFieldTypes } from '../custom_field/v1';
 import { ConfigurationAttributesRt, ConfigurationRt } from './v1';
 
 describe('configure', () => {
@@ -23,10 +24,23 @@ describe('configure', () => {
     fields: null,
   };
 
+  const textCustomField = {
+    key: 'text_custom_field',
+    label: 'Text custom field',
+    type: CustomFieldTypes.TEXT,
+  };
+
+  const toggleCustomField = {
+    key: 'toggle_custom_field',
+    label: 'Toggle custom field',
+    type: CustomFieldTypes.TOGGLE,
+  };
+
   describe('ConfigurationAttributesRt', () => {
     const defaultRequest = {
       connector: resilient,
       closure_type: 'close-by-user',
+      customFields: [textCustomField, toggleCustomField],
       owner: 'cases',
       created_at: '2020-02-19T23:06:33.798Z',
       created_by: {
@@ -47,7 +61,13 @@ describe('configure', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: defaultRequest,
+        right: {
+          ...defaultRequest,
+          customFields: [
+            { ...textCustomField, required: undefined, limit: undefined },
+            { ...toggleCustomField, required: undefined },
+          ],
+        },
       });
     });
 
@@ -56,7 +76,31 @@ describe('configure', () => {
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: defaultRequest,
+        right: {
+          ...defaultRequest,
+          customFields: [
+            { ...textCustomField, required: undefined, limit: undefined },
+            { ...toggleCustomField, required: undefined },
+          ],
+        },
+      });
+    });
+
+    it('removes foo:bar attributes from custom fields', () => {
+      const query = ConfigurationAttributesRt.decode({
+        ...defaultRequest,
+        CustomFields: [{ ...textCustomField, foo: 'bar' }, toggleCustomField],
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          customFields: [
+            { ...textCustomField, required: undefined, limit: undefined },
+            { ...toggleCustomField, required: undefined },
+          ],
+        },
       });
     });
   });
@@ -65,6 +109,7 @@ describe('configure', () => {
     const defaultRequest = {
       connector: serviceNow,
       closure_type: 'close-by-user',
+      customFields: [],
       created_at: '2020-02-19T23:06:33.798Z',
       created_by: {
         full_name: 'Leslie Knope',

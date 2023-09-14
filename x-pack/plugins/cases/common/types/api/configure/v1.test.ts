@@ -6,6 +6,7 @@
  */
 
 import { ConnectorTypes } from '../../domain/connector/v1';
+import { CustomFieldTypes } from '../../domain/custom_field/v1';
 import {
   CaseConfigureRequestParamsRt,
   ConfigurationPatchRequestRt,
@@ -26,6 +27,20 @@ describe('configure', () => {
       connector: serviceNow,
       closure_type: 'close-by-user',
       owner: 'Cases',
+      customFields: [
+        {
+          key: 'text_custom_field',
+          label: 'Text custom field',
+          type: CustomFieldTypes.TEXT,
+          required: false,
+        },
+        {
+          key: 'toggle_custom_field',
+          label: 'Toggle custom field',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ],
     };
 
     it('has expected attributes in request', () => {

@@ -11,6 +11,11 @@ import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
+import {
+  CustomFieldListTypeRt,
+  CustomFieldTextTypeRt,
+  CustomFieldToggleTypeRt,
+} from '../custom_field/v1';
 
 export { CaseStatuses };
 
@@ -56,19 +61,19 @@ const customFieldValue = <C extends rt.Mixed>(codec: C) =>
 
 const CustomFieldText = rt.strict({
   key: rt.string,
-  type: rt.literal('text'),
+  type: CustomFieldTextTypeRt,
   field: customFieldValue(rt.string),
 });
 
 const CustomFieldToggle = rt.strict({
   key: rt.string,
-  type: rt.literal('toggle'),
+  type: CustomFieldToggleTypeRt,
   field: customFieldValue(rt.boolean),
 });
 
 const CustomFieldList = rt.strict({
   key: rt.string,
-  type: rt.literal('list'),
+  type: CustomFieldListTypeRt,
   field: customFieldValue(rt.string),
 });
 

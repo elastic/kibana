@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
+import { TextCustomFieldRt, ToggleCustomFieldRt } from '../custom_field/v1';
 import { UserRt } from '../user/v1';
 
 const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
@@ -20,6 +21,10 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    * Whether to close the case after it has been synced with the external system
    */
   closure_type: ClosureTypeRt,
+  /**
+   * The custom fields configured for the case
+   */
+  customFields: rt.array(rt.union([TextCustomFieldRt, ToggleCustomFieldRt])),
 });
 
 export const CasesConfigureBasicRt = rt.intersection([
