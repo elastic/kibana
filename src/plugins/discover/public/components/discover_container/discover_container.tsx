@@ -82,15 +82,13 @@ export const DiscoverContainerInternal = ({
       css={discoverContainerWrapperCss}
       data-test-subj="discover-container-internal-wrapper"
     >
-      <EuiFlexItem>
-        <KibanaContextProvider services={services}>
-          <DiscoverMainRoute
-            customizationCallbacks={customizationCallbacks}
-            mode="embedded"
-            isDev={isDev}
-          />
-        </KibanaContextProvider>
-      </EuiFlexItem>
+      <KibanaContextProvider services={services}>
+        <DiscoverMainRoute
+          customizationCallbacks={customizationCallbacks}
+          mode="embedded"
+          isDev={isDev}
+        />
+      </KibanaContextProvider>
     </EuiFlexGroup>
   );
 };
