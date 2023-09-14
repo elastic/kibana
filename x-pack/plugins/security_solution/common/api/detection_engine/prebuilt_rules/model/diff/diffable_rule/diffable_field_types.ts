@@ -92,7 +92,6 @@ export const RuleEsqlQuery = t.exact(
   t.type({
     query: RuleQuery,
     language: t.literal('esql'),
-    filters: RuleFilterArray,
   })
 );
 

@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { has, isEmpty } from 'lodash/fp';
+import { has, isEmpty, get } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
 import deepmerge from 'deepmerge';
@@ -84,7 +84,6 @@ export interface RuleFields {
   eqlOptions: unknown;
   newTermsFields?: unknown;
   historyWindowSize?: unknown;
-  esqlOptions: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -98,7 +97,6 @@ type QueryRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
-  | 'esqlOptions'
 >;
 type EqlQueryRuleFields<T> = Omit<
   T,
@@ -110,7 +108,6 @@ type EqlQueryRuleFields<T> = Omit<
   | 'threatMapping'
   | 'newTermsFields'
   | 'historyWindowSize'
-  | 'esqlOptions'
 >;
 type ThresholdRuleFields<T> = Omit<
   T,
@@ -122,7 +119,6 @@ type ThresholdRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
-  | 'esqlOptions'
 >;
 type MlRuleFields<T> = Omit<
   T,
@@ -135,7 +131,6 @@ type MlRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
-  | 'esqlOptions'
 >;
 type ThreatMatchRuleFields<T> = Omit<
   T,
@@ -145,7 +140,6 @@ type ThreatMatchRuleFields<T> = Omit<
   | 'eqlOptions'
   | 'newTermsFields'
   | 'historyWindowSize'
-  | 'esqlOptions'
 >;
 type NewTermsRuleFields<T> = Omit<
   T,
@@ -156,7 +150,6 @@ type NewTermsRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'eqlOptions'
-  | 'esqlOptions'
 >;
 type EsqlRuleFields<T> = Omit<
   T,
@@ -237,7 +230,7 @@ const isEsqlFields = <T>(
     | ThreatMatchRuleFields<T>
     | NewTermsRuleFields<T>
     | EsqlRuleFields<T>
-): fields is EsqlRuleFields<T> => has('esqlOptions', fields);
+): fields is EsqlRuleFields<T> => get('queryBar.query.language', fields) === 'esql';
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
@@ -262,7 +255,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions,
         newTermsFields,
         historyWindowSize,
-        esqlOptions,
         ...mlRuleFields
       } = fields;
       return mlRuleFields;
@@ -276,7 +268,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions: _eqlOptions,
         newTermsFields: removedNewTermsFields,
         historyWindowSize: removedHistoryWindowSize,
-        esqlOptions: removedEsqlOptions,
         ...thresholdRuleFields
       } = fields;
       return thresholdRuleFields;
@@ -288,7 +279,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions: __eqlOptions,
         newTermsFields: _removedNewTermsFields,
         historyWindowSize: _removedHistoryWindowSize,
-        esqlOptions: _removedEsqlOptions,
         ...threatMatchRuleFields
       } = fields;
       return threatMatchRuleFields;
@@ -304,7 +294,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         eqlOptions: ___eqlOptions,
         newTermsFields: __removedNewTermsFields,
         historyWindowSize: __removedHistoryWindowSize,
-        esqlOptions: __removedEsqlOptions,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
@@ -318,7 +307,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatMapping: ___removedThreatMapping,
         newTermsFields: ___removedNewTermsFields,
         historyWindowSize: ___removedHistoryWindowSize,
-        esqlOptions: ___removedEsqlOptions,
         ...eqlRuleFields
       } = fields;
       return eqlRuleFields;
@@ -332,7 +320,6 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar: ____removedThreatQueryBar,
         threatMapping: ____removedThreatMapping,
         eqlOptions: ____eqlOptions,
-        esqlOptions: ____removedEsqlOptions,
         ...newTermsRuleFields
       } = fields;
       return newTermsRuleFields;
@@ -482,20 +469,10 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         new_terms_fields: ruleFields.newTermsFields,
         history_window_start: `now-${ruleFields.historyWindowSize}`,
       }
-    : isEsqlFields(ruleFields)
+    : isEsqlFields(ruleFields) && !('index' in ruleFields)
     ? {
-        filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
-        esql_params: ruleFields.esqlOptions
-          ? {
-              suppression_duration:
-                ruleFields.esqlOptions?.suppressionMode === GroupByOptions.PerTimePeriod
-                  ? ruleFields.esqlOptions?.suppressionDuration
-                  : undefined,
-              group_by_fields: ruleFields.esqlOptions?.groupByFields,
-            }
-          : undefined,
       }
     : {
         ...(ruleFields.groupByFields.length > 0

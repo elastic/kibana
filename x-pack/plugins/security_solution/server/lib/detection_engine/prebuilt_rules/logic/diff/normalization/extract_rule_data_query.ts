@@ -63,12 +63,10 @@ export const extractRuleEqlQuery = (
 
 export const extractRuleEsqlQuery = (
   query: RuleQuery,
-  language: EsqlQueryLanguage,
-  filters: RuleFilterArray | undefined
+  language: EsqlQueryLanguage
 ): RuleEsqlQuery => {
   return {
     query,
     language,
-    filters: filters ?? [],
   };
 };

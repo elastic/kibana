@@ -65,7 +65,7 @@ export const esqlExecutor = async ({
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
       size: ruleParams.maxSignals,
-      filters: ruleParams.filters,
+      filters: [],
       primaryTimestamp,
       secondaryTimestamp,
       exceptionFilter,
@@ -87,9 +87,6 @@ export const esqlExecutor = async ({
     const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
     result.searchAfterTimes = [esqlSearchDuration];
 
-    const suppressionDuration = completeRule.ruleParams.esqlParams?.suppressionDuration;
-    const suppressionFields = completeRule.ruleParams.esqlParams?.groupByFields ?? [];
-
     const wrappedAlerts = wrapGroupedEsqlAlerts({
       results: response,
       spaceId,
@@ -99,19 +96,15 @@ export const esqlExecutor = async ({
       ruleExecutionLogger,
       publicBaseUrl,
       tuple,
-      suppressionFields,
+      suppressionFields: [],
     });
-
-    const suppressionWindow = suppressionDuration
-      ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
-      : completeRule.ruleParams.from;
 
     const bulkCreateResult = await bulkCreateWithSuppression({
       alertWithSuppression,
       ruleExecutionLogger,
       wrappedDocs: wrappedAlerts,
       services,
-      suppressionWindow,
+      suppressionWindow: completeRule.ruleParams.from,
       alertTimestampOverride,
     });
     addToSearchAfterReturn({ current: result, next: bulkCreateResult });

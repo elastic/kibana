@@ -22,6 +22,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from '
 import { useParams } from 'react-router-dom';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
@@ -264,7 +265,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
                   queryBarTitle={defineStepData.queryBar.title}
                   queryBarSavedId={defineStepData.queryBar.saved_id}
-                  esqlGroupByFields={defineStepData.esqlOptions.groupByFields}
                 />
               )}
               <EuiSpacer />

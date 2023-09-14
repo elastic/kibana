@@ -39,7 +39,6 @@ import {
   AlertsIndex,
   BuildingBlockType,
   DataViewId,
-  EsqlParams,
   EventCategoryOverride,
   ExceptionListArray,
   IndexPatternArray,
@@ -203,7 +202,6 @@ export const RuleSchema = t.intersection([
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
     alert_suppression: AlertSuppression,
-    esql_params: EsqlParams,
     investigation_fields: InvestigationFields,
   }),
 ]);

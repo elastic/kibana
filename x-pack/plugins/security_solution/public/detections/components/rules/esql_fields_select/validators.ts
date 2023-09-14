@@ -154,7 +154,11 @@ export const esqlSuppressByFieldsValidator = async (
 
   const { ruleType } = formData as DefineStepRule;
 
-  const needsValidation = isEsqlRule(ruleType) && !isEmpty(query) && suppressByFields?.length > 0;
+  const needsValidation =
+    isEsqlRule(ruleType) &&
+    !isEmpty(query) &&
+    suppressByFields?.length > 0 &&
+    computeIsESQLQueryAggregating(query);
   if (!needsValidation) {
     return;
   }

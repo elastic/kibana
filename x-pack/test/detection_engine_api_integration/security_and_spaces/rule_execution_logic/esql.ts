@@ -161,8 +161,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('grouping query`s rules', () => {
-      it('should group results correctly', async () => {
+    describe('aggregating query rules', () => {
+      it('should aggregate results correctly', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { agent: { name: 'test-1' } };

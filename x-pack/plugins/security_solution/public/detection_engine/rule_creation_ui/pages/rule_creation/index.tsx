@@ -20,6 +20,7 @@ import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from '
 import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -529,7 +530,6 @@ const CreateRulePageComponent: React.FC = () => {
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
-            esqlGroupByFields={defineStepData.esqlOptions.groupByFields}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -550,8 +550,6 @@ const CreateRulePageComponent: React.FC = () => {
       memoizedIndex,
       defineStepData.queryBar.saved_id,
       defineStepData.queryBar.title,
-      //   defineStepData.queryBar.query.query,
-      defineStepData.esqlOptions.groupByFields,
       defineStepData.ruleType,
       defineStepData.shouldLoadQueryDynamically,
       defineStepData.threatIndex,

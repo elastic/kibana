@@ -77,12 +77,7 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
-import {
-  convertAlertSuppressionToCamel,
-  convertAlertSuppressionToSnake,
-  convertEsqlParamsToCamel,
-  convertEsqlParamsToSnake,
-} from '../utils/utils';
+import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
 
@@ -120,8 +115,6 @@ export const typeSpecificSnakeToCamel = (
         type: params.type,
         language: params.language,
         query: params.query,
-        filters: params.filters,
-        esqlParams: convertEsqlParamsToCamel(params.esql_params),
       };
     }
     case 'threat_match': {
@@ -231,8 +224,6 @@ const patchEsqlParams = (
     type: existingRule.type,
     language: params.language ?? existingRule.language,
     query: params.query ?? existingRule.query,
-    filters: params.filters ?? existingRule.filters,
-    esqlParams: convertEsqlParamsToCamel(params.esql_params) ?? existingRule.esqlParams,
   };
 };
 
@@ -568,8 +559,6 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSp
         type: params.type,
         language: params.language,
         query: params.query,
-        filters: params.filters,
-        esql_params: convertEsqlParamsToSnake(params.esqlParams),
       };
     }
     case 'threat_match': {

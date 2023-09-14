@@ -32,7 +32,7 @@ import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
-import { esqlValidator, esqlSuppressByFieldsValidator } from '../esql_fields_select/validators';
+import { esqlValidator } from '../esql_fields_select/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
   EQL_QUERY_REQUIRED,
@@ -133,7 +133,7 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   eqlOptions: {},
   queryBar: {
-    fieldsToValidateOnChange: ['esqlOptions.groupByFields', 'queryBar'],
+    fieldsToValidateOnChange: ['queryBar'],
     validations: [
       {
         validator: (
@@ -187,7 +187,7 @@ export const schema: FormSchema<DefineStepRule> = {
         validator: debounceAsync(eqlValidator, 300),
       },
       {
-        validator: debounceAsync(esqlValidator, 3000),
+        validator: debounceAsync(esqlValidator, 300),
       },
     ],
   },
@@ -645,39 +645,6 @@ export const schema: FormSchema<DefineStepRule> = {
         defaultMessage: 'If a suppression field is missing',
       }
     ),
-  },
-  esqlOptions: {
-    groupByFields: {
-      type: FIELD_TYPES.COMBO_BOX,
-      label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.groupByFieldsLabel',
-        {
-          defaultMessage: 'Select fields to suppress possibly duplicated alerts',
-        }
-      ),
-      helpText: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlOptions.fieldGroupByFieldHelpText',
-        {
-          defaultMessage: 'Select available field(s) to suppress possibly duplicated ES|QL alerts',
-        }
-      ),
-      validations: [
-        {
-          validator: debounceAsync(esqlSuppressByFieldsValidator, 3000),
-        },
-      ],
-    },
-    suppressionDuration: {
-      label: i18n.translate(
-        'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlSuppressionDurationLabel',
-        {
-          defaultMessage: 'Configure suppression window for ES|QL alerts',
-        }
-      ),
-      value: {},
-      unit: {},
-    },
-    suppressionMode: {},
   },
   newTermsFields: {
     type: FIELD_TYPES.COMBO_BOX,

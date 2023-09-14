@@ -38,7 +38,6 @@ import type { Threshold } from '../../../../../common/api/detection_engine/model
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
-import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
@@ -628,32 +627,6 @@ export const buildAlertSuppressionMissingFieldsDescription = (
     {
       title,
       description,
-    },
-  ];
-};
-
-export const buildAlertEsqlDescription = (
-  esqlSuppressionDuration: Duration,
-  esqlGroupByFields: string[],
-  suppressionMode: GroupByOptions
-): ListItems[] => {
-  const suppressionWindowDescription =
-    suppressionMode === GroupByOptions.PerTimePeriod
-      ? `${esqlSuppressionDuration?.value}${esqlSuppressionDuration?.unit}`
-      : i18n.ESQL_SUPPRESSION_PER_RULE_EXECUTION;
-
-  const isSuppressionEnabled = esqlGroupByFields.length > 0;
-  if (!isSuppressionEnabled) {
-    return [];
-  }
-  return [
-    {
-      title: <TechnicalPreviewBadge label={i18n.ESQL_SUPPRESS_BY_FIELDS} />,
-      description: esqlGroupByFields?.join(', '),
-    },
-    {
-      title: <TechnicalPreviewBadge label={i18n.ESQL_SUPPRESSION_WINDOW} />,
-      description: suppressionWindowDescription,
     },
   ];
 };
