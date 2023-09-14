@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'svlCommonPage']);
 
-  describe.only('Field formats example', function () {
+  describe('Field formats example', function () {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.login();
