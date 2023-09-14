@@ -12,6 +12,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiFlexGroup,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -20,11 +21,10 @@ import { css } from '@emotion/react';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
-  onSectionChange: (value: string) => void;
+  onSectionChange: (value: string | undefined) => void;
   sectionSelectOptions: string[];
-  sectionValue: string;
   totalRulesCount: number;
-  searchValue?: string;
+  searchValue: string;
   isSearching: boolean;
   pageSize: number;
 }
@@ -42,13 +42,11 @@ export const RulesTableHeader = ({
   pageSize,
   onSectionChange,
   sectionSelectOptions,
-  sectionValue,
 }: RulesTableToolbarProps) => {
-  const [selected, setSelected] = useState([]);
+  const [selected, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
 
   const sectionOptions = sectionSelectOptions.map((option) => ({
     label: option,
-    isSelected: option === sectionValue,
   }));
 
   return (

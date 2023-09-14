@@ -98,13 +98,12 @@ export const RulesContainer = () => {
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <EuiPanel hasBorder={false} hasShadow={false}>
         <RulesTableHeader
-          onSectionChange={(value: string) =>
+          onSectionChange={(value) =>
             setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
           }
           sectionSelectOptions={cleanedSectionList}
-          sectionValue={rulesQuery.section}
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
-          searchValue={rulesQuery.search}
+          searchValue={rulesQuery.search || ''}
           totalRulesCount={rulesPageData.all_rules.length}
           pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
