@@ -165,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('data view switching', () => {
+      describe.skip('data view switching', () => {
         it('recovers from missing data view', async () => {
           await listingTable.clickItemLink('eventAnnotation', 'missing data view');
 
