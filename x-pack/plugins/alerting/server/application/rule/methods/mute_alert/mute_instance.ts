@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { muteAlertSo } from '../../../../data/rule/methods/mute_alert_so';
 import { muteAlertParamsSchema } from './schemas';
 import type { MuteAlertParams } from './types';
 import { Rule } from '../../../../types';
@@ -76,15 +77,15 @@ async function muteInstanceWithOCC(
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
     mutedInstanceIds.push(alertInstanceId);
-    await context.unsecuredSavedObjectsClient.update(
-      'alert',
+    await muteAlertSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      savedObjectsUpdateOptions: { version },
       alertId,
-      updateMeta(context, {
+      alertAttributes: updateMeta(context, {
         mutedInstanceIds,
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
       }),
-      { version }
-    );
+    });
   }
 }
