@@ -279,9 +279,7 @@ const VulnerabilitiesDataGrid = ({
     [pageSize, setUrlQuery]
   );
 
-  const showVulnerabilityFlyout = flyoutVulnerabilityIndex
-    ? flyoutVulnerabilityIndex > invalidIndex
-    : undefined;
+  const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
   if (data?.page.length === 0) {
     return <EmptyState onResetFilters={onResetFilters} />;

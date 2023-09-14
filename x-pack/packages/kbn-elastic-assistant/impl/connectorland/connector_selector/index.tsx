@@ -14,29 +14,22 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import {
-  GEN_AI_CONNECTOR_ID,
-  OpenAiProviderType,
-} from '@kbn/stack-connectors-plugin/public/common';
+import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/public/common';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
+import { getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
   http: HttpSetup;
   isDisabled?: boolean;
-  onConnectorSelectionChange: (connectorId: string, provider: OpenAiProviderType) => void;
+  onConnectorSelectionChange: (connector: ActionConnector | undefined) => void;
   selectedConnectorId?: string;
   onConnectorModalVisibilityChange?: (isVisible: boolean) => void;
-}
-
-interface Config {
-  apiProvider: string;
 }
 
 export const ConnectorSelector: React.FC<Props> = React.memo(
@@ -95,18 +88,19 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const connectorOptions = useMemo(() => {
       return (
         connectors?.map((connector) => {
-          const apiProvider: string | undefined = (
-            connector as ActionConnectorProps<Config, unknown>
-          )?.config?.apiProvider;
+          const apiProvider = getGenAiConfig(connector)?.apiProvider;
+          const connectorDetails = connector.isPreconfigured
+            ? i18n.PRECONFIGURED_CONNECTOR
+            : apiProvider;
           return {
             value: connector.id,
             inputDisplay: connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
                 <strong>{connector.name}</strong>
-                {apiProvider && (
-                  <EuiText size="s" color="subdued">
-                    <p>{apiProvider}</p>
+                {connectorDetails && (
+                  <EuiText size="xs" color="subdued">
+                    <p>{connectorDetails}</p>
                   </EuiText>
                 )}
               </React.Fragment>
@@ -138,10 +132,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           return;
         }
 
-        const apiProvider = (
-          connectors?.find((c) => c.id === connectorId) as ActionConnectorProps<Config, unknown>
-        )?.config.apiProvider as OpenAiProviderType;
-        onConnectorSelectionChange(connectorId, apiProvider);
+        const connector = connectors?.find((c) => c.id === connectorId);
+        onConnectorSelectionChange(connector);
       },
       [connectors, onConnectorSelectionChange, onConnectorModalVisibilityChange]
     );
@@ -162,12 +154,8 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           <ConnectorAddModal
             actionType={actionType}
             onClose={cleanupAndCloseModal}
-            postSaveEventHandler={(savedAction: ActionConnector) => {
-              onConnectorSelectionChange(
-                savedAction.id,
-                (savedAction as ActionConnectorProps<Config, unknown>)?.config
-                  .apiProvider as OpenAiProviderType
-              );
+            postSaveEventHandler={(connector: ActionConnector) => {
+              onConnectorSelectionChange(connector);
               refetchConnectors?.();
               cleanupAndCloseModal();
             }}

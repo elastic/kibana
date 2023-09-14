@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
 import { orderedFlyoutTabs } from './tabs';
 
@@ -22,35 +20,17 @@ export interface Props {
 export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
   const { source } = useSourceContext();
   const { parsedDateRange } = useUnifiedSearchContext();
-  const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
   return source ? (
     <AssetDetails
       asset={{ id: name, name }}
       assetType="host"
-      dateRange={hostFlyoutState?.dateRange ?? parsedDateRange}
-      activeTabId={hostFlyoutState?.tabId}
+      dateRange={parsedDateRange}
       overrides={{
         metadata: {
-          query: hostFlyoutState?.metadataSearch,
           showActionsColumn: true,
         },
-        processes: {
-          query: hostFlyoutState?.processSearch,
-        },
-        logs: {
-          query: hostFlyoutState?.logsSearch,
-        },
       }}
-      onTabsStateChange={(state) =>
-        setHostFlyoutState({
-          dateRange: state.dateRange,
-          metadataSearch: state.metadata?.query,
-          processSearch: state.processes?.query,
-          logsSearch: state.logs?.query,
-          tabId: state.activeTabId as HostFlyout['tabId'],
-        })
-      }
       tabs={orderedFlyoutTabs}
       links={['apmServices', 'nodeDetails']}
       renderMode={{

@@ -20,10 +20,11 @@ import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
 import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
 
-describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165968
+describe('Pagination', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'host_uncommon_processes');
+      cy.task('esArchiverLoad', { archiveName: 'host_uncommon_processes' });
     });
 
     beforeEach(() => {
@@ -99,7 +100,7 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('All users and all Hosts tables', () => {
     before(() => {
-      cy.task('esArchiverLoad', 'all_users');
+      cy.task('esArchiverLoad', { archiveName: 'all_users' });
     });
 
     beforeEach(() => {

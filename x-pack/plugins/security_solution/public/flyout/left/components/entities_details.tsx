@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ENTITIES_NO_DATA_MESSAGE } from './translations';
 import { useLeftPanelContext } from '../context';
 import { getField } from '../../shared/utils';
 import { UserDetails } from './user_details';
 import { HostDetails } from './host_details';
-import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
+import { ENTITIES_DETAILS_NO_DATA_TEST_ID, ENTITIES_DETAILS_TEST_ID } from './test_ids';
 
 export const ENTITIES_TAB_ID = 'entities-details';
 
@@ -24,19 +25,29 @@ export const EntitiesDetails: React.FC = () => {
   const userName = getField(getFieldsData('user.name'));
   const timestamp = getField(getFieldsData('@timestamp'));
 
+  const showDetails = timestamp && (hostName || userName);
+  const showUserDetails = userName && timestamp;
+  const showHostDetails = hostName && timestamp;
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj={ENTITIES_DETAILS_TEST_ID}>
-      {userName && timestamp && (
-        <EuiFlexItem>
-          <UserDetails userName={userName} timestamp={timestamp} scopeId={scopeId} />
-        </EuiFlexItem>
+    <>
+      {showDetails ? (
+        <EuiFlexGroup direction="column" gutterSize="m" data-test-subj={ENTITIES_DETAILS_TEST_ID}>
+          {showUserDetails && (
+            <EuiFlexItem>
+              <UserDetails userName={userName} timestamp={timestamp} scopeId={scopeId} />
+            </EuiFlexItem>
+          )}
+          {showHostDetails && (
+            <EuiFlexItem>
+              <HostDetails hostName={hostName} timestamp={timestamp} scopeId={scopeId} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ) : (
+        <div data-test-subj={ENTITIES_DETAILS_NO_DATA_TEST_ID}>{ENTITIES_NO_DATA_MESSAGE}</div>
       )}
-      {hostName && timestamp && (
-        <EuiFlexItem>
-          <HostDetails hostName={hostName} timestamp={timestamp} scopeId={scopeId} />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    </>
   );
 };
 

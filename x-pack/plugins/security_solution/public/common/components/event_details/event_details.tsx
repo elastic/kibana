@@ -289,7 +289,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     isReadOnly,
                   }}
                   goToTable={goToTableTab}
-                  investigationFields={maybeRule?.investigation_fields ?? []}
+                  investigationFields={maybeRule?.investigation_fields?.field_names ?? []}
                 />
                 <EuiSpacer size="xl" />
                 <Insights
