@@ -20,6 +20,7 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
@@ -43,7 +44,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { PLUGIN_ID } from '../common';
@@ -79,6 +80,7 @@ import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
+import { getESQLSearchProvider } from './global_search/search_provider';
 
 /**
  * @public
@@ -164,6 +166,7 @@ export interface DiscoverSetupPlugins {
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 /**
@@ -230,6 +233,27 @@ export class DiscoverPlugin
       );
       this.singleDocLocator = plugins.share.url.locators.create(
         new DiscoverSingleDocLocatorDefinition()
+      );
+    }
+
+    if (plugins.globalSearch) {
+      const enableESQL = core.uiSettings.get(ENABLE_ESQL);
+      plugins.globalSearch.registerResultProvider(
+        getESQLSearchProvider(
+          enableESQL,
+          core.getStartServices().then(
+            ([
+              {
+                application: { capabilities },
+              },
+            ]) => capabilities
+          ),
+          core.getStartServices().then((deps) => {
+            const { data } = deps[1];
+            return data;
+          }),
+          this.locator
+        )
       );
     }
 
