@@ -14,8 +14,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { getEsqlQueryConfig, esqlToOptions } from '../esql_fields_select/validators';
-import type { FieldType } from '../esql_fields_select/validators';
+import { getEsqlQueryConfig, esqlToOptions } from './validators';
+import type { FieldType } from './validators';
 
 type UseEsqlFieldOptions = (
   esqlQuery: string | undefined,

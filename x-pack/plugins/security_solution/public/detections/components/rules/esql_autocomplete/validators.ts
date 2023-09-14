@@ -37,14 +37,6 @@ const constructValidationError = (error: Error) => {
   };
 };
 
-const constructSuppressByFieldsValidationError = (error: Error) => {
-  return {
-    code: ERROR_CODES.INVALID_ESQL_SUPPRESS_BY_FIELDS,
-    message: i18n.ESQL_VALIDATION_SUPPRESS_BY_GENERAL_ERROR,
-    error,
-  };
-};
-
 export const getEsqlQueryConfig = ({
   esqlQuery,
   expressions,
@@ -142,53 +134,5 @@ export const esqlValidator = async (
     }
   } catch (error) {
     return constructValidationError(error);
-  }
-};
-
-export const esqlSuppressByFieldsValidator = async (
-  ...args: Parameters<ValidationFunc>
-): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
-  const [{ value, formData, path }] = args;
-  const suppressByFields = (value ?? []) as string[];
-  const query = formData.queryBar?.query?.query as string;
-
-  const { ruleType } = formData as DefineStepRule;
-
-  const needsValidation =
-    isEsqlRule(ruleType) &&
-    !isEmpty(query) &&
-    suppressByFields?.length > 0 &&
-    computeIsESQLQueryAggregating(query);
-  if (!needsValidation) {
-    return;
-  }
-
-  try {
-    const data = await fetchEsqlFields(query);
-
-    if (data && 'error' in data) {
-      return constructSuppressByFieldsValidationError(data.error);
-    }
-
-    const options = (data?.columns ?? []).map(({ id }) => ({ label: id }));
-    const optionsSet = new Set(options?.map((option) => option.label));
-
-    const errorFields: string[] = [];
-
-    suppressByFields?.forEach((field) => {
-      if (!optionsSet.has(field)) {
-        errorFields.push(field);
-      }
-    });
-
-    if (errorFields.length) {
-      return {
-        code: ERROR_CODES.INVALID_ESQL_SUPPRESS_BY_FIELDS,
-        path,
-        message: i18n.esqlValidationInvalidSuppressByFields(errorFields.join(', ')),
-      };
-    }
-  } catch (error) {
-    return constructSuppressByFieldsValidationError(error);
   }
 };

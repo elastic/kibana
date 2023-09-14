@@ -32,7 +32,7 @@ import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
-import { esqlValidator } from '../esql_fields_select/validators';
+import { esqlValidator } from '../esql_autocomplete/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
   EQL_QUERY_REQUIRED,
