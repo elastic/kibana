@@ -34,10 +34,10 @@ ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
 ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq -r '.[].Config.Labels["org.opencontainers.image.revision"]')
 
 cat << EOT | buildkite-agent annotate --style "success"
-  Promotion successful!
-  New image: $TARGET_IMAGE
-  Source image: $SOURCE_IMAGE
-  Elasticsearch commit: $ELASTIC_COMMIT_HASH (https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH)
+  <h2>Promotion successful!</h2><br/>
+  New image: $TARGET_IMAGE<br/>
+  Source image: $SOURCE_IMAGE<br/>
+  Elasticsearch commit: <a href="https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH">$ELASTIC_COMMIT_HASH</a>
 EOT
 
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"

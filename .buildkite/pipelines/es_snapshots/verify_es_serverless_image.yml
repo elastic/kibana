@@ -6,8 +6,8 @@ env:
 steps:
   - label: "Annotate runtime parameters"
     command: |
-      buildkite-agent annotate --context build-params --style info "ES_SERVERLESS_IMAGE: $ES_SERVERLESS_IMAGE"
-      buildkite-agent annotate --context build-params --style info "Kibana build hash: $BUILDKITE_BRANCH / $BUILDKITE_COMMIT"
+      buildkite-agent annotate --context es-serverless-image --style info "ES_SERVERLESS_IMAGE: $ES_SERVERLESS_IMAGE"
+      buildkite-agent annotate --context kibana-commit --style info "Kibana build hash: $BUILDKITE_BRANCH / $BUILDKITE_COMMIT"
 
   - group: "(:kibana: x :elastic:) Trigger Kibana Serverless suite"
     if: "build.env('SKIP_VERIFICATION') != '1' && build.env('SKIP_VERIFICATION') != 'true'"
