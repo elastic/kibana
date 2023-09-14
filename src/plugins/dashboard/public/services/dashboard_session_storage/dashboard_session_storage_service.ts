@@ -22,6 +22,7 @@ import { panelStorageErrorStrings } from '../../dashboard_container/_dashboard_c
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
+const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
 interface DashboardSessionStorageRequiredServices {
   notifications: DashboardNotificationsService;
@@ -37,12 +38,14 @@ export type DashboardSessionStorageServiceFactory = KibanaPluginServiceFactory<
 class DashboardSessionStorageService implements DashboardSessionStorageServiceType {
   private activeSpaceId: string;
   private sessionStorage: Storage;
+  private localStorage: Storage;
   private notifications: DashboardNotificationsService;
   private spaces: DashboardSpacesService;
 
   constructor(requiredServices: DashboardSessionStorageRequiredServices) {
     ({ notifications: this.notifications, spaces: this.spaces } = requiredServices);
     this.sessionStorage = new Storage(sessionStorage);
+    this.localStorage = new Storage(localStorage);
 
     this.activeSpaceId = 'default';
     if (this.spaces.getActiveSpace$) {
@@ -51,6 +54,21 @@ class DashboardSessionStorageService implements DashboardSessionStorageServiceTy
       });
     }
   }
+
+  public getViewMode = (): ViewMode => {
+    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY);
+  };
+
+  public storeViewMode = (viewMode: ViewMode) => {
+    try {
+      this.localStorage.set(DASHBOARD_VIEWMODE_LOCAL_KEY, viewMode);
+    } catch (e) {
+      this.notifications.toasts.addDanger({
+        title: panelStorageErrorStrings.getPanelsGetError(e.message),
+        'data-test-subj': 'dashboardPanelsGetFailure',
+      });
+    }
+  };
 
   public clearState(id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {

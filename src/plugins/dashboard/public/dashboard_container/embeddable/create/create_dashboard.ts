@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Subject } from 'rxjs';
+import { distinctUntilKeyChanged, Subject } from 'rxjs';
 import { cloneDeep, identity, pickBy } from 'lodash';
 
 import {
@@ -151,12 +151,13 @@ export const initializeDashboard = async ({
   }
 
   // --------------------------------------------------------------------------------------
-  // Gather input from session storage if integration is used.
+  // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
   const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
     if (!useSessionStorageIntegration) return;
     return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
   })();
+  const localViewMode = dashboardSessionStorage.getViewMode();
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
@@ -166,6 +167,8 @@ export const initializeDashboard = async ({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),
     ...sessionStorageInput,
+
+    ...(localViewMode && useSessionStorageIntegration ? { viewMode: localViewMode } : {}),
     ...overrideInput,
   });
 
@@ -173,6 +176,17 @@ export const initializeDashboard = async ({
     type: 'dashboard',
     description: initialInput.title,
   };
+
+  // --------------------------------------------------------------------------------------
+  // Store view mode in local storage to keep all Dashboards in the same view mode.
+  // --------------------------------------------------------------------------------------
+  dashboardSessionStorage.storeViewMode(initialInput.viewMode);
+  untilDashboardReady().then((dashboard) => {
+    dashboard
+      .getInput$()
+      .pipe(distinctUntilKeyChanged('viewMode'))
+      .subscribe(({ viewMode }) => dashboardSessionStorage.storeViewMode(viewMode));
+  });
 
   // --------------------------------------------------------------------------------------
   // Set up unified search integration.

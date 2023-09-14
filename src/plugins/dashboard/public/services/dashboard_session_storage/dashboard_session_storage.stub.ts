@@ -17,6 +17,8 @@ export const dashboardSessionStorageServiceFactory: DashboardSessionStorageServi
     clearState: jest.fn(),
     getState: jest.fn().mockReturnValue(undefined),
     setState: jest.fn(),
+    getViewMode: jest.fn(),
+    storeViewMode: jest.fn(),
     getDashboardIdsWithUnsavedChanges: jest
       .fn()
       .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
