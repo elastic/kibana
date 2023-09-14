@@ -60,6 +60,7 @@ const externals = {
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',
   immer: '__kbnSharedDeps__.Immer',
+  reselect: '__kbnSharedDeps__.Reselect',
 
   /**
    * big deps which are locked to a single version

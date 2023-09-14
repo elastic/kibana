@@ -66,6 +66,7 @@ RUNTIME_DEPS = [
   "@npm//redux",
   "@npm//react-redux",
   "@npm//immer",
+  "@npm//reselect"
 ]
 
 webpack_cli(

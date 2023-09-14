@@ -107,6 +107,7 @@ module.exports = (_, argv) => {
         'react-router-dom-v5-compat',
         'react-router',
         'react',
+        'reselect',
         'rxjs',
         'rxjs/operators',
         'styled-components',
