@@ -35,7 +35,7 @@ export function createUninstallRoute(
   analytics: AnalyticsServiceSetup,
   getScopedContext: (req: KibanaRequest) => SampleDataContext,
   specProviders: Record<string, SampleDatasetProvider>,
-  panelReplacedData: Record<string, SampleDatasetDashboardPanel[]>,
+  panelReplacementRecords: Record<string, SampleDatasetDashboardPanel[]>,
   additionalSampleDataSavedObjects: Record<string, SavedObjectsSchema>
 ): void {
   router.delete(
@@ -61,7 +61,7 @@ export function createUninstallRoute(
       const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects({
         sampleDatasets,
         spaceAwareSampleDataset,
-        panelReplacedData: panelReplacedData[request.params.id],
+        panelReplacementRecords: panelReplacementRecords[request.params.id],
         additionalSampleDataSavedObjects: additionalSampleDataSavedObjects[request.params.id],
       });
 

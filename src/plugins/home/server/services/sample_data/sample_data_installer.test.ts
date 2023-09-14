@@ -133,6 +133,22 @@ const testDatasets: SampleDatasetSchema[] = [
           [`.alerts-security.alerts-default`]: {},
         },
         deleteAliasWhenRemoved: false,
+        indexSettings: {
+          default_pipeline: 'Security_Solution_alerts_sample_data_ingest_pipeline',
+        },
+        pipeline: {
+          id: 'Security_Solution_alerts_sample_data_ingest_pipeline',
+          description: 'Security Solution alerts sample data ingest pipeline',
+          processors: [
+            {
+              set: {
+                field: 'kibana.space_ids',
+                value: ['default'],
+                ignore_failure: true,
+              },
+            },
+          ],
+        },
       },
     ],
   },
@@ -296,7 +312,7 @@ describe('SampleDataInstaller', () => {
     });
 
     describe('when the data index is using an alias', () => {
-      it('deletes the alias and the index', async () => {
+      it('deletes the alias and the index ', async () => {
         const indexName = 'target_index';
 
         esClient.asCurrentUser.indices.getAlias.mockResponse({
@@ -321,6 +337,29 @@ describe('SampleDataInstaller', () => {
         });
       });
 
+      it('creates the data index with alias', async () => {
+        await installer.install('test_securitysolution_data_index');
+
+        expect(esClient.asCurrentUser.indices.putIndexTemplate).toHaveBeenCalledTimes(0);
+        expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledTimes(1);
+        expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
+          index: 'kibana_sample_data_test_securitysolution_data_index_test_alerts_data_index',
+          mappings: {
+            properties: {
+              someField: { type: 'keyword' },
+            },
+          },
+          aliases: {
+            [`.alerts-security.alerts-default`]: {},
+          },
+          settings: {
+            index: {
+              default_pipeline: 'Security_Solution_alerts_sample_data_ingest_pipeline',
+            },
+          },
+        });
+      });
+
       it('should NOT to delete the alias when deleteAliasWhenRemoved is false', async () => {
         const indexName =
           'kibana_sample_data_test_securitysolution_data_index_test_alerts_data_index';
@@ -333,6 +372,27 @@ describe('SampleDataInstaller', () => {
         expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
           index: indexName,
         });
+      });
+    });
+
+    it('should create ingest pipeline when the data index is using ingest pipeline', async () => {
+      await installer.install('test_securitysolution_data_index');
+
+      expect(esClient.asCurrentUser.ingest.putPipeline).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.ingest.putPipeline).toHaveBeenCalledWith({
+        id: 'Security_Solution_alerts_sample_data_ingest_pipeline',
+        body: {
+          description: 'Security Solution alerts sample data ingest pipeline',
+          processors: [
+            {
+              set: {
+                field: 'kibana.space_ids',
+                value: ['default'],
+                ignore_failure: true,
+              },
+            },
+          ],
+        },
       });
     });
   });
@@ -400,30 +460,37 @@ describe('SampleDataInstaller', () => {
       }
     });
 
-    describe('when the data index is using an alias', () => {
-      it('deletes the alias and the index', async () => {
-        const indexName = 'target_index';
+    it('deletes the alias and the index when the data index is using an alias', async () => {
+      const indexName = 'target_index';
 
-        esClient.asCurrentUser.indices.getAlias.mockResponse({
-          [indexName]: {
-            aliases: {
-              kibana_sample_data_test_single_data_index: {},
-            },
+      esClient.asCurrentUser.indices.getAlias.mockResponse({
+        [indexName]: {
+          aliases: {
+            kibana_sample_data_test_single_data_index: {},
           },
-        });
+        },
+      });
 
-        await installer.uninstall('test_single_data_index');
+      await installer.uninstall('test_single_data_index');
 
-        expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledTimes(1);
-        expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledWith({
-          name: 'kibana_sample_data_test_single_data_index',
-          index: indexName,
-        });
+      expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledWith({
+        name: 'kibana_sample_data_test_single_data_index',
+        index: indexName,
+      });
 
-        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
-        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
-          index: indexName,
-        });
+      expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
+        index: indexName,
+      });
+    });
+
+    it('should delete ingest pipeline when the data index is using ingest pipeline', async () => {
+      await installer.uninstall('test_securitysolution_data_index');
+
+      expect(esClient.asCurrentUser.ingest.deletePipeline).toHaveBeenCalledTimes(1);
+      expect(esClient.asCurrentUser.ingest.deletePipeline).toHaveBeenCalledWith({
+        id: 'Security_Solution_alerts_sample_data_ingest_pipeline',
       });
     });
   });

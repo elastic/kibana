@@ -35,7 +35,7 @@ export function createInstallRoute(
   analytics: AnalyticsServiceSetup,
   getScopedContext: (req: KibanaRequest) => SampleDataContext,
   specProviders: Record<string, SampleDatasetProvider>,
-  panelReplacedData: Record<string, SampleDatasetDashboardPanel[]>,
+  panelReplacementRecords: Record<string, SampleDatasetDashboardPanel[]>,
   additionalSampleDataSavedObjects: Record<string, SavedObjectsSchema>
 ): void {
   router.post(
@@ -65,7 +65,7 @@ export function createInstallRoute(
       const sampleDatasetsWithSpaceAwareSavedObjects = getSampleDatasetsWithSpaceAwareSavedObjects({
         sampleDatasets,
         spaceAwareSampleDataset,
-        panelReplacedData: panelReplacedData[params.id],
+        panelReplacementRecords: panelReplacementRecords[params.id],
         additionalSampleDataSavedObjects: additionalSampleDataSavedObjects[params.id],
       });
 

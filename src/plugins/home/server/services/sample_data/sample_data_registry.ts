@@ -33,7 +33,7 @@ import { createListRoute, createInstallRoute } from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
 import { registerSampleDatasetWithIntegration } from './lib/register_with_integrations';
-import { getReplacedPanelInDashboard, getDashboardReferenceByIdFromDataset } from './routes/utils';
+import { getDashboardReferenceByIdFromDataset } from './routes/utils';
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
@@ -42,7 +42,7 @@ export class SampleDataRegistry {
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
   private readonly scopedSampleDataContextFactories: SampleDataContextFactory[] = [];
   private readonly validatedSpaceProviders: Record<string, SampleDatasetProvider> = {};
-  private panelReplacedData: Record<string, SampleDatasetDashboardPanel[]> = {};
+  private panelReplacementRecords: Record<string, SampleDatasetDashboardPanel[]> = {};
   private additionalSampleDataSavedObjects: Record<string, SavedObjectsSchema> = {};
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
@@ -105,7 +105,7 @@ export class SampleDataRegistry {
       core.analytics,
       getScopedContext,
       this.validatedSpaceProviders,
-      this.panelReplacedData,
+      this.panelReplacementRecords,
       this.additionalSampleDataSavedObjects
     );
     createUninstallRoute(
@@ -116,7 +116,7 @@ export class SampleDataRegistry {
       core.analytics,
       getScopedContext,
       this.validatedSpaceProviders,
-      this.panelReplacedData,
+      this.panelReplacementRecords,
       this.additionalSampleDataSavedObjects
     );
 
@@ -203,12 +203,20 @@ export class SampleDataRegistry {
             ? reference.name.split(':')[1]
             : reference.name;
 
-          getReplacedPanelInDashboard(dashboard, referenceName, embeddableConfig);
+          const panels = JSON.parse(dashboard.attributes.panelsJSON);
+          const panel = panels.find((panelItem: any) => {
+            return panelItem.panelRefName === referenceName;
+          });
+          if (!panel) {
+            throw new Error(`Unable to find panel for reference: ${referenceName}`);
+          }
+          panel.embeddableConfig = embeddableConfig;
+          dashboard.attributes.panelsJSON = JSON.stringify(panels);
 
-          this.panelReplacedData[sampleDataId] =
-            this.panelReplacedData[sampleDataId] == null
+          this.panelReplacementRecords[sampleDataId] =
+            this.panelReplacementRecords[sampleDataId] == null
               ? [sampleDatasetDashboardPanel]
-              : [...this.panelReplacedData[sampleDataId], sampleDatasetDashboardPanel];
+              : [...this.panelReplacementRecords[sampleDataId], sampleDatasetDashboardPanel];
         } catch (error) {
           throw new Error(
             `Unable to replace panel with embeddable ${oldEmbeddableId}, error: ${error}`

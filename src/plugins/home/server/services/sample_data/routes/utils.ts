@@ -69,22 +69,6 @@ export const getSpaceAwareSampleDatasets = (
     {}
   );
 
-export const getReplacedPanelInDashboard = (
-  dashboard: SavedObjectSchema,
-  referenceName: string,
-  embeddableConfig: object
-) => {
-  const panels = JSON.parse(dashboard.attributes.panelsJSON);
-  const panel = panels.find((panelItem: any) => {
-    return panelItem.panelRefName === referenceName;
-  });
-  if (!panel) {
-    throw new Error(`Unable to find panel for reference: ${referenceName}`);
-  }
-  panel.embeddableConfig = embeddableConfig;
-  dashboard.attributes.panelsJSON = JSON.stringify(panels);
-};
-
 export const getDashboardReferenceByIdFromDataset = ({
   sampleDatasets,
   sampleDataId,
@@ -123,12 +107,12 @@ export const getDashboardReferenceByIdFromDataset = ({
 export const getSampleDatasetsWithSpaceAwareSavedObjects = ({
   sampleDatasets,
   spaceAwareSampleDataset,
-  panelReplacedData = [],
+  panelReplacementRecords = [],
   additionalSampleDataSavedObjects = [],
 }: {
   sampleDatasets: SampleDatasetSchema[]; // This has the **additional** or **replaced** visualizations from other plugins
   spaceAwareSampleDataset: SampleDatasetSchema; // This is space aware, but not aware of addition or replacement from other plugins
-  panelReplacedData: SampleDatasetDashboardPanel[];
+  panelReplacementRecords: SampleDatasetDashboardPanel[];
   additionalSampleDataSavedObjects: SavedObjectsSchema;
 }) =>
   sampleDatasets.map((sampleDataset) => ({
@@ -136,7 +120,7 @@ export const getSampleDatasetsWithSpaceAwareSavedObjects = ({
     savedObjects: spaceAwareSampleDataset.savedObjects
       .concat(additionalSampleDataSavedObjects)
       .map((savedObject) => {
-        const replacementRecord = panelReplacedData.find(
+        const replacementRecord = panelReplacementRecords.find(
           (data) => data.dashboardId === savedObject.id
         );
         const replacedDashboard =
