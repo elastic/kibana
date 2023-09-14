@@ -39,6 +39,34 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       await testSubjects.missingOrFail(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
     }
 
+    public async enableCustomTimeRange() {
+      log.debug('enableCustomTimeRange');
+      const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+
+      if ((await toggle.getAttribute('aria-checked')) === 'false') {
+        await toggle.click();
+        await retry.waitFor(
+          'custom time range to be enabled',
+          async () => (await toggle.getAttribute('aria-checked')) === 'true',
+          async () => await toggle.click()
+        );
+      }
+    }
+
+    public async disableCustomTimeRange() {
+      log.debug('disableCustomTimeRange');
+      const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
+
+      if ((await toggle.getAttribute('aria-checked')) === 'true') {
+        await toggle.click();
+        await retry.waitFor(
+          'custom time range to be disabled',
+          async () => (await toggle.getAttribute('aria-checked')) === 'false',
+          async () => await toggle.click()
+        );
+      }
+    }
+
     public async findFlyout() {
       log.debug('findFlyout');
       return await testSubjects.find(this.FLYOUT_TEST_SUBJ);
@@ -50,19 +78,20 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       return await flyout.findByCssSelector(`[data-test-subj="${testSubject}"]`);
     }
 
-    public async findToggleQuickMenuButton() {
-      log.debug('findToggleQuickMenuButton');
+    public async findDatePickerQuickMenuButton() {
+      log.debug('findDatePickerQuickMenuButton');
       return await this.findFlyoutTestSubject('superDatePickerToggleQuickMenuButton');
     }
 
     public async openDatePickerQuickMenu() {
       log.debug('openDatePickerQuickMenu');
-      const button = await this.findToggleQuickMenuButton();
+      const button = await this.findDatePickerQuickMenuButton();
       await button.click();
 
       await retry.waitFor(
         'super date picker quick menu to be displayed',
-        async () => await testSubjects.isDisplayed('superDatePickerQuickMenu')
+        async () => await testSubjects.isDisplayed('superDatePickerQuickMenu'),
+        async () => await button.click()
       );
     }
 
@@ -115,32 +144,6 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
         await testSubjects.click('cancelCustomizePanelButton');
         await testSubjects.waitForDeleted('cancelCustomizePanelButton');
       });
-    }
-
-    public async enableCustomTimeRange() {
-      log.debug('enableCustomTimeRange');
-      const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-
-      if ((await toggle.getAttribute('aria-checked')) === 'false') {
-        await toggle.click();
-        await retry.waitFor(
-          'custom time range to be enabled',
-          async () => (await toggle.getAttribute('aria-checked')) === 'true'
-        );
-      }
-    }
-
-    public async disableCustomTimeRange() {
-      log.debug('disableCustomTimeRange');
-      const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-
-      if ((await toggle.getAttribute('aria-checked')) === 'true') {
-        await toggle.click();
-        await retry.waitFor(
-          'custom time range to be disabled',
-          async () => (await toggle.getAttribute('aria-checked')) === 'false'
-        );
-      }
     }
   })();
 }
