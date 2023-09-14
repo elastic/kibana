@@ -17,9 +17,7 @@ export const isErrorResponse = (response?: IKibanaSearchResponse) => {
   return (
     !response ||
     !response.rawResponse ||
-    (!response.isRunning &&
-      !!response.isPartial &&
-      !response.rawResponse?.response?._clusters?.details)
+    (!response.isRunning && !!response.isPartial && !response.rawResponse?._clusters?.details)
   );
 };
 
@@ -27,7 +25,7 @@ export const isErrorResponse = (response?: IKibanaSearchResponse) => {
  * @returns true if response is completed successfully
  */
 export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && !response.isRunning && !response.isPartial);
+  return Boolean(response && !response.isRunning);
 };
 
 /**
