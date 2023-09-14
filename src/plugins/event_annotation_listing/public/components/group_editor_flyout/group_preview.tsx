@@ -97,9 +97,17 @@ export const GroupPreview = ({
     getLensAttributes(group, currentTimeFieldName)
   );
 
+  // we don't use currentDataView directly to hide/show the missing prompt because we want to delay
+  // the embeddable render until the lensAttributes have been updated in useDebounce
+  // in the case that the user selects a new data view
+  const [showMissingDataViewPrompt, setShowMissingDataViewPrompt] = useState<boolean>(
+    !currentDataView
+  );
+
   useDebounce(
     () => {
       setLensAttributes(getLensAttributes(group, currentTimeFieldName));
+      setShowMissingDataViewPrompt(!currentDataView);
     },
     250,
     [group, currentTimeFieldName]
@@ -176,7 +184,7 @@ export const GroupPreview = ({
           }
         `}
       >
-        {currentDataView ? (
+        {!showMissingDataViewPrompt ? (
           <EuiFlexGroup
             css={css`
               height: 100%;
