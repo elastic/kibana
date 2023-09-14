@@ -60,12 +60,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should schedule task, run rule and schedule actions when appropriate', async () => {
       const testStart = new Date();
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -110,7 +110,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
       const resp = await waitForDocumentInIndex({
@@ -118,22 +117,6 @@ export default function ({ getService }: FtrProviderContext) {
         indexName: ALERT_ACTION_INDEX,
       });
       expect(resp.hits.hits.length).to.be(1);
-
-      await waitForAllTasksIdle({
-        esClient,
-        filter: testStart,
-      });
-
-      await disableRule({
-        supertest,
-        ruleId,
-      });
-
-      await waitForDisabled({
-        esClient,
-        ruleId,
-        filter: testStart,
-      });
 
       const document = resp.hits.hits[0];
       expect(document._source).to.eql({
@@ -157,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(eventLogResp.hits.hits.length).to.be(1);
 
       const eventLogDocument = eventLogResp.hits.hits[0]._source;
-      await validateEventLog(eventLogDocument, {
+      validateEventLog(eventLogDocument, {
         ruleId,
         ruleTypeId: RULE_TYPE_ID,
         outcome: 'success',
@@ -169,12 +152,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should pass updated rule params to executor', async () => {
       const testStart = new Date();
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -219,7 +202,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
       const resp = await waitForDocumentInIndex({
@@ -288,11 +270,11 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
 
       // Should fail
-      actionId = await createSlackConnector({
+      const createdAction = await createSlackConnector({
         supertest,
         name: 'Slack Connector: Alerting API test',
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -325,7 +307,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       // Should retry when the the action fails
       const resp = await waitForAllTasks({
@@ -340,12 +321,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should throttle alerts when appropriate', async () => {
       const testStart = new Date();
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -387,7 +368,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
       await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
@@ -414,12 +394,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should throttle alerts with throttled action when appropriate', async () => {
       const testStart = new Date();
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -465,7 +445,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
       await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
@@ -492,12 +471,12 @@ export default function ({ getService }: FtrProviderContext) {
     it('should reset throttle window when not firing and should not throttle when changing groups', async () => {
       const testStart = new Date();
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -567,7 +546,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       // Wait for the action to index a document
       const resp = await waitForDocumentInIndex({
@@ -637,12 +615,12 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -688,7 +666,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       await muteRule({
         supertest,
@@ -727,12 +704,12 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -778,7 +755,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       await muteAlert({
         supertest,
@@ -815,12 +791,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`should unmute all instances when unmuting an alert`, async () => {
-      actionId = await createIndexConnector({
+      const createdAction = await createIndexConnector({
         supertest,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
-      expect(actionId).not.to.be(undefined);
+      actionId = createdAction.id;
 
       const createdRule = await createEsQueryRule({
         supertest,
@@ -866,7 +842,6 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       ruleId = createdRule.id;
-      expect(ruleId).not.to.be(undefined);
 
       await muteAlert({
         supertest,
@@ -936,7 +911,8 @@ function validateEventLog(event: any, params: ValidateEventLogParams) {
 
   expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
   expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(1);
-  expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
+  // Sometimes fast enough that it will report 0ms
+  expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms >= 0).to.be.ok();
   expect(
     event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms
   ).to.be.greaterThan(0);

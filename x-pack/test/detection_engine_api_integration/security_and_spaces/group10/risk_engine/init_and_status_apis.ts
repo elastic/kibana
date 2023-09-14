@@ -15,6 +15,9 @@ import {
   clearLegacyTransforms,
   riskEngineRouteHelpersFactory,
   clearTransforms,
+  installLegacyRiskScore,
+  getLegacyRiskScoreDashboards,
+  clearLegacyDashboards,
 } from './utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -36,6 +39,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
       await clearTransforms({
         es,
+        log,
+      });
+      await clearLegacyDashboards({
+        supertest,
         log,
       });
     });
@@ -97,6 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
           dynamic: 'strict',
           properties: {
             '@timestamp': {
+              ignore_malformed: false,
               type: 'date',
             },
             host: {
@@ -328,7 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should remove legacy risk score transform if it exists', async () => {
-        await createLegacyTransforms({ es });
+        await installLegacyRiskScore({ supertest });
 
         for (const transformId of legacyTransformIds) {
           const tr = await es.transform.getTransform({
@@ -337,6 +345,12 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(tr?.transforms?.[0]?.id).to.eql(transformId);
         }
+
+        const legacyDashboards = await getLegacyRiskScoreDashboards({
+          kibanaServer,
+        });
+
+        expect(legacyDashboards.length).to.eql(4);
 
         await riskEngineRoutes.init();
 
@@ -349,6 +363,12 @@ export default ({ getService }: FtrProviderContext) => {
             expect(err).to.not.be(undefined);
           }
         }
+
+        const legacyDashboardsAfterInit = await getLegacyRiskScoreDashboards({
+          kibanaServer,
+        });
+
+        expect(legacyDashboardsAfterInit.length).to.eql(0);
       });
     });
 

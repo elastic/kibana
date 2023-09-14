@@ -51,6 +51,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
+  const refreshPageWithDelay = async () => {
+    /**
+     * Delay gives React a chance to finish
+     * running effects (like updating the URL) before
+     * refreshing the page.
+     */
+    await pageObjects.common.sleep(1000);
+    await browser.refresh();
+  };
+
   describe('Node Details', () => {
     describe('#With Asset Details', () => {
       before(async () => {
@@ -111,6 +121,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           }
         );
+
+        it('preserves selected date range between page reloads', async () => {
+          const start = moment.utc(START_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
+          const end = moment.utc(END_HOST_ALERTS_DATE).format(DATE_PICKER_FORMAT);
+
+          await pageObjects.timePicker.setAbsoluteRange(start, end);
+          await refreshPageWithDelay();
+
+          const datePickerValue = await pageObjects.timePicker.getTimeConfig();
+
+          expect(datePickerValue.start).to.equal(start);
+          expect(datePickerValue.end).to.equal(end);
+        });
       });
 
       describe('#Asset Type: host', () => {
@@ -119,6 +142,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
             END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
           );
+        });
+
+        it('preserves selected tab between page reloads', async () => {
+          await testSubjects.missingOrFail('infraAssetDetailsMetadataTable');
+          await pageObjects.assetDetails.clickMetadataTab();
+          await pageObjects.assetDetails.metadataTableExists();
+
+          await refreshPageWithDelay();
+
+          await pageObjects.assetDetails.metadataTableExists();
         });
 
         describe('Overview Tab', () => {
@@ -142,9 +175,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 8 charts in the Metrics section', async () => {
+          it('should render 12 charts in the Metrics section', async () => {
             const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(8);
+            expect(hosts.length).to.equal(12);
           });
 
           it('should show alerts', async () => {
@@ -181,11 +214,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickRemoveMetadataPin();
             expect(await pageObjects.assetDetails.metadataRemovePinExists()).to.be(false);
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getMetadataSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
+          });
         });
 
         describe('Processes Tab', () => {
           before(async () => {
             await pageObjects.assetDetails.clickProcessesTab();
+            await pageObjects.header.waitUntilLoadingHasFinished();
           });
 
           it('should render processes tab and with Total Value summary', async () => {
@@ -200,6 +248,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.getProcessesTableBody();
             await pageObjects.assetDetails.clickProcessesTableExpandButton();
           });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
+          });
+
+          it('shows an error message when typing invalid term into the search input', async () => {
+            const searchInput = await pageObjects.assetDetails.getProcessesSearchField();
+
+            await pageObjects.assetDetails.processesSearchInputErrorMissing();
+            await searchInput.type(',');
+            await pageObjects.assetDetails.processesSearchInputErrorExists();
+          });
         });
 
         describe('Logs Tab', () => {
@@ -209,6 +279,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should render logs tab', async () => {
             await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+          });
+
+          it('preserves search term between page reloads', async () => {
+            const searchInput = await pageObjects.assetDetails.getLogsSearchField();
+
+            expect(await searchInput.getAttribute('value')).to.be('');
+
+            await searchInput.type('test');
+            await refreshPageWithDelay();
+
+            await retry.try(async () => {
+              expect(await searchInput.getAttribute('value')).to.be('test');
+            });
+            await searchInput.clearValue();
           });
         });
 
@@ -254,6 +338,58 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const processValue = await processesTotalValue.getVisibleText();
             expect(processValue).to.eql('N/A');
           });
+        });
+      });
+    });
+
+    describe('#With Asset Details using nginx host', () => {
+      before(async () => {
+        await Promise.all([
+          esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+          kibanaServer.savedObjects.cleanStandardList(),
+        ]);
+        await browser.setWindowSize(1600, 1200);
+
+        await navigateToNodeDetails('demo-stack-nginx-01', 'demo-stack-nginx-01');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
+      describe('Overview Tab Nginx', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickOverviewTab();
+
+          await pageObjects.timePicker.setAbsoluteRange(
+            START_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT),
+            END_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT)
+          );
+        });
+
+        [
+          { metric: 'cpuUsage', value: '0.8%' },
+          { metric: 'normalizedLoad1m', value: '1.4%' },
+          { metric: 'memoryUsage', value: '18.0%' },
+          { metric: 'diskSpaceUsage', value: '17.5%' },
+        ].forEach(({ metric, value }) => {
+          it(`${metric} tile should show ${value}`, async () => {
+            await retry.tryForTime(3 * 1000, async () => {
+              const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+              expect(tileValue).to.eql(value);
+            });
+          });
+        });
+
+        it('should render 12 charts in the Metrics section', async () => {
+          const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
+          expect(hosts.length).to.equal(12);
+        });
+
+        it('should render 3 charts in the Nginx Metrics section', async () => {
+          const hosts = await pageObjects.assetDetails.getAssetDetailsNginxMetricsCharts();
+          expect(hosts.length).to.equal(3);
         });
       });
     });

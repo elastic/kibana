@@ -28,97 +28,114 @@ export const defaultNavigation: MlNodeDefinition = {
   icon: 'machineLearningApp',
   children: [
     {
-      link: 'ml:overview',
+      title: '',
+      id: 'root',
+      children: [
+        {
+          link: 'ml:overview',
+        },
+        {
+          link: 'ml:notifications',
+        },
+      ],
     },
     {
-      link: 'ml:notifications',
-    },
-    {
-      id: 'anomaly_detection',
       title: i18n.translate('defaultNavigation.ml.anomalyDetection', {
         defaultMessage: 'Anomaly Detection',
       }),
-      isGroupTitle: true,
-    },
-    {
-      title: i18n.translate('defaultNavigation.ml.jobs', {
-        defaultMessage: 'Jobs',
-      }),
-      link: 'ml:anomalyDetection',
-    },
-    {
-      link: 'ml:anomalyExplorer',
-    },
-    {
-      link: 'ml:singleMetricViewer',
-    },
-    {
-      link: 'ml:settings',
+      id: 'anomaly_detection',
+      children: [
+        {
+          title: i18n.translate('defaultNavigation.ml.jobs', {
+            defaultMessage: 'Jobs',
+          }),
+          link: 'ml:anomalyDetection',
+        },
+        {
+          link: 'ml:anomalyExplorer',
+        },
+        {
+          link: 'ml:singleMetricViewer',
+        },
+        {
+          link: 'ml:settings',
+        },
+      ],
     },
     {
       id: 'data_frame_analytics',
       title: i18n.translate('defaultNavigation.ml.dataFrameAnalytics', {
         defaultMessage: 'Data Frame Analytics',
       }),
-      isGroupTitle: true,
-    },
-    {
-      title: 'Jobs',
-      link: 'ml:dataFrameAnalytics',
-    },
-    {
-      link: 'ml:resultExplorer',
-    },
-    {
-      link: 'ml:analyticsMap',
+      children: [
+        {
+          title: 'Jobs',
+          link: 'ml:dataFrameAnalytics',
+        },
+        {
+          link: 'ml:resultExplorer',
+        },
+        {
+          link: 'ml:analyticsMap',
+        },
+      ],
     },
     {
       id: 'model_management',
       title: i18n.translate('defaultNavigation.ml.modelManagement', {
         defaultMessage: 'Model Management',
       }),
-      isGroupTitle: true,
-    },
-    {
-      link: 'ml:nodesOverview',
-    },
-    {
-      link: 'ml:nodes',
+      children: [
+        {
+          link: 'ml:nodesOverview',
+        },
+        {
+          link: 'ml:nodes',
+        },
+      ],
     },
     {
       id: 'data_visualizer',
       title: i18n.translate('defaultNavigation.ml.dataVisualizer', {
         defaultMessage: 'Data Visualizer',
       }),
-      isGroupTitle: true,
-    },
-    {
-      title: i18n.translate('defaultNavigation.ml.file', {
-        defaultMessage: 'File',
-      }),
-      link: 'ml:fileUpload',
-    },
-    {
-      title: i18n.translate('defaultNavigation.ml.dataView', {
-        defaultMessage: 'Data view',
-      }),
-      link: 'ml:indexDataVisualizer',
+      children: [
+        {
+          title: i18n.translate('defaultNavigation.ml.file', {
+            defaultMessage: 'File',
+          }),
+          link: 'ml:fileUpload',
+        },
+        {
+          title: i18n.translate('defaultNavigation.ml.dataView', {
+            defaultMessage: 'Data view',
+          }),
+          link: 'ml:indexDataVisualizer',
+        },
+        {
+          title: i18n.translate('defaultNavigation.ml.dataComparison', {
+            defaultMessage: 'Data comparison',
+          }),
+          link: 'ml:dataComparison',
+        },
+      ],
     },
     {
       id: 'aiops_labs',
       title: i18n.translate('defaultNavigation.ml.aiopsLabs', {
         defaultMessage: 'AIOps labs',
       }),
-      isGroupTitle: true,
-    },
-    {
-      link: 'ml:logRateAnalysis',
-    },
-    {
-      link: 'ml:logPatternAnalysis',
-    },
-    {
-      link: 'ml:changePointDetections',
+      children: [
+        {
+          link: 'ml:logRateAnalysis',
+        },
+        {
+          link: 'ml:logPatternAnalysis',
+        },
+        {
+          link: 'ml:changePointDetections',
+        },
+      ],
     },
   ],
 };

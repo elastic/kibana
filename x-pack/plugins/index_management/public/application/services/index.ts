@@ -24,12 +24,16 @@ export {
   useLoadIndexTemplates,
   simulateIndexTemplate,
   useLoadNodesPlugins,
+  loadIndex,
+  useLoadIndexMappings,
+  loadIndexStatistics,
+  useLoadIndexSettings,
+  createIndex,
 } from './api';
-
-export { useLoadIndex } from './indices_api';
 
 export { sortTable } from './sort_table';
 
 export { UiMetricService } from './ui_metric';
 export { HttpService } from './http';
 export { NotificationService } from './notification';
+export { documentationService } from './documentation';
