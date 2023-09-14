@@ -11,10 +11,16 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const testSubjects = getService('testSubjects');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('empty pages', function () {
     before(async () => {
+      await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
     });
 
     it('should show search specific empty page in discover', async () => {
