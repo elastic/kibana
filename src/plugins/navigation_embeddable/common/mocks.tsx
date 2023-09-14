@@ -7,6 +7,7 @@
  */
 
 import { buildMockDashboard } from '@kbn/dashboard-plugin/public/mocks';
+import { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
 import { NavigationEmbeddableByValueInput } from '../public/embeddable/types';
 import { NavigationEmbeddableFactoryDefinition } from '../public';
 import { NavigationEmbeddableAttributes } from './content_management';
@@ -39,20 +40,21 @@ export const mockNavigationEmbeddableInput = (
   ...(partial ?? {}),
 });
 
-export const mockNavigationEmbeddable = async (
-  explicitInput?: Partial<NavigationEmbeddableByValueInput>
-) => {
-  const dashboardContainer = buildMockDashboard();
+export const mockNavigationEmbeddable = async ({
+  explicitInput,
+  dashboardExplicitInput,
+}: {
+  explicitInput?: Partial<NavigationEmbeddableByValueInput>;
+  dashboardExplicitInput?: Partial<DashboardContainerInput>;
+}) => {
+  const dashboardContainer = buildMockDashboard({
+    overrides: dashboardExplicitInput,
+    savedObjectId: '123',
+  });
   const navigationEmbeddableFactoryStub = new NavigationEmbeddableFactoryDefinition();
 
   const navigationEmbeddable = await navigationEmbeddableFactoryStub.create(
-    {
-      id: 'mocked_links_panel',
-      attributes: {
-        title: 'mocked nav',
-      },
-      ...explicitInput,
-    },
+    mockNavigationEmbeddableInput(explicitInput),
     dashboardContainer
   );
 

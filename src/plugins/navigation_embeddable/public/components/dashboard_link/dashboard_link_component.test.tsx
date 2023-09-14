@@ -26,35 +26,49 @@ jest.mock('./dashboard_link_tools');
 describe('Dashboard link component', () => {
   const mockDashboards = [
     {
-      id: 'foo',
+      id: '456',
       status: 'success',
       attributes: {
-        title: 'my dashboard',
+        title: 'another dashboard',
         description: 'something awesome',
         panelsJSON: [],
         timeRestore: false,
-        version: 1,
+        version: '1',
+      },
+    },
+    {
+      id: '123',
+      status: 'success',
+      attributes: {
+        title: 'current dashboard',
+        description: '',
+        panelsJSON: [],
+        timeRestore: false,
+        version: '1',
       },
     },
   ];
 
   const defaultLinkInfo = {
-    destination: 'foo',
+    destination: '456',
     order: 1,
-    id: '123',
+    id: 'foo',
     type: 'dashboardLink' as const,
   };
 
   let navEmbeddable: NavigationEmbeddable;
   beforeEach(async () => {
+    window.open = jest.fn();
     (fetchDashboard as jest.Mock).mockResolvedValue(mockDashboards[0]);
     (getDashboardLocator as jest.Mock).mockResolvedValue({
       app: 'dashboard',
-      path: '/dashboardItem/123',
+      path: '/dashboardItem/456',
       state: {},
     });
     (getDashboardHref as jest.Mock).mockReturnValue('https://my-kibana.com/dashboard/123');
-    navEmbeddable = await mockNavigationEmbeddable();
+    navEmbeddable = await mockNavigationEmbeddable({
+      dashboardExplicitInput: mockDashboards[1].attributes,
+    });
   });
 
   afterEach(() => {
@@ -79,13 +93,13 @@ describe('Dashboard link component', () => {
       navEmbeddable,
     });
 
-    expect(screen.getByTestId('dashboardLink--123--loading')).toBeInTheDocument();
-    const link = await screen.findByTestId('dashboardLink--123');
-    expect(link).toBeInTheDocument();
+    expect(screen.getByTestId('dashboardLink--foo--loading')).toBeInTheDocument();
+    const link = await screen.findByTestId('dashboardLink--foo');
+    expect(link).toHaveTextContent('another dashboard');
     await userEvent.click(link);
     expect(coreServices.application.navigateToApp).toBeCalledTimes(1);
     expect(coreServices.application.navigateToApp).toBeCalledWith('dashboard', {
-      path: '/dashboardItem/123',
+      path: '/dashboardItem/456',
       state: {},
     });
   });
@@ -96,8 +110,7 @@ describe('Dashboard link component', () => {
         <DashboardLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
       </NavigationEmbeddableContext.Provider>
     );
-    const link = await screen.findByTestId('dashboardLink--123');
-    expect(link).toBeInTheDocument();
+    const link = await screen.findByTestId('dashboardLink--foo');
     const clickEvent = createEvent.click(link, { ctrlKey: true });
     const preventDefault = jest.spyOn(clickEvent, 'preventDefault');
     fireEvent(link, clickEvent);
@@ -105,7 +118,6 @@ describe('Dashboard link component', () => {
   });
 
   test('openInNewTab uses window.open, not navigateToApp', async () => {
-    window.open = jest.fn();
     const linkInfo = {
       ...defaultLinkInfo,
       options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
@@ -118,15 +130,14 @@ describe('Dashboard link component', () => {
 
     expect(fetchDashboard).toHaveBeenCalledWith(linkInfo.destination);
     expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, navEmbeddable });
-    const link = await screen.findByTestId('dashboardLink--123');
+    const link = await screen.findByTestId('dashboardLink--foo');
     expect(link).toBeInTheDocument();
     await userEvent.click(link);
     expect(coreServices.application.navigateToApp).toBeCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
-    (window.open as jest.Mock).mockRestore();
   });
 
-  test('linkOptions passed to getDashboardLocator', async () => {
+  test('passes linkOptions to getDashboardLocator', async () => {
     const linkInfo = {
       ...defaultLinkInfo,
       options: {
@@ -142,5 +153,69 @@ describe('Dashboard link component', () => {
       </NavigationEmbeddableContext.Provider>
     );
     expect(getDashboardLocator).toHaveBeenCalledWith({ link: linkInfo, navEmbeddable });
+  });
+
+  test('shows an error when fetchDashboard fails', async () => {
+    (fetchDashboard as jest.Mock).mockRejectedValue(new Error('some error'));
+    const linkInfo = {
+      ...defaultLinkInfo,
+      id: 'notfound',
+    };
+    render(
+      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
+        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
+      </NavigationEmbeddableContext.Provider>
+    );
+    const link = await screen.findByTestId('dashboardLink--notfound--error');
+    expect(link).toHaveTextContent('Error fetching dashboard');
+  });
+
+  test('current dashboard is not a clickable href', async () => {
+    const linkInfo = {
+      ...defaultLinkInfo,
+      destination: '123',
+      id: 'bar',
+    };
+    render(
+      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
+        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
+      </NavigationEmbeddableContext.Provider>
+    );
+    const link = await screen.findByTestId('dashboardLink--bar');
+    expect(link).toHaveTextContent('current dashboard');
+    await userEvent.click(link);
+    expect(coreServices.application.navigateToApp).toBeCalledTimes(0);
+    expect(window.open).toBeCalledTimes(0);
+  });
+
+  test('shows dashboard title and description in tooltip', async () => {
+    render(
+      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
+        <DashboardLinkComponent link={defaultLinkInfo} layout={NAV_VERTICAL_LAYOUT} />
+      </NavigationEmbeddableContext.Provider>
+    );
+    const link = await screen.findByTestId('dashboardLink--foo');
+    await userEvent.hover(link);
+    const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
+    expect(tooltip).toHaveTextContent('another dashboard'); // title
+    expect(tooltip).toHaveTextContent('something awesome'); // description
+  });
+
+  test('can override link label', async () => {
+    const label = 'my custom label';
+    const linkInfo = {
+      ...defaultLinkInfo,
+      label,
+    };
+    render(
+      <NavigationEmbeddableContext.Provider value={navEmbeddable}>
+        <DashboardLinkComponent link={linkInfo} layout={NAV_VERTICAL_LAYOUT} />
+      </NavigationEmbeddableContext.Provider>
+    );
+    const link = await screen.findByTestId('dashboardLink--foo');
+    expect(link).toHaveTextContent(label);
+    await userEvent.hover(link);
+    const tooltip = await screen.findByTestId('dashboardLink--foo--tooltip');
+    expect(tooltip).toHaveTextContent(label);
   });
 });

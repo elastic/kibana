@@ -160,6 +160,7 @@ export const DashboardLinkComponent = ({
         position: layout === NAV_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
         delay: 'long',
+        'data-test-subj': `dashboardLink--${link.id}--tooltip`,
       }}
       iconType={error ? 'warning' : undefined}
       iconProps={{ className: 'dashboardLinkIcon' }}
