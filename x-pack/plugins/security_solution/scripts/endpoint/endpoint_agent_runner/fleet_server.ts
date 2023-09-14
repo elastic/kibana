@@ -48,7 +48,7 @@ import type { FormattedAxiosError } from '../common/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
 import { isLocalhost } from '../common/is_localhost';
 import { dump } from './utils';
-import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
+import { fetchFleetServerUrl } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
 export const runFleetServerIfNeeded = async (): Promise<
@@ -203,62 +203,13 @@ export const startFleetServerWithDocker = async ({
 
   if (isElasticOnLocalhost) {
     esURL.hostname = localhostRealIp;
-    esUrlWithRealIp = esURL.toString();
+    // here?
+    esUrlWithRealIp = `https://elastic_serverless:changeme@127.0.0.1:9200/`;
+    // esUrlWithRealIp = esURL.toString();
   }
+  console.log({ esURL });
 
   try {
-    // const dockerArgs = [
-    //   'run',
-
-    //   '--restart',
-    //   'no',
-
-    //   '--add-host',
-    //   'host.docker.internal:host-gateway',
-
-    //   '--rm',
-
-    //   '--detach',
-
-    // '--name',
-    // containerName,
-
-    //   // The container's hostname will appear in Fleet when the agent enrolls
-    //   '--hostname',
-    //   containerName,
-
-    //   '--volume',
-    //   `${CA_CERT_PATH}:/ca.crt`,
-
-    //   '--env',
-    //   'FLEET_SERVER_ENABLE=1',
-
-    //   '--env',
-    //   `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
-
-    //   '--env',
-    //   `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
-
-    //   '--env',
-    //   'ELASTICSEARCH_HOSTS=https://host.docker.internal:9200',
-
-    //   '--env',
-    //   `FLEET_SERVER_ELASTICSEARCH_CA=/ca.crt`,
-
-    //   '--env',
-    //   'ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
-
-    //   '--env',
-    //   'ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
-
-    //   '--env',
-    //   `FLEET_SERVER_POLICY=${policyId}`,
-
-    //   '--publish',
-    //   `${fleetServerPort}:8220`,
-
-    //   `docker.elastic.co/observability-ci/fleet-server:latest`,
-    // ];
     const dockerArgs = [
       'run',
 
@@ -268,19 +219,20 @@ export const startFleetServerWithDocker = async ({
       '--add-host',
       'host.docker.internal:host-gateway',
 
-      //   '--network',
-      // 'elastic',
-
       // '--rm',
 
       '--detach',
 
-      // '--name',
-      // containerName,
+      '--name',
+      containerName,
 
       // The container's hostname will appear in Fleet when the agent enrolls
       '--hostname',
       containerName,
+
+      '--env',
+      // `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
+      `FLEET_SERVER_ELASTICSEARCH_HOST=https://host.docker.internal:9200`,
 
       '--volume',
       `${CA_CERT_PATH}:/ca.crt`,
@@ -306,11 +258,13 @@ export const startFleetServerWithDocker = async ({
       // `--env`,
       // `FLEET_CA=/kibana.crt`,
 
+      // '-p',
+      // `127.0.0.1:8220:8220`,
       '--env',
       'FLEET_SERVER_ENABLE=1',
 
-      // '--env',
-      // 'ELASTICSEARCH_USERNAME=elastic_serverless',
+      '--env',
+      'ELASTICSEARCH_USERNAME=elastic_serverless',
 
       '--env',
       // `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
@@ -318,6 +272,7 @@ export const startFleetServerWithDocker = async ({
 
       '--env',
       'FLEET_URL=https://host.docker.internal:8220',
+      // 'FLEET_URL=https://localhost:8220',
 
       '--env',
       `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
@@ -347,7 +302,13 @@ export const startFleetServerWithDocker = async ({
       'FLEET_SERVER_ELASTICSEARCH_HOSTS=https://host.docker.internal:9200',
 
       '--env',
+      'ELASTICSEARCH_HOSTS=https://host.docker.internal:9200',
+
+      '--env',
       `ELASTICSEARCH_CA=/elasticsearch.crt`,
+
+      '--env',
+      'ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
 
       '--env',
       'FLEET_SERVER_ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
@@ -362,14 +323,16 @@ export const startFleetServerWithDocker = async ({
       'FLEET_SERVER_ELASTICSEARCH_CA=/elasticsearch.crt',
       '--env',
       'FLEET_SERVER_ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
-
+      '--env',
+      'ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',
       '--env',
       `FLEET_SERVER_POLICY=${policyId}`,
 
       '--publish',
       `${fleetServerPort}:8220`,
 
-      `docker.elastic.co/cloud-release/elastic-agent-cloud:8.11.0-SNAPSHOT`,
+      `docker.elastic.co/observability-ci/fleet-server:latest`,
+      // `docker.elastic.co/cloud-release/elastic-agent-cloud:8.11.0-SNAPSHOT`,
       // `docker.elastic.co/beats/elastic-agent:8.10.0-SNAPSHOT`,
     ];
 
@@ -393,9 +356,11 @@ export const startFleetServerWithDocker = async ({
 
     containerId = (await execa('docker', dockerArgs)).stdout;
 
-    const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName, 120000);
+    console.log({ containerId, containerName });
+    // const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName, 120000);
 
-    log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
+    // console.log({ fleetServerAgent });
+    log.verbose(`Fleet server enrolled agent:\n${JSON.stringify('fleetServerAgent', null, 2)}`);
 
     log.info(`Done. Fleet Server is running and connected to Fleet.
   Container Name: ${containerName}
@@ -500,13 +465,13 @@ const addFleetServerHostToFleetSettings = async (
   try {
     const exitingFleetServerHostUrl = await fetchFleetServerUrl(kbnClient);
 
-    console.log({ exitingFleetServerHostUrl, fleetServerHostUrl });
     const newFleetHostEntry: PostFleetServerHostsRequest['body'] = {
       name: `Dev fleet server running on localhost`,
       host_urls: [fleetServerHostUrl],
       is_default: !exitingFleetServerHostUrl,
     };
 
+    console.log({ newFleetHostEntry });
     const { item } = await kbnClient
       .request<PostFleetServerHostsResponse>({
         method: 'POST',
@@ -540,6 +505,7 @@ ${chalk.bold(chalk.cyan('xpack.fleet.internal.fleetServerStandalone: false'))}
     log.verbose(item);
     log.indent(-4);
 
+    console.log({ item });
     return item;
   } catch (error) {
     console.log({ error });
