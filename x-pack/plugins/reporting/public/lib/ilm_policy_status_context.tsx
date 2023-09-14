@@ -27,7 +27,6 @@ export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSetting
   statefulSettings,
   children,
 }) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   if (statefulSettings) {
     const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
