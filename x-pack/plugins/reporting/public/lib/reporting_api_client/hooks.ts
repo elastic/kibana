@@ -9,9 +9,9 @@ import { INTERNAL_ROUTES } from '../../../common/constants';
 import { IlmPolicyStatusResponse } from '../../../common/types';
 import { useKibana, useRequest, UseRequestResponse } from '../../shared_imports';
 
-export const useCheckIlmPolicyStatus = (statefulSettings: boolean): UseRequestResponse<IlmPolicyStatusResponse>  => {
+export const useCheckIlmPolicyStatus = (): UseRequestResponse<IlmPolicyStatusResponse>  => {
   const {
     services: { http },
   } = useKibana();
-  return statefulSettings? useRequest(http, { path: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS, method: 'get' }) : useRequest(http, { path: '', method: 'get' });
+  return useRequest(http, { path: INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS, method: 'get' });
 };

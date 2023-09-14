@@ -9,6 +9,7 @@ import type { FunctionComponent } from 'react';
 import React, { createContext, useContext } from 'react';
 
 import { IlmPolicyStatusResponse } from '../../common/types';
+import { useKibana, useRequest } from '../shared_imports';
 
 import { useCheckIlmPolicyStatus } from './reporting_api_client';
 
@@ -22,14 +23,35 @@ interface ContextValue {
 
 const IlmPolicyStatusContext = createContext<undefined | ContextValue>(undefined);
 
-export const IlmPolicyStatusContextProvider: FunctionComponent<{statefulSettings: boolean}> = ({ statefulSettings, children }) => {
-  const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus(statefulSettings);
+export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSettings: boolean }> = ({
+  statefulSettings,
+  children,
+}) => {
+  if (statefulSettings) {
+    const { isLoading, data, resendRequest: recheckStatus } = useCheckIlmPolicyStatus();
 
-  return (
-    <IlmPolicyStatusContext.Provider value={{ isLoading, status: data?.status, recheckStatus }}>
-      {children}
-    </IlmPolicyStatusContext.Provider>
-  );
+    return (
+      <IlmPolicyStatusContext.Provider value={{ isLoading, status: data?.status, recheckStatus }}>
+        {children}
+      </IlmPolicyStatusContext.Provider>
+    );
+  } else {
+    const noIlm = () => {
+      const {
+        services: { http },
+      } = useKibana();
+
+      useRequest(http, { path: '', method: 'get' });
+    };
+
+    return (
+      <IlmPolicyStatusContext.Provider
+        value={{ isLoading: false, status: undefined, recheckStatus: noIlm }}
+      >
+        {children}
+      </IlmPolicyStatusContext.Provider>
+    );
+  }
 };
 
 export type UseIlmPolicyStatusReturn = ReturnType<typeof useIlmPolicyStatus>;
