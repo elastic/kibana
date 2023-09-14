@@ -8,7 +8,6 @@
 import React, { type ChangeEvent, FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
   EuiComboBox,
@@ -17,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiText,
@@ -281,7 +281,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
       {reindexingTaskId === undefined ? (
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiText>
                   <h4>
@@ -291,18 +291,25 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
                     />
                   </h4>
                 </EuiText>
+                <EuiText size="xs" color="GrayText">
+                  <EuiLink
+                    href={links.upgradeAssistant.reindexWithPipeline}
+                    target="_blank"
+                    external
+                  >
+                    {'Learn more.'}
+                  </EuiLink>
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonIcon
-                  href={links.upgradeAssistant.reindexWithPipeline}
-                  target="_blank"
-                  iconType="iInCircle"
-                  aria-label={i18n.translate(
-                    'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.linkToReindexingAriaLabel',
-                    {
-                      defaultMessage: 'Link to the reindexing documentation',
-                    }
-                  )}
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexingTooltip"
+                      defaultMessage="Reindexing copies data from the selected index to the specified destination index. Each of the documents is first processed by the created pipeline, resulting in the addition of the inference result to each document before it is indexed."
+                    />
+                  }
+                  position="right"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
