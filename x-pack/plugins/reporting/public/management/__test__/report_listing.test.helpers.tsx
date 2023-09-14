@@ -99,7 +99,7 @@ export const createTestBed = registerTestBed(
   }: Partial<Props> & TestDependencies) => (
     <KibanaContextProvider services={{ http, application, uiSettings }}>
       <InternalApiClientProvider apiClient={reportingAPIClient}>
-        <IlmPolicyStatusContextProvider>
+        <IlmPolicyStatusContextProvider statefulSettings={mockConfig.statefulSettings.enabled}>
           <ReportListing
             license$={l$}
             config={mockConfig}

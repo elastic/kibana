@@ -36,6 +36,7 @@ export const IlmPolicyStatusContextProvider: FunctionComponent<{ statefulSetting
         {children}
       </IlmPolicyStatusContext.Provider>
     );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
   } else {
     const useNoIlm = () => {
       const {
