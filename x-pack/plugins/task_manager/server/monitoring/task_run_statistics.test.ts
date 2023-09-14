@@ -905,6 +905,7 @@ const mockTaskRunEvent = (
       persistence:
         persistence ?? (task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring),
       result,
+      isExpired: false,
     }),
     timing
   );

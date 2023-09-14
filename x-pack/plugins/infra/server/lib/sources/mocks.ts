@@ -10,6 +10,7 @@ import type { InfraSources } from './sources';
 type IInfraSources = Pick<InfraSources, keyof InfraSources>;
 
 export const createInfraSourcesMock = (): jest.Mocked<IInfraSources> => ({
+  getInfraSourceConfiguration: jest.fn(),
   getSourceConfiguration: jest.fn(),
   createSourceConfiguration: jest.fn(),
   deleteSourceConfiguration: jest.fn(),

@@ -11,6 +11,7 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.10.0>>
+* <<release-notes-8.9.2>>
 * <<release-notes-8.9.1>>
 * <<release-notes-8.9.0>>
 * <<release-notes-8.8.2>>
@@ -50,8 +51,6 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.10.0]]
 == {kib} 8.10.0
 
-coming::[8.10.0]
-
 For information about the {kib} 8.10.0 release, review the following information.
 
 [float]
@@ -63,7 +62,7 @@ Before you upgrade to 8.10.0, review the breaking changes, then mitigate the imp
 
 [discrete]
 [[breaking-162665]]
-.New summary search capabilities 
+.New summary search capabilities
 [%collapsible]
 ====
 *Details* +
@@ -75,7 +74,7 @@ New summary search capabilities introduce breaking changes in various places, an
 
 If some SLOs have been installed in a prior version at 8.10, the user will need to remove them manually from the UI, or by deleting the Saved Object and the associated Transform.
 ====
-      
+
 [discrete]
 [[breaking-162506]]
 .Get case metrics APIs now internal
@@ -84,7 +83,7 @@ If some SLOs have been installed in a prior version at 8.10, the user will need 
 *Details* +
 The get case metrics APIs are now internal. For more information, refer to ({kibana-pull}162506[#162506]).
 ====
-      
+
 [discrete]
 [[breaking-162492]]
 .Case limits
@@ -106,7 +105,7 @@ For example:
 ////
 For the full list, refer to {kib-issue}146945[#146945].
 ====
-      
+
 [discrete]
 [[breaking-159041]]
 .`addProcessorDefinition` is removed
@@ -115,7 +114,7 @@ For the full list, refer to {kib-issue}146945[#146945].
 *Details* +
 The function `addProcessorDefinition` is removed from the Console plugin start contract (server side). For more information, refer to ({kibana-pull}159041[#159041]).
 ====
-      
+
 [float]
 [[deprecations-8.10.0]]
 === Deprecations
@@ -143,8 +142,8 @@ The following rule action variables have been deprecated; use the recommended va
 * tags (rule.tags)
 
 For more information, refer to ({kibana-pull}161136[#161136]).
-====  
-      
+====
+
 [float]
 [[features-8.10.0]]
 === Features
@@ -184,7 +183,8 @@ Observability::
 
 For more information about the features introduced in 8.10.0, refer to <<whats-new,What's new in 8.10>>.
 
-[[enhancements-and-bug-fixes-v8.10.0]]
+[discrete]
+[[enhancements-and-bug-fixes-v8.10.0-revised]]
 === Enhancements and bug fixes
 
 For detailed information about the 8.10.0 release, review the enhancements and bug fixes.
@@ -310,10 +310,44 @@ Reporting::
 Uptime::
 * Fixes auto-expand feature for failed step detail ({kibana-pull}162747[#162747]).
 
+[[release-notes-8.9.2]]
+== {kib} 8.9.2
+
+Review the following information about the {kib} 8.9.2 release.
+
+[float]
+[[enhancement-v8.9.2]]
+=== Enhancements
+
+Fleet::
+* Adds the configuration setting `xpack.fleet.packageVerification.gpgKeyPath` as an environment variable in the {kib} container ({kibana-pull}163783[#163783]).
+
+[float]
+[[fixes-v8.9.2]]
+=== Bug Fixes
+
+Dashboard::
+* Fixes missing state on short URLs could be lost on an alias match redirect ({kibana-pull}163658[#163658]).
+* Fixes 'Download CSV' returning no data when panel has custom time range outside the time range of the global time picker ({kibana-pull}163887[#163887]).
+* Fixes **Dashboard** getting stuck at loading in {kib} when Controls is used and mapping changed from integer to keyword ({kibana-pull}163529[#163529]).
+Elastic Security::
+For the Elastic Security 8.9.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Allow removing temporary data view from event annotation group in *Lens* ({kibana-pull}163976[#163976]).
+Machine Learning::
+* Anomaly detection wizard: ensure custom URLs test functionality works as expected ({kibana-pull}165055[#165055]).
+* Fixes anomaly detection module manifest queries for {kib} sample data sets, so cold and frozen tiers are not queried ({kibana-pull}164332[#164332]).
+Management::
+* Transforms: Fixes privileges check ({kibana-pull}163687[#163687]).
+Operations::
+* Fixes an issue where {kib} did not start on CentOS/RHEL 7 ({kibana-pull}165151[#165151]).
+Reporting::
+* Allow custom roles to use image reporting in **Dashboard** ({kibana-pull}163873[#163873]).
+
 [[release-notes-8.9.1]]
 == {kib} 8.9.1
 
-Review the following information about the {kib} 8.9.1 release. 
+Review the following information about the {kib} 8.9.1 release.
 
 [float]
 [[breaking-changes-8.9.1]]
@@ -361,6 +395,28 @@ Discover::
 For information about the {kib} 8.9.0 release, review the following information.
 
 [float]
+[[known-issues-8.9.0]]
+=== Known issues
+
+// tag::known-issue-160116[]
+[discrete]
+.Changes to Lens visualizations do not appear in the saved object.
+[%collapsible]
+====
+*Details* +
+Changes to Lens visualizations do not appear in the saved object. 
+
+*Impact* +
+When you remove fields from Lens visualizations, then save your changes, the removed fields continue to appear in the Lens visualization saved objects. 
+For example, when you remove runtime fields from a Lens visualization and {kib}, then inspect the Lens visualization saved object, the runtime fields continue to appear and an error message appears.
+
+*Workaround* +
+In 8.10.0, we are addressing this issue by merging the existing and changed saved object instead of replacing the saved object.
+
+====
+// end::known-issue-161249[]
+
+[float]
 [[breaking-changes-8.9.0]]
 === Breaking changes
 
@@ -376,7 +432,7 @@ Before you upgrade to 8.9.0, review the breaking changes, then mitigate the impa
 The Uptime app now gets hidden from the interface when it doesn't have any data for more than a week. If you have a standalone Heartbeat pushing data to Elasticsearch, the Uptime app is considered active. You can disable this automatic behavior from the advanced settings in Kibana using the **Always show legacy Uptime app** option.
 For synthetic monitoring, we now recommend to use the new Synthetics app. For more information, refer to {kibana-pull}159118[#159118]
 ====
-      
+
 [discrete]
 [[breaking-159012]]
 .Remove synthetics pattern from Uptime settings
@@ -393,7 +449,7 @@ Data from browser monitors and monitors of all types created within the Syntheti
 The following functionality is deprecated in 8.9.0, and will be removed in 9.0.0.
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
 you make the necessary updates after you upgrade to 8.9.0.
-      
+
 [discrete]
 [[deprecation-156455]]
 .Hide ability to create legacy input controls
@@ -402,7 +458,7 @@ you make the necessary updates after you upgrade to 8.9.0.
 *Details* +
 The option to create legacy input controls when creating a new visualization is hidden. For more information, refer to {kibana-pull}156455[#156455]
 ====
-      
+
 [discrete]
 [[deprecation-155503]]
 .Remove legacy field stats
@@ -411,7 +467,7 @@ The option to create legacy input controls when creating a new visualization is 
 *Details* +
 Legacy felid stats that were previously shown within a popover have been removed. For more information, refer to {kibana-pull}155503[#155503]
 ====
-      
+
 [float]
 [[features-8.9.0]]
 === Features
@@ -621,14 +677,14 @@ Review the following information about the {kib} 8.8.2 release.
 [%collapsible]
 ====
 *Details* +
-Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed. 
+Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed.
 This action triggers a lot of queries to the Elastic Package Registry (EPR) to fetch integration packages.  As a result,
-there is an increase in Kibana's resident memory usage (RSS). 
+there is an increase in Kibana's resident memory usage (RSS).
 
 *Impact* +
-Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can 
+Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can
 cause Kibana to run out of memory during an upgrade.  For example, we have observed 1GB Kibana instances run
-out of memory during an upgrade when there were 20 agent policies with 5 integrations in each. 
+out of memory during an upgrade when there were 20 agent policies with 5 integrations in each.
 
 *Workaround* +
 Two workaround options are available:
@@ -704,14 +760,14 @@ Review the following information about the {kib} 8.8.1 release.
 [%collapsible]
 ====
 *Details* +
-Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed. 
+Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed.
 This action triggers a lot of queries to the Elastic Package Registry (EPR) to fetch integration packages.  As a result,
-there is an increase in Kibana's resident memory usage (RSS). 
+there is an increase in Kibana's resident memory usage (RSS).
 
 *Impact* +
-Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can 
+Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can
 cause Kibana to run out of memory during an upgrade.  For example, we have observed 1GB Kibana instances run
-out of memory during an upgrade when there were 20 agent policies with 5 integrations in each. 
+out of memory during an upgrade when there were 20 agent policies with 5 integrations in each.
 
 *Workaround* +
 Two workaround options are available:
@@ -822,14 +878,14 @@ Review the following information about the {kib} 8.8.0 release.
 [%collapsible]
 ====
 *Details* +
-Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed. 
+Due to a schema version update, during {fleet} setup in 8.8.x, all agent policies are being queried and deployed.
 This action triggers a lot of queries to the Elastic Package Registry (EPR) to fetch integration packages.  As a result,
-there is an increase in Kibana's resident memory usage (RSS). 
+there is an increase in Kibana's resident memory usage (RSS).
 
 *Impact* +
-Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can 
+Because the default batch size of `100` for schema version upgrade of {fleet} agent policies is too high, this can
 cause Kibana to run out of memory during an upgrade.  For example, we have observed 1GB Kibana instances run
-out of memory during an upgrade when there were 20 agent policies with 5 integrations in each. 
+out of memory during an upgrade when there were 20 agent policies with 5 integrations in each.
 
 *Workaround* +
 Two workaround options are available:

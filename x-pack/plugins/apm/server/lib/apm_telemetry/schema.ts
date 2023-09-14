@@ -931,7 +931,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           type: 'long',
           _meta: {
             description:
-              'Total number of shards for span and trasnaction indices',
+              'Total number of shards for span and transaction indices',
           },
         },
       },
@@ -941,8 +941,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
             count: {
               type: 'long',
               _meta: {
-                description:
-                  'Total number of transaction and span documents overall',
+                description: 'Total number of metric documents overall',
               },
             },
           },
@@ -950,7 +949,8 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
             size_in_bytes: {
               type: 'long',
               _meta: {
-                description: 'Size of the index in byte units overall.',
+                description:
+                  'Size of the metric indicess in byte units overall.',
               },
             },
           },
@@ -1006,6 +1006,22 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
     },
   },
   per_service: { type: 'array', items: { ...apmPerServiceSchema } },
+  top_traces: {
+    max: {
+      type: 'long',
+      _meta: {
+        description:
+          'Max number of documents in top 100 traces withing the last day',
+      },
+    },
+    median: {
+      type: 'long',
+      _meta: {
+        description:
+          'Median number of documents in top 100 traces within the last day',
+      },
+    },
+  },
   tasks: {
     aggregated_transactions: {
       took: {
@@ -1165,6 +1181,17 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           _meta: {
             description:
               'Execution time in milliseconds for the "per_service" task',
+          },
+        },
+      },
+    },
+    top_traces: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "top_traces" task',
           },
         },
       },

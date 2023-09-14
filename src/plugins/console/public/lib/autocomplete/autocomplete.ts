@@ -967,7 +967,7 @@ export default function ({
   }
 
   function addMethodAutoCompleteSetToContext(context: AutoCompleteContext) {
-    context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'].map((m, i) => ({
+    context.autoCompleteSet = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'].map((m, i) => ({
       name: m,
       score: -i,
       meta: i18n.translate('console.autocomplete.addMethodMetaText', { defaultMessage: 'method' }),
@@ -1053,6 +1053,12 @@ export default function ({
     if (!ret.bodyTokenPath) {
       // zero length tokenPath is true
 
+      return context;
+    }
+
+    const t = editor.getTokenAt(pos);
+    if (t && t.type === 'punctuation.end_triple_quote' && pos.column !== t.position.column + 3) {
+      // skip to populate context as the current position is not on the edge of end_triple_quote
       return context;
     }
 

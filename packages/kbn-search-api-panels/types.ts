@@ -24,26 +24,28 @@ export interface LanguageDefinitionSnippetArguments {
   apiKey: string;
   indexName?: string;
   cloudId?: string;
+  ingestPipeline?: string;
+  extraIngestDocumentValues?: Record<string, boolean>;
 }
 
 type CodeSnippet = string | ((args: LanguageDefinitionSnippetArguments) => string);
 export interface LanguageDefinition {
+  name: string;
+  id: Languages;
+  iconType: string;
+  docLink?: string;
+  configureClient?: CodeSnippet;
+  ingestData?: CodeSnippet;
+  ingestDataIndex?: CodeSnippet;
+  installClient?: string;
+  buildSearchQuery?: CodeSnippet;
+  testConnection?: CodeSnippet;
   advancedConfig?: string;
   apiReference?: string;
   basicConfig?: string;
-  configureClient: CodeSnippet;
-  docLink: string;
   github?: {
     link: string;
     label: string;
   };
-  iconType: string;
-  id: Languages;
-  ingestData: CodeSnippet;
-  ingestDataIndex: CodeSnippet;
-  installClient: string;
   languageStyling?: string;
-  name: string;
-  buildSearchQuery: CodeSnippet;
-  testConnection: CodeSnippet;
 }

@@ -43,25 +43,30 @@ paths:
               schema:
                 $ref: './read_packs.schema.yaml#/components/schemas/SuccessResponse'
     delete:
-          summary: Delete packs
-          parameters:
-            - $ref: './delete_packs.schema.yaml#/components/parameters/DeletePacksRequestQueryParameter'
-          responses:
-            '200':
-              description: OK
-              content:
-                application/json:
-                  schema:
-                    $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
+      summary: Delete packs
+      parameters:
+        - $ref: './delete_packs.schema.yaml#/components/parameters/DeletePacksRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './find_packs.schema.yaml#/components/schemas/SuccessResponse'
     put:
-          summary: Update packs
-          parameters:
-            - $ref: './update_packs.schema.yaml#/components/parameters/UpdatePacksRequestQueryBody'
-            - $ref: './update_packs.schema.yaml#/components/parameters/UpdatePacksRequestQueryParameter'
-          responses:
-            '200':
-              description: OK
-              content:
-                application/json:
-                  schema:
-                    $ref: './update_packs.schema.yaml#/components/schemas/SuccessResponse'
+      summary: Update packs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
+      parameters:
+        - $ref: './update_packs.schema.yaml#/components/parameters/UpdatePacksRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './update_packs.schema.yaml#/components/schemas/SuccessResponse'

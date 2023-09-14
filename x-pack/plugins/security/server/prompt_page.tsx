@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiProvider,
-} from '@elastic/eui';
+import 'css.escape'; // Polyfill required to render `EuiPageTemplate` server-side
+import { EuiPageTemplate, EuiProvider } from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconWarning } from '@elastic/eui/lib/components/icon/assets/warning';
 // @ts-expect-error no definitions in component folder
@@ -61,19 +56,15 @@ export function PromptPage({
   const content = (
     <I18nProvider>
       <EuiProvider colorMode="light" cache={emotionCache}>
-        <EuiPage paddingSize="none" style={{ minHeight: '100vh' }} data-test-subj="promptPage">
-          <EuiPageBody>
-            <EuiPageContent verticalPosition="center" horizontalPosition="center">
-              <EuiEmptyPrompt
-                iconType="warning"
-                iconColor="danger"
-                title={<h2>{title}</h2>}
-                body={body}
-                actions={actions}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+        <EuiPageTemplate data-test-subj="promptPage">
+          <EuiPageTemplate.EmptyPrompt
+            iconType="warning"
+            iconColor="danger"
+            title={<h2>{title}</h2>}
+            body={body}
+            actions={actions}
+          />
+        </EuiPageTemplate>
       </EuiProvider>
     </I18nProvider>
   );
@@ -88,8 +79,6 @@ export function PromptPage({
   const styleSheetPaths = [
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
     `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename('v8')}`,
-    `${basePath.serverBasePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-    `${basePath.serverBasePath}/ui/legacy_light_theme.css`,
   ];
 
   return (
