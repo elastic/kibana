@@ -17,23 +17,28 @@ export type CasesSupportedOperations = typeof allOperations[number];
 // x-pack/plugins/cases/server/authorization/index.ts
 
 const pushOperations = ['pushCase'] as const;
-const createOperations = ['createCase', 'createComment', 'createConfiguration'] as const;
+const createOperations = ['createCase', 'createComment'] as const;
 const readOperations = [
   'getCase',
   'getComment',
   'getTags',
   'getReporters',
   'getUserActions',
+] as const;
+const updateOperations = ['updateCase', 'updateComment'] as const;
+const deleteOperations = ['deleteCase', 'deleteComment'] as const;
+const configureOperations = [
+  'createConfiguration',
+  'updateConfiguration',
   'findConfigurations',
 ] as const;
-const updateOperations = ['updateCase', 'updateComment', 'updateConfiguration'] as const;
-const deleteOperations = ['deleteCase', 'deleteComment'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
   ...readOperations,
   ...updateOperations,
   ...deleteOperations,
+  ...configureOperations,
 ] as const;
 
 export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
@@ -57,6 +62,7 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(readOperations, privilegeDefinition.cases?.read),
       ...getCasesPrivilege(updateOperations, privilegeDefinition.cases?.update),
       ...getCasesPrivilege(deleteOperations, privilegeDefinition.cases?.delete),
+      ...getCasesPrivilege(deleteOperations, privilegeDefinition.cases?.configure),
     ]);
   }
 }

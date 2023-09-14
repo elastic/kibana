@@ -100,6 +100,33 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
           },
         ],
       },
+      {
+        name: i18n.translate('xpack.cases.features.configureSubFeatureName', {
+          defaultMessage: 'Configure',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'cases_configure',
+                name: i18n.translate('xpack.cases.features.configureSubFeatureDetails', {
+                  defaultMessage: 'Configure cases',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [...filesSavedObjectTypes],
+                  read: [...filesSavedObjectTypes],
+                },
+                cases: {
+                  configure: [APP_ID],
+                },
+                ui: capabilities.configure,
+              },
+            ],
+          },
+        ],
+      },
     ],
   };
 };

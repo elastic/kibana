@@ -5,16 +5,23 @@ Array [
   "cases:observability/pushCase",
   "cases:observability/createCase",
   "cases:observability/createComment",
-  "cases:observability/createConfiguration",
   "cases:observability/getCase",
   "cases:observability/getComment",
   "cases:observability/getTags",
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
-  "cases:observability/findConfigurations",
   "cases:observability/updateCase",
   "cases:observability/updateComment",
+  "cases:observability/deleteCase",
+  "cases:observability/deleteComment",
+  "cases:observability/createConfiguration",
   "cases:observability/updateConfiguration",
+  "cases:observability/findConfigurations",
+]
+`;
+
+exports[`cases feature_privilege_builder within feature grants configure privileges under feature with id observability 1`] = `
+Array [
   "cases:observability/deleteCase",
   "cases:observability/deleteComment",
 ]
@@ -24,7 +31,6 @@ exports[`cases feature_privilege_builder within feature grants create privileges
 Array [
   "cases:securitySolution/createCase",
   "cases:securitySolution/createComment",
-  "cases:securitySolution/createConfiguration",
 ]
 `;
 
@@ -48,7 +54,6 @@ Array [
   "cases:observability/getTags",
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
-  "cases:observability/findConfigurations",
 ]
 `;
 
@@ -56,6 +61,5 @@ exports[`cases feature_privilege_builder within feature grants update privileges
 Array [
   "cases:observability/updateCase",
   "cases:observability/updateComment",
-  "cases:observability/updateConfiguration",
 ]
 `;
