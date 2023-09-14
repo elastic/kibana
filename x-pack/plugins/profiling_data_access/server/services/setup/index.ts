@@ -36,7 +36,7 @@ export interface ProfilingSetupOptions {
   isCloudEnabled: boolean;
 }
 
-export function createHasSetupService({
+export function createGetStatusService({
   createProfilingEsClient,
   deps,
   logger,

@@ -48,15 +48,13 @@ export function registerSetupRoute({
         const esClient = await getClient(context);
         const core = await context.core;
 
-        const profilingStatusCheck = await dependencies.start.profilingDataAccess.services.hasSetup(
-          {
-            esClient,
-            soClient: core.savedObjects.client,
-            spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
-          }
-        );
+        const profilingStatus = await dependencies.start.profilingDataAccess.services.getStatus({
+          esClient,
+          soClient: core.savedObjects.client,
+          spaceId: dependencies.setup.spaces?.spacesService?.getSpaceId(request),
+        });
 
-        return response.ok({ body: profilingStatusCheck });
+        return response.ok({ body: profilingStatus });
       } catch (error) {
         return handleRouteHandlerError({
           error,
