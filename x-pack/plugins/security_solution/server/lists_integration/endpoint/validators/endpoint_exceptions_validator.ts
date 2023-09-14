@@ -9,11 +9,12 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { BaseValidator } from './base_validator';
 
 export class EndpointExceptionsValidator extends BaseValidator {
   static isEndpointException(item: { listId: string }): boolean {
-    return item.listId === 'endpoint_list';
+    return item.listId === ENDPOINT_LIST_ID;
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
