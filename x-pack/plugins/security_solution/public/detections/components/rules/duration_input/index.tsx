@@ -25,7 +25,6 @@ interface DurationInputProps {
   minimumValue?: number;
   isDisabled: boolean;
   durationUnitOptions?: Array<{ value: 's' | 'm' | 'h' | 'd'; text: string }>;
-  label?: string;
 }
 
 const getNumberFromUserInput = (input: string, minimumValue = 0): number | undefined => {
@@ -86,7 +85,6 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
     { value: 'm', text: I18n.MINUTES },
     { value: 'h', text: I18n.HOURS },
   ],
-  label,
 }: DurationInputProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(durationValueField);
   const { value: durationValue, setValue: setDurationValue } = durationValueField;
@@ -111,7 +109,7 @@ const DurationInputComponent: React.FC<DurationInputProps> = ({
   const rest = { disabled: isDisabled };
 
   return (
-    <StyledEuiFormRow error={errorMessage} isInvalid={isInvalid} label={label}>
+    <StyledEuiFormRow error={errorMessage} isInvalid={isInvalid}>
       <EuiFormControlLayout
         append={
           <MyEuiSelect
