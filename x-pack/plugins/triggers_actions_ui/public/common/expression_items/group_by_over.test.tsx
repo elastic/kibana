@@ -52,14 +52,14 @@ describe('group by expression', () => {
             },
           ]}
           termField="notavailable"
-          groupBy={'all'}
+          groupBy={'top'}
           onChangeSelectedGroupBy={() => {}}
           onChangeSelectedTermSize={() => {}}
           onChangeSelectedTermField={onChangeSelectedTermField}
         />
       </IntlProvider>
     );
-
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
     expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
   });
 
@@ -86,8 +86,36 @@ describe('group by expression', () => {
         />
       </IntlProvider>
     );
-
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
     expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
+  });
+
+  it('clears selected agg field if groupBy field is all', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'test',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termField={['test']}
+          groupBy={'all'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(undefined);
   });
 
   it('calls onChangeSelectedTermField when a termField is selected', async () => {

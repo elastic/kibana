@@ -102,26 +102,22 @@ export const GroupByExpression = ({
     useState<GroupByOverFieldOption[]>(initialTermFieldOptions);
 
   useEffect(() => {
-    // if current field set doesn't contain selected field, clear selection
-    if (Array.isArray(termField)) {
-      const hasUnknownField = termField.some(
-        (term) => !fields.some((field) => field.name === term)
-      );
-      if (hasUnknownField) {
-        setSelectedTermsFieldsOptions([]);
-        onChangeSelectedTermField('');
-      }
-    } else {
-      if (
-        termField &&
-        termField.length > 0 &&
-        !fields.find((field: FieldOption) => field.name === termField)
-      ) {
-        setSelectedTermsFieldsOptions([]);
-        onChangeSelectedTermField('');
-      }
+    if (groupBy === builtInGroupByTypes.all.value) {
+      setSelectedTermsFieldsOptions([]);
+      onChangeSelectedTermField(undefined);
     }
-  }, [termField, fields, onChangeSelectedTermField]);
+  }, [groupBy, onChangeSelectedTermField]);
+
+  useEffect(() => {
+    // if current field set doesn't contain selected field, clear selection
+    const hasUnknownField = selectedTermsFieldsOptions.some(
+      (fieldOption) => !fields.some((field) => field.name === fieldOption.label)
+    );
+    if (hasUnknownField) {
+      setSelectedTermsFieldsOptions([]);
+      onChangeSelectedTermField('');
+    }
+  }, [selectedTermsFieldsOptions, fields, onChangeSelectedTermField]);
 
   return (
     <EuiPopover
