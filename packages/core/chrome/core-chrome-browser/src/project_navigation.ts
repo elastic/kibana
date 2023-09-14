@@ -5,8 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
+import { EuiAccordionProps } from '@elastic/eui';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -90,6 +92,8 @@ export interface ChromeProjectNavigationNode {
    * @default 'visible'
    */
   breadcrumbStatus?: 'hidden' | 'visible';
+
+  accordionProps?: Partial<EuiAccordionProps>;
 }
 
 /** @public */

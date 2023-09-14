@@ -25,6 +25,10 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
+      accordionProps: {
+        forceState: 'open',
+        arrowProps: { css: { display: 'none' } },
+      },
       breadcrumbStatus: 'hidden',
       children: [
         {

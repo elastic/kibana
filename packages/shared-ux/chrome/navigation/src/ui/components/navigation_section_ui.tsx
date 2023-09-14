@@ -162,6 +162,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
           setIsCollapsed(!isOpen);
           setDoCollapseFromActiveState(false);
         },
+        ...navNode.accordionProps,
       }}
       forceState={isCollapsed ? 'closed' : 'open'}
       data-test-subj={`nav-bucket-${id}`}

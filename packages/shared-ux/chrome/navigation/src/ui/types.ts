@@ -12,6 +12,7 @@ import type {
   ChromeProjectNavigationNode,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
+import type { EuiAccordionProps } from '@elastic/eui';
 
 import type { RecentlyAccessedProps } from './components';
 
@@ -101,6 +102,10 @@ export interface GroupDefinition<
    * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
    */
   defaultIsCollapsed?: boolean;
+  /*
+   * Pass props to the EUI accordion component used to represent a nav group
+   */
+  accordionProps?: Partial<EuiAccordionProps>;
   preset?: NavigationGroupPreset;
 }
 
