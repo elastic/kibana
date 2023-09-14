@@ -18,7 +18,7 @@ export interface UseHighlightedFieldsParams {
   /**
    * An array of field objects with category and value
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * An array of fields user has selected to highlight, defined on rule
    */
@@ -45,8 +45,6 @@ export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
   investigationFields,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult => {
-  if (!dataFormattedForFieldBrowser) return {};
-
   const eventCategories = getEventCategoriesFromData(dataFormattedForFieldBrowser);
 
   const eventCodeField = find(

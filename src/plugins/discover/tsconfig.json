@@ -71,7 +71,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
-    "@kbn/no-data-page-plugin"
+    "@kbn/no-data-page-plugin",
+    "@kbn/global-search-plugin"
   ],
   "exclude": [
     "target/**/*"

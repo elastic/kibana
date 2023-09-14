@@ -73,10 +73,6 @@ export const Description: FC = () => {
     [ruleName, openRulePreview, ruleId]
   );
 
-  if (!dataFormattedForFieldBrowser) {
-    return null;
-  }
-
   const hasRuleDescription = ruleDescription && ruleDescription.length > 0;
 
   return (
