@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { initSampleDataSets } from './sample_data_sets';
+export { MetricsDataClient } from './client';

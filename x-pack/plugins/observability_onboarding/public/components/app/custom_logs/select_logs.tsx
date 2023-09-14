@@ -25,9 +25,9 @@ import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
-} from '../../../shared/step_panel';
+} from '../../shared/step_panel';
 import { useWizard } from '.';
-import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
+import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 
 export function SelectLogs() {
   const { navigateToKibanaUrl, navigateToAppUrl } = useKibanaNavigation();
