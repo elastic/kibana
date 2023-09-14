@@ -13,18 +13,19 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { getOverlays } from '../services';
-import { ShardFailureModal } from './shard_failure_modal';
-import type { ShardFailureRequest } from './shard_failure_types';
-import './_shard_failure_modal.scss';
+import type { SearchRequest } from '..';
+import { IncompleteResultsModal } from './incomplete_results_modal';
+import type { SearchResponseIncompleteWarning } from '../search';
+import './_incomplete_results_modal.scss';
 
 // @internal
-export interface ShardFailureOpenModalButtonProps {
+export interface OpenIncompleteResultsModalButtonProps {
   theme: ThemeServiceStart;
-  title: string;
+  warning: SearchResponseIncompleteWarning;
   size?: EuiButtonProps['size'];
   color?: EuiButtonProps['color'];
   getRequestMeta: () => {
-    request: ShardFailureRequest;
+    request: SearchRequest;
     response: estypes.SearchResponse<any>;
   };
   isButtonEmpty?: boolean;
@@ -32,31 +33,31 @@ export interface ShardFailureOpenModalButtonProps {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default function ShardFailureOpenModalButton({
+export default function OpenIncompleteResultsModalButton({
   getRequestMeta,
   theme,
-  title,
+  warning,
   size = 's',
   color = 'warning',
   isButtonEmpty = false,
-}: ShardFailureOpenModalButtonProps) {
+}: OpenIncompleteResultsModalButtonProps) {
   const onClick = useCallback(() => {
     const { request, response } = getRequestMeta();
     const modal = getOverlays().openModal(
       toMountPoint(
-        <ShardFailureModal
+        <IncompleteResultsModal
           request={request}
           response={response}
-          title={title}
+          warning={warning}
           onClose={() => modal.close()}
         />,
         { theme$: theme.theme$ }
       ),
       {
-        className: 'shardFailureModal',
+        className: 'incompleteResultsModal',
       }
     );
-  }, [getRequestMeta, theme.theme$, title]);
+  }, [getRequestMeta, theme.theme$, warning]);
 
   const Component = isButtonEmpty ? EuiLink : EuiButton;
 
@@ -65,11 +66,11 @@ export default function ShardFailureOpenModalButton({
       color={color}
       size={size}
       onClick={onClick}
-      data-test-subj="openShardFailureModalBtn"
+      data-test-subj="openIncompleteResultsModalBtn"
     >
       <FormattedMessage
-        id="data.search.searchSource.fetch.shardsFailedModal.showDetails"
-        defaultMessage="Show details"
+        id="data.search.searchSource.fetch.incompleteResultsModal.viewDetails"
+        defaultMessage="View details"
         description="Open the modal to show details"
       />
     </Component>

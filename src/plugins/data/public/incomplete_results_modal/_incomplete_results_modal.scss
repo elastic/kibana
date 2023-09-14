@@ -1,5 +1,5 @@
 // set width and height to fixed values to prevent resizing when you switch tabs
-.shardFailureModal {
+.incompleteResultsModal {
   min-height: 75vh;
   width: 768px;
 
@@ -12,10 +12,4 @@
   .euiModalHeader {
     padding-bottom: 0;
   }
-}
-
-.shardFailureModal__desc {
-  // set for IE11, since without it depending on the content the width of the list
-  // could be much higher than the available screenspace
-  max-width: 686px;
 }

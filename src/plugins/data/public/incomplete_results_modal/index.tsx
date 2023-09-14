@@ -7,17 +7,13 @@
  */
 
 import React from 'react';
-import type { ShardFailureOpenModalButtonProps } from './shard_failure_open_modal_button';
+import type { OpenIncompleteResultsModalButtonProps } from './open_incomplete_results_modal_button';
 
 const Fallback = () => <div />;
 
-const LazyShardFailureOpenModalButton = React.lazy(
-  () => import('./shard_failure_open_modal_button')
-);
-export const ShardFailureOpenModalButton = (props: ShardFailureOpenModalButtonProps) => (
+const LazyOpenModalButton = React.lazy(() => import('./open_incomplete_results_modal_button'));
+export const OpenIncompleteResultsModalButton = (props: OpenIncompleteResultsModalButtonProps) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazyShardFailureOpenModalButton {...props} />
+    <LazyOpenModalButton {...props} />
   </React.Suspense>
 );
-
-export type { ShardFailureRequest } from './shard_failure_types';

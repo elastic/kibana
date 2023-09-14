@@ -520,7 +520,7 @@ export class SearchSource {
             options.inspector?.adapter,
             options.abortSignal,
             options.sessionId,
-            options.disableShardFailureWarning
+            options.disableWarningToasts
           );
         }
       }
