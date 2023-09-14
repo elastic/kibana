@@ -45,7 +45,6 @@
     "@kbn/cases-plugin",
     "@kbn/test-subj-selector",
     "@kbn/core-http-common",
-    "@kbn/std",
     "@kbn/data-views-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/security-api-integration-helpers",
@@ -54,5 +53,10 @@
     "@kbn/dev-utils",
     "@kbn/bfetch-plugin",
     "@kbn/rison",
+    "@kbn/std",
+    "@kbn/serverless-common-settings",
+    "@kbn/serverless-observability-settings",
+    "@kbn/serverless-search-settings",
+    "@kbn/serverless-security-settings",
   ]
 }

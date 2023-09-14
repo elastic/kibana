@@ -127,13 +127,6 @@ export const RELATED_USERS_TOOL_TIP = (hostName: string) =>
     values: { hostName },
   });
 
-export const PREVALENCE_ERROR_MESSAGE = i18n.translate(
-  'xpack.securitySolution.flyout.prevalenceErrorMessage',
-  {
-    defaultMessage: 'prevalence',
-  }
-);
-
 export const PREVALENCE_NO_DATA_MESSAGE = i18n.translate(
   'xpack.securitySolution.flyout.prevalenceNoDataMessage',
   {
