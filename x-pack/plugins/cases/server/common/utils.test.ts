@@ -38,7 +38,12 @@ import type {
   CaseConnector,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
-import { ConnectorTypes, CaseSeverity, AttachmentType } from '../../common/types/domain';
+import {
+  ConnectorTypes,
+  CaseSeverity,
+  AttachmentType,
+  CustomFieldTypes,
+} from '../../common/types/domain';
 import type { AttachmentRequest } from '../../common/types/api';
 import {
   createAlertRequests,
@@ -46,7 +51,6 @@ import {
   createPersistableStateRequests,
   createUserRequests,
 } from './limiter_checker/test_utils';
-import { CustomFieldTypes } from '../../common/types/domain/custom_field/v1';
 
 interface CommentReference {
   ids: string[];

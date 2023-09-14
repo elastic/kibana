@@ -17,10 +17,14 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 
 describe('create', () => {
   const theCase = {
