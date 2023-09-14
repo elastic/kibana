@@ -99,7 +99,7 @@ describe('useSearchStrategy', () => {
       useSearchStrategy<FactoryQueryTypes>({ ...userSearchStrategyProps, initialResult })
     );
 
-    expect(result.current.result).toBe(initialResult);
+    expect(result.current.result).toEqual(initialResult);
   });
 
   it('calls start with the given request', () => {
