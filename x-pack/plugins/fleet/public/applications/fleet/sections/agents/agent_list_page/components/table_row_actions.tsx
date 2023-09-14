@@ -127,6 +127,7 @@ export const TableRowActions: React.FunctionComponent<{
           onClick={() => {
             onUpgradeClick();
           }}
+          data-test-subj="restartUpgradeBtn"
         >
           <FormattedMessage
             id="xpack.fleet.agentList.restartUpgradeOneButton"

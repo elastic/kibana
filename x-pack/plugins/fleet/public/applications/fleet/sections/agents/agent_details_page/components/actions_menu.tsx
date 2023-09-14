@@ -124,6 +124,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           setIsUpgradeModalOpen(true);
         }}
         key="restartUpgradeAgent"
+        data-test-subj="restartUpgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.restartUpgradeOneButton"
