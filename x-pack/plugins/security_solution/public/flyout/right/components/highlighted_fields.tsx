@@ -50,7 +50,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
     field: 'field',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.highlightedFieldsFieldColumnLabel"
+        id="xpack.securitySolution.flyout.right.investigation.highlightedFields.tableFieldColumnLabel"
         defaultMessage="Field"
       />
     ),
@@ -61,7 +61,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
     field: 'description',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.highlightedFieldsValueColumnLabel"
+        id="xpack.securitySolution.flyout.right.investigation.highlightedFields.tableValueColumnLabel"
         defaultMessage="Value"
       />
     ),
@@ -116,7 +116,7 @@ export const HighlightedFields: FC = () => {
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.highlightedFieldsTitle"
+              id="xpack.securitySolution.flyout.right.investigation.highlightedFields.highlightedFieldsTitle"
               defaultMessage="Highlighted fields"
             />
           </h5>

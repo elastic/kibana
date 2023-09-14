@@ -11,7 +11,6 @@ import { EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
 import type { RelatedCase } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CaseDetailsLink } from '../../../common/components/links';
-import { CORRELATIONS_RELATED_CASES } from '../../shared/translations';
 import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID,
@@ -26,7 +25,7 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
     field: 'title',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.correlations.nameColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.correlations.nameColumnLabel"
         defaultMessage="Name"
       />
     ),
@@ -41,7 +40,7 @@ const columns: Array<EuiBasicTableColumn<RelatedCase>> = [
     field: 'status',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.correlations.statusColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.correlations.statusColumnLabel"
         defaultMessage="Status"
       />
     ),
@@ -61,7 +60,6 @@ export interface RelatedCasesProps {
  */
 export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, data, dataCount } = useFetchRelatedCases({ eventId });
-  const title = `${dataCount} ${CORRELATIONS_RELATED_CASES(dataCount)}`;
 
   if (loading) {
     return <EuiSkeletonText lines={1} size="m" isLoading={loading} contentAriaLabel="Loading" />;
@@ -74,7 +72,13 @@ export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
   return (
     <ExpandablePanel
       header={{
-        title,
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesTitle"
+            defaultMessage="{count} related {count, plural, one {case} other {cases}}"
+            values={{ count: dataCount }}
+          />
+        ),
         iconType: ICON,
       }}
       content={{ error }}
@@ -91,7 +95,7 @@ export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
         pagination={true}
         message={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.correlations.relatedCasesNoDataDescription"
+            id="xpack.securitySolution.flyout.left.insights.correlations.relatedCasesNoDataDescription"
             defaultMessage="No related cases."
           />
         }

@@ -42,7 +42,7 @@ export const ShareButton: FC<ShareButtonProps> = ({ alertUrl }) => {
           data-test-subj={FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.shareButtonLabel"
+            id="xpack.securitySolution.flyout.right.header.shareButtonLabel"
             defaultMessage="Share Alert"
           />
         </EuiButtonEmpty>

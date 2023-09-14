@@ -30,7 +30,7 @@ export const InsightsSection: React.FC<InsightsSectionProps> = ({ expanded = fal
     <ExpandableSection
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.insightsTitle"
+          id="xpack.securitySolution.flyout.right.insights.sectionTitle"
           defaultMessage="Insights"
         />
       }

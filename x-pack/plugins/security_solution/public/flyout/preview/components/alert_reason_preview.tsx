@@ -55,7 +55,7 @@ export const AlertReasonPreview: React.FC = () => {
       <EuiTitle>
         <h6>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.preview.alertReasonTitle"
+            id="xpack.securitySolution.flyout.preview.alertReason.panelTitle"
             defaultMessage="Alert reason"
           />
         </h6>

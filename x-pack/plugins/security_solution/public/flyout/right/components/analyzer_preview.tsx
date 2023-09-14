@@ -67,9 +67,12 @@ export const AnalyzerPreview: React.FC = () => {
       <EuiTreeView
         items={items}
         display="compressed"
-        aria-label={i18n.translate('xpack.securitySolution.flyout.right.analyzerPreviewAriaLabel', {
-          defaultMessage: 'Analyzer preview',
-        })}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.treeViewAriaLabel',
+          {
+            defaultMessage: 'Analyzer preview',
+          }
+        )}
         showExpansionArrows
       />
     </div>

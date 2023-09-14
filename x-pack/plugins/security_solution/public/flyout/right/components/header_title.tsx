@@ -91,7 +91,7 @@ export const HeaderTitle: VFC<HeaderTitleProps> = memo(({ flyoutIsExpandable }) 
             ruleName
           ) : (
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.headerTitle"
+              id="xpack.securitySolution.flyout.right.header.headerTitle"
               defaultMessage="Event details"
             />
           )}

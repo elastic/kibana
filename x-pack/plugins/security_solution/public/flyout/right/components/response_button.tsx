@@ -47,7 +47,7 @@ export const ResponseButton: React.FC = () => {
       {!responseActions ? (
         <p data-test-subj={RESPONSE_EMPTY_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.responseSectionNoDataDescription"
+            id="xpack.securitySolution.flyout.right.response.noDataDescription"
             defaultMessage="There are no response actions defined for this event."
           />
         </p>
@@ -58,7 +58,7 @@ export const ResponseButton: React.FC = () => {
           data-test-subj={RESPONSE_BUTTON_TEST_ID}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.responseSectionButtonLabel"
+            id="xpack.securitySolution.flyout.right.response.responseButtonLabel"
             defaultMessage="Response"
           />
         </EuiButton>

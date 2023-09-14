@@ -47,7 +47,7 @@ export const EntitiesDetails: React.FC = () => {
       ) : (
         <p data-test-subj={ENTITIES_DETAILS_NO_DATA_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.entities.noDataDescription"
+            id="xpack.securitySolution.flyout.left.insights.entities.noDataDescription"
             defaultMessage="Host and user information are unavailable for this alert."
           />
         </p>

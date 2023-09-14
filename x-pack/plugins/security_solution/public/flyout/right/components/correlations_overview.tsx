@@ -86,7 +86,7 @@ export const CorrelationsOverview: React.FC = () => {
       header={{
         title: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.correlationsTitle"
+            id="xpack.securitySolution.flyout.right.insights.correlations.overviewTitle"
             defaultMessage="Correlations"
           />
         ),
@@ -114,7 +114,7 @@ export const CorrelationsOverview: React.FC = () => {
       ) : (
         <p data-test-subj={INSIGHTS_CORRELATIONS_NO_DATA_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.correlationsNoDataDescription"
+            id="xpack.securitySolution.flyout.right.insights.correlations.noDataDescription"
             defaultMessage="No correlations data available."
           />
         </p>

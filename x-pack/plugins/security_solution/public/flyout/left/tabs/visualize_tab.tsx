@@ -29,7 +29,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
     id: SESSION_VIEW_ID,
     label: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.sessionViewButtonLabel"
+        id="xpack.securitySolution.flyout.left.visualize.sessionViewButtonLabel"
         defaultMessage="Session View"
       />
     ),
@@ -39,7 +39,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
     id: ANALYZE_GRAPH_ID,
     label: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.analyzerGraphButtonLabel"
+        id="xpack.securitySolution.flyout.left.visualize.analyzerGraphButtonLabel"
         defaultMessage="Analyzer Graph"
       />
     ),
@@ -90,9 +90,12 @@ export const VisualizeTab: FC = memo(() => {
       <EuiButtonGroup
         color="primary"
         name="coarsness"
-        legend={i18n.translate('xpack.securitySolution.flyout.left.visualizeButtonLabel', {
-          defaultMessage: 'Visualize options',
-        })}
+        legend={i18n.translate(
+          'xpack.securitySolution.flyout.left.visualize.buttonGroupButtonLabel',
+          {
+            defaultMessage: 'Visualize options',
+          }
+        )}
         options={visualizeButtons}
         idSelected={activeVisualizationId}
         onChange={(id) => onChangeCompressed(id)}

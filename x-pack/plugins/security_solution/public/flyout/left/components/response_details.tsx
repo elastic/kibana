@@ -59,7 +59,7 @@ export const ResponseDetails: React.FC = () => {
       <EuiTitle size="xxxs">
         <h5>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.response.title"
+            id="xpack.securitySolution.flyout.left.response.responseTitle"
             defaultMessage="Responses"
           />
         </h5>
@@ -68,7 +68,7 @@ export const ResponseDetails: React.FC = () => {
       {!responseActions ? (
         <InlineBlock data-test-subj={RESPONSE_EMPTY_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.documentDetails.response.emptyMessage"
+            id="xpack.securitySolution.flyout.left.response.noDataDescription"
             defaultMessage="There are no response actions defined for this event. To add some, edit the rule’s settings and set up {link}."
             values={{
               link: (
@@ -77,7 +77,7 @@ export const ResponseDetails: React.FC = () => {
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.left.documentDetails.response.responseActionLink"
+                    id="xpack.securitySolution.flyout.left.response.noDataLinkText"
                     defaultMessage="response actions"
                   />
                 </EuiLink>

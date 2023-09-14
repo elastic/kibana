@@ -48,7 +48,7 @@ export const DocumentSeverity: FC = memo(() => {
         <EuiTitle size="xxs" data-test-subj={FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID}>
           <h5>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.severityTitle"
+              id="xpack.securitySolution.flyout.right.header.severityTitle"
               defaultMessage="Severity:"
             />
           </h5>

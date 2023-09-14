@@ -151,7 +151,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
             <EuiIconTip
               title={
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.userTechnicalPreviewButtonLabel"
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewButtonLabel"
                   defaultMessage="Technical preview"
                 />
               }
@@ -159,7 +159,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
               type="iInCircle"
               content={
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.userTechnicalPreviewTooltip"
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewTooltip"
                   defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
                 />
               }

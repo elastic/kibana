@@ -72,13 +72,13 @@ export const SessionPreviewContainer: FC = () => {
   const noSessionMessage = !isEnterprisePlus ? (
     <div data-test-subj={SESSION_PREVIEW_UPSELL_TEST_ID}>
       <FormattedMessage
-        id="xpack.securitySolution.flyout.sessionPreviewUpsellDescription"
+        id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.upsellDescription"
         defaultMessage="This feature requires an {subscription}"
         values={{
           subscription: (
             <EuiLink href="https://www.elastic.co/pricing/" target="_blank">
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.sessionPreviewUpsellLinkText"
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.upsellLinkText"
                 defaultMessage="Enterprise subscription"
               />
             </EuiLink>
@@ -89,7 +89,7 @@ export const SessionPreviewContainer: FC = () => {
   ) : !sessionViewConfig ? (
     <div data-test-subj={SESSION_PREVIEW_NO_DATA_TEST_ID}>
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.sessionPreviewNoDataDescription"
+        id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataDescription"
         defaultMessage="You can only view Linux session details if you’ve enabled the {setting} setting in your Elastic Defend integration policy. Refer to {link} for more information."
         values={{
           setting: (
@@ -99,7 +99,7 @@ export const SessionPreviewContainer: FC = () => {
               `}
             >
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.sessionPreviewNoDataSettingDescription"
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataSettingDescription"
                 defaultMessage="Include session data"
               />
             </span>
@@ -110,7 +110,7 @@ export const SessionPreviewContainer: FC = () => {
               target="_blank"
             >
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.sessionPreviewNoDataLinkText"
+                id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.noDataLinkText"
                 defaultMessage="Enable Session View data"
               />
             </EuiLink>
@@ -125,7 +125,7 @@ export const SessionPreviewContainer: FC = () => {
       header={{
         title: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.sessionPreviewTitle"
+            id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.sessionPreviewTitle"
             defaultMessage="Session viewer preview"
           />
         ),

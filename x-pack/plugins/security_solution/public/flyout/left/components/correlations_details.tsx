@@ -100,7 +100,7 @@ export const CorrelationsDetails: React.FC = () => {
       ) : (
         <p data-test-subj={CORRELATIONS_DETAILS_NO_DATA_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.correlations.noDataDescription"
+            id="xpack.securitySolution.flyout.left.insights.correlations.noDataDescription"
             defaultMessage="No correlations data available."
           />
         </p>

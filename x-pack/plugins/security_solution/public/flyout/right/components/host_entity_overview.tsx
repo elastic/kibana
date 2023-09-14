@@ -152,7 +152,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
             <EuiIconTip
               title={
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.hostTechnicalPreviewButtonLabel"
+                  id="xpack.securitySolution.flyout.right.insights.entities.hostTechnicalPreviewButtonLabel"
                   defaultMessage="Technical preview"
                 />
               }
@@ -160,7 +160,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
               type="iInCircle"
               content={
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.hostTechnicalPreviewTooltip"
+                  id="xpack.securitySolution.flyout.right.insights.entities.hostTechnicalPreviewTooltip"
                   defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
                 />
               }

@@ -52,7 +52,7 @@ export const SessionPreview: FC = () => {
         <ValueContainer
           text={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.sessionPreviewProcessDescription"
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.processDescription"
               defaultMessage="started"
             />
           }
@@ -69,7 +69,7 @@ export const SessionPreview: FC = () => {
         <ValueContainer
           text={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.sessionPreviewTimeDescription"
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.timeDescription"
               defaultMessage="at"
             />
           }
@@ -87,7 +87,7 @@ export const SessionPreview: FC = () => {
         <ValueContainer
           text={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.sessionPreviewRuleDescription"
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.ruleDescription"
               defaultMessage="with rule"
             />
           }
@@ -113,7 +113,7 @@ export const SessionPreview: FC = () => {
         <ValueContainer
           text={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.sessionPreviewCommandDescription"
+              id="xpack.securitySolution.flyout.right.visualizations.sessionPreview.commandDescription"
               defaultMessage="by"
             />
           }

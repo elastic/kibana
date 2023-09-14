@@ -68,7 +68,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     field: 'field',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.prevalence.fieldColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.prevalence.fieldColumnLabel"
         defaultMessage="Field"
       />
     ),
@@ -80,7 +80,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
     field: 'value',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.prevalence.valueColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.prevalence.valueColumnLabel"
         defaultMessage="Value"
       />
     ),
@@ -93,7 +93,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.prevalence.alertCountColumnTooltip"
+            id="xpack.securitySolution.flyout.left.insights.prevalence.alertCountColumnTooltip"
             defaultMessage="Total number of alerts with identical field value pairs."
           />
         }
@@ -101,13 +101,13 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.alertCountColumnLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.alertCountColumnLabel"
               defaultMessage="Alert"
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.alertCountColumnCountLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.alertCountColumnCountLabel"
               defaultMessage="count"
             />
           </EuiFlexItem>
@@ -139,7 +139,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.prevalence.documentCountColumnTooltip"
+            id="xpack.securitySolution.flyout.left.insights.prevalence.documentCountColumnTooltip"
             defaultMessage="Total number of event documents with identical field value pairs."
           />
         }
@@ -147,13 +147,13 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.documentCountColumnLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.documentCountColumnLabel"
               defaultMessage="Document"
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.documentCountColumnCountLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.documentCountColumnCountLabel"
               defaultMessage="count"
             />
           </EuiFlexItem>
@@ -202,7 +202,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.prevalence.hostPrevalenceColumnTooltip"
+            id="xpack.securitySolution.flyout.left.insights.prevalence.hostPrevalenceColumnTooltip"
             defaultMessage="Percentage of unique hosts with identical field value pairs."
           />
         }
@@ -210,13 +210,13 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.hostPrevalenceColumnLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.hostPrevalenceColumnLabel"
               defaultMessage="Host"
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.hostPrevalenceColumnCountLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.hostPrevalenceColumnCountLabel"
               defaultMessage="prevalence"
             />
           </EuiFlexItem>
@@ -235,7 +235,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.prevalence.userPrevalenceColumnTooltip"
+            id="xpack.securitySolution.flyout.left.insights.prevalence.userPrevalenceColumnTooltip"
             defaultMessage="Percentage of unique users with identical field value pairs."
           />
         }
@@ -243,13 +243,13 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.userPrevalenceColumnLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.userPrevalenceColumnLabel"
               defaultMessage="User"
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.userPrevalenceColumnCountLabel"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.userPrevalenceColumnCountLabel"
               defaultMessage="prevalence"
             />
           </EuiFlexItem>
@@ -336,13 +336,13 @@ export const PrevalenceDetails: React.FC = () => {
     <>
       <EuiCallOut data-test-subj={PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID}>
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.documentDetails.prevalenceTableAlertUpsell"
+          id="xpack.securitySolution.flyout.left.insights.prevalence.tableAlertUpsellDescription"
           defaultMessage="Preview of a {subscription} feature showing host and user prevalence."
           values={{
             subscription: (
               <EuiLink href="https://www.elastic.co/pricing/" target="_blank">
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.left.documentDetails.prevalenceTableAlertUpsellLink"
+                  id="xpack.securitySolution.flyout.left.insights.prevalence.tableAlertUpsellLinkText"
                   defaultMessage="Platinum"
                 />
               </EuiLink>
@@ -374,7 +374,7 @@ export const PrevalenceDetails: React.FC = () => {
         ) : (
           <p data-test-subj={PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID}>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.prevalence.noDataDescription"
+              id="xpack.securitySolution.flyout.left.insights.prevalence.noDataDescription"
               defaultMessage="No prevalence data available."
             />
           </p>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import React, { type FC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -30,7 +30,7 @@ export const columns = [
     field: '@timestamp',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.correlations.timestampColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.correlations.timestampColumnLabel"
         defaultMessage="Timestamp"
       />
     ),
@@ -42,7 +42,7 @@ export const columns = [
     field: ALERT_RULE_NAME,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.correlations.ruleColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
         defaultMessage="Rule"
       />
     ),
@@ -52,7 +52,7 @@ export const columns = [
     field: ALERT_REASON,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.correlations.reasonColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.correlations.reasonColumnLabel"
         defaultMessage="Reason"
       />
     ),
@@ -62,7 +62,7 @@ export const columns = [
     field: 'kibana.alert.severity',
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.correlations.severityColumnLabel"
+        id="xpack.securitySolution.flyout.left.insights.correlations.severityColumnLabel"
         defaultMessage="Severity"
       />
     ),
@@ -78,7 +78,7 @@ export interface CorrelationsDetailsAlertsTableProps {
   /**
    * Text to display in the ExpandablePanel title section
    */
-  title: string;
+  title: ReactElement;
   /**
    * Whether the table is loading
    */
@@ -210,7 +210,7 @@ const getFilters = (alertIds?: string[]) => {
       {
         meta: {
           alias: i18n.translate(
-            'xpack.securitySolution.flyout.left.correlations.tableFilterLabel',
+            'xpack.securitySolution.flyout.left.insights.correlations.tableFilterLabel',
             {
               defaultMessage: 'Correlations Details Table Alert IDs.',
             }

@@ -34,7 +34,7 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
     id: ENTITIES_TAB_ID,
     label: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.entitiesButtonLabel"
+        id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
         defaultMessage="Entities"
       />
     ),
@@ -44,7 +44,7 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
     id: THREAT_INTELLIGENCE_TAB_ID,
     label: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.threatIntelligenceButtonLabel"
+        id="xpack.securitySolution.flyout.left.insights.threatIntelligenceButtonLabel"
         defaultMessage="Threat intelligence"
       />
     ),
@@ -54,7 +54,7 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
     id: PREVALENCE_TAB_ID,
     label: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.prevalenceButtonLabel"
+        id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
         defaultMessage="Prevalence"
       />
     ),
@@ -64,7 +64,7 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
     id: CORRELATIONS_TAB_ID,
     label: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.correlationsButtonLabel"
+        id="xpack.securitySolution.flyout.left.insights.correlationsButtonLabel"
         defaultMessage="Correlations"
       />
     ),
@@ -112,9 +112,12 @@ export const InsightsTab: React.FC = memo(() => {
       <EuiButtonGroup
         color="primary"
         name="coarsness"
-        legend={i18n.translate('xpack.securitySolution.flyout.left.insightsButtonLabel', {
-          defaultMessage: 'Insights options',
-        })}
+        legend={i18n.translate(
+          'xpack.securitySolution.flyout.left.insights.buttonGroupButtonLabel',
+          {
+            defaultMessage: 'Insights options',
+          }
+        )}
         options={insightsButtons}
         idSelected={activeInsightsId}
         onChange={onChangeCompressed}

@@ -91,7 +91,7 @@ describe('<Reason />', () => {
         banner: {
           title: (
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.alertReasonPreviewTitle"
+              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
               defaultMessage="Preview alert reason"
             />
           ),

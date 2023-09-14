@@ -51,7 +51,7 @@ export const ThreatIntelligenceOverview: FC = () => {
       header={{
         title: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.threatIntelligenceTitle"
+            id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatIntelligenceTitle"
             defaultMessage="Threat intelligence"
           />
         ),
@@ -71,7 +71,7 @@ export const ThreatIntelligenceOverview: FC = () => {
           value={threatMatchesCount}
           text={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.threatMatchDescription"
+              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatMatchDescription"
               defaultMessage="threat {count, plural, one {match} other {matches}} detected"
               values={{ count: threatMatchesCount }}
             />
@@ -84,7 +84,7 @@ export const ThreatIntelligenceOverview: FC = () => {
           value={threatEnrichmentsCount}
           text={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.threatEnrichmentDescription"
+              id="xpack.securitySolution.flyout.right.insights.threatIntelligence.threatEnrichmentDescription"
               defaultMessage="{count, plural, one {field} other {fields}} enriched with threat intelligence"
               values={{ count: threatEnrichmentsCount }}
             />

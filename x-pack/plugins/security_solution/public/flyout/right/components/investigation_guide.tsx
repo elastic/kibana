@@ -63,7 +63,7 @@ export const InvestigationGuide: React.FC = () => {
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigationGuideTitle"
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideTitle"
               defaultMessage="Investigation guide"
             />
           </h5>
@@ -77,14 +77,14 @@ export const InvestigationGuide: React.FC = () => {
             data-test-subj={INVESTIGATION_GUIDE_BUTTON_TEST_ID}
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigationGuideButtonLabel"
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel"
               defaultMessage="Show investigation guide"
             />
           </EuiButton>
         ) : (
           <p data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.investigationGuideNoDataDescription"
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
               defaultMessage="There’s no investigation guide for this rule."
             />
           </p>

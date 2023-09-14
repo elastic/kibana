@@ -29,7 +29,7 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
       expanded={expanded}
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.investigationSectionTitle"
+          id="xpack.securitySolution.flyout.right.investigation.sectionTitle"
           defaultMessage="Investigation"
         />
       }

@@ -51,7 +51,7 @@ export const InvestigationGuide: React.FC = () => {
       ) : (
         <p data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.left.investigationGuideNoData"
+            id="xpack.securitySolution.flyout.left.investigation.noDataDescription"
             defaultMessage="There’s no investigation guide for this rule. {documentation} to add one."
             values={{
               documentation: (
@@ -60,7 +60,7 @@ export const InvestigationGuide: React.FC = () => {
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.left.documentDetails.investigationGuideDocumentationLink"
+                    id="xpack.securitySolution.flyout.left.investigation.noDataLinkText"
                     defaultMessage="Edit the rule's settings"
                   />
                 </EuiLink>

@@ -44,7 +44,7 @@ export const ExpandDetailButton: FC = memo(() => {
       data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
     >
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.collapseDetailButtonLabel"
+        id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
         defaultMessage="Collapse details"
       />
     </EuiButtonEmpty>
@@ -56,7 +56,7 @@ export const ExpandDetailButton: FC = memo(() => {
       data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
     >
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.expandDetailButtonLabel"
+        id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"
         defaultMessage="Expand details"
       />
     </EuiButtonEmpty>

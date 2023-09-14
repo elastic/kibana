@@ -34,7 +34,7 @@ export const tabs: LeftPanelTabsType = [
     'data-test-subj': VISUALIZE_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.visualizeTabLabel"
+        id="xpack.securitySolution.flyout.left.visualize.tabLabel"
         defaultMessage="Visualize"
       />
     ),
@@ -46,7 +46,7 @@ export const tabs: LeftPanelTabsType = [
     'data-test-subj': INSIGHTS_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insightsTabLabel"
+        id="xpack.securitySolution.flyout.left.insights.tabLabel"
         defaultMessage="Insights"
       />
     ),
@@ -58,7 +58,7 @@ export const tabs: LeftPanelTabsType = [
     'data-test-subj': INVESTIGATION_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.investigationsTabLabel"
+        id="xpack.securitySolution.flyout.left.investigations.tabLabel"
         defaultMessage="Investigation"
       />
     ),
@@ -70,7 +70,7 @@ export const tabs: LeftPanelTabsType = [
     'data-test-subj': RESPONSE_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.responseTabLabel"
+        id="xpack.securitySolution.flyout.left.response.tabLabel"
         defaultMessage="Response"
       />
     ),

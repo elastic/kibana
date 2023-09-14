@@ -29882,7 +29882,6 @@
     "xpack.securitySolution.exceptions.viewer.lastUpdated": "已更新 {updated}",
     "xpack.securitySolution.exceptions.viewer.paginationDetails": "正在显示 {partOne} 个，共 {partTwo} 个",
     "xpack.securitySolution.fieldBrowser.descriptionForScreenReaderOnly": "{field} 字段的描述：",
-    "xpack.securitySolution.flyout.errorTitle": "无法显示 {title}",
     "xpack.securitySolution.footer.autoRefreshActiveTooltip": "自动刷新已启用时，时间线将显示匹配查询的最近 {numberOfItems} 个事件。",
     "xpack.securitySolution.formattedNumber.countsLabel": "{mantissa}{scale}{hasRemainder}",
     "xpack.securitySolution.header.editableTitle.editButtonAria": "通过单击，可以编辑 {title}",

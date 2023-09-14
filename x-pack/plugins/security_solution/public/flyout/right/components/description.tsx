@@ -42,7 +42,7 @@ export const Description: FC = () => {
         banner: {
           title: (
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.rulePreviewTitle"
+              id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
               defaultMessage="Preview rule details"
             />
           ),
@@ -67,7 +67,7 @@ export const Description: FC = () => {
             data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.ruleSummaryButtonLabel"
+              id="xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel"
               defaultMessage="Show rule summary"
             />
           </EuiButtonEmpty>
@@ -87,7 +87,7 @@ export const Description: FC = () => {
               <EuiFlexItem>
                 <h5>
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.right.ruleDescriptionTitle"
+                    id="xpack.securitySolution.flyout.right.about.description.ruleTitle"
                     defaultMessage="Rule description"
                   />
                 </h5>
@@ -97,7 +97,7 @@ export const Description: FC = () => {
           ) : (
             <h5>
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.documentDescriptionTitle"
+                id="xpack.securitySolution.flyout.right.about.description.documentTitle"
                 defaultMessage="Document description"
               />
             </h5>

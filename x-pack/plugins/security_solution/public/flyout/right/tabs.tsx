@@ -30,7 +30,7 @@ export const tabs: RightPanelTabsType = [
     'data-test-subj': OVERVIEW_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.overviewTabLabel"
+        id="xpack.securitySolution.flyout.right.header.overviewTabLabel"
         defaultMessage="Overview"
       />
     ),
@@ -41,7 +41,7 @@ export const tabs: RightPanelTabsType = [
     'data-test-subj': TABLE_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.tableTabLabel"
+        id="xpack.securitySolution.flyout.right.header.tableTabLabel"
         defaultMessage="Table"
       />
     ),
@@ -52,7 +52,7 @@ export const tabs: RightPanelTabsType = [
     'data-test-subj': JSON_TAB_TEST_ID,
     name: (
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.jsonTabLabel"
+        id="xpack.securitySolution.flyout.right.header.jsonTabLabel"
         defaultMessage="JSON"
       />
     ),

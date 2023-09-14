@@ -31,7 +31,7 @@ export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
       expanded={expanded}
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.aboutTitle"
+          id="xpack.securitySolution.flyout.right.about.sectionTitle"
           defaultMessage="About"
         />
       }

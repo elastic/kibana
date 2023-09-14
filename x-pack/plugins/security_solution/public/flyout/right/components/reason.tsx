@@ -42,7 +42,7 @@ export const Reason: FC = () => {
         banner: {
           title: (
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.alertReasonPreviewTitle"
+              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
               defaultMessage="Preview alert reason"
             />
           ),
@@ -64,7 +64,7 @@ export const Reason: FC = () => {
           data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.alertReasonButtonLabel"
+            id="xpack.securitySolution.flyout.right.about.reason.alertReasonButtonLabel"
             defaultMessage="Show full reason"
           />
         </EuiButtonEmpty>
@@ -83,7 +83,7 @@ export const Reason: FC = () => {
                 <EuiFlexItem>
                   <h5>
                     <FormattedMessage
-                      id="xpack.securitySolution.flyout.right.alertReasonTitle"
+                      id="xpack.securitySolution.flyout.right.about.reason.alertReasonTitle"
                       defaultMessage="Alert reason"
                     />
                   </h5>
@@ -93,7 +93,7 @@ export const Reason: FC = () => {
             ) : (
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.documentReasonTitle"
+                  id="xpack.securitySolution.flyout.right.about.reason.documentReasonTitle"
                   defaultMessage="Document reason"
                 />
               </p>

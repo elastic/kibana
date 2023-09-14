@@ -21,7 +21,7 @@ export const FlyoutError: React.VFC = () => (
       title={
         <h2>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.errorTitle"
+            id="xpack.securitySolution.flyout.shared.errorTitle"
             defaultMessage="Unable to display {title}."
             values={{ title: 'data' }}
           />
@@ -30,7 +30,7 @@ export const FlyoutError: React.VFC = () => (
       body={
         <p>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.errorDescription"
+            id="xpack.securitySolution.flyout.shared.errorDescription"
             defaultMessage="There was an error displaying {message}."
             values={{ message: 'data' }}
           />

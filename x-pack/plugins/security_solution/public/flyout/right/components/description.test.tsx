@@ -109,7 +109,7 @@ describe('<Description />', () => {
         banner: {
           title: (
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.rulePreviewTitle"
+              id="xpack.securitySolution.flyout.right.about.description.rulePreviewTitle"
               defaultMessage="Preview rule details"
             />
           ),

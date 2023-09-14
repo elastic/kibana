@@ -31,7 +31,7 @@ export const VisualizationsSection: React.FC<VisualizationsSectionProps> = ({
       expanded={expanded}
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.visualizationsTitle"
+          id="xpack.securitySolution.flyout.right.visualizations.sectionTitle"
           defaultMessage="Visualizations"
         />
       }

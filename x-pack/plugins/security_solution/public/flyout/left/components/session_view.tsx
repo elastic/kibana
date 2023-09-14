@@ -41,7 +41,7 @@ export const SessionView: FC = () => {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.sessionView.errorMessageTitle"
+              id="xpack.securitySolution.flyout.left.visualize.sessionView.errorMessageTitle"
               defaultMessage="Unable to display {title}"
               values={{ title: 'session view' }}
             />
@@ -50,7 +50,7 @@ export const SessionView: FC = () => {
         body={
           <p>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.left.sessionView.errorMessageDescription"
+              id="xpack.securitySolution.flyout.left.visualize.sessionView.errorMessageDescription"
               defaultMessage="There was an error displaying {message}"
               values={{ message: 'session view' }}
             />

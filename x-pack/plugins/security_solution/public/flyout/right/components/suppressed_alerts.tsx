@@ -12,7 +12,6 @@ import {
   INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID,
   INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID,
 } from './test_ids';
-import { CORRELATIONS_SUPPRESSED_ALERTS } from '../../shared/translations';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW } from '../../../common/components/event_details/insights/translations';
 
@@ -35,7 +34,13 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
           error={false}
           icon={'layers'}
           value={alertSuppressionCount}
-          text={CORRELATIONS_SUPPRESSED_ALERTS(alertSuppressionCount)}
+          text={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.correlations.suppressedAlertsLabel"
+              defaultMessage="suppressed {count, plural, =1 {alert} other {alerts}}"
+              values={{ count: alertSuppressionCount }}
+            />
+          }
           data-test-subj={INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}
           key={`correlation-row-suppressed-alerts`}
         />
@@ -47,7 +52,7 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({ alertSuppre
           iconType="beaker"
           tooltipContent={
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.suppressedAlertTechnicalPreviewTooltip"
+              id="xpack.securitySolution.flyout.right.insights.entities.suppressedAlertTechnicalPreviewTooltip"
               defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
             />
           }

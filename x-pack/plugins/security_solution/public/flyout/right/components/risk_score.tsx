@@ -42,7 +42,7 @@ export const RiskScore: FC = memo(() => {
         <EuiTitle size="xxs" data-test-subj={FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID}>
           <h5>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.riskScoreTitle"
+              id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
               defaultMessage="Risk score:"
             />
           </h5>

@@ -72,7 +72,7 @@ export const PrevalenceOverview: FC = () => {
       header={{
         title: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.prevalenceTitle"
+            id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTitle"
             defaultMessage="Prevalence"
           />
         ),
@@ -89,7 +89,7 @@ export const PrevalenceOverview: FC = () => {
               icon={'warning'}
               text={
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.prevalenceRowDescription"
+                  id="xpack.securitySolution.flyout.right.insights.prevalence.rowDescription"
                   defaultMessage="{field}, {value} is uncommon"
                   values={{ field: d.field, value: d.value }}
                 />
@@ -100,7 +100,7 @@ export const PrevalenceOverview: FC = () => {
         ) : (
           <p data-test-subj={INSIGHTS_PREVALENCE_NO_DATA_TEST_ID}>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.prevalenceNoDataDescription"
+              id="xpack.securitySolution.flyout.right.insights.prevalence.noDataDescription"
               defaultMessage="No prevalence data available."
             />
           </p>

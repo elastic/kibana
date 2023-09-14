@@ -27,7 +27,7 @@ export const ResponseSection: VFC<ResponseSectionProps> = ({ expanded = false })
       expanded={expanded}
       title={
         <FormattedMessage
-          id="xpack.securitySolution.flyout.right.responseSectionTitle"
+          id="xpack.securitySolution.flyout.right.response.sectionTitle"
           defaultMessage="Response"
         />
       }
