@@ -14,13 +14,13 @@ import { shardFailureResponse } from './__mocks__/shard_failure_response';
 
 describe('ShardFailureDescription', () => {
   it('renders matching snapshot given valid properties', () => {
-    const failure = (shardFailureResponse._shards as any).failures[0];
+    const failure = shardFailureResponse._shards.failures![0];
     const component = shallowWithIntl(<ShardFailureDescription {...failure} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should show more details when button is pressed', async () => {
-    const failure = (shardFailureResponse._shards as any).failures[0];
+    const failure = shardFailureResponse._shards.failures![0];
     const component = shallowWithIntl(<ShardFailureDescription {...failure} />);
     await component.find(EuiButtonEmpty).simulate('click');
     expect(component).toMatchSnapshot();

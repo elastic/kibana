@@ -7,49 +7,23 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { debounce } from 'lodash';
-import { EuiSpacer, EuiTextAlign } from '@elastic/eui';
+import { EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import type { MountPoint } from '@kbn/core/public';
 import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
-import { ShardFailureOpenModalButton, ShardFailureRequest } from '../../shard_failure_modal';
+import { OpenIncompleteResultsModalButton } from '../../incomplete_results_modal';
 import {
-  SearchResponseShardFailureWarning,
+  SearchResponseIncompleteWarning,
   SearchResponseWarning,
   WarningHandlerCallback,
 } from '../types';
 import { extractWarnings } from './extract_warnings';
 
-const getDebouncedWarning = () => {
-  const addWarning = () => {
-    const { toasts } = getNotifications();
-    return debounce(toasts.addWarning.bind(toasts), 30000, {
-      leading: true,
-    });
-  };
-  const memory: Record<string, ReturnType<typeof addWarning>> = {};
-
-  return (
-    debounceKey: string,
-    title: string,
-    text?: string | MountPoint<HTMLElement> | undefined
-  ) => {
-    memory[debounceKey] = memory[debounceKey] || addWarning();
-    return memory[debounceKey]({ title, text });
-  };
-};
-
-const debouncedWarningWithoutReason = getDebouncedWarning();
-const debouncedTimeoutWarning = getDebouncedWarning();
-const debouncedWarning = getDebouncedWarning();
-
 /**
  * @internal
- * All warnings are expected to come from the same response. Therefore all "text" properties, which contain the
- * response, will be the same.
+ * All warnings are expected to come from the same response.
  */
 export function handleWarnings({
   request,
@@ -78,47 +52,29 @@ export function handleWarnings({
     return;
   }
 
-  // timeout notification
-  const [timeout] = internal.filter((w) => w.type === 'timed_out');
-  if (timeout) {
-    debouncedTimeoutWarning(sessionId + timeout.message, timeout.message);
-  }
-
-  // shard warning failure notification
-  const shardFailures = internal.filter((w) => w.type === 'shard_failure');
-  if (shardFailures.length === 0) {
+  // Incomplete data failure notification
+  const incompleteWarnings = internal.filter((w) => w.type === 'incomplete');
+  if (incompleteWarnings.length === 0) {
     return;
   }
 
-  const [warning] = shardFailures as SearchResponseShardFailureWarning[];
-  const title = warning.message;
-
-  // if warning message contains text (warning response), show in ShardFailureOpenModalButton
-  if (warning.text) {
-    const text = toMountPoint(
-      <>
-        {warning.text}
-        <EuiSpacer size="s" />
-        <EuiTextAlign textAlign="right">
-          <ShardFailureOpenModalButton
-            theme={theme}
-            title={title}
-            getRequestMeta={() => ({
-              request: request as ShardFailureRequest,
-              response,
-            })}
-          />
-        </EuiTextAlign>
-      </>,
+  const [incompleteWarning] = incompleteWarnings as SearchResponseIncompleteWarning[];
+  getNotifications().toasts.addWarning({
+    title: incompleteWarning.message,
+    text: toMountPoint(
+      <EuiTextAlign textAlign="right">
+        <OpenIncompleteResultsModalButton
+          theme={theme}
+          getRequestMeta={() => ({
+            request,
+            response,
+          })}
+          warning={incompleteWarning}
+        />
+      </EuiTextAlign>,
       { theme$: theme.theme$ }
-    );
-
-    debouncedWarning(sessionId + warning.text, title, text);
-    return;
-  }
-
-  // timeout warning, or shard warning with no failure reason
-  debouncedWarningWithoutReason(sessionId + title, title);
+    ),
+  });
 }
 
 /**
