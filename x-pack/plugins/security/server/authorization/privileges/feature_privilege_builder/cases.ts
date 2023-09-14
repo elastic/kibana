@@ -24,14 +24,11 @@ const readOperations = [
   'getTags',
   'getReporters',
   'getUserActions',
+  'findConfigurations',
 ] as const;
 const updateOperations = ['updateCase', 'updateComment'] as const;
 const deleteOperations = ['deleteCase', 'deleteComment'] as const;
-const configureOperations = [
-  'createConfiguration',
-  'updateConfiguration',
-  'findConfigurations',
-] as const;
+const configureOperations = ['createConfiguration', 'updateConfiguration'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
