@@ -65,6 +65,10 @@ import {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import {
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from '@kbn/core-elasticsearch-server-internal';
 import { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -82,6 +86,7 @@ export interface APMPluginSetupDependencies {
   infra?: InfraPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
+  elasticsearch: InternalElasticsearchServiceSetup;
 
   // optional dependencies
   actions?: ActionsPlugin['setup'];
@@ -108,6 +113,7 @@ export interface APMPluginStartDependencies {
   infra: InfraPluginStart;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
+  elasticsearch: InternalElasticsearchServiceStart;
 
   // optional dependencies
   actions?: ActionsPlugin['start'];
