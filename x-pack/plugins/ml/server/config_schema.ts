@@ -6,9 +6,11 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-const enabledSchema = schema.object({
-  enabled: schema.boolean(),
-});
+const enabledSchema = schema.maybe(
+  schema.object({
+    enabled: schema.boolean(),
+  })
+);
 
 export const configSchema = schema.object({
   ad: enabledSchema,
