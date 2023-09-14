@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  describe('Esql type rules', () => {
+  describe.only('Esql type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -457,13 +457,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('alerts enrichment', () => {
+    describe.only('alerts enrichment', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/host_risk');
+        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {

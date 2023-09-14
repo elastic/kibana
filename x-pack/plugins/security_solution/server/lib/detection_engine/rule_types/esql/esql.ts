@@ -14,8 +14,8 @@ import type {
 
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
-import { wrapGroupedEsqlAlerts } from './wrap_grouped_esql_alerts';
-import { bulkCreateWithSuppression } from '../query/alert_suppression/bulk_create_with_suppression';
+import { wrapEsqlAlerts } from './wrap_esql_alerts';
+import { createEnrichEventsFunction } from '../utils/enrichments';
 
 import type { RunOpts } from '../types';
 
@@ -33,7 +33,6 @@ export const esqlExecutor = async ({
   runOpts: {
     completeRule,
     tuple,
-    runtimeMappings,
     ruleExecutionLogger,
     bulkCreate,
     mergeStrategy,
@@ -43,7 +42,6 @@ export const esqlExecutor = async ({
     unprocessedExceptions,
     alertTimestampOverride,
     publicBaseUrl,
-    alertWithSuppression,
   },
   services,
   state,
@@ -87,7 +85,9 @@ export const esqlExecutor = async ({
     const esqlSearchDuration = makeFloatString(performance.now() - esqlSignalSearchStart);
     result.searchAfterTimes = [esqlSearchDuration];
 
-    const wrappedAlerts = wrapGroupedEsqlAlerts({
+    ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
+
+    const wrappedAlerts = wrapEsqlAlerts({
       results: response,
       spaceId,
       completeRule,
@@ -96,19 +96,16 @@ export const esqlExecutor = async ({
       ruleExecutionLogger,
       publicBaseUrl,
       tuple,
-      suppressionFields: [],
     });
 
-    const bulkCreateResult = await bulkCreateWithSuppression({
-      alertWithSuppression,
-      ruleExecutionLogger,
-      wrappedDocs: wrappedAlerts,
+    const enrichAlerts = createEnrichEventsFunction({
       services,
-      suppressionWindow: completeRule.ruleParams.from,
-      alertTimestampOverride,
+      logger: ruleExecutionLogger,
     });
+    const bulkCreateResult = await bulkCreate(wrappedAlerts, tuple.maxSignals, enrichAlerts);
+
     addToSearchAfterReturn({ current: result, next: bulkCreateResult });
-    ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} signals`);
+    ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
 
     if (response.values.length > ruleParams.maxSignals) {
       result.warningMessages.push(getMaxSignalsWarning());
