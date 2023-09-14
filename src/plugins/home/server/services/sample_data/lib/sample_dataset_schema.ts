@@ -9,6 +9,15 @@ import type { Writable } from '@kbn/utility-types';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 const idRegExp = /^[a-zA-Z0-9-]+$/;
+const processor = schema.recordOf(
+  schema.string(),
+  schema.object({
+    field: schema.string(),
+    value: schema.maybe(schema.arrayOf(schema.string())),
+    ignore_failure: schema.maybe(schema.boolean()),
+  })
+);
+
 const dataIndexSchema = schema.object({
   id: schema.string({
     validate(value: string) {
@@ -54,6 +63,14 @@ const dataIndexSchema = schema.object({
   // Set to true to move timestamp to current week, preserving day of week and time of day
   // Relative distance from timestamp to currentTimeMarker will not remain the same
   preserveDayOfWeekTimeOfDay: schema.boolean({ defaultValue: false }),
+
+  pipeline: schema.maybe(
+    schema.object({
+      id: schema.string(),
+      description: schema.maybe(schema.string()),
+      processors: schema.arrayOf(processor),
+    })
+  ),
 });
 
 export type DataIndexSchema = TypeOf<typeof dataIndexSchema>;

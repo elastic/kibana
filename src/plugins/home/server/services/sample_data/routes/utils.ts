@@ -132,7 +132,7 @@ export const getSampleDatasetsWithSpaceAwareSavedObjects = ({
   additionalSampleDataSavedObjects: SavedObjectsSchema;
 }) =>
   sampleDatasets.map((sampleDataset) => ({
-    ...sampleDataset,
+    ...(sampleDataset.id === spaceAwareSampleDataset.id ? spaceAwareSampleDataset : sampleDataset),
     savedObjects: spaceAwareSampleDataset.savedObjects
       .concat(additionalSampleDataSavedObjects)
       .map((savedObject) => {

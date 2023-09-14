@@ -23,6 +23,20 @@ const securitysolutionDescription = i18n.translate(
       'Sample data, visualizations, and dashboards for monitoring Security Solution routes.',
   }
 );
+const securitysolutionAlertsIngestPipelineDescription = i18n.translate(
+  'home.sampleData.securitySolutionSpecAlertsIngestPipelineDescription',
+  {
+    defaultMessage:
+      'This set kibana.space_ids to current space and adjust @timestamp field to the time when data was ingested.',
+  }
+);
+
+const securitysolutionAuditbeatIngestPipelineDescription = i18n.translate(
+  'home.sampleData.securitySolutionSpecAuditbeatIngestPipelineDescription',
+  {
+    defaultMessage: 'This adjust @timestamp field to the time when data was ingested.',
+  }
+);
 
 export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSchema = function (
   spaceId = 'default'
@@ -43,8 +57,25 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
         timeFields: ['@timestamp'],
         currentTimeMarker: '2018-01-09T00:00:00',
         preserveDayOfWeekTimeOfDay: true,
+        deleteAliasWhenRemoved: true,
         aliases: {
           'auditbeat-sample-data': {},
+        },
+        indexSettings: {
+          default_pipeline: 'Security_Solution_auditbeat_sample_data_ingest_pipeline',
+        },
+        pipeline: {
+          id: 'Security_Solution_auditbeat_sample_data_ingest_pipeline',
+          description: securitysolutionAuditbeatIngestPipelineDescription,
+          processors: [
+            {
+              set: {
+                field: '@timestamp',
+                value: ['{{ _ingest.timestamp }}'],
+                ignore_failure: true,
+              },
+            },
+          ],
         },
       },
       {
@@ -58,6 +89,50 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
           [`.alerts-security.alerts-${spaceId}`]: {},
         },
         deleteAliasWhenRemoved: false,
+        indexSettings: {
+          default_pipeline: 'Security_Solution_alerts_sample_data_ingest_pipeline',
+        },
+        pipeline: {
+          id: 'Security_Solution_alerts_sample_data_ingest_pipeline',
+          description: securitysolutionAlertsIngestPipelineDescription,
+          processors: [
+            {
+              set: {
+                field: 'kibana.space_ids',
+                value: [spaceId],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: '@timestamp',
+                value: ['{{ _ingest.timestamp }}'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'alert.actions.createdAt',
+                value: ['{{ _ingest.timestamp }}'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'agent.type',
+                value: ['endpoint'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'event.kind',
+                value: ['signal'],
+                ignore_failure: true,
+              },
+            },
+          ],
+        },
       },
     ],
     status: 'not_installed',

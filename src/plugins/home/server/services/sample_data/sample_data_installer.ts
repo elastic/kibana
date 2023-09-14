@@ -154,18 +154,40 @@ export class SampleDataInstaller {
     } catch (err) {
       // ignore error
     }
+
+    if (dataIndex.pipeline) {
+      try {
+        await this.esClient.asCurrentUser.ingest.deletePipeline({
+          id: dataIndex.pipeline?.id,
+        });
+      } catch (err) {
+        // ignore error
+      }
+    }
   }
 
   private async installDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
     const index = createIndexName(dataset.id, dataIndex.id);
     const aliases = dataIndex.aliases;
     try {
+      if (dataIndex.pipeline) {
+        await this.esClient.asCurrentUser.ingest.putPipeline({
+          id: dataIndex.pipeline.id,
+          body: {
+            description: dataIndex.pipeline.description,
+            processors: dataIndex.pipeline.processors,
+          },
+        });
+      }
+
       if (dataIndex.isDataStream) {
         const request = {
           name: index,
           body: {
             template: {
               mappings: { properties: dataIndex.fields },
+              settings: dataIndex.indexSettings,
+              aliases,
             },
             index_patterns: [index],
             data_stream: {},
@@ -176,13 +198,6 @@ export class SampleDataInstaller {
         await this.esClient.asCurrentUser.indices.createDataStream({
           name: index,
         });
-        if (aliases) {
-          await this.esClient.asCurrentUser.indices.updateAliases({
-            actions: Object.entries(aliases).map(([alias]) => ({
-              add: { index, alias },
-            })),
-          });
-        }
       } else {
         await this.esClient.asCurrentUser.indices.create({
           index,
