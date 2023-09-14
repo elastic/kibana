@@ -58,27 +58,12 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async openDatePickerQuickMenu() {
       log.debug('openDatePickerQuickMenu');
       const button = await this.findToggleQuickMenuButton();
-      await retry.try(async () => {
-        if (!(await button.isSelected())) {
-          await button.click();
-        }
-        if (!(await button.isSelected())) {
-          throw new Error('openDatePickerQuickMenu click missed');
-        }
-      });
-    }
+      await button.click();
 
-    public async closeDatePickerQuickMenu() {
-      log.debug('closeDatePickerQuickMenu');
-      const button = await this.findToggleQuickMenuButton();
-      await retry.try(async () => {
-        if (await button.isSelected()) {
-          await button.click();
-        }
-        if (await button.isSelected()) {
-          throw new Error('closeDatePickerQuickMenu click missed');
-        }
-      });
+      await retry.waitFor(
+        'super date picker quick menu to be displayed',
+        async () => await testSubjects.isDisplayed('superDatePickerQuickMenu')
+      );
     }
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
@@ -135,27 +120,27 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async enableCustomTimeRange() {
       log.debug('enableCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-      await retry.try(async () => {
-        if ((await toggle.getAttribute('aria-checked')) === 'false') {
-          await toggle.click();
-          if ((await toggle.getAttribute('aria-checked')) === 'false') {
-            throw new Error('enableCustomTimeRange click missed');
-          }
-        }
-      });
+
+      if ((await toggle.getAttribute('aria-checked')) === 'false') {
+        await toggle.click();
+        await retry.waitFor(
+          'custom time range to be enabled',
+          async () => (await toggle.getAttribute('aria-checked')) === 'true'
+        );
+      }
     }
 
     public async disableCustomTimeRange() {
       log.debug('disableCustomTimeRange');
       const toggle = await testSubjects.find(this.TOGGLE_TIME_RANGE_TEST_SUBJ);
-      await retry.try(async () => {
-        if ((await toggle.getAttribute('aria-checked')) === 'true') {
-          await toggle.click();
-          if ((await toggle.getAttribute('aria-checked')) === 'true') {
-            throw new Error('disableCustomTimeRange click missed');
-          }
-        }
-      });
+
+      if ((await toggle.getAttribute('aria-checked')) === 'true') {
+        await toggle.click();
+        await retry.waitFor(
+          'custom time range to be disabled',
+          async () => (await toggle.getAttribute('aria-checked')) === 'false'
+        );
+      }
     }
   })();
 }
