@@ -7,7 +7,7 @@
 
 import { last } from 'lodash';
 import { InfraFormatterType } from '../../../../common/custom_threshold_rule/types';
-import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
+import { MetricsExplorerMetric } from '../../../../common/custom_threshold_rule/metrics_explorer';
 
 export const metricToFormat = (metric?: MetricsExplorerMetric) => {
   if (metric && metric.field) {

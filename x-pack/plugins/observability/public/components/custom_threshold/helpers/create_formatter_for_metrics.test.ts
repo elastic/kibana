@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
+import { MetricsExplorerMetric } from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { createFormatterForMetric } from './create_formatter_for_metric';
 
 describe('createFormatterForMetric()', () => {

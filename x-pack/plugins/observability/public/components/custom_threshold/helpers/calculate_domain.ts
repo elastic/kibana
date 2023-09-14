@@ -6,7 +6,7 @@
  */
 
 import { min, max, sum, isNumber } from 'lodash';
-import { MetricsExplorerSeries } from '../../../../common/threshold_rule/metrics_explorer';
+import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../../../common/custom_threshold_rule/types';
 import { getMetricId } from './get_metric_id';
 

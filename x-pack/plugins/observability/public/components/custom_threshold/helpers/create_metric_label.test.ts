@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
+import { MetricsExplorerMetric } from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { createMetricLabel } from './create_metric_label';
 
 describe('createMetricLabel()', () => {

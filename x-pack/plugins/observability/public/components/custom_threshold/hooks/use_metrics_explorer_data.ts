@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
-} from '../../../../common/threshold_rule/metrics_explorer';
+} from '../../../../common/custom_threshold_rule/metrics_explorer';
 
 import {
   MetricsExplorerOptions,

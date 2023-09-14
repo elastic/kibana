@@ -27,8 +27,8 @@ import { useKibana } from '../../../utils/kibana_react';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerRow,
-} from '../../../../common/threshold_rule/metrics_explorer';
-import { Color } from '../../../../common/threshold_rule/color_palette';
+} from '../../../../common/custom_threshold_rule/metrics_explorer';
+import { Color } from '../../../../common/custom_threshold_rule/color_palette';
 import {
   MetricsExplorerChartType,
   MetricsExplorerOptionsMetric,

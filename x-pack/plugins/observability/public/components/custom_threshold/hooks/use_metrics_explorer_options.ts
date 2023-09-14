@@ -12,8 +12,8 @@ import createContainer from 'constate';
 import type { TimeRange } from '@kbn/es-query';
 import { useState, useEffect, useMemo, Dispatch, SetStateAction } from 'react';
 
-import { metricsExplorerMetricRT } from '../../../../common/threshold_rule/metrics_explorer';
-import { Color } from '../../../../common/threshold_rule/color_palette';
+import { metricsExplorerMetricRT } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import { Color } from '../../../../common/custom_threshold_rule/color_palette';
 
 import { useAlertPrefillContext } from '../helpers/use_alert_prefill';
 import { useKibanaTimefilterTime, useSyncKibanaTimeFilterTime } from './use_kibana_timefilter_time';

@@ -19,7 +19,7 @@ import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
 import { AlertsLocatorParams, getAlertUrl, TimeUnitChar } from '../../../../common';
-import { createFormatter } from '../../../../common/threshold_rule/formatters';
+import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { ObservabilityConfig } from '../../..';
 import { AlertStates, searchConfigurationSchema } from './types';

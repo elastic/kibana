@@ -6,7 +6,7 @@
  */
 
 import { first } from 'lodash';
-import { MetricsExplorerResponse } from '../../../../common/threshold_rule/metrics_explorer';
+import { MetricsExplorerResponse } from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { MetricThresholdAlertParams, ExpressionChartSeries } from '../types';
 
 export const transformMetricsExplorerData = (

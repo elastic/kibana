@@ -7,7 +7,7 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
-import { MetricsExplorerSeries } from '../../../../common/threshold_rule/metrics_explorer';
+import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
 
 import { TriggerActionsContext } from './triggers_actions_context';
 import { useAlertPrefillContext } from '../helpers/use_alert_prefill';
