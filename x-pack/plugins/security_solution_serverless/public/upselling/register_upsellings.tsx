@@ -18,6 +18,7 @@ import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/me
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import { EndpointPolicyProtectionsLazy } from './sections/endpoint_management';
+import { RuleDetailsEndpointExceptionsLazy } from './sections/endpoint_exceptions';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
 import {
@@ -131,6 +132,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpointPolicyProtections',
     pli: AppFeatureKey.endpointPolicyProtections,
     component: EndpointPolicyProtectionsLazy,
+  },
+  {
+    id: 'endpointExceptions',
+    pli: AppFeatureKey.endpointExceptions,
+    component: RuleDetailsEndpointExceptionsLazy,
   },
 ];
 

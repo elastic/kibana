@@ -19,7 +19,7 @@ import {
   EuiWindowEvent,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -32,12 +32,13 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 
 import {
-  tableDefaults,
   dataTableActions,
   dataTableSelectors,
   FILTER_OPEN,
+  tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { useGetEndpointExceptionsUnavailableComponent } from './hooks/use_get_endpoint_exceptions_unavailablle_component';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -100,10 +101,10 @@ import {
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import {
-  explainLackOfPermission,
   canEditRuleWithActions,
-  isBoolean,
+  explainLackOfPermission,
   hasUserCRUDPermission,
+  isBoolean,
 } from '../../../../common/utils/privileges';
 
 import {
@@ -248,6 +249,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const startMlJobsIfNeeded = useCallback(async () => {
     await startMlJobs(rule?.machine_learning_job_id);
   }, [rule, startMlJobs]);
+
+  const EndpointExceptionsUnavailableComponent = useGetEndpointExceptionsUnavailableComponent();
 
   const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, hasIndexRead });
 
@@ -777,13 +780,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route
                   path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
                 >
-                  <ExceptionsViewer
-                    rule={rule}
-                    listTypes={RULE_ENDPOINT_EXCEPTION_LIST_TYPE}
-                    onRuleChange={refreshRule}
-                    isViewReadOnly={!isExistingRule}
-                    data-test-subj="endpointExceptionsTab"
-                  />
+                  {!EndpointExceptionsUnavailableComponent ? (
+                    <ExceptionsViewer
+                      rule={rule}
+                      listTypes={RULE_ENDPOINT_EXCEPTION_LIST_TYPE}
+                      onRuleChange={refreshRule}
+                      isViewReadOnly={!isExistingRule}
+                      data-test-subj="endpointExceptionsTab"
+                    />
+                  ) : (
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      <EuiFlexItem grow={false}>
+                        <EndpointExceptionsUnavailableComponent />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
                   <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
