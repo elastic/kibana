@@ -70,7 +70,7 @@ export const mockConfig = {
   roles: {
     enabled: false,
   },
-  statefulSettings: { enabled: true }
+  statefulSettings: { enabled: true },
 };
 
 const validCheck = {
