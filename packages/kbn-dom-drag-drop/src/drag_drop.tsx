@@ -613,11 +613,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
       onDrop: dropType ? (e: DroppableEvent) => drop(e, dropType) : noop,
       draggable,
       ghost:
-        (true &&
-          isActiveDropTarget &&
-          dropType !== 'reorder' &&
-          dragging?.ghost &&
-          dragging.ghost) ||
+        (isActiveDropTarget && dropType !== 'reorder' && dragging?.ghost && dragging.ghost) ||
         undefined,
     };
   };
