@@ -96,8 +96,6 @@ export class MlServerPlugin
     nlp: true,
   };
   private isServerless: boolean = false;
-  private registerCases: () => void = () => {};
-  private registerSampleDatasetsIntegration: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
@@ -256,26 +254,25 @@ export class MlServerPlugin
     initMlServerLog({ log: this.log });
 
     if (plugins.alerting) {
-      registerMlAlerts({
-        alerting: plugins.alerting,
-        logger: this.log,
-        mlSharedServices: sharedServicesProviders,
-        mlServicesProviders: internalServicesProviders,
-      });
+      registerMlAlerts(
+        {
+          alerting: plugins.alerting,
+          logger: this.log,
+          mlSharedServices: sharedServicesProviders,
+          mlServicesProviders: internalServicesProviders,
+        },
+        this.enabledFeatures
+      );
     }
 
-    this.registerCases = () => {
-      if (plugins.cases) {
-        registerCasesPersistableState(plugins.cases);
-      }
-    };
+    if (plugins.cases) {
+      registerCasesPersistableState(plugins.cases, this.enabledFeatures);
+    }
 
-    this.registerSampleDatasetsIntegration = () => {
-      // called in start once enabledFeatures is available
-      if (this.home) {
-        registerSampleDataSetLinks(this.enabledFeatures, this.home);
-      }
-    };
+    // called in start once enabledFeatures is available
+    if (this.home) {
+      registerSampleDataSetLinks(this.home, this.enabledFeatures);
+    }
 
     registerKibanaSettings(coreSetup);
 
@@ -308,10 +305,6 @@ export class MlServerPlugin
         return;
       }
 
-      if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
-        this.registerCases();
-        this.registerSampleDatasetsIntegration();
-      }
       // check whether the job saved objects exist
       // and create them if needed.
       const { initializeJobs } = jobSavedObjectsInitializationFactory(

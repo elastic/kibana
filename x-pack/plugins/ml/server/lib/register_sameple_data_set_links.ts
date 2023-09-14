@@ -10,8 +10,8 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { MlFeatures } from '../types';
 
 export function registerSampleDataSetLinks(
-  enabledFeatures: MlFeatures,
-  home: HomeServerPluginSetup
+  home: HomeServerPluginSetup,
+  enabledFeatures: MlFeatures
 ) {
   if (enabledFeatures.ad === true) {
     const sampleDataLinkLabel = i18n.translate('xpack.ml.sampleDataLinkLabel', {
