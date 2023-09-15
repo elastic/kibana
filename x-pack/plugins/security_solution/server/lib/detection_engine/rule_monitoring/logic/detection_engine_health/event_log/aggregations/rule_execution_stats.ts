@@ -13,7 +13,7 @@ import type {
   NumberOfDetectedGaps,
   NumberOfExecutions,
   NumberOfLoggedMessages,
-  RuleExecutionStats,
+  HealthOverviewStats,
   TopMessages,
   RuleExecutionStatus,
 } from '../../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -179,7 +179,7 @@ export const getRuleExecutionStatsAggregation = (
 export const normalizeRuleExecutionStatsAggregationResult = (
   aggregations: Record<string, RawData>,
   aggregationLevel: RuleExecutionStatsAggregationLevel
-): RuleExecutionStats => {
+): HealthOverviewStats => {
   const totalExecutions = aggregations.totalExecutions || {};
   const executeEvents = aggregations.executeEvents || {};
   const statusChangeEvents = aggregations.statusChangeEvents || {};

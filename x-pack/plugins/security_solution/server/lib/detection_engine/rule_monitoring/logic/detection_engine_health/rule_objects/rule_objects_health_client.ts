@@ -49,9 +49,9 @@ export interface IRuleObjectsHealthClient {
   calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth>;
 }
 
-type RuleHealth = Pick<RuleHealthSnapshot, 'stats_at_the_moment' | 'debug'>;
-type SpaceHealth = Pick<SpaceHealthSnapshot, 'stats_at_the_moment' | 'debug'>;
-type ClusterHealth = Pick<ClusterHealthSnapshot, 'stats_at_the_moment' | 'debug'>;
+type RuleHealth = Pick<RuleHealthSnapshot, 'state_at_the_moment' | 'debug'>;
+type SpaceHealth = Pick<SpaceHealthSnapshot, 'state_at_the_moment' | 'debug'>;
+type ClusterHealth = Pick<ClusterHealthSnapshot, 'state_at_the_moment' | 'debug'>;
 
 export const createRuleObjectsHealthClient = (
   rulesClient: RulesClientApi,
@@ -62,7 +62,7 @@ export const createRuleObjectsHealthClient = (
     async calculateRuleHealth(args: RuleHealthParameters): Promise<RuleHealth> {
       const rule = await fetchRuleById(rulesClient, args.rule_id);
       return {
-        stats_at_the_moment: { rule },
+        state_at_the_moment: { rule },
         debug: {},
       };
     },
@@ -72,7 +72,7 @@ export const createRuleObjectsHealthClient = (
       const aggregations = await rulesClient.aggregate({ aggs });
 
       return {
-        stats_at_the_moment: normalizeSpaceHealthAggregationResult(aggregations),
+        state_at_the_moment: normalizeSpaceHealthAggregationResult(aggregations),
         debug: {
           rulesClient: {
             request: { aggs },
@@ -92,7 +92,7 @@ export const createRuleObjectsHealthClient = (
       });
 
       return {
-        stats_at_the_moment: normalizeClusterHealthAggregationResult(response.aggregations),
+        state_at_the_moment: normalizeClusterHealthAggregationResult(response.aggregations),
         debug: {
           savedObjectsClient: {
             request: { aggs },

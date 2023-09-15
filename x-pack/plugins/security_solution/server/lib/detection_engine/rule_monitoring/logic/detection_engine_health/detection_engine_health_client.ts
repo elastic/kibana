@@ -44,7 +44,7 @@ export const createDetectionEngineHealthClient = (
           const statsBasedOnEventLog = await eventLogHealthClient.calculateRuleHealth(args);
 
           return {
-            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+            state_at_the_moment: statsBasedOnRuleObjects.state_at_the_moment,
             stats_over_interval: statsBasedOnEventLog.stats_over_interval,
             history_over_interval: statsBasedOnEventLog.history_over_interval,
             debug: {
@@ -76,7 +76,7 @@ export const createDetectionEngineHealthClient = (
           ]);
 
           return {
-            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+            state_at_the_moment: statsBasedOnRuleObjects.state_at_the_moment,
             stats_over_interval: statsBasedOnEventLog.stats_over_interval,
             history_over_interval: statsBasedOnEventLog.history_over_interval,
             debug: {
@@ -107,7 +107,7 @@ export const createDetectionEngineHealthClient = (
           ]);
 
           return {
-            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+            state_at_the_moment: statsBasedOnRuleObjects.state_at_the_moment,
             stats_over_interval: statsBasedOnEventLog.stats_over_interval,
             history_over_interval: statsBasedOnEventLog.history_over_interval,
             debug: {

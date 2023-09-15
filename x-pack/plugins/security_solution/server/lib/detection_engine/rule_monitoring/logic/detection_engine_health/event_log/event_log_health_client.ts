@@ -56,9 +56,9 @@ export interface IEventLogHealthClient {
   calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth>;
 }
 
-type RuleHealth = Omit<RuleHealthSnapshot, 'stats_at_the_moment'>;
-type SpaceHealth = Omit<SpaceHealthSnapshot, 'stats_at_the_moment'>;
-type ClusterHealth = Omit<ClusterHealthSnapshot, 'stats_at_the_moment'>;
+type RuleHealth = Omit<RuleHealthSnapshot, 'state_at_the_moment'>;
+type SpaceHealth = Omit<SpaceHealthSnapshot, 'state_at_the_moment'>;
+type ClusterHealth = Omit<ClusterHealthSnapshot, 'state_at_the_moment'>;
 
 export const createEventLogHealthClient = (
   eventLog: IEventLogClient,
