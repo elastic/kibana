@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('search examples', function () {
+  describe('search examples', function () {
     before(async () => {
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
