@@ -35,6 +35,11 @@ export const isErrorResponse = (response?: IKibanaSearchResponse) => {
  * @returns true if response is completed successfully
  */
 export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
+  // Some custom search strategies do not indicate whether they are still running. In this case, assume it is complete.
+  if (response && !response.hasOwnProperty('isRunning')) {
+    return true;
+  }
+
   return !isErrorResponse(response) && Boolean(response && !response.isRunning);
 };
 

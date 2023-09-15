@@ -179,6 +179,13 @@ describe('utils', () => {
       });
       expect(isError).toBe(true);
     });
+
+    it('returns `true` if the response does not indicate isRunning', () => {
+      const isError = isCompleteResponse({
+        rawResponse: {},
+      });
+      expect(isError).toBe(true);
+    });
   });
 
   describe('isPartialResponse', () => {
