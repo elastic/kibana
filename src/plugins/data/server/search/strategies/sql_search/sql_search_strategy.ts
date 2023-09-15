@@ -21,6 +21,7 @@ import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
+import { getRequestMeta } from '../common/request_meta';
 
 export const sqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
@@ -48,6 +49,7 @@ export const sqlSearchStrategyProvider = (
       const { keep_cursor: keepCursor, ...params } = request.params ?? {};
       let body: SqlQueryResponse;
       let headers: IncomingHttpHeaders;
+      let meta: object;
 
       if (id) {
         ({ body, headers } = await client.sql.getAsync(
@@ -59,7 +61,7 @@ export const sqlSearchStrategyProvider = (
           { ...options.transport, signal: options.abortSignal, meta: true }
         ));
       } else {
-        ({ headers, body } = await client.sql.query(
+        ({ headers, body, meta } = await client.sql.query(
           {
             format: params.format ?? 'json',
             ...getDefaultAsyncSubmitParams(searchConfig, options),
@@ -79,7 +81,7 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning);
+      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning, getRequestMeta(meta));
     };
 
     const cancel = async () => {
