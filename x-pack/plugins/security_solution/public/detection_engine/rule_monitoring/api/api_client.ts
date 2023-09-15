@@ -50,10 +50,8 @@ export const api: IRuleMonitoringApiClient = {
     } = args;
 
     const url = getRuleExecutionEventsUrl(ruleId);
-    const startDate = dateRange?.start ? dateMath.parse(dateRange.start)?.toISOString() : undefined;
-    const endDate = dateRange?.end
-      ? dateMath.parse(dateRange.end, { roundUp: true })?.toISOString()
-      : undefined;
+    const startDate = dateMath.parse(dateRange?.start ?? '')?.toISOString();
+    const endDate = dateMath.parse(dateRange?.end ?? '', { roundUp: true })?.toISOString();
 
     return http().fetch<GetRuleExecutionEventsResponse>(url, {
       method: 'GET',
