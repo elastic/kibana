@@ -38,7 +38,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   features: PluginSetupContract;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
-  cloudSetup: CloudSetup;
+  cloud: CloudSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
