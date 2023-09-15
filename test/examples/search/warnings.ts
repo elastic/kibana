@@ -11,7 +11,6 @@ import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import assert from 'assert';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
-import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -153,15 +152,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let toasts: WebElementWrapper[] = [];
+      let toastContents: string[] = [];
       await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
+        const toasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
+        toastContents = await Promise.all(toasts.map((t) => t.getVisibleText()));
       });
       const expects = ['The data might be incomplete or wrong.', 'Query result'];
-      await asyncForEach(toasts, async (t, index) => {
-        expect(await t.getVisibleText()).to.eql(expects[index]);
-      });
+      expect(toastContents).to.eql(expects);
 
       // warnings tab
       const warnings = await getTestJson('warningsTab', 'warningsCodeBlock');
