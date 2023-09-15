@@ -623,7 +623,6 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
         : {}),
     });
     await waitUntilClusterReady({ client, expectedStatus: 'green', log });
-    log.success('ES is ready');
   }
 
   if (options.teardown) {

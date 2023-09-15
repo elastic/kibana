@@ -12,6 +12,7 @@ import * as extractConfig from '../utils/extract_config_files';
 import * as dockerUtils from '../utils/docker';
 import { createAnyInstanceSerializer, createStripAnsiSerializer } from '@kbn/jest-serializers';
 import * as installUtils from '../install';
+import * as waitClusterUtil from '../utils/wait_until_cluster_ready';
 import { Cluster } from '../cluster';
 import { ES_NOPASSWORD_P12_PATH } from '@kbn/dev-utils/src/certs';
 import {
@@ -101,6 +102,10 @@ jest.mock('../utils/docker', () => ({
   runDockerContainer: jest.fn(),
 }));
 
+jest.mock('../utils/wait_until_cluster_ready', () => ({
+  waitUntilClusterReady: jest.fn(),
+}));
+
 const downloadSnapshotMock = jest.spyOn(installUtils, 'downloadSnapshot');
 const installSourceMock = jest.spyOn(installUtils, 'installSource');
 const installSnapshotMock = jest.spyOn(installUtils, 'installSnapshot');
@@ -108,6 +113,7 @@ const installArchiveMock = jest.spyOn(installUtils, 'installArchive');
 const extractConfigFilesMock = jest.spyOn(extractConfig, 'extractConfigFiles');
 const runServerlessClusterMock = jest.spyOn(dockerUtils, 'runServerlessCluster');
 const runDockerContainerMock = jest.spyOn(dockerUtils, 'runDockerContainer');
+const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -364,6 +370,30 @@ describe('#start(installPath)', () => {
 
     expect(logWriter.messages[0]).toContain(`and writing logs to ${writeLogsToPath}`);
     expect(fs.existsSync(writeLogsToPath)).toBe(true);
+  });
+
+  test('waits until cluster is ready', async () => {
+    mockEsBin({ start: true });
+    waitUntilClusterReadyMock.mockResolvedValue();
+
+    await new Cluster({ log }).start(installPath, esClusterExecOptions);
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+  });
+
+  test(`skips waiting for cluster is ready if 'skipReadyCheck' is passed`, async () => {
+    mockEsBin({ start: true });
+    waitUntilClusterReadyMock.mockResolvedValue();
+
+    await new Cluster({ log }).start(installPath, { skipReadyCheck: true });
+    expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(0);
+  });
+
+  test(`rejects if 'waitUntilClusterReady' rejects`, async () => {
+    mockEsBin({ start: true });
+    waitUntilClusterReadyMock.mockRejectedValue(new Error('foo'));
+    await expect(
+      new Cluster({ log }).start(installPath, esClusterExecOptions)
+    ).rejects.toThrowError('foo');
   });
 
   test('rejects if #start() was called previously', async () => {

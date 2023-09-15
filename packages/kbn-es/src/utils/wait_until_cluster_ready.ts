@@ -48,6 +48,7 @@ export async function waitUntilClusterReady({
       const resp = await client.cluster.health();
       const status: HealthStatus = resp.status;
       if (isReady(status)) {
+        log.success('ES cluster is ready');
         return;
       }
 
