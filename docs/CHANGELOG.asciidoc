@@ -7,7 +7,6 @@
 // each other on Github, so don't worry too much on using the right prefix.
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
-:version: 8.10.0
 
 ifeval::["{version}"=="8.10.0"]
 IMPORTANT: {kib} 8.10.0 has been withdrawn.

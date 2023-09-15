@@ -4,7 +4,6 @@
 <titleabbrev>Install with Docker</titleabbrev>
 ++++
 
-:version: 8.10.0
 :kib-docker-repo:     docker.elastic.co/kibana/kibana
 :kib-docker-image:    {kib-docker-repo}:{version}
 :es-docker-repo:      docker.elastic.co/elasticsearch/elasticsearch
