@@ -108,4 +108,29 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
     );
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should render no data message', () => {
+    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByText } = render(
+      <TestProviders>
+        <RelatedAlertsBySameSourceEvent
+          originalEventId={originalEventId}
+          scopeId={scopeId}
+          eventId={eventId}
+        />
+      </TestProviders>
+    );
+    expect(getByText('No related source events.')).toBeInTheDocument();
+  });
 });
