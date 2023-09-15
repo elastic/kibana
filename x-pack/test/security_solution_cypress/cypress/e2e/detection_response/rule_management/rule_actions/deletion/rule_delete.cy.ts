@@ -19,7 +19,7 @@ import { createRule, findAllRules } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/common';
 import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
 
-describe('Rule deletion', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const TESTED_RULE_DATA = getNewRule({
     rule_id: 'rule1',
     name: 'New Rule Test',

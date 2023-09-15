@@ -48,7 +48,6 @@ export const enablesRule = () => {
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
-    console.log({ response });
     cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
