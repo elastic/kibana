@@ -9,7 +9,6 @@ import type { SavedObjectAttributes } from '@kbn/core/server';
 import { Filter } from '@kbn/es-query';
 import type { WeekdayStr } from '@kbn/rrule';
 import { IsoWeekday } from '../../../../common';
-import type { RuleActionTypes } from '../../../../common';
 import {
   ruleNotifyWhenAttributes,
   ruleLastRunOutcomeValuesAttributes,
@@ -157,7 +156,6 @@ export interface RuleActionAttributes {
     throttle: string | null;
   };
   alertsFilter?: AlertsFilterAttributes;
-  type?: RuleActionTypes;
 }
 
 type MappedParamsAttributes = SavedObjectAttributes & {

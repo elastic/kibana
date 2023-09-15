@@ -57,7 +57,6 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
-  RuleActionTypes,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -407,7 +406,7 @@ export interface RawRuleAlertsFilter extends AlertsFilter {
   timeframe?: AlertsFilterTimeframe;
 }
 
-export interface RawDefaultAction {
+export interface RawRuleAction {
   uuid: string;
   group?: string;
   actionRef: string;
@@ -419,18 +418,7 @@ export interface RawDefaultAction {
     throttle: string | null;
   };
   alertsFilter?: RawRuleAlertsFilter;
-  type?: typeof RuleActionTypes.DEFAULT;
 }
-
-interface RawSystemAction {
-  uuid: string;
-  actionRef: string;
-  actionTypeId: string;
-  params: RuleActionParams;
-  type: typeof RuleActionTypes.SYSTEM;
-}
-
-export type RawRuleAction = RawDefaultAction | RawSystemAction;
 
 // note that the `error` property is "null-able", as we're doing a partial
 // update on the rule when we update this data, but need to ensure we
