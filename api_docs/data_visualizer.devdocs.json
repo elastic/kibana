@@ -433,15 +433,7 @@
         "label": "IndexDataVisualizerSpec",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ getAdditionalLinks?: ",
-          {
-            "pluginId": "dataVisualizer",
-            "scope": "public",
-            "docId": "kibDataVisualizerPluginApi",
-            "section": "def-public.GetAdditionalLinks",
-            "text": "GetAdditionalLinks"
-          },
-          " | undefined; }>"
+          "React.FunctionComponent<Props>"
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
@@ -489,15 +481,7 @@
       "label": "DataVisualizerPluginStart",
       "description": [],
       "signature": [
-        "{ getFileDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<{ getAdditionalLinks?: ",
-        {
-          "pluginId": "dataVisualizer",
-          "scope": "public",
-          "docId": "kibDataVisualizerPluginApi",
-          "section": "def-public.GetAdditionalLinks",
-          "text": "GetAdditionalLinks"
-        },
-        " | undefined; }>>; getDataComparisonComponent: () => Promise<() => React.FC<",
+        "{ getFileDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getDataComparisonComponent: () => Promise<() => React.FC<",
         "DataComparisonDetectionAppStateProps",
         ">>; getMaxBytesFormatted: () => string; }"
       ],
