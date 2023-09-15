@@ -10,6 +10,7 @@ import { from } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
+import { getRequestMeta } from '../common/request_meta';
 
 export const esqlSearchStrategyProvider = (
   logger: Logger,
@@ -32,7 +33,7 @@ export const esqlSearchStrategyProvider = (
     const search = async () => {
       try {
         const { terminateAfter, ...requestParams } = request.params ?? {};
-        const { headers, body } = await esClient.asCurrentUser.transport.request(
+        const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
             path: '/_query',
@@ -45,10 +46,12 @@ export const esqlSearchStrategyProvider = (
             meta: true,
           }
         );
+        const requestMeta = getRequestMeta(meta);
         return {
           rawResponse: body,
           isPartial: false,
           isRunning: false,
+          ...(requestMeta ? { requestMeta } : {}),
           warning: headers?.warning,
         };
       } catch (e) {

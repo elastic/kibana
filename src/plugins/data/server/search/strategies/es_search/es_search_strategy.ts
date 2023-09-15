@@ -15,6 +15,7 @@ import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../../collectors/search/usage';
+import { getRequestMeta } from '../common/request_meta';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -50,12 +51,13 @@ export const esSearchStrategyProvider = (
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,
         };
-        const body = await esClient.asCurrentUser.search(params, {
+        const { body, meta } = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
           ...transport,
+          meta: true,
         });
         const response = shimHitsTotal(body, options);
-        return toKibanaSearchResponse(response);
+        return toKibanaSearchResponse(response, getRequestMeta(meta));
       } catch (e) {
         throw getKbnServerError(e);
       }

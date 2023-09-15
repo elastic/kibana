@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { SearchRequestMeta } from '../../../../common';
 import type { AsyncSearchResponse } from './types';
 import { getTotalLoaded } from '../es_search';
 
@@ -16,7 +15,7 @@ import { getTotalLoaded } from '../es_search';
 export function toAsyncKibanaSearchResponse(
   response: AsyncSearchResponse,
   warning?: string,
-  requestMeta: SearchRequestMeta
+  requestMeta?: RequestMeta
 ) {
   return {
     id: response.id,
