@@ -24,7 +24,10 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
  * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
  * @internal
  */
-export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unknown>, requestMeta?: RequestMeta) {
+export function toKibanaSearchResponse(
+  rawResponse: estypes.SearchResponse<unknown>,
+  requestMeta?: RequestMeta
+) {
   return {
     rawResponse,
     isPartial: false,
