@@ -6,8 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RuleActionTypes } from '../../../../..';
-import { updateSystemActionSchema } from '../../../../../system_actions/v1';
 import { validateDurationV1, validateNotifyWhenV1 } from '../../../validation';
 import { validateSnoozeScheduleV1 } from '../validation';
 import { rRuleSchemaV1 } from '../../../../r_rule';
@@ -39,8 +37,8 @@ const ruleSnoozeScheduleSchemaWithValidation = schema.object(
   { validate: validateSnoozeScheduleV1 }
 );
 
-const ruleDefaultActionSchema = schema.object({
-  group: schema.string(),
+const ruleActionSchema = schema.object({
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   uuid: schema.maybe(schema.string()),
@@ -51,7 +49,6 @@ const ruleDefaultActionSchema = schema.object({
       notifyWhen: notifyWhenSchema,
     })
   ),
-  type: schema.maybe(schema.literal(RuleActionTypes.DEFAULT)),
 });
 
 export const bulkEditOperationsSchema = schema.arrayOf(
@@ -68,7 +65,7 @@ export const bulkEditOperationsSchema = schema.arrayOf(
     schema.object({
       operation: schema.oneOf([schema.literal('add'), schema.literal('set')]),
       field: schema.literal('actions'),
-      value: schema.arrayOf(schema.oneOf([ruleDefaultActionSchema, updateSystemActionSchema])),
+      value: schema.arrayOf(ruleActionSchema),
     }),
     schema.object({
       operation: schema.literal('set'),

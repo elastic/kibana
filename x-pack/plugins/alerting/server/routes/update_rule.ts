@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
   RewriteResponseCase,
-  RewriteRequestCase,
   handleDisabledApiKeysError,
   rewriteActionsReq,
   rewriteActionsRes,
@@ -54,15 +53,17 @@ const bodySchema = schema.object({
   ),
 });
 
-const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, actions, ...rest } = result.data;
+type Data = TypeOf<typeof bodySchema>;
+
+const rewriteBodyReq = (
+  data: Data,
+  isSystemAction: (connectorId: string) => boolean
+): UpdateOptions<RuleTypeParams>['data'] => {
+  const { notify_when: notifyWhen, actions, ...rest } = data;
   return {
-    ...result,
-    data: {
-      ...rest,
-      notifyWhen,
-      actions: rewriteActionsReq(actions),
-    },
+    ...rest,
+    notifyWhen,
+    actions: rewriteActionsReq(actions, isSystemAction),
   };
 };
 const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
@@ -133,10 +134,17 @@ export const updateRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const actionsClient = (await context.actions).getActionsClient();
+
           const { id } = req.params;
           const rule = req.body;
+
           try {
-            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
+            const alertRes = await rulesClient.update({
+              id,
+              data: rewriteBodyReq(rule, actionsClient.isSystemAction),
+            });
+
             return res.ok({
               body: rewriteBodyRes(alertRes),
             });

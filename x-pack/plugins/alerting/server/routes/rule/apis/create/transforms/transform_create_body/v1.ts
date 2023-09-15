@@ -13,28 +13,28 @@ import type {
 import type { CreateRuleData } from '../../../../../../application/rule/methods/create';
 import type { RuleParams } from '../../../../../../application/rule/types';
 
-const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleData['actions'] => {
+const transformCreateBodyActions = (
+  actions: CreateRuleActionV1[],
+  isSystemAction: (connectorId: string) => boolean
+): CreateRuleData['actions'] => {
   if (!actions) return [];
 
-  return actions.map((action) => {
-    if (action.type === RuleActionTypes.SYSTEM) {
+  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
+    if (isSystemAction(action.id)) {
       return {
         id: action.id,
-        uuid: action.uuid,
         params: action.params,
         actionTypeId: action.actionTypeId,
-        type: action.type,
+        uuid: action.uuid,
+        type: RuleActionTypes.SYSTEM,
       };
     }
 
-    const { frequency, alerts_filter: alertsFilter } = action;
-
     return {
-      group: action.group,
+      group: action.group ?? 'default',
       id: action.id,
       params: action.params,
       actionTypeId: action.actionTypeId,
-      ...(action.type ? { type: action.type } : {}),
       ...(action.uuid ? { uuid: action.uuid } : {}),
       ...(frequency
         ? {
@@ -46,12 +46,14 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
           }
         : {}),
       ...(alertsFilter ? { alertsFilter } : {}),
+      type: RuleActionTypes.DEFAULT,
     };
   });
 };
 
 export const transformCreateBody = <Params extends RuleParams = never>(
-  createBody: CreateRuleRequestBodyV1<Params>
+  createBody: CreateRuleRequestBodyV1<Params>,
+  isSystemAction: (connectorId: string) => boolean
 ): CreateRuleData<Params> => {
   return {
     name: createBody.name,
@@ -62,7 +64,7 @@ export const transformCreateBody = <Params extends RuleParams = never>(
     ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
     params: createBody.params,
     schedule: createBody.schedule,
-    actions: transformCreateBodyActions(createBody.actions),
+    actions: transformCreateBodyActions(createBody.actions, isSystemAction),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
   };
 };

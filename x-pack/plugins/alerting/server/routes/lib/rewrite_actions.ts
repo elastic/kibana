@@ -13,19 +13,28 @@ import { RuleAction } from '../../types';
 import { actionsSchema } from './actions_schema';
 
 export const rewriteActionsReq = (
-  actions?: TypeOf<typeof actionsSchema>
+  actions: TypeOf<typeof actionsSchema>,
+  isSystemConnector: (connectorId: string) => boolean
 ): NormalizedAlertAction[] => {
   if (!actions) return [];
 
   return actions.map((action) => {
-    if (action.type === RuleActionTypes.SYSTEM) {
-      return action;
+    if (isSystemConnector(action.id)) {
+      return {
+        id: action.id,
+        params: action.params,
+        uuid: action.uuid,
+        type: RuleActionTypes.SYSTEM,
+      };
     }
 
-    const { frequency, alerts_filter: alertsFilter, ...restAction } = action;
+    const { frequency, alerts_filter: alertsFilter, group } = action;
 
     return {
-      ...restAction,
+      id: action.id,
+      params: action.params,
+      uuid: action.uuid,
+      group: group ?? 'default',
       ...(frequency
         ? {
             frequency: {
@@ -35,6 +44,7 @@ export const rewriteActionsReq = (
           }
         : {}),
       ...(alertsFilter ? { alertsFilter } : {}),
+      type: RuleActionTypes.DEFAULT,
     };
   });
 };

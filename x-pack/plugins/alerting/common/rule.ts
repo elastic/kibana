@@ -129,11 +129,11 @@ export interface RuleDefaultAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
-  type?: typeof RuleActionTypes.DEFAULT;
+  type: typeof RuleActionTypes.DEFAULT;
 }
 
 export interface RuleSystemAction {
-  uuid: string;
+  uuid?: string;
   id: string;
   actionTypeId: string;
   params: RuleActionParams;

@@ -79,6 +79,52 @@ export async function getAll({
   });
 }
 
+export async function getAllSystemActions({
+  context,
+}: {
+  context: GetAllParams['context'];
+}): Promise<FindConnectorResult[]> {
+  try {
+    await context.authorization.ensureAuthorized({ operation: 'get' });
+  } catch (error) {
+    context.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.FIND,
+        error,
+      })
+    );
+    throw error;
+  }
+
+  const systemActions = context.inMemoryConnectors.filter((connector) => connector.isSystemAction);
+
+  const transformedSystemActions = systemActions
+    .map((systemAction) => ({
+      id: systemAction.id,
+      actionTypeId: systemAction.actionTypeId,
+      name: systemAction.name,
+      isPreconfigured: systemAction.isPreconfigured,
+      isDeprecated: isConnectorDeprecated(systemAction),
+      isSystemAction: systemAction.isSystemAction,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  transformedSystemActions.forEach((systemAction) => {
+    // Try to validate the connectors, but don't throw.
+    try {
+      connectorSchema.validate(systemAction);
+    } catch (e) {
+      context.logger.warn(`Error validating systemAction connector: ${systemAction.id}, ${e}`);
+    }
+  });
+
+  return await injectExtraFindData({
+    kibanaIndices: context.kibanaIndices,
+    scopedClusterClient: context.scopedClusterClient,
+    connectors: transformedSystemActions,
+  });
+}
+
 async function injectExtraFindData({
   kibanaIndices,
   scopedClusterClient,
