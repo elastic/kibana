@@ -6,17 +6,27 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
+import React from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+
+const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;
 
 export const ProjectNavigation: React.FC = ({ children }) => {
+  const [isCollapsed, setIsCollapsed] = useLocalStorage(LOCAL_STORAGE_IS_COLLAPSED_KEY, false);
+  const onCollapseToggle = (nextIsCollapsed: boolean) => {
+    setIsCollapsed(nextIsCollapsed);
+  };
+
   return (
     <>
       {
         /* must render the tree to initialize the navigation, even if hidden internally in EUI */
         <div hidden>{children}</div>
       }
-      <EuiCollapsibleNavBeta>{children}</EuiCollapsibleNavBeta>
+      <EuiCollapsibleNavBeta initialIsCollapsed={isCollapsed} onCollapseToggle={onCollapseToggle}>
+        {children}
+      </EuiCollapsibleNavBeta>
     </>
   );
 };
