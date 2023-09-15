@@ -31,7 +31,6 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
         indexPattern={this.props.request.stats?.indexPattern?.value}
         requestMeta={this.props.request.response.json.requestMeta}
         json={JSON.stringify(json, null, 2)}
-
       />
     );
   }

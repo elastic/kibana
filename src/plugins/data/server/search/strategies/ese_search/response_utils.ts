@@ -13,7 +13,11 @@ import { getTotalLoaded } from '../es_search';
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
-export function toAsyncKibanaSearchResponse(response: AsyncSearchResponse, warning?: string, requestMeta: SearchRequestMeta) {
+export function toAsyncKibanaSearchResponse(
+  response: AsyncSearchResponse,
+  warning?: string,
+  requestMeta: SearchRequestMeta
+) {
   return {
     id: response.id,
     rawResponse: response.response,

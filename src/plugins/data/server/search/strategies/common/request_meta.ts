@@ -7,7 +7,7 @@
  */
 
 export function getRequestMeta(meta?: object) {
-  return meta?.request?.params 
+  return meta?.request?.params
     ? {
         method: meta.request.params.method,
         path: meta.request.params.path,

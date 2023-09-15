@@ -307,7 +307,7 @@ export class SearchInterceptor {
     // Async search requires a series of requests
     // 1) POST /<index pattern>/_async_search/
     // 2..n) GET /_async_search/<async search identifier>
-    // 
+    //
     // First request contains useful request meta for tools like Inspector.
     // Preserve and project first request meta into responses.
     let firstRequestMeta;

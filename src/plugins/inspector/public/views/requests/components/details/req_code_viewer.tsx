@@ -47,7 +47,7 @@ export const RequestCodeViewer = ({ indexPattern, requestMeta, json }: RequestCo
 
   function getValue() {
     if (!requestMeta) {
-      return json
+      return json;
     }
 
     const fullPath = requestMeta.querystring

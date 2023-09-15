@@ -79,7 +79,11 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning, id ? undefined : getRequestMeta(meta));
+      return toAsyncKibanaSearchResponse(
+        { ...body, response },
+        headers?.warning,
+        id ? undefined : getRequestMeta(meta)
+      );
     };
 
     const cancel = async () => {
