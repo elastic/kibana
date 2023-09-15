@@ -13,7 +13,7 @@ import {
 } from '../../../screens/alerts_detection_rules';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { ruleDetailsUrl } from '../../../urls/navigation';
-import { enablesRule, getDetails } from '../../../tasks/rule_details';
+import { getDetails } from '../../../tasks/rule_details';
 import { ruleFields } from '../../../data/detection_engine';
 import { getTimeline } from '../../../objects/timeline';
 import { getExistingRule, getNewRule } from '../../../objects/rule';
@@ -33,6 +33,7 @@ import {
   removeExternalLinkText,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
+  RULE_SWITCH,
   RULE_TYPE_DETAILS,
   RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
@@ -45,7 +46,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 // This test is meant to test all common aspects of the rule details page that should function
@@ -58,6 +59,7 @@ describe('Common components', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
+    deleteConnectors();
     login();
     createTimeline(getTimeline()).then((response) => {
       createRule({
@@ -93,20 +95,23 @@ describe('Common components', { tags: ['@ess', '@serverless'] }, () => {
         visitWithoutDateRange(ruleDetailsUrl(rule.body.id));
       });
     });
-    // visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-    // expectManagementTableRules([ruleFields.ruleName]);
   });
 
   it('Only modifies rule active status on enable/disable', () => {
-    enablesRule();
+    cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
 
-    cy.intercept('GET', `/api/detection_engine/rules?id=*`).as('fetchRuleDetails');
-
-    cy.wait('@fetchRuleDetails').then(({ response }) => {
+    cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as(
+      'bulk_action'
+    );
+    cy.get(RULE_SWITCH).should('be.visible');
+    cy.get(RULE_SWITCH).click();
+    cy.wait('@bulk_action').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-
-      cy.wrap(response?.body.max_signals).should('eql', getExistingRule().max_signals);
-      cy.wrap(response?.body.enabled).should('eql', true);
+      cy.wrap(response?.body.attributes.results.updated[0].max_signals).should(
+        'eql',
+        getExistingRule().max_signals
+      );
+      cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', true);
     });
   });
 
