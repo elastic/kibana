@@ -60,7 +60,7 @@ describe('group by expression', () => {
       </IntlProvider>
     );
     expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
-    expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(undefined);
   });
 
   it('clears selected agg field if there is unknown field', async () => {
@@ -87,7 +87,7 @@ describe('group by expression', () => {
       </IntlProvider>
     );
     expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
-    expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(undefined);
   });
 
   it('clears selected agg field if groupBy field is all', async () => {

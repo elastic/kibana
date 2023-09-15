@@ -102,11 +102,11 @@ export const GroupByExpression = ({
     useState<GroupByOverFieldOption[]>(initialTermFieldOptions);
 
   useEffect(() => {
-    if (groupBy === builtInGroupByTypes.all.value) {
+    if (groupBy === builtInGroupByTypes.all.value && selectedTermsFieldsOptions.length > 0) {
       setSelectedTermsFieldsOptions([]);
       onChangeSelectedTermField(undefined);
     }
-  }, [groupBy, onChangeSelectedTermField]);
+  }, [selectedTermsFieldsOptions, groupBy, onChangeSelectedTermField]);
 
   useEffect(() => {
     // if current field set doesn't contain selected field, clear selection
@@ -115,7 +115,7 @@ export const GroupByExpression = ({
     );
     if (hasUnknownField) {
       setSelectedTermsFieldsOptions([]);
-      onChangeSelectedTermField('');
+      onChangeSelectedTermField(undefined);
     }
   }, [selectedTermsFieldsOptions, fields, onChangeSelectedTermField]);
 
