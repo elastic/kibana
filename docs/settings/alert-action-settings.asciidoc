@@ -322,16 +322,19 @@ For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a REST API
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts. 
 
 `xpack.actions.preconfigured.<connector-id>.config.hasAuth`::
-For an <<email-action-type,email>> or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies whether a user and password are required inside the secrets configuration. Defaults to `true`.
+For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies whether a user and password are required inside the secrets configuration. Defaults to `true`.
 
 `xpack.actions.preconfigured.<connector-id>.config.headers`::
-For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a set of key-value pairs sent as headers with the request.
+For a <<webhook-action-type,webhook>> or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a set of key-value pairs sent as headers with the request.
 
 `xpack.actions.preconfigured.<connector-id>.config.host`::
 For an <<email-action-type,email connector>>, specifies the host name of the service provider.
 
 `xpack.actions.preconfigured.<connector-id>.config.index`::
 For an <<index-action-type,index connector>>, specifies the {es} index.
+
+`xpack.actions.preconfigured.<connector-id>.config.method`::
+For a <<webhook-action-type,webhook connector>>, specifies the HTTP request method, either `post` or `put`. Defaults to `post`.
 
 `xpack.actions.preconfigured.<connector-id>.config.orgId`::
 For an <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} organization identifier.
@@ -370,6 +373,7 @@ A configuration URL that varies by connector:
 +
 --
 * For a <<d3security-action-type,D3 Security conector>>, specifies the D3 Security API request URL.
+* For a <<webhook-action-type,webhook connector>>, specifies the web service request URL.
 
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure this hostname is added to the allowed hosts.
 --
@@ -420,7 +424,7 @@ For a <<jira-action-type,Jira connector>>, specifies the account email for HTTP 
 A password secret that varies by connector:
 +
 --
-* For an <<email-action-type,email>> or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+* For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
 * For an <<xmatters-action-type,xMatters connector>>, specifies a password that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
 
@@ -445,7 +449,7 @@ A token secret that varies by connector:
 A user name secret that varies by connector:
 +
 --
-* For an <<email-action-type,email>> or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
+* For an <<email-action-type,email>>, <<webhook-action-type,webhook>>, or <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.hasAuth` is `true`.
 * For an <<xmatters-action-type,xMatters connector>>, specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `true`.
 --
 
