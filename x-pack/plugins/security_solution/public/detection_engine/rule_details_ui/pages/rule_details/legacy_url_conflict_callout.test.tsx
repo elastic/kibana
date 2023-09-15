@@ -9,11 +9,12 @@ import React from 'react';
 import { LegacyUrlConflictCallOut } from './legacy_url_conflict_callout';
 import { render, screen } from '@testing-library/react';
 import type { Rule } from '../../../rule_management/logic';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 
-const mockSpacesApi = {
+const mockSpacesApi: SpacesApi = {
   getActiveSpace$: jest.fn(),
   getActiveSpace: jest.fn(),
   ui: {
@@ -29,6 +30,7 @@ const mockSpacesApi = {
     redirectLegacyUrl: mockRedirectLegacyUrl,
     useSpaces: jest.fn(),
   },
+  hasOnlyDefaultSpace: false,
 };
 
 describe('<LegacyUrlConflictCallOut />', () => {
