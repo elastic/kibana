@@ -8,6 +8,10 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
+ifeval::["{version}"=="8.10.0"]
+IMPORTANT: {kib} 8.10.0 has been withdrawn.
+endif::[]
+
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.10.0>>

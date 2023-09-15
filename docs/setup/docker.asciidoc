@@ -110,10 +110,16 @@ WARNING: Version {version} has not yet been released.
 No Docker image is currently available for {kib} {version}.
 endif::[]
 
+ifeval::["{version}"=="8.10.0"]
+IMPORTANT: {kib} 8.10.0 has been withdrawn.
+endif::[]
+
+ifeval::["{version}"!="8.10.0"]
 [source,sh,subs="attributes"]
 ----
 docker pull {kib-docker-image}
 ----
+endif::[]
 --
 
 . Optional: Verify the {kib} image's signature.
