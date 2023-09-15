@@ -7,6 +7,7 @@
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useRightPanelContext } from '../context';
 import { LeftPanelKey, LeftPanelInvestigationTab } from '../../left';
@@ -16,11 +17,6 @@ import {
   INVESTIGATION_GUIDE_NO_DATA_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
-import {
-  INVESTIGATION_GUIDE_BUTTON,
-  INVESTIGATION_GUIDE_NO_DATA,
-  INVESTIGATION_GUIDE_TITLE,
-} from './translations';
 
 /**
  * Render either the investigation guide button that opens Investigation section in the left panel,
@@ -65,7 +61,12 @@ export const InvestigationGuide: React.FC = () => {
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
         <EuiTitle size="xxs">
-          <h5>{INVESTIGATION_GUIDE_TITLE}</h5>
+          <h5>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideTitle"
+              defaultMessage="Investigation guide"
+            />
+          </h5>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -75,12 +76,18 @@ export const InvestigationGuide: React.FC = () => {
             iconType="documentation"
             data-test-subj={INVESTIGATION_GUIDE_BUTTON_TEST_ID}
           >
-            {INVESTIGATION_GUIDE_BUTTON}
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel"
+              defaultMessage="Show investigation guide"
+            />
           </EuiButton>
         ) : (
-          <div data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
-            {INVESTIGATION_GUIDE_NO_DATA}
-          </div>
+          <p data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
+              defaultMessage="There’s no investigation guide for this rule."
+            />
+          </p>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
