@@ -304,17 +304,37 @@ export class SearchInterceptor {
 
     const cancel = () => id && !isSavedToBackground && sendCancelRequest();
 
+    // Async search requires a series of requests
+    // 1) POST /<index pattern>/_async_search/
+    // 2..n) GET /_async_search/<async search identifier>
+    // 
+    // First request contains useful request meta for tools like Inspector.
+    // Preserve and project first request meta into responses.
+    let firstRequestMeta;
+
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
       ...options,
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
       tap((response) => {
+        if (!firstRequestMeta && response.requestMeta) {
+          firstRequestMeta = response.requestMeta;
+        }
+
         id = response.id;
 
         if (isCompleteResponse(response)) {
           searchTracker?.complete();
         }
+      }),
+      map((response) => {
+        return firstRequestMeta
+          ? {
+              ...response,
+              requestMeta: firstRequestMeta,
+            }
+          : response;
       }),
       catchError((e: Error) => {
         searchTracker?.error();

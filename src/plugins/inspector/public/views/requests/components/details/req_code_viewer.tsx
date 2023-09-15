@@ -21,6 +21,7 @@ import { InspectorPluginStartDeps } from '../../../../plugin';
 
 interface RequestCodeViewerProps {
   indexPattern?: string;
+  requestMeta?: requestMeta;
   json: string;
 }
 
@@ -39,19 +40,33 @@ const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearc
 /**
  * @internal
  */
-export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps) => {
+export const RequestCodeViewer = ({ indexPattern, requestMeta, json }: RequestCodeViewerProps) => {
   const { services } = useKibana<InspectorPluginStartDeps>();
 
   const navigateToUrl = services.application?.navigateToUrl;
 
-  const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
+  function getValue() {
+    if (!requestMeta) {
+      return json
+    }
+
+    const fullPath = requestMeta.querystring
+      ? `${requestMeta.path}?${requestMeta.querystring}`
+      : requestMeta.path;
+
+    return `${requestMeta.method} ${fullPath}\n${json}`;
+  }
+
+  const value = getValue();
+
+  const devToolsDataUri = compressToEncodedURIComponent(value);
   const consoleHref = services.share.url.locators
     .get('CONSOLE_APP_LOCATOR')
     ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
   // Check if both the Dev Tools UI and the Console UI are enabled.
   const canShowDevTools =
     services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;
-  const shouldShowDevToolsLink = !!(indexPattern && canShowDevTools);
+  const shouldShowDevToolsLink = !!(requestMeta && canShowDevTools);
   const handleDevToolsLinkClick = useCallback(
     () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
     [consoleHref, navigateToUrl]
@@ -135,7 +150,7 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
       <EuiFlexItem grow={true} data-test-subj="inspectorRequestCodeViewerContainer">
         <CodeEditor
           languageId={XJsonLang.ID}
-          value={json}
+          value={value}
           options={{
             readOnly: true,
             lineNumbers: 'off',

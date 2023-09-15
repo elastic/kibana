@@ -34,6 +34,7 @@ import {
   shimHitsTotal,
 } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
+import { getRequestMeta } from '../common/request_meta';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
@@ -65,7 +66,7 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
-      const { body, headers } = id
+      const { body, headers, meta } = id
         ? await client.asyncSearch.get(
             { ...params, id },
             { ...options.transport, signal: options.abortSignal, meta: true }
@@ -78,7 +79,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
+      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning, id ? undefined : getRequestMeta(meta));
     };
 
     const cancel = async () => {

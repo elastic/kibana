@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
+import type { SearchRequestMeta } from '../../../../common';
 import type { AsyncSearchResponse } from './types';
 import { getTotalLoaded } from '../es_search';
 
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
-export function toAsyncKibanaSearchResponse(response: AsyncSearchResponse, warning?: string) {
+export function toAsyncKibanaSearchResponse(response: AsyncSearchResponse, warning?: string, requestMeta: SearchRequestMeta) {
   return {
     id: response.id,
     rawResponse: response.response,
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),
+    ...(requestMeta ? { requestMeta } : {}),
     ...getTotalLoaded(response.response),
   };
 }
