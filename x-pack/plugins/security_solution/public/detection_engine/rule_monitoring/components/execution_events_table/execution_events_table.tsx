@@ -7,7 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSuperDatePicker,
+} from '@elastic/eui';
 
 import type { RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
 
@@ -23,7 +29,6 @@ import { useColumns } from './use_columns';
 import { useExpandableRows } from '../basic/tables/use_expandable_rows';
 import { useExecutionEvents } from './use_execution_events';
 import { EventMessageFilter } from './event_message_filter';
-import { EventDateRangeFilter } from './event_date_range_filter';
 
 import * as i18n from './translations';
 
@@ -103,7 +108,12 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EventDateRangeFilter value={filters.state.dateRange} onChange={filters.setDateRange} />
+          <EuiSuperDatePicker
+            start={filters.state.dateRange.start}
+            end={filters.state.dateRange.end}
+            onTimeChange={filters.setDateRange}
+            showUpdateButton={false}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
