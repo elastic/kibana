@@ -81,7 +81,7 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning, getRequestMeta(meta));
+      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning, id ? undefined : getRequestMeta(meta));
     };
 
     const cancel = async () => {

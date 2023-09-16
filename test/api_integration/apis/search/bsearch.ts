@@ -327,6 +327,34 @@ export default function ({ getService }: FtrProviderContext) {
           expect(jsonBody[0].result.requestMeta.path).to.be('/_query');
           expect(jsonBody[0].result.requestMeta.querystring).to.be('');
         });
+
+        it(`'sql' search strategy should return request meta`, async () => {
+          const resp = await supertest
+            .post(`/internal/bsearch`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+            .send({
+              batch: [
+                {
+                  request: {
+                    params: {
+                      query: 'SELECT * FROM ".kibana" LIMIT 1',
+                    },
+                  },
+                  options: {
+                    strategy: 'sql',
+                  },
+                },
+              ],
+            });
+
+          const jsonBody = parseBfetchResponse(resp);
+
+          expect(resp.status).to.be(200);
+          expect(jsonBody[0].result).to.have.property('requestMeta');
+          expect(jsonBody[0].result.requestMeta.method).to.be('POST');
+          expect(jsonBody[0].result.requestMeta.path).to.be('/_sql');
+          expect(jsonBody[0].result.requestMeta.querystring).to.be('format=json');
+        });
       });
     });
   });
