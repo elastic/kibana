@@ -72,6 +72,7 @@ import { isEqual } from 'lodash';
 import classNames from 'classnames';
 import { FieldIcon } from '@kbn/react-field';
 import { diffChars, diffLines, diffWords } from 'diff';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { getFieldTypeName } from '@kbn/field-utils';
 import {
   UnifiedDataTableSettings,
@@ -467,11 +468,20 @@ export const UnifiedDataTable = ({
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
-  const [showDiff, setShowDiff] = useState(true);
-  const [showAllFields, setShowAllFields] = useState(false);
+  const [showDiff, setShowDiff] = useLocalStorage(`${consumer}:dataGridShowDiff`, true);
+  const [showAllFields, setShowAllFields] = useLocalStorage(
+    `${consumer}:dataGridShowAllFields`,
+    false
+  );
   const [isDiffOptionsMenuOpen, setIsDiffOptionsMenuOpen] = useState(false);
-  const [diffMode, setDiffMode] = useState<'basic' | 'chars' | 'words' | 'lines'>('basic');
-  const [showDiffDecorations, setShowDiffDecorations] = useState(true);
+  const [diffMode, setDiffMode] = useLocalStorage<'basic' | 'chars' | 'words' | 'lines'>(
+    `${consumer}:dataGridDiffMode`,
+    'basic'
+  );
+  const [showDiffDecorations, setShowDiffDecorations] = useLocalStorage(
+    `${consumer}:dataGridShowDiffDecorations`,
+    true
+  );
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const rowMap = useMemo(() => {
@@ -1120,7 +1130,7 @@ export const UnifiedDataTable = ({
           </EuiButtonEmpty>
           <EuiSwitch
             label="Show diff"
-            checked={showDiff}
+            checked={showDiff ?? true}
             labelProps={{
               css: css`
                 font-size: ${euiThemeVars.euiFontSizeXS} !important;
@@ -1257,7 +1267,7 @@ export const UnifiedDataTable = ({
               <EuiPanel color="transparent" paddingSize="s">
                 <EuiSwitch
                   label="Show decorations"
-                  checked={showDiffDecorations}
+                  checked={showDiffDecorations ?? true}
                   compressed
                   onChange={(e) => {
                     setShowDiffDecorations(e.target.checked);
@@ -1269,7 +1279,7 @@ export const UnifiedDataTable = ({
           {!defaultColumns && (
             <EuiSwitch
               label="Show all fields"
-              checked={showAllFields}
+              checked={showAllFields ?? false}
               labelProps={{
                 css: css`
                   font-size: ${euiThemeVars.euiFontSizeXS} !important;
@@ -1288,7 +1298,18 @@ export const UnifiedDataTable = ({
         </>
       ),
     }),
-    [defaultColumns, diffMode, isDiffOptionsMenuOpen, showAllFields, showDiff, showDiffDecorations]
+    [
+      defaultColumns,
+      diffMode,
+      isDiffOptionsMenuOpen,
+      setDiffMode,
+      setShowAllFields,
+      setShowDiff,
+      setShowDiffDecorations,
+      showAllFields,
+      showDiff,
+      showDiffDecorations,
+    ]
   );
 
   const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
