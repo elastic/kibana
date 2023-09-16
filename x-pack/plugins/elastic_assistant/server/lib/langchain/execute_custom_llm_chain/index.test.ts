@@ -13,6 +13,8 @@ import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { mockActionResultData } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { executeCustomLlmChain } from '.';
+import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 jest.mock('../llm/actions_client_llm');
 
@@ -21,7 +23,7 @@ const mockConversationChain = {
 };
 
 jest.mock('langchain/chains', () => ({
-  ConversationChain: jest.fn().mockImplementation(() => mockConversationChain),
+  ConversationalRetrievalQAChain: jest.fn().mockImplementation(() => mockConversationChain),
 }));
 
 const mockConnectorId = 'mock-connector-id';
@@ -35,6 +37,8 @@ const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as KibanaReque
 >;
 
 const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
+const mockLogger = loggerMock.create();
+const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
 describe('executeCustomLlmChain', () => {
   beforeEach(() => {
@@ -49,7 +53,9 @@ describe('executeCustomLlmChain', () => {
     await executeCustomLlmChain({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages,
+      logger: mockLogger,
       request: mockRequest,
     });
 
@@ -64,7 +70,9 @@ describe('executeCustomLlmChain', () => {
     await executeCustomLlmChain({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages,
+      logger: mockLogger,
       request: mockRequest,
     });
 
@@ -79,7 +87,9 @@ describe('executeCustomLlmChain', () => {
     await executeCustomLlmChain({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages: onlyOneMessage,
+      logger: mockLogger,
       request: mockRequest,
     });
 
@@ -92,7 +102,9 @@ describe('executeCustomLlmChain', () => {
     const result: ResponseBody = await executeCustomLlmChain({
       actions: mockActions,
       connectorId: mockConnectorId,
+      esClient: esClientMock,
       langChainMessages,
+      logger: mockLogger,
       request: mockRequest,
     });
 
