@@ -25,7 +25,7 @@ import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
-const CELL_CLASS = 'unifiedDataTable__cellValue';
+export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 export const getRenderCellValueFn = ({
   dataView,

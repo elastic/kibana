@@ -31,6 +31,16 @@ import {
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
   EuiDataGridProps,
+  EuiDataGridColumn,
+  useGeneratedHtmlId,
+  useEuiBackgroundColor,
+  EuiDataGridColumnVisibility,
+  EuiDataGridRowHeightsOptions,
+  EuiButtonEmpty,
+  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -40,12 +50,18 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler, formatFieldValue } from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { isEqual } from 'lodash';
+import classNames from 'classnames';
+import { FieldIcon } from '@kbn/react-field';
+import { getFieldTypeName } from '@kbn/field-utils';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -57,7 +73,7 @@ import {
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
-import { getRenderCellValueFn } from '../utils/get_render_cell_value';
+import { CELL_CLASS, getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
   getAllControlColumns,
   getEuiGridColumns,
@@ -439,20 +455,29 @@ export const UnifiedDataTable = ({
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [isCompareActive, setIsCompareActive] = useState(false);
+  const [showDiff, setShowDiff] = useState(true);
+  const [showAllFields, setShowAllFields] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
+  const rowMap = useMemo(() => {
+    const map = new Map<string, DataTableRecord>();
+    rows?.forEach((row) => {
+      map.set(row.id, row);
+    });
+    return map;
+  }, [rows]);
   const usedSelectedDocs = useMemo(() => {
     if (!selectedDocs.length || !rows?.length) {
       return [];
     }
-    const idMap = rows.reduce((map, row) => map.set(row.id, true), new Map());
     // filter out selected docs that are no longer part of the current data
-    const result = selectedDocs.filter((docId) => !!idMap.get(docId));
+    const result = selectedDocs.filter((docId) => !!rowMap.get(docId));
     if (result.length === 0 && isFilterActive) {
       setIsFilterActive(false);
     }
     return result;
-  }, [selectedDocs, rows, isFilterActive]);
+  }, [selectedDocs, rows?.length, isFilterActive, rowMap]);
 
   const displayedRows = useMemo(() => {
     if (!rows) {
@@ -832,16 +857,18 @@ export const UnifiedDataTable = ({
         {usedSelectedDocs.length ? (
           <DataTableDocumentToolbarBtn
             isFilterActive={isFilterActive}
+            isCompareActive={isCompareActive}
             rows={rows!}
             selectedDocs={usedSelectedDocs}
             setSelectedDocs={setSelectedDocs}
             setIsFilterActive={setIsFilterActive}
+            setIsCompareActive={setIsCompareActive}
           />
         ) : null}
         {externalAdditionalControls}
       </>
     );
-  }, [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]);
+  }, [usedSelectedDocs, isFilterActive, isCompareActive, rows, externalAdditionalControls]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
     () =>
@@ -935,6 +962,261 @@ export const UnifiedDataTable = ({
 
   const { dataGridId, setDataGridWrapper } = useFullScreenWatcher();
 
+  const comparisonFields = useMemo(() => {
+    if (!isCompareActive) {
+      return [];
+    }
+
+    let fields: string[] = [];
+
+    if (defaultColumns || showAllFields) {
+      if (dataView.timeFieldName) {
+        fields.push(dataView.timeFieldName);
+      }
+
+      dataView.fields.sort().forEach((field) => {
+        if (field.name !== dataView.timeFieldName) {
+          fields.push(field.name);
+        }
+      });
+    } else {
+      fields = visibleColumns;
+    }
+
+    return fields;
+  }, [
+    dataView.fields,
+    dataView.timeFieldName,
+    defaultColumns,
+    isCompareActive,
+    showAllFields,
+    visibleColumns,
+  ]);
+
+  const comparisonRowCount = useMemo(() => {
+    if (!isCompareActive) {
+      return 0;
+    }
+
+    return comparisonFields.length;
+  }, [comparisonFields.length, isCompareActive]);
+
+  const fieldsColumnId = useGeneratedHtmlId({ prefix: 'fields' });
+
+  const comparisonColumns: EuiDataGridColumn[] = useMemo(() => {
+    if (!isCompareActive) {
+      return [];
+    }
+
+    const fieldsColumnName = 'Field';
+    const fieldsColumn: EuiDataGridColumn = {
+      id: fieldsColumnId,
+      displayAsText: fieldsColumnName,
+      isSortable: true,
+      actions: false,
+      initialWidth: 200,
+      isExpandable: false,
+    };
+    const currentColumns = [fieldsColumn];
+
+    usedSelectedDocs.forEach((docId, i) => {
+      const doc = rowMap.get(docId);
+      if (doc) {
+        currentColumns.push({
+          id: docId,
+          displayAsText: doc.raw._id,
+          isSortable: true,
+          actions: false,
+        });
+      }
+    });
+
+    return currentColumns;
+  }, [fieldsColumnId, isCompareActive, rowMap, usedSelectedDocs]);
+
+  const comparisonToolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
+    () => ({
+      showColumnSelector: false,
+      showDisplaySelector: {
+        allowDensity: false,
+      },
+      additionalControls: (
+        <>
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            iconType="cross"
+            onClick={() => {
+              setIsCompareActive(false);
+            }}
+            data-test-subj="unifiedFieldListCloseComparison"
+            className={classNames({
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              euiDataGrid__controlBtn: true,
+            })}
+          >
+            <FormattedMessage
+              id="unifiedDataTable.closeDocumentComparison"
+              defaultMessage="Stop comparing documents"
+            />
+          </EuiButtonEmpty>
+          <EuiSwitch
+            label="Show diff"
+            checked={showDiff}
+            labelProps={{
+              css: css`
+                font-size: ${euiThemeVars.euiFontSizeXS} !important;
+                font-weight: ${euiThemeVars.euiFontWeightMedium};
+              `,
+            }}
+            compressed
+            css={css`
+              padding-left: ${euiThemeVars.euiSizeXS};
+            `}
+            onChange={(e) => {
+              setShowDiff(e.target.checked);
+            }}
+          />
+          {!defaultColumns && (
+            <EuiSwitch
+              label="Show all fields"
+              checked={showAllFields}
+              labelProps={{
+                css: css`
+                  font-size: ${euiThemeVars.euiFontSizeXS} !important;
+                  font-weight: ${euiThemeVars.euiFontWeightMedium};
+                `,
+              }}
+              compressed
+              css={css`
+                padding-left: ${euiThemeVars.euiSizeM};
+              `}
+              onChange={(e) => {
+                setShowAllFields(e.target.checked);
+              }}
+            />
+          )}
+        </>
+      ),
+    }),
+    [defaultColumns, showAllFields, showDiff]
+  );
+
+  const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
+  const comparisonColumnVisibility: EuiDataGridColumnVisibility = useMemo(
+    () => ({
+      visibleColumns: comparisonColumns.map(({ id }) => id),
+      setVisibleColumns: () => {},
+    }),
+    [comparisonColumns]
+  );
+  const comparisonRowHeight: EuiDataGridRowHeightsOptions = useMemo(
+    () => ({ defaultHeight: 'auto' }),
+    []
+  );
+
+  const comparisonBaseDocId = usedSelectedDocs[0];
+  const comparisonBaseDoc = useMemo(
+    () => rowMap.get(comparisonBaseDocId)?.flattened,
+    [comparisonBaseDocId, rowMap]
+  );
+  const baseDocCellCss = css`
+    background-color: ${useEuiBackgroundColor('success', { method: 'transparent' })};
+  `;
+  const matchingCellCss = css`
+    color: ${euiThemeVars.euiColorSuccessText} !important;
+  `;
+  const differentCellCss = css`
+    color: ${euiThemeVars.euiColorDangerText} !important;
+  `;
+
+  const renderComparisonCellValue = useCallback(
+    function ComparisonCellValue(props: EuiDataGridCellValueElementProps) {
+      const { rowIndex, columnId, setCellProps } = props;
+      const fieldName = comparisonFields[rowIndex];
+      const field = useMemo(() => dataView.fields.getByName(fieldName), [fieldName]);
+      const doc = useMemo(() => rowMap.get(columnId), [columnId]);
+
+      useEffect(() => {
+        if (!showDiff) {
+          setCellProps({ css: undefined });
+          return;
+        }
+
+        if (columnId === comparisonBaseDocId) {
+          setCellProps({ css: baseDocCellCss });
+        } else if (columnId !== fieldsColumnId) {
+          const baseValue = comparisonBaseDoc?.[fieldName];
+          const currentValue = doc?.flattened[fieldName];
+
+          if (isEqual(baseValue, currentValue)) {
+            setCellProps({ css: matchingCellCss });
+          } else {
+            setCellProps({ css: differentCellCss });
+          }
+        }
+      }, [columnId, doc?.flattened, fieldName, setCellProps]);
+
+      if (columnId === fieldsColumnId) {
+        return (
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <FieldIcon
+                type={field?.type ?? 'unknown'}
+                label={getFieldTypeName(field?.type)}
+                scripted={field?.scripted}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText
+                size="relative"
+                css={css`
+                  font-weight: ${euiThemeVars.euiFontWeightSemiBold};
+                `}
+              >
+                {fieldName}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+
+      if (!doc) {
+        return '-';
+      }
+
+      return (
+        <span
+          className={CELL_CLASS}
+          // formatFieldValue guarantees sanitized values
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: formatFieldValue(
+              doc.flattened[fieldName],
+              doc.raw,
+              fieldFormats,
+              dataView,
+              dataView.fields.getByName(columnId)
+            ),
+          }}
+        />
+      );
+    },
+    [
+      baseDocCellCss,
+      comparisonBaseDoc,
+      comparisonBaseDocId,
+      comparisonFields,
+      dataView,
+      differentCellCss,
+      fieldFormats,
+      fieldsColumnId,
+      matchingCellCss,
+      rowMap,
+      showDiff,
+    ]
+  );
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -984,29 +1266,49 @@ export const UnifiedDataTable = ({
           data-document-number={displayedRows.length}
           className={classnames(className, 'unifiedDataTable__table')}
         >
-          <EuiDataGridMemoized
-            id={dataGridId}
-            aria-describedby={randomId}
-            aria-labelledby={ariaLabelledBy}
-            columns={euiGridColumns}
-            columnVisibility={columnsVisibility}
-            data-test-subj="docTable"
-            leadingControlColumns={customLeadingControlColumn}
-            onColumnResize={onResize}
-            pagination={paginationObj}
-            renderCellValue={renderCellValue}
-            ref={dataGridRef}
-            rowCount={rowCount}
-            schemaDetectors={schemaDetectors}
-            sorting={sorting as EuiDataGridSorting}
-            toolbarVisibility={toolbarVisibility}
-            rowHeightsOptions={rowHeightsOptions}
-            inMemory={inMemory}
-            gridStyle={gridStyleOverride ?? GRID_STYLE}
-            renderCustomGridBody={renderCustomGridBody}
-            renderCustomToolbar={renderCustomToolbarFn}
-            trailingControlColumns={customTrailingControlColumn}
-          />
+          {isCompareActive ? (
+            <EuiDataGridMemoized
+              id={dataGridId}
+              key="comparisonTable"
+              aria-describedby={randomId}
+              aria-labelledby={ariaLabelledBy}
+              columns={comparisonColumns}
+              columnVisibility={comparisonColumnVisibility}
+              data-test-subj="comparisonTable"
+              renderCellValue={renderComparisonCellValue}
+              rowCount={comparisonRowCount}
+              schemaDetectors={schemaDetectors}
+              toolbarVisibility={comparisonToolbarVisibility}
+              inMemory={comparisonInMemory}
+              gridStyle={GRID_STYLE}
+              rowHeightsOptions={comparisonRowHeight}
+            />
+          ) : (
+            <EuiDataGridMemoized
+              id={dataGridId}
+              key="docTable"
+              aria-describedby={randomId}
+              aria-labelledby={ariaLabelledBy}
+              columns={euiGridColumns}
+              columnVisibility={columnsVisibility}
+              data-test-subj="docTable"
+              leadingControlColumns={customLeadingControlColumn}
+              onColumnResize={onResize}
+              pagination={paginationObj}
+              renderCellValue={renderCellValue}
+              ref={dataGridRef}
+              rowCount={rowCount}
+              schemaDetectors={schemaDetectors}
+              sorting={sorting as EuiDataGridSorting}
+              toolbarVisibility={toolbarVisibility}
+              rowHeightsOptions={rowHeightsOptions}
+              inMemory={inMemory}
+              gridStyle={gridStyleOverride ?? GRID_STYLE}
+              renderCustomGridBody={renderCustomGridBody}
+              renderCustomToolbar={renderCustomToolbarFn}
+              trailingControlColumns={customTrailingControlColumn}
+            />
+          )}
         </div>
         {loadingState !== DataLoadingState.loading &&
           !usedSelectedDocs.length && // hide footer when showing selected documents
