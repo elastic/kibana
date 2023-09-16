@@ -35,7 +35,6 @@ import {
   retryIfBulkEditConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
-  injectReferencesIntoActions,
   getBulkSnooze,
   getBulkUnsnooze,
   verifySnoozeScheduleLimit,
@@ -120,6 +119,7 @@ export async function bulkEditRules<Params extends RuleParams>(
 ): Promise<BulkEditResult<Params>> {
   const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
   const ids = (options as BulkEditOptionsIds<Params>).ids;
+  const actionsClient = await context.getActionsClient();
 
   if (ids && queryFilter) {
     throw Boom.badRequest(
@@ -234,13 +234,17 @@ export async function bulkEditRules<Params extends RuleParams>(
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
     // when we are doing the bulk create and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
-      id,
-      logger: context.logger,
-      ruleType,
-      references,
-      omitGeneratedValues: false,
-    });
+    const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
+      attributes as RuleAttributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+        omitGeneratedValues: false,
+      },
+      actionsClient.isSystemAction
+    );
     try {
       ruleDomainSchema.validate(ruleDomain);
     } catch (e) {
@@ -444,6 +448,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     }
 
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
+    const actionsClient = await context.getActionsClient();
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
@@ -461,12 +466,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       rule.references = migratedActions.resultedReferences;
     }
 
-    const ruleActions = injectReferencesIntoActions(
-      rule.id,
-      rule.attributes.actions || [],
-      rule.references || []
-    );
-
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
       rule.attributes,
       {
@@ -474,7 +473,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         logger: context.logger,
         ruleType: context.ruleTypeRegistry.get(rule.attributes.alertTypeId),
         references: rule.references,
-      }
+      },
+      actionsClient.isSystemAction
     );
 
     const {
@@ -486,7 +486,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       context,
       operations,
       rule: ruleDomain,
-      ruleActions,
+      ruleActions: ruleDomain.actions,
       ruleType,
     });
 

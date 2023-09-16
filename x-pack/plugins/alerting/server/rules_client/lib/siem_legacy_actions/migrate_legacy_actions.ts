@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { transformRawActionsToDomainActions } from '../../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 import type { RulesClientContext } from '../..';
 import { RawRuleAction, RawRule } from '../../../types';
 import { validateActions } from '../validate_actions';
-import { injectReferencesIntoActions } from '../../common';
 import { retrieveMigratedLegacyActions } from './retrieve_migrated_legacy_actions';
 
 type MigrateLegacyActions = (
@@ -60,13 +60,22 @@ export const migrateLegacyActions: MigrateLegacyActions = async (
       if (skipActionsValidation === true) {
         return;
       }
+
       const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+      const transformedActions = transformRawActionsToDomainActions({
+        ruleId,
+        actions: legacyActions,
+        references: legacyActionsReferences,
+        isSystemAction: context.isSystemAction,
+      });
+
       await validateActions(context, ruleType, {
         ...attributes,
         // set to undefined to avoid both per-actin and rule level values clashing
         throttle: undefined,
         notifyWhen: undefined,
-        actions: injectReferencesIntoActions(ruleId, legacyActions, legacyActionsReferences),
+        actions: transformedActions,
       });
     };
 

@@ -110,6 +110,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
 };
 const paramsModifier = jest.fn();
 
@@ -564,6 +565,7 @@ describe('bulkEdit()', () => {
         params: {},
         uuid: '111',
       };
+
       const newAction = {
         frequency: {
           notifyWhen: 'onActiveAlert',
@@ -574,6 +576,7 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
       };
+
       const newAction2 = {
         frequency: {
           notifyWhen: 'onActiveAlert',
@@ -595,10 +598,12 @@ describe('bulkEdit()', () => {
                 {
                   ...existingAction,
                   actionRef: 'action_0',
+                  actionTypeId: 'test-0',
                 },
                 {
                   ...newAction,
                   actionRef: 'action_1',
+                  actionTypeId: 'test-1',
                   uuid: '222',
                 },
               ],
@@ -687,7 +692,10 @@ describe('bulkEdit()', () => {
           ...existingRule.attributes.executionStatus,
           lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
         },
-        actions: [existingAction, { ...newAction, uuid: '222' }],
+        actions: [
+          { ...existingAction, type: RuleActionTypes.DEFAULT, actionTypeId: 'test-0' },
+          { ...newAction, uuid: '222', type: RuleActionTypes.DEFAULT, actionTypeId: 'test-1' },
+        ],
         id: existingRule.id,
         snoozeSchedule: [],
       });
@@ -718,6 +726,7 @@ describe('bulkEdit()', () => {
                 params: {
                   message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
                 },
+                type: RuleActionTypes.DEFAULT,
               },
             ],
           },
@@ -784,6 +793,7 @@ describe('bulkEdit()', () => {
             timezone: 'UTC',
           },
         },
+        type: RuleActionTypes.DEFAULT,
       };
       const newAction = {
         frequency: {
@@ -796,6 +806,7 @@ describe('bulkEdit()', () => {
         params: {},
         uuid: '222',
         alertsFilter: { query: { kql: 'test:1', dsl: 'test', filters: [] } },
+        type: RuleActionTypes.DEFAULT,
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({

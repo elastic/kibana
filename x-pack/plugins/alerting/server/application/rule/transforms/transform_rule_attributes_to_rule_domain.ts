@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
 import { RuleAttributes } from '../../../data/rule/types';
-import { PartialRule, RuleActionTypes } from '../../../types';
+import { PartialRule } from '../../../types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import {
-  injectReferencesIntoActions,
-  injectReferencesIntoParams,
-} from '../../../rules_client/common';
+import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
+import { transformRawActionsToDomainActions } from './transform_raw_actions_to_domain_actions';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -151,37 +149,12 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       })?.toISOString()
     : null;
 
-  const actionsWithInjectedRefs = esRule.actions
-    ? injectReferencesIntoActions(id, esRule.actions, references || [])
-    : [];
-
-  const ruleDomainActions: RuleDomain['actions'] = actionsWithInjectedRefs.map((action) => {
-    if (isSystemAction(action.id)) {
-      return {
-        id: action.id,
-        params: action.params,
-        actionTypeId: action.actionTypeId,
-        uuid: action.uuid,
-        type: RuleActionTypes.SYSTEM,
-      };
-    }
-
-    const defaultAction = {
-      group: action.group ?? 'default',
-      id: action.id,
-      params: action.params,
-      actionTypeId: action.actionTypeId,
-      uuid: action.uuid,
-      ...(action.frequency ? { frequency: action.frequency } : {}),
-      ...(action.alertsFilter ? { alertsFilter: action.alertsFilter } : {}),
-      type: RuleActionTypes.DEFAULT,
-    };
-
-    if (omitGeneratedValues) {
-      return omit(defaultAction, 'alertsFilter.query.dsl');
-    }
-
-    return defaultAction;
+  const ruleDomainActions: RuleDomain['actions'] = transformRawActionsToDomainActions({
+    ruleId: id,
+    actions: esRule.actions,
+    references,
+    isSystemAction,
+    omitGeneratedValues,
   });
 
   const params = injectReferencesIntoParams<Params, RuleParams>(

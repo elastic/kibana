@@ -9,6 +9,8 @@ import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
 import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
 import {
@@ -26,6 +28,7 @@ export function mockHandlerArguments(
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
+    actionsClient = actionsClientMock.create(),
   }: {
     rulesClient?: RulesClientMock;
     rulesSettingsClient?: RulesSettingsClientMock;
@@ -34,6 +37,7 @@ export function mockHandlerArguments(
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
+    actionsClient?: ActionsClientMock;
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -58,6 +62,11 @@ export function mockHandlerArguments(
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
+      },
+      actions: {
+        getActionsClient() {
+          return actionsClient ?? actionsClientMock.create();
+        },
       },
     } as unknown as AlertingRequestHandlerContext,
     request as KibanaRequest<unknown, unknown, unknown>,
