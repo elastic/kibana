@@ -24,11 +24,13 @@ export const NavigationUI: FC<Props> = ({ children, unstyled, footerChildren, da
         <EuiFlexGroup
           direction="column"
           gutterSize="none"
-          style={{ overflowY: 'auto' }}
+          style={{ height: `calc(100% - 48px)` }}
           justifyContent="spaceBetween"
           data-test-subj={dataTestSubj}
         >
-          <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+          <EuiFlexItem style={{ overflowY: 'auto' }} grow={false}>
+            {children}
+          </EuiFlexItem>
 
           {footerChildren && <EuiFlexItem grow={false}>{footerChildren}</EuiFlexItem>}
         </EuiFlexGroup>
