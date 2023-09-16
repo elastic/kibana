@@ -39,11 +39,9 @@ describe(
   'Detection rules, Prebuilt Rules Installation and Update - Error handling',
   { tags: ['@ess', '@serverless'] },
   () => {
-    before(() => {
+    beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
       cleanKibana();
-    });
-    beforeEach(() => {
       login();
 
       visitRulesManagementTable();
@@ -59,12 +57,10 @@ describe(
         rule_id: 'rule_2',
       });
 
-      before(() => {
+      beforeEach(() => {
+        cleanKibana();
         // Make two mock rules available for installation
         installPrebuiltRuleAssets([RULE_1, RULE_2]);
-      });
-
-      beforeEach(() => {
         // Navigate to install Elastic rules page
         addElasticRulesButtonClick();
       });
@@ -129,14 +125,12 @@ describe(
         version: 2,
       });
 
-      before(() => {
+      beforeEach(() => {
+        cleanKibana();
         /* Create a new rule and install it */
         createAndInstallMockedPrebuiltRules([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         /* Create a second version of the rule, making it available for update */
         installPrebuiltRuleAssets([UPDATED_RULE_1, UPDATED_RULE_2]);
-      });
-
-      beforeEach(() => {
         login();
         visitRulesManagementTable();
 
