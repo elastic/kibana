@@ -34,6 +34,7 @@ describe('common_transformations', () => {
       throttle: '1m',
     },
     alerts_filter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const systemAction: AsApiContract<RuleSystemAction> = {

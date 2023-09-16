@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuleActionTypes } from '../../../../common';
 import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -47,6 +48,7 @@ export const legacyGetHourlyNotificationResult = (
       },
       actionTypeId: '.email',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+      type: RuleActionTypes.DEFAULT,
     },
   ],
   throttle: null,
@@ -96,6 +98,7 @@ export const legacyGetWeeklyNotificationResult = (
       },
       actionTypeId: '.email',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+      type: RuleActionTypes.DEFAULT,
     },
   ],
   throttle: null,
@@ -145,6 +148,7 @@ export const legacyGetDailyNotificationResult = (
       },
       actionTypeId: '.email',
       id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
+      type: RuleActionTypes.DEFAULT,
     },
   ],
   throttle: null,

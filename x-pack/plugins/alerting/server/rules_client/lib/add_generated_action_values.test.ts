@@ -39,6 +39,7 @@ describe('addGeneratedActionValues()', () => {
         timezone: 'UTC',
       },
     },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const systemAction: RuleSystemAction = {

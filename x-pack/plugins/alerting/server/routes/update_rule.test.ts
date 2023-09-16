@@ -14,7 +14,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { RuleDefaultAction, RuleNotifyWhen } from '../../common';
+import { RuleActionTypes, RuleDefaultAction, RuleNotifyWhen } from '../../common';
 import { AsApiContract } from './lib';
 import { PartialRule } from '../types';
 
@@ -43,6 +43,7 @@ describe('updateRuleRoute', () => {
         filters: [],
       },
     },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const mockedAlert = {
@@ -71,6 +72,7 @@ describe('updateRuleRoute', () => {
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         alerts_filter: mockedAlert.actions[0].alertsFilter,
+        type: RuleActionTypes.DEFAULT,
       },
     ],
   };

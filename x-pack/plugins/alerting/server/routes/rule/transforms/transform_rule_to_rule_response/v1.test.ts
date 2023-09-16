@@ -24,6 +24,7 @@ describe('transformRuleToRuleResponse', () => {
         timezone: 'UTC',
       },
     },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const systemAction: RuleSystemAction = {

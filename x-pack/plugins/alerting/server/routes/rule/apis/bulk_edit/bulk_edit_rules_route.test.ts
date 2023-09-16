@@ -13,7 +13,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { SanitizedRule } from '../../../../types';
+import { RuleActionTypes, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -42,6 +42,7 @@ describe('bulkEditRulesRoute', () => {
           foo: true,
         },
         uuid: '123-456',
+        type: RuleActionTypes.DEFAULT,
       },
     ],
     consumer: 'bar',

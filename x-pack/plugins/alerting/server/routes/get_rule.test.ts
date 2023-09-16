@@ -12,7 +12,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { RuleDefaultAction, SanitizedRule } from '../types';
+import { RuleActionTypes, RuleDefaultAction, SanitizedRule } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -45,6 +45,7 @@ describe('getRuleRoute', () => {
         timezone: 'UTC',
       },
     },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const mockedAlert: SanitizedRule<{
@@ -102,6 +103,7 @@ describe('getRuleRoute', () => {
         connector_type_id: mockedAlert.actions[0].actionTypeId,
         uuid: mockedAlert.actions[0].uuid,
         alerts_filter: action.alertsFilter,
+        type: RuleActionTypes.DEFAULT,
       },
     ],
   };

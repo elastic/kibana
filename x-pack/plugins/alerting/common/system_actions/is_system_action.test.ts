@@ -15,6 +15,7 @@ describe('isSystemAction', () => {
     group: 'default',
     id: '1',
     params: {},
+    type: RuleActionTypes.DEFAULT,
   };
 
   const systemAction: RuleSystemAction = {

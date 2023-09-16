@@ -15,7 +15,7 @@ import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { AsApiContract } from '../../../lib';
-import { RuleDefaultAction, SanitizedRule } from '../../../../types';
+import { RuleActionTypes, RuleDefaultAction, SanitizedRule } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
@@ -52,6 +52,7 @@ describe('createRuleRoute', () => {
         timezone: 'UTC',
       },
     },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const mockedAlert: SanitizedRule<{ bar: boolean }> = {
@@ -200,6 +201,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -316,6 +318,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -433,6 +436,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -550,6 +554,7 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",

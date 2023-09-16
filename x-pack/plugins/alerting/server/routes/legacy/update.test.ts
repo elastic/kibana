@@ -13,7 +13,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
-import { RuleNotifyWhen } from '../../../common';
+import { RuleActionTypes, RuleNotifyWhen } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const rulesClient = rulesClientMock.create();
@@ -48,6 +48,7 @@ describe('updateAlertRoute', () => {
         params: {
           baz: true,
         },
+        type: RuleActionTypes.DEFAULT,
       },
     ],
     notifyWhen: RuleNotifyWhen.CHANGE,

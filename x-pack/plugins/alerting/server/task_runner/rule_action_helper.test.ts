@@ -26,6 +26,7 @@ const mockOldAction: RuleAction = {
   actionTypeId: 'slack',
   params: {},
   uuid: '123-456',
+  type: RuleActionTypes.DEFAULT,
 };
 
 const mockAction: RuleAction = {
@@ -39,6 +40,7 @@ const mockAction: RuleAction = {
     throttle: null,
   },
   uuid: '123-456',
+  type: RuleActionTypes.DEFAULT,
 };
 
 const mockSummaryAction: RuleAction = {
@@ -52,6 +54,7 @@ const mockSummaryAction: RuleAction = {
     throttle: '1d',
   },
   uuid: '111-111',
+  type: RuleActionTypes.DEFAULT,
 };
 
 const mockSystemAction: RuleSystemAction = {

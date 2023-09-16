@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule, RuleType } from '../../common';
+import { Rule, RuleActionTypes, RuleType } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRule, loadRuleType, loadRuleTypes } from './alert_api';
 
@@ -324,6 +324,7 @@ function getRule(): Rule<{ x: number }> {
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
         uuid: '123-456',
+        type: RuleActionTypes.DEFAULT,
       },
     ],
     params: { x: 42 },

@@ -13,7 +13,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
-import { RuleDefaultAction, SanitizedRule } from '../types';
+import { RuleActionTypes, RuleDefaultAction, SanitizedRule } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -36,6 +36,7 @@ describe('cloneRuleRoute', () => {
       foo: true,
     },
     uuid: '123-456',
+    type: RuleActionTypes.DEFAULT,
   };
 
   const mockedRule: SanitizedRule<{ bar: boolean }> = {
@@ -99,6 +100,7 @@ describe('cloneRuleRoute', () => {
         ...ruleToClone.actions[0],
         connector_type_id: 'test',
         uuid: '123-456',
+        type: RuleActionTypes.DEFAULT,
       },
     ],
   };

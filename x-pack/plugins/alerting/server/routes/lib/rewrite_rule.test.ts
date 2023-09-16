@@ -27,6 +27,7 @@ const defaultAction: RuleDefaultAction = {
     throttle: '1m',
   },
   alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
+  type: RuleActionTypes.DEFAULT,
 };
 
 const systemAction: RuleSystemAction = {

@@ -9,7 +9,7 @@ import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/ser
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { Rule } from '../../../types';
+import { Rule, RuleActionTypes } from '../../../types';
 
 import {
   legacyGetBulkRuleActionsSavedObject,
@@ -92,6 +92,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
         },
       },
     ];
+
     savedObjectsClient.find.mockResolvedValue({
       total: 0,
       per_page: 0,
@@ -104,6 +105,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
       savedObjectsClient,
       logger,
     });
+
     expect(returnValue).toEqual<FuncReturn>({
       'alert-123': {
         ruleThrottle: '1d',
@@ -118,6 +120,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -212,6 +215,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -228,6 +232,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_2',
             id: 'action-456',
             params: {},
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -303,6 +308,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
+            type: RuleActionTypes.DEFAULT,
           },
           {
             actionTypeId: 'action_type_2',
@@ -314,6 +320,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_2',
             id: 'action-456',
             params: {},
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -385,6 +392,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -455,6 +463,7 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },

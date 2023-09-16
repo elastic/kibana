@@ -54,6 +54,7 @@ describe('validateActions', () => {
       query: { kql: 'test:1', filters: [] },
       timeframe: { days: [1], hours: { start: '10:00', end: '17:00' }, timezone: 'UTC' },
     },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const systemAction: NormalizedAlertAction = {

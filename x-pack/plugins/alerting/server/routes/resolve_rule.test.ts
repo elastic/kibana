@@ -12,7 +12,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { ResolvedSanitizedRule, RuleDefaultAction } from '../types';
+import { ResolvedSanitizedRule, RuleActionTypes, RuleDefaultAction } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -33,6 +33,7 @@ describe('resolveRuleRoute', () => {
       foo: true,
     },
     uuid: '123-456',
+    type: RuleActionTypes.DEFAULT,
   };
 
   const mockedRule: ResolvedSanitizedRule<{
@@ -101,6 +102,7 @@ describe('resolveRuleRoute', () => {
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
         uuid: mockedRule.actions[0].uuid,
+        type: RuleActionTypes.DEFAULT,
       },
     ],
     outcome: 'aliasMatch',
