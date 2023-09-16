@@ -32,7 +32,7 @@ import { UnifiedDataTableContext } from '../table_context';
 import { defaultMonacoEditorWidth } from '../constants';
 import JsonCodeEditor from '../components/json_code_editor/json_code_editor';
 
-const CELL_CLASS = 'unifiedDataTable__cellValue';
+export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 export const getRenderCellValueFn = ({
   dataView,
