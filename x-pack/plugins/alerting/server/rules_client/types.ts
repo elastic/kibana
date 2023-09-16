@@ -84,12 +84,22 @@ export interface RulesClientContext {
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
 export type NormalizedSystemAction = Omit<RuleSystemAction, 'actionTypeId'>;
 
+export type NormalizedAlertDefaultActionWithGeneratedValues = Omit<
+  RuleDefaultAction,
+  'uuid' | 'alertsFilter' | 'actionTypeId'
+> & {
+  uuid: string;
+  alertsFilter?: RawRuleAlertsFilter;
+};
+
+export type NormalizedAlertSystemActionWithGeneratedValues = Omit<
+  RuleSystemAction,
+  'uuid' | 'actionTypeId'
+> & { uuid: string };
+
 export type NormalizedAlertActionWithGeneratedValues =
-  | (Omit<RuleDefaultAction, 'uuid' | 'alertsFilter' | 'actionTypeId'> & {
-      uuid: string;
-      alertsFilter?: RawRuleAlertsFilter;
-    })
-  | Omit<RuleSystemAction, 'actionTypeId'>;
+  | NormalizedAlertDefaultActionWithGeneratedValues
+  | NormalizedAlertSystemActionWithGeneratedValues;
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];

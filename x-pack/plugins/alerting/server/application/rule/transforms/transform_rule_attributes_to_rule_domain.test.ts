@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RecoveredActionGroup, RuleActionTypes } from '../../../../common';
+import { RecoveredActionGroup } from '../../../../common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
@@ -54,8 +54,9 @@ const systemAction: RuleActionAttributes = {
   uuid: '123',
   actionTypeId: '.test-system-action',
   params: {},
-  type: RuleActionTypes.SYSTEM,
 };
+
+const isSystemAction = (id: string) => id === 'my-system-action-id';
 
 describe('transformRuleAttributesToRuleDomain', () => {
   const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
@@ -91,13 +92,17 @@ describe('transformRuleAttributesToRuleDomain', () => {
     apiKeyOwner: 'user',
   };
 
-  it('transforms the system actions correctly', () => {
-    const res = transformRuleAttributesToRuleDomain(rule, {
-      id: '1',
-      logger,
-      ruleType,
-      references,
-    });
+  it('transforms the actions correctly', () => {
+    const res = transformRuleAttributesToRuleDomain(
+      rule,
+      {
+        id: '1',
+        logger,
+        ruleType,
+        references,
+      },
+      isSystemAction
+    );
 
     expect(res.actions).toMatchInlineSnapshot(`
       Array [
@@ -117,6 +122,7 @@ describe('transformRuleAttributesToRuleDomain', () => {
           "group": "default",
           "id": "default-action-id",
           "params": Object {},
+          "type": "default",
           "uuid": "1",
         },
         Object {

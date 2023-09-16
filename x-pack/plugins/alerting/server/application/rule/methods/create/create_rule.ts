@@ -214,7 +214,8 @@ export async function createRule<Params extends RuleParams = never>(
       logger: context.logger,
       ruleType: context.ruleTypeRegistry.get(createdRuleSavedObject.attributes.alertTypeId),
       references,
-    }
+    },
+    actionsClient.isSystemAction
   );
 
   // Try to validate created rule, but don't throw.

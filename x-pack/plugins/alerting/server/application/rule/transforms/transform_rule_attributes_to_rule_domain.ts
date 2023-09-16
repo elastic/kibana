@@ -7,12 +7,11 @@
 import { omit, isEmpty } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { SavedObjectReference } from '@kbn/core/server';
-import { isSystemAction } from '../../../../common/system_actions/is_system_action';
 import { ruleExecutionStatusValues } from '../constants';
 import { getRuleSnoozeEndTime } from '../../../lib';
 import { RuleDomain, Monitoring, RuleParams } from '../types';
 import { RuleAttributes } from '../../../data/rule/types';
-import { RawRule, PartialRule } from '../../../types';
+import { PartialRule, RuleActionTypes } from '../../../types';
 import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
 import {
   injectReferencesIntoActions,
@@ -121,7 +120,8 @@ interface TransformEsToRuleParams {
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
   esRule: RuleAttributes,
-  transformParams: TransformEsToRuleParams
+  transformParams: TransformEsToRuleParams,
+  isSystemAction: (connectorId: string) => boolean
 ): RuleDomain<Params> => {
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
@@ -151,19 +151,38 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       })?.toISOString()
     : null;
 
-  let actions = esRule.actions
-    ? injectReferencesIntoActions(id, esRule.actions as RawRule['actions'], references || [])
+  const actionsWithInjectedRefs = esRule.actions
+    ? injectReferencesIntoActions(id, esRule.actions, references || [])
     : [];
 
-  if (omitGeneratedValues) {
-    actions = actions.map((ruleAction) => {
-      if (isSystemAction(ruleAction)) {
-        return ruleAction;
-      }
+  const ruleDomainActions: RuleDomain['actions'] = actionsWithInjectedRefs.map((action) => {
+    if (isSystemAction(action.id)) {
+      return {
+        id: action.id,
+        params: action.params,
+        actionTypeId: action.actionTypeId,
+        uuid: action.uuid,
+        type: RuleActionTypes.SYSTEM,
+      };
+    }
 
-      return omit(ruleAction, 'alertsFilter.query.dsl');
-    });
-  }
+    const defaultAction = {
+      group: action.group ?? 'default',
+      id: action.id,
+      params: action.params,
+      actionTypeId: action.actionTypeId,
+      uuid: action.uuid,
+      ...(action.frequency ? { frequency: action.frequency } : {}),
+      ...(action.alertsFilter ? { alertsFilter: action.alertsFilter } : {}),
+      type: RuleActionTypes.DEFAULT,
+    };
+
+    if (omitGeneratedValues) {
+      return omit(defaultAction, 'alertsFilter.query.dsl');
+    }
+
+    return defaultAction;
+  });
 
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
@@ -185,7 +204,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     alertTypeId: esRule.alertTypeId,
     consumer: esRule.consumer,
     schedule: esRule.schedule,
-    actions: actions as RuleDomain['actions'],
+    actions: ruleDomainActions,
     params,
     mapped_params: esRule.mapped_params,
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
