@@ -16,7 +16,7 @@ export function toAsyncKibanaSearchResponse(
   response: SqlQueryResponse,
   startTime: number,
   warning?: string,
-  requestMeta?: RequestMeta,
+  requestMeta?: RequestMeta
 ): SqlSearchStrategyResponse {
   return {
     id: response.id,

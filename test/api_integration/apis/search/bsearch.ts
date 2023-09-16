@@ -297,7 +297,9 @@ export default function ({ getService }: FtrProviderContext) {
           expect(jsonBody[0].result).to.have.property('requestMeta');
           expect(jsonBody[0].result.requestMeta.method).to.be('POST');
           expect(jsonBody[0].result.requestMeta.path).to.be('/.kibana/_async_search');
-          expect(jsonBody[0].result.requestMeta.querystring).to.be('batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true');
+          expect(jsonBody[0].result.requestMeta.querystring).to.be(
+            'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true'
+          );
         });
 
         it(`'esql' search strategy should return request meta`, async () => {
