@@ -357,6 +357,36 @@ export default function ({ getService }: FtrProviderContext) {
           expect(jsonBody[0].result.requestMeta.path).to.be('/_sql');
           expect(jsonBody[0].result.requestMeta.querystring).to.be('format=json');
         });
+
+        it(`'eql' search strategy should return request meta`, async () => {
+          const resp = await supertest
+            .post(`/internal/bsearch`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+            .send({
+              batch: [
+                {
+                  request: {
+                    params: {
+                      index: '.kibana',
+                      query: 'any where true',
+                      timestamp_field: "created_at",
+                    },
+                  },
+                  options: {
+                    strategy: 'eql',
+                  },
+                },
+              ],
+            });
+
+          const jsonBody = parseBfetchResponse(resp);
+
+          expect(resp.status).to.be(200);
+          expect(jsonBody[0].result).to.have.property('requestMeta');
+          expect(jsonBody[0].result.requestMeta.method).to.be('POST');
+          expect(jsonBody[0].result.requestMeta.path).to.be('/.kibana/_eql/search');
+          expect(jsonBody[0].result.requestMeta.querystring).to.be('ignore_unavailable=true');
+        });
       });
     });
   });

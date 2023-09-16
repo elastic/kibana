@@ -15,12 +15,14 @@ import { EqlSearchStrategyResponse } from '../../../../common';
  * (EQL does not provide _shard info, so total/loaded cannot be calculated.)
  */
 export function toEqlKibanaSearchResponse(
-  response: TransportResult<EqlSearchResponse>
+  response: TransportResult<EqlSearchResponse>,
+  requestMeta?: RequestMeta,
 ): EqlSearchStrategyResponse {
   return {
     id: response.body.id,
     rawResponse: response,
     isPartial: response.body.is_partial,
     isRunning: response.body.is_running,
+    ...(requestMeta ? { requestMeta } : {}),
   };
 }
