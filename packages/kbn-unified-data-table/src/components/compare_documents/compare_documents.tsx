@@ -49,6 +49,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
 import { CELL_CLASS } from '../../utils/get_render_cell_value';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
+import { useComparisonFields } from './hooks/use_comparison_fields';
 
 export interface CompareDocumentsProps {
   consumer: string;
@@ -112,33 +113,11 @@ const CompareDocuments = ({
     () => ({ defaultHeight: 'auto' }),
     []
   );
-  const comparisonFields = useMemo(() => {
-    let fields: string[] = [];
-
-    if (forceShowAllFields || showAllFields) {
-      if (dataView.timeFieldName) {
-        fields.push(dataView.timeFieldName);
-      }
-
-      dataView.fields
-        .sort((a, b) => a.displayName.localeCompare(b.displayName))
-        .forEach((field) => {
-          if (field.name !== dataView.timeFieldName) {
-            fields.push(field.name);
-          }
-        });
-    } else {
-      fields = selectedFieldNames;
-    }
-
-    return fields;
-  }, [
+  const comparisonFields = useComparisonFields({
+    dataView,
     selectedFieldNames,
-    dataView.fields,
-    dataView.timeFieldName,
-    forceShowAllFields,
-    showAllFields,
-  ]);
+    showAllFields: Boolean(forceShowAllFields || showAllFields),
+  });
   const comparisonRowCount = useMemo(() => comparisonFields.length, [comparisonFields.length]);
   const comparisonToolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
     () => ({
