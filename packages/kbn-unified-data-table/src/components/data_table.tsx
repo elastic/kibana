@@ -42,6 +42,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroupItemProps,
+  tint,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -63,6 +64,7 @@ import { isEqual } from 'lodash';
 import classNames from 'classnames';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldTypeName } from '@kbn/field-utils';
+import { diffLines } from 'diff';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -1165,6 +1167,8 @@ export const UnifiedDataTable = ({
     () => rowMap.get(comparisonBaseDocId)?.flattened,
     [comparisonBaseDocId, rowMap]
   );
+  const matchBackgroundColor = useEuiBackgroundColor('success');
+  const diffBackgroundColor = useEuiBackgroundColor('danger');
   const baseDocCellCss = css`
     background-color: ${useEuiBackgroundColor('success', { method: 'transparent' })};
   `;
@@ -1199,7 +1203,8 @@ export const UnifiedDataTable = ({
         }
 
         if (columnId === comparisonBaseDocId) {
-          setCellProps({ css: baseDocCellCss });
+          setCellProps({ css: undefined });
+          // setCellProps({ css: baseDocCellCss });
         } else if (columnId !== fieldsColumnId) {
           const baseValue = comparisonBaseDoc?.[fieldName];
           const currentValue = doc?.flattened[fieldName];
@@ -1240,6 +1245,67 @@ export const UnifiedDataTable = ({
         return '-';
       }
 
+      const baseValue = comparisonBaseDoc?.[fieldName];
+      const currentValue = doc?.flattened[fieldName];
+
+      if (showDiff && baseValue && currentValue) {
+        const getStringifiedValue = (value: unknown) => {
+          const extractedValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
+          if (typeof extractedValue === 'object') {
+            return JSON.stringify(extractedValue, null, 2);
+          }
+          return String(extractedValue ?? '-');
+        };
+        const diff = diffLines(getStringifiedValue(baseValue), getStringifiedValue(currentValue));
+        const indicatorCss = css`
+          position: absolute;
+          width: ${euiThemeVars.euiSizeS};
+          height: 100%;
+          margin-left: -${euiThemeVars.euiSizeS};
+          text-align: center;
+          line-height: ${euiThemeVars.euiFontSizeM};
+          font-weight: ${euiThemeVars.euiFontWeightMedium};
+        `;
+        const matchCss = css`
+          background-color: ${matchBackgroundColor};
+          color: ${euiThemeVars.euiColorSuccessText};
+
+          &:before {
+            content: '+';
+            ${indicatorCss}
+            background-color: ${tint(euiThemeVars.euiColorSuccess, 0.82)};
+            color: ${euiThemeVars.euiColorSuccessText};
+          }
+        `;
+        const diffCss = css`
+          background-color: ${diffBackgroundColor};
+          color: ${euiThemeVars.euiColorDangerText};
+
+          &:before {
+            content: '-';
+            ${indicatorCss}
+            background-color: ${tint(euiThemeVars.euiColorDanger, 0.82)};
+            color: ${euiThemeVars.euiColorDangerText};
+          }
+        `;
+        return (
+          <>
+            {diff.map((part) => (
+              <div
+                css={[
+                  css`
+                    position: relative;
+                  `,
+                  part.added ? matchCss : part.removed ? diffCss : undefined,
+                ]}
+              >
+                {part.value}
+              </div>
+            ))}
+          </>
+        );
+      }
+
       return (
         <span
           className={CELL_CLASS}
@@ -1258,14 +1324,15 @@ export const UnifiedDataTable = ({
       );
     },
     [
-      baseDocCellCss,
       comparisonBaseDoc,
       comparisonBaseDocId,
       comparisonFields,
       dataView,
+      diffBackgroundColor,
       differentCellCss,
       fieldFormats,
       fieldsColumnId,
+      matchBackgroundColor,
       matchingCellCss,
       rowMap,
       showDiff,
