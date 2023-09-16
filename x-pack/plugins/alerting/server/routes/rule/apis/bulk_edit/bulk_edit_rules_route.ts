@@ -49,7 +49,10 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
             const bulkEditResults = await rulesClient.bulkEdit<RuleParamsV1>({
               filter,
               ids,
-              operations: transformOperationsV1(operations, actionsClient.isSystemAction),
+              operations: transformOperationsV1({
+                operations,
+                isSystemAction: actionsClient.isSystemAction,
+              }),
             });
 
             const resultBody: BulkEditRulesResponseV1<RuleParamsV1> = {

@@ -9,10 +9,17 @@ import { RuleActionTypes } from '../../../../../../../common';
 import { BulkEditOperation } from '../../../../../../application/rule/methods/bulk_edit';
 import { BulkEditRulesRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_edit';
 
-export const transformOperations = (
-  operations: BulkEditRulesRequestBodyV1['operations'],
-  isSystemAction: (connectorId: string) => boolean
-): BulkEditOperation[] => {
+export const transformOperations = ({
+  operations,
+  isSystemAction,
+}: {
+  operations?: BulkEditRulesRequestBodyV1['operations'];
+  isSystemAction: (connectorId: string) => boolean;
+}): BulkEditOperation[] => {
+  if (operations == null || operations.length === 0) {
+    return [];
+  }
+
   return operations.map((operation) => {
     if (operation.field !== 'actions') {
       return operation;

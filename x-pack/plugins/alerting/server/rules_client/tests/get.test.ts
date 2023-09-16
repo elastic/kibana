@@ -62,6 +62,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -92,6 +93,8 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -109,11 +112,14 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid",
           },
         ],
         "alertTypeId": "123",
@@ -159,6 +165,8 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
           {
             group: 'default',
@@ -166,6 +174,8 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid-2',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -183,18 +193,24 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid",
           },
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "preconfigured",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid-2",
           },
         ],
         "alertTypeId": "123",
@@ -240,11 +256,15 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
           {
             group: 'default',
             actionRef: 'system_action:system_action-id',
             params: {},
+            actionTypeId: '.test-system-action',
+            uuid: 'test-uuid-2',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -262,16 +282,22 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid",
           },
           Object {
+            "actionTypeId": ".test-system-action",
             "group": "default",
             "id": "system_action-id",
             "params": Object {},
+            "type": "default",
+            "uuid": "test-uuid-2",
           },
         ],
         "alertTypeId": "123",
@@ -342,6 +368,8 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -372,11 +400,14 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid",
           },
         ],
         "alertTypeId": "123",
@@ -414,6 +445,8 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
         ],
       },
@@ -468,6 +501,8 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -509,6 +544,8 @@ describe('get()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: '.test',
+              uuid: 'test-uuid',
             },
           ],
         },
@@ -629,6 +666,8 @@ describe('get()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
         ],
         notifyWhen: 'onActiveAlert',

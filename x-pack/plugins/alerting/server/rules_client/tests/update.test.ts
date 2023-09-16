@@ -92,11 +92,14 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
+  // @ts-expect-error: read-only property
+  rulesClientParams.isSystemAction = (id: string) => id === 'system_action-id';
 });
 
 setGlobalDate();
@@ -130,6 +133,8 @@ describe('update()', () => {
             notifyWhen: RuleNotifyWhen.CHANGE,
             throttle: null,
           },
+          uuid: '123',
+          type: RuleActionTypes.DEFAULT,
         },
       ],
     },
@@ -234,6 +239,7 @@ describe('update()', () => {
         isSystemAction: false,
       },
     ]);
+
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -251,6 +257,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
           {
             group: 'default',
@@ -259,6 +266,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
           {
             group: 'default',
@@ -267,6 +275,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -293,6 +302,7 @@ describe('update()', () => {
         },
       ],
     });
+
     const result = await rulesClient.update({
       id: '1',
       data: {
@@ -313,6 +323,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -320,6 +331,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -327,10 +339,12 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
     });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -341,6 +355,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
           Object {
             "actionTypeId": "test",
@@ -349,6 +365,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
           Object {
             "actionTypeId": "test2",
@@ -357,6 +375,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -550,6 +570,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
           {
             group: 'default',
@@ -558,6 +579,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
           {
             group: 'custom',
@@ -566,6 +588,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -605,6 +628,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -612,6 +636,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'custom',
@@ -619,6 +644,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -693,6 +719,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
           Object {
             "actionTypeId": "test",
@@ -701,6 +729,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
           Object {
             "actionTypeId": "test",
@@ -709,6 +739,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -810,6 +842,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
           {
             uuid: 'system-action-uuid',
@@ -857,6 +890,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             id: 'system_action-id',
@@ -889,7 +923,6 @@ describe('update()', () => {
             actionTypeId: 'test-system',
             params: { myNewParam: 'test' },
             uuid: 'system-action-uuid',
-            type: RuleActionTypes.SYSTEM,
           },
         ],
         alertTypeId: 'myType',
@@ -928,6 +961,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
           Object {
             "actionTypeId": "test-system",
@@ -1015,6 +1050,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
             {
               id: 'system_action-id',
@@ -1097,6 +1133,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -1134,6 +1171,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -1198,6 +1236,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -1243,6 +1283,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -1276,6 +1317,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -1290,6 +1332,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
         ],
         "apiKey": "MTIzOmFiYw==",
@@ -1403,6 +1447,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         revision: 1,
@@ -1436,6 +1481,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -1451,6 +1497,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
         ],
         "apiKey": null,
@@ -1552,6 +1600,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
               {
                 group: 'default',
@@ -1559,6 +1608,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
               {
                 group: 'default',
@@ -1566,6 +1616,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
             ],
           },
@@ -1613,6 +1664,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },
@@ -1647,6 +1699,7 @@ describe('update()', () => {
               notifyWhen: 'onActionGroupChange',
               throttle: null,
             },
+            uuid: '123',
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1695,6 +1748,7 @@ describe('update()', () => {
               notifyWhen: 'onActionGroupChange',
               throttle: null,
             },
+            uuid: '123',
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1729,6 +1783,7 @@ describe('update()', () => {
               notifyWhen: 'onActionGroupChange',
               throttle: null,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -1803,6 +1858,7 @@ describe('update()', () => {
               notifyWhen: 'onActionGroupChange',
               throttle: null,
             },
+            uuid: '123',
           },
           {
             group: 'default',
@@ -1816,6 +1872,7 @@ describe('update()', () => {
               notifyWhen: 'onActionGroupChange',
               throttle: null,
             },
+            uuid: '123',
           },
           {
             group: 'default',
@@ -1829,6 +1886,7 @@ describe('update()', () => {
               notifyWhen: 'onActionGroupChange',
               throttle: null,
             },
+            uuid: '123',
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1874,6 +1932,7 @@ describe('update()', () => {
               notifyWhen: 'onThrottleInterval',
               throttle: '5m',
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -1886,6 +1945,7 @@ describe('update()', () => {
               notifyWhen: 'onThrottleInterval',
               throttle: '5m',
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -1898,6 +1958,7 @@ describe('update()', () => {
               notifyWhen: 'onThrottleInterval',
               throttle: '5m',
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -1936,6 +1997,7 @@ describe('update()', () => {
                 notifyWhen: 'onActionGroupChange',
                 throttle: null,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },
@@ -2024,6 +2086,7 @@ describe('update()', () => {
                 notifyWhen: 'onActionGroupChange',
                 throttle: null,
               },
+              uuid: '123',
             },
           ],
           scheduledTaskId: taskId,
@@ -2067,6 +2130,7 @@ describe('update()', () => {
                 notifyWhen: 'onActionGroupChange',
                 throttle: null,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },
@@ -2102,6 +2166,7 @@ describe('update()', () => {
                 notifyWhen: 'onActionGroupChange',
                 throttle: null,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },
@@ -2139,6 +2204,7 @@ describe('update()', () => {
                   notifyWhen: 'onActionGroupChange',
                   throttle: null,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
               {
                 group: 'group2',
@@ -2151,6 +2217,7 @@ describe('update()', () => {
                   notifyWhen: 'onActionGroupChange',
                   throttle: null,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
             ],
           },
@@ -2185,6 +2252,7 @@ describe('update()', () => {
                   notifyWhen: 'onActionGroupChange',
                   throttle: null,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
               {
                 group: 'default',
@@ -2192,6 +2260,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
             ],
           },
@@ -2228,6 +2297,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
             ],
           },
@@ -2269,6 +2339,7 @@ describe('update()', () => {
                   notifyWhen: 'onActionGroupChange',
                   throttle: null,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
               {
                 group: 'default',
@@ -2276,6 +2347,7 @@ describe('update()', () => {
                 params: {
                   foo: true,
                 },
+                type: RuleActionTypes.DEFAULT,
               },
             ],
           },
@@ -2317,6 +2389,7 @@ describe('update()', () => {
                 notifyWhen: 'onActionGroupChange',
                 throttle: null,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },
@@ -2389,6 +2462,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
             {
               group: 'default',
@@ -2396,6 +2470,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
             {
               group: 'default',
@@ -2403,6 +2478,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },
@@ -2449,6 +2525,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -2488,6 +2565,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -2506,7 +2584,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '146',
+            uuid: '145',
           },
         ],
         alertTypeId: 'myType',
@@ -2545,6 +2623,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
         ],
         "createdAt": 2019-02-12T21:01:22.479Z,
@@ -2624,6 +2704,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
           {
             group: 'default',
@@ -2632,6 +2713,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
           {
             group: 'default',
@@ -2640,6 +2722,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -2683,6 +2766,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -2690,6 +2774,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -2697,6 +2782,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -2731,6 +2817,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
             {
               group: 'default',
@@ -2738,6 +2825,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
             {
               group: 'default',
@@ -2745,6 +2833,7 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },
@@ -3023,6 +3112,7 @@ describe('update()', () => {
               summary: false,
             },
             uuid: '123-456',
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
@@ -3035,6 +3125,7 @@ describe('update()', () => {
               throttle: null,
               summary: false,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -3057,7 +3148,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '153',
+            uuid: '152',
           },
         ],
         alertTypeId: 'myType',
@@ -3171,6 +3262,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '123',
           },
         ],
         apiKey: Buffer.from('123:abc').toString('base64'),
@@ -3213,6 +3305,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -3227,6 +3320,8 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "123",
           },
         ],
         "apiKey": "MTIzOmFiYw==",
@@ -3261,7 +3356,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "154",
+            "uuid": "153",
           },
         ],
         "alertTypeId": "myType",
@@ -3336,6 +3431,7 @@ describe('update()', () => {
                 notifyWhen: 'onActionGroupChange',
                 throttle: null,
               },
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         },

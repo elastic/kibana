@@ -42,8 +42,8 @@ const transformMonitoring = (monitoring: Monitoring): MonitoringV1 => {
 const transformRuleActions = (actions: Rule['actions']): RuleResponseV1['actions'] => {
   return actions.map((action) => {
     if (action.type === RuleActionTypes.SYSTEM) {
-      const { actionTypeId, ...restAction } = action;
-      return { ...restAction, connector_type_id: actionTypeId };
+      const { id, actionTypeId, params, uuid } = action;
+      return { id, params, uuid, connector_type_id: actionTypeId };
     }
 
     const { group, id, actionTypeId, params, frequency, uuid, alertsFilter } = action;

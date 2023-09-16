@@ -65,6 +65,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -123,6 +124,8 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
             ],
           },
@@ -169,11 +172,14 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": ".test",
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
+                "uuid": "test-uuid",
               },
             ],
             "alertTypeId": "myType",
@@ -234,6 +240,8 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
               {
                 group: 'default',
@@ -241,6 +249,8 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid-2',
               },
             ],
           },
@@ -263,18 +273,24 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": ".test",
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
+                "uuid": "test-uuid",
               },
               Object {
+                "actionTypeId": ".test",
                 "group": "default",
                 "id": "preconfigured",
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
+                "uuid": "test-uuid-2",
               },
             ],
             "alertTypeId": "myType",
@@ -335,11 +351,15 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
               {
                 group: 'default',
                 actionRef: 'system_action:system_action-id',
                 params: {},
+                actionTypeId: '.system-action',
+                uuid: 'test-uuid-2',
               },
             ],
           },
@@ -362,16 +382,22 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": ".test",
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
+                "uuid": "test-uuid",
               },
               Object {
+                "actionTypeId": ".system-action",
                 "group": "default",
                 "id": "system_action-id",
                 "params": Object {},
+                "type": "default",
+                "uuid": "test-uuid-2",
               },
             ],
             "alertTypeId": "myType",
@@ -531,6 +557,8 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
             ],
           },
@@ -563,6 +591,8 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
             ],
           },
@@ -600,11 +630,14 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": ".test",
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
+                "uuid": "test-uuid",
               },
             ],
             "alertTypeId": "myType",
@@ -623,11 +656,14 @@ describe('find()', () => {
           Object {
             "actions": Array [
               Object {
+                "actionTypeId": ".test",
                 "group": "default",
                 "id": "1",
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
+                "uuid": "test-uuid",
               },
             ],
             "alertTypeId": "123",
@@ -739,6 +775,8 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
             ],
           },
@@ -771,6 +809,8 @@ describe('find()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
             ],
           },

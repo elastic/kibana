@@ -23,9 +23,10 @@ import {
 } from '../../lib';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
-import { injectReferencesIntoActions, injectReferencesIntoParams } from '../common';
+import { injectReferencesIntoParams } from '../common';
 import { RulesClientContext } from '../types';
-import { isSystemAction } from '../../../common/system_actions/is_system_action';
+import { RuleDomain } from '../../application/rule/types';
+import { transformRawActionsToDomainActions } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -100,6 +101,8 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
   includeSnoozeData: boolean = false,
   omitGeneratedValues: boolean = true
 ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
+  const isSystemAction = context.isSystemAction;
+
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
     rRule: {
@@ -121,6 +124,14 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
 
   const includeMonitoring = monitoring && !excludeFromPublicApi;
 
+  const ruleDomainActions: RuleDomain['actions'] = transformRawActionsToDomainActions({
+    ruleId: id,
+    actions: actions ?? [],
+    references,
+    isSystemAction,
+    omitGeneratedValues,
+  });
+
   const rule: PartialRule<Params> = {
     id,
     notifyWhen,
@@ -128,7 +139,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     // we currently only support the Interval Schedule type
     // Once we support additional types, this type signature will likely change
     schedule: schedule as IntervalSchedule,
-    actions: actions ? injectReferencesIntoActions(id, actions, references || []) : [],
+    actions: ruleDomainActions,
     params: injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
     ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
     ...(includeSnoozeData && !excludeFromPublicApi
@@ -161,18 +172,6 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
         }
       : {}),
   };
-
-  if (omitGeneratedValues) {
-    if (rule.actions) {
-      rule.actions = rule.actions.map((ruleAction) => {
-        if (isSystemAction(ruleAction)) {
-          return ruleAction;
-        }
-
-        return omit(ruleAction, 'alertsFilter.query.dsl');
-      });
-    }
-  }
 
   // Need the `rule` object to build a URL
   if (!excludeFromPublicApi) {

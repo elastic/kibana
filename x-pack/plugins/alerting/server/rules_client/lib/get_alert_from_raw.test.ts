@@ -55,6 +55,7 @@ describe('getAlertFromRaw()', () => {
     maxScheduledPerMinute: 10000,
     internalSavedObjectsRepository,
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+    isSystemAction: jest.fn(),
   };
 
   const rawRule: RawRule = {
@@ -126,10 +127,9 @@ describe('getAlertFromRaw()', () => {
     uuid: '111',
     params: { foo: 'bar' },
     actionTypeId: '.test',
-    type: RuleActionTypes.SYSTEM,
   };
 
-  it('removes the dsl query from the default action', () => {
+  it('transforms a default action correctly', () => {
     ruleTypeRegistry.get.mockReturnValue(ruleType);
 
     const res = getAlertFromRaw(context, '1', '.test', { ...rawRule, actions: [defaultAction] }, [
@@ -152,12 +152,14 @@ describe('getAlertFromRaw()', () => {
             timezone: 'UTC',
           },
         },
+        type: RuleActionTypes.DEFAULT,
       },
     ]);
   });
 
-  it('does not modify system actions', () => {
+  it('transforms a system action correctly', () => {
     ruleTypeRegistry.get.mockReturnValue(ruleType);
+    context.isSystemAction.mockReturnValue(true);
 
     const res = getAlertFromRaw(context, '1', '.test', { ...rawRule, actions: [systemAction] }, [
       { id: 'system-action-id', name: 'system-action-ref', type: 'test' },

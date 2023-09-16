@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { RuleActionTypes } from '../../../../../../../common';
 import { CreateRuleRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/create';
 import { transformCreateBody } from './v1';
 
 describe('transformCreateBody', () => {
-  const defaultAction = {
+  const isSystemAction = (id: string) => id === 'system-action-id';
+
+  const defaultAction: CreateRuleRequestBodyV1['actions'][number] = {
     id: '1',
     uuid: '111',
     params: { foo: 'bar' },
-    group: 'default',
+    group: 'my-group',
     actionTypeId: '.test',
     frequency: { notify_when: 'onThrottleInterval' as const, summary: true, throttle: '1h' },
     alerts_filter: {
@@ -21,12 +24,11 @@ describe('transformCreateBody', () => {
     },
   };
 
-  const systemAction = {
-    id: '1',
+  const systemAction: CreateRuleRequestBodyV1['actions'][number] = {
+    id: 'system-action-id',
     uuid: '111',
     params: { foo: 'bar' },
     actionTypeId: '.test',
-    type: 'system' as const,
   };
 
   const rule: CreateRuleRequestBodyV1<{}> = {
@@ -45,7 +47,29 @@ describe('transformCreateBody', () => {
   };
 
   it('transforms the default action correctly', async () => {
-    const res = transformCreateBody({ ...rule, actions: [defaultAction] });
+    const res = transformCreateBody({ ...rule, actions: [defaultAction] }, isSystemAction);
+
+    expect(res.actions).toEqual([
+      {
+        actionTypeId: '.test',
+        alertsFilter: { query: { dsl: '{test:1}', filters: [], kql: 'test:1s' } },
+        frequency: { notifyWhen: 'onThrottleInterval', summary: true, throttle: '1h' },
+        group: 'my-group',
+        id: '1',
+        params: { foo: 'bar' },
+        type: RuleActionTypes.DEFAULT,
+        uuid: '111',
+      },
+    ]);
+  });
+
+  it('sets the group to default if it is undefined', async () => {
+    const { group, ...defaultActionWithoutGroup } = defaultAction;
+    const res = transformCreateBody(
+      { ...rule, actions: [defaultActionWithoutGroup] },
+      isSystemAction
+    );
+
     expect(res.actions).toEqual([
       {
         actionTypeId: '.test',
@@ -54,16 +78,22 @@ describe('transformCreateBody', () => {
         group: 'default',
         id: '1',
         params: { foo: 'bar' },
-        type: undefined,
+        type: RuleActionTypes.DEFAULT,
         uuid: '111',
       },
     ]);
   });
 
-  it('transforms the actions correctly', async () => {
-    const res = transformCreateBody({ ...rule, actions: [systemAction] });
+  it('transforms the system action correctly', async () => {
+    const res = transformCreateBody({ ...rule, actions: [systemAction] }, isSystemAction);
     expect(res.actions).toEqual([
-      { actionTypeId: '.test', id: '1', params: { foo: 'bar' }, type: 'system', uuid: '111' },
+      {
+        actionTypeId: '.test',
+        id: 'system-action-id',
+        params: { foo: 'bar' },
+        type: RuleActionTypes.SYSTEM,
+        uuid: '111',
+      },
     ]);
   });
 });

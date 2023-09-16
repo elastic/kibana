@@ -62,6 +62,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -93,6 +94,8 @@ describe('resolve()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: '.test',
+              uuid: 'test-uuid',
             },
           ],
           notifyWhen: 'onActiveAlert',
@@ -108,16 +111,21 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
+
     const result = await rulesClient.resolve({ id: '1' });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid",
           },
         ],
         "alertTypeId": "123",
@@ -167,6 +175,8 @@ describe('resolve()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: '.test',
+              uuid: 'test-uuid',
             },
           ],
           notifyWhen: 'onActiveAlert',
@@ -182,16 +192,21 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
+
     const result = await rulesClient.resolve({ id: '1', includeLegacyId: true });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid",
           },
         ],
         "alertTypeId": "123",
@@ -253,6 +268,8 @@ describe('resolve()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: '.test',
+              uuid: 'test-uuid',
             },
           ],
           notifyWhen: 'onActiveAlert',
@@ -268,6 +285,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
+
     const result = await rulesClient.resolve({ id: '1', includeSnoozeData: true });
     expect(result.isSnoozedUntil).toBeTruthy();
   });
@@ -318,6 +336,8 @@ describe('resolve()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: '.test',
+              uuid: 'test-uuid',
             },
           ],
           notifyWhen: 'onActiveAlert',
@@ -338,6 +358,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
+
     const result = await rulesClient.resolve({ id: '1' });
 
     expect(injectReferencesFn).toHaveBeenCalledWith(
@@ -347,15 +368,19 @@ describe('resolve()', () => {
       },
       [{ id: '9', name: 'soRef_0', type: 'someSavedObjectType' }]
     );
+
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": ".test",
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": "test-uuid",
           },
         ],
         "alertTypeId": "123",
@@ -396,6 +421,8 @@ describe('resolve()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: '.test',
+              uuid: 'test-uuid',
             },
           ],
         },
@@ -404,6 +431,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
+
     await expect(rulesClient.resolve({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Action reference \\"action_0\\" not found in alert id: 1"`
     );
@@ -413,6 +441,7 @@ describe('resolve()', () => {
     const injectReferencesFn = jest.fn().mockImplementation(() => {
       throw new Error('something went wrong!');
     });
+
     ruleTypeRegistry.get.mockImplementation(() => ({
       id: '123',
       name: 'Test',
@@ -433,6 +462,7 @@ describe('resolve()', () => {
         params: { validate: (params) => params },
       },
     }));
+
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
       saved_object: {
@@ -454,6 +484,8 @@ describe('resolve()', () => {
               params: {
                 foo: true,
               },
+              actionTypeId: '.test',
+              uuid: 'test-uuid',
             },
           ],
           notifyWhen: 'onActiveAlert',
@@ -474,6 +506,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
+
     await expect(rulesClient.resolve({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error injecting reference into rule params for rule id 1 - something went wrong!"`
     );
@@ -499,6 +532,8 @@ describe('resolve()', () => {
                 params: {
                   foo: true,
                 },
+                actionTypeId: '.test',
+                uuid: 'test-uuid',
               },
             ],
           },
@@ -626,6 +661,8 @@ describe('resolve()', () => {
             params: {
               foo: true,
             },
+            actionTypeId: '.test',
+            uuid: 'test-uuid',
           },
         ],
         notifyWhen: 'onActiveAlert',
@@ -652,6 +689,7 @@ describe('resolve()', () => {
         outcome: 'aliasMatch',
         alias_target_id: '2',
       });
+
       (formatLegacyActions as jest.Mock).mockResolvedValue([
         {
           id: 'migrated_rule_mock',
