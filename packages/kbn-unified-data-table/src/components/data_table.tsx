@@ -71,8 +71,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { isEqual } from 'lodash';
 import classNames from 'classnames';
 import { FieldIcon } from '@kbn/react-field';
+import { diffChars, diffLines, diffWords } from 'diff';
 import { getFieldTypeName } from '@kbn/field-utils';
-import { diffLines } from 'diff';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -469,8 +469,9 @@ export const UnifiedDataTable = ({
   const [isCompareActive, setIsCompareActive] = useState(false);
   const [showDiff, setShowDiff] = useState(true);
   const [showAllFields, setShowAllFields] = useState(false);
-  const [isDiffModeSelectorOpen, setIsDiffModeSelectorOpen] = useState(false);
-  const [diffMode, setDiffMode] = useState<'basic' | 'lines'>('basic');
+  const [isDiffOptionsMenuOpen, setIsDiffOptionsMenuOpen] = useState(false);
+  const [diffMode, setDiffMode] = useState<'basic' | 'chars' | 'words' | 'lines'>('basic');
+  const [showDiffDecorations, setShowDiffDecorations] = useState(true);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const rowMap = useMemo(() => {
@@ -1136,23 +1137,23 @@ export const UnifiedDataTable = ({
           />
           <EuiPopover
             button={
-              <EuiToolTip position="top" delay="long" content="Select diff mode">
+              <EuiToolTip position="top" delay="long" content="Diff options">
                 <EuiButtonIcon
                   iconType="arrowDown"
                   size="xs"
                   iconSize="s"
                   color="text"
                   disabled={!showDiff}
-                  aria-label="Select diff mode"
+                  aria-label="Diff options"
                   onClick={() => {
-                    setIsDiffModeSelectorOpen(!isDiffModeSelectorOpen);
+                    setIsDiffOptionsMenuOpen(!isDiffOptionsMenuOpen);
                   }}
                 />
               </EuiToolTip>
             }
-            isOpen={isDiffModeSelectorOpen}
+            isOpen={isDiffOptionsMenuOpen}
             closePopover={() => {
-              setIsDiffModeSelectorOpen(false);
+              setIsDiffOptionsMenuOpen(false);
             }}
             panelPaddingSize="none"
             anchorPosition="downLeft"
@@ -1166,7 +1167,7 @@ export const UnifiedDataTable = ({
                 `}
               >
                 <EuiTitle size="xxs">
-                  <h3>Select diff mode</h3>
+                  <h3>Diff mode</h3>
                 </EuiTitle>
               </EuiPanel>
 
@@ -1176,7 +1177,6 @@ export const UnifiedDataTable = ({
                 size="s"
                 onClick={() => {
                   setDiffMode('basic');
-                  setIsDiffModeSelectorOpen(false);
                 }}
               >
                 Full value
@@ -1208,16 +1208,62 @@ export const UnifiedDataTable = ({
               </EuiPanel>
 
               <EuiContextMenuItem
+                key="chars"
+                icon={diffMode === 'chars' ? 'check' : 'empty'}
+                size="s"
+                onClick={() => {
+                  setDiffMode('chars');
+                }}
+              >
+                By character
+              </EuiContextMenuItem>
+
+              <EuiContextMenuItem
+                key="words"
+                icon={diffMode === 'words' ? 'check' : 'empty'}
+                size="s"
+                onClick={() => {
+                  setDiffMode('words');
+                }}
+              >
+                By word
+              </EuiContextMenuItem>
+
+              <EuiContextMenuItem
                 key="lines"
                 icon={diffMode === 'lines' ? 'check' : 'empty'}
                 size="s"
                 onClick={() => {
                   setDiffMode('lines');
-                  setIsDiffModeSelectorOpen(false);
                 }}
               >
-                Line by line
+                By line
               </EuiContextMenuItem>
+
+              <EuiHorizontalRule margin="none" />
+
+              <EuiPanel
+                color="transparent"
+                paddingSize="s"
+                css={css`
+                  padding-bottom: 0;
+                `}
+              >
+                <EuiTitle size="xxs">
+                  <h3>Settings</h3>
+                </EuiTitle>
+              </EuiPanel>
+
+              <EuiPanel color="transparent" paddingSize="s">
+                <EuiSwitch
+                  label="Show decorations"
+                  checked={showDiffDecorations}
+                  compressed
+                  onChange={(e) => {
+                    setShowDiffDecorations(e.target.checked);
+                  }}
+                />
+              </EuiPanel>
             </EuiContextMenuPanel>
           </EuiPopover>
           {!defaultColumns && (
@@ -1242,7 +1288,7 @@ export const UnifiedDataTable = ({
         </>
       ),
     }),
-    [defaultColumns, diffMode, isDiffModeSelectorOpen, showAllFields, showDiff]
+    [defaultColumns, diffMode, isDiffOptionsMenuOpen, showAllFields, showDiff, showDiffDecorations]
   );
 
   const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
@@ -1343,7 +1389,7 @@ export const UnifiedDataTable = ({
       const baseValue = comparisonBaseDoc?.[fieldName];
       const currentValue = doc?.flattened[fieldName];
 
-      if (showDiff && diffMode === 'lines' && baseValue && currentValue) {
+      if (showDiff && diffMode !== 'basic' && baseValue && currentValue) {
         const getStringifiedValue = (value: unknown) => {
           const extractedValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
           if (typeof extractedValue === 'object') {
@@ -1351,7 +1397,12 @@ export const UnifiedDataTable = ({
           }
           return String(extractedValue ?? '-');
         };
-        const diff = diffLines(getStringifiedValue(baseValue), getStringifiedValue(currentValue));
+        const diff =
+          diffMode === 'chars'
+            ? diffChars(getStringifiedValue(baseValue), getStringifiedValue(currentValue))
+            : diffMode === 'words'
+            ? diffWords(getStringifiedValue(baseValue), getStringifiedValue(currentValue))
+            : diffLines(getStringifiedValue(baseValue), getStringifiedValue(currentValue));
         const indicatorCss = css`
           position: absolute;
           width: ${euiThemeVars.euiSizeS};
@@ -1364,7 +1415,8 @@ export const UnifiedDataTable = ({
         const matchCss = css`
           background-color: ${matchBackgroundColor};
           color: ${euiThemeVars.euiColorSuccessText};
-
+        `;
+        const matchIndicatorCss = css`
           &:before {
             content: '+';
             ${indicatorCss}
@@ -1375,7 +1427,8 @@ export const UnifiedDataTable = ({
         const diffCss = css`
           background-color: ${diffBackgroundColor};
           color: ${euiThemeVars.euiColorDangerText};
-
+        `;
+        const diffIndicatorCss = css`
           &:before {
             content: '-';
             ${indicatorCss}
@@ -1383,19 +1436,38 @@ export const UnifiedDataTable = ({
             color: ${euiThemeVars.euiColorDangerText};
           }
         `;
+        const SegmentTag: keyof JSX.IntrinsicElements = diffMode === 'lines' ? 'div' : 'span';
+
         return (
           <div className={CELL_CLASS}>
             {diff.map((part) => (
-              <div
+              <SegmentTag
                 css={[
                   css`
                     position: relative;
                   `,
                   part.added ? matchCss : part.removed ? diffCss : undefined,
+                  showDiffDecorations
+                    ? diffMode === 'lines'
+                      ? part.added
+                        ? matchIndicatorCss
+                        : part.removed
+                        ? diffIndicatorCss
+                        : undefined
+                      : part.added
+                      ? css`
+                          text-decoration: underline;
+                        `
+                      : part.removed
+                      ? css`
+                          text-decoration: line-through;
+                        `
+                      : undefined
+                    : undefined,
                 ]}
               >
                 {part.value}
-              </div>
+              </SegmentTag>
             ))}
           </div>
         );
@@ -1433,6 +1505,7 @@ export const UnifiedDataTable = ({
       matchingCellCss,
       rowMap,
       showDiff,
+      showDiffDecorations,
     ]
   );
 
