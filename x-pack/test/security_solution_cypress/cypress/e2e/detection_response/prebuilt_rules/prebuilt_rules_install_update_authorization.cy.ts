@@ -32,6 +32,7 @@ import {
   RULE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
+import { cleanKibana } from '../../../tasks/common';
 
 // Rule to test update
 const RULE_1_ID = 'rule_1';
@@ -68,8 +69,10 @@ describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
-    before(() => {
+    beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
+      cleanKibana();
+
       // Install one prebuilt rule asset to assert that user can't install it
       installPrebuiltRuleAssets([RULE_2]);
 
