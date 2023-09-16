@@ -411,7 +411,7 @@ export const UnifiedDataTable = ({
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
-  const rowMap = useMemo(() => {
+  const docMap = useMemo(() => {
     const map = new Map<string, DataTableRecord>();
     rows?.forEach((row) => {
       map.set(row.id, row);
@@ -423,12 +423,12 @@ export const UnifiedDataTable = ({
       return [];
     }
     // filter out selected docs that are no longer part of the current data
-    const result = selectedDocs.filter((docId) => !!rowMap.get(docId));
+    const result = selectedDocs.filter((docId) => !!docMap.get(docId));
     if (result.length === 0 && isFilterActive) {
       setIsFilterActive(false);
     }
     return result;
-  }, [selectedDocs, rows?.length, isFilterActive, rowMap]);
+  }, [selectedDocs, rows?.length, isFilterActive, docMap]);
 
   const displayedRows = useMemo(() => {
     if (!rows) {
@@ -834,6 +834,8 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -888,12 +890,12 @@ export const UnifiedDataTable = ({
               consumer={consumer}
               ariaLabelledBy={ariaLabelledBy}
               dataView={dataView}
-              docMap={rowMap}
-              columns={visibleColumns}
+              selectedFieldNames={visibleColumns}
               selectedDocs={usedSelectedDocs}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
               fieldFormats={fieldFormats}
+              getDocById={getDocById}
               setSelectedDocs={setSelectedDocs}
               setIsCompareActive={setIsCompareActive}
             />

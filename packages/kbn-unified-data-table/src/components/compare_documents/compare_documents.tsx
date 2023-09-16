@@ -55,12 +55,12 @@ export interface CompareDocumentsProps {
   consumer: string;
   ariaLabelledBy: string;
   dataView: DataView;
-  docMap: Map<string, DataTableRecord>;
-  columns: string[];
+  selectedFieldNames: string[];
   selectedDocs: string[];
   schemaDetectors: EuiDataGridSchemaDetector[];
   forceShowAllFields: boolean;
   fieldFormats: FieldFormatsStart;
+  getDocById: (id: string) => DataTableRecord | undefined;
   setSelectedDocs: (selectedDocs: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
 }
@@ -70,12 +70,12 @@ const CompareDocuments = ({
   consumer,
   ariaLabelledBy,
   dataView,
-  docMap,
-  columns,
+  selectedFieldNames,
   selectedDocs,
   schemaDetectors,
   forceShowAllFields,
   fieldFormats,
+  getDocById,
   setSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
@@ -107,7 +107,7 @@ const CompareDocuments = ({
     const currentColumns = [fieldsColumn];
 
     selectedDocs.forEach((docId, i) => {
-      const doc = docMap.get(docId);
+      const doc = getDocById(docId);
 
       if (doc) {
         const additional: EuiListGroupItemProps[] = [];
@@ -161,7 +161,7 @@ const CompareDocuments = ({
     });
 
     return currentColumns;
-  }, [docMap, fieldsColumnId, selectedDocs, setSelectedDocs]);
+  }, [fieldsColumnId, getDocById, selectedDocs, setSelectedDocs]);
   const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
   const comparisonColumnVisibility: EuiDataGridColumnVisibility = useMemo(
     () => ({
@@ -190,11 +190,17 @@ const CompareDocuments = ({
           }
         });
     } else {
-      fields = columns;
+      fields = selectedFieldNames;
     }
 
     return fields;
-  }, [columns, dataView.fields, dataView.timeFieldName, forceShowAllFields, showAllFields]);
+  }, [
+    selectedFieldNames,
+    dataView.fields,
+    dataView.timeFieldName,
+    forceShowAllFields,
+    showAllFields,
+  ]);
   const comparisonRowCount = useMemo(() => {
     return comparisonFields.length;
   }, [comparisonFields.length]);
@@ -410,8 +416,8 @@ const CompareDocuments = ({
   );
   const comparisonBaseDocId = selectedDocs[0];
   const comparisonBaseDoc = useMemo(
-    () => docMap.get(comparisonBaseDocId)?.flattened,
-    [comparisonBaseDocId, docMap]
+    () => getDocById(comparisonBaseDocId)?.flattened,
+    [comparisonBaseDocId, getDocById]
   );
   const matchBackgroundColor = useEuiBackgroundColor('success');
   const diffBackgroundColor = useEuiBackgroundColor('danger');
@@ -439,7 +445,7 @@ const CompareDocuments = ({
       const { rowIndex, columnId, setCellProps } = props;
       const fieldName = comparisonFields[rowIndex];
       const field = useMemo(() => dataView.fields.getByName(fieldName), [fieldName]);
-      const doc = useMemo(() => docMap.get(columnId), [columnId]);
+      const doc = useMemo(() => getDocById(columnId), [columnId]);
 
       useEffect(() => {
         if (!showDiff || diffMode !== 'basic') {
@@ -614,7 +620,7 @@ const CompareDocuments = ({
       diffMode,
       fieldFormats,
       dataView,
-      docMap,
+      getDocById,
       comparisonBaseDocId,
       baseDocCellCss,
       matchingCellCss,
