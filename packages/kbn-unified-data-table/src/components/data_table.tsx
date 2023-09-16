@@ -974,11 +974,13 @@ export const UnifiedDataTable = ({
         fields.push(dataView.timeFieldName);
       }
 
-      dataView.fields.sort().forEach((field) => {
-        if (field.name !== dataView.timeFieldName) {
-          fields.push(field.name);
-        }
-      });
+      dataView.fields
+        .sort((a, b) => a.displayName.localeCompare(b.displayName))
+        .forEach((field) => {
+          if (field.name !== dataView.timeFieldName) {
+            fields.push(field.name);
+          }
+        });
     } else {
       fields = visibleColumns;
     }
@@ -1124,10 +1126,14 @@ export const UnifiedDataTable = ({
     background-color: ${useEuiBackgroundColor('success', { method: 'transparent' })};
   `;
   const matchingCellCss = css`
-    color: ${euiThemeVars.euiColorSuccessText} !important;
+    * * {
+      color: ${euiThemeVars.euiColorSuccessText} !important;
+    }
   `;
   const differentCellCss = css`
-    color: ${euiThemeVars.euiColorDangerText} !important;
+    * * {
+      color: ${euiThemeVars.euiColorDangerText} !important;
+    }
   `;
 
   const renderComparisonCellValue = useCallback(
@@ -1174,7 +1180,7 @@ export const UnifiedDataTable = ({
                   font-weight: ${euiThemeVars.euiFontWeightSemiBold};
                 `}
               >
-                {fieldName}
+                {field?.displayName ?? fieldName}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -1196,7 +1202,7 @@ export const UnifiedDataTable = ({
               doc.raw,
               fieldFormats,
               dataView,
-              dataView.fields.getByName(columnId)
+              dataView.getFieldByName(fieldName)
             ),
           }}
         />
