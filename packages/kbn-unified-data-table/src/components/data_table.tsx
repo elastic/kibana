@@ -749,7 +749,6 @@ export const UnifiedDataTable = ({
         {usedSelectedDocs.length ? (
           <DataTableDocumentToolbarBtn
             isFilterActive={isFilterActive}
-            isCompareActive={isCompareActive}
             rows={rows!}
             selectedDocs={usedSelectedDocs}
             setSelectedDocs={setSelectedDocs}
@@ -760,7 +759,7 @@ export const UnifiedDataTable = ({
         {externalAdditionalControls}
       </>
     );
-  }, [usedSelectedDocs, isFilterActive, isCompareActive, rows, externalAdditionalControls]);
+  }, [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
     () =>
