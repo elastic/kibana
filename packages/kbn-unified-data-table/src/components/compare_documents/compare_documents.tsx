@@ -13,7 +13,6 @@ import {
   EuiContextMenuPanel,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridColumn,
   EuiDataGridColumnVisibility,
   EuiDataGridInMemory,
   EuiDataGridRowHeightsOptions,
@@ -23,7 +22,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiListGroupItemProps,
   EuiPanel,
   EuiPopover,
   EuiSwitch,
@@ -50,6 +48,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
 import { CELL_CLASS } from '../../utils/get_render_cell_value';
+import { useComparisonColumns } from './hooks/use_comparison_columns';
 
 export interface CompareDocumentsProps {
   consumer: string;
@@ -95,81 +94,12 @@ const CompareDocuments = ({
     true
   );
   const fieldsColumnId = useGeneratedHtmlId({ prefix: 'fields' });
-  const comparisonColumns: EuiDataGridColumn[] = useMemo(() => {
-    const fieldColumnName = i18n.translate('unifiedDataTable.fieldColumnTitle', {
-      defaultMessage: 'Field',
-    });
-    const fieldsColumn: EuiDataGridColumn = {
-      id: fieldsColumnId,
-      displayAsText: fieldColumnName,
-      isSortable: false,
-      actions: false,
-      initialWidth: 200,
-      isExpandable: false,
-    };
-    const currentColumns = [fieldsColumn];
-
-    selectedDocs.forEach((docId, i) => {
-      const doc = getDocById(docId);
-
-      if (doc) {
-        const additional: EuiListGroupItemProps[] = [];
-
-        if (i !== 0) {
-          additional.push({
-            iconType: 'pin',
-            label: i18n.translate('unifiedDataTable.pinForComparison', {
-              defaultMessage: 'Pin for comparison',
-            }),
-            size: 'xs',
-            onClick: () => {
-              const newSelectedDocs = [...selectedDocs];
-              const index = newSelectedDocs.indexOf(docId);
-              const [baseDocId] = newSelectedDocs;
-
-              newSelectedDocs[0] = docId;
-              newSelectedDocs[index] = baseDocId;
-
-              setSelectedDocs(newSelectedDocs);
-            },
-          });
-        }
-
-        if (selectedDocs.length > 2) {
-          additional.push({
-            iconType: 'cross',
-            label: i18n.translate('unifiedDataTable.removeFromComparison', {
-              defaultMessage: 'Remove from comparison',
-            }),
-            size: 'xs',
-            onClick: () => {
-              const newSelectedDocs = [...selectedDocs];
-              newSelectedDocs.splice(i, 1);
-
-              setSelectedDocs(newSelectedDocs);
-            },
-          });
-        }
-
-        currentColumns.push({
-          id: docId,
-          displayAsText: doc.raw._id,
-          isSortable: false,
-          isExpandable: false,
-          actions: {
-            showHide: false,
-            showMoveLeft: false,
-            showMoveRight: false,
-            showSortAsc: false,
-            showSortDesc: false,
-            additional,
-          },
-        });
-      }
-    });
-
-    return currentColumns;
-  }, [fieldsColumnId, getDocById, selectedDocs, setSelectedDocs]);
+  const comparisonColumns = useComparisonColumns({
+    fieldsColumnId,
+    selectedDocs,
+    getDocById,
+    setSelectedDocs,
+  });
   const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
   const comparisonColumnVisibility: EuiDataGridColumnVisibility = useMemo(
     () => ({
