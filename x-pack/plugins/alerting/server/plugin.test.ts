@@ -27,7 +27,6 @@ import {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';

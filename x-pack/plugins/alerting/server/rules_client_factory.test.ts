@@ -115,6 +115,7 @@ test('creates a rules client with proper constructor arguments when security is 
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
     connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
   });
 });
 
@@ -158,6 +159,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     isAuthenticationTypeAPIKey: expect.any(Function),
     getAuthenticationAPIKey: expect.any(Function),
     connectorAdapterRegistry: expect.any(ConnectorAdapterRegistry),
+    isSystemAction: expect.any(Function),
   });
 });
 

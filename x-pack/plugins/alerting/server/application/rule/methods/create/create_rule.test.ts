@@ -87,6 +87,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
   connectorAdapterRegistry,
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {

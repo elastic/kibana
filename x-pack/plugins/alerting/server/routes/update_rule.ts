@@ -66,6 +66,7 @@ const rewriteBodyReq = (
     actions: rewriteActionsReq(actions, isSystemAction),
   };
 };
+
 const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   actions,
   alertTypeId,

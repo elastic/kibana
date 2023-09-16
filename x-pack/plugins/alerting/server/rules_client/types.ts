@@ -79,6 +79,7 @@ export interface RulesClientContext {
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
+  readonly isSystemAction: (actionId: string) => boolean;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

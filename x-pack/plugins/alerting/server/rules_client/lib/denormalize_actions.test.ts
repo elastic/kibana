@@ -56,6 +56,7 @@ describe('denormalizeActions', () => {
     isAuthenticationTypeAPIKey: jest.fn(),
     getAuthenticationAPIKey: jest.fn(),
     connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+    isSystemAction: jest.fn(),
   };
 
   beforeEach(() => {

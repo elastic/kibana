@@ -12,7 +12,6 @@ import {
   RuleLastRun,
   RuleAction,
   RuleType,
-  RuleDefaultAction,
   isSystemAction,
 } from '../../common';
 
@@ -27,7 +26,7 @@ function transformAction(input: AsApiContract<RuleAction>): RuleAction {
     frequency,
     alerts_filter: alertsFilter,
     ...rest
-  } = input as AsApiContract<RuleDefaultAction>;
+  } = input;
 
   return {
     actionTypeId,

@@ -175,6 +175,9 @@ export class RulesClientFactory {
         }
         return { apiKeysEnabled: false };
       },
+      isSystemAction(actionId: string) {
+        return actions.isSystemActionConnector(actionId);
+      },
     });
   }
 }
