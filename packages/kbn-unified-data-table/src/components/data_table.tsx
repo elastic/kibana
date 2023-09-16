@@ -1407,7 +1407,7 @@ export const UnifiedDataTable = ({
           position: absolute;
           width: ${euiThemeVars.euiSizeS};
           height: 100%;
-          margin-left: -${euiThemeVars.euiSizeS};
+          margin-left: calc(-${euiThemeVars.euiSizeS} - calc(${euiThemeVars.euiSizeXS} / 2));
           text-align: center;
           line-height: ${euiThemeVars.euiFontSizeM};
           font-weight: ${euiThemeVars.euiFontWeightMedium};
@@ -1420,8 +1420,8 @@ export const UnifiedDataTable = ({
           &:before {
             content: '+';
             ${indicatorCss}
-            background-color: ${tint(euiThemeVars.euiColorSuccess, 0.82)};
-            color: ${euiThemeVars.euiColorSuccessText};
+            background-color: ${euiThemeVars.euiColorSuccess};
+            color: ${euiThemeVars.euiColorLightestShade};
           }
         `;
         const diffCss = css`
@@ -1432,8 +1432,8 @@ export const UnifiedDataTable = ({
           &:before {
             content: '-';
             ${indicatorCss}
-            background-color: ${tint(euiThemeVars.euiColorDanger, 0.82)};
-            color: ${euiThemeVars.euiColorDangerText};
+            background-color: ${tint(euiThemeVars.euiColorDanger, 0.25)};
+            color: ${euiThemeVars.euiColorLightestShade};
           }
         `;
         const SegmentTag: keyof JSX.IntrinsicElements = diffMode === 'lines' ? 'div' : 'span';
@@ -1447,6 +1447,11 @@ export const UnifiedDataTable = ({
                     position: relative;
                   `,
                   part.added ? matchCss : part.removed ? diffCss : undefined,
+                  diffMode === 'lines'
+                    ? css`
+                        padding-left: calc(${euiThemeVars.euiSizeXS} / 2);
+                      `
+                    : undefined,
                   showDiffDecorations
                     ? diffMode === 'lines'
                       ? part.added
