@@ -42,8 +42,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroupItemProps,
-  shade,
   tint,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiToolTip,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -432,6 +439,8 @@ export const UnifiedDataTable = ({
   const [isCompareActive, setIsCompareActive] = useState(false);
   const [showDiff, setShowDiff] = useState(true);
   const [showAllFields, setShowAllFields] = useState(false);
+  const [isDiffModeSelectorOpen, setIsDiffModeSelectorOpen] = useState(false);
+  const [diffMode, setDiffMode] = useState<'basic' | 'lines'>('basic');
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const rowMap = useMemo(() => {
@@ -1016,6 +1025,92 @@ export const UnifiedDataTable = ({
               setShowDiff(e.target.checked);
             }}
           />
+          <EuiPopover
+            button={
+              <EuiToolTip position="top" delay="long" content="Select diff mode">
+                <EuiButtonIcon
+                  iconType="arrowDown"
+                  size="xs"
+                  iconSize="s"
+                  color="text"
+                  disabled={!showDiff}
+                  aria-label="Select diff mode"
+                  onClick={() => {
+                    setIsDiffModeSelectorOpen(!isDiffModeSelectorOpen);
+                  }}
+                />
+              </EuiToolTip>
+            }
+            isOpen={isDiffModeSelectorOpen}
+            closePopover={() => {
+              setIsDiffModeSelectorOpen(false);
+            }}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel size="s">
+              <EuiPanel
+                color="transparent"
+                paddingSize="s"
+                css={css`
+                  padding-bottom: 0;
+                `}
+              >
+                <EuiTitle size="xxs">
+                  <h3>Select diff mode</h3>
+                </EuiTitle>
+              </EuiPanel>
+
+              <EuiContextMenuItem
+                key="basic"
+                icon={diffMode === 'basic' ? 'check' : 'empty'}
+                size="s"
+                onClick={() => {
+                  setDiffMode('basic');
+                  setIsDiffModeSelectorOpen(false);
+                }}
+              >
+                Full value
+              </EuiContextMenuItem>
+
+              <EuiHorizontalRule margin="none" />
+
+              <EuiPanel
+                color="transparent"
+                paddingSize="s"
+                css={css`
+                  padding-bottom: 0;
+                `}
+              >
+                <EuiTitle size="xxxs">
+                  <h4>
+                    Advanced modes{' '}
+                    <EuiToolTip
+                      position="top"
+                      content={
+                        'Advanced modes offer enhanced diffing capabilities, but operate ' +
+                        'on raw documents and therefore do not support field formatting.'
+                      }
+                    >
+                      <EuiIcon type="questionInCircle" />
+                    </EuiToolTip>
+                  </h4>
+                </EuiTitle>
+              </EuiPanel>
+
+              <EuiContextMenuItem
+                key="lines"
+                icon={diffMode === 'lines' ? 'check' : 'empty'}
+                size="s"
+                onClick={() => {
+                  setDiffMode('lines');
+                  setIsDiffModeSelectorOpen(false);
+                }}
+              >
+                Line by line
+              </EuiContextMenuItem>
+            </EuiContextMenuPanel>
+          </EuiPopover>
           {!defaultColumns && (
             <EuiSwitch
               label="Show all fields"
@@ -1038,7 +1133,7 @@ export const UnifiedDataTable = ({
         </>
       ),
     }),
-    [defaultColumns, showAllFields, showDiff]
+    [defaultColumns, diffMode, isDiffModeSelectorOpen, showAllFields, showDiff]
   );
 
   const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
@@ -1089,14 +1184,13 @@ export const UnifiedDataTable = ({
       const doc = useMemo(() => rowMap.get(columnId), [columnId]);
 
       useEffect(() => {
-        if (!showDiff) {
+        if (!showDiff || diffMode !== 'basic') {
           setCellProps({ css: undefined });
           return;
         }
 
         if (columnId === comparisonBaseDocId) {
-          setCellProps({ css: undefined });
-          // setCellProps({ css: baseDocCellCss });
+          setCellProps({ css: baseDocCellCss });
         } else if (columnId !== fieldsColumnId) {
           const baseValue = comparisonBaseDoc?.[fieldName];
           const currentValue = doc?.flattened[fieldName];
@@ -1140,7 +1234,7 @@ export const UnifiedDataTable = ({
       const baseValue = comparisonBaseDoc?.[fieldName];
       const currentValue = doc?.flattened[fieldName];
 
-      if (showDiff && baseValue && currentValue) {
+      if (showDiff && diffMode === 'lines' && baseValue && currentValue) {
         const getStringifiedValue = (value: unknown) => {
           const extractedValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
           if (typeof extractedValue === 'object') {
@@ -1181,7 +1275,7 @@ export const UnifiedDataTable = ({
           }
         `;
         return (
-          <>
+          <div className={CELL_CLASS}>
             {diff.map((part) => (
               <div
                 css={[
@@ -1194,7 +1288,7 @@ export const UnifiedDataTable = ({
                 {part.value}
               </div>
             ))}
-          </>
+          </div>
         );
       }
 
@@ -1216,11 +1310,13 @@ export const UnifiedDataTable = ({
       );
     },
     [
+      baseDocCellCss,
       comparisonBaseDoc,
       comparisonBaseDocId,
       comparisonFields,
       dataView,
       diffBackgroundColor,
+      diffMode,
       differentCellCss,
       fieldFormats,
       fieldsColumnId,
