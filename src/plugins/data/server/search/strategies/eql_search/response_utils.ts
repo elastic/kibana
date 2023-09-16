@@ -16,7 +16,7 @@ import { EqlSearchStrategyResponse } from '../../../../common';
  */
 export function toEqlKibanaSearchResponse(
   response: TransportResult<EqlSearchResponse>,
-  requestMeta?: RequestMeta,
+  requestMeta?: RequestMeta
 ): EqlSearchStrategyResponse {
   return {
     id: response.body.id,

@@ -369,7 +369,7 @@ export default function ({ getService }: FtrProviderContext) {
                     params: {
                       index: '.kibana',
                       query: 'any where true',
-                      timestamp_field: "created_at",
+                      timestamp_field: 'created_at',
                     },
                   },
                   options: {
