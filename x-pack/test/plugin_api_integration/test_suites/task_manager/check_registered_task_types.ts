@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     'sampleRecurringTaskWithInvalidIndirectParam',
     'sampleOneTimeTaskWithInvalidIndirectParam',
     'sampleTaskWithParamsSchema',
+    'taskToDisable',
   ];
 
   // This test is meant to fail when any change is made in task manager registered types.

@@ -24,10 +24,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
-import semverValid from 'semver/functions/valid';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import type { Agent } from '../../../../types';
@@ -36,6 +34,7 @@ import {
   sendPostBulkAgentUpgrade,
   useStartServices,
   useKibanaVersion,
+  useConfig,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
@@ -71,7 +70,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   isScheduled = false,
 }) => {
   const { notifications } = useStartServices();
-  const kibanaVersion = semverCoerce(useKibanaVersion())?.version || '';
+  const kibanaVersion = useKibanaVersion() || '';
+  const config = useConfig();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<string | undefined>();
   const [availableVersions, setVersions] = useState<string[]>([]);
@@ -204,23 +204,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }
 
   const onCreateOption = (searchValue: string) => {
-    if (!semverValid(searchValue)) {
-      return;
-    }
+    const normalizedSearchValue = searchValue.trim().toLowerCase();
 
-    const agentVersionNumber = semverCoerce(searchValue);
-    if (
-      agentVersionNumber?.version &&
-      semverGt(kibanaVersion, agentVersionNumber?.version) &&
-      minVersion &&
-      semverGt(agentVersionNumber?.version, minVersion)
-    ) {
-      const newOption = {
-        label: searchValue,
-        value: searchValue,
-      };
-      setSelectedVersion([newOption]);
-    }
+    const newOption = {
+      label: normalizedSearchValue,
+      value: normalizedSearchValue,
+    };
+    setSelectedVersion([newOption]);
   };
 
   return (
@@ -320,8 +310,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             }
             setSelectedVersion(selected);
           }}
-          onCreateOption={onCreateOption}
-          customOptionText="Input the desired version"
+          onCreateOption={
+            config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? undefined : onCreateOption
+          }
+          customOptionText="Use custom agent version {searchValue} (not recommended)"
         />
       </EuiFormRow>
       {!isSingleAgent &&

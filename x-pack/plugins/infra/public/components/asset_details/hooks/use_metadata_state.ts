@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import createContainer from 'constate';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
 import { useDateRangeProviderContext } from './use_date_range';
+import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'asset' | 'assetType'>;
 
 export function useMetadataProvider({ asset, assetType }: UseMetadataProviderProps) {
-  const { dateRangeTs } = useDateRangeProviderContext();
+  const [, setUrlState] = useAssetDetailsUrlState();
+  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
   const inventoryModel = findInventoryModel(assetType);
   const { sourceId } = useSourceContext();
 
@@ -24,8 +27,14 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
     assetType,
     inventoryModel.requiredMetrics,
     sourceId,
-    dateRangeTs
+    getDateRangeInTimestamp()
   );
+
+  useEffect(() => {
+    if (metadata?.name) {
+      setUrlState({ name: metadata.name });
+    }
+  }, [metadata?.name, setUrlState]);
 
   return {
     loading,

@@ -19,7 +19,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { ElasticFlameGraph } from '../../../common/flamegraph';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { getFlamegraphModel } from '../../utils/get_flamegraph_model';
 import { FlameGraphLegend } from './flame_graph_legend';
 import { FrameInformationWindow } from '../frame_information_window';
@@ -34,10 +34,9 @@ interface Props {
   comparisonFlamegraph?: ElasticFlameGraph;
   baseline?: number;
   comparison?: number;
-  showInformationWindow: boolean;
-  toggleShowInformationWindow: () => void;
   searchText?: string;
   onChangeSearchText?: FlameSpec['onSearchTextChange'];
+  isEmbedded?: boolean;
 }
 
 export function FlameGraph({
@@ -47,11 +46,14 @@ export function FlameGraph({
   comparisonFlamegraph,
   baseline,
   comparison,
-  showInformationWindow,
-  toggleShowInformationWindow,
   searchText,
   onChangeSearchText,
+  isEmbedded = false,
 }: Props) {
+  const [showInformationWindow, setShowInformationWindow] = useState(false);
+  function toggleShowInformationWindow() {
+    setShowInformationWindow((prev) => !prev);
+  }
   const theme = useEuiTheme();
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
@@ -157,9 +159,7 @@ export function FlameGraph({
                           comparisonScaleFactor={comparison}
                           onShowMoreClick={() => {
                             trackProfilingEvent({ metric: 'flamegraph_node_details_click' });
-                            if (!showInformationWindow) {
-                              toggleShowInformationWindow();
-                            }
+                            toggleShowInformationWindow();
                             setHighlightedVmIndex(valueIndex);
                           }}
                         />
@@ -194,7 +194,8 @@ export function FlameGraph({
           frame={selected}
           totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
           totalSamples={totalSamples}
-          samplingRate={primaryFlamegraph?.SamplingRate ?? 1.0}
+          showAIAssistant={!isEmbedded}
+          showSymbolsStatus={!isEmbedded}
         />
       )}
     </>

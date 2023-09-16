@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { AlertsCasesTourSteps } from '@kbn/security-solution-plugin/public/common/components/guided_onboarding_tour/tour_config';
-import { tag } from '../../../tags';
 
 import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import { navigateFromHeaderTo } from '../../../tasks/security_header';
@@ -30,7 +29,7 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login, visit } from '../../../tasks/login';
 import { startAlertsCasesTour } from '../../../tasks/api_calls/tour';
 
-describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+describe('Guided onboarding tour', { tags: ['@ess', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -72,7 +71,7 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
 
   describe.skip(
     'persists tour steps in flyout on flyout toggle',
-    { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+    { tags: ['@ess', '@brokenInServerless'] },
     () => {
       const stepsInAlertsFlyout = [
         AlertsCasesTourSteps.reviewAlertDetailsFlyout,
@@ -83,25 +82,21 @@ describe('Guided onboarding tour', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }
       const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
       stepsInAlertsFlyout.forEach((step) => {
-        it(
-          `step: ${step}, resets to ${step}`,
-          { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
-          () => {
-            startTour();
-            goToStep(step);
-            assertTourStepExist(step);
-            closeAlertFlyout();
-            assertTourStepNotExist(step);
-            expandFirstAlert();
-            assertTourStepExist(step);
-          }
-        );
+        it(`step: ${step}, resets to ${step}`, { tags: ['@ess', '@brokenInServerless'] }, () => {
+          startTour();
+          goToStep(step);
+          assertTourStepExist(step);
+          closeAlertFlyout();
+          assertTourStepNotExist(step);
+          expandFirstAlert();
+          assertTourStepExist(step);
+        });
       });
 
       stepsInCasesFlyout.forEach((step) => {
         it(
           `step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`,
-          { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] },
+          { tags: ['@ess', '@brokenInServerless'] },
           () => {
             startTour();
             goToStep(step);

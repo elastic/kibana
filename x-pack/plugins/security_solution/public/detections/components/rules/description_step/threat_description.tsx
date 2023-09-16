@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import type { BuildThreatDescription } from './types';
@@ -120,7 +120,6 @@ export const ThreatEuiFlexGroup = ({ label, threat }: BuildThreatDescription) =>
           </EuiFlexItem>
         );
       })}
-      <EuiSpacer />
     </ThreatEuiFlexGroupStyles>
   );
 };

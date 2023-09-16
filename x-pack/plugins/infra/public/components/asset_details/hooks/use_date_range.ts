@@ -5,32 +5,60 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/es-query';
 import createContainer from 'constate';
-import { useMemo } from 'react';
+import { useCallback, useState } from 'react';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { parseDateRange } from '../../../utils/datemath';
-import type { AssetDetailsProps } from '../types';
-import { toTimestampRange } from '../utils';
+import { getDefaultDateRange, toTimestampRange } from '../utils';
+import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
-const DEFAULT_DATE_RANGE = {
-  from: 'now-15m',
-  to: 'now',
-};
+export interface UseDateRangeProviderProps {
+  initialDateRange?: TimeRange;
+}
 
-export type UseAssetDetailsStateProps = Pick<AssetDetailsProps, 'dateRange'>;
+export function useDateRangeProvider({
+  initialDateRange = getDefaultDateRange(),
+}: UseDateRangeProviderProps) {
+  const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
+  const [parsedDateRange, setParsedDateRange] = useState(parseDateRange(dateRange));
+  const [refreshTs, setRefreshTs] = useState(Date.now());
 
-export function useDateRangeProvider({ dateRange: rawDateRange }: UseAssetDetailsStateProps) {
-  const dateRange = useMemo(() => {
-    const { from = DEFAULT_DATE_RANGE.from, to = DEFAULT_DATE_RANGE.to } =
-      parseDateRange(rawDateRange);
+  useEffectOnce(() => {
+    const { from, to } = getParsedDateRange();
+
+    // forces the date picker to initialize with absolute dates.
+    setUrlState({ dateRange: { from, to } });
+  });
+
+  const setDateRange = useCallback(
+    (newDateRange: TimeRange) => {
+      setUrlState({ dateRange: newDateRange });
+      setParsedDateRange(parseDateRange(newDateRange));
+      setRefreshTs(Date.now());
+    },
+    [setUrlState]
+  );
+
+  const getParsedDateRange = useCallback(() => {
+    const defaultDateRange = getDefaultDateRange();
+    const { from = defaultDateRange.from, to = defaultDateRange.to } = parsedDateRange;
 
     return { from, to };
-  }, [rawDateRange]);
+  }, [parsedDateRange]);
 
-  const dateRangeTs = toTimestampRange(dateRange);
+  const getDateRangeInTimestamp = useCallback(
+    () => toTimestampRange(getParsedDateRange()),
+    [getParsedDateRange]
+  );
 
   return {
     dateRange,
-    dateRangeTs,
+    getDateRangeInTimestamp,
+    getParsedDateRange,
+    refreshTs,
+    setDateRange,
   };
 }
 

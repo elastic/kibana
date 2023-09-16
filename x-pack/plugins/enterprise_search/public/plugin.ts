@@ -121,8 +121,11 @@ export class EnterpriseSearchPlugin implements Plugin {
   private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { cloud } = plugins;
     const { config } = this;
+    if (!config.ui?.enabled) {
+      return;
+    }
+    const { cloud } = plugins;
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -416,6 +419,9 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
+    if (!this.config.ui?.enabled) {
+      return;
+    }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);

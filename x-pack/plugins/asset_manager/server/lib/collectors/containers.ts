@@ -16,9 +16,9 @@ export async function collectContainers({
   sourceIndices,
   afterKey,
 }: CollectorOptions) {
-  const { metrics, logs, traces } = sourceIndices;
+  const { metrics, logs } = sourceIndices;
   const dsl: estypes.SearchRequest = {
-    index: [traces, logs, metrics],
+    index: [logs, metrics],
     size: QUERY_MAX_SIZE,
     collapse: {
       field: 'container.id',

@@ -23,6 +23,7 @@
     "@kbn/shared-ux-page-solution-nav",
     "@kbn/security-solution-side-nav",
     "@kbn/security-solution-navigation",
+    "@kbn/security-solution-upselling",
     "@kbn/default-nav-ml",
     "@kbn/default-nav-devtools",
     "@kbn/kibana-react-plugin",
@@ -36,8 +37,13 @@
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
     "@kbn/cloud-security-posture-plugin",
+    "@kbn/security-solution-features",
+    "@kbn/cases-plugin",
     "@kbn/fleet-plugin",
+    "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/cloud-defend-plugin",
+    "@kbn/core-logging-server-mocks"
   ]
 }

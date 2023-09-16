@@ -12,7 +12,14 @@ import Url from 'url';
 
 import type { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
-import { hostDetailsUrl, LOGOUT_URL, userDetailsUrl } from '../urls/navigation';
+import { LoginState } from '@kbn/security-plugin/common/login_state';
+import {
+  hostDetailsUrl,
+  LOGOUT_URL,
+  SECURITY_DETECTIONS_RULES_URL,
+  userDetailsUrl,
+} from '../urls/navigation';
+import { resetRulesTableState } from './common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -43,11 +50,6 @@ const ELASTICSEARCH_USERNAME = 'ELASTICSEARCH_USERNAME';
  * username to be used when authenticating with Kibana
  */
 const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
-
-/**
- * The Kibana server endpoint used for authentication
- */
-const LOGIN_API_ENDPOINT = '/internal/security/login';
 
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user
@@ -135,53 +137,46 @@ export const deleteRoleAndUser = (role: ROLES) => {
   });
 };
 
+const loginWithUsernameAndPassword = (username: string, password: string) => {
+  const baseUrl = Cypress.config().baseUrl;
+  if (!baseUrl) {
+    throw Error(`Cypress config baseUrl not set!`);
+  }
+
+  const headers = { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' };
+  // programmatically authenticate without interacting with the Kibana login page
+  cy.request<LoginState>({ headers, url: `${baseUrl}/internal/security/login_state` }).then(
+    (loginState) => {
+      const basicProvider = loginState.body.selector.providers.find(
+        (provider) => provider.type === 'basic'
+      );
+      return cy.request({
+        url: `${baseUrl}/internal/security/login`,
+        method: 'POST',
+        headers,
+        body: {
+          providerType: basicProvider.type,
+          providerName: basicProvider.name,
+          currentURL: '/',
+          params: { username, password },
+        },
+      });
+    }
+  );
+};
+
 export const loginWithUser = (user: User) => {
   cy.session(user, () => {
-    cy.request({
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: {
-          username: user.username,
-          password: user.password,
-        },
-      },
-      headers: {
-        'kbn-xsrf': 'cypress-creds-via-config',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-      method: 'POST',
-      url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
-    });
+    loginWithUsernameAndPassword(user.username, user.password);
   });
 };
 
-const loginWithRole = async (role: ROLES) => {
+const loginWithRole = (role: ROLES) => {
   postRoleAndUser(role);
-  const theUrl = new URL(String(Cypress.config().baseUrl));
-  theUrl.username = role;
-  theUrl.password = Cypress.env(ELASTICSEARCH_PASSWORD);
 
-  cy.log(`origin: ${theUrl}`);
+  cy.log(`origin: ${Cypress.config().baseUrl}`);
   cy.session(role, () => {
-    cy.request({
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: {
-          username: role,
-          password: 'changeme',
-        },
-      },
-      headers: {
-        'kbn-xsrf': 'cypress-creds-via-config',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-      method: 'POST',
-      url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
-    });
+    loginWithUsernameAndPassword(role, 'changeme');
   });
 };
 
@@ -225,24 +220,7 @@ const loginViaEnvironmentCredentials = () => {
   const password = Cypress.env(ELASTICSEARCH_PASSWORD);
 
   cy.session([username, password], () => {
-    // programmatically authenticate without interacting with the Kibana login page
-    cy.request({
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: {
-          username,
-          password,
-        },
-      },
-      headers: {
-        'kbn-xsrf': 'cypress-creds-via-env',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-      method: 'POST',
-      url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
-    });
+    loginWithUsernameAndPassword(username, password);
   });
 };
 
@@ -258,26 +236,8 @@ const loginViaConfig = () => {
 
   // read the login details from `kibana.dev.yaml`
   cy.readFile(KIBANA_DEV_YML_PATH).then((kibanaDevYml) => {
-    const config = yaml.safeLoad(kibanaDevYml);
-
-    // programmatically authenticate without interacting with the Kibana login page
-    cy.request({
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: '/',
-        params: {
-          username: config.elasticsearch.username,
-          password: config.elasticsearch.password,
-        },
-      },
-      headers: {
-        'kbn-xsrf': 'cypress-creds-via-config',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-      method: 'POST',
-      url: `${Cypress.config().baseUrl}${LOGIN_API_ENDPOINT}`,
-    });
+    const { username, password } = yaml.safeLoad(kibanaDevYml);
+    loginWithUsernameAndPassword(username, password);
   });
 };
 
@@ -391,6 +351,11 @@ export const visitHostDetailsPage = (hostName = 'suricata-iowa') => {
   visit(hostDetailsUrl(hostName));
   cy.get('[data-test-subj="loading-spinner"]').should('exist');
   cy.get('[data-test-subj="loading-spinner"]').should('not.exist');
+};
+
+export const visitSecurityDetectionRulesPage = (role?: ROLES) => {
+  resetRulesTableState(); // Clear persistent rules filter data before page loading
+  visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL, role);
 };
 
 export const visitUserDetailsPage = (userName = 'test') => {

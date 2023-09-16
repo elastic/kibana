@@ -8,12 +8,14 @@
 import { IlmPolicy } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { DataStreamAdapter } from './data_stream_adapter';
 
 interface CreateOrUpdateIlmPolicyOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   name: string;
   policy: IlmPolicy;
+  dataStreamAdapter: DataStreamAdapter;
 }
 /**
  * Creates ILM policy if it doesn't already exist, updates it if it does
@@ -23,7 +25,10 @@ export const createOrUpdateIlmPolicy = async ({
   esClient,
   name,
   policy,
+  dataStreamAdapter,
 }: CreateOrUpdateIlmPolicyOpts) => {
+  if (dataStreamAdapter.isUsingDataStreams()) return;
+
   logger.info(`Installing ILM policy ${name}`);
 
   try {

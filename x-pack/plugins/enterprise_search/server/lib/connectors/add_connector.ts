@@ -7,76 +7,85 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CURRENT_CONNECTORS_INDEX } from '../..';
-import { ConnectorDocument } from '../../../common/types/connectors';
+import {
+  createConnector,
+  Connector,
+  deleteConnectorById,
+  ConnectorStatus,
+} from '@kbn/search-connectors';
+
+import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+
 import { ErrorCode } from '../../../common/types/error_codes';
-import { createConnectorDocument } from '../../utils/create_connector_document';
+import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { createIndex } from '../indices/create_index';
 import { getDefaultPipeline } from '../pipelines/get_default_pipeline';
 
-import { deleteConnectorById } from './delete_connector';
-
-import { fetchConnectorByIndexName } from './fetch_connectors';
-
-const createConnector = async (
-  document: ConnectorDocument,
-  client: IScopedClusterClient,
-  language: string | null,
-  deleteExisting: boolean
-): Promise<{ id: string; index_name: string }> => {
-  const index = document.index_name;
-  const indexExists = await client.asCurrentUser.indices.exists({ index });
-  if (indexExists) {
-    {
-      throw new Error(ErrorCode.INDEX_ALREADY_EXISTS);
-    }
-  }
-
-  const connector = await fetchConnectorByIndexName(client, index);
-  if (connector) {
-    if (deleteExisting) {
-      await deleteConnectorById(client, connector.id);
-    } else {
-      throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
-    }
-  }
-  const crawler = await fetchCrawlerByIndexName(client, index);
-
-  if (crawler) {
-    throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
-  }
-
-  const result = await client.asCurrentUser.index({
-    document,
-    index: CURRENT_CONNECTORS_INDEX,
-    refresh: 'wait_for',
-  });
-  await createIndex(client, document.index_name, language, false);
-
-  return { id: result._id, index_name: document.index_name };
-};
-
 export const addConnector = async (
   client: IScopedClusterClient,
   input: {
-    delete_existing_connector?: boolean;
-    index_name: string;
-    is_native: boolean;
+    deleteExistingConnector?: boolean;
+    indexName: string | null;
+    isNative: boolean;
     language: string | null;
-    service_type?: string;
+    serviceType?: string | null;
   }
-): Promise<{ id: string; index_name: string }> => {
-  const pipeline = await getDefaultPipeline(client);
+): Promise<Connector> => {
+  const index = input.indexName;
+  if (index) {
+    const indexExists = await client.asCurrentUser.indices.exists({ index });
+    if (indexExists) {
+      {
+        throw new Error(ErrorCode.INDEX_ALREADY_EXISTS);
+      }
+    }
 
-  const document = createConnectorDocument({
-    indexName: input.index_name,
-    isNative: input.is_native,
-    language: input.language,
-    pipeline,
-    serviceType: input.service_type ?? null,
+    const connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
+    if (connector) {
+      if (input.deleteExistingConnector) {
+        await deleteConnectorById(client.asCurrentUser, connector.id);
+      } else {
+        throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
+      }
+    }
+    const crawler = await fetchCrawlerByIndexName(client, index);
+
+    if (crawler) {
+      throw new Error(ErrorCode.CRAWLER_ALREADY_EXISTS);
+    }
+    await createIndex(client, index, input.language, false);
+  }
+
+  const nativeConnector =
+    input.isNative && input.serviceType
+      ? NATIVE_CONNECTOR_DEFINITIONS[input.serviceType]
+      : undefined;
+
+  if (
+    input.isNative &&
+    input.serviceType &&
+    !nativeConnector &&
+    input.serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  ) {
+    throw new Error(`Could not find connector definition for service type ${input.serviceType}`);
+  }
+
+  const nativeFields = nativeConnector
+    ? {
+        configuration: nativeConnector.configuration,
+        features: nativeConnector.features,
+        status: ConnectorStatus.NEEDS_CONFIGURATION,
+      }
+    : {};
+
+  return await createConnector(client.asCurrentUser, {
+    ...input,
+    name: stripSearchPrefix(input.indexName || ''),
+    ...nativeFields,
+    pipeline: await getDefaultPipeline(client),
   });
-
-  return await createConnector(document, client, input.language, !!input.delete_existing_connector);
 };

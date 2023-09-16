@@ -61,6 +61,7 @@ describe('ruleTypesRoute', () => {
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
         hasAlertsMappings: true,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<AsApiContract<RegistryAlertTypeWithAuth>> = [
@@ -169,6 +170,8 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
 
@@ -222,6 +225,8 @@ describe('ruleTypesRoute', () => {
         },
         producer: 'alerts',
         enabledInLicense: true,
+        hasAlertsMappings: false,
+        hasFieldsForAAD: false,
       } as RegistryAlertTypeWithAuth,
     ];
 

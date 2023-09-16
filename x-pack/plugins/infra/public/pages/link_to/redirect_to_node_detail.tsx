@@ -6,65 +6,60 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
-
-import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
+import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
+import rison from '@kbn/rison';
+import { replaceStateKeyInQueryString } from '../../../common/url_state_storage_service';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
-import { getFromFromLocation, getToFromLocation, getNodeNameFromLocation } from './query_params';
 import { InventoryItemType } from '../../../common/inventory_models/types';
+import { AssetDetailsUrlState } from '../../components/asset_details/types';
+import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
 
-type RedirectToNodeDetailProps = RouteComponentProps<{
-  nodeId: string;
-  nodeType: InventoryItemType;
-}>;
+export const REDIRECT_NODE_DETAILS_FROM_KEY = 'from';
+export const REDIRECT_NODE_DETAILS_TO_KEY = 'to';
+export const REDIRECT_ASSET_DETAILS_KEY = 'assetDetails';
 
-export const RedirectToNodeDetail = ({
-  match: {
-    params: { nodeId, nodeType },
-  },
-  location,
-}: RedirectToNodeDetailProps) => {
-  const searchString = replaceMetricTimeInQueryString(
-    getFromFromLocation(location),
-    getToFromLocation(location)
-  )('');
+const getHostDetailSearch = (queryParams: URLSearchParams) => {
+  const from = queryParams.get(REDIRECT_NODE_DETAILS_FROM_KEY);
+  const to = queryParams.get(REDIRECT_NODE_DETAILS_TO_KEY);
+  const assetDetailsParam = queryParams.get(REDIRECT_ASSET_DETAILS_KEY);
 
-  const queryParams = new URLSearchParams(searchString);
-
-  if (nodeType === 'host') {
-    const assetName = getNodeNameFromLocation(location);
-    if (assetName) {
-      queryParams.set('assetName', assetName);
-    }
-  }
-
-  return <Redirect to={`/detail/${nodeType}/${nodeId}?${queryParams.toString()}`} />;
+  return replaceStateKeyInQueryString(ASSET_DETAILS_URL_STATE_KEY, {
+    ...(assetDetailsParam ? (rison.decode(assetDetailsParam) as AssetDetailsUrlState) : undefined),
+    dateRange: {
+      from: from ? new Date(parseFloat(from)).toISOString() : undefined,
+      to: to ? new Date(parseFloat(to)).toISOString() : undefined,
+    },
+  } as AssetDetailsUrlState)('');
 };
 
-export const getNodeDetailUrl = ({
-  nodeType,
-  nodeId,
-  to,
-  from,
-  assetName,
-}: {
-  nodeType: InventoryItemType;
-  nodeId: string;
-  to?: number;
-  from?: number;
-  assetName?: string;
-}): LinkDescriptor => {
-  return {
-    app: 'metrics',
-    pathname: `link-to/${nodeType}-detail/${nodeId}`,
-    search: {
-      ...(assetName ? { assetName } : undefined),
-      ...(to && from
-        ? {
-            to: `${to}`,
-            from: `${from}`,
-          }
-        : undefined),
-    },
-  };
+const getNodeDetailSearch = (queryParams: URLSearchParams) => {
+  const from = queryParams.get(REDIRECT_NODE_DETAILS_FROM_KEY);
+  const to = queryParams.get(REDIRECT_NODE_DETAILS_TO_KEY);
+
+  return replaceMetricTimeInQueryString(
+    from ? parseFloat(from) : NaN,
+    to ? parseFloat(to) : NaN
+  )('');
+};
+
+export const RedirectToNodeDetail = () => {
+  const {
+    params: { nodeType, nodeId },
+  } = useRouteMatch<{ nodeType: InventoryItemType; nodeId: string }>();
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+
+  const search =
+    nodeType === 'host' ? getHostDetailSearch(queryParams) : getNodeDetailSearch(queryParams);
+
+  return (
+    <Redirect
+      to={{
+        pathname: `/detail/${nodeType}/${nodeId}`,
+        search,
+        state: location.state,
+      }}
+    />
+  );
 };
