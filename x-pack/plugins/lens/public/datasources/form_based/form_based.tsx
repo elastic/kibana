@@ -64,7 +64,7 @@ import {
 
 import {
   getFiltersInLayer,
-  getShardFailuresWarningMessages,
+  getSearchWarningMessages,
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
@@ -811,7 +811,7 @@ export function getFormBasedDatasource({
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
-      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
+      return [...getSearchWarningMessages(state, warning, request, response, core.theme)];
     },
 
     checkIntegrity: (state, indexPatterns) => {
