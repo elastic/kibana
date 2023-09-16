@@ -886,8 +886,9 @@ export const UnifiedDataTable = ({
         >
           {isCompareActive ? (
             <CompareDocuments
-              randomId={randomId}
+              key="comparisonTable"
               consumer={consumer}
+              ariaDescribedBy={randomId}
               ariaLabelledBy={ariaLabelledBy}
               dataView={dataView}
               selectedFieldNames={visibleColumns}

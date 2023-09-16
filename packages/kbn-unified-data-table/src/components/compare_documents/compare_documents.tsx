@@ -51,8 +51,8 @@ import { GRID_STYLE } from '../../constants';
 import { CELL_CLASS } from '../../utils/get_render_cell_value';
 
 export interface CompareDocumentsProps {
-  randomId: string;
   consumer: string;
+  ariaDescribedBy: string;
   ariaLabelledBy: string;
   dataView: DataView;
   selectedFieldNames: string[];
@@ -66,8 +66,8 @@ export interface CompareDocumentsProps {
 }
 
 const CompareDocuments = ({
-  randomId,
   consumer,
+  ariaDescribedBy,
   ariaLabelledBy,
   dataView,
   selectedFieldNames,
@@ -633,8 +633,7 @@ const CompareDocuments = ({
 
   return (
     <EuiDataGrid
-      key="comparisonTable"
-      aria-describedby={randomId}
+      aria-describedby={ariaDescribedBy}
       aria-labelledby={ariaLabelledBy}
       columns={comparisonColumns}
       columnVisibility={comparisonColumnVisibility}
