@@ -7,10 +7,6 @@
  */
 
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumnVisibility,
@@ -20,14 +16,7 @@ import {
   EuiDataGridToolBarVisibilityOptions,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPanel,
-  EuiPopover,
-  EuiSwitch,
   EuiText,
-  EuiTitle,
-  EuiToolTip,
   tint,
   useEuiBackgroundColor,
   useGeneratedHtmlId,
@@ -37,17 +26,15 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { formatFieldValue, getFieldTypeName } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 import { euiThemeVars } from '@kbn/ui-theme';
-import classNames from 'classnames';
 import { diffChars, diffLines, diffWords } from 'diff';
 import { isEqual } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
 import { CELL_CLASS } from '../../utils/get_render_cell_value';
+import { ComparisonControls } from './comparison_controls';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 
@@ -85,7 +72,6 @@ const CompareDocuments = ({
     `${consumer}:dataGridShowAllFields`,
     false
   );
-  const [isDiffOptionsMenuOpen, setIsDiffOptionsMenuOpen] = useState(false);
   const [diffMode, setDiffMode] = useLocalStorage<'basic' | 'chars' | 'words' | 'lines'>(
     `${consumer}:dataGridDiffMode`,
     'basic'
@@ -126,236 +112,23 @@ const CompareDocuments = ({
         allowDensity: false,
       },
       additionalControls: (
-        <>
-          <EuiButtonEmpty
-            size="xs"
-            color="text"
-            iconType="cross"
-            onClick={() => {
-              setIsCompareActive(false);
-            }}
-            data-test-subj="unifiedFieldListCloseComparison"
-            className={classNames({
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              euiDataGrid__controlBtn: true,
-            })}
-          >
-            <FormattedMessage
-              id="unifiedDataTable.closeDocumentComparison"
-              defaultMessage="Stop comparing documents"
-            />
-          </EuiButtonEmpty>
-
-          <EuiSwitch
-            label={i18n.translate('unifiedDataTable.showDiff', {
-              defaultMessage: 'Show diff',
-            })}
-            checked={showDiff ?? true}
-            labelProps={{
-              css: css`
-                font-size: ${euiThemeVars.euiFontSizeXS} !important;
-                font-weight: ${euiThemeVars.euiFontWeightMedium};
-              `,
-            }}
-            compressed
-            css={css`
-              padding-left: ${euiThemeVars.euiSizeXS};
-            `}
-            onChange={(e) => {
-              setShowDiff(e.target.checked);
-            }}
-          />
-
-          <EuiPopover
-            button={
-              <EuiToolTip
-                position="top"
-                delay="long"
-                content={i18n.translate('unifiedDataTable.diffOptionsTooltip', {
-                  defaultMessage: 'Diff options',
-                })}
-              >
-                <EuiButtonIcon
-                  iconType="arrowDown"
-                  size="xs"
-                  iconSize="s"
-                  color="text"
-                  disabled={!showDiff}
-                  aria-label={
-                    isDiffOptionsMenuOpen
-                      ? i18n.translate('unifiedDataTable.closeDiffOptions', {
-                          defaultMessage: 'Close diff options',
-                        })
-                      : i18n.translate('unifiedDataTable.openDiffOptions', {
-                          defaultMessage: 'Open diff options',
-                        })
-                  }
-                  onClick={() => {
-                    setIsDiffOptionsMenuOpen(!isDiffOptionsMenuOpen);
-                  }}
-                />
-              </EuiToolTip>
-            }
-            isOpen={isDiffOptionsMenuOpen}
-            closePopover={() => {
-              setIsDiffOptionsMenuOpen(false);
-            }}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel size="s">
-              <EuiPanel
-                color="transparent"
-                paddingSize="s"
-                css={css`
-                  padding-bottom: 0;
-                `}
-              >
-                <EuiTitle size="xxs">
-                  <h3>
-                    <FormattedMessage id="unifiedDataTable.diffMode" defaultMessage="Diff mode" />
-                  </h3>
-                </EuiTitle>
-              </EuiPanel>
-
-              <EuiContextMenuItem
-                key="basic"
-                icon={diffMode === 'basic' ? 'check' : 'empty'}
-                size="s"
-                onClick={() => {
-                  setDiffMode('basic');
-                }}
-              >
-                <FormattedMessage id="unifiedDataTable.diffModeBasic" defaultMessage="Full value" />
-              </EuiContextMenuItem>
-
-              <EuiHorizontalRule margin="none" />
-
-              <EuiPanel
-                color="transparent"
-                paddingSize="s"
-                css={css`
-                  padding-bottom: 0;
-                `}
-              >
-                <EuiTitle size="xxxs">
-                  <h4>
-                    <FormattedMessage
-                      id="unifiedDataTable.advancedDiffModes"
-                      defaultMessage="Advanced modes"
-                    />{' '}
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate('unifiedDataTable.advancedDiffModesTooltip', {
-                        defaultMessage:
-                          'Advanced modes offer enhanced diffing capabilities, but operate ' +
-                          'on raw documents and therefore do not support field formatting.',
-                      })}
-                    >
-                      <EuiIcon type="questionInCircle" />
-                    </EuiToolTip>
-                  </h4>
-                </EuiTitle>
-              </EuiPanel>
-
-              <EuiContextMenuItem
-                key="chars"
-                icon={diffMode === 'chars' ? 'check' : 'empty'}
-                size="s"
-                onClick={() => {
-                  setDiffMode('chars');
-                }}
-              >
-                <FormattedMessage
-                  id="unifiedDataTable.diffModeChars"
-                  defaultMessage="By character"
-                />
-              </EuiContextMenuItem>
-
-              <EuiContextMenuItem
-                key="words"
-                icon={diffMode === 'words' ? 'check' : 'empty'}
-                size="s"
-                onClick={() => {
-                  setDiffMode('words');
-                }}
-              >
-                <FormattedMessage id="unifiedDataTable.diffModeWords" defaultMessage="By word" />
-              </EuiContextMenuItem>
-
-              <EuiContextMenuItem
-                key="lines"
-                icon={diffMode === 'lines' ? 'check' : 'empty'}
-                size="s"
-                onClick={() => {
-                  setDiffMode('lines');
-                }}
-              >
-                <FormattedMessage id="unifiedDataTable.diffModeLines" defaultMessage="By line" />
-              </EuiContextMenuItem>
-
-              <EuiHorizontalRule margin="none" />
-
-              <EuiPanel
-                color="transparent"
-                paddingSize="s"
-                css={css`
-                  padding-bottom: 0;
-                `}
-              >
-                <EuiTitle size="xxs">
-                  <h3>
-                    <FormattedMessage
-                      id="unifiedDataTable.diffSettings"
-                      defaultMessage="Settings"
-                    />
-                  </h3>
-                </EuiTitle>
-              </EuiPanel>
-
-              <EuiPanel color="transparent" paddingSize="s">
-                <EuiSwitch
-                  label={i18n.translate('unifiedDataTable.showDiffDecorations', {
-                    defaultMessage: 'Show decorations',
-                  })}
-                  checked={showDiffDecorations ?? true}
-                  compressed
-                  onChange={(e) => {
-                    setShowDiffDecorations(e.target.checked);
-                  }}
-                />
-              </EuiPanel>
-            </EuiContextMenuPanel>
-          </EuiPopover>
-
-          {!forceShowAllFields && (
-            <EuiSwitch
-              label={i18n.translate('unifiedDataTable.showAllFields', {
-                defaultMessage: 'Show all fields',
-              })}
-              checked={showAllFields ?? false}
-              labelProps={{
-                css: css`
-                  font-size: ${euiThemeVars.euiFontSizeXS} !important;
-                  font-weight: ${euiThemeVars.euiFontWeightMedium};
-                `,
-              }}
-              compressed
-              css={css`
-                padding-left: ${euiThemeVars.euiSizeM};
-              `}
-              onChange={(e) => {
-                setShowAllFields(e.target.checked);
-              }}
-            />
-          )}
-        </>
+        <ComparisonControls
+          showDiff={showDiff}
+          diffMode={diffMode}
+          showDiffDecorations={showDiffDecorations}
+          showAllFields={showAllFields}
+          forceShowAllFields={forceShowAllFields}
+          setIsCompareActive={setIsCompareActive}
+          setShowDiff={setShowDiff}
+          setDiffMode={setDiffMode}
+          setShowDiffDecorations={setShowDiffDecorations}
+          setShowAllFields={setShowAllFields}
+        />
       ),
     }),
     [
       forceShowAllFields,
       diffMode,
-      isDiffOptionsMenuOpen,
       setDiffMode,
       setIsCompareActive,
       setShowAllFields,
