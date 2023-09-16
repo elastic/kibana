@@ -20,6 +20,8 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/actions-plugin",
     "@kbn/elastic-assistant",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server-mocks",
   ],
   "exclude": [
     "target/**/*",
