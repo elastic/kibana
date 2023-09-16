@@ -1411,19 +1411,27 @@ export const UnifiedDataTable = ({
       const currentValue = doc?.flattened[fieldName];
 
       if (showDiff && diffMode !== 'basic' && baseValue && currentValue) {
-        const getStringifiedValue = (value: unknown) => {
-          const extractedValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
-          if (typeof extractedValue === 'object') {
+        const hasLengthOne = (value: unknown): value is unknown[] => {
+          return Array.isArray(value) && value.length === 1;
+        };
+        const getStringifiedValue = (value: unknown, forceJson: boolean) => {
+          const extractedValue = !forceJson && hasLengthOne(value) ? value[0] : value;
+          if (forceJson || typeof extractedValue === 'object') {
             return JSON.stringify(extractedValue, null, 2);
           }
           return String(extractedValue ?? '-');
         };
+        const forceJson =
+          (hasLengthOne(baseValue) && !hasLengthOne(currentValue)) ||
+          (!hasLengthOne(baseValue) && hasLengthOne(currentValue));
+        const baseValueString = getStringifiedValue(baseValue, forceJson);
+        const currentValueString = getStringifiedValue(currentValue, forceJson);
         const diff =
           diffMode === 'chars'
-            ? diffChars(getStringifiedValue(baseValue), getStringifiedValue(currentValue))
+            ? diffChars(baseValueString, currentValueString)
             : diffMode === 'words'
-            ? diffWords(getStringifiedValue(baseValue), getStringifiedValue(currentValue))
-            : diffLines(getStringifiedValue(baseValue), getStringifiedValue(currentValue));
+            ? diffWords(baseValueString, currentValueString)
+            : diffLines(baseValueString, currentValueString);
         const indicatorCss = css`
           position: absolute;
           width: ${euiThemeVars.euiSizeS};
