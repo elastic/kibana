@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SanitizedDefaultRuleAction } from '@kbn/alerting-plugin/common';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   NOTIFICATION_DEFAULT_FREQUENCY,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -206,27 +205,11 @@ describe('Rule actions normalization', () => {
         } as RuleAlertType)
       ).toBe('1d');
     });
-
-    test('returns "NOTIFICATION_THROTTLE_RULE" if it is a system action', () => {
-      expect(
-        transformFromAlertThrottle({
-          actions: [
-            {
-              id: 'id-123',
-              actionTypeId: 'id-456',
-              params: {},
-              uuid: 'uuid',
-              type: RuleActionTypes.SYSTEM,
-            },
-          ],
-        } as RuleAlertType)
-      ).toBe(NOTIFICATION_THROTTLE_RULE);
-    });
   });
 
   describe('transformToActionFrequency', () => {
     describe('actions without frequencies', () => {
-      const actionsWithoutFrequencies: SanitizedDefaultRuleAction[] = [
+      const actionsWithoutFrequencies: SanitizedRuleAction[] = [
         {
           group: 'group',
           id: 'id-123',
@@ -271,7 +254,7 @@ describe('Rule actions normalization', () => {
     });
 
     describe('actions with frequencies', () => {
-      const actionsWithFrequencies: SanitizedDefaultRuleAction[] = [
+      const actionsWithFrequencies: SanitizedRuleAction[] = [
         {
           group: 'group',
           id: 'id-123',
@@ -311,7 +294,7 @@ describe('Rule actions normalization', () => {
     });
 
     describe('some actions with frequencies', () => {
-      const someActionsWithFrequencies: SanitizedDefaultRuleAction[] = [
+      const someActionsWithFrequencies: SanitizedRuleAction[] = [
         {
           group: 'group',
           id: 'id-123',

@@ -6,15 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  RuleSystemAction,
-  SanitizedDefaultRuleAction,
-  SanitizedRule,
-} from '@kbn/alerting-plugin/common';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RuleParams } from '../../../rule_schema';
 import { duplicateRule } from './duplicate_rule';
-import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../../common/constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
@@ -161,41 +155,6 @@ describe('duplicateRule', () => {
         enabled: false,
       })
     );
-  });
-
-  it('should add frequency to default actions', async () => {
-    const defaultAction: SanitizedDefaultRuleAction = {
-      group: 'group',
-      id: 'id-123',
-      actionTypeId: 'id-456',
-      params: {},
-    };
-
-    const rule = createTestRule();
-    const result = await duplicateRule({
-      rule: { ...rule, actions: [defaultAction] },
-    });
-
-    expect(result.actions).toEqual([
-      { ...defaultAction, frequency: NOTIFICATION_DEFAULT_FREQUENCY },
-    ]);
-  });
-
-  it('should not add frequency to system actions', async () => {
-    const systemAction: RuleSystemAction = {
-      id: 'id',
-      actionTypeId: 'action_type_id',
-      params: {},
-      uuid: 'uuid',
-      type: RuleActionTypes.SYSTEM,
-    };
-
-    const rule = createTestRule();
-    const result = await duplicateRule({
-      rule: { ...rule, actions: [systemAction] },
-    });
-
-    expect(result.actions).toEqual([systemAction]);
   });
 
   describe('when duplicating a prebuilt (immutable) rule', () => {

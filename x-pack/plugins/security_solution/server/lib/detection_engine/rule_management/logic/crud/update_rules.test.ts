@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 import type { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
-import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../../common/constants';
 import { getRuleMock, resolveRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 import { updateRules } from './update_rules';
@@ -79,70 +77,5 @@ describe('updateRules', () => {
         }),
       })
     );
-  });
-
-  it('should add frequency to default actions', async () => {
-    const defaultAction = {
-      id: 'id',
-      action_type_id: 'action_type_id',
-      params: {},
-      group: 'group',
-    };
-
-    const rulesOptionsMock = getUpdateRulesOptionsMock();
-    rulesOptionsMock.ruleUpdate.enabled = false;
-    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getRuleMock(getQueryRuleParams())
-    );
-
-    await updateRules({
-      ...rulesOptionsMock,
-      ruleUpdate: { ...rulesOptionsMock.ruleUpdate, actions: [defaultAction] },
-    });
-
-    const data = rulesOptionsMock.rulesClient.update.mock.calls[0][0].data;
-
-    expect(data.actions).toEqual([
-      {
-        id: 'id',
-        actionTypeId: 'action_type_id',
-        params: {},
-        group: 'group',
-        frequency: NOTIFICATION_DEFAULT_FREQUENCY,
-      },
-    ]);
-  });
-
-  it('should not add frequency to system actions', async () => {
-    const systemAction = {
-      id: 'id',
-      action_type_id: 'action_type_id',
-      params: {},
-      uuid: 'uuid',
-      type: RuleActionTypes.SYSTEM,
-    };
-
-    const rulesOptionsMock = getUpdateRulesOptionsMock();
-    rulesOptionsMock.ruleUpdate.enabled = false;
-    (rulesOptionsMock.rulesClient as unknown as RulesClientMock).update.mockResolvedValue(
-      getRuleMock(getQueryRuleParams())
-    );
-
-    await updateRules({
-      ...rulesOptionsMock,
-      ruleUpdate: { ...rulesOptionsMock.ruleUpdate, actions: [systemAction] },
-    });
-
-    const data = rulesOptionsMock.rulesClient.update.mock.calls[0][0].data;
-
-    expect(data.actions).toEqual([
-      {
-        id: 'id',
-        actionTypeId: 'action_type_id',
-        params: {},
-        uuid: 'uuid',
-        type: RuleActionTypes.SYSTEM,
-      },
-    ]);
   });
 });

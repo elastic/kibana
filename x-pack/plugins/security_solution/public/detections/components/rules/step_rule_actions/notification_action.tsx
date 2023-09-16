@@ -12,7 +12,6 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { RuleActionFrequency, RuleAction } from '@kbn/alerting-plugin/common';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isSystemAction } from '../../../../../common/utils/is_system_action';
 import { getTimeTypeValue } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import * as i18n from './translations';
 
@@ -115,7 +114,7 @@ export function NotificationAction({
             <EuiFlexItem grow={false}>
               <EuiIcon size="s" type="bell" color="subdued" />
             </EuiFlexItem>
-            {isSystemAction(action) ? null : <FrequencyDescription frequency={action.frequency} />}
+            <FrequencyDescription frequency={action.frequency} />
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

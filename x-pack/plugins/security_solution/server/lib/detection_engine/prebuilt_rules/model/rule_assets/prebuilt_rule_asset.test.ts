@@ -13,7 +13,6 @@ import { getListArrayMock } from '../../../../../../common/detection_engine/sche
 
 import { PrebuiltRuleAsset } from './prebuilt_rule_asset';
 import { getPrebuiltRuleMock, getPrebuiltThreatMatchRuleMock } from './prebuilt_rule_asset.mock';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 describe('Prebuilt rule asset schema', () => {
   test('empty objects do not validate', () => {
@@ -867,7 +866,7 @@ describe('Prebuilt rule asset schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of default actions that are missing "group"', () => {
+  test('You cannot send in an array of actions that are missing "group"', () => {
     const payload: Omit<PrebuiltRuleAsset['actions'], 'group'> = {
       ...getPrebuiltRuleMock(),
       actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
@@ -878,13 +877,11 @@ describe('Prebuilt rule asset schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,group"',
-      'Invalid value "undefined" supplied to "actions,uuid"',
-      'Invalid value "undefined" supplied to "actions,type"',
     ]);
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of default actions that are missing "id"', () => {
+  test('You cannot send in an array of actions that are missing "id"', () => {
     const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
       ...getPrebuiltRuleMock(),
       actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
@@ -895,13 +892,11 @@ describe('Prebuilt rule asset schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,id"',
-      'Invalid value "undefined" supplied to "actions,uuid"',
-      'Invalid value "undefined" supplied to "actions,type"',
     ]);
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of default actions that are missing "action_type_id"', () => {
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
     const payload: Omit<PrebuiltRuleAsset['actions'], 'action_type_id'> = {
       ...getPrebuiltRuleMock(),
       actions: [{ group: 'group', id: 'id', params: {} }],
@@ -912,13 +907,11 @@ describe('Prebuilt rule asset schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,action_type_id"',
-      'Invalid value "undefined" supplied to "actions,uuid"',
-      'Invalid value "undefined" supplied to "actions,type"',
     ]);
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of default actions that are missing "params"', () => {
+  test('You cannot send in an array of actions that are missing "params"', () => {
     const payload: Omit<PrebuiltRuleAsset['actions'], 'params'> = {
       ...getPrebuiltRuleMock(),
       actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
@@ -929,13 +922,11 @@ describe('Prebuilt rule asset schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,params"',
-      'Invalid value "undefined" supplied to "actions,uuid"',
-      'Invalid value "undefined" supplied to "actions,type"',
     ]);
     expect(message.schema).toEqual({});
   });
 
-  test('You cannot send in an array of default actions that are including "actionTypeId"', () => {
+  test('You cannot send in an array of actions that are including "actionTypeId"', () => {
     const payload: Omit<PrebuiltRuleAsset['actions'], 'actions'> = {
       ...getPrebuiltRuleMock(),
       actions: [
@@ -953,152 +944,6 @@ describe('Prebuilt rule asset schema', () => {
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "undefined" supplied to "actions,action_type_id"',
-      'Invalid value "undefined" supplied to "actions,uuid"',
-      'Invalid value "undefined" supplied to "actions,type"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of system actions that are missing "id"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          action_type_id: 'action_type_id',
-          params: {},
-          uuid: 'uuid',
-          type: RuleActionTypes.SYSTEM,
-        },
-      ],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-      'Invalid value "undefined" supplied to "actions,id"',
-      'Invalid value "system" supplied to "actions,type"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of system actions that are missing "action_type_id"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          id: 'id',
-          params: {},
-          uuid: 'uuid',
-          type: RuleActionTypes.SYSTEM,
-        },
-      ],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-      'Invalid value "undefined" supplied to "actions,action_type_id"',
-      'Invalid value "system" supplied to "actions,type"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of system actions that are missing "params"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          id: 'id',
-          action_type_id: 'action_type_id',
-          uuid: 'uuid',
-          type: RuleActionTypes.SYSTEM,
-        },
-      ],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-      'Invalid value "undefined" supplied to "actions,params"',
-      'Invalid value "system" supplied to "actions,type"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of system actions that are missing "uuid"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          id: 'id',
-          action_type_id: 'action_type_id',
-          params: {},
-          type: RuleActionTypes.SYSTEM,
-        },
-      ],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-      'Invalid value "system" supplied to "actions,type"',
-      'Invalid value "undefined" supplied to "actions,uuid"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of system actions that are missing "type"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          id: 'id',
-          action_type_id: 'action_type_id',
-          params: {},
-          uuid: 'uuid',
-        },
-      ],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-      'Invalid value "undefined" supplied to "actions,type"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot send in an array of system actions that are including "actionTypeId"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [
-        {
-          id: 'id',
-          actionTypeId: 'actionTypeId',
-          params: {},
-          uuid: 'uuid',
-          type: RuleActionTypes.SYSTEM,
-        },
-      ],
-    };
-
-    const decoded = PrebuiltRuleAsset.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-      'Invalid value "undefined" supplied to "actions,action_type_id"',
-      'Invalid value "system" supplied to "actions,type"',
     ]);
     expect(message.schema).toEqual({});
   });

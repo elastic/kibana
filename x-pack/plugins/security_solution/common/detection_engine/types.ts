@@ -5,28 +5,12 @@
  * 2.0.
  */
 
-import type { RuleDefaultAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
-/**
- * TODO: Switch to RuleAction to support system actions
- * RuleAction is defined as RuleDefaultAction | RuleSystemAction
- */
-// export type RuleAlertAction = Omit<RuleDefaultAction, 'actionTypeId' | 'alertsFilter'> & {
-//   action_type_id: string;
-//   alerts_filter?: RuleDefaultAction['alertsFilter'];
-// };
-
-export type RuleAlertDefaultAction =
-  | Omit<RuleDefaultAction, 'actionTypeId' | 'alertsFilter'> & {
-      action_type_id: string;
-      alerts_filter?: RuleDefaultAction['alertsFilter'];
-    };
-
-export type RuleAlertSystemAction = Omit<RuleSystemAction, 'actionTypeId'> & {
+export type RuleAlertAction = Omit<RuleAction, 'actionTypeId' | 'alertsFilter'> & {
   action_type_id: string;
+  alerts_filter?: RuleAction['alertsFilter'];
 };
-
-export type RuleAlertAction = RuleAlertDefaultAction | RuleAlertSystemAction;
 
 /**
  * Defines the search types you can have from Elasticsearch within a

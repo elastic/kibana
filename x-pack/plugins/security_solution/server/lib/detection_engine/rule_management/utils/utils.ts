@@ -14,11 +14,8 @@ import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
-import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
-import { isSystemAction } from '../../../../../common/utils/is_system_action';
 import type {
   FindRulesResponse,
-  NormalizedRuleAction,
   RuleToImport,
 } from '../../../../../common/api/detection_engine/rule_management';
 import type {
@@ -383,14 +380,3 @@ export const convertAlertSuppressionToSnake = (
         missing_fields_strategy: input.missingFieldsStrategy,
       }
     : undefined;
-
-export const partitionActions = <S, D>(
-  actions: RuleAction[] | SanitizedRuleAction[] | NormalizedRuleAction[]
-): [S[], D[]] => {
-  const [systemActions, defaultActions] = partition(isSystemAction, actions) as unknown as [
-    S[],
-    D[]
-  ];
-
-  return [systemActions, defaultActions];
-};
