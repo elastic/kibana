@@ -9,6 +9,8 @@ import { RuleActionTypes } from '../../../common';
 import { rewriteActionsReq, rewriteActionsRes } from './rewrite_actions';
 
 describe('rewrite Actions', () => {
+  const isSystemAction = (id: string) => id === 'system-action-id';
+
   describe('rewriteActionsRes', () => {
     it('rewrites a default action response correctly', () => {
       expect(
@@ -39,6 +41,7 @@ describe('rewrite Actions', () => {
                 },
               },
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ])
       ).toEqual([
@@ -66,7 +69,7 @@ describe('rewrite Actions', () => {
         rewriteActionsRes([
           {
             uuid: '111',
-            id: '1',
+            id: 'system-action-id',
             params: { foo: 'bar' },
             type: RuleActionTypes.SYSTEM,
             actionTypeId: '.test',
@@ -75,7 +78,7 @@ describe('rewrite Actions', () => {
       ).toEqual([
         {
           uuid: '111',
-          id: '1',
+          id: 'system-action-id',
           params: { foo: 'bar' },
           type: RuleActionTypes.SYSTEM,
           connector_type_id: '.test',
@@ -91,34 +94,37 @@ describe('rewrite Actions', () => {
   describe('rewriteActionsReq', () => {
     it('rewrites a default action request correctly', () => {
       expect(
-        rewriteActionsReq([
-          {
-            uuid: '111',
-            group: 'default',
-            id: '1',
-            params: { foo: 'bar' },
-            frequency: {
-              summary: true,
-              notify_when: 'onThrottleInterval',
-              throttle: '1h',
-            },
-            alerts_filter: {
-              query: {
-                kql: 'test:1s',
-                dsl: '{test:1}',
-                filters: [],
+        rewriteActionsReq(
+          [
+            {
+              uuid: '111',
+              group: 'default',
+              id: '1',
+              params: { foo: 'bar' },
+              frequency: {
+                summary: true,
+                notify_when: 'onThrottleInterval',
+                throttle: '1h',
               },
-              timeframe: {
-                days: [1, 2, 3],
-                timezone: 'UTC',
-                hours: {
-                  start: '00:00',
-                  end: '15:00',
+              alerts_filter: {
+                query: {
+                  kql: 'test:1s',
+                  dsl: '{test:1}',
+                  filters: [],
+                },
+                timeframe: {
+                  days: [1, 2, 3],
+                  timezone: 'UTC',
+                  hours: {
+                    start: '00:00',
+                    end: '15:00',
+                  },
                 },
               },
             },
-          },
-        ])
+          ],
+          isSystemAction
+        )
       ).toEqual([
         {
           uuid: '111',
@@ -151,26 +157,28 @@ describe('rewrite Actions', () => {
 
     it('rewrites a system action request correctly', () => {
       expect(
-        rewriteActionsReq([
-          {
-            uuid: '111',
-            id: '1',
-            params: { foo: 'bar' },
-            type: RuleActionTypes.SYSTEM,
-          },
-        ])
+        rewriteActionsReq(
+          [
+            {
+              uuid: '111',
+              id: 'system-action-id',
+              params: { foo: 'bar' },
+            },
+          ],
+          isSystemAction
+        )
       ).toEqual([
         {
           uuid: '111',
-          id: '1',
+          id: 'system-action-id',
           params: { foo: 'bar' },
           type: RuleActionTypes.SYSTEM,
         },
       ]);
     });
 
-    it('returns an empty array if the actions are undefined', () => {
-      expect(rewriteActionsReq()).toEqual([]);
+    it('returns an empty array if the actions are empty', () => {
+      expect(rewriteActionsReq([], isSystemAction)).toEqual([]);
     });
   });
 });

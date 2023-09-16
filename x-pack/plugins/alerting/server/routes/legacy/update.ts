@@ -19,6 +19,7 @@ import {
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../../common';
+import { rewriteActionsReq } from '../lib';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -65,6 +66,8 @@ export const updateAlertRoute = (
         }
         trackLegacyRouteUsage('update', usageCounter);
         const rulesClient = (await context.alerting).getRulesClient();
+        const actionsClient = (await context.actions).getActionsClient();
+
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
         try {
@@ -72,7 +75,7 @@ export const updateAlertRoute = (
             id,
             data: {
               name,
-              actions,
+              actions: rewriteActionsReq(actions, actionsClient.isSystemAction),
               params,
               schedule,
               tags,

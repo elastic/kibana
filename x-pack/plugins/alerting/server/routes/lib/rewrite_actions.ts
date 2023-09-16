@@ -16,7 +16,9 @@ export const rewriteActionsReq = (
   actions: TypeOf<typeof actionsSchema>,
   isSystemConnector: (connectorId: string) => boolean
 ): NormalizedAlertAction[] => {
-  if (!actions) return [];
+  if (!actions || actions.length === 0) {
+    return [];
+  }
 
   return actions.map((action) => {
     if (isSystemConnector(action.id)) {
@@ -33,7 +35,7 @@ export const rewriteActionsReq = (
     return {
       id: action.id,
       params: action.params,
-      uuid: action.uuid,
+      ...(action.uuid ? { uuid: action.uuid } : {}),
       group: group ?? 'default',
       ...(frequency
         ? {

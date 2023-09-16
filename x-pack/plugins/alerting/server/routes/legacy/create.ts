@@ -18,7 +18,7 @@ import {
 } from '../../types';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RouteOptions } from '..';
-import { countUsageOfPredefinedIds } from '../lib';
+import { countUsageOfPredefinedIds, rewriteActionsReq } from '../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const bodySchema = schema.object({
@@ -65,6 +65,8 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
         const rulesClient = (await context.alerting).getRulesClient();
+        const actionsClient = (await context.actions).getActionsClient();
+
         const alert = req.body;
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;
@@ -79,9 +81,14 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
 
         try {
           const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
-            data: { ...alert, notifyWhen },
+            data: {
+              ...alert,
+              actions: rewriteActionsReq(alert.actions, actionsClient.isSystemAction),
+              notifyWhen,
+            },
             options: { id: params?.id },
           });
+
           return res.ok({
             body: alertRes,
           });
