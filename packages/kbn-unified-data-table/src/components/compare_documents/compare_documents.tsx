@@ -39,6 +39,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { formatFieldValue, getFieldTypeName } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -95,11 +96,13 @@ const CompareDocuments = ({
   );
   const fieldsColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const comparisonColumns: EuiDataGridColumn[] = useMemo(() => {
-    const fieldsColumnName = 'Field';
+    const fieldColumnName = i18n.translate('unifiedDataTable.fieldColumnTitle', {
+      defaultMessage: 'Field',
+    });
     const fieldsColumn: EuiDataGridColumn = {
       id: fieldsColumnId,
-      displayAsText: fieldsColumnName,
-      isSortable: true,
+      displayAsText: fieldColumnName,
+      isSortable: false,
       actions: false,
       initialWidth: 200,
       isExpandable: false,
@@ -115,7 +118,9 @@ const CompareDocuments = ({
         if (i !== 0) {
           additional.push({
             iconType: 'pin',
-            label: 'Pin for comparison',
+            label: i18n.translate('unifiedDataTable.pinForComparison', {
+              defaultMessage: 'Pin for comparison',
+            }),
             size: 'xs',
             onClick: () => {
               const newSelectedDocs = [...selectedDocs];
@@ -133,7 +138,9 @@ const CompareDocuments = ({
         if (selectedDocs.length > 2) {
           additional.push({
             iconType: 'cross',
-            label: 'Remove from comparison',
+            label: i18n.translate('unifiedDataTable.removeFromComparison', {
+              defaultMessage: 'Remove from comparison',
+            }),
             size: 'xs',
             onClick: () => {
               const newSelectedDocs = [...selectedDocs];
@@ -147,7 +154,8 @@ const CompareDocuments = ({
         currentColumns.push({
           id: docId,
           displayAsText: doc.raw._id,
-          isSortable: true,
+          isSortable: false,
+          isExpandable: false,
           actions: {
             showHide: false,
             showMoveLeft: false,
@@ -201,9 +209,7 @@ const CompareDocuments = ({
     forceShowAllFields,
     showAllFields,
   ]);
-  const comparisonRowCount = useMemo(() => {
-    return comparisonFields.length;
-  }, [comparisonFields.length]);
+  const comparisonRowCount = useMemo(() => comparisonFields.length, [comparisonFields.length]);
   const comparisonToolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
     () => ({
       showColumnSelector: false,
@@ -230,8 +236,11 @@ const CompareDocuments = ({
               defaultMessage="Stop comparing documents"
             />
           </EuiButtonEmpty>
+
           <EuiSwitch
-            label="Show diff"
+            label={i18n.translate('unifiedDataTable.showDiff', {
+              defaultMessage: 'Show diff',
+            })}
             checked={showDiff ?? true}
             labelProps={{
               css: css`
@@ -247,16 +256,31 @@ const CompareDocuments = ({
               setShowDiff(e.target.checked);
             }}
           />
+
           <EuiPopover
             button={
-              <EuiToolTip position="top" delay="long" content="Diff options">
+              <EuiToolTip
+                position="top"
+                delay="long"
+                content={i18n.translate('unifiedDataTable.diffOptionsTooltip', {
+                  defaultMessage: 'Diff options',
+                })}
+              >
                 <EuiButtonIcon
                   iconType="arrowDown"
                   size="xs"
                   iconSize="s"
                   color="text"
                   disabled={!showDiff}
-                  aria-label="Diff options"
+                  aria-label={
+                    isDiffOptionsMenuOpen
+                      ? i18n.translate('unifiedDataTable.closeDiffOptions', {
+                          defaultMessage: 'Close diff options',
+                        })
+                      : i18n.translate('unifiedDataTable.openDiffOptions', {
+                          defaultMessage: 'Open diff options',
+                        })
+                  }
                   onClick={() => {
                     setIsDiffOptionsMenuOpen(!isDiffOptionsMenuOpen);
                   }}
@@ -279,7 +303,9 @@ const CompareDocuments = ({
                 `}
               >
                 <EuiTitle size="xxs">
-                  <h3>Diff mode</h3>
+                  <h3>
+                    <FormattedMessage id="unifiedDataTable.diffMode" defaultMessage="Diff mode" />
+                  </h3>
                 </EuiTitle>
               </EuiPanel>
 
@@ -291,7 +317,7 @@ const CompareDocuments = ({
                   setDiffMode('basic');
                 }}
               >
-                Full value
+                <FormattedMessage id="unifiedDataTable.diffModeBasic" defaultMessage="Full value" />
               </EuiContextMenuItem>
 
               <EuiHorizontalRule margin="none" />
@@ -305,13 +331,17 @@ const CompareDocuments = ({
               >
                 <EuiTitle size="xxxs">
                   <h4>
-                    Advanced modes{' '}
+                    <FormattedMessage
+                      id="unifiedDataTable.advancedDiffModes"
+                      defaultMessage="Advanced modes"
+                    />{' '}
                     <EuiToolTip
                       position="top"
-                      content={
-                        'Advanced modes offer enhanced diffing capabilities, but operate ' +
-                        'on raw documents and therefore do not support field formatting.'
-                      }
+                      content={i18n.translate('unifiedDataTable.advancedDiffModesTooltip', {
+                        defaultMessage:
+                          'Advanced modes offer enhanced diffing capabilities, but operate ' +
+                          'on raw documents and therefore do not support field formatting.',
+                      })}
                     >
                       <EuiIcon type="questionInCircle" />
                     </EuiToolTip>
@@ -327,7 +357,10 @@ const CompareDocuments = ({
                   setDiffMode('chars');
                 }}
               >
-                By character
+                <FormattedMessage
+                  id="unifiedDataTable.diffModeChars"
+                  defaultMessage="By character"
+                />
               </EuiContextMenuItem>
 
               <EuiContextMenuItem
@@ -338,7 +371,7 @@ const CompareDocuments = ({
                   setDiffMode('words');
                 }}
               >
-                By word
+                <FormattedMessage id="unifiedDataTable.diffModeWords" defaultMessage="By word" />
               </EuiContextMenuItem>
 
               <EuiContextMenuItem
@@ -349,7 +382,7 @@ const CompareDocuments = ({
                   setDiffMode('lines');
                 }}
               >
-                By line
+                <FormattedMessage id="unifiedDataTable.diffModeLines" defaultMessage="By line" />
               </EuiContextMenuItem>
 
               <EuiHorizontalRule margin="none" />
@@ -362,13 +395,20 @@ const CompareDocuments = ({
                 `}
               >
                 <EuiTitle size="xxs">
-                  <h3>Settings</h3>
+                  <h3>
+                    <FormattedMessage
+                      id="unifiedDataTable.diffSettings"
+                      defaultMessage="Settings"
+                    />
+                  </h3>
                 </EuiTitle>
               </EuiPanel>
 
               <EuiPanel color="transparent" paddingSize="s">
                 <EuiSwitch
-                  label="Show decorations"
+                  label={i18n.translate('unifiedDataTable.showDiffDecorations', {
+                    defaultMessage: 'Show decorations',
+                  })}
                   checked={showDiffDecorations ?? true}
                   compressed
                   onChange={(e) => {
@@ -378,9 +418,12 @@ const CompareDocuments = ({
               </EuiPanel>
             </EuiContextMenuPanel>
           </EuiPopover>
+
           {!forceShowAllFields && (
             <EuiSwitch
-              label="Show all fields"
+              label={i18n.translate('unifiedDataTable.showAllFields', {
+                defaultMessage: 'Show all fields',
+              })}
               checked={showAllFields ?? false}
               labelProps={{
                 css: css`

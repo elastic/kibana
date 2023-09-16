@@ -82,7 +82,6 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 
 export function DataTableDocumentToolbarBtn({
   isFilterActive,
-  isCompareActive,
   rows,
   selectedDocs,
   setIsFilterActive,
@@ -90,7 +89,6 @@ export function DataTableDocumentToolbarBtn({
   setSelectedDocs,
 }: {
   isFilterActive: boolean;
-  isCompareActive: boolean;
   rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
