@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HTMLAttributeAnchorTarget } from 'react';
 import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'react';
 import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
 import { useGetAppUrl, useNavigateTo } from './navigation';
@@ -13,6 +14,7 @@ export interface BaseLinkProps {
   id: string;
   path?: string;
   urlState?: string;
+  target?: HTMLAttributeAnchorTarget | undefined;
 }
 
 export type GetLinkUrlProps = BaseLinkProps & { absolute?: boolean };
@@ -26,7 +28,16 @@ export type WrappedLinkProps = BaseLinkProps & {
    **/
   onClick?: MouseEventHandler;
 };
-export type GetLinkProps = (params: WrappedLinkProps) => LinkProps;
+export type GetLinkProps = (
+  params: WrappedLinkProps & {
+    /**
+     * Optional `overrideNavigation` boolean prop.
+     * It overrides the default browser navigation action with history navigation using kibana tools.
+     * It is `true` by default.
+     **/
+    overrideNavigation?: boolean;
+  }
+) => LinkProps;
 
 export interface LinkProps {
   onClick: MouseEventHandler;
@@ -60,7 +71,7 @@ export const useGetLinkProps = (): GetLinkProps => {
   const { navigateTo } = useNavigateTo();
 
   const getLinkProps = useCallback<GetLinkProps>(
-    ({ id, path, urlState, onClick: onClickProps }) => {
+    ({ id, path, urlState, onClick: onClickProps, overrideNavigation = true }) => {
       const url = getLinkUrl({ id, path, urlState });
       return {
         href: url,
@@ -71,8 +82,10 @@ export const useGetLinkProps = (): GetLinkProps => {
           if (onClickProps) {
             onClickProps(ev);
           }
-          ev.preventDefault();
-          navigateTo({ url });
+          if (overrideNavigation) {
+            ev.preventDefault();
+            navigateTo({ url });
+          }
         },
       };
     },
@@ -90,7 +103,13 @@ export const withLink = <T extends Partial<LinkProps>>(
 ): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
   React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
-    const { onClick, href } = getLink({ id, path, urlState, onClick: _onClick });
+    const { onClick, href } = getLink({
+      id,
+      path,
+      urlState,
+      onClick: _onClick,
+      ...(rest.target === '_blank' && { overrideNavigation: false }),
+    });
     return <Component onClick={onClick} href={href} {...(rest as unknown as T)} />;
   });
 
