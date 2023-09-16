@@ -136,8 +136,10 @@ export const enhancedEsSearchStrategyProvider = (
       );
 
       const response = esResponse.body as estypes.SearchResponse<any>;
+      const requestMeta = getRequestMeta(esResponse.meta);
       return {
         rawResponse: shimHitsTotal(response, options),
+        ...(requestMeta ? { requestMeta } : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {
