@@ -41,6 +41,7 @@ import {
   EuiSwitch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -914,18 +915,60 @@ export const UnifiedDataTable = ({
 
     usedSelectedDocs.forEach((docId, i) => {
       const doc = rowMap.get(docId);
+
       if (doc) {
+        const additional: EuiListGroupItemProps[] = [];
+
+        if (i !== 0) {
+          additional.push({
+            iconType: 'pin',
+            label: 'Pin for comparison',
+            size: 'xs',
+            onClick: () => {
+              const newSelectedDocs = [...selectedDocs];
+              const index = newSelectedDocs.indexOf(docId);
+              const [baseDocId] = newSelectedDocs;
+
+              newSelectedDocs[0] = docId;
+              newSelectedDocs[index] = baseDocId;
+
+              setSelectedDocs(newSelectedDocs);
+            },
+          });
+        }
+
+        if (selectedDocs.length > 2) {
+          additional.push({
+            iconType: 'cross',
+            label: 'Remove from comparison',
+            size: 'xs',
+            onClick: () => {
+              const newSelectedDocs = [...selectedDocs];
+              newSelectedDocs.splice(i, 1);
+
+              setSelectedDocs(newSelectedDocs);
+            },
+          });
+        }
+
         currentColumns.push({
           id: docId,
           displayAsText: doc.raw._id,
           isSortable: true,
-          actions: false,
+          actions: {
+            showHide: false,
+            showMoveLeft: false,
+            showMoveRight: false,
+            showSortAsc: false,
+            showSortDesc: false,
+            additional,
+          },
         });
       }
     });
 
     return currentColumns;
-  }, [fieldsColumnId, isCompareActive, rowMap, usedSelectedDocs]);
+  }, [fieldsColumnId, isCompareActive, rowMap, selectedDocs, usedSelectedDocs]);
 
   const comparisonToolbarVisibility: EuiDataGridToolBarVisibilityOptions = useMemo(
     () => ({
@@ -1017,13 +1060,19 @@ export const UnifiedDataTable = ({
     background-color: ${useEuiBackgroundColor('success', { method: 'transparent' })};
   `;
   const matchingCellCss = css`
-    * * {
-      color: ${euiThemeVars.euiColorSuccessText} !important;
+    .unifiedDataTable__cellValue {
+      &,
+      & * {
+        color: ${euiThemeVars.euiColorSuccessText} !important;
+      }
     }
   `;
   const differentCellCss = css`
-    * * {
-      color: ${euiThemeVars.euiColorDangerText} !important;
+    .unifiedDataTable__cellValue {
+      &,
+      & * {
+        color: ${euiThemeVars.euiColorDangerText} !important;
+      }
     }
   `;
 
