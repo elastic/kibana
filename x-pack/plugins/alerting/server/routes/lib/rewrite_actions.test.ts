@@ -80,7 +80,6 @@ describe('rewrite Actions', () => {
           uuid: '111',
           id: 'system-action-id',
           params: { foo: 'bar' },
-          type: RuleActionTypes.SYSTEM,
           connector_type_id: '.test',
         },
       ]);
@@ -151,6 +150,7 @@ describe('rewrite Actions', () => {
               },
             },
           },
+          type: RuleActionTypes.DEFAULT,
         },
       ]);
     });

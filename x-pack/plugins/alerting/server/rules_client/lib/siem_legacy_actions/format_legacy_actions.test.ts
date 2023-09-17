@@ -9,7 +9,7 @@ import type { SavedObjectsFindResult, SavedObjectAttribute } from '@kbn/core/ser
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { Rule, RuleActionTypes } from '../../../types';
+import { Rule } from '../../../types';
 
 import {
   legacyGetBulkRuleActionsSavedObject,
@@ -120,7 +120,6 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -215,7 +214,6 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -232,7 +230,6 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_2',
             id: 'action-456',
             params: {},
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -308,7 +305,6 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
-            type: RuleActionTypes.DEFAULT,
           },
           {
             actionTypeId: 'action_type_2',
@@ -320,7 +316,6 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_2',
             id: 'action-456',
             params: {},
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -392,7 +387,6 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       },
@@ -463,7 +457,6 @@ describe('legacyGetBulkRuleActionsSavedObject', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
-            type: RuleActionTypes.DEFAULT,
           },
         ],
       },

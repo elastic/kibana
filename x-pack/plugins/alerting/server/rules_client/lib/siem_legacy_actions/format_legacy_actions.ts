@@ -31,7 +31,7 @@ interface LegacyGetBulkRuleActionsSavedObject {
  */
 export interface LegacyActionsObj {
   ruleThrottle: string | null;
-  legacyRuleActions: RuleDefaultAction[];
+  legacyRuleActions: Array<Omit<RuleDefaultAction, 'type'>>;
 }
 
 /**
