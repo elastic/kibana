@@ -15,8 +15,8 @@ import {
   EuiDataGridToolBarVisibilityOptions,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -25,7 +25,7 @@ import { ComparisonControls } from './comparison_controls';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
 import { useComparisonFields } from './hooks/use_comparison_fields';
-import { DocumentDiffMode } from './types';
+import type { DocumentDiffMode } from './types';
 
 export interface CompareDocumentsProps {
   consumer: string;
