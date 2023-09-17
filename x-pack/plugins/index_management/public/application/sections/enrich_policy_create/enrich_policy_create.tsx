@@ -10,14 +10,14 @@ import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
-import { breadcrumbService } from '../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 
 import { CreatePolicyWizard } from './create_policy_wizard';
 import { CreatePolicyContextProvider } from './create_policy_context';
 
 export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = () => {
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('enrichPolicyCreate');
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.enrichPoliciesCreate);
   }, []);
 
   return (

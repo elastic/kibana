@@ -216,6 +216,7 @@ export const CreateStep = ({ onBack, onSubmit, isLoading }: Props) => {
       >
         <EuiFlexItem grow={false}>
           <EuiButton
+            minWidth={false}
             color="primary"
             iconSide="left"
             iconType="arrowLeft"
@@ -229,34 +230,36 @@ export const CreateStep = ({ onBack, onSubmit, isLoading }: Props) => {
           </EuiButton>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)}
-            isDisabled={isLoading}
-            data-test-subj="createAndExecuteButton"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
-              defaultMessage="Create and execute policy"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)}
+              isDisabled={isLoading}
+              data-test-subj="createAndExecuteButton"
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
+                defaultMessage="Create and execute"
+              />
+            </EuiButton>
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            color="primary"
-            onClick={() => onSubmit()}
-            isDisabled={isLoading}
-            data-test-subj="createButton"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.createStep.createButtonLabel"
-              defaultMessage="Create policy"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              color="primary"
+              onClick={() => onSubmit()}
+              isDisabled={isLoading}
+              data-test-subj="createButton"
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.enrichPolicyCreate.createStep.createButtonLabel"
+                defaultMessage="Create"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </>
   );

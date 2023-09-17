@@ -87,7 +87,7 @@ describe('Create enrich policy', () => {
     it('Allows to submit the form when fields are filled', async () => {
       const { actions } = testBed;
 
-      await testBed.actions.completeCreationStep({});
+      await testBed.actions.completeConfigurationStep({});
 
       expect(actions.isOnFieldSelectionStep()).toBe(true);
     });
@@ -103,7 +103,7 @@ describe('Create enrich policy', () => {
 
       testBed.component.update();
 
-      await testBed.actions.completeCreationStep({});
+      await testBed.actions.completeConfigurationStep({});
     });
 
     it('shows validation errors if form isnt filled', async () => {
@@ -135,7 +135,7 @@ describe('Create enrich policy', () => {
 
       testBed.component.update();
 
-      await testBed.actions.completeCreationStep({ indices: 'test-1, test-2' });
+      await testBed.actions.completeConfigurationStep({ indices: 'test-1, test-2' });
 
       expect(testBed.exists('noCommonFieldsError')).toBe(true);
     });
@@ -151,7 +151,7 @@ describe('Create enrich policy', () => {
 
       testBed.component.update();
 
-      await testBed.actions.completeCreationStep({});
+      await testBed.actions.completeConfigurationStep({});
       await testBed.actions.completeFieldsSelectionStep();
     });
 
@@ -186,5 +186,28 @@ describe('Create enrich policy', () => {
 
       expect(exists('errorWhenCreatingCallout')).toBe(true);
     });
+  });
+
+  it('Can navigate back and forth with next/back buttons', async () => {
+    httpRequestsMockHelpers.setGetFieldsFromIndices(getFieldsFromIndices());
+
+    await act(async () => {
+      testBed = await setup(httpSetup);
+    });
+
+    const { component, actions } = testBed;
+    component.update();
+
+    // Navigate to create step
+    await actions.completeConfigurationStep({});
+    await actions.completeFieldsSelectionStep();
+
+    // Clicking back button should take us to fields selection step
+    await actions.clickBackButton();
+    expect(actions.isOnFieldSelectionStep()).toBe(true);
+
+    // Clicking back button should take us to configuration step
+    await actions.clickBackButton();
+    expect(actions.isOnConfigurationStep()).toBe(true);
   });
 });
