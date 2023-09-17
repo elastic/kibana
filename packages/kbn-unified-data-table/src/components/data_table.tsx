@@ -835,6 +835,7 @@ export const UnifiedDataTable = ({
   });
 
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
+  const docTableRef = useRef<HTMLDivElement>(null);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -876,6 +877,7 @@ export const UnifiedDataTable = ({
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
         <div
+          ref={docTableRef}
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
@@ -887,6 +889,7 @@ export const UnifiedDataTable = ({
           {isCompareActive ? (
             <CompareDocuments
               key="comparisonTable"
+              wrapperRef={docTableRef}
               consumer={consumer}
               ariaDescribedBy={randomId}
               ariaLabelledBy={ariaLabelledBy}

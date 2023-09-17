@@ -9,20 +9,24 @@
 import { EuiDataGridColumn, EuiListGroupItemProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import { useMemo } from 'react';
+import { RefObject, useMemo } from 'react';
 
 export interface UseComparisonColumnsProps {
+  wrapperRef: RefObject<HTMLElement>;
   fieldColumnId: string;
   selectedDocs: string[];
   getDocById: (docId: string) => DataTableRecord | undefined;
   setSelectedDocs: (selectedDocs: string[]) => void;
 }
 
+const defaultColumnWidth = 300;
+const fieldColumnWidth = 200;
 const fieldColumnName = i18n.translate('unifiedDataTable.fieldColumnTitle', {
   defaultMessage: 'Field',
 });
 
 export const useComparisonColumns = ({
+  wrapperRef,
   fieldColumnId,
   selectedDocs,
   getDocById,
@@ -32,13 +36,18 @@ export const useComparisonColumns = ({
     const fieldsColumn: EuiDataGridColumn = {
       id: fieldColumnId,
       displayAsText: fieldColumnName,
+      initialWidth: fieldColumnWidth,
       isSortable: false,
-      actions: false,
-      initialWidth: 200,
       isExpandable: false,
+      actions: false,
     };
 
     const currentColumns = [fieldsColumn];
+    const wrapperWidth = wrapperRef.current?.offsetWidth ?? 0;
+    const columnWidth =
+      defaultColumnWidth * selectedDocs.length + fieldColumnWidth > wrapperWidth
+        ? defaultColumnWidth
+        : undefined;
 
     selectedDocs.forEach((docId, docIndex) => {
       const doc = getDocById(docId);
@@ -85,6 +94,7 @@ export const useComparisonColumns = ({
       currentColumns.push({
         id: docId,
         displayAsText: doc.raw._id,
+        initialWidth: columnWidth,
         isSortable: false,
         isExpandable: false,
         actions: {
@@ -99,7 +109,7 @@ export const useComparisonColumns = ({
     });
 
     return currentColumns;
-  }, [fieldColumnId, getDocById, selectedDocs, setSelectedDocs]);
+  }, [fieldColumnId, getDocById, selectedDocs, setSelectedDocs, wrapperRef]);
 
   return comparisonColumns;
 };
