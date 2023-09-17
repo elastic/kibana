@@ -53,5 +53,6 @@ export interface RequestStatistic {
 
 export interface Response {
   json?: object;
+  requestMeta?: unknown;
   time?: number;
 }

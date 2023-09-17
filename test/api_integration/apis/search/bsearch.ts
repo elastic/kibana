@@ -302,32 +302,62 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it(`'esql' search strategy should return request meta`, async () => {
-          const resp = await supertest
-            .post(`/internal/bsearch`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-            .send({
-              batch: [
-                {
-                  request: {
-                    params: {
-                      query: 'from .kibana | limit 1',
+        describe('esql', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        query: 'from .kibana | limit 1',
+                      },
+                    },
+                    options: {
+                      strategy: 'esql',
                     },
                   },
-                  options: {
-                    strategy: 'esql',
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result).to.have.property('requestMeta');
+            expect(jsonBody[0].result.requestMeta.method).to.be('POST');
+            expect(jsonBody[0].result.requestMeta.path).to.be('/_query');
+            expect(jsonBody[0].result.requestMeta.querystring).to.be('');
+          });
+
+          it(`should return request meta when request fails`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        query: 'fro .kibana | limit 1',
+                      },
+                    },
+                    options: {
+                      strategy: 'esql',
+                    },
                   },
-                },
-              ],
-            });
+                ],
+              });
 
-          const jsonBody = parseBfetchResponse(resp);
+            const jsonBody = parseBfetchResponse(resp);
 
-          expect(resp.status).to.be(200);
-          expect(jsonBody[0].result).to.have.property('requestMeta');
-          expect(jsonBody[0].result.requestMeta.method).to.be('POST');
-          expect(jsonBody[0].result.requestMeta.path).to.be('/_query');
-          expect(jsonBody[0].result.requestMeta.querystring).to.be('');
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].error).to.have.property('requestMeta');
+            expect(jsonBody[0].error.requestMeta.method).to.be('POST');
+            expect(jsonBody[0].error.requestMeta.path).to.be('/_query');
+            expect(jsonBody[0].error.requestMeta.querystring).to.be('');
+          });
         });
 
         it(`'sql' search strategy should return request meta`, async () => {

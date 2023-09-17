@@ -12,9 +12,11 @@ import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {
   public errBody?: Record<string, any>;
-  constructor(message: string, public readonly statusCode: number, errBody?: Record<string, any>) {
+  public requestMeta?: unknown;
+  constructor(message: string, public readonly statusCode: number, errBody?: Record<string, any>, requestMeta?: unknown) {
     super(message);
     this.errBody = errBody;
+    this.requestMeta = requestMeta;
   }
 }
 
@@ -28,7 +30,8 @@ export function getKbnServerError(e: Error) {
   return new KbnServerError(
     e.message ?? 'Unknown error',
     e instanceof errors.ResponseError ? e.statusCode! : 500,
-    e instanceof errors.ResponseError ? e.body : undefined
+    e instanceof errors.ResponseError ? e.body : undefined,
+    e instanceof errors.ResponseError ? e.meta?.meta?.request?.params : undefined,
   );
 }
 
@@ -43,6 +46,7 @@ export function reportServerError(res: KibanaResponseFactory, err: KbnServerErro
     body: {
       message: err.message,
       attributes: err.errBody?.error,
+      ...(err.requestMeta ? { requestMeta: err.requestMeta } : {})
     },
   });
 }

@@ -47,6 +47,7 @@ export function registerBsearchRoute(
                   message: err.message,
                   statusCode: err.statusCode,
                   attributes: err.errBody?.error,
+                  requestMeta: err.requestMeta,
                 };
               })
             )
