@@ -12,7 +12,13 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { RuleActionTypes, RuleDefaultAction, SanitizedRule } from '../types';
+import {
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
+  SanitizedRule,
+  SanitizedRuleResponse,
+} from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -48,6 +54,16 @@ describe('getRuleRoute', () => {
     type: RuleActionTypes.DEFAULT,
   };
 
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    type: RuleActionTypes.SYSTEM,
+  };
+
   const mockedAlert: SanitizedRule<{
     bar: boolean;
   }> = {
@@ -78,7 +94,7 @@ describe('getRuleRoute', () => {
     revision: 0,
   };
 
-  const getResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
+  const getResult: AsApiContract<SanitizedRuleResponse<{ bar: boolean }>> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
     notify_when: mockedAlert.notifyWhen,
@@ -103,7 +119,6 @@ describe('getRuleRoute', () => {
         connector_type_id: mockedAlert.actions[0].actionTypeId,
         uuid: mockedAlert.actions[0].uuid,
         alerts_filter: action.alertsFilter,
-        type: RuleActionTypes.DEFAULT,
       },
     ],
   };
@@ -184,5 +199,65 @@ describe('getRuleRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  describe('actions', () => {
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      getRuleRoute(router, licenseState);
+
+      const [_, handler] = router.get.mock.calls[0];
+      rulesClient.get.mockResolvedValueOnce({ ...mockedAlert, actions: [action, systemAction] });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient },
+        {
+          params: {
+            id: '1',
+          },
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.actions).toEqual([
+        {
+          alerts_filter: {
+            query: {
+              dsl: '{"must": {"term": { "name": "test" }}}',
+              filters: [],
+              kql: 'name:test',
+            },
+            timeframe: {
+              days: [1],
+              hours: {
+                end: '17:00',
+                start: '08:00',
+              },
+              timezone: 'UTC',
+            },
+          },
+          connector_type_id: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+        {
+          connector_type_id: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+      ]);
+    });
   });
 });

@@ -11,22 +11,23 @@ import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import {
   verifyAccessAndContext,
-  RewriteResponseCase,
   rewriteRuleLastRun,
   rewriteActionsRes,
+  AsApiContract,
 } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   ResolvedSanitizedRule,
+  ResolvedSanitizedRuleResponse,
 } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>> = ({
+const rewriteBodyRes = ({
   alertTypeId,
   createdBy,
   updatedBy,
@@ -43,7 +44,9 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
   lastRun,
   nextRun,
   ...rest
-}) => ({
+}: ResolvedSanitizedRule<RuleTypeParams>): AsApiContract<
+  ResolvedSanitizedRuleResponse<RuleTypeParams>
+> => ({
   ...rest,
   rule_type_id: alertTypeId,
   created_by: createdBy,

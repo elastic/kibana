@@ -12,7 +12,13 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { ResolvedSanitizedRule, RuleActionTypes, RuleDefaultAction } from '../types';
+import {
+  ResolvedSanitizedRule,
+  ResolvedSanitizedRuleResponse,
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
+} from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -34,6 +40,16 @@ describe('resolveRuleRoute', () => {
     },
     uuid: '123-456',
     type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    type: RuleActionTypes.SYSTEM,
   };
 
   const mockedRule: ResolvedSanitizedRule<{
@@ -68,7 +84,7 @@ describe('resolveRuleRoute', () => {
     revision: 0,
   };
 
-  const resolveResult: AsApiContract<ResolvedSanitizedRule<{ bar: boolean }>> = {
+  const resolveResult: AsApiContract<ResolvedSanitizedRuleResponse<{ bar: boolean }>> = {
     ...pick(
       mockedRule,
       'consumer',
@@ -102,7 +118,6 @@ describe('resolveRuleRoute', () => {
         params: mockedRule.actions[0].params,
         connector_type_id: mockedRule.actions[0].actionTypeId,
         uuid: mockedRule.actions[0].uuid,
-        type: RuleActionTypes.DEFAULT,
       },
     ],
     outcome: 'aliasMatch',
@@ -184,5 +199,50 @@ describe('resolveRuleRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  describe('actions', () => {
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      resolveRuleRoute(router, licenseState);
+
+      const [_, handler] = router.get.mock.calls[0];
+      rulesClient.resolve.mockResolvedValueOnce({ ...mockedRule, actions: [action, systemAction] });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient },
+        {
+          params: {
+            id: '1',
+          },
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.actions).toEqual([
+        {
+          connector_type_id: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+        {
+          connector_type_id: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+      ]);
+    });
   });
 });

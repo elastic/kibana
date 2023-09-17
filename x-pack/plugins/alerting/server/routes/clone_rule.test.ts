@@ -13,7 +13,13 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
-import { RuleActionTypes, RuleDefaultAction, SanitizedRule } from '../types';
+import {
+  PartialRuleResponse,
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
+  SanitizedRule,
+} from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -37,6 +43,16 @@ describe('cloneRuleRoute', () => {
     },
     uuid: '123-456',
     type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    type: RuleActionTypes.SYSTEM,
   };
 
   const mockedRule: SanitizedRule<{ bar: boolean }> = {
@@ -80,7 +96,7 @@ describe('cloneRuleRoute', () => {
     ],
   };
 
-  const cloneResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
+  const cloneResult: AsApiContract<PartialRuleResponse<{ bar: boolean }>> = {
     ...ruleToClone,
     mute_all: mockedRule.muteAll,
     created_by: mockedRule.createdBy,
@@ -100,7 +116,6 @@ describe('cloneRuleRoute', () => {
         ...ruleToClone.actions[0],
         connector_type_id: 'test',
         uuid: '123-456',
-        type: RuleActionTypes.DEFAULT,
       },
     ],
   };
@@ -214,5 +229,50 @@ describe('cloneRuleRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  describe('actions', () => {
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      cloneRuleRoute(router, licenseState);
+
+      const [_, handler] = router.post.mock.calls[0];
+      rulesClient.clone.mockResolvedValueOnce({ ...mockedRule, actions: [action, systemAction] });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient },
+        {
+          params: {
+            id: '1',
+          },
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.actions).toEqual([
+        {
+          connector_type_id: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+        {
+          connector_type_id: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+      ]);
+    });
   });
 });

@@ -10,16 +10,17 @@ import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import {
   verifyAccessAndContext,
-  RewriteResponseCase,
   handleDisabledApiKeysError,
   rewriteRuleLastRun,
   rewriteActionsRes,
+  AsApiContract,
 } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   PartialRule,
+  PartialRuleResponse,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -27,7 +28,7 @@ const paramSchema = schema.object({
   newId: schema.maybe(schema.string()),
 });
 
-const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
+const rewriteBodyRes = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -46,7 +47,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   lastRun,
   nextRun,
   ...rest
-}) => ({
+}: PartialRule<RuleTypeParams>): AsApiContract<PartialRuleResponse<RuleTypeParams>> => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
