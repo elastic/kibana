@@ -230,6 +230,17 @@ export interface Rule<Params extends RuleTypeParams = never> {
   viewInAppRelativeUrl?: string;
 }
 
+/**
+ * TODO: Remove when all http routes and methods
+ * of the rule clients are versioned.
+ *
+ * Actions internally (rules client methods) contains a type (RuleActionTypes).
+ * All APIs strip out the type from the actions. This TS type represents that.
+ */
+export type RuleResponse<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'actions'> & {
+  actions: RuleActionResponse[];
+};
+
 export interface SanitizedAlertsFilter extends AlertsFilter {
   query?: {
     kql: string;

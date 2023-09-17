@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule, RuleActionTypes, RuleType } from '../../common';
+import { RuleResponse, RuleType } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadRule, loadRuleType, loadRuleTypes } from './alert_api';
 
@@ -296,7 +296,7 @@ function getApiRule() {
   };
 }
 
-function getRule(): Rule<{ x: number }> {
+function getRule(): RuleResponse<{ x: number }> {
   return {
     id: '3d534c70-582b-11ec-8995-2b1578a3bc5d',
     notifyWhen: 'onActiveAlert',
@@ -324,7 +324,6 @@ function getRule(): Rule<{ x: number }> {
         group: 'threshold met',
         id: '3619a0d0-582b-11ec-8995-2b1578a3bc5d',
         uuid: '123-456',
-        type: RuleActionTypes.DEFAULT,
       },
     ],
     params: { x: 42 },

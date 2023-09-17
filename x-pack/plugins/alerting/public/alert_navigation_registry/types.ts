@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '../../common';
+import { SanitizedRuleResponse } from '../../common';
 
 /**
  * Returns information that can be used to navigate to a specific page to view the given rule.
@@ -16,4 +16,4 @@ import { SanitizedRule } from '../../common';
  * originally registered to {@link PluginSetupContract.registerNavigation}.
  *
  */
-export type AlertNavigationHandler = (rule: SanitizedRule) => string;
+export type AlertNavigationHandler = (rule: SanitizedRuleResponse) => string;

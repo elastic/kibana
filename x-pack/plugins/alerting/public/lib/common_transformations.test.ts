@@ -6,14 +6,7 @@
  */
 
 import { ApiRule, transformRule } from './common_transformations';
-import {
-  RuleActionTypes,
-  RuleDefaultAction,
-  RuleExecutionStatusErrorReasons,
-  RuleLastRunOutcomeValues,
-  RuleSystemAction,
-} from '../../common';
-import { AsApiContract } from '@kbn/actions-plugin/common';
+import { RuleExecutionStatusErrorReasons, RuleLastRunOutcomeValues } from '../../common';
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -23,26 +16,24 @@ const dateUpdated = new Date(dateFixed - 1000);
 const dateExecuted = new Date(dateFixed);
 
 describe('common_transformations', () => {
-  const defaultAction: AsApiContract<RuleDefaultAction> = {
+  const defaultAction = {
     group: 'default',
     id: 'aaa',
     connector_type_id: 'bbb',
     params: {},
     frequency: {
       summary: false,
-      notify_when: 'onThrottleInterval',
+      notify_when: 'onThrottleInterval' as const,
       throttle: '1m',
     },
     alerts_filter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
-    type: RuleActionTypes.DEFAULT,
   };
 
-  const systemAction: AsApiContract<RuleSystemAction> = {
+  const systemAction = {
     id: 'system-action',
     uuid: '123',
     connector_type_id: 'bbb',
     params: {},
-    type: RuleActionTypes.SYSTEM,
   };
 
   test('transformRule() with all optional fields', () => {
@@ -116,6 +107,7 @@ describe('common_transformations', () => {
       },
       next_run: dateUpdated.toISOString(),
     };
+
     expect(transformRule(apiRule)).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -141,7 +133,6 @@ describe('common_transformations', () => {
             "actionTypeId": "bbb",
             "id": "system-action",
             "params": Object {},
-            "type": "system",
             "uuid": "123",
           },
         ],
@@ -324,7 +315,6 @@ describe('common_transformations', () => {
             "actionTypeId": "bbb",
             "id": "system-action",
             "params": Object {},
-            "type": "system",
             "uuid": "123",
           },
         ],
