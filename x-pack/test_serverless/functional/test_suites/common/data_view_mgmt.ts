@@ -100,5 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('rollup-tag');
       });
     });
+
+    // todo add test to look for spaces header - tableHeaderCell_namespaces_1
   });
 }
