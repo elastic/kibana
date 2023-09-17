@@ -15,9 +15,9 @@ import {
   useEuiBackgroundColor,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { formatFieldValue, getFieldTypeName } from '@kbn/discover-utils';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldIcon } from '@kbn/react-field';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -25,7 +25,7 @@ import { Change, diffChars, diffLines, diffWords } from 'diff';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
-import { DocumentDiffMode } from '../types';
+import type { DocumentDiffMode } from '../types';
 
 export interface UseComparisonCellValueProps {
   dataView: DataView;

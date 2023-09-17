@@ -25,7 +25,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
-import { DocumentDiffMode } from './types';
+import type { DocumentDiffMode } from './types';
 
 export interface ComparisonControlsProps {
   showDiff: boolean | undefined;

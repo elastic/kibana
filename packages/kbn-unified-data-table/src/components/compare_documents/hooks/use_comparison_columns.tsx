@@ -7,7 +7,7 @@
  */
 
 import { EuiDataGridColumn, EuiListGroupItemProps } from '@elastic/eui';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 
