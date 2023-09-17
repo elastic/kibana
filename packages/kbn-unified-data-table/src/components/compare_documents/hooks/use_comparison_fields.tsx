@@ -40,7 +40,7 @@ export const useComparisonFields = ({
     }
 
     return fields;
-  }, [selectedFieldNames, dataView.fields, dataView.timeFieldName, showAllFields]);
+  }, [dataView.fields, dataView.timeFieldName, selectedFieldNames, showAllFields]);
 
   return comparisonFields;
 };

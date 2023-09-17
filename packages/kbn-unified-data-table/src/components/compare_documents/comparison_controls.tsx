@@ -25,16 +25,17 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
+import { DocumentDiffMode } from './types';
 
 export interface ComparisonControlsProps {
   showDiff: boolean | undefined;
-  diffMode: 'basic' | 'chars' | 'words' | 'lines' | undefined;
+  diffMode: DocumentDiffMode | undefined;
   showDiffDecorations: boolean | undefined;
   showAllFields: boolean | undefined;
   forceShowAllFields: boolean;
   setIsCompareActive: (isCompareActive: boolean) => void;
   setShowDiff: (showDiff: boolean) => void;
-  setDiffMode: (diffMode: 'basic' | 'chars' | 'words' | 'lines') => void;
+  setDiffMode: (diffMode: DocumentDiffMode) => void;
   setShowDiffDecorations: (showDiffDecorations: boolean) => void;
   setShowAllFields: (showAllFields: boolean) => void;
 }

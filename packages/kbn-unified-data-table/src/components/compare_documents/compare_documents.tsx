@@ -25,6 +25,7 @@ import { ComparisonControls } from './comparison_controls';
 import { useComparisonCellValue } from './hooks/use_comparison_cell_value';
 import { useComparisonColumns } from './hooks/use_comparison_columns';
 import { useComparisonFields } from './hooks/use_comparison_fields';
+import { DocumentDiffMode } from './types';
 
 export interface CompareDocumentsProps {
   consumer: string;
@@ -58,7 +59,7 @@ const CompareDocuments = ({
   setIsCompareActive,
 }: CompareDocumentsProps) => {
   const [showDiff, setShowDiff] = useLocalStorage(getStorageKey(consumer, 'ShowDiff'), true);
-  const [diffMode, setDiffMode] = useLocalStorage<'basic' | 'chars' | 'words' | 'lines'>(
+  const [diffMode, setDiffMode] = useLocalStorage<DocumentDiffMode>(
     getStorageKey(consumer, 'DiffMode'),
     'basic'
   );
@@ -71,14 +72,14 @@ const CompareDocuments = ({
     false
   );
 
-  const fieldsColumnId = useGeneratedHtmlId({ prefix: 'fields' });
+  const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const comparisonFields = useComparisonFields({
     dataView,
     selectedFieldNames,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
   });
   const comparisonColumns = useComparisonColumns({
-    fieldsColumnId,
+    fieldColumnId,
     selectedDocs,
     getDocById,
     setSelectedDocs,
@@ -135,7 +136,7 @@ const CompareDocuments = ({
   const ComparisonCellValue = useComparisonCellValue({
     dataView,
     comparisonFields,
-    fieldsColumnId,
+    fieldColumnId,
     selectedDocs,
     showDiff,
     diffMode,
