@@ -289,11 +289,11 @@ export default function ({ getService }: FtrProviderContext) {
                                         error_type: 'exception',
                                         message: 'simulated failure',
                                         name: '.kibana',
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
                             },
                           },
                         },
@@ -364,20 +364,20 @@ export default function ({ getService }: FtrProviderContext) {
                         index: '.kibana',
                         body: {
                           bool: {
-                              filter: [
-                                {
-                                  error_query: {
-                                    indices: [
-                                      {
-                                        error_type: 'exception',
-                                        message: 'simulated failure',
-                                        name: '.kibana',
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            },
+                            filter: [
+                              {
+                                error_query: {
+                                  indices: [
+                                    {
+                                      error_type: 'exception',
+                                      message: 'simulated failure',
+                                      name: '.kibana',
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
                         },
                       },
                     },
