@@ -16,7 +16,6 @@ import {
 } from './rule_errors';
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };
 describe('rule_errors', () => {
@@ -102,29 +101,6 @@ describe('rule_errors', () => {
         'schedule.interval': [],
         ruleTypeId: [],
         actionConnectors: ['Action for myActionType connector is required.'],
-      });
-    });
-
-    it('should not return an error on system actions', () => {
-      const rule = mockRule();
-
-      rule.actions = [
-        {
-          id: '1234',
-          actionTypeId: '.test',
-          uuid: '456',
-          params: {},
-          type: RuleActionTypes.SYSTEM,
-        },
-      ];
-
-      const result = validateBaseProperties(rule, config);
-
-      expect(result.errors).toStrictEqual({
-        name: [],
-        'schedule.interval': [],
-        ruleTypeId: [],
-        actionConnectors: [],
       });
     });
   });

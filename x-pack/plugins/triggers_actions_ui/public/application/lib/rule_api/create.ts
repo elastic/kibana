@@ -9,7 +9,6 @@ import { AsApiContract, RewriteResponseCase } from '@kbn/actions-plugin/common';
 import { Rule, RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { transformRule } from './common_transformations';
-import { isSystemAction } from '../is_system_action';
 
 type RuleCreateBody = Omit<
   RuleUpdates,
@@ -28,29 +27,17 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
 }): any => ({
   ...res,
   rule_type_id: ruleTypeId,
-  actions: actions.map((action) => {
-    if (isSystemAction(action)) {
-      const { actionTypeId, ...restSystemAction } = action;
-
-      return { ...restSystemAction, connector_type_id: actionTypeId };
-    }
-
-    const { group, id, params, frequency, alertsFilter, actionTypeId, ...restAction } = action;
-
-    return {
-      ...restAction,
-      group,
-      id,
-      params,
-      frequency: {
-        notify_when: frequency!.notifyWhen,
-        throttle: frequency!.throttle,
-        summary: frequency!.summary,
-      },
-      alerts_filter: alertsFilter,
-      connector_type_id: actionTypeId,
-    };
-  }),
+  actions: actions.map(({ group, id, params, frequency, alertsFilter }) => ({
+    group,
+    id,
+    params,
+    frequency: {
+      notify_when: frequency!.notifyWhen,
+      throttle: frequency!.throttle,
+      summary: frequency!.summary,
+    },
+    alerts_filter: alertsFilter,
+  })),
 });
 
 export async function createRule({
@@ -63,6 +50,5 @@ export async function createRule({
   const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule`, {
     body: JSON.stringify(rewriteBodyRequest(rule)),
   });
-
   return transformRule(res);
 }

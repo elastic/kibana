@@ -17,12 +17,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-  RuleDefaultAction,
 } from '@kbn/alerting-plugin/common';
-import {
-  RuleActionAlertsFilterPayload,
-  RuleActionFrequencyPayload,
-} from '../rule_form/rule_reducer';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -221,19 +216,8 @@ describe('action_form', () => {
       disabledByActionType,
       preconfiguredOnly,
     ]);
-
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(newActionType);
-
-    const defaultAction: RuleDefaultAction = {
-      group: 'default',
-      id: 'test',
-      actionTypeId: newActionType.id,
-      params: {
-        message: '',
-      },
-    };
-
     const initialAlert = {
       name: 'test',
       params: {},
@@ -242,7 +226,18 @@ describe('action_form', () => {
       schedule: {
         interval: '1m',
       },
-      actions: customActions ? customActions : [defaultAction],
+      actions: customActions
+        ? customActions
+        : [
+            {
+              group: 'default',
+              id: 'test',
+              actionTypeId: newActionType.id,
+              params: {
+                message: '',
+              },
+            },
+          ],
       tags: [],
       muteAll: false,
       enabled: false,
@@ -307,7 +302,6 @@ describe('action_form', () => {
     ]);
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
-
     const wrapper = mountWithIntl(
       <ActionForm
         actions={initialAlert.actions}
@@ -342,34 +336,23 @@ describe('action_form', () => {
           },
         ]}
         setActionGroupIdByIndex={(group: string, index: number) => {
-          (initialAlert.actions[index] as RuleDefaultAction).group = group;
+          initialAlert.actions[index].group = group;
         }}
         setActions={(_updatedActions: RuleAction[]) => {}}
         setActionParamsProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
         }
-        setActionFrequencyProperty={(
-          key: RuleActionFrequencyPayload['key'],
-          value: RuleActionFrequencyPayload['value'],
-          index: number
-        ) =>
+        setActionFrequencyProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = {
-            ...(initialAlert.actions[index] as RuleDefaultAction),
-            frequency: {
-              ...(initialAlert.actions[index] as RuleDefaultAction).frequency!,
-              [key]: value,
-            },
+            ...initialAlert.actions[index],
+            frequency: { ...initialAlert.actions[index].frequency!, [key]: value },
           })
         }
-        setActionAlertsFilterProperty={(
-          key: RuleActionAlertsFilterPayload['key'],
-          value: RuleActionAlertsFilterPayload['value'],
-          index: number
-        ) =>
+        setActionAlertsFilterProperty={(key: string, value: any, index: number) =>
           (initialAlert.actions[index] = {
-            ...(initialAlert.actions[index] as RuleDefaultAction),
+            ...initialAlert.actions[index],
             alertsFilter: {
-              ...(initialAlert.actions[index] as RuleDefaultAction).alertsFilter,
+              ...initialAlert.actions[index].alertsFilter,
               [key]: value,
             },
           })

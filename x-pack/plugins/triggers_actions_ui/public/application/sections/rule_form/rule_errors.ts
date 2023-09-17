@@ -18,23 +18,19 @@ import {
   TriggersActionsUiConfig,
 } from '../../../types';
 import { InitialRule } from './rule_reducer';
-import { isSystemAction } from '../../lib/is_system_action';
 
 export function validateBaseProperties(
   ruleObject: InitialRule,
   config: TriggersActionsUiConfig
 ): ValidationResult {
   const validationResult = { errors: {} };
-
   const errors = {
     name: new Array<string>(),
     'schedule.interval': new Array<string>(),
     ruleTypeId: new Array<string>(),
     actionConnectors: new Array<string>(),
   };
-
   validationResult.errors = errors;
-
   if (!ruleObject.name) {
     errors.name.push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredNameText', {
@@ -42,7 +38,6 @@ export function validateBaseProperties(
       })
     );
   }
-
   if (ruleObject.schedule.interval.length < 2) {
     errors['schedule.interval'].push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredIntervalText', {
@@ -52,7 +47,6 @@ export function validateBaseProperties(
   } else if (config.minimumScheduleInterval && config.minimumScheduleInterval.enforce) {
     const duration = parseDuration(ruleObject.schedule.interval);
     const minimumDuration = parseDuration(config.minimumScheduleInterval.value);
-
     if (duration < minimumDuration) {
       errors['schedule.interval'].push(
         i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.belowMinimumText', {
@@ -65,28 +59,17 @@ export function validateBaseProperties(
     }
   }
 
-  const invalidThrottleActions = ruleObject.actions.filter((action) => {
-    if (isSystemAction(action)) {
-      return false;
-    }
-
-    if (!action.frequency?.throttle) {
-      return false;
-    }
-
-    const throttleDuration = parseDuration(action.frequency.throttle);
-
+  const invalidThrottleActions = ruleObject.actions.filter((a) => {
+    if (!a.frequency?.throttle) return false;
+    const throttleDuration = parseDuration(a.frequency.throttle);
     const intervalDuration =
       ruleObject.schedule.interval && ruleObject.schedule.interval.length > 1
         ? parseDuration(ruleObject.schedule.interval)
         : 0;
-
     return (
-      action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
-      throttleDuration < intervalDuration
+      a.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE && throttleDuration < intervalDuration
     );
   });
-
   if (invalidThrottleActions.length) {
     errors['schedule.interval'].push(
       i18n.translate(
@@ -106,11 +89,9 @@ export function validateBaseProperties(
       })
     );
   }
-
   const emptyConnectorActions = ruleObject.actions.find(
     (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
   );
-
   if (emptyConnectorActions !== undefined) {
     errors.actionConnectors.push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredActionConnector', {
@@ -119,7 +100,6 @@ export function validateBaseProperties(
       })
     );
   }
-
   return validationResult;
 }
 

@@ -9,13 +9,14 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiSuperSelectProps } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
+import { RuleAction } from '../../../types';
 import { ActionNotifyWhen } from './action_notify_when';
-import { RuleDefaultAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 describe('action_notify_when', () => {
   async function setup(
-    frequency: RuleDefaultAction['frequency'] = DEFAULT_FREQUENCY,
+    frequency: RuleAction['frequency'] = DEFAULT_FREQUENCY,
     hasAlertsMappings: boolean = true
   ) {
     const wrapper = mountWithIntl(
