@@ -12,6 +12,7 @@ import {
   EuiDataGridInMemory,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSchemaDetector,
+  EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -100,6 +101,7 @@ const CompareDocuments = ({
     []
   );
   const comparisonInMemory: EuiDataGridInMemory = useMemo(() => ({ level: 'sorting' }), []);
+  const gridStyle: EuiDataGridStyle = useMemo(() => ({ ...GRID_STYLE, rowHover: undefined }), []);
   const additionalControls = useMemo(
     () => (
       <ComparisonControls
@@ -152,7 +154,7 @@ const CompareDocuments = ({
     <EuiDataGrid
       aria-describedby={ariaDescribedBy}
       aria-labelledby={ariaLabelledBy}
-      gridStyle={GRID_STYLE}
+      gridStyle={gridStyle}
       toolbarVisibility={comparisonToolbarVisibility}
       columns={comparisonColumns}
       columnVisibility={comparisonColumnVisibility}
