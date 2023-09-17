@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
@@ -17,7 +18,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { ShardFailure } from './shard_failure_types';
 
 /**
  * Provides pretty formatting of a given key string
@@ -47,7 +47,7 @@ export function formatValueByKey(value: unknown, key: string): string | JSX.Elem
   }
 }
 
-export function ShardFailureDescription(props: ShardFailure) {
+export function ShardFailureDescription(props: estypes.ShardFailure) {
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   const flattendReason = getFlattenedObject(props.reason);
@@ -70,7 +70,7 @@ export function ShardFailureDescription(props: ShardFailure) {
       title: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.indexTitle', {
         defaultMessage: 'Index',
       }),
-      description: props.index,
+      description: props.index ?? '',
     },
     {
       title: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.reasonTypeTitle', {
@@ -84,7 +84,7 @@ export function ShardFailureDescription(props: ShardFailure) {
             title: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.nodeTitle', {
               defaultMessage: 'Node',
             }),
-            description: props.node,
+            description: props.node ?? '',
           },
           ...reasonItems,
         ]
@@ -99,7 +99,6 @@ export function ShardFailureDescription(props: ShardFailure) {
           columnWidths={[1, 6]}
           listItems={items}
           compressed
-          className="shardFailureModal__desc"
           titleProps={{ className: 'shardFailureModal__descTitle' }}
           descriptionProps={{ className: 'shardFailureModal__descValue' }}
         />

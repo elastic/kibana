@@ -10,7 +10,10 @@ import { EuiSwitch, EuiSwitchEvent, EuiLoadingSpinner } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { ConfigKey, EncryptedSyntheticsMonitor } from '../../../../../../../common/runtime_types';
-import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import {
+  useCanEditSynthetics,
+  useCanUsePublicLocations,
+} from '../../../../../../hooks/use_capabilities';
 import { useMonitorEnableHandler } from '../../../../hooks';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import * as labels from './labels';
@@ -31,6 +34,8 @@ export const MonitorEnabled = ({
   isSwitchable = true,
 }: Props) => {
   const canEditSynthetics = useCanEditSynthetics();
+
+  const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
 
   const monitorName = monitor[ConfigKey.NAME];
   const statusLabels = useMemo(() => {
@@ -63,11 +68,14 @@ export const MonitorEnabled = ({
       {isLoading || initialLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUsePublicLocations={canUsePublicLocations}
+        >
           <SwitchWithCursor
             compressed={true}
             checked={enabled}
-            disabled={isLoading || !canEditSynthetics}
+            disabled={isLoading || !canEditSynthetics || !canUsePublicLocations}
             showLabel={false}
             label={enabledDisableLabel}
             title={enabledDisableLabel}

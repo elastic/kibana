@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { get } from 'lodash';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
 import { ALERT_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
+import { SavedObjectExecutionSource } from '../lib/action_execution_source';
 
 const LEGACY_VERSION = 'pre-7.10.0';
 
@@ -34,36 +34,57 @@ export async function getAuthorizationModeBySource(
     : AuthorizationMode.RBAC;
 }
 
-export async function getBulkAuthorizationModeBySource(
+export async function bulkGetAuthorizationModeBySource(
+  logger: Logger,
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   executionSources: Array<ActionExecutionSource<unknown>> = []
-): Promise<Record<string, number>> {
-  const count = { [AuthorizationMode.Legacy]: 0, [AuthorizationMode.RBAC]: 0 };
-  if (executionSources.length === 0) {
-    count[AuthorizationMode.RBAC] = 1;
-    return count;
+): Promise<Record<AuthorizationMode, number>> {
+  const authModes = { [AuthorizationMode.Legacy]: 0, [AuthorizationMode.RBAC]: 0 };
+
+  const alertSavedObjectExecutionSources: SavedObjectExecutionSource[] = executionSources.filter(
+    (source) =>
+      isSavedObjectExecutionSource(source) && source?.source?.type === ALERT_SAVED_OBJECT_TYPE
+  ) as SavedObjectExecutionSource[];
+
+  // If no ALERT_SAVED_OBJECT_TYPE source, default to RBAC
+  if (alertSavedObjectExecutionSources.length === 0) {
+    authModes[AuthorizationMode.RBAC] = 1;
+    return authModes;
   }
-  const alerts = await unsecuredSavedObjectsClient.bulkGet<{
+
+  // Collect the unique rule IDs for ALERT_SAVED_OBJECT_TYPE sources and bulk get the associated SOs
+  const rulesIds = new Set(
+    alertSavedObjectExecutionSources.map((source: SavedObjectExecutionSource) => source?.source?.id)
+  );
+
+  // Get rule saved objects to determine whether to use RBAC or legacy authorization source
+  const ruleSOs = await unsecuredSavedObjectsClient.bulkGet<{
     meta?: {
       versionApiKeyLastmodified?: string;
     };
   }>(
-    executionSources.map((es) => ({
+    [...rulesIds].map((id) => ({
       type: ALERT_SAVED_OBJECT_TYPE,
-      id: get(es, 'source.id'),
+      id,
     }))
   );
-  const legacyVersions = alerts.saved_objects.reduce<Record<string, boolean>>((acc, so) => {
-    acc[so.id] = so.attributes.meta?.versionApiKeyLastmodified === LEGACY_VERSION;
+
+  return ruleSOs.saved_objects.reduce((acc, ruleSO) => {
+    if (ruleSO.error) {
+      logger.warn(
+        `Error retrieving saved object [${ruleSO.type}/${ruleSO.id}] - ${ruleSO.error?.message} - default to using RBAC authorization mode.`
+      );
+      // If there's an error retrieving the saved object, default to RBAC auth mode to avoid privilege de-escalation
+      authModes[AuthorizationMode.RBAC]++;
+    } else {
+      // Check whether this is a legacy rule
+      const isLegacy = ruleSO.attributes?.meta?.versionApiKeyLastmodified === LEGACY_VERSION;
+      if (isLegacy) {
+        authModes[AuthorizationMode.Legacy]++;
+      } else {
+        authModes[AuthorizationMode.RBAC]++;
+      }
+    }
     return acc;
-  }, {});
-  return executionSources.reduce((acc, es) => {
-    const isAlertSavedObject =
-      isSavedObjectExecutionSource(es) && es.source?.type === ALERT_SAVED_OBJECT_TYPE;
-    const isLegacyVersion = legacyVersions[get(es, 'source.id')];
-    const key =
-      isAlertSavedObject && isLegacyVersion ? AuthorizationMode.Legacy : AuthorizationMode.RBAC;
-    acc[key]++;
-    return acc;
-  }, count);
+  }, authModes);
 }
