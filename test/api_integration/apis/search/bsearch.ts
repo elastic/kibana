@@ -234,72 +234,170 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('request meta', () => {
-        it(`'es' search strategy should return request meta`, async () => {
-          const resp = await supertest
-            .post(`/internal/bsearch`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-            .send({
-              batch: [
-                {
-                  request: {
-                    params: {
-                      index: '.kibana',
-                      body: {
-                        query: {
-                          match_all: {},
+        describe('es', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          query: {
+                            match_all: {},
+                          },
                         },
                       },
                     },
+                    options: {
+                      strategy: 'es',
+                    },
                   },
-                  options: {
-                    strategy: 'es',
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result).to.have.property('requestMeta');
+            expect(jsonBody[0].result.requestMeta.method).to.be('POST');
+            expect(jsonBody[0].result.requestMeta.path).to.be('/.kibana/_search');
+            expect(jsonBody[0].result.requestMeta.querystring).to.be('ignore_unavailable=true');
+          });
+
+          it(`should return request meta when request fails`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          query: {
+                            bool: {
+                              filter: [
+                                {
+                                  error_query: {
+                                    indices: [
+                                      {
+                                        error_type: 'exception',
+                                        message: 'simulated failure',
+                                        name: '.kibana',
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                          },
+                        },
+                      },
+                    },
+                    options: {
+                      strategy: 'es',
+                    },
                   },
-                },
-              ],
-            });
+                ],
+              });
 
-          const jsonBody = parseBfetchResponse(resp);
+            const jsonBody = parseBfetchResponse(resp);
 
-          expect(resp.status).to.be(200);
-          expect(jsonBody[0].result).to.have.property('requestMeta');
-          expect(jsonBody[0].result.requestMeta.method).to.be('POST');
-          expect(jsonBody[0].result.requestMeta.path).to.be('/.kibana/_search');
-          expect(jsonBody[0].result.requestMeta.querystring).to.be('ignore_unavailable=true');
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].error).to.have.property('requestMeta');
+            expect(jsonBody[0].error.requestMeta.method).to.be('POST');
+            expect(jsonBody[0].error.requestMeta.path).to.be('/.kibana/_search');
+            expect(jsonBody[0].error.requestMeta.querystring).to.be('ignore_unavailable=true');
+          });
         });
 
-        it(`'ese' search strategy should return request meta`, async () => {
-          const resp = await supertest
-            .post(`/internal/bsearch`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-            .send({
-              batch: [
-                {
-                  request: {
-                    params: {
-                      index: '.kibana',
-                      body: {
-                        query: {
-                          match_all: {},
+        describe('ese', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          query: {
+                            match_all: {},
+                          },
                         },
                       },
                     },
+                    options: {
+                      strategy: 'ese',
+                    },
                   },
-                  options: {
-                    strategy: 'ese',
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result).to.have.property('requestMeta');
+            expect(jsonBody[0].result.requestMeta.method).to.be('POST');
+            expect(jsonBody[0].result.requestMeta.path).to.be('/.kibana/_async_search');
+            expect(jsonBody[0].result.requestMeta.querystring).to.be(
+              'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true'
+            );
+          });
+
+          it(`should return request meta when request fails`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          bool: {
+                              filter: [
+                                {
+                                  error_query: {
+                                    indices: [
+                                      {
+                                        error_type: 'exception',
+                                        message: 'simulated failure',
+                                        name: '.kibana',
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            },
+                        },
+                      },
+                    },
+                    options: {
+                      strategy: 'ese',
+                    },
                   },
-                },
-              ],
-            });
+                ],
+              });
 
-          const jsonBody = parseBfetchResponse(resp);
+            const jsonBody = parseBfetchResponse(resp);
 
-          expect(resp.status).to.be(200);
-          expect(jsonBody[0].result).to.have.property('requestMeta');
-          expect(jsonBody[0].result.requestMeta.method).to.be('POST');
-          expect(jsonBody[0].result.requestMeta.path).to.be('/.kibana/_async_search');
-          expect(jsonBody[0].result.requestMeta.querystring).to.be(
-            'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true'
-          );
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].error).to.have.property('requestMeta');
+            expect(jsonBody[0].error.requestMeta.method).to.be('POST');
+            expect(jsonBody[0].error.requestMeta.path).to.be('/.kibana/_async_search');
+            expect(jsonBody[0].error.requestMeta.querystring).to.be(
+              'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true'
+            );
+          });
         });
 
         describe('esql', () => {
