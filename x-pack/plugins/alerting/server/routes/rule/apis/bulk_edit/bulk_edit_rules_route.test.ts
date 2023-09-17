@@ -13,7 +13,14 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { RuleActionTypes, SanitizedRule } from '../../../../types';
+import {
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
+  SanitizedRule,
+} from '../../../../types';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../../../lib/license_api_access', () => ({
@@ -189,5 +196,145 @@ describe('bulkEditRulesRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  describe('actions', () => {
+    const action: RuleDefaultAction = {
+      actionTypeId: 'test',
+      group: 'default',
+      id: '2',
+      params: {
+        foo: true,
+      },
+      uuid: '123-456',
+      type: RuleActionTypes.DEFAULT,
+    };
+
+    const systemAction: RuleSystemAction = {
+      actionTypeId: 'test-2',
+      id: 'system_action-id',
+      params: {
+        foo: true,
+      },
+      uuid: '123-456',
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    const mockedActionAlerts: Array<SanitizedRule<{}>> = [
+      { ...mockedAlert, actions: [action, systemAction] },
+    ];
+
+    const bulkEditActionsRequest = {
+      filter: '',
+      operations: [
+        {
+          operation: 'add',
+          field: 'actions',
+          value: [omit(action, 'type'), omit(systemAction, 'type')],
+        },
+      ],
+    };
+
+    const bulkEditActionsResult = { rules: mockedActionAlerts, errors: [], total: 1, skipped: [] };
+
+    it('adds the type of the actions correctly before passing the request to the rules client', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditActionsResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: bulkEditActionsRequest,
+        },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(rulesClient.bulkEdit.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "filter": "",
+          "ids": undefined,
+          "operations": Array [
+            Object {
+              "field": "actions",
+              "operation": "add",
+              "value": Array [
+                Object {
+                  "frequency": undefined,
+                  "group": "default",
+                  "id": "2",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "default",
+                  "uuid": "123-456",
+                },
+                Object {
+                  "id": "system_action-id",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "system",
+                  "uuid": "123-456",
+                },
+              ],
+            },
+          ],
+        }
+      `);
+    });
+
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      rulesClient.bulkEdit.mockResolvedValueOnce(bulkEditActionsResult);
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: bulkEditActionsRequest,
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.rules[0].actions).toEqual([
+        {
+          connector_type_id: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+        {
+          connector_type_id: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+          uuid: '123-456',
+        },
+      ]);
+    });
   });
 });

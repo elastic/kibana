@@ -238,6 +238,21 @@ export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   'apiKey' | 'actions'
 > & { actions: SanitizedRuleAction[] };
 
+/**
+ * TODO: Remove when all http routes and methods
+ * of the rule clients are versioned.
+ *
+ * Actions internally (rules client methods) contains a type (RuleActionTypes).
+ * All APIs strip out the type from the actions. This TS type represents that.
+ */
+export type SanitizedRuleActionResponse = Omit<SanitizedDefaultRuleAction, 'type' | 'group'> & {
+  group?: string;
+};
+export type SanitizedRuleResponse<Params extends RuleTypeParams = never> = Omit<
+  Rule<Params>,
+  'apiKey' | 'actions'
+> & { actions: SanitizedRuleActionResponse[] };
+
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 

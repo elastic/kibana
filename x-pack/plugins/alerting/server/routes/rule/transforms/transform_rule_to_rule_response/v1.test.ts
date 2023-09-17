@@ -97,7 +97,6 @@ describe('transformRuleToRuleResponse', () => {
           uuid: '111',
           params: { foo: 'bar' },
           connector_type_id: '.test',
-          type: RuleActionTypes.SYSTEM,
         },
       ]);
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import { createRuleRoute } from './create_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
@@ -15,9 +15,16 @@ import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { AsApiContract } from '../../../lib';
-import { RuleActionTypes, RuleDefaultAction, SanitizedRule } from '../../../../types';
+import {
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
+  SanitizedRule,
+  SanitizedRuleResponse,
+} from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -53,6 +60,16 @@ describe('createRuleRoute', () => {
       },
     },
     type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction: RuleSystemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    uuid: '123-456',
+    type: RuleActionTypes.SYSTEM,
   };
 
   const mockedAlert: SanitizedRule<{ bar: boolean }> = {
@@ -103,7 +120,7 @@ describe('createRuleRoute', () => {
     ],
   };
 
-  const createResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
+  const createResult: AsApiContract<SanitizedRuleResponse<{ bar: boolean }>> = {
     ...ruleToCreate,
     mute_all: mockedAlert.muteAll,
     created_by: mockedAlert.createdBy,
@@ -127,7 +144,7 @@ describe('createRuleRoute', () => {
         },
         connector_type_id: 'test',
         uuid: '123-456',
-      } as AsApiContract<RuleDefaultAction>,
+      },
     ],
   };
 
@@ -652,5 +669,138 @@ describe('createRuleRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  describe('actions', () => {
+    it('adds the type of the actions correctly before passing the request to the rules client', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      rulesClient.create.mockResolvedValueOnce({ ...mockedAlert, actions: [action, systemAction] });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: { ...ruleToCreate, actions: [omit(action, 'type'), omit(systemAction, 'type')] },
+        },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data": Object {
+              "actions": Array [
+                Object {
+                  "actionTypeId": "test",
+                  "group": "default",
+                  "id": "2",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "default",
+                  "uuid": "123-456",
+                },
+                Object {
+                  "actionTypeId": "test-2",
+                  "id": "system_action-id",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "system",
+                  "uuid": "123-456",
+                },
+              ],
+              "alertTypeId": "1",
+              "consumer": "bar",
+              "enabled": true,
+              "name": "abc",
+              "notifyWhen": "onActionGroupChange",
+              "params": Object {
+                "bar": true,
+              },
+              "schedule": Object {
+                "interval": "10s",
+              },
+              "tags": Array [
+                "foo",
+              ],
+              "throttle": "30s",
+            },
+            "options": Object {
+              "id": undefined,
+            },
+          },
+        ]
+      `);
+    });
+
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      createRuleRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+
+      rulesClient.create.mockResolvedValueOnce({ ...mockedAlert, actions: [action, systemAction] });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          body: ruleToCreate,
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.actions).toEqual([
+        {
+          alerts_filter: {
+            query: { dsl: '{"must": {"term": { "name": "test" }}}', filters: [], kql: 'name:test' },
+            timeframe: { days: [1], hours: { end: '17:00', start: '08:00' }, timezone: 'UTC' },
+          },
+          connector_type_id: 'test',
+          group: 'default',
+          id: '2',
+          params: { foo: true },
+          uuid: '123-456',
+        },
+        {
+          connector_type_id: 'test-2',
+          id: 'system_action-id',
+          params: { foo: true },
+          uuid: '123-456',
+        },
+      ]);
+    });
   });
 });
