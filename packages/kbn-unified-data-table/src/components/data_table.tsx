@@ -944,6 +944,7 @@ export const UnifiedDataTable = ({
 
   const { dataGridId, setDataGridWrapper } = useFullScreenWatcher();
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
+  const docTableRef = useRef<HTMLDivElement>(null);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -986,6 +987,7 @@ export const UnifiedDataTable = ({
       <span className="unifiedDataTable__inner">
         <div
           ref={setDataGridWrapper}
+          ref={docTableRef}
           data-test-subj="discoverDocTable"
           data-render-complete={isRenderComplete}
           data-shared-item=""
@@ -998,6 +1000,7 @@ export const UnifiedDataTable = ({
             <CompareDocuments
               id={dataGridId}
               key="comparisonTable"
+              wrapperRef={docTableRef}
               consumer={consumer}
               ariaDescribedBy={randomId}
               ariaLabelledBy={ariaLabelledBy}

@@ -18,7 +18,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import React, { useMemo } from 'react';
+import React, { RefObject, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { GRID_STYLE } from '../../constants';
 import { ComparisonControls } from './comparison_controls';
@@ -28,6 +28,7 @@ import { useComparisonFields } from './hooks/use_comparison_fields';
 import type { DocumentDiffMode } from './types';
 
 export interface CompareDocumentsProps {
+  wrapperRef: RefObject<HTMLElement>;
   consumer: string;
   ariaDescribedBy: string;
   ariaLabelledBy: string;
@@ -45,6 +46,7 @@ export interface CompareDocumentsProps {
 const getStorageKey = (consumer: string, key: string) => `${consumer}:dataGrid${key}`;
 
 const CompareDocuments = ({
+  wrapperRef,
   consumer,
   ariaDescribedBy,
   ariaLabelledBy,
@@ -79,6 +81,7 @@ const CompareDocuments = ({
     showAllFields: Boolean(forceShowAllFields || showAllFields),
   });
   const comparisonColumns = useComparisonColumns({
+    wrapperRef,
     fieldColumnId,
     selectedDocs,
     getDocById,
