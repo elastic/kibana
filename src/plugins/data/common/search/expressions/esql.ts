@@ -227,9 +227,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   .ok({ json: finalResponse });
               },
               error(error) {
-                logInspectorRequest()
-                  .json(params)
-                  .error({ json: error });
+                logInspectorRequest().json(params).error({ json: error });
               },
             })
           );

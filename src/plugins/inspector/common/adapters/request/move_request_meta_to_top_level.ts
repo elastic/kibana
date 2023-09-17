@@ -15,7 +15,7 @@ export function moveRequestMetaToTopLevel(status: RequestStatus, response: Respo
       return response;
     }
 
-    const json = { 
+    const json = {
       ...response.json,
       err: { ...response.json.err },
     };
