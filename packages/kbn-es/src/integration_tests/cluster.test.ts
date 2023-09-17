@@ -21,8 +21,10 @@ import {
   InstallSnapshotOptions,
   InstallSourceOptions,
 } from '../install/types';
+import { Client } from '@elastic/elasticsearch';
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
+expect.addSnapshotSerializer(createAnyInstanceSerializer(Client));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 const log = new ToolingLog();
@@ -372,15 +374,25 @@ describe('#start(installPath)', () => {
     expect(fs.existsSync(writeLogsToPath)).toBe(true);
   });
 
-  test('waits until cluster is ready', async () => {
+  test('calls waitUntilClusterReady() by default', async () => {
     mockEsBin({ start: true });
     waitUntilClusterReadyMock.mockResolvedValue();
 
     await new Cluster({ log }).start(installPath, esClusterExecOptions);
     expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
+    expect(waitUntilClusterReadyMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "client": <Client>,
+          "expectedStatus": "yellow",
+          "log": <ToolingLog>,
+          "readyTimeout": undefined,
+        },
+      ]
+    `);
   });
 
-  test(`skips waiting for cluster is ready if 'skipReadyCheck' is passed`, async () => {
+  test(`doesn't call waitUntilClusterReady() if 'skipReadyCheck' is passed`, async () => {
     mockEsBin({ start: true });
     waitUntilClusterReadyMock.mockResolvedValue();
 
@@ -388,7 +400,7 @@ describe('#start(installPath)', () => {
     expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(0);
   });
 
-  test(`rejects if 'waitUntilClusterReady' rejects`, async () => {
+  test(`rejects if waitUntilClusterReady() rejects`, async () => {
     mockEsBin({ start: true });
     waitUntilClusterReadyMock.mockRejectedValue(new Error('foo'));
     await expect(
@@ -780,18 +792,8 @@ describe('#runServerless()', () => {
       waitForReady: true,
     };
     await cluster.runServerless(serverlessOptions);
-    expect(runServerlessClusterMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        <ToolingLog>,
-        Object {
-          "background": true,
-          "basePath": "${installPath}",
-          "clean": true,
-          "teardown": true,
-          "waitForReady": true,
-        },
-      ]
-    `);
+    expect(runServerlessClusterMock.mock.calls[0][0]).toMatchInlineSnapshot(`<ToolingLog>`);
+    expect(runServerlessClusterMock.mock.calls[0][1]).toBe(serverlessOptions);
   });
 });
 
@@ -840,17 +842,12 @@ describe('#runDocker()', () => {
   });
 
   test('passes through all options+log to #runDockerContainer()', async () => {
+    const options = { dockerCmd: 'start -a es01' };
     runDockerContainerMock.mockResolvedValueOnce();
 
     const cluster = new Cluster({ log });
-    await cluster.runDocker({ dockerCmd: 'start -a es01' });
-    expect(runDockerContainerMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        <ToolingLog>,
-        Object {
-          "dockerCmd": "start -a es01",
-        },
-      ]
-    `);
+    await cluster.runDocker(options);
+    expect(runDockerContainerMock.mock.calls[0][0]).toMatchInlineSnapshot(`<ToolingLog>`);
+    expect(runDockerContainerMock.mock.calls[0][1]).toBe(options);
   });
 });
