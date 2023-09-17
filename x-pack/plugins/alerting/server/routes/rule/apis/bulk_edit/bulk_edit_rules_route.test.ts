@@ -336,5 +336,48 @@ describe('bulkEditRulesRoute', () => {
         },
       ]);
     });
+
+    it('fails if the action contains a type in the request', async () => {
+      const actionToValidate = {
+        group: 'default',
+        id: '2',
+        params: {
+          foo: true,
+        },
+        uuid: '123-456',
+        type: RuleActionTypes.DEFAULT,
+      };
+
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      bulkEditInternalRulesRoute(router, licenseState);
+
+      const [config, _] = router.post.mock.calls[0];
+
+      expect(() =>
+        // @ts-expect-error: body exists
+        config.validate.body.validate({
+          ...bulkEditActionsRequest,
+          operations: [
+            {
+              operation: 'add',
+              field: 'actions',
+              value: [actionToValidate],
+            },
+          ],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[operations.0]: types that failed validation:
+        - [operations.0.0.field]: expected value to equal [tags]
+        - [operations.0.1.value.0.type]: definition for this key is missing
+        - [operations.0.2.operation]: expected value to equal [set]
+        - [operations.0.3.operation]: expected value to equal [set]
+        - [operations.0.4.operation]: expected value to equal [set]
+        - [operations.0.5.operation]: expected value to equal [set]
+        - [operations.0.6.operation]: expected value to equal [delete]
+        - [operations.0.7.operation]: expected value to equal [set]"
+      `);
+    });
   });
 });

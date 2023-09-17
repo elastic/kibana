@@ -6,7 +6,8 @@
  */
 import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { omit } from 'lodash';
-import { RuleActionTypes, RuleDefaultAction } from '../../../common';
+import { AsApiContract } from '.';
+import { RuleActionResponse, RuleActionTypes, RuleDefaultAction } from '../../../common';
 import { isSystemAction } from '../../../common/system_actions/is_system_action';
 import { NormalizedAlertAction } from '../../rules_client';
 import { RuleAction } from '../../types';
@@ -51,7 +52,9 @@ export const rewriteActionsReq = (
   });
 };
 
-export const rewriteActionsRes = (actions?: RuleAction[]) => {
+export const rewriteActionsRes = (
+  actions?: RuleAction[]
+): Array<AsApiContract<RuleActionResponse>> => {
   const rewriteFrequency = ({
     notifyWhen,
     ...rest
@@ -64,11 +67,11 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
 
   return actions.map((action) => {
     if (isSystemAction(action)) {
-      const { actionTypeId, ...restAction } = action;
+      const { actionTypeId, type, ...restAction } = action;
       return { ...restAction, connector_type_id: actionTypeId };
     }
 
-    const { actionTypeId, frequency, alertsFilter, ...restAction } = action;
+    const { actionTypeId, frequency, alertsFilter, type, ...restAction } = action;
 
     return {
       ...restAction,

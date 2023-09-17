@@ -142,6 +142,17 @@ export interface RuleSystemAction {
 
 export type RuleAction = RuleDefaultAction | RuleSystemAction;
 
+/**
+ * TODO: Remove when all http routes and methods
+ * of the rule clients are versioned.
+ *
+ * Actions internally (rules client methods) contains a type (RuleActionTypes).
+ * All APIs strip out the type from the actions. This TS type represents that.
+ */
+export type RuleActionResponse = Omit<RuleDefaultAction, 'type' | 'group'> & {
+  group?: string;
+};
+
 export interface AggregateOptions {
   search?: string;
   defaultSearchOperator?: 'AND' | 'OR';

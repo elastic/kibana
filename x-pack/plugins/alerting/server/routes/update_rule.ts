@@ -11,18 +11,19 @@ import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '..
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
-  RewriteResponseCase,
   handleDisabledApiKeysError,
   rewriteActionsReq,
   rewriteActionsRes,
   actionsSchema,
   rewriteRuleLastRun,
+  AsApiContract,
 } from './lib';
 import {
   RuleTypeParams,
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   validateNotifyWhenType,
+  PartialRuleResponse,
   PartialRule,
 } from '../types';
 
@@ -67,7 +68,7 @@ const rewriteBodyReq = (
   };
 };
 
-const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
+const rewriteBodyRes = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -86,7 +87,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   lastRun,
   nextRun,
   ...rest
-}) => ({
+}: PartialRule<RuleTypeParams>): AsApiContract<PartialRuleResponse<RuleTypeParams>> => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,

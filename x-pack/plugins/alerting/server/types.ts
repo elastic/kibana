@@ -57,6 +57,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
+  RuleActionResponse,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -328,6 +329,18 @@ export interface RuleMeta extends SavedObjectAttributes {
 
 export type PartialRule<Params extends RuleTypeParams = never> = Pick<Rule<Params>, 'id'> &
   Partial<Omit<Rule<Params>, 'id'>>;
+
+/**
+ * TODO: Remove when all http routes and methods
+ * of the rule clients are versioned.
+ *
+ * Actions internally (rules client methods) contains a type (RuleActionTypes).
+ * All APIs strip out the type from the actions. This TS type represents that.
+ */
+export type PartialRuleResponse<Params extends RuleTypeParams = never> = Omit<
+  PartialRule<Params>,
+  'action'
+> & { actions?: RuleActionResponse[] };
 
 export interface RuleWithLegacyId<Params extends RuleTypeParams = never> extends Rule<Params> {
   legacyId: string | null;
