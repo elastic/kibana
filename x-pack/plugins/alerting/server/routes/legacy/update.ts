@@ -20,6 +20,7 @@ import {
   validateNotifyWhenType,
 } from '../../../common';
 import { rewriteActionsReq } from '../lib';
+import { rewriteActionsResLegacy } from '../lib/rewrite_actions';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -84,7 +85,7 @@ export const updateAlertRoute = (
             },
           });
           return res.ok({
-            body: alertRes,
+            body: { ...alertRes, actions: rewriteActionsResLegacy(alertRes.actions) },
           });
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

@@ -20,6 +20,7 @@ import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RouteOptions } from '..';
 import { countUsageOfPredefinedIds, rewriteActionsReq } from '../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { rewriteActionsResLegacy } from '../lib/rewrite_actions';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -90,7 +91,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
           });
 
           return res.ok({
-            body: alertRes,
+            body: { ...alertRes, actions: rewriteActionsResLegacy(alertRes.actions) },
           });
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

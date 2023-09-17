@@ -26,7 +26,7 @@ export const rewriteActionsReq = (
       return {
         id: action.id,
         params: action.params,
-        uuid: action.uuid,
+        ...(action.uuid ? { uuid: action.uuid } : {}),
         type: RuleActionTypes.SYSTEM,
       };
     }
@@ -84,4 +84,12 @@ export const rewriteActionsRes = (
         : {}),
     };
   });
+};
+
+export const rewriteActionsResLegacy = <T extends { type: RuleActionTypes }>(
+  actions?: T[]
+): Array<Omit<T, 'type'>> => {
+  if (!actions) return [];
+
+  return actions.map(({ type, ...restAction }) => restAction);
 };

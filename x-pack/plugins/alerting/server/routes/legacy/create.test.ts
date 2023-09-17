@@ -12,10 +12,12 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
-import { Rule, RuleActionTypes } from '../../../common/rule';
+import { RuleActionTypes } from '../../../common/rule';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
 
@@ -35,7 +37,26 @@ describe('createAlertRoute', () => {
   const createdAt = new Date();
   const updatedAt = new Date();
 
-  const mockedAlert = {
+  const action = {
+    actionTypeId: 'test',
+    group: 'default',
+    id: '2',
+    params: {
+      foo: true,
+    },
+    type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    type: RuleActionTypes.SYSTEM,
+  };
+
+  const createRequest = {
     alertTypeId: '1',
     consumer: 'bar',
     name: 'abc',
@@ -45,7 +66,7 @@ describe('createAlertRoute', () => {
       bar: true,
     },
     throttle: '30s',
-    notifyWhen: 'onActionGroupChange',
+    notifyWhen: 'onActionGroupChange' as const,
     actions: [
       {
         group: 'default',
@@ -53,13 +74,12 @@ describe('createAlertRoute', () => {
         params: {
           foo: true,
         },
-        type: RuleActionTypes.DEFAULT,
       },
     ],
   };
 
-  const createResult: Rule<{ bar: boolean }> = {
-    ...mockedAlert,
+  const createResult = {
+    ...createRequest,
     enabled: true,
     muteAll: false,
     createdBy: '',
@@ -67,21 +87,26 @@ describe('createAlertRoute', () => {
     apiKey: '',
     apiKeyOwner: '',
     mutedInstanceIds: [],
-    notifyWhen: 'onActionGroupChange',
+    notifyWhen: 'onActionGroupChange' as const,
     createdAt,
     updatedAt,
     id: '123',
     actions: [
       {
-        ...mockedAlert.actions[0],
+        ...createRequest.actions[0],
         actionTypeId: 'test',
       },
     ],
     executionStatus: {
-      status: 'unknown',
+      status: 'unknown' as const,
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
     revision: 0,
+  };
+
+  const mockedResponse = {
+    ...createResult,
+    actions: [action],
   };
 
   it('creates an alert with proper parameters', async () => {
@@ -90,6 +115,8 @@ describe('createAlertRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     createAlertRoute({
       router,
@@ -102,12 +129,12 @@ describe('createAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(createResult);
+    rulesClient.create.mockResolvedValueOnce(mockedResponse);
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { rulesClient, actionsClient },
       {
-        body: mockedAlert,
+        body: createRequest,
       },
       ['ok']
     );
@@ -127,6 +154,7 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -166,6 +194,8 @@ describe('createAlertRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     createAlertRoute({
       router,
@@ -178,13 +208,13 @@ describe('createAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.create.mockResolvedValueOnce({ ...mockedResponse, id: 'custom-id' });
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { rulesClient, actionsClient },
       {
         params: { id: 'custom-id' },
-        body: mockedAlert,
+        body: createRequest,
       },
       ['ok']
     );
@@ -204,6 +234,7 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -243,6 +274,8 @@ describe('createAlertRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     createAlertRoute({
       router,
@@ -255,14 +288,14 @@ describe('createAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.create.mockResolvedValueOnce({ ...mockedResponse, id: 'custom-id' });
     rulesClient.getSpaceId.mockReturnValueOnce('default');
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { rulesClient, actionsClient },
       {
         params: { id: 'custom-id' },
-        body: mockedAlert,
+        body: createRequest,
       },
       ['ok']
     );
@@ -282,6 +315,7 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -321,6 +355,8 @@ describe('createAlertRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     createAlertRoute({
       router,
@@ -333,14 +369,14 @@ describe('createAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id?}"`);
 
-    rulesClient.create.mockResolvedValueOnce(expectedResult);
+    rulesClient.create.mockResolvedValueOnce({ ...mockedResponse, id: 'custom-id' });
     rulesClient.getSpaceId.mockReturnValueOnce('another-space');
 
     const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
+      { rulesClient, actionsClient },
       {
         params: { id: 'custom-id' },
-        body: mockedAlert,
+        body: createRequest,
       },
       ['ok']
     );
@@ -360,6 +396,7 @@ describe('createAlertRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
+                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -393,14 +430,22 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     createAlertRoute({ router, licenseState, encryptedSavedObjects });
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(createResult);
+    rulesClient.create.mockResolvedValueOnce(mockedResponse);
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient, actionsClient },
+      {
+        params: { id: 'custom-id' },
+        body: createRequest,
+      }
+    );
 
     await handler(context, req, res);
 
@@ -411,6 +456,8 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -420,9 +467,15 @@ describe('createAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    rulesClient.create.mockResolvedValueOnce(createResult);
+    rulesClient.create.mockResolvedValueOnce(mockedResponse);
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {});
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient, actionsClient },
+      {
+        params: { id: 'custom-id' },
+        body: createRequest,
+      }
+    );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
@@ -433,6 +486,8 @@ describe('createAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     createAlertRoute({ router, licenseState, encryptedSavedObjects });
 
@@ -440,7 +495,14 @@ describe('createAlertRoute', () => {
 
     rulesClient.create.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok', 'forbidden']);
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient, actionsClient },
+      {
+        params: { id: 'custom-id' },
+        body: createRequest,
+      },
+      ['ok', 'forbidden']
+    );
 
     await handler(context, req, res);
 
@@ -453,6 +515,8 @@ describe('createAlertRoute', () => {
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+    const actionsClient = actionsClientMock.create();
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
 
     createAlertRoute({
       router,
@@ -460,9 +524,190 @@ describe('createAlertRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
     });
+
     const [, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, {}, ['ok']);
+
+    rulesClient.create.mockResolvedValueOnce(mockedResponse);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient, actionsClient },
+      {
+        params: { id: 'custom-id' },
+        body: createRequest,
+      },
+      ['ok']
+    );
+
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('create', mockUsageCounter);
+  });
+
+  describe('actions', () => {
+    it('adds the type of the actions correctly before passing the request to the rules client', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      createAlertRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+      rulesClient.create.mockResolvedValueOnce({
+        ...mockedResponse,
+        actions: [action, systemAction],
+      });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          params: {
+            id: '1',
+          },
+          body: { ...createRequest, actions: [omit(action, 'type'), omit(systemAction, 'type')] },
+        },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(rulesClient.create.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "data": Object {
+              "actions": Array [
+                Object {
+                  "group": "default",
+                  "id": "2",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "default",
+                },
+                Object {
+                  "id": "system_action-id",
+                  "params": Object {
+                    "foo": true,
+                  },
+                  "type": "system",
+                },
+              ],
+              "alertTypeId": "1",
+              "consumer": "bar",
+              "name": "abc",
+              "notifyWhen": "onActionGroupChange",
+              "params": Object {
+                "bar": true,
+              },
+              "schedule": Object {
+                "interval": "10s",
+              },
+              "tags": Array [
+                "foo",
+              ],
+              "throttle": "30s",
+            },
+            "options": Object {
+              "id": "1",
+            },
+          },
+        ]
+      `);
+    });
+
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+      const actionsClient = actionsClientMock.create();
+      actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+
+      createAlertRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [_, handler] = router.post.mock.calls[0];
+      rulesClient.create.mockResolvedValueOnce({
+        ...mockedResponse,
+        actions: [action, systemAction],
+      });
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient, actionsClient },
+        {
+          params: {
+            id: '1',
+          },
+          body: { ...createRequest, actions: [omit(action, 'type'), omit(systemAction, 'type')] },
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.actions).toEqual([
+        {
+          actionTypeId: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          actionTypeId: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+        },
+      ]);
+    });
+
+    it('fails if the action contains a type in the request', async () => {
+      const actionToValidate = {
+        group: 'default',
+        id: '2',
+        params: {
+          foo: true,
+        },
+        type: RuleActionTypes.DEFAULT,
+      };
+
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+      createAlertRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [config, _] = router.post.mock.calls[0];
+
+      expect(() =>
+        // @ts-expect-error: body exists
+        config.validate.body.validate({ ...createRequest, actions: [actionToValidate] })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[actions.0.type]: definition for this key is missing"`
+      );
+    });
   });
 });
