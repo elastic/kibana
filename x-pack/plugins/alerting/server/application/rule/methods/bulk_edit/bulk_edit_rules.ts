@@ -250,7 +250,7 @@ export async function bulkEditRules<Params extends RuleParams>(
         references,
         omitGeneratedValues: false,
       },
-      actionsClient.isSystemAction
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
     try {
       ruleDomainSchema.validate(ruleDomain);

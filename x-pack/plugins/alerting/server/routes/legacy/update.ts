@@ -76,7 +76,9 @@ export const updateAlertRoute = (
             id,
             data: {
               name,
-              actions: rewriteActionsReq(actions, actionsClient.isSystemAction),
+              actions: rewriteActionsReq(actions, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              ),
               params,
               schedule,
               tags,

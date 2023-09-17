@@ -144,7 +144,9 @@ export const updateRuleRoute = (
           try {
             const alertRes = await rulesClient.update({
               id,
-              data: rewriteBodyReq(rule, actionsClient.isSystemAction),
+              data: rewriteBodyReq(rule, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              ),
             });
 
             return res.ok({

@@ -84,7 +84,9 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
           const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
             data: {
               ...alert,
-              actions: rewriteActionsReq(alert.actions, actionsClient.isSystemAction),
+              actions: rewriteActionsReq(alert.actions, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              ),
               notifyWhen,
             },
             options: { id: params?.id },

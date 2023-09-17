@@ -51,7 +51,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
               ids,
               operations: transformOperationsV1({
                 operations,
-                isSystemAction: actionsClient.isSystemAction,
+                isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
               }),
             });
 
