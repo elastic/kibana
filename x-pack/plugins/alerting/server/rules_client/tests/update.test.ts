@@ -29,6 +29,7 @@ import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { migrateLegacyActions } from '../lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RuleDomain } from '../../application/rule/types';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -98,8 +99,6 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
-  // @ts-expect-error: read-only property
-  rulesClientParams.isSystemAction = (id: string) => id === 'system_action-id';
 });
 
 setGlobalDate();
@@ -199,6 +198,10 @@ describe('update()', () => {
       resultedActions: [],
       resultedReferences: [],
     });
+
+    actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+    // @ts-expect-error: read-only property
+    rulesClientParams.isSystemAction = (id: string) => id === 'system_action-id';
   });
 
   test('updates given parameters', async () => {
@@ -765,7 +768,7 @@ describe('update()', () => {
     expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(3);
   });
 
-  test('should update a rule with some system actions', async () => {
+  test('should update a rule with default and system actions', async () => {
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       {
@@ -813,17 +816,6 @@ describe('update()', () => {
         isSystemAction: true,
       },
     ]);
-
-    actionsClient.isSystemAction.mockReset();
-    // Needed for validateSystemActions
-    actionsClient.isSystemAction.mockReturnValueOnce(true);
-    /**
-     * Needed for denormalizeActions
-     * The first one is for the default action
-     * and the second one is for the system action
-     */
-    actionsClient.isSystemAction.mockReturnValueOnce(false);
-    actionsClient.isSystemAction.mockReturnValueOnce(true);
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -996,11 +988,133 @@ describe('update()', () => {
     expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
   });
 
-  test('should validate system actions correctly', async () => {
-    actionsClient.isSystemAction.mockReset();
-    // Needed for validateSystemActions
-    actionsClient.isSystemAction.mockReturnValueOnce(false);
+  test('should construct the refs correctly and not persist the type of the action', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {},
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+      {
+        id: 'system_action-id',
+        actionTypeId: 'test-system',
+        config: {},
+        isMissingSecrets: false,
+        name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ]);
 
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            uuid: '123',
+          },
+          {
+            uuid: 'system-action-uuid',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test-system',
+            params: { myNewParam: 'test' },
+            type: RuleActionTypes.SYSTEM,
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+            type: RuleActionTypes.DEFAULT,
+          },
+          {
+            id: 'system_action-id',
+            params: {
+              myNewParam: 'test',
+            },
+            type: RuleActionTypes.SYSTEM,
+            uuid: 'system-action-uuid',
+          },
+        ],
+      },
+    });
+
+    const rule = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
+
+    expect(rule.actions).toEqual([
+      {
+        group: 'default',
+        actionRef: 'action_0',
+        actionTypeId: 'test',
+        params: {
+          foo: true,
+        },
+        uuid: '107',
+      },
+      {
+        actionRef: 'system_action:system_action-id',
+        actionTypeId: 'test-system',
+        params: { myNewParam: 'test' },
+        uuid: 'system-action-uuid',
+      },
+    ]);
+  });
+
+  test('should add the actions type to the response correctly', async () => {
+    actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
       {
         id: '1',
@@ -1031,6 +1145,181 @@ describe('update()', () => {
       },
     ]);
 
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            uuid: '123',
+          },
+          {
+            uuid: 'system-action-uuid',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test-system',
+            params: { myNewParam: 'test' },
+            type: RuleActionTypes.SYSTEM,
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+            type: RuleActionTypes.DEFAULT,
+          },
+          {
+            id: 'system_action-id',
+            params: {
+              myNewParam: 'test',
+            },
+            type: RuleActionTypes.SYSTEM,
+            uuid: 'system-action-uuid',
+          },
+        ],
+      },
+    });
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+            "type": "default",
+            "uuid": "123",
+          },
+          Object {
+            "actionTypeId": "test-system",
+            "id": "system_action-id",
+            "params": Object {
+              "myNewParam": "test",
+            },
+            "type": "system",
+            "uuid": "system-action-uuid",
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "revision": 1,
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
+  });
+
+  test('should throw an error if the system action does not exist', async () => {
+    actionsClient.isSystemAction.mockReset();
+    // Needed for validateSystemActions
+    actionsClient.isSystemAction.mockReturnValueOnce(false);
+
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: 'system_action-id',
+        actionTypeId: 'test-system',
+        config: {},
+        isMissingSecrets: false,
+        name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ]);
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            uuid: 'system-action-uuid',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test-system',
+            params: { myNewParam: 'test' },
+            type: RuleActionTypes.SYSTEM,
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+
     await expect(() =>
       rulesClient.update({
         id: '1',
@@ -1044,14 +1333,6 @@ describe('update()', () => {
           throttle: null,
           notifyWhen: 'onActiveAlert',
           actions: [
-            {
-              group: 'default',
-              id: '1',
-              params: {
-                foo: true,
-              },
-              type: RuleActionTypes.DEFAULT,
-            },
             {
               id: 'system_action-id',
               params: {
@@ -1071,6 +1352,264 @@ describe('update()', () => {
       ids: ['system_action-id'],
       throwIfSystemAction: false,
     });
+  });
+
+  test('should throw an error if the system action contains the frequency', async () => {
+    const action = {
+      id: 'system_action-id',
+      uuid: '123',
+      params: {},
+      actionTypeId: '.test',
+      frequency: {
+        summary: false,
+        notifyWhen: 'onActionGroupChange',
+        throttle: null,
+      },
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    actionsClient.isSystemAction.mockReset();
+    // Needed for validateSystemActions
+    actionsClient.isSystemAction.mockReturnValueOnce(true);
+
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: 'system_action-id',
+        actionTypeId: 'test-system',
+        config: {},
+        isMissingSecrets: false,
+        name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ]);
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            uuid: 'system-action-uuid',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test-system',
+            params: { myNewParam: 'test' },
+            type: RuleActionTypes.SYSTEM,
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+
+    await expect(() =>
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [action],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating update actions: frequency or alertsFilter are not allowed for system actions"`
+    );
+  });
+
+  test('should throw an error if the system action contains the alertsFilter', async () => {
+    const action = {
+      id: 'system_action-id',
+      uuid: '123',
+      params: {},
+      actionTypeId: '.test',
+      alertsFilter: {
+        query: { kql: 'test:1', filters: [] },
+      },
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    actionsClient.isSystemAction.mockReset();
+    // Needed for validateSystemActions
+    actionsClient.isSystemAction.mockReturnValueOnce(true);
+
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: 'system_action-id',
+        actionTypeId: 'test-system',
+        config: {},
+        isMissingSecrets: false,
+        name: 'system action connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: true,
+      },
+    ]);
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            uuid: 'system-action-uuid',
+            actionRef: 'system_action:system_action-id',
+            actionTypeId: 'test-system',
+            params: { myNewParam: 'test' },
+            type: RuleActionTypes.SYSTEM,
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+
+    await expect(() =>
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [action],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating update actions: frequency or alertsFilter are not allowed for system actions"`
+    );
+  });
+
+  test('should throw an error if the default action does not contain the group', async () => {
+    const action = {
+      id: 'action-id-1',
+      params: {},
+      actionTypeId: '.test',
+      type: RuleActionTypes.DEFAULT,
+    };
+
+    actionsClient.isSystemAction.mockReset();
+    // Needed for validateSystemActions
+    actionsClient.isSystemAction.mockReturnValueOnce(false);
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        config: {
+          from: 'me@me.com',
+          hasAuth: false,
+          host: 'hello',
+          port: 22,
+          secure: null,
+          service: null,
+        },
+        isMissingSecrets: false,
+        name: 'email connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+      },
+    ]);
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+            uuid: '123',
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        revision: 1,
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+
+    await expect(() =>
+      rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          // @ts-expect-error: group is undefined
+          actions: [action],
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error validating update actions: group is required for alert actions"`
+    );
   });
 
   test('should call useSavedObjectReferences.extractReferences and useSavedObjectReferences.injectReferences if defined for rule type', async () => {
@@ -1187,7 +1726,7 @@ describe('update()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '108',
+            uuid: '109',
           },
         ],
         alertTypeId: 'myType',
@@ -1373,7 +1912,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "109",
+            "uuid": "110",
           },
         ],
         "alertTypeId": "myType",
@@ -1530,7 +2069,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "110",
+            "uuid": "111",
           },
         ],
         "alertTypeId": "myType",
@@ -2584,7 +3123,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
-            uuid: '145',
+            uuid: '146',
           },
         ],
         alertTypeId: 'myType',
@@ -3148,7 +3687,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '152',
+            uuid: '153',
           },
         ],
         alertTypeId: 'myType',
@@ -3356,7 +3895,7 @@ describe('update()', () => {
             "params": Object {
               "foo": true,
             },
-            "uuid": "153",
+            "uuid": "154",
           },
         ],
         "alertTypeId": "myType",

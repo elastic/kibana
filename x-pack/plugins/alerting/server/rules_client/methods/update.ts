@@ -58,6 +58,13 @@ export async function update<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { id, data, allowMissingConnectorSecrets, shouldIncrementRevision }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
+  /**
+   * TODO: Remove when the update method is versioned.
+   * Use a schema instead.
+   */
+
+  validateActionsSchema(data.actions);
+
   return await retryIfConflicts(
     context.logger,
     `rulesClient.update('${id}')`,
@@ -323,3 +330,32 @@ async function updateAlert<Params extends RuleTypeParams>(
     true
   );
 }
+
+/**
+ * TODO: Remove when the update method is versioned.
+ * Use a schema instead.
+ */
+const validateActionsSchema = (actions?: UpdateOptions<{}>['data']['actions']) => {
+  try {
+    if (actions == null || actions.length === 0) {
+      return;
+    }
+
+    for (const action of actions) {
+      if (action.type === RuleActionTypes.SYSTEM) {
+        // @ts-expect-error: properties are not part of system actions
+        if (action.frequency || action.alertsFilter) {
+          throw new Error('frequency or alertsFilter are not allowed for system actions');
+        }
+      }
+
+      if (action.type === RuleActionTypes.DEFAULT) {
+        if (action.group == null) {
+          throw new Error('group is required for alert actions');
+        }
+      }
+    }
+  } catch (error) {
+    throw Boom.badRequest(`Error validating update actions: ${error.message}`);
+  }
+};
