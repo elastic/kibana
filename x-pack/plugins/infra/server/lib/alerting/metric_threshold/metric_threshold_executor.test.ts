@@ -18,6 +18,7 @@ import {
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { createLifecycleRuleExecutorMock } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_rule_executor_mock';
+import { MetricsDataClient } from '@kbn/metrics-data-access-plugin/server';
 import {
   Aggregators,
   Comparator,
@@ -1908,6 +1909,9 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
 const mockLibs: any = {
   sources: new InfraSources({
     config: createMockStaticConfiguration({}),
+    metricsClient: {
+      getMetricIndices: jest.fn().mockResolvedValue('metrics-*,metricbeat-*'),
+    } as unknown as MetricsDataClient,
   }),
   configuration: createMockStaticConfiguration({}),
   metricsRules: {

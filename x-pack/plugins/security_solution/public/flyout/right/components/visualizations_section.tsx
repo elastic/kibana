@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
 import { ExpandableSection } from './expandable_section';
 import { VISUALIZATIONS_SECTION_TEST_ID } from './test_ids';
-import { VISUALIZATIONS_TITLE } from './translations';
 
 export interface VisualizationsSectionProps {
   /**
@@ -29,7 +29,12 @@ export const VisualizationsSection: React.FC<VisualizationsSectionProps> = ({
   return (
     <ExpandableSection
       expanded={expanded}
-      title={VISUALIZATIONS_TITLE}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.visualizations.sectionTitle"
+          defaultMessage="Visualizations"
+        />
+      }
       data-test-subj={VISUALIZATIONS_SECTION_TEST_ID}
     >
       <SessionPreviewContainer />

@@ -88,12 +88,16 @@ describe('<RulePreview />', () => {
 
     expect(getByTestId(RULE_PREVIEW_BODY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_ABOUT_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_PREVIEW_ABOUT_HEADER_TEST_ID)).toHaveTextContent('About');
     expect(getByTestId(RULE_PREVIEW_ABOUT_CONTENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_PREVIEW_DEFINITION_HEADER_TEST_ID)).toHaveTextContent('Definition');
     expect(getByTestId(RULE_PREVIEW_DEFINITION_CONTENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_PREVIEW_SCHEDULE_HEADER_TEST_ID)).toHaveTextContent('Schedule');
     expect(getByTestId(RULE_PREVIEW_SCHEDULE_CONTENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_PREVIEW_ACTIONS_HEADER_TEST_ID)).toHaveTextContent('Actions');
     expect(getByTestId(RULE_PREVIEW_ACTIONS_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
