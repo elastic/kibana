@@ -10,24 +10,16 @@ import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { parseDateRange } from '../../../utils/datemath';
-import { toTimestampRange } from '../utils';
+import { getDefaultDateRange, toTimestampRange } from '../utils';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
 
 export interface UseDateRangeProviderProps {
-  initialDateRange: TimeRange;
+  initialDateRange?: TimeRange;
 }
 
-const DEFAULT_FROM_IN_MILLISECONDS = 15 * 60000;
-const getDefaultDateRange = () => {
-  const now = Date.now();
-
-  return {
-    from: new Date(now - DEFAULT_FROM_IN_MILLISECONDS).toISOString(),
-    to: new Date(now).toISOString(),
-  };
-};
-
-export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderProps) {
+export function useDateRangeProvider({
+  initialDateRange = getDefaultDateRange(),
+}: UseDateRangeProviderProps) {
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const dateRange: TimeRange = urlState?.dateRange ?? initialDateRange;
   const [parsedDateRange, setParsedDateRange] = useState(parseDateRange(dateRange));
@@ -36,7 +28,7 @@ export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderP
   useEffectOnce(() => {
     const { from, to } = getParsedDateRange();
 
-    // forces the date picker to initiallize with absolute dates.
+    // forces the date picker to initialize with absolute dates.
     setUrlState({ dateRange: { from, to } });
   });
 
@@ -56,9 +48,10 @@ export function useDateRangeProvider({ initialDateRange }: UseDateRangeProviderP
     return { from, to };
   }, [parsedDateRange]);
 
-  const getDateRangeInTimestamp = useCallback(() => {
-    return toTimestampRange(getParsedDateRange());
-  }, [getParsedDateRange]);
+  const getDateRangeInTimestamp = useCallback(
+    () => toTimestampRange(getParsedDateRange()),
+    [getParsedDateRange]
+  );
 
   return {
     dateRange,
