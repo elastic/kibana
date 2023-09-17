@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { RuleActionTypes } from '../../../../../../common';
 import { rRuleRequestSchema } from '../../../../r_rule/schemas';
-import { notifyWhenSchema } from '../../../schemas';
+import { notifyWhenSchema, actionAlertsFilterSchema } from '../../../schemas';
 import { validateDuration } from '../../../validation';
 import { validateSnoozeSchedule } from '../validation';
 
@@ -39,6 +39,7 @@ const bulkEditDefaultActionSchema = schema.object({
       notifyWhen: notifyWhenSchema,
     })
   ),
+  alertsFilter: schema.maybe(actionAlertsFilterSchema),
   type: schema.literal(RuleActionTypes.DEFAULT),
 });
 

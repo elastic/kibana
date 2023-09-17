@@ -80,6 +80,7 @@ import {
   transformRuleDomainToRule,
 } from '../../transforms';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { bulkEditOperationsSchema } from './schemas';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -117,6 +118,12 @@ export async function bulkEditRules<Params extends RuleParams>(
   context: RulesClientContext,
   options: BulkEditOptions<Params>
 ): Promise<BulkEditResult<Params>> {
+  try {
+    bulkEditOperationsSchema.validate(options.operations);
+  } catch (error) {
+    throw Boom.badRequest(`Error validating bulk edit rules operations - ${error.message}`);
+  }
+
   const queryFilter = (options as BulkEditOptionsFilter<Params>).filter;
   const ids = (options as BulkEditOptionsIds<Params>).ids;
   const actionsClient = await context.getActionsClient();
@@ -448,7 +455,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     }
 
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
-    const actionsClient = await context.getActionsClient();
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
@@ -474,7 +480,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         ruleType: context.ruleTypeRegistry.get(rule.attributes.alertTypeId),
         references: rule.references,
       },
-      actionsClient.isSystemAction
+      context.isSystemAction
     );
 
     const {
