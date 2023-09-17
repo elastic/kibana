@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
 
 export interface UseComparisonColumnsProps {
-  fieldsColumnId: string;
+  fieldColumnId: string;
   selectedDocs: string[];
   getDocById: (docId: string) => DataTableRecord | undefined;
   setSelectedDocs: (selectedDocs: string[]) => void;
@@ -23,14 +23,14 @@ const fieldColumnName = i18n.translate('unifiedDataTable.fieldColumnTitle', {
 });
 
 export const useComparisonColumns = ({
-  fieldsColumnId,
+  fieldColumnId,
   selectedDocs,
   getDocById,
   setSelectedDocs,
 }: UseComparisonColumnsProps) => {
   const comparisonColumns: EuiDataGridColumn[] = useMemo(() => {
     const fieldsColumn: EuiDataGridColumn = {
-      id: fieldsColumnId,
+      id: fieldColumnId,
       displayAsText: fieldColumnName,
       isSortable: false,
       actions: false,
@@ -99,7 +99,7 @@ export const useComparisonColumns = ({
     });
 
     return currentColumns;
-  }, [fieldsColumnId, getDocById, selectedDocs, setSelectedDocs]);
+  }, [fieldColumnId, getDocById, selectedDocs, setSelectedDocs]);
 
   return comparisonColumns;
 };
