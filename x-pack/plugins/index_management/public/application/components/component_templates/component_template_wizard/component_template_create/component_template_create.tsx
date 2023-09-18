@@ -55,19 +55,31 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
     setSaveError(null);
   };
 
+  const isCloning = Boolean(sourceComponentTemplate);
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateCreate);
-  }, []);
+    if (isCloning) {
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateClone);
+    } else {
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateCreate);
+    }
+  }, [isCloning]);
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.createComponentTemplate.pageTitle"
-              defaultMessage="Create component template"
-            />
+            {isCloning ? (
+              <FormattedMessage
+                id="xpack.idxMgmt.cloneComponentTemplate.pageTitle"
+                defaultMessage="Clone component template"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.idxMgmt.createComponentTemplate.pageTitle"
+                defaultMessage="Create component template"
+              />
+            )}
           </span>
         }
         bottomBorder

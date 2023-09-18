@@ -10,7 +10,6 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { PageLoading, attemptToURIDecode } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { ComponentTemplateCreate } from '../component_template_create';
@@ -22,10 +21,6 @@ export interface Params {
 export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
   const { sourceComponentTemplateName } = props.match.params;
   const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName)!;
-
-  useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateClone);
-  }, []);
 
   const { toasts, api } = useComponentTemplatesContext();
 
