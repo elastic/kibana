@@ -173,7 +173,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             schedule: { interval },
           } = completeRule.ruleConfig;
 
-          const refresh = isPreview ? false : actions.length ? 'wait_for' : true;
+          const refresh = actions.length ? 'wait_for' : false;
 
           ruleExecutionLogger.debug('[+] Starting Signal Rule execution');
           ruleExecutionLogger.debug(`interval: ${interval}`);
