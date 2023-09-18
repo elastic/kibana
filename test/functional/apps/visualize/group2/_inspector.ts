@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await inspector.open();
         await inspector.openInspectorRequestsView();
-        const { body } =  await inspector.getRequest(1);
+        const { body } = await inspector.getRequest(1);
         expect(body.aggs['2'].max).property('missing', 10);
       });
 

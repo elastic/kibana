@@ -299,7 +299,9 @@ export class InspectorService extends FtrService {
     return this.testSubjects.find('inspectorRequestDetailResponse');
   }
 
-  public async getRequest(codeEditorIndex: number = 0): Promise<{ command: string, body: Record<string, any> }> {
+  public async getRequest(
+    codeEditorIndex: number = 0
+  ): Promise<{ command: string; body: Record<string, any> }> {
     await (await this.getOpenRequestDetailRequestButton()).click();
 
     await this.monacoEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
