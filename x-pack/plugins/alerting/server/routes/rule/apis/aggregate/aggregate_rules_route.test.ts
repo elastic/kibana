@@ -5,74 +5,145 @@
  * 2.0.
  */
 
-import { aggregateAlertRoute } from './aggregate';
+import { aggregateRulesRoute } from './aggregate_rules_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../lib/license_state.mock';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { mockHandlerArguments } from '../_mock_handler_arguments';
-import { rulesClientMock } from '../../rules_client.mock';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
-import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+import { licenseStateMock } from '../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../rules_client.mock';
+import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-jest.mock('../../lib/track_legacy_route_usage', () => ({
-  trackLegacyRouteUsage: jest.fn(),
-}));
-
-jest.mock('../../lib/license_api_access', () => ({
+jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('../lib/track_legacy_terminology', () => ({
+jest.mock('../../../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
-
-jest.mock('../../../common', () => ({
-  ...jest.requireActual('../../../common'),
-  formatDefaultAggregationResult: jest.fn(),
-}));
-
-const { formatDefaultAggregationResult } = jest.requireMock('../../../common');
 
 beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('aggregateAlertRoute', () => {
-  it('aggregate alerts with proper parameters', async () => {
+const aggregateResult = {
+  status: {
+    buckets: [
+      {
+        key: 'ok',
+        doc_count: 15,
+      },
+      {
+        key: 'error',
+        doc_count: 2,
+      },
+      {
+        key: 'active',
+        doc_count: 23,
+      },
+      {
+        key: 'pending',
+        doc_count: 1,
+      },
+      {
+        key: 'unknown',
+        doc_count: 0,
+      },
+      {
+        key: 'warning',
+        doc_count: 10,
+      },
+    ],
+  },
+  outcome: {
+    buckets: [
+      {
+        key: 'succeeded',
+        doc_count: 2,
+      },
+      {
+        key: 'failed',
+        doc_count: 4,
+      },
+      {
+        key: 'warning',
+        doc_count: 6,
+      },
+    ],
+  },
+  enabled: {
+    buckets: [
+      {
+        key: 0,
+        key_as_string: '0',
+        doc_count: 2,
+      },
+      {
+        key: 1,
+        key_as_string: '1',
+        doc_count: 28,
+      },
+    ],
+  },
+  muted: {
+    buckets: [
+      {
+        key: 0,
+        key_as_string: '0',
+        doc_count: 27,
+      },
+      {
+        key: 1,
+        key_as_string: '1',
+        doc_count: 3,
+      },
+    ],
+  },
+  snoozed: {
+    doc_count: 0,
+    count: {
+      doc_count: 0,
+    },
+  },
+  tags: {
+    buckets: [
+      {
+        key: 'a',
+        doc_count: 10,
+      },
+      {
+        key: 'b',
+        doc_count: 20,
+      },
+      {
+        key: 'c',
+        doc_count: 30,
+      },
+    ],
+  },
+};
+
+describe('aggregateRulesRoute', () => {
+  it('aggregate rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    aggregateAlertRoute(router, licenseState);
+    aggregateRulesRoute(router, licenseState);
 
-    const [config, handler] = router.get.mock.calls[0];
+    const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_aggregate"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/_aggregate"`);
 
-    const aggregateResult = {
-      ruleExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
-      },
-      ruleLastRunOutcome: {
-        succeeded: 1,
-        failed: 2,
-        warning: 3,
-      },
-    };
-    formatDefaultAggregationResult.mockReturnValueOnce(aggregateResult);
+    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
-        query: {
+        body: {
           default_search_operator: 'AND',
         },
       },
@@ -82,18 +153,35 @@ describe('aggregateAlertRoute', () => {
     expect(await handler(context, req, res)).toMatchInlineSnapshot(`
       Object {
         "body": Object {
-          "alertExecutionStatus": Object {
+          "rule_enabled_status": Object {
+            "disabled": 2,
+            "enabled": 28,
+          },
+          "rule_execution_status": Object {
             "active": 23,
             "error": 2,
             "ok": 15,
             "pending": 1,
             "unknown": 0,
+            "warning": 10,
           },
-          "ruleLastRunOutcome": Object {
-            "failed": 2,
-            "succeeded": 1,
-            "warning": 3,
+          "rule_last_run_outcome": Object {
+            "failed": 4,
+            "succeeded": 2,
+            "warning": 6,
           },
+          "rule_muted_status": Object {
+            "muted": 3,
+            "unmuted": 27,
+          },
+          "rule_snoozed_status": Object {
+            "snoozed": 0,
+          },
+          "rule_tags": Array [
+            "a",
+            "b",
+            "c",
+          ],
         },
       }
     `);
@@ -156,39 +244,49 @@ describe('aggregateAlertRoute', () => {
 
     expect(res.ok).toHaveBeenCalledWith({
       body: {
-        ruleLastRunOutcome: aggregateResult.ruleLastRunOutcome,
-        alertExecutionStatus: aggregateResult.ruleExecutionStatus,
+        rule_enabled_status: {
+          disabled: 2,
+          enabled: 28,
+        },
+        rule_execution_status: {
+          ok: 15,
+          error: 2,
+          active: 23,
+          pending: 1,
+          unknown: 0,
+          warning: 10,
+        },
+        rule_last_run_outcome: {
+          failed: 4,
+          succeeded: 2,
+          warning: 6,
+        },
+        rule_muted_status: {
+          muted: 3,
+          unmuted: 27,
+        },
+        rule_snoozed_status: {
+          snoozed: 0,
+        },
+        rule_tags: ['a', 'b', 'c'],
       },
     });
   });
 
-  it('ensures the license allows aggregating alerts', async () => {
+  it('ensures the license allows aggregating rules', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    aggregateAlertRoute(router, licenseState);
+    aggregateRulesRoute(router, licenseState);
 
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
 
-    formatDefaultAggregationResult.mockReturnValueOnce({
-      ruleExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
-      },
-      ruleLastRunOutcome: {
-        succeeded: 1,
-        failed: 2,
-        warning: 3,
-      },
-    });
+    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
-        query: {
+        body: {
           default_search_operator: 'OR',
         },
       }
@@ -199,7 +297,7 @@ describe('aggregateAlertRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  it('ensures the license check prevents aggregating alerts', async () => {
+  it('ensures the license check prevents aggregating rules', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
@@ -207,14 +305,14 @@ describe('aggregateAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    aggregateAlertRoute(router, licenseState);
+    aggregateRulesRoute(router, licenseState);
 
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
 
     const [context, req, res] = mockHandlerArguments(
       {},
       {
-        query: {},
+        body: {},
       },
       ['ok']
     );
@@ -223,68 +321,20 @@ describe('aggregateAlertRoute', () => {
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
 
-  it('should track every call', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    aggregateAlertRoute(router, licenseState, mockUsageCounter);
-
-    formatDefaultAggregationResult.mockReturnValueOnce({
-      ruleExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
-      },
-      ruleLastRunOutcome: {
-        succeeded: 1,
-        failed: 2,
-        warning: 3,
-      },
-    });
-
-    const [, handler] = router.get.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        query: {
-          default_search_operator: 'AND',
-        },
-      },
-      ['ok']
-    );
-    await handler(context, req, res);
-    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('aggregate', mockUsageCounter);
-  });
-
   it('should track calls with deprecated param values', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    aggregateAlertRoute(router, licenseState, mockUsageCounter);
+    aggregateRulesRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.post.mock.calls[0];
 
-    formatDefaultAggregationResult.mockReturnValueOnce({
-      ruleExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
-      },
-      ruleLastRunOutcome: {
-        succeeded: 1,
-        failed: 2,
-        warning: 3,
-      },
-    });
+    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
-    const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
         params: {},
-        query: {
+        body: {
           search_fields: ['alertTypeId:1', 'message:foo'],
           search: 'alertTypeId:2',
         },
