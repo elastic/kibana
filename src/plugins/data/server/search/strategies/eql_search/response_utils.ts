@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { EqlSearchResponse } from './types';
 import { EqlSearchStrategyResponse } from '../../../../common';
@@ -16,7 +17,7 @@ import { EqlSearchStrategyResponse } from '../../../../common';
  */
 export function toEqlKibanaSearchResponse(
   response: TransportResult<EqlSearchResponse>,
-  requestParams?: RequestMeta
+  requestParams?: ConnectionRequestParams
 ): EqlSearchStrategyResponse {
   return {
     id: response.body.id,

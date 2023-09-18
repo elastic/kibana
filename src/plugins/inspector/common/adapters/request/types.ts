@@ -54,6 +54,7 @@ export interface RequestStatistic {
 }
 
 export interface Response {
+  // TODO replace object with IKibanaSearchResponse once IKibanaSearchResponse is seperated from data plugin.
   json?: object;
   requestParams?: ConnectionRequestParams;
   time?: number;

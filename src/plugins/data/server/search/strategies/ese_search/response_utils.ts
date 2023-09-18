@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import type { AsyncSearchResponse } from './types';
 import { getTotalLoaded } from '../es_search';
 
@@ -15,7 +16,7 @@ import { getTotalLoaded } from '../es_search';
 export function toAsyncKibanaSearchResponse(
   response: AsyncSearchResponse,
   warning?: string,
-  requestParams?: RequestMeta
+  requestParams?: ConnectionRequestParams
 ) {
   return {
     id: response.id,

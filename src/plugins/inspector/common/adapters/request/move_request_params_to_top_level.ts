@@ -6,18 +6,33 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { RequestStatus, Response } from './types';
+
+interface ErrorResponse {
+  [key: string]: unknown;
+  err?: {
+    [key: string]: unknown;
+    requestParams?: ConnectionRequestParams;
+  }
+};
+
+// TODO replace IKibanaSearchResponse when its seperated from data plugin
+interface OkResponse {
+  [key: string]: unknown;
+  requestParams?: ConnectionRequestParams;
+}
 
 export function moveRequestParamsToTopLevel(status: RequestStatus, response: Response) {
   if (status === RequestStatus.ERROR) {
-    const requestParams = response.json?.err?.requestParams;
+    const requestParams = (response.json as ErrorResponse)?.err?.requestParams;
     if (!requestParams) {
       return response;
     }
 
     const json = {
       ...response.json,
-      err: { ...response.json.err },
+      err: { ...(response.json as ErrorResponse).err },
     };
     delete json.err.requestParams;
     return {
@@ -27,12 +42,12 @@ export function moveRequestParamsToTopLevel(status: RequestStatus, response: Res
     };
   }
 
-  const requestParams = response.json?.requestParams;
+  const requestParams = (response.json as OkResponse)?.requestParams;
   if (!requestParams) {
     return response;
   }
 
-  const json = { ...response.json };
+  const json = { ...response.json } as OkResponse;
   delete json.requestParams;
   return {
     ...response,

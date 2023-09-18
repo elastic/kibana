@@ -29,6 +29,7 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
@@ -310,7 +311,7 @@ export class SearchInterceptor {
     //
     // First request contains useful request params for tools like Inspector.
     // Preserve and project first request params into responses.
-    let firstRequestParams;
+    let firstRequestParams: ConnectionRequestParams;
 
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
