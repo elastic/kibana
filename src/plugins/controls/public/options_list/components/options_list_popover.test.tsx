@@ -13,16 +13,15 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 
+import { pluginServices } from '../../services';
 import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
 import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
-import { OptionsListPopover } from './options_list_popover';
-import { pluginServices } from '../../services';
+import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
 
 describe('Options list popover', () => {
   const defaultProps = {
-    width: 500,
     isLoading: false,
     updateSearchString: jest.fn(),
     loadMoreSuggestions: jest.fn(),
@@ -32,6 +31,7 @@ describe('Options list popover', () => {
     componentState: Partial<OptionsListComponentState>;
     explicitInput: Partial<OptionsListEmbeddableInput>;
     output: Partial<ControlOutput>;
+    popoverProps: Partial<OptionsListPopoverProps>;
   }
 
   async function mountComponent(options?: Partial<MountOptions>) {
