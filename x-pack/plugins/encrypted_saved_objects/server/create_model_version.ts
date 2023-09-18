@@ -24,6 +24,19 @@ export interface CreateEsoModelVersionFnOpts {
   outputType?: EncryptedSavedObjectTypeRegistration;
 }
 
+// This function is designed to wrap a Model Version implementation of an Encrypted Saved Object (a Saved Object
+// who's type is registered with the Encrypted Saved Object Plugin). The purpose of this wrapper is to ensure that
+// version changes to the ESO what would require re-encryption (e.g.changes to encrypted fields or fields excluded
+// from AAD) are performed correctly. Prior to Model Versions, the CreateEncryptedSavedObjectsMigrationFn handled
+// wrapping migration functions for the same purpose.
+//
+// For Model Versions, 'unsafe_transform' changes are leveraged to implement any changes that require re-encryption.
+// This funtion returns a Model Version where the 'unsafe_transform' changes are merged into a single transform where
+// the document being transformed is first decrypted via the inputType EncryptedSavedObjectTypeRegistration (or by
+// default, the EncryptedSavedObjectTypeRegistration registered with the ESO Plugin), then transformed based on the
+// 'unsafe_transform' changes defined in the the input Model Versions, and finally encrypred via the outputType
+// EncryptedSavedObjectTypeRegistration (or by default, the EncryptedSavedObjectTypeRegistration registered with the
+// ESO Plugin). The implementation for this can be found in getCreateEsoModelVersion below.
 export type CreateEsoModelVersionFn = (
   opts: CreateEsoModelVersionFnOpts
 ) => SavedObjectsModelVersion;
@@ -34,19 +47,22 @@ export const getCreateEsoModelVersion =
     instantiateServiceWithLegacyType: (
       typeRegistration: EncryptedSavedObjectTypeRegistration
     ) => EncryptedSavedObjectsService
-  ): CreateEsoModelVersionFn =>
-  (opts) => {
-    const { modelVersion, shouldTransformIfDecryptionFails, inputType, outputType } = opts;
+  ): CreateEsoModelVersionFn => ({ modelVersion, shouldTransformIfDecryptionFails, inputType, outputType }) => {
 
-    // If there are no unsafe changes, then there is nothing for us to do but return the model version
-    const incommingUnsafeChanges = modelVersion.changes.filter(
+    // If there are no unsafe changes, then there is no reason to create an Encrypted Saved Objects Model Version
+    // Throw an error to notify the developer
+    const incomingUnsafeChanges = modelVersion.changes.filter(
       (change) => change.type === 'unsafe_transform'
     ) as SavedObjectsModelUnsafeTransformChange[];
-    if (!incommingUnsafeChanges || incommingUnsafeChanges.length === 0) return modelVersion;
+    if (incomingUnsafeChanges.length === 0) {
+      throw new Error(
+        `No unsafe transform changes defined. At least one unsafe transform change is required to create an Encrypted Saved Objects Model Version.`
+      );
+    }
 
     if (inputType && outputType && inputType.type !== outputType.type) {
       throw new Error(
-        `An Invalid Encrypted Saved Objects Model Version Transformation is trying to transform across types ("${inputType.type}" => "${outputType.type}"), which isn't permitted`
+        `An invalid Encrypted Saved Objects Model Version transformation is trying to transform across types ("${inputType.type}" => "${outputType.type}"), which isn't permitted`
       );
     }
 
@@ -62,14 +78,13 @@ export const getCreateEsoModelVersion =
       inputService,
       transformedService,
       shouldTransformIfDecryptionFails,
-      incommingUnsafeChanges.map((change) => change.transformFn)
+      incomingUnsafeChanges.map((change) => change.transformFn)
     );
 
     // ToDo: not sure of what the order should be here. I opted to place the merged unsafe transform at the beginning
-    const changes = [
-      { type: 'unsafe_transform', transformFn } as SavedObjectsModelUnsafeTransformChange,
-    ] as SavedObjectsModelChange[];
-    changes.push(...modelVersion.changes.filter((change) => change.type !== 'unsafe_transform'));
+    const changes : SavedObjectsModelChange[] = [
+      { type: 'unsafe_transform', transformFn }, ...modelVersion.changes.filter((change) => change.type !== 'unsafe_transform'),
+    ];
 
     return { ...modelVersion, changes };
   };
@@ -81,9 +96,10 @@ function createMergedUnsafeTransformFn(
   unsafeTransforms: SavedObjectModelUnsafeTransformFn[]
 ): SavedObjectModelUnsafeTransformFn {
   // merge all transforms
-  const mergedUnsafetransform = mergeTransformFunctions(unsafeTransforms);
+  const mergedUnsafeTransform = mergeTransformFunctions(unsafeTransforms);
 
   return (document, context) => {
+    context.modelVersion
     const { type, id, originId } = document;
     const descriptorNamespace = document.namespace ?? undefined; // ToDo: this may not be enough to account for agnostic types, see https://github.com/elastic/kibana/issues/161002#issuecomment-1712249597
     const encryptionDescriptor = { id, type, namespace: descriptorNamespace };
@@ -117,11 +133,11 @@ function createMergedUnsafeTransformFn(
     });
 
     // call merged transforms
-    const result = mergedUnsafetransform(documentToTransform, context);
+    const result = mergedUnsafeTransform(documentToTransform, context);
 
     // encrypt
     const transformedDoc = mapAttributes(
-      /* <MigratedAttributes>*/ result.document,
+      result.document,
       (transformedAttributes) => {
         return transformedService.encryptAttributesSync<any>(
           encryptionDescriptor,
@@ -130,8 +146,8 @@ function createMergedUnsafeTransformFn(
       }
     );
 
-    // return encryted doc
-    return { document: transformedDoc };
+    // return encrypted doc
+    return { ...result, document: transformedDoc };
   };
 }
 

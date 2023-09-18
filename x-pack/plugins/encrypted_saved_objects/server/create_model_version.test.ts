@@ -14,11 +14,11 @@ import type { EncryptedSavedObjectTypeRegistration } from './crypto';
 import { EncryptionError, EncryptionErrorOperation } from './crypto';
 import { encryptedSavedObjectsServiceMock } from './crypto/index.mock';
 
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('create ESO model version', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const inputType: EncryptedSavedObjectTypeRegistration = {
     type: 'known-type-1',
     attributesToEncrypt: new Set(['firstAttr']),
@@ -56,7 +56,7 @@ describe('create ESO model version', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"An Invalid Encrypted Saved Objects Model Version Transformation is trying to transform across types (\\"known-type-1\\" => \\"known-type-2\\"), which isn't permitted"`
+      `"An invalid Encrypted Saved Objects Model Version transformation is trying to transform across types (\\"known-type-1\\" => \\"known-type-2\\"), which isn't permitted"`
     );
   });
 
@@ -128,18 +128,20 @@ describe('create ESO model version', () => {
       context
     );
 
-    expect(result.document).toEqual({
-      id: '123',
-      type: 'known-type-1',
-      namespace: 'namespace',
-      new_prop_1: 'new prop 1',
-      new_prop_2: 'new prop 2',
-      attributes: {
-        firstAttr: 'first_attr',
-        one: '1',
-        two: '2',
-        three: '3',
-        four: '4',
+    expect(result).toEqual({
+      document: {
+        id: '123',
+        type: 'known-type-1',
+        namespace: 'namespace',
+        new_prop_1: 'new prop 1',
+        new_prop_2: 'new prop 2',
+        attributes: {
+          firstAttr: 'first_attr',
+          one: '1',
+          two: '2',
+          three: '3',
+          four: '4',
+        },
       },
     });
   });
@@ -209,7 +211,7 @@ describe('create ESO model version', () => {
       );
     });
 
-    it('throws error on decryption failure if shouldTranformIfDecryptionFails is false', () => {
+    it('throws error on decryption failure if shouldTransformIfDecryptionFails is false', () => {
       const instantiateServiceWithLegacyType = jest.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
@@ -469,7 +471,7 @@ describe('create ESO model version', () => {
       expect(encryptionSavedObjectService.encryptAttributesSync).not.toHaveBeenCalled();
     });
 
-    it('throws error on tranform failure even if shouldMigrateIfDecryptionFails is true', () => {
+    it('throws error on transform failure even if shouldMigrateIfDecryptionFails is true', () => {
       const instantiateServiceWithLegacyType = jest.fn(() =>
         encryptedSavedObjectsServiceMock.create()
       );
@@ -803,13 +805,15 @@ describe('create ESO model version', () => {
         context
       );
 
-      expect(result.document).toMatchObject({
-        id: '123',
-        type: 'known-type-1',
-        namespace: 'namespace',
-        attributes: {
-          firstAttr: '#####',
-          encryptedAttr: `#####`,
+      expect(result).toMatchObject({
+        document: {
+          id: '123',
+          type: 'known-type-1',
+          namespace: 'namespace',
+          attributes: {
+            firstAttr: '#####',
+            encryptedAttr: `#####`,
+          },
         },
       });
 
