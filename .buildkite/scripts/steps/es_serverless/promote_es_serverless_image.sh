@@ -49,7 +49,7 @@ if [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-f
   "elasticsearch_serverless_commit": "TODO: this currently can't be decided",
   "elasticsearch_commit": "$ELASTIC_COMMIT_HASH",
   "created_at": "`date`",
-  "timestamp": "`NODE_DISABLE_COLORS=1 node -p 'Date.now()'`"
+  "timestamp": "`FORCE_COLOR=0 node -p 'Date.now()'`"
 }
 EOT
 
@@ -66,10 +66,10 @@ fi
 
 echo "--- Annotating build with info"
 cat << EOT | buildkite-agent annotate --style "success"
-  <h2>Promotion successful!</h2><br/>
-  New image: $TARGET_IMAGE<br/>
-  Source image: $SOURCE_IMAGE<br/>
-  Kibana commit: <a href="https://github.com/elastic/kibana/commit/$BUILDKITE_COMMIT">$BUILDKITE_COMMIT</a><br/>
-  Elasticsearch commit: <a href="https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH">$ELASTIC_COMMIT_HASH</a></br>
-  Manifest file: $MANIFEST_UPLOAD_PATH
+  <h2>Promotion successful!</h2>
+  <br/>New image: $TARGET_IMAGE
+  <br/>Source image: $SOURCE_IMAGE
+  <br/>Kibana commit: <a href="https://github.com/elastic/kibana/commit/$BUILDKITE_COMMIT">$BUILDKITE_COMMIT</a>
+  <br/>Elasticsearch commit: <a href="https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH">$ELASTIC_COMMIT_HASH</a>
+  <br/>Manifest file: $MANIFEST_UPLOAD_PATH
 EOT
