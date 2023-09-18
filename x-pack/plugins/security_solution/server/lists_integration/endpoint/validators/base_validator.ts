@@ -79,7 +79,6 @@ export class BaseValidator {
   protected async validateHasEndpointExceptionsPrivileges(
     privilege: keyof EndpointAuthz
   ): Promise<void> {
-
     if (!(await this.endpointAuthzPromise)[privilege]) {
       throw new EndpointExceptionsValidationError('Endpoint exceptions authorization failure', 403);
     }
