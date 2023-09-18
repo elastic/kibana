@@ -6,9 +6,14 @@
  */
 
 import { pick } from 'lodash';
+import {
+  getConsoleHelpPanelResponseActionTestSubj,
+  openConsoleHelpPanel,
+} from '../../../screens/responder';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/policy_details';
 import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 import type { ServerlessRoleName } from '../../../../../../../../test_serverless/shared/lib';
-import type { EndpointArtifactPageId } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
+import type { EndpointArtifactPageId } from '../../../screens';
 import {
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
@@ -21,17 +26,10 @@ import {
   openRowActionMenu,
   visitEndpointList,
   visitPolicyList,
-} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
-import {
-  ensurePermissionDeniedScreen,
-  getAgentListTable,
+  ensureFleetPermissionDeniedScreen,
+  getFleetAgentListTable,
   visitFleetAgentList,
-} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens';
-import {
-  getConsoleHelpPanelResponseActionTestSubj,
-  openConsoleHelpPanel,
-} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/response_console';
-import { ensurePolicyDetailsPageAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/policy_details';
+} from '../../../screens';
 import type { CyIndexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 
@@ -96,7 +94,7 @@ describe(
 
         it('should NOT have access to Fleet', () => {
           visitFleetAgentList();
-          ensurePermissionDeniedScreen();
+          ensureFleetPermissionDeniedScreen();
         });
 
         it('should NOT have access to execute response actions', () => {
@@ -152,7 +150,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       describe('Response Actions access', () => {
@@ -203,7 +201,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       it('should have access to Response Actions Log', () => {
@@ -252,7 +250,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       it('should have access to Response Actions Log', () => {
@@ -294,7 +292,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
 
       describe('Response Actions access', () => {
@@ -350,7 +348,7 @@ describe(
 
       it('should have access to Fleet', () => {
         visitFleetAgentList();
-        getAgentListTable().should('exist');
+        getFleetAgentListTable().should('exist');
       });
     });
 
@@ -384,7 +382,7 @@ describe(
 
           it('should have access to Fleet', () => {
             visitFleetAgentList();
-            getAgentListTable().should('exist');
+            getFleetAgentListTable().should('exist');
           });
 
           it('should have access to Response Actions Log', () => {

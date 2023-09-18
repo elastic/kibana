@@ -6,6 +6,12 @@
  */
 
 import type { Agent } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_HOSTNAME_CELL,
+  AGENT_POLICY_CELL,
+  TABLE_ROW_ACTIONS,
+  TABLE_ROW_ACTIONS_MENU,
+} from '../../screens';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import {
@@ -18,15 +24,9 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/e
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 import {
-  AGENT_HOSTNAME_CELL,
-  TABLE_ROW_ACTIONS,
-  TABLE_ROW_ACTIONS_MENU,
-  AGENT_POLICY_CELL,
-} from '../../screens/endpoints';
-import {
   FLEET_REASSIGN_POLICY_MODAL,
   FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON,
-} from '../../screens/fleet';
+} from '../../screens/fleet/agent_details';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';

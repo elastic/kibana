@@ -11,7 +11,7 @@ import {
   getUnIsolateActionMenuItem,
   openRowActionMenu,
   visitEndpointList,
-} from '../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
+} from '../../screens';
 import type { CyIndexEndpointHosts } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 

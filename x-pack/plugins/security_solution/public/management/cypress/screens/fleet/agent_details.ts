@@ -6,7 +6,7 @@
  */
 
 import { FLEET_BASE_PATH } from '@kbn/fleet-plugin/public/constants';
-import { loadPage } from '../tasks/common';
+import { loadPage } from '../../tasks/common';
 
 export const FLEET_REASSIGN_POLICY_MODAL = 'agentReassignPolicyModal';
 export const FLEET_REASSIGN_POLICY_MODAL_CONFIRM_BUTTON = 'confirmModalConfirmButton';

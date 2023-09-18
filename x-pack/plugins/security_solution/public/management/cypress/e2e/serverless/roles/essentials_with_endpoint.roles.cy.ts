@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/policy_details';
 import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
-import type { EndpointArtifactPageId } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
+import type { EndpointArtifactPageId } from '../../../screens';
 import {
   getNoPrivilegesPage,
   getArtifactListEmptyStateAddButton,
@@ -15,14 +16,11 @@ import {
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
-} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
-import {
-  ensurePermissionDeniedScreen,
-  getAgentListTable,
+  ensureFleetPermissionDeniedScreen,
+  getFleetAgentListTable,
   visitFleetAgentList,
-} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens';
+} from '../../../screens';
 import type { ServerlessRoleName } from '../../../../../../../../test_serverless/shared/lib';
-import { ensurePolicyDetailsPageAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/policy_details';
 import type { CyIndexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 
@@ -78,7 +76,7 @@ describe(
 
         it('should NOT have access to Fleet', () => {
           visitFleetAgentList();
-          ensurePermissionDeniedScreen();
+          ensureFleetPermissionDeniedScreen();
         });
       });
     });
@@ -122,7 +120,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -153,7 +151,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -196,7 +194,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -234,7 +232,7 @@ describe(
 
       it('should NOT have access to Fleet', () => {
         visitFleetAgentList();
-        ensurePermissionDeniedScreen();
+        ensureFleetPermissionDeniedScreen();
       });
     });
 
@@ -280,7 +278,7 @@ describe(
 
         it('should have access to Fleet', () => {
           visitFleetAgentList();
-          getAgentListTable().should('exist');
+          getFleetAgentListTable().should('exist');
         });
       });
     });

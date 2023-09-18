@@ -7,9 +7,9 @@
 
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
-import { getNoPrivilegesPage } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/common';
+import { getNoPrivilegesPage } from '../../../screens/common';
 import { ensureResponseActionAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management';
-import { getEndpointManagementPageList } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
+import { getEndpointManagementPageList } from '../../../screens';
 
 describe(
   'App Features for Security Essential PLI',

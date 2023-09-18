@@ -8,9 +8,11 @@
 import { FLEET_BASE_PATH } from '@kbn/fleet-plugin/public/constants';
 
 export const visitFleetAgentList = (): Cypress.Chainable => {
+  // `failOnStatus` below is necesary because the page (when not accessible) will actually return
+  // a `4xx` error along with an HTML page to display.
   return cy.visit(FLEET_BASE_PATH, { failOnStatusCode: false });
 };
 
-export const getAgentListTable = (): Cypress.Chainable => {
+export const getFleetAgentListTable = (): Cypress.Chainable => {
   return cy.getByTestSubj('fleetAgentListTable');
 };

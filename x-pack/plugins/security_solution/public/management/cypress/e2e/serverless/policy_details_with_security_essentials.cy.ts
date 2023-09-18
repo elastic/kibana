@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
-import { visitPolicyDetails } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/policy_details';
 
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
@@ -35,7 +35,7 @@ describe(
 
     beforeEach(() => {
       login();
-      visitPolicyDetails(loadedPolicyData.integrationPolicies[0].id);
+      visitPolicyDetailsPage(loadedPolicyData.integrationPolicies[0].id);
     });
 
     it('should display upselling section for protections', () => {

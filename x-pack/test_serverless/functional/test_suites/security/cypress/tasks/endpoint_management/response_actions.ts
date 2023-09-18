@@ -17,7 +17,7 @@ import {
   UNISOLATE_HOST_ROUTE_V2,
   UPLOAD_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import { UserAuthzAccessLevel } from '../../screens/endpoint_management';
+import { UserAuthzAccessLevel } from '@kbn/security-solution-plugin/public/management/cypress/screens';
 
 /**
  * Ensure user has the given `accessLevel` to the type of response action

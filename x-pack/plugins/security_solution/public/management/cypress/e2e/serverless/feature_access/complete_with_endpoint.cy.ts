@@ -11,7 +11,7 @@ import {
   getAgentListTable,
   visitFleetAgentList,
 } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens';
-import { getEndpointManagementPageList } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
+import { getEndpointManagementPageList } from '../../../screens';
 import { ensureResponseActionAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management';
 
 describe(
