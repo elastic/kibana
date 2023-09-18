@@ -6,7 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import {
   CoreStart,
   Plugin,
@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
 import {
   DISCOVER_APP_TARGET,
   LOGS_APP_TARGET,
@@ -41,7 +42,6 @@ import {
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
 import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
@@ -62,20 +62,17 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
-    logs: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.object({
+    logs: offeringBasedSchema({
+      serverless: schema.object({
         app_target: schema.oneOf(
           [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
           { defaultValue: LOGS_APP_TARGET }
         ),
       }),
-      schema.never(),
-      {
-        defaultValue: { app_target: LOGS_APP_TARGET },
-      }
-    ),
+      options: {
+        defaultValue: { app_target: LOGS_APP_TARGET } as const, // "as const" is required for TS to not generalize `app_target: string`
+      },
+    }),
     alerting: schema.object({
       inventory_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
@@ -156,8 +153,17 @@ export class InfraServerPlugin
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
+    const metricsClient = plugins.metricsDataAccess.client;
+    metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(
+        options.savedObjectsClient,
+        'default'
+      );
+      return sourceConfiguration.configuration.metricAlias;
+    });
     const sources = new InfraSources({
       config: this.config,
+      metricsClient,
     });
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),
@@ -189,6 +195,7 @@ export class InfraServerPlugin
       framework,
       sources,
       sourceStatus,
+      metricsClient,
       ...domainLibs,
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),
@@ -205,7 +212,7 @@ export class InfraServerPlugin
 
     // Register an handler to retrieve the fallback logView starting from a source configuration
     plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
-      const sourceConfiguration = await sources.getSourceConfiguration(soClient, sourceId);
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(soClient, sourceId);
       return mapSourceToLogView(sourceConfiguration);
     });
     plugins.logsShared.logViews.setLogViewsStaticConfig({
@@ -273,7 +280,6 @@ export class InfraServerPlugin
     return {
       inventoryViews,
       metricsExplorerViews,
-      getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }
 

@@ -10,8 +10,9 @@ import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { panels } from './panels';
 
-export type PreviewPanelPaths = 'rule-preview';
+export type PreviewPanelPaths = 'rule-preview' | 'alert-reason-preview';
 export const RulePreviewPanel: PreviewPanelPaths = 'rule-preview';
+export const AlertReasonPreviewPanel: PreviewPanelPaths = 'alert-reason-preview';
 export const PreviewPanelKey: PreviewPanelProps['key'] = 'document-details-preview';
 
 export interface PreviewPanelProps extends FlyoutPanelProps {

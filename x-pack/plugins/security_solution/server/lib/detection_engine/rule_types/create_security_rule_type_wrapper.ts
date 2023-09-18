@@ -72,6 +72,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     ruleExecutionLoggerFactory,
     version,
     isPreview,
+    experimentalFeatures,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -340,7 +341,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             const bulkCreate = bulkCreateFactory(
               alertWithPersistence,
               refresh,
-              ruleExecutionLogger
+              ruleExecutionLogger,
+              experimentalFeatures
             );
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;

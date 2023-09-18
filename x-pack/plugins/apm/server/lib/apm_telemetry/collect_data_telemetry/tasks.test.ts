@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { tasks } from './tasks';
 import {
   SERVICE_NAME,
@@ -19,7 +19,7 @@ describe('data telemetry collection tasks', () => {
     metric: 'apm-8.0.0-metric',
     span: 'apm-8.0.0-span',
     transaction: 'apm-8.0.0-transaction',
-  } as ApmIndicesConfig;
+  } as APMIndices;
 
   describe('environments', () => {
     const task = tasks.find((t) => t.name === 'environments');
@@ -586,6 +586,58 @@ describe('data telemetry collection tasks', () => {
         service_groups: {
           kuery_fields: ['service.environment', 'agent.name'],
           total: 2,
+        },
+      });
+    });
+  });
+
+  describe('top_traces', () => {
+    const task = tasks.find((t) => t.name === 'top_traces');
+
+    it('returns max and median number of documents in top traces', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        aggregations: {
+          top_traces: {
+            buckets: [
+              {
+                key: '521485',
+                doc_count: 1026,
+              },
+              {
+                key: '594439',
+                doc_count: 1025,
+              },
+              {
+                key: '070251',
+                doc_count: 1023,
+              },
+              {
+                key: '108079',
+                doc_count: 1023,
+              },
+              {
+                key: '118887',
+                doc_count: 1023,
+              },
+            ],
+          },
+          max: {
+            value: 1026,
+          },
+          median: {
+            values: {
+              '50.0': 1023,
+            },
+          },
+        },
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toEqual({
+        top_traces: {
+          max: 1026,
+          median: 1023,
         },
       });
     });

@@ -27,7 +27,7 @@ export interface MetricLayerOptions {
   subtitle?: string;
 }
 
-interface MetricLayerConfig {
+export interface MetricLayerConfig {
   data: FormulaValueConfig;
   options?: MetricLayerOptions;
   /**

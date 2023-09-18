@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/server/lib/risk_engine/types';
+import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createSignalsIndex, deleteAllAlerts, deleteAllRules } from '../../../utils';
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return await previewRiskScores({ body: {} });
   };
 
-  describe('Risk Engine Scoring - Preview', () => {
+  describe('Risk Engine - Risk Scoring Preview API', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,

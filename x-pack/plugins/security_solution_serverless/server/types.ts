@@ -20,6 +20,7 @@ import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 
+import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -33,10 +34,11 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
   security: SecurityPluginSetup;
   securitySolution: SecuritySolutionPluginSetup;
   securitySolutionEss: SecuritySolutionEssPluginSetup;
+  serverless: ServerlessPluginSetup;
   features: PluginSetupContract;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
-  cloudSetup: CloudSetup;
+  cloud: CloudSetup;
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
@@ -71,8 +73,10 @@ export interface UsageSource {
 }
 
 export interface UsageSourceMetadata {
-  tier?: ProductTier;
+  tier?: Tier;
 }
+
+export type Tier = ProductTier | 'none';
 
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;

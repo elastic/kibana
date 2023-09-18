@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { find } from 'lodash/fp';
 import { useMemo } from 'react';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { isActiveTimeline } from '../../../helpers';
 
 export interface UseFetchRelatedAlertsByAncestryParams {
   /**
-   * An array of field objects with category and value
+   * Value of the kibana.alert.ancestors.id field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  documentId: string;
+  /**
+   * Values of the kibana.alert.rule.parameters.index field
+   */
+  indices: string[];
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -45,33 +47,16 @@ export interface UseFetchRelatedAlertsByAncestryResult {
  * This uses the kibana.alert.ancestors.id and kibana.alert.rule.parameters.index fields.
  */
 export const useFetchRelatedAlertsByAncestry = ({
-  dataFormattedForFieldBrowser,
+  documentId,
+  indices,
   scopeId,
 }: UseFetchRelatedAlertsByAncestryParams): UseFetchRelatedAlertsByAncestryResult => {
-  const documentId = useMemo(() => {
-    const originalDocumentId = find(
-      { category: 'kibana', field: 'kibana.alert.ancestors.id' },
-      dataFormattedForFieldBrowser
-    );
-    const { values } = originalDocumentId ?? { values: [] };
-    return Array.isArray(values) ? values[0] : '';
-  }, [dataFormattedForFieldBrowser]);
-
-  const { values: indices } = useMemo(
-    () =>
-      find(
-        { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
-        dataFormattedForFieldBrowser
-      ) || { values: [] },
-    [dataFormattedForFieldBrowser]
-  );
-
-  const isActiveTimelines = isActiveTimeline(scopeId ?? '');
+  const isActiveTimelines = isActiveTimeline(scopeId);
 
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
     isActiveTimeline: isActiveTimelines,
     documentId,
-    indices: indices || [],
+    indices,
   });
 
   return useMemo(

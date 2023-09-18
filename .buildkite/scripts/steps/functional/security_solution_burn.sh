@@ -12,4 +12,4 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'fals
 
 echo "--- Security Solution Cypress tests, burning changed specs (Chrome)"
 
-yarn --cwd x-pack/plugins/security_solution cypress:changed-specs-only
+yarn --cwd x-pack/test/security_solution_cypress cypress:changed-specs-only:ess

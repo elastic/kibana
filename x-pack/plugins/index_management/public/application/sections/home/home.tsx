@@ -10,12 +10,14 @@ import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { documentationService } from '../../services/documentation';
-import { DataStreamList } from './data_stream_list';
-import { IndexList } from './index_list';
-import { TemplateList } from './template_list';
-import { ComponentTemplateList } from '../../components/component_templates';
 import { breadcrumbService } from '../../services/breadcrumbs';
+import { documentationService } from '../../services/documentation';
+import { useAppContext } from '../../app_context';
+import { ComponentTemplateList } from '../../components/component_templates';
+import { IndexList } from './index_list';
+import { IndexDetailsPage } from './index_list/details_page';
+import { DataStreamList } from './data_stream_list';
+import { TemplateList } from './template_list';
 
 export enum Section {
   Indices = 'indices',
@@ -41,6 +43,9 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
+  const {
+    config: { enableIndexDetailsPage },
+  } = useAppContext();
   const tabs = [
     {
       id: Section.Indices,
@@ -83,7 +88,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     breadcrumbService.setBreadcrumbs('home');
   }, []);
 
-  return (
+  const indexManagementTabs = (
     <>
       <EuiPageHeader
         data-test-subj="indexManagementHeaderContent"
@@ -140,4 +145,18 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
       </Routes>
     </>
   );
+  if (enableIndexDetailsPage) {
+    return (
+      <>
+        <Routes>
+          <Route
+            path={`/${Section.Indices}/:indexName/:indexDetailsSection?`}
+            component={IndexDetailsPage}
+          />
+          <Route render={() => indexManagementTabs} />
+        </Routes>
+      </>
+    );
+  }
+  return indexManagementTabs;
 };

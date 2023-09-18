@@ -6,6 +6,7 @@
   "include": [
     "harden/**/*",
     "root/**/*",
+    "openssl_legacy_provider/**/*",
     "*.js",
     "*.ts",
   ],

@@ -9,41 +9,41 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
   EuiIcon,
   EuiLink,
   useEuiTheme,
   useEuiFontSize,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../common/utility_types';
 import {
-  buildUserNamesFilter,
-  RiskScoreEntity,
-  RiskSeverity,
-} from '../../../../common/search_strategy';
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../common/components/first_last_seen/first_last_seen';
+import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
-import { NetworkDetailsLink } from '../../../common/components/links';
 import { DescriptionListStyled } from '../../../common/components/page';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScore } from '../../../explore/components/risk_score/severity/common';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../explore/containers/risk_score';
 import * as i18n from '../../../overview/components/user_overview/translations';
-import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
 import {
-  TECHNICAL_PREVIEW_ICON_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
-  ENTITIES_USER_OVERVIEW_IP_TEST_ID,
+  ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
+  ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
+  TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 
@@ -90,7 +90,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
-  const [_, { userDetails: data }] = useObservedUserDetails({
+  const [_, { userDetails }] = useObservedUserDetails({
     endDate: to,
     userName,
     indexNames: selectedPatterns,
@@ -103,22 +103,38 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     timerange,
   });
 
-  const descriptionList: DescriptionList[] = useMemo(
+  const userDomain: DescriptionList[] = useMemo(
     () => [
       {
-        title: i18n.HOST_IP,
+        title: i18n.USER_DOMAIN,
         description: (
           <DefaultFieldRenderer
-            rowItems={getOr([], 'host.ip', data)}
-            attrName={'host.ip'}
+            rowItems={getOr([], 'user.domain', userDetails)}
+            attrName={'domain'}
             idPrefix={CONTEXT_ID}
             isDraggable={false}
-            render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
           />
         ),
       },
     ],
-    [data]
+    [userDetails]
+  );
+
+  const userLastSeen: DescriptionList[] = useMemo(
+    () => [
+      {
+        title: i18n.LAST_SEEN,
+        description: (
+          <FirstLastSeen
+            indexPatterns={selectedPatterns}
+            field={'user.name'}
+            value={userName}
+            type={FirstLastSeenType.LAST_SEEN}
+          />
+        ),
+      },
+    ],
+    [userName, selectedPatterns]
   );
 
   const { euiTheme } = useEuiTheme();
@@ -132,32 +148,41 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         title: (
           <>
             {i18n.USER_RISK_CLASSIFICATION}
-            <EuiBetaBadge
-              css={css`
-                margin-left: ${euiTheme.size.xs};
-              `}
-              label={TECHNICAL_PREVIEW_TITLE}
-              size="s"
-              iconType="beaker"
-              tooltipContent={TECHNICAL_PREVIEW_MESSAGE}
-              tooltipPosition="bottom"
+            <EuiIconTip
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewButtonLabel"
+                  defaultMessage="Technical preview"
+                />
+              }
+              size="m"
+              type="iInCircle"
+              content={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewTooltip"
+                  defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                />
+              }
+              position="bottom"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
               data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
             />
           </>
         ),
-
         description: (
           <>
             {userRiskData ? (
               <RiskScore severity={userRiskData.user.risk.calculated_level} />
             ) : (
-              <RiskScore severity={RiskSeverity.unknown} />
+              getEmptyTagValue()
             )}
           </>
         ),
       },
     ];
-  }, [euiTheme.size.xs, userRisk]);
+  }, [userRisk]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_USER_OVERVIEW_TEST_ID}>
@@ -184,15 +209,20 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
         <EuiFlexGroup>
           <EuiFlexItem>
             <OverviewDescriptionList
-              dataTestSubj={ENTITIES_USER_OVERVIEW_IP_TEST_ID}
-              descriptionList={descriptionList}
+              dataTestSubj={ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID}
+              descriptionList={userDomain}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            {isAuthorized && (
+            {isAuthorized ? (
               <DescriptionListStyled
                 data-test-subj={ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID}
                 listItems={[userRiskLevel]}
+              />
+            ) : (
+              <OverviewDescriptionList
+                dataTestSubj={ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID}
+                descriptionList={userLastSeen}
               />
             )}
           </EuiFlexItem>

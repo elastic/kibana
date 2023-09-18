@@ -170,7 +170,7 @@ export class EndpointMetadataService {
       fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
-        this.logger?.warn(`agent with id ${fleetAgentId} not found`);
+        this.logger?.debug(`agent with id ${fleetAgentId} not found`);
       } else {
         throw error;
       }

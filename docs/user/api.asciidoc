@@ -53,6 +53,8 @@ Calls to the API endpoints require different operations. To interact with the {k
 
 * *PUT* - Updates the existing information.
 
+* *PATCH* - Applies partial modifications to the existing information.
+
 * *DELETE* - Removes the information.
 
 [float]

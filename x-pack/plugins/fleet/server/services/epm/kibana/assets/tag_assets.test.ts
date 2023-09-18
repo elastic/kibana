@@ -703,7 +703,7 @@ describe('tagKibanaAssets', () => {
     } as any;
     const assetTags = [
       {
-        text: 'SecuritySolution',
+        text: 'Security Solution',
         asset_types: ['dashboard'],
       },
     ];
@@ -733,9 +733,9 @@ describe('tagKibanaAssets', () => {
       {
         color: expect.any(String),
         description: 'Tag defined in package-spec',
-        name: 'SecuritySolution',
+        name: 'Security Solution',
       },
-      { id: 'SecuritySolution', overwrite: true, refresh: false }
+      { id: 'security-solution-default', overwrite: true, refresh: false }
     );
   });
 

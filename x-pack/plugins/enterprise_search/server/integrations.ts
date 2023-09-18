@@ -35,36 +35,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['enterprise_search', 'workplace_search_content_source'],
   },
   {
-    id: 'onedrive',
-    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.onedriveName', {
-      defaultMessage: 'OneDrive',
-    }),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.onedriveDescription',
-      {
-        defaultMessage: 'Search over your files stored on OneDrive with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'azure', 'workplace_search_content_source'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/one_drive',
-  },
-  {
-    id: 'salesforce_sandbox',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceSandboxName',
-      {
-        defaultMessage: 'Salesforce Sandbox',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceSandboxDescription',
-      {
-        defaultMessage: 'Search over your content on Salesforce Sandbox with Workplace Search.',
-      }
-    ),
-    categories: ['enterprise_search', 'workplace_search_content_source'],
-  },
-  {
     id: 'zendesk',
     title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.zendeskName', {
       defaultMessage: 'Zendesk',
@@ -359,6 +329,40 @@ export const registerEnterpriseSearchIntegrations = (
       shipper: 'enterprise_search',
       isBeta: false,
     });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'onedrive',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.oneDriveTitle', {
+        defaultMessage: 'OneDrive',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.integrations.oneDriveDescription',
+        {
+          defaultMessage: 'Search over your content on OneDrive.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'datastore',
+        'connector',
+        'connector_client',
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=salesforce',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/salesforce_sandbox.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
     customIntegrations.registerCustomIntegration({
       id: 'build_a_connector',
       title: i18n.translate('xpack.enterpriseSearch.integrations.buildAConnectorName', {
@@ -410,6 +414,39 @@ export const registerEnterpriseSearchIntegrations = (
           type: 'svg',
           src: http.basePath.prepend(
             '/plugins/enterpriseSearch/assets/source_icons/postgresql.svg'
+          ),
+        },
+      ],
+      shipper: 'enterprise_search',
+      isBeta: false,
+    });
+
+    customIntegrations.registerCustomIntegration({
+      id: 'salesforce_sandbox',
+      title: i18n.translate('xpack.enterpriseSearch.integrations.salesforceSandboxTitle', {
+        defaultMessage: 'Salesforce Sandbox',
+      }),
+      description: i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.integrations.salesforceSandboxDescription',
+        {
+          defaultMessage: 'Search over your content on Salesforce Sandbox.',
+        }
+      ),
+      categories: [
+        'enterprise_search',
+        'elastic_stack',
+        'custom',
+        'datastore',
+        'connector',
+        'connector_client',
+      ],
+      uiInternalPath:
+        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=salesforce',
+      icons: [
+        {
+          type: 'svg',
+          src: http.basePath.prepend(
+            '/plugins/enterpriseSearch/assets/source_icons/salesforce_sandbox.svg'
           ),
         },
       ],

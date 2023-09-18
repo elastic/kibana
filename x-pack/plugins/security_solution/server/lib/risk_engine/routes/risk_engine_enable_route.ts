@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../common/constants';
-import type { SetupPlugins } from '../../../plugin';
+import type { StartPlugins } from '../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
 export const riskEngineEnableRoute = (
   router: SecuritySolutionPluginRouter,
-  logger: Logger,
-  security: SetupPlugins['security']
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.post(
     {
@@ -27,16 +26,22 @@ export const riskEngineEnableRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const [_, { taskManager }] = await getStartServices();
       const securitySolution = await context.securitySolution;
-      const soClient = (await context.core).savedObjects.client;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
-      const user = security?.authc.getCurrentUser(request);
+
+      if (!taskManager) {
+        return siemResponse.error({
+          statusCode: 400,
+          body: {
+            message:
+              'Task Manager is unavailable, but is required to enable the risk engine. Please enable the taskManager plugin and try again.',
+          },
+        });
+      }
 
       try {
-        await riskEngineClient.enableRiskEngine({
-          savedObjectsClient: soClient,
-          user,
-        });
+        await riskEngineClient.enableRiskEngine({ taskManager });
         return response.ok({ body: { success: true } });
       } catch (e) {
         const error = transformError(e);

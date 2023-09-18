@@ -90,7 +90,7 @@ describe('SecurityNavControlService', () => {
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Account menu"
-                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
+                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
                 data-test-subj="userMenuButton"
                 style="line-height: normal;"
                 type="button"
@@ -102,7 +102,7 @@ describe('SecurityNavControlService', () => {
                     class="eui-textTruncate euiButtonEmpty__text"
                   >
                     <span
-                      class="euiHeaderSectionItemButton__content"
+                      class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                     >
                       <span
                         aria-label="Loading"

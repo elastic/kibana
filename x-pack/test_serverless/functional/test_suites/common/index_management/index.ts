@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Management', function () {
     loadTestFile(require.resolve('./index_templates'));
+    loadTestFile(require.resolve('./indices'));
   });
 };

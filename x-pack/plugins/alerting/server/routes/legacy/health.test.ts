@@ -53,6 +53,8 @@ const ruleTypes = [
     producer: 'test',
     enabledInLicense: true,
     defaultScheduleInterval: '10m',
+    hasAlertsMappings: false,
+    hasFieldsForAAD: false,
   } as RegistryAlertTypeWithAuth,
 ];
 

@@ -210,6 +210,7 @@ export interface DownloadSourceSOAttributes {
   host: string;
   is_default: boolean;
   source_id?: string;
+  proxy_id?: string | null;
 }
 export interface SimpleSOAssetAttributes {
   title?: string;
