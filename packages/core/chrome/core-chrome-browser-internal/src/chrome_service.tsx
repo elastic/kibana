@@ -207,7 +207,6 @@ export class ChromeService {
       map(([headerBanner, isVisible, chromeStyle]) => {
         return [
           'kbnBody',
-          chromeStyle === 'project' ? 'kbnBody--projectLayout' : 'kbnBody--classicLayout',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
           getKbnVersionClass(),
@@ -277,6 +276,11 @@ export class ChromeService {
     const setProjectsUrl = (projectsUrl: string) => {
       validateChromeStyle();
       projectNavigation.setProjectsUrl(projectsUrl);
+    };
+
+    const setProjectName = (projectName: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectName(projectName);
     };
 
     const isIE = () => {
@@ -372,6 +376,7 @@ export class ChromeService {
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
                 projectsUrl$={projectNavigation.getProjectsUrl$()}
+                projectName$={projectNavigation.getProjectName$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
@@ -500,6 +505,7 @@ export class ChromeService {
       project: {
         setHome: setProjectHome,
         setProjectsUrl,
+        setProjectName,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,

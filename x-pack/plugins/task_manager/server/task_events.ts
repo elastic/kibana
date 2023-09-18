@@ -70,6 +70,7 @@ export interface RanTask {
   task: ConcreteTaskInstance;
   persistence: TaskPersistence;
   result: TaskRunResult;
+  isExpired: boolean;
 }
 export type ErroredTask = RanTask & {
   error: Error;
@@ -88,7 +89,8 @@ export type TaskManagerStats =
   | 'claimDuration'
   | 'queuedEphemeralTasks'
   | 'ephemeralTaskDelay'
-  | 'workerUtilization';
+  | 'workerUtilization'
+  | 'runDelay';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>

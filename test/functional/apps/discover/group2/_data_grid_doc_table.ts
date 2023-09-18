@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:rowHeightOption': 0, // single line
   };
   const testSubjects = getService('testSubjects');
   const security = getService('security');
@@ -119,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.saveSearch('expand-cell-search');
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.header.waitUntilLoadingHasFinished();
