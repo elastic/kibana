@@ -6,6 +6,7 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { AllDatasetSelection } from '@kbn/log-explorer-plugin/common';
 import { DatasetLocatorDependencies } from '../types';
 import { AllDatasetsLocatorParams } from './types';
 import { ALL_DATASETS_LOCATOR_ID, constructLocatorPath } from '../utils';
@@ -17,11 +18,11 @@ export class AllDatasetsLocatorDefinition implements LocatorDefinition<AllDatase
 
   constructor(protected readonly deps: DatasetLocatorDependencies) {}
 
-  public readonly getLocation = async (params: AllDatasetsLocatorParams) => {
-    const { useHash, datasetsClient } = this.deps;
-    const index = await datasetsClient.generateDataViewId();
+  public readonly getLocation = (params: AllDatasetsLocatorParams) => {
+    const { useHash } = this.deps;
+    const index = AllDatasetSelection.create().toDataviewSpec().id;
 
-    return await constructLocatorPath({
+    return constructLocatorPath({
       locatorParams: params,
       index,
       useHash,

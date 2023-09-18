@@ -23,6 +23,9 @@
       "share",
     ],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": [
+      "common",
+    ]
   }
 }

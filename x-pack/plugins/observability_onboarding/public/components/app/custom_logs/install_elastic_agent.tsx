@@ -59,7 +59,7 @@ export function InstallElasticAgent() {
   async function onContinue() {
     await singleDatasetLocator!.navigate({
       integration: wizardState.integrationName,
-      dataset: wizardState.datasetName,
+      dataset: `${wizardState.integrationName}.${wizardState.datasetName}`,
     });
   }
 

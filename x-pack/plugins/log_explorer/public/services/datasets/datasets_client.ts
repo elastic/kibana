@@ -7,6 +7,7 @@
 
 import { HttpStart } from '@kbn/core/public';
 
+import { AllDatasetSelection, SingleDatasetSelection } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATASETS_URL,
@@ -23,7 +24,6 @@ import {
 import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { IDatasetsClient } from './types';
-import { AllDatasetSelection, SingleDatasetSelection } from '../../utils/dataset_selection';
 
 const defaultIntegrationsParams: Pick<FindIntegrationsRequestQuery, 'dataStreamType'> = {
   dataStreamType: 'logs',

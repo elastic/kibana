@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { DatasetSelection } from '../../../utils/dataset_selection';
+import { DatasetSelection } from '../../../../common/dataset_selection';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID, selectDatasetLabel } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 

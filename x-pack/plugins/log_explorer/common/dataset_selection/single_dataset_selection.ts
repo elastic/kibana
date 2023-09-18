@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Dataset } from '../../../common/datasets';
+import { Dataset } from '../datasets';
 import { encodeDatasetSelection } from './encoding';
 import { DatasetSelectionStrategy, SingleDatasetSelectionPayload } from './types';
 
