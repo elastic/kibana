@@ -6,3 +6,4 @@
  */
 
 export { DataSourceContextProvider, useDataSource } from './data_source_context';
+export { EnabledFeaturesContextProvider, useEnabledFeatures } from './serverless_context';

@@ -162,14 +162,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     }
 
     if (pluginsSetup.management) {
-      registerManagementSection(
-        pluginsSetup.management,
-        core,
-        {
-          usageCollection: pluginsSetup.usageCollection,
-        },
-        this.isServerless
-      ).enable();
+      registerManagementSection(pluginsSetup.management, core, {
+        usageCollection: pluginsSetup.usageCollection,
+      }).enable();
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -196,13 +191,13 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           registerMapExtension,
           registerCasesAttachments,
         } = await import('./register_helper');
-        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, this.isServerless);
+        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
 
         if (fullLicense) {
-          registerMlUiActions(pluginsSetup.uiActions, core, this.isServerless);
+          registerMlUiActions(pluginsSetup.uiActions, core);
 
           if (mlCapabilities.isADEnabled) {
-            registerEmbeddables(pluginsSetup.embeddable, core, this.isServerless);
+            registerEmbeddables(pluginsSetup.embeddable, core);
 
             if (pluginsSetup.cases) {
               registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);

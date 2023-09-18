@@ -11,33 +11,19 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobType } from '../../../../common/types/saved_objects';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
-import { useIsServerless } from '../../contexts/kibana';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   jobType: JobType;
 }
 
 export const NewJobAwaitingNodeWarning: FC<Props> = () => {
-  const isServerless = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
   if (lazyMlNodesAvailable() === false) {
     return null;
   }
 
-  return isServerless ? (
-    <>
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.ml.jobsAwaitingNodeWarning.serverless.title"
-            defaultMessage="Machine learning is starting..."
-          />
-        }
-        color="primary"
-        iconType="iInCircle"
-      />
-      <EuiSpacer size="m" />
-    </>
-  ) : (
+  return showNodeInfo ? (
     <>
       <EuiCallOut
         title={
@@ -56,6 +42,20 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
           />
         </div>
       </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
+  ) : (
+    <>
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.ml.jobsAwaitingNodeWarning.serverless.title"
+            defaultMessage="Machine learning is starting..."
+          />
+        }
+        color="primary"
+        iconType="iInCircle"
+      />
       <EuiSpacer size="m" />
     </>
   );

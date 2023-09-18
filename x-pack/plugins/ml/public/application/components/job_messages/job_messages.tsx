@@ -25,7 +25,7 @@ import { JobMessage } from '../../../../common/types/audit_message';
 import { blurButtonOnClick } from '../../util/component_utils';
 
 import { JobIcon } from '../job_message_icon';
-import { useIsServerless } from '../../contexts/kibana';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface JobMessagesProps {
   messages: JobMessage[];
@@ -46,7 +46,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
   refreshMessage,
   actionHandler,
 }) => {
-  const isServerless = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
   const columns: Array<EuiBasicTableColumn<JobMessage>> = useMemo(() => {
     const cols = [
       {
@@ -90,7 +90,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
       },
     ];
 
-    if (isServerless === false) {
+    if (showNodeInfo) {
       cols.splice(2, 0, {
         field: 'node_name',
         name: i18n.translate('xpack.ml.jobMessages.nodeLabel', {
@@ -101,7 +101,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
     }
 
     return cols;
-  }, [isServerless, refreshMessage]);
+  }, [showNodeInfo, refreshMessage]);
 
   if (typeof actionHandler === 'function') {
     columns.push({

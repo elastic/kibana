@@ -75,7 +75,7 @@ export interface FullTimeRangeSelectorProps {
   /**
    * Optional flag to disable the frozen data tier choice.
    */
-  hideFrozenDataTierChoice?: boolean;
+  showFrozenDataTierChoice?: boolean;
 }
 
 /**
@@ -96,12 +96,12 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     disabled,
     callback,
     apiPath,
-    hideFrozenDataTierChoice = false,
+    showFrozenDataTierChoice: showFrozenDataTierChoiceProp = true,
   } = props;
   const {
     http,
     notifications: { toasts },
-    isServerless,
+    showFrozenDataTierChoice,
   } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
@@ -113,9 +113,9 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        isServerless || hideFrozenDataTierChoice
-          ? false
-          : frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
+        showFrozenDataTierChoice && showFrozenDataTierChoiceProp
+          ? frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE
+          : false,
         apiPath
       );
       if (typeof callback === 'function' && fullTimeRange !== undefined) {
@@ -137,8 +137,8 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     toasts,
     http,
     query,
-    isServerless,
-    hideFrozenDataTierChoice,
+    showFrozenDataTierChoice,
+    showFrozenDataTierChoiceProp,
     frozenDataPreference,
     apiPath,
     callback,
@@ -229,7 +229,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           />
         </EuiButton>
       </EuiToolTip>
-      {isServerless || hideFrozenDataTierChoice ? null : (
+      {showFrozenDataTierChoice && showFrozenDataTierChoiceProp ? (
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
@@ -255,7 +255,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
             {popoverContent}
           </EuiPopover>
         </EuiFlexItem>
-      )}
+      ) : null}
     </EuiFlexGroup>
   );
 };

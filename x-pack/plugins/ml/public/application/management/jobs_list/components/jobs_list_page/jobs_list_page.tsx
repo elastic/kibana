@@ -54,17 +54,7 @@ export const JobsListPage: FC<{
   data: DataPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
-  isServerless: boolean;
-}> = ({
-  coreStart,
-  share,
-  history,
-  spacesApi,
-  data,
-  usageCollection,
-  fieldFormats,
-  isServerless,
-}) => {
+}> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
@@ -74,8 +64,8 @@ export const JobsListPage: FC<{
   const theme$ = coreStart.theme.theme$;
 
   const mlServices = useMemo(
-    () => getMlGlobalServices(coreStart.http, isServerless, usageCollection),
-    [coreStart.http, isServerless, usageCollection]
+    () => getMlGlobalServices(coreStart.http, usageCollection),
+    [coreStart.http, usageCollection]
   );
 
   const check = async () => {

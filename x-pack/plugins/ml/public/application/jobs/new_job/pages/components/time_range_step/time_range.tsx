@@ -17,12 +17,12 @@ import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { useDataSource } from '../../../../../contexts/ml';
+import { useDataSource, useEnabledFeatures } from '../../../../../contexts/ml';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { TimeRangePicker, TimeRange } from '../../../common/components';
-import { useMlKibana, useIsServerless } from '../../../../../contexts/kibana';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   ML_FROZEN_TIER_PREFERENCE,
   type MlStorageKey,
@@ -33,7 +33,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
   const dataSourceContext = useDataSource();
-  const isServerless = useIsServerless();
+  const { showFrozenDataTierChoice } = useEnabledFeatures();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
     useContext(JobCreatorContext);
@@ -138,7 +138,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
                 callback={fullTimeRangeCallback}
                 timefilter={timefilter}
                 apiPath={`${ML_INTERNAL_BASE_PATH}/fields_service/time_field_range`}
-                hideFrozenDataTierChoice={isServerless}
+                showFrozenDataTierChoice={showFrozenDataTierChoice}
               />
             </EuiFlexItem>
             <EuiFlexItem />
