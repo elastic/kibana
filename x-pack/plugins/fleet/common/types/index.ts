@@ -23,6 +23,7 @@ export interface FleetConfigType {
     elasticsearch: {
       hosts?: string[];
       ca_sha256?: string;
+      ca_trusted_fingerprint?: string;
     };
     fleet_server?: {
       hosts?: string[];

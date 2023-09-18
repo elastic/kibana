@@ -58,6 +58,7 @@ export const runFleetServerIfNeeded = async (): Promise<
 > => {
   let fleetServerContainerId;
   let fleetServerAgentPolicyId;
+  let serviceToken;
 
   const {
     log,
@@ -68,9 +69,8 @@ export const runFleetServerIfNeeded = async (): Promise<
   log.indent(4);
 
   try {
-    fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
-    const serviceToken =
-      'AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6cWtqR1hSS2FRSzIyb01McFg3aTQwdw'; // await generateFleetServiceToken();
+    // fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
+    // const serviceToken = await generateFleetServiceToken();
 
     if (isKibanaOnLocalhost) {
       await configureFleetIfNeeded();
@@ -250,12 +250,6 @@ export const startFleetServerWithDocker = async ({
       '--volume',
       `${FLEET_SERVER_KEY_PATH}:/fleet-server.key`,
 
-      // `--env`,
-      // `KIBANA_FLEET_CA=/elasticsearch.crt`,
-
-      // `--env`,
-      // `KIBANA_CA=/elasticsearch.crt`,
-
       `--env`,
       `FLEET_CA=/ca.crt`,
 
@@ -267,9 +261,6 @@ export const startFleetServerWithDocker = async ({
 
       '--env',
       'FLEET_SERVER_ENABLE=1',
-
-      // '--env',
-      // 'ELASTICSEARCH_USERNAME=system_indices_superuser',
 
       '--env',
       // `FLEET_SERVER_ELASTICSEARCH_HOST=${esUrlWithRealIp}`,
@@ -313,10 +304,7 @@ export const startFleetServerWithDocker = async ({
       `ELASTICSEARCH_CA=/elasticsearch.crt`,
 
       '--env',
-      'ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
-
-      '--env',
-      'FLEET_SERVER_ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1kZXY6VVVVVVVVTEstKiBaNA',
+      'ELASTICSEARCH_SERVICE_TOKEN=AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ',
 
       '--env',
       'FLEET_SERVER_ELASTICSEARCH_CA_TRUSTED_FINGERPRINT=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84',

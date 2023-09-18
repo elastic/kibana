@@ -141,7 +141,9 @@ export const getFTRConfig = ({
         );
 
         if (vars.serverless) {
-          // vars.kbnTestServer.serverArgs.push(`--xpack.fleet.internal.fleetServerStandalone=false`);
+          vars.kbnTestServer.serverArgs.push(
+            `--xpack.fleet.agents.elasticsearch.ca_trusted_fingerprint=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84`
+          );
         }
       }
 
