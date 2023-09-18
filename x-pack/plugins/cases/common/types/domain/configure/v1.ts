@@ -7,10 +7,6 @@
 
 import * as rt from 'io-ts';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connector/v1';
-
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
-import { limitedStringSchema } from '../../../schema';
-
 import { UserRt } from '../user/v1';
 import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../custom_field/v1';
 
@@ -27,7 +23,7 @@ export const CustomFieldConfigurationRt = rt.strict({
   /**
    * label of custom field
    */
-  label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CUSTOM_FIELD_LABEL_LENGTH }),
+  label: rt.string,
   /**
    * custom field options - required
    */
@@ -44,7 +40,7 @@ export const ToggleCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationRt,
 ]);
 
-export const CustomFieldsRt = rt.array(
+export const CustomFieldsConfigurationRt = rt.array(
   rt.union([TextCustomFieldConfigurationRt, ToggleCustomFieldConfigurationRt])
 );
 
@@ -60,7 +56,7 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   /**
    * The custom fields configured for the case
    */
-  customFields: CustomFieldsRt,
+  customFields: CustomFieldsConfigurationRt,
 });
 
 export const CasesConfigureBasicRt = rt.intersection([
@@ -98,7 +94,7 @@ export const ConfigurationRt = rt.intersection([
 
 export const ConfigurationsRt = rt.array(ConfigurationRt);
 
-export type CustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type CustomFieldsConfiguration = rt.TypeOf<typeof CustomFieldsConfigurationRt>;
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;

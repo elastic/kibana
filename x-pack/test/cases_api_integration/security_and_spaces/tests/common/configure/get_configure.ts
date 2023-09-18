@@ -47,6 +47,15 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a configuration', async () => {
+      await createConfiguration(supertest);
+
+      const configuration = await getConfiguration({ supertest });
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
+
+      expect(data).to.eql(getConfigurationOutput());
+    });
+
+    it('should return a configuration with customFields', async () => {
       const customFields = {
         customFields: [
           { key: 'hello', label: 'text', type: CustomFieldTypes.TEXT, required: false },

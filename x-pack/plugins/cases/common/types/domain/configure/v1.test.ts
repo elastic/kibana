@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../constants';
 import { ConnectorTypes } from '../connector/v1';
 import { CustomFieldTypes } from '../custom_field/v1';
 import {
@@ -73,10 +71,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [
-            { ...textCustomField, required: false },
-            { ...toggleCustomField, required: false },
-          ],
+          customFields: [textCustomField, toggleCustomField],
         },
       });
     });
@@ -88,10 +83,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [
-            { ...textCustomField, required: false },
-            { ...toggleCustomField, required: false },
-          ],
+          customFields: [textCustomField, toggleCustomField],
         },
       });
     });
@@ -106,10 +98,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [
-            { ...textCustomField, required: false },
-            { ...toggleCustomField, required: false },
-          ],
+          customFields: [textCustomField, toggleCustomField],
         },
       });
     });
@@ -195,16 +184,6 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
-    });
-
-    it('limits label to 50 characters', () => {
-      const longLabel = 'x'.repeat(MAX_CUSTOM_FIELD_LABEL_LENGTH + 1);
-
-      expect(
-        PathReporter.report(
-          CustomFieldConfigurationRt.decode({ ...defaultRequest, label: longLabel })
-        )
-      ).toContain('The length of the label is too long. The maximum length is 50.');
     });
   });
 
