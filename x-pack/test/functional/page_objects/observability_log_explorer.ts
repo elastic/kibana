@@ -321,6 +321,10 @@ export function ObservabilityLogExplorerPageObject({
       return testSubjects.find('logExplorerDiscoverFallbackLink');
     },
 
+    getOnboardingLink() {
+      return testSubjects.find('logExplorerOnboardingLink');
+    },
+
     // Query Bar
     getQueryBar() {
       return testSubjects.find('queryInput');
