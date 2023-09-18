@@ -36,15 +36,17 @@ export type ColorMappingInputData =
  * The props of the CategoricalColorMapping component
  */
 export interface ColorMappingProps {
-  /** the initial color mapping model, usually coming from a the visualization saved object */
+  /** The initial color mapping model, usually coming from a the visualization saved object */
   model: ColorMapping.Config;
   /** A map of paletteId and palette configuration */
   palettes: Map<string, ColorMapping.CategoricalPalette>;
+  /** A data description of what needs to be colored */
   data: ColorMappingInputData;
+  /** Theme dark mode */
   isDarkMode: boolean;
-  /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
+  /** A map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
   specialTokens: Map<string, string>;
-  /** a function called at every change in the model */
+  /** A function called at every change in the model */
   onModelUpdate: (model: ColorMapping.Config) => void;
 }
 

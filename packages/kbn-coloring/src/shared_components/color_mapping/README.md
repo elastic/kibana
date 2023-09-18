@@ -5,10 +5,10 @@ This shared component can be used to define a color mapping as an association of
 This package provides:
 - a React component, called `CategoricalColorMapping` that provides a simplified UI (that in general can be hosted in a flyout), that helps the user generate a `ColorMapping.Config` object that descibes the mappings configuration
 - a function `getColorFactory` that given a color mapping configuration returns a function that maps a passed category to the corresponding color
-- a definition scheme for the color mapping, based on the type `ColorMapping.Config`, that provides an extensible way of describing the link betwe
+- a definition scheme for the color mapping, based on the type `ColorMapping.Config`, that provides an extensible way of describing the link between colors and rules. Collects the minimal information required apply colors based on categories. Together with the `ColorMappingInputData` can be used to get colors in a deterministic way.
 
 
-An example of a configuration is the following:
+An example of the configuration is the following:
 ```ts
 const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignmentMode: 'auto',
@@ -45,7 +45,8 @@ const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
 };
 ```
 
-The function `getColorFactory` has the following type:
+The function `getColorFactory` is a curry function where, given the model, a palette getter, the theme mode (dark/light) and a list of categories, returns a function that can be used to pick the right color based on a given category.
+
 ```ts
 function getColorFactory(
   model: ColorMapping.Config,
@@ -57,7 +58,7 @@ function getColorFactory(
     }
 ): (category: string | string[]) => Color
 ```
-where given the model, a palette getter, the theme mode (dark/light) and a list of categories, it will return a function that can be used to pick the right color based on the passed category.
+
 
 
 A `category` can be in the shape of a plain string or an array of strings. Numbers, MultiFieldKey, IP etc needs to be stringified.
@@ -67,15 +68,17 @@ The `CategoricalColorMapping` React component has the following props:
 
 ```tsx
 function CategoricalColorMapping(props: {
-    /** the initial color mapping model, usually coming from a the visualization saved object */
+  /** The initial color mapping model, usually coming from a the visualization saved object */
   model: ColorMapping.Config;
   /** A map of paletteId and palette configuration */
   palettes: Map<string, ColorMapping.CategoricalPalette>;
+  /** A data description of what needs to be colored */
   data: ColorMappingInputData;
+  /** Theme dark mode */
   isDarkMode: boolean;
-  /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
+  /** A map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
   specialTokens: Map<string, string>;
-  /** a function called at every change in the model */
+  /** A function called at every change in the model */
   onModelUpdate: (model: ColorMapping.Config) => void;
 })
 
