@@ -86,7 +86,6 @@
     "@kbn/osquery-plugin",
     "@kbn/aiops-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/observability-log-explorer-plugin"
   ],
   "exclude": [
     "target/**/*"
