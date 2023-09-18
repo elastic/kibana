@@ -11,10 +11,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CellActionsMode } from '@kbn/cell-actions';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getSourcererScopeId } from '../../../helpers';
 import { SecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger } from '../../../actions/constants';
-import { SEVERITY_TITLE } from './translations';
 import { useRightPanelContext } from '../context';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
 import { FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID } from './test_ids';
@@ -46,7 +46,12 @@ export const DocumentSeverity: FC = memo(() => {
     <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs" data-test-subj={FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID}>
-          <h5>{`${SEVERITY_TITLE}:`}</h5>
+          <h5>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.header.severityTitle"
+              defaultMessage="Severity:"
+            />
+          </h5>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
