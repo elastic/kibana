@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -82,13 +82,19 @@ export const DiscoverContainerInternal = ({
       css={discoverContainerWrapperCss}
       data-test-subj="discover-container-internal-wrapper"
     >
-      <KibanaContextProvider services={services}>
-        <DiscoverMainRoute
-          customizationCallbacks={customizationCallbacks}
-          mode="embedded"
-          isDev={isDev}
-        />
-      </KibanaContextProvider>
+      <EuiFlexItem
+        css={css`
+          width: 100%;
+        `}
+      >
+        <KibanaContextProvider services={services}>
+          <DiscoverMainRoute
+            customizationCallbacks={customizationCallbacks}
+            mode="embedded"
+            isDev={isDev}
+          />
+        </KibanaContextProvider>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
