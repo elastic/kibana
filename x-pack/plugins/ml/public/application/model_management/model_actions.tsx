@@ -24,7 +24,6 @@ import {
   type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import { isSecurityHasPrivilegesResponse } from '../services/ml_api_service';
 import { getUserConfirmationProvider } from './force_stop_dialog';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
@@ -84,10 +83,7 @@ export function useModelActions({
         cluster: ['manage_ingest_pipelines'],
       })
       .then((result) => {
-        let canManagePipelines = false;
-        if (isSecurityHasPrivilegesResponse(result)) {
-          canManagePipelines = result.hasPrivileges.cluster.manage_ingest_pipelines;
-        }
+        const canManagePipelines = result.hasPrivileges?.cluster?.manage_ingest_pipelines;
         if (isMounted) {
           setCanManageIngestPipelines(canManagePipelines);
         }

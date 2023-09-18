@@ -11,7 +11,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { HttpStart } from '@kbn/core/public';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
@@ -54,31 +53,9 @@ import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
 
-export interface SecurityHasPrivilegesDisabledResponse {
-  securityDisabled: boolean;
-  upgradeInProgress: boolean;
-}
-
 export interface ExtendedSecurityHasPrivilegesResponse {
   hasPrivileges: estypes.SecurityHasPrivilegesResponse;
   upgradeInProgress: boolean;
-}
-
-export function isSecurityHasPrivilegesDisabledResponse(
-  arg: any
-): arg is SecurityHasPrivilegesDisabledResponse {
-  return arg.hasOwnProperty('securityDisabled') && arg.hasOwnProperty('upgradeInProgress');
-}
-
-export function isSecurityHasPrivilegesResponse(
-  arg: any
-): arg is ExtendedSecurityHasPrivilegesResponse {
-  return (
-    arg.hasOwnProperty('hasPrivileges') &&
-    isPopulatedObject(arg.hasPrivileges) &&
-    arg.hasPrivileges.hasOwnProperty('has_all_requested') &&
-    arg.hasPrivileges.hasOwnProperty('cluster')
-  );
 }
 
 export interface MlInfoResponse {
@@ -436,9 +413,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     hasPrivileges(obj: any) {
       const body = JSON.stringify(obj);
-      return httpService.http<
-        ExtendedSecurityHasPrivilegesResponse | SecurityHasPrivilegesDisabledResponse
-      >({
+      return httpService.http<ExtendedSecurityHasPrivilegesResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
         method: 'POST',
         body,

@@ -74,7 +74,6 @@ export function systemRoutes(
             // return that security is disabled and don't call the privilegeCheck endpoint
             return response.ok({
               body: {
-                securityDisabled: true,
                 upgradeInProgress,
               },
             });

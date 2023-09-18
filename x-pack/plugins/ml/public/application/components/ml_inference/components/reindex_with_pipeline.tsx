@@ -32,10 +32,6 @@ import { useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
-import {
-  isSecurityHasPrivilegesDisabledResponse,
-  isSecurityHasPrivilegesResponse,
-} from '../../../services/ml_api_service';
 
 const destIndexEmpty = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexEmpty',
@@ -193,14 +189,10 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
             ],
           });
 
-          let ableToReindex: boolean = false;
-          if (isSecurityHasPrivilegesDisabledResponse(privilege)) {
-            ableToReindex = privilege.securityDisabled === true;
-          }
-          if (isSecurityHasPrivilegesResponse(privilege)) {
-            ableToReindex = privilege.hasPrivileges.has_all_requested === true;
-          }
-          setCanReindex(ableToReindex);
+          setCanReindex(
+            privilege.hasPrivileges === undefined ||
+              privilege.hasPrivileges.has_all_requested === true
+          );
         } catch (e) {
           const error = extractErrorMessage(e);
           const errorMessage = i18n.translate(
@@ -315,7 +307,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
                   content={
                     <FormattedMessage
                       id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexingTooltip"
-                      defaultMessage="Reindexing copies data from the selected index to the specified destination index. Each of the documents is first processed by the created pipeline, resulting in the addition of the inference result to each document before it is indexed."
+                      defaultMessage="Reindex data from the source index to a destination index using the new pipeline, which adds inference results to each document."
                     />
                   }
                   position="right"
