@@ -5,45 +5,43 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../../../../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import {
-  RecoveredActionGroup,
-  getDefaultRuleAggregation,
-  DefaultRuleAggregationResult,
-} from '../../../common';
-import { RegistryRuleType } from '../../rule_type_registry';
+import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
+
+import { RegistryRuleType } from '../../../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
+import { RecoveredActionGroup } from '../../../../../common';
+import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
+import { defaultRuleAggregationFactory } from '.';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   authorization: authorization as unknown as AlertingAuthorization,
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
@@ -52,13 +50,14 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  maxScheduledPerMinute: 1000,
+  internalSavedObjectsRepository,
 };
 
 beforeEach(() => {
@@ -176,7 +175,7 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     const result = await rulesClient.aggregate<DefaultRuleAggregationResult>({
       options: {},
-      aggs: getDefaultRuleAggregation(),
+      aggs: defaultRuleAggregationFactory(),
     });
 
     expect(result).toMatchInlineSnapshot(`
@@ -332,7 +331,7 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     await rulesClient.aggregate({
       options: { filter: 'foo: someTerm' },
-      aggs: getDefaultRuleAggregation(),
+      aggs: defaultRuleAggregationFactory(),
     });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -385,7 +384,9 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
     authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
-    await expect(rulesClient.aggregate({ aggs: getDefaultRuleAggregation() })).rejects.toThrow();
+    await expect(
+      rulesClient.aggregate({ aggs: defaultRuleAggregationFactory() })
+    ).rejects.toThrow();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -404,7 +405,7 @@ describe('aggregate()', () => {
     test('sets to default (50) if it is not provided', async () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
-      await rulesClient.aggregate({ aggs: getDefaultRuleAggregation() });
+      await rulesClient.aggregate({ aggs: defaultRuleAggregationFactory() });
 
       expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
         {
@@ -421,7 +422,7 @@ describe('aggregate()', () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
       await rulesClient.aggregate({
-        aggs: getDefaultRuleAggregation({ maxTags: 1000 }),
+        aggs: defaultRuleAggregationFactory({ maxTags: 1000 }),
       });
 
       expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
