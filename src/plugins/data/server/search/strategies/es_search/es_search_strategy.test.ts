@@ -131,7 +131,10 @@ describe('ES search strategy', () => {
       ...params,
       track_total_hits: true,
     });
-    expect(esClient.search.mock.calls[0][1]).toEqual({ signal: expect.any(AbortSignal), meta: true });
+    expect(esClient.search.mock.calls[0][1]).toEqual({
+      signal: expect.any(AbortSignal),
+      meta: true,
+    });
   });
 
   it('throws normalized error if ResponseError is thrown', async () => {
