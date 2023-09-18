@@ -85,6 +85,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) =>
       kibanaVersion: deps.kibanaVersion,
       share: deps.share,
       data: deps.data,
+      dataViewEditor: deps.dataViewEditor,
       security: deps.security,
       licenseManagement: deps.licenseManagement,
       storage: localStorage,

@@ -33,6 +33,7 @@
     ],
     "optionalPlugins": [
       "alerting",
+      "dataViewEditor",
       "dashboard",
       "home",
       "licenseManagement",

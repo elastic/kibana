@@ -48,6 +48,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -66,6 +67,7 @@ export interface MlStartDependencies {
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  dataViewEditor?: DataViewEditorStart;
   dataVisualizer: DataVisualizerPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
@@ -130,6 +132,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             data: pluginsStart.data,
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
+            dataViewEditor: pluginsStart.dataViewEditor,
             share: pluginsStart.share,
             security: pluginsStart.security,
             licensing: pluginsStart.licensing,
