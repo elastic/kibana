@@ -8,10 +8,6 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-ifeval::["{version}"=="8.10.0"]
-IMPORTANT: {kib} 8.10.0 has been withdrawn.
-endif::[]
-
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.10.1>>
@@ -60,7 +56,7 @@ The 8.10.1 release includes the following bug fixes.
 
 [float]
 [[fixes-v8.10.1]]
-=== Bug Fixes
+=== Bug fixes
 
 Dashboard::
 * Fixes content editor flyout footer ({kibana-pull}165907[#165907]).
@@ -76,11 +72,25 @@ Presentation::
 [[release-notes-8.10.0]]
 == {kib} 8.10.0
 
-ifeval::["{version}"=="8.10.0"]
 IMPORTANT: {kib} 8.10.0 has been withdrawn.
-endif::[]
 
 For information about the {kib} 8.10.0 release, review the following information.
+
+[float]
+[[security-updates-v8.10.0]]
+=== Security updates
+
+* An issue was discovered by Elastic whereby sensitive information is recorded
+in {kib} logs in the event of an error. The issue impacts only {kib} version
+8.10.0 when logging in the JSON layout or when the pattern layout is configured
+to log the `%meta` pattern.
++
+The issue is resolved in {kib} 8.10.1. Version 8.10.0 has been removed from our
+download sites.
++
+For more information, see our related
+https://discuss.elastic.co/t/kibana-8-10-1-security-update/343287[security
+announcement].
 
 [float]
 [[breaking-changes-8.10.0]]
