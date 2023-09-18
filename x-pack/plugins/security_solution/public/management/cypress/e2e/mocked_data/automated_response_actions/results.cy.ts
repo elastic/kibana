@@ -13,7 +13,7 @@ import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
 
-import { loginWithRole, ROLE } from '../../../tasks/login';
+import { login, ROLE } from '../../../tasks/login';
 
 describe('Results', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -52,7 +52,7 @@ describe('Results', () => {
 
   describe('see results when has RBAC', () => {
     before(() => {
-      loginWithRole(ROLE.endpoint_response_actions_access);
+      login(ROLE.endpoint_response_actions_access);
       disableExpandableFlyoutAdvancedSettings();
     });
 
@@ -68,7 +68,7 @@ describe('Results', () => {
   });
   describe('do not see results results when does not have RBAC', () => {
     before(() => {
-      loginWithRole(ROLE.endpoint_response_actions_no_access);
+      login(ROLE.endpoint_response_actions_no_access);
       disableExpandableFlyoutAdvancedSettings();
     });
 

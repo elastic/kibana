@@ -13,7 +13,7 @@ import {
   setCustomProtectionUpdatesManifestVersion,
   setCustomProtectionUpdatesNote,
 } from '../../tasks/endpoint_policy';
-import { login, loginWithRole, ROLE } from '../../tasks/login';
+import { login, ROLE } from '../../tasks/login';
 import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
 
 describe('Policy Details', () => {
@@ -189,7 +189,7 @@ describe('Policy Details', () => {
       const twoMonthsAgo = moment.utc().subtract(2, 'months');
 
       beforeEach(() => {
-        loginWithRole(ROLE.endpoint_security_policy_management_read);
+        login(ROLE.endpoint_security_policy_management_read);
         disableExpandableFlyoutAdvancedSettings();
       });
 
