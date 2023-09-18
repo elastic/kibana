@@ -30,6 +30,7 @@
     "@kbn/observability-onboarding-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/share-plugin",
+    "@kbn/io-ts-utils",
   ],
   "exclude": [
     "target/**/*"
