@@ -39,7 +39,7 @@ const steps: EuiContainedStepProps[] = [
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiLink
-            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-supportedNlpModelsLink"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-supportedNlpModelsLink"
             href={docLinks.supportedNlpModels}
             target="_blank"
             external
@@ -52,7 +52,7 @@ const steps: EuiContainedStepProps[] = [
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiLink
-            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-trainedModelsLink"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-trainedModelsLink"
             href={docLinks.trainedModels}
             target="_blank"
             external
@@ -65,7 +65,7 @@ const steps: EuiContainedStepProps[] = [
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiLinkTo
-            data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-trainedModelsButton"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-trainedModelsButton"
             to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)}
             shouldNotCreateHref
           >
@@ -89,7 +89,7 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLinkTo
-        data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-createIndexButton"
+        data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-createIndexButton"
         to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
         shouldNotCreateHref
       >
@@ -147,7 +147,7 @@ export const NlpEnrichmentPanel: React.FC = () => (
               values={{
                 supportedMlModels: (
                   <EuiLink
-                    data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentPanel-supportedMlModelsLink"
+                    data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentPanel-supportedMlModelsLink"
                     target="_blank"
                     href={docLinks.supportedNlpModels}
                     external={false}

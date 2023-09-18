@@ -44,7 +44,7 @@ describe('useEnterpriseSearchContentNav', () => {
     expect(useEnterpriseSearchNav()).toEqual([
       {
         href: '/app/enterprise_search/overview',
-        id: 'es_overview',
+        id: 'es_getting_started',
         items: [
           {
             href: '/app/enterprise_search/elasticsearch',
@@ -208,7 +208,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(useEnterpriseSearchApplicationNav()).toEqual([
       {
         href: '/app/enterprise_search/overview',
-        id: 'es_overview',
+        id: 'es_getting_started',
         items: [
           {
             href: '/app/enterprise_search/elasticsearch',
@@ -400,7 +400,7 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
   const baseNavs = [
     {
       href: '/app/enterprise_search/overview',
-      id: 'es_overview',
+      id: 'es_getting_started',
       items: [
         {
           href: '/app/enterprise_search/elasticsearch',

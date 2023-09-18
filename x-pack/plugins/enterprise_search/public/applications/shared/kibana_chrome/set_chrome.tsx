@@ -19,7 +19,7 @@ import {
   useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
-  useEsreBreadcrumbs,
+  useAiSearchBreadcrumbs,
   useElasticsearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
@@ -132,7 +132,7 @@ export const SetAiSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const docTitle = aiSearchTitle(title);
 
   const crumbs = useGenerateBreadcrumbs(trail);
-  const breadcrumbs = useEsreBreadcrumbs(crumbs);
+  const breadcrumbs = useAiSearchBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

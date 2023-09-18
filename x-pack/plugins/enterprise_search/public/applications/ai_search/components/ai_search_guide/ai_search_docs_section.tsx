@@ -37,7 +37,7 @@ export const SetAISearchChromeSearchDocsSection: React.FC = () => (
                 values={{
                   searchLab: (
                     <EuiLink
-                      data-telemetry-id="entSearch-aiSearch-documentation-esreHomeLink"
+                      data-telemetry-id="entSearch-aiSearch-documentation-searchLabsLink"
                       target="_blank"
                       href={docLinks.searchLabs}
                       external

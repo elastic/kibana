@@ -35,46 +35,6 @@ export const useEnterpriseSearchNav = () => {
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
-      id: 'es_overview',
-      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
-        defaultMessage: 'Overview',
-      }),
-      ...generateNavLink({
-        shouldNotCreateHref: true,
-        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
-      }),
-      items: [
-        {
-          id: 'elasticsearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
-            defaultMessage: 'Elasticsearch',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ELASTICSEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'vectorSearch',
-          name: VECTOR_SEARCH_PLUGIN.NAME,
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: VECTOR_SEARCH_PLUGIN.URL,
-          }),
-        },
-        {
-          id: 'aiSearch',
-          name: i18n.translate('xpack.enterpriseSearch.nav.aiSearchTitle', {
-            defaultMessage: 'AI Search',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: AI_SEARCH_PLUGIN.URL,
-          }),
-        },
-      ],
-    },
-    {
       id: 'content',
       items: [
         {
@@ -135,6 +95,46 @@ export const useEnterpriseSearchNav = () => {
       name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
         defaultMessage: 'Applications',
       }),
+    },
+    {
+      id: 'es_getting_started',
+      name: i18n.translate('xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle', {
+        defaultMessage: 'Gettting started',
+      }),
+      ...generateNavLink({
+        shouldNotCreateHref: true,
+        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      }),
+      items: [
+        {
+          id: 'elasticsearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.elasticsearchTitle', {
+            defaultMessage: 'Elasticsearch',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'vectorSearch',
+          name: VECTOR_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: VECTOR_SEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'aiSearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.aiSearchTitle', {
+            defaultMessage: 'AI Search',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: AI_SEARCH_PLUGIN.URL,
+          }),
+        },
+      ],
     },
     ...(productAccess.hasAppSearchAccess || productAccess.hasWorkplaceSearchAccess
       ? [

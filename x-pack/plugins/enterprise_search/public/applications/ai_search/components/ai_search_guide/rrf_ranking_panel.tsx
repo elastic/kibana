@@ -33,7 +33,7 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLink
-        data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingPanel-rrfDocsLink"
+        data-telemetry-id="entSearch-aiSearch-rankAggregation-rrfRankingPanel-rrfDocsLink"
         href={docLinks.rrf}
         target="_blank"
         external
@@ -51,7 +51,7 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLinkTo
-        data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingPanel-devToolsConsoleButton"
+        data-telemetry-id="entSearch-aiSearch-rankAggregation-rrfRankingPanel-devToolsConsoleButton"
         to={generatePath(DEV_TOOLS_CONSOLE_PATH)}
         shouldNotCreateHref
       >
@@ -75,7 +75,7 @@ export const RrfRankingPanel: React.FC = () => (
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.aiSearch.rrfRankingPanel.description"
-              data-telemetry-id="entSearch-esre-semanticSearch-rrfRankingPanel-rrfDocsLink"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-rrfRankingPanel-rrfDocsLink"
               defaultMessage="Use {rrf} to combine rankings from multiple result sets with different relevance indicators, with no fine tuning required."
               values={{
                 rrf: (

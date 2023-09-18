@@ -42,7 +42,7 @@ export const SemanticSearchSection: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.semanticSearch.description"
-                  defaultMessage="ESRE combines your choice of these information retrieval tools."
+                  defaultMessage="Combine any choice of these information retrieval tools."
                 />
               </p>
             </EuiText>
@@ -54,7 +54,7 @@ export const SemanticSearchSection: React.FC = () => {
           <EuiFlexItem grow={false}>
             <AISearchGuideAccordion
               id="elserAccordion"
-              data-telemetry-id="entSearch-esre-semanticSearch-elserAccordion"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-elserAccordion"
               initialIsOpen
               icon={elserIllustration}
               title={i18n.translate('xpack.enterpriseSearch.aiSearch.elserAccordion.title', {
@@ -75,7 +75,7 @@ export const SemanticSearchSection: React.FC = () => {
           <EuiFlexItem grow={false}>
             <AISearchGuideAccordion
               id="vectorSearchAccordion"
-              data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchAccordion"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchAccordion"
               icon={vectorSearchIllustration}
               title={i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchAccordion.title', {
                 defaultMessage: 'Vector Search',
@@ -95,7 +95,7 @@ export const SemanticSearchSection: React.FC = () => {
           <EuiFlexItem grow={false}>
             <AISearchGuideAccordion
               id="nlpEnrichmentAccordion"
-              data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentAccordion"
+              data-telemetry-id="entSearch-aiSearch-semanticSearch-nlpEnrichmentAccordion"
               icon={nlpEnrichmentIllustration}
               title={i18n.translate(
                 'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.title',

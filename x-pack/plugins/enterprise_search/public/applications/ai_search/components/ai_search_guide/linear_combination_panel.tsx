@@ -33,7 +33,7 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLink
-        data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationPanel-knnSearchCombineLink"
+        data-telemetry-id="entSearch-aiSearch-rankAggregation-linearCombinationPanel-knnSearchCombineLink"
         href={docLinks.knnSearchCombine}
         target="_blank"
         external
@@ -54,7 +54,7 @@ const steps: EuiContainedStepProps[] = [
     }),
     children: (
       <EuiLinkTo
-        data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationPanel-devToolsConsoleButton"
+        data-telemetry-id="entSearch-aiSearch-rankAggregation-linearCombinationPanel-devToolsConsoleButton"
         to={generatePath(DEV_TOOLS_CONSOLE_PATH)}
         shouldNotCreateHref
       >

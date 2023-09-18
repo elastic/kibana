@@ -39,7 +39,7 @@ const steps: EuiContainedStepProps[] = [
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiLink
-            data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-trainedModelsLink"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-trainedModelsLink"
             href={docLinks.trainedModels}
             target="_blank"
             external
@@ -52,7 +52,7 @@ const steps: EuiContainedStepProps[] = [
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiLinkTo
-            data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-trainedModelsButton"
+            data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-trainedModelsButton"
             to={generatePath(ML_MANAGE_TRAINED_MODELS_PATH)}
             shouldNotCreateHref
           >
@@ -80,7 +80,7 @@ const steps: EuiContainedStepProps[] = [
         shouldNotCreateHref
       >
         <EuiButton
-          data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-createIndexButton"
+          data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-createIndexButton"
           iconType="plusInCircle"
         >
           {i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchPanel.step2.buttonLabel', {
@@ -136,7 +136,7 @@ export const VectorSearchPanel: React.FC = () => (
               values={{
                 vectorDbCapabilities: (
                   <EuiLink
-                    data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchPanel-knnSearchLink"
+                    data-telemetry-id="entSearch-aiSearch-semanticSearch-vectorSearchPanel-knnSearchLink"
                     target="_blank"
                     href={docLinks.knnSearch}
                     external={false}

@@ -37,7 +37,7 @@ const steps: EuiContainedStepProps[] = [
         values={{
           behavioralAnalytics: (
             <EuiLinkTo
-              data-telemetry-id="entSearch-esre-measurePerformance-behavioralAnalyticsLink"
+              data-telemetry-id="entSearch-aiSearch-measurePerformance-behavioralAnalyticsLink"
               to={generatePath(ANALYTICS_PLUGIN.URL)}
               shouldNotCreateHref
             >
@@ -103,7 +103,7 @@ export const MeasurePerformanceSection: React.FC = () => (
                 values={{
                   behavioralAnalytics: (
                     <EuiLink
-                      data-telemetry-id="entSearch-esre-measurePerformance-behavioralAnalyticsDocsLink"
+                      data-telemetry-id="entSearch-aiSearch-measurePerformance-behavioralAnalyticsDocsLink"
                       target="_blank"
                       href={docLinks.behavioralAnalytics}
                       external

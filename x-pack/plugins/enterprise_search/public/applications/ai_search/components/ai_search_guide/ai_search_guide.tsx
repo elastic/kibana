@@ -24,7 +24,7 @@ import analyticsIllustration from '../../../../assets/images/analytics.svg';
 import scalableIllustration from '../../../../assets/images/scalable.svg';
 import simplifyIllustration from '../../../../assets/images/simplify.svg';
 import { SetAiSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
+import { EnterpriseSearchAISearchPageTemplate } from '../layout/page_template';
 
 import { SetAISearchChromeSearchDocsSection } from './ai_search_docs_section';
 import { MeasurePerformanceSection } from './measure_performance_section';
@@ -35,7 +35,7 @@ export const AISearchGuide: React.FC = () => {
   const isMobile = useIsWithinBreakpoints(['xs']);
 
   return (
-    <EnterpriseSearchEsrePageTemplate
+    <EnterpriseSearchAISearchPageTemplate
       restrictWidth
       bottomBorder={false}
       pageHeader={{
@@ -89,6 +89,6 @@ export const AISearchGuide: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </EnterpriseSearchEsrePageTemplate>
+    </EnterpriseSearchAISearchPageTemplate>
   );
 };

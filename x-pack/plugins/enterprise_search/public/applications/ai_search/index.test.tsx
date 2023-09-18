@@ -16,7 +16,7 @@ import { AISearchGuide } from './components/ai_search_guide/ai_search_guide';
 import { EnterpriseSearchAISearch } from '.';
 
 describe('SearchExperiences', () => {
-  it('renders the ESRE guide', () => {
+  it('renders the AI Search guide', () => {
     setMockValues({
       errorConnectingMessage: '',
       config: { host: 'localhost' },

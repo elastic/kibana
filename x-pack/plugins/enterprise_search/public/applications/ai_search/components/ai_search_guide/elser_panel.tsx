@@ -38,7 +38,7 @@ const steps: EuiContainedStepProps[] = [
         shouldNotCreateHref
       >
         <EuiButton
-          data-telemetry-id="entSearch-esre-semanticSearch-elserPanel-createIndexButton"
+          data-telemetry-id="entSearch-aiSearch-semanticSearch-elserPanel-createIndexButton"
           iconType="plusInCircle"
         >
           {i18n.translate('xpack.enterpriseSearch.aiSearch.elserPanel.step1.buttonLabel', {

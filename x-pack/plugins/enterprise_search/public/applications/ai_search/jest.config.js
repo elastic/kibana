@@ -8,7 +8,7 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/plugins/enterprise_search/public/applications/esre'],
+  roots: ['<rootDir>/x-pack/plugins/enterprise_search/public/applications/ai_search'],
   collectCoverage: true,
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
@@ -18,7 +18,7 @@ module.exports = {
     '!<rootDir>/x-pack/plugins/enterprise_search/public/applications/test_helpers/**/*.{ts,tsx}',
   ],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/enterprise_search/public/applications/esre',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/enterprise_search/public/applications/ai_search',
   modulePathIgnorePatterns: [
     '<rootDir>/x-pack/plugins/enterprise_search/public/applications/app_search/cypress',
     '<rootDir>/x-pack/plugins/enterprise_search/public/applications/workplace_search/cypress',
