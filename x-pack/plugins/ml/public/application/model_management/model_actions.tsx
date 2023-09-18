@@ -534,7 +534,9 @@ export function useModelActions({
         isPrimary: true,
         available: isTestable,
         onClick: (item) => onTestAction(item),
-        enabled: (item) => canTestTrainedModels && isTestable(item, true) && !isLoading,
+        enabled: (item) => {
+          return canTestTrainedModels && isTestable(item, true) && !isLoading;
+        },
       },
     ],
     [

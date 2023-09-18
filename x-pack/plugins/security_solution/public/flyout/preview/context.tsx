@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { useEventDetails } from '../shared/hooks/use_event_details';
+import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import type { PreviewPanelProps } from '.';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useTimelineEventsDetails } from '../../timelines/containers/details';
-import { getAlertIndexAlias } from '../../timelines/components/side_panel/event_details/helpers';
-import { useSpaceId } from '../../common/hooks/use_space_id';
-import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 
 export interface PreviewPanelContext {
   /**
@@ -41,7 +37,7 @@ export interface PreviewPanelContext {
   /**
    * An object with top level fields from the ECS object
    */
-  dataAsNestedObject: Ecs | null;
+  dataAsNestedObject: Ecs;
 }
 
 export const PreviewPanelContext = createContext<PreviewPanelContext | undefined>(undefined);
@@ -53,47 +49,43 @@ export type PreviewPanelProviderProps = {
   children: React.ReactNode;
 } & Partial<PreviewPanelProps['params']>;
 
-export const PreviewPanelProvider = ({
-  id,
-  indexName,
-  scopeId,
-  ruleId,
-  children,
-}: PreviewPanelProviderProps) => {
-  const currentSpaceId = useSpaceId();
-  const eventIndex = indexName ? getAlertIndexAlias(indexName, currentSpaceId) ?? indexName : '';
-  const [{ pageName }] = useRouteSpy();
-  const sourcererScope =
-    pageName === SecurityPageName.detections
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-  const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [_, __, ___, dataAsNestedObject] = useTimelineEventsDetails({
-    indexName: eventIndex,
-    eventId: id ?? '',
-    runtimeMappings: sourcererDataView.runtimeMappings,
-    skip: !id,
-  });
+export const PreviewPanelProvider = memo(
+  ({ id, indexName, scopeId, ruleId, children }: PreviewPanelProviderProps) => {
+    const { dataAsNestedObject, indexPattern, loading } = useEventDetails({
+      eventId: id,
+      indexName,
+    });
 
-  const contextValue = useMemo(
-    () =>
-      id && indexName && scopeId
-        ? {
-            eventId: id,
-            indexName,
-            scopeId,
-            ruleId: ruleId ?? '',
-            indexPattern: sourcererDataView.indexPattern,
-            dataAsNestedObject,
-          }
-        : undefined,
-    [id, indexName, scopeId, ruleId, sourcererDataView.indexPattern, dataAsNestedObject]
-  );
+    const contextValue = useMemo(
+      () =>
+        id && indexName && scopeId && dataAsNestedObject
+          ? {
+              eventId: id,
+              indexName,
+              scopeId,
+              ruleId: ruleId ?? '',
+              indexPattern,
+              dataAsNestedObject,
+            }
+          : undefined,
+      [id, indexName, scopeId, ruleId, indexPattern, dataAsNestedObject]
+    );
 
-  return (
-    <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>
-  );
-};
+    if (loading) {
+      return <FlyoutLoading />;
+    }
+
+    if (!contextValue) {
+      return <FlyoutError />;
+    }
+
+    return (
+      <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>
+    );
+  }
+);
+
+PreviewPanelProvider.displayName = 'PreviewPanelProvider';
 
 export const usePreviewPanelContext = (): PreviewPanelContext => {
   const contextValue = useContext(PreviewPanelContext);
