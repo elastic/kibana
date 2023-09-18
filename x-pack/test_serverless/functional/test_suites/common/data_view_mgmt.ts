@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/165796
   // FLAKY: https://github.com/elastic/kibana/issues/165425
   describe.skip('Data View Management', function () {
-    describe('disables scripted fields', function () {
+    describe('disables scripted fields - meaningless change', function () {
       let dataViewId = '';
 
       before(async () => {
