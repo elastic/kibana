@@ -1491,7 +1491,8 @@ export class Embeddable
       /** lens visualizations allow inline editing action
        *  navigation to the editor is allowed through the flyout
        */
-      editable: false,
+      editable: this.getIsEditable(),
+      inlineEditable: true,
       title,
       description,
       editPath: getEditPath(savedObjectId),
