@@ -86,7 +86,8 @@
     "@kbn/content-management-utils",
     "@kbn/serverless",
     "@kbn/ebt-tools",
-    "@kbn/field-utils",
+    "@kbn/search-response-warnings",
+    "@kbn/field-utils"
   ],
   "exclude": [
     "target/**/*",
