@@ -93,7 +93,6 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Configuration',
         }),
         status: completionState.configurationStep ? 'complete' : getStepStatus(CONFIGURATION),
-        onClick: () => currentStep !== CONFIGURATION && changeCurrentStepTo(CONFIGURATION),
         children: currentStep === CONFIGURATION && (
           <ConfigurationStep onNext={() => changeCurrentStepTo(FIELD_SELECTION)} />
         ),
@@ -104,13 +103,11 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Field selection',
         }),
         status: completionState.fieldsSelectionStep ? 'complete' : getStepStatus(FIELD_SELECTION),
-        onClick: () => {
-          if (currentStep !== FIELD_SELECTION && completionState.configurationStep) {
-            changeCurrentStepTo(FIELD_SELECTION);
-          }
-        },
         children: currentStep === FIELD_SELECTION && (
-          <FieldSelectionStep onNext={() => changeCurrentStepTo(CREATE)} />
+          <FieldSelectionStep
+            onNext={() => changeCurrentStepTo(CREATE)}
+            onBack={() => changeCurrentStepTo(CONFIGURATION)}
+          />
         ),
       },
       {
@@ -119,17 +116,12 @@ export const CreatePolicyWizard = () => {
           defaultMessage: 'Create',
         }),
         status: (currentStep === CREATE ? 'current' : 'incomplete') as EuiStepStatus,
-        onClick: () => {
-          if (
-            currentStep !== CREATE &&
-            completionState.configurationStep &&
-            completionState.fieldsSelectionStep
-          ) {
-            changeCurrentStepTo(CREATE);
-          }
-        },
         children: currentStep === CREATE && (
-          <CreateStep onSubmit={onSubmit} isLoading={isLoading} />
+          <CreateStep
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+            onBack={() => changeCurrentStepTo(FIELD_SELECTION)}
+          />
         ),
       },
     ],

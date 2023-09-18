@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
+  const pageObjects = getPageObjects(['common', 'indexManagement', 'header', 'svlCommonPage']);
   const log = getService('log');
   const security = getService('security');
   const comboBox = getService('comboBox');
@@ -44,8 +44,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       await log.debug('Navigating to the enrich policies tab');
+      await pageObjects.svlCommonPage.login();
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.common.navigateToApp('indexManagement');
+
       // Navigate to the enrich policies tab
       await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -61,6 +63,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       } catch (e) {
         log.debug('[Teardown error] Error deleting test policy');
         throw e;
+      } finally {
+        await pageObjects.svlCommonPage.forceLogout();
       }
     });
 

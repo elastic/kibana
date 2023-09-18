@@ -17,6 +17,7 @@ import type { SerializedEnrichPolicy } from '../../../../../common';
 import { useAppContext } from '../../../app_context';
 import { useRedirectPath } from '../../../hooks/redirect_path';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
 import { PoliciesTable } from './policies_table';
@@ -37,6 +38,10 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
     core: { executionContext },
   } = useAppContext();
   const redirectTo = useRedirectPath(history);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.enrichPolicies);
+  }, []);
 
   useExecutionContext(executionContext, {
     type: 'application',

@@ -61,7 +61,14 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
         const res = await enrichPoliciesActions.create(client, policy.name, serializedPolicy);
 
         if (executeAfter) {
-          await enrichPoliciesActions.execute(client, policy.name);
+          try {
+            await enrichPoliciesActions.execute(client, policy.name);
+          } catch (error) {
+            // If executing the policy fails, remove the previously created policy and
+            // return the error.
+            await enrichPoliciesActions.remove(client, policy.name);
+            return handleEsError({ error, response });
+          }
         }
 
         return response.ok({ body: res });

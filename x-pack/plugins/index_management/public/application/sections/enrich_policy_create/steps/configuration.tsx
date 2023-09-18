@@ -9,7 +9,17 @@ import React, { useState } from 'react';
 import { omit, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPopover, EuiIcon, EuiCode, EuiButton, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiIcon,
+  EuiCode,
+  EuiButton,
+  EuiText,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import {
   useForm,
   Form,
@@ -313,20 +323,30 @@ export const ConfigurationStep = ({ onNext }: Props) => {
 
       <EuiSpacer />
 
-      <EuiButton
-        fill
-        color="primary"
-        iconSide="right"
-        iconType="arrowRight"
-        disabled={form.isValid === false}
-        data-test-subj="nextButton"
-        onClick={onSubmit}
+      <EuiFlexGroup
+        data-test-subj="configureStep"
+        justifyContent="spaceBetween"
+        style={{ maxWidth: 400 }}
       >
-        <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.nextButtonLabel"
-          defaultMessage="Next"
-        />
-      </EuiButton>
+        <EuiFlexItem grow={false} />
+
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            color="primary"
+            iconSide="right"
+            iconType="arrowRight"
+            disabled={form.isValid === false}
+            data-test-subj="nextButton"
+            onClick={onSubmit}
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicyCreate.configurationStep.nextButtonLabel"
+              defaultMessage="Next"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Form>
   );
 };

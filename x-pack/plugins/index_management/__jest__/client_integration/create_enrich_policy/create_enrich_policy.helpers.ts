@@ -25,9 +25,10 @@ const testBedConfig: AsyncTestBedConfig = {
 export interface CreateEnrichPoliciesTestBed extends TestBed<TestSubjects> {
   actions: {
     clickNextButton: () => Promise<void>;
+    clickBackButton: () => Promise<void>;
     clickRequestTab: () => Promise<void>;
     clickCreatePolicy: () => Promise<void>;
-    completeCreationStep: ({ indices }: { indices?: string }) => Promise<void>;
+    completeConfigurationStep: ({ indices }: { indices?: string }) => Promise<void>;
     completeFieldsSelectionStep: () => Promise<void>;
     isOnConfigurationStep: () => boolean;
     isOnFieldSelectionStep: () => boolean;
@@ -58,6 +59,13 @@ export const setup = async (
 
     testBed.component.update();
   };
+  const clickBackButton = async () => {
+    await act(async () => {
+      testBed.find('backButton').simulate('click');
+    });
+
+    testBed.component.update();
+  };
   const clickCreatePolicy = async (executeAfter?: boolean) => {
     await act(async () => {
       testBed.find(executeAfter ? 'createAndExecuteButton' : 'createButton').simulate('click');
@@ -74,7 +82,7 @@ export const setup = async (
     testBed.component.update();
   };
 
-  const completeCreationStep = async ({ indices }: { indices?: string }) => {
+  const completeConfigurationStep = async ({ indices }: { indices?: string }) => {
     const { form } = testBed;
 
     form.setInputValue('policyNameField.input', 'test_policy');
@@ -97,9 +105,10 @@ export const setup = async (
     ...testBed,
     actions: {
       clickNextButton,
+      clickBackButton,
       clickRequestTab,
       clickCreatePolicy,
-      completeCreationStep,
+      completeConfigurationStep,
       completeFieldsSelectionStep,
       isOnConfigurationStep,
       isOnFieldSelectionStep,

@@ -9,6 +9,8 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiButton,
   EuiIconTip,
   EuiSpacer,
@@ -32,6 +34,7 @@ import { useCreatePolicyContext, DraftPolicy } from '../create_policy_context';
 
 interface Props {
   onNext: () => void;
+  onBack: () => void;
 }
 
 export const fieldSelectionFormSchema: FormSchema = {
@@ -86,7 +89,7 @@ const buildFieldOption = (field: FieldItem) => ({
   prepend: <KbnFieldIcon type={field.normalizedType} />,
 });
 
-export const FieldSelectionStep = ({ onNext }: Props) => {
+export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [fieldOptions, setFieldOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [matchFieldOptions, setMatchFieldOptions] = useState<EuiComboBoxOptionOption[]>([]);
@@ -243,20 +246,43 @@ export const FieldSelectionStep = ({ onNext }: Props) => {
 
       <EuiSpacer />
 
-      <EuiButton
-        fill
-        color="primary"
-        iconSide="right"
-        iconType="arrowRight"
-        disabled={form.isValid === false}
-        data-test-subj="nextButton"
-        onClick={onSubmit}
+      <EuiFlexGroup
+        data-test-subj="fieldSelectionStep"
+        justifyContent="spaceBetween"
+        style={{ maxWidth: 400 }}
       >
-        <FormattedMessage
-          id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.nextButtonLabel"
-          defaultMessage="Next"
-        />
-      </EuiButton>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            iconSide="left"
+            iconType="arrowLeft"
+            data-test-subj="backButton"
+            onClick={onBack}
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.backButtonLabel"
+              defaultMessage="Back"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            color="primary"
+            iconSide="right"
+            iconType="arrowRight"
+            disabled={form.isValid === false}
+            data-test-subj="nextButton"
+            onClick={onSubmit}
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.enrichPolicyCreate.fieldSelectionStep.nextButtonLabel"
+              defaultMessage="Next"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Form>
   );
 };

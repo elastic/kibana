@@ -175,10 +175,11 @@ const RequestTab = ({ policy }: { policy: SerializedEnrichPolicy }) => {
 const CREATE_AND_EXECUTE_POLICY = true;
 interface Props {
   onSubmit: (executePolicyAfterCreation?: boolean) => void;
+  onBack: () => void;
   isLoading: boolean;
 }
 
-export const CreateStep = ({ onSubmit, isLoading }: Props) => {
+export const CreateStep = ({ onBack, onSubmit, isLoading }: Props) => {
   const { draft } = useCreatePolicyContext();
 
   const summaryTabs = [
@@ -208,35 +209,57 @@ export const CreateStep = ({ onSubmit, isLoading }: Props) => {
 
       <EuiSpacer size="l" />
 
-      <EuiFlexGroup data-test-subj="creationStep">
+      <EuiFlexGroup
+        data-test-subj="creationStep"
+        justifyContent="spaceBetween"
+        style={{ maxWidth: 400 }}
+      >
         <EuiFlexItem grow={false}>
           <EuiButton
+            minWidth={false}
             color="primary"
-            onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)}
-            isDisabled={isLoading}
-            data-test-subj="createAndExecuteButton"
+            iconSide="left"
+            iconType="arrowLeft"
+            data-test-subj="backButton"
+            onClick={onBack}
           >
             <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
-              defaultMessage="Create and execute policy"
+              id="xpack.idxMgmt.enrichPolicyCreate.createStep.backButtonLabel"
+              defaultMessage="Back"
             />
           </EuiButton>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            color="primary"
-            onClick={() => onSubmit()}
-            isDisabled={isLoading}
-            data-test-subj="createButton"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.createStep.createButtonLabel"
-              defaultMessage="Create policy"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              onClick={() => onSubmit(CREATE_AND_EXECUTE_POLICY)}
+              isDisabled={isLoading}
+              data-test-subj="createAndExecuteButton"
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.enrichPolicyCreate.createStep.createAndExecuteButtonLabel"
+                defaultMessage="Create and execute"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              color="primary"
+              onClick={() => onSubmit()}
+              isDisabled={isLoading}
+              data-test-subj="createButton"
+            >
+              <FormattedMessage
+                id="xpack.idxMgmt.enrichPolicyCreate.createStep.createButtonLabel"
+                defaultMessage="Create"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </>
   );
