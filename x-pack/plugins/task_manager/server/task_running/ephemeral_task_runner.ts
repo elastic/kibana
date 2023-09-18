@@ -347,6 +347,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
               task: { ...this.instance.task, state },
               persistence: TaskPersistence.Ephemeral,
               result: TaskRunResult.Success,
+              isExpired: false,
             }),
             taskTiming
           )
@@ -360,6 +361,7 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
               task: { ...this.instance.task, state },
               persistence: TaskPersistence.Ephemeral,
               result: TaskRunResult.Failed,
+              isExpired: false,
               error,
             }),
             taskTiming
