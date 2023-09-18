@@ -32,7 +32,6 @@ describe('Options list popover', () => {
     componentState: Partial<OptionsListComponentState>;
     explicitInput: Partial<OptionsListEmbeddableInput>;
     output: Partial<ControlOutput>;
-    popoverProps: Partial<OptionsListPopoverProps>;
   }
 
   async function mountComponent(options?: Partial<MountOptions>) {
@@ -59,12 +58,12 @@ describe('Options list popover', () => {
   };
 
   test('available options list width responds to container size', async () => {
-    let popover = await mountComponent({ popoverProps: { width: 301 } });
+    let popover = await mountComponent();
     let popoverDiv = findTestSubject(popover, 'optionsList-control-popover');
     expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 301px; min-width: 300px;');
 
     // the div cannot be smaller than 301 pixels wide
-    popover = await mountComponent({ popoverProps: { width: 300 } });
+    popover = await mountComponent();
     popoverDiv = findTestSubject(popover, 'optionsList-control-available-options');
     expect(popoverDiv.getDOMNode().getAttribute('style')).toBe('width: 100%; height: 100%;');
   });
