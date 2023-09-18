@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CORRELATIONS_RELATED_CASES } from '../../shared/translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID } from './test_ids';
@@ -25,7 +25,13 @@ export interface RelatedCasesProps {
  */
 export const RelatedCases: React.VFC<RelatedCasesProps> = ({ eventId }) => {
   const { loading, error, dataCount } = useFetchRelatedCases({ eventId });
-  const text = CORRELATIONS_RELATED_CASES(dataCount);
+  const text = (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.right.insights.correlations.relatedCasesLabel"
+      defaultMessage="related {count, plural, one {case} other {cases}}"
+      values={{ count: dataCount }}
+    />
+  );
 
   return (
     <InsightsSummaryRow

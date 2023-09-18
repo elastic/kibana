@@ -68,6 +68,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         advancedSettings: {
           pathname: '/app/management/kibana/settings',
         },
+        login: {
+          pathname: '/login',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {

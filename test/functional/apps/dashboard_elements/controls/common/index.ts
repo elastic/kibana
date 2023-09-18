@@ -13,11 +13,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
 
-  const { dashboardControls, common, dashboard } = getPageObjects([
-    'dashboardControls',
-    'dashboard',
-    'common',
-  ]);
+  const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
   async function setup() {
     await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
@@ -31,9 +27,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     });
 
     // enable the controls lab and navigate to the dashboard listing page to start
-    await common.navigateToApp('dashboard');
+    await dashboard.navigateToApp();
     await dashboardControls.enableControlsLab();
-    await common.navigateToApp('dashboard');
+    await dashboard.navigateToApp();
     await dashboard.preserveCrossAppState();
   }
 
