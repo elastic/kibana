@@ -17,7 +17,12 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { create } from './create';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 
@@ -387,12 +392,12 @@ describe('create', () => {
     const theCustomFields: CaseCustomFields = [
       {
         key: 'first_customField_key',
-        type: 'text',
+        type: CustomFieldTypes.TEXT,
         field: { value: ['this is a text field value', 'this is second'] },
       },
       {
         key: 'second_customField_key',
-        type: 'toggle',
+        type: CustomFieldTypes.TOGGLE,
         field: { value: [true] },
       },
     ];

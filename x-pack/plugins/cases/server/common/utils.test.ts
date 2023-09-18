@@ -38,7 +38,12 @@ import type {
   CaseConnector,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
-import { ConnectorTypes, CaseSeverity, AttachmentType } from '../../common/types/domain';
+import {
+  ConnectorTypes,
+  CaseSeverity,
+  AttachmentType,
+  CustomFieldTypes,
+} from '../../common/types/domain';
 import type { AttachmentRequest } from '../../common/types/api';
 import {
   createAlertRequests,
@@ -93,7 +98,7 @@ describe('common utils', () => {
   const customFields = [
     {
       key: 'string_custom_field_1',
-      type: 'text' as const,
+      type: CustomFieldTypes.TEXT as const,
       field: { value: ['this is a text field value', 'this is second'] },
     },
   ];

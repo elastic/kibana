@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -885,28 +886,23 @@ describe('update', () => {
       const customFields = [
         {
           key: 'string_custom_field_1',
-          type: 'text' as const,
+          type: CustomFieldTypes.TEXT as const,
           field: { value: ['this is a text field value', 'this is second'] },
         },
         {
           key: 'string_custom_field_2',
-          type: 'text' as const,
+          type: CustomFieldTypes.TEXT as const,
           field: { value: null },
         },
         {
           key: 'boolean_custom_field_1',
-          type: 'toggle' as const,
+          type: CustomFieldTypes.TOGGLE as const,
           field: { value: [true] },
         },
         {
           key: 'boolean_custom_field_2',
-          type: 'toggle' as const,
+          type: CustomFieldTypes.TOGGLE as const,
           field: { value: null },
-        },
-        {
-          key: 'list_custom_field_1',
-          type: 'list' as const,
-          field: { value: ['this is a text field value'] },
         },
       ];
 

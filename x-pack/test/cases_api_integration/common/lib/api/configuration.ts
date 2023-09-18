@@ -38,6 +38,7 @@ export const getConfigurationRequest = ({
     } as CaseConnector,
     closure_type: 'close-by-user',
     owner: 'securitySolutionFixture',
+    customFields: [],
     ...overrides,
   };
 };
@@ -49,6 +50,7 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
     mappings: [],
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
+    customFields: [],
     ...overwrite,
   };
 };

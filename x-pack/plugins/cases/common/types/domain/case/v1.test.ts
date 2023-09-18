@@ -301,22 +301,6 @@ describe('CustomFieldRt', () => {
         field: { value: null },
       },
     ],
-    [
-      'type list value list',
-      {
-        key: 'list_custom_field_1',
-        type: 'list',
-        field: { value: ['this is a text field value'] },
-      },
-    ],
-    [
-      'type list value null',
-      {
-        key: 'list_custom_field_1',
-        type: 'list',
-        field: { value: null },
-      },
-    ],
   ])(`has expected attributes for customField with %s`, (_, customField) => {
     const query = CustomFieldRt.decode(customField);
 
@@ -334,16 +318,6 @@ describe('CustomFieldRt', () => {
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value 666 supplied');
-  });
-
-  it('fails if list type and value dont match expected attributes in request', () => {
-    const query = CustomFieldRt.decode({
-      key: 'list_custom_field_1',
-      type: 'list',
-      field: { value: [true] },
-    });
-
-    expect(PathReporter.report(query)[0]).toContain('Invalid value true supplied');
   });
 
   it('fails if toggle type and value dont match expected attributes in request', () => {
