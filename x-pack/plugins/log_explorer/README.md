@@ -60,6 +60,7 @@ In its current state the `<LogExplorer />` achieves neither goal. To resolve the
 ## Resources
 
 - [Statecharts overview](https://statecharts.dev/)
+- [Statecharts: A Visual Formalism For Complex Systems (original paper)](https://www.wisdom.weizmann.ac.il/~harel/papers/Statecharts.pdf)
 - [XState documentation](https://stately.ai/docs/xstate)
 - [XState VS Code extension](https://stately.ai/docs/tools/xstate-vscode-extension)
 - [`infra` plugin's state machine patterns](../infra/docs/state_machines/README.md)
