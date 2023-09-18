@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
@@ -38,6 +39,13 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_CASES_SECTION_TEST_ID
 );
 
+const renderRelatedCases = () =>
+  render(
+    <IntlProvider locale="en">
+      <RelatedCases eventId={eventId} />
+    </IntlProvider>
+  );
+
 describe('<RelatedCases />', () => {
   it('should render many related cases correctly', () => {
     (useFetchRelatedCases as jest.Mock).mockReturnValue({
@@ -54,7 +62,7 @@ describe('<RelatedCases />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(<RelatedCases eventId={eventId} />);
+    const { getByTestId } = renderRelatedCases();
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toHaveTextContent('1 related case');
@@ -67,7 +75,19 @@ describe('<RelatedCases />', () => {
       error: true,
     });
 
-    const { container } = render(<RelatedCases eventId={eventId} />);
+    const { container } = renderRelatedCases();
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should render no data message', () => {
+    (useFetchRelatedCases as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+
+    const { getByText } = renderRelatedCases();
+    expect(getByText('No related cases.')).toBeInTheDocument();
   });
 });

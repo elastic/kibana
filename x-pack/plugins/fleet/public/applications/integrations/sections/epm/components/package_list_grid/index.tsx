@@ -168,7 +168,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       gutterSize="xl"
       data-test-subj="epmList.integrationCards"
     >
-      <EuiFlexItem data-test-subj="epmList.controlsSideColumn" grow={1} className="kbnStickyMenu">
+      <EuiFlexItem data-test-subj="epmList.controlsSideColumn" grow={1}>
         <ControlsColumn controls={controls} title={title} />
       </EuiFlexItem>
       <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>

@@ -12,12 +12,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchLandingPage = getPageObject('svlSearchLandingPage');
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
   describe('navigation', function () {
     before(async () => {
+      await svlCommonPage.login();
       await svlSearchNavigation.navigateToLandingPage();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
     });
 
     it('navigate search sidenav & breadcrumbs', async () => {

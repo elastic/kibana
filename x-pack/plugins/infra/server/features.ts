@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
+import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
@@ -42,7 +43,7 @@ export const METRICS_FEATURE = {
       catalogue: ['infraops', 'metrics'],
       api: ['infra', 'rac'],
       savedObject: {
-        all: ['infrastructure-ui-source'],
+        all: ['infrastructure-ui-source', metricsDataSourceSavedObjectName],
         read: ['index-pattern'],
       },
       alerting: {
@@ -64,7 +65,7 @@ export const METRICS_FEATURE = {
       api: ['infra', 'rac'],
       savedObject: {
         all: [],
-        read: ['infrastructure-ui-source', 'index-pattern'],
+        read: ['infrastructure-ui-source', 'index-pattern', metricsDataSourceSavedObjectName],
       },
       alerting: {
         rule: {

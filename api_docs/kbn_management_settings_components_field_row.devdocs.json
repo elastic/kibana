@@ -1,0 +1,277 @@
+{
+  "id": "@kbn/management-settings-components-field-row",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-row",
+        "id": "def-common.FieldRow",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldRow",
+        "description": [
+          "\nComponent for displaying a {@link FieldDefinition} in a form row, using a {@link FieldInput}."
+        ],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">(props: ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.FieldRowProps",
+            "text": "FieldRowProps"
+          },
+          "<T>) => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-row",
+            "id": "def-common.FieldRow.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "The {@link FieldRowProps } for the {@link FieldRow } component."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-common.FieldRowProps",
+                "text": "FieldRowProps"
+              },
+              "<T>"
+            ],
+            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-row",
+        "id": "def-common.FieldRowProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldRowProps",
+        "description": [
+          "\nProps for a {@link FieldRow} component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.FieldRowProps",
+            "text": "FieldRowProps"
+          },
+          "<T>"
+        ],
+        "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-row",
+            "id": "def-common.FieldRowProps.isSavingEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSavingEnabled",
+            "description": [
+              "True if saving settings is enabled, false otherwise."
+            ],
+            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-row",
+            "id": "def-common.FieldRowProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [
+              "The {@link OnChangeFn} handler."
+            ],
+            "signature": [
+              "(id: string, change: ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T>) => void"
+            ],
+            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-row",
+                "id": "def-common.FieldRowProps.onChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-management/settings/components/field_row/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-row",
+                "id": "def-common.FieldRowProps.onChange.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "change",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/management-settings-types",
+                    "scope": "common",
+                    "docId": "kibKbnManagementSettingsTypesPluginApi",
+                    "section": "def-common.UnsavedFieldChange",
+                    "text": "UnsavedFieldChange"
+                  },
+                  "<T>"
+                ],
+                "path": "packages/kbn-management/settings/components/field_row/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-row",
+            "id": "def-common.FieldRowProps.onClear",
+            "type": "Function",
+            "tags": [],
+            "label": "onClear",
+            "description": [
+              "\nThe onClear handler, if a value is cleared to an empty or default state."
+            ],
+            "signature": [
+              "((id: string) => void) | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/management-settings-components-field-row",
+                "id": "def-common.FieldRowProps.onClear.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The id relating to the field to clear."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-row",
+            "id": "def-common.FieldRowProps.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [
+              "The {@link FieldDefinition} corresponding the setting."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<T, ",
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.KnownTypeToValue",
+                "text": "KnownTypeToValue"
+              },
+              "<T> | null>"
+            ],
+            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-row",
+            "id": "def-common.FieldRowProps.unsavedChange",
+            "type": "Object",
+            "tags": [],
+            "label": "unsavedChange",
+            "description": [
+              "The {@link UnsavedFieldChange} corresponding to any unsaved change to the field."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_row/field_row.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

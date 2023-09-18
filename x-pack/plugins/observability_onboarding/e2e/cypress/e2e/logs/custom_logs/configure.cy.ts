@@ -59,11 +59,11 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
           .type('myLogs.log');
         cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
           'have.value',
-          'myLogs'
+          'mylogs'
         );
         cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
           'have.value',
-          'myLogs'
+          'mylogs'
         );
       });
 
@@ -280,7 +280,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('installation fails', () => {
-        cy.getByTestSubj('obltOnboardingCustomIntegrationUnauthorized').should(
+        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
           'exist'
         );
       });
@@ -304,8 +304,6 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('installation succeed and user is redirected install elastic agent step', () => {
-        cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
-
         cy.url().should(
           'include',
           '/app/observabilityOnboarding/customLogs/installElasticAgent'
@@ -349,7 +347,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       });
 
       it('user should see the error displayed', () => {
-        cy.getByTestSubj('obltOnboardingCustomIntegrationUnknownError').should(
+        cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
           'exist'
         );
       });

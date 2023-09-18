@@ -299,7 +299,7 @@ export class CommonPageObject extends FtrService {
         const navSuccessful = currentUrl
           .replace(':80/', '/')
           .replace(':443/', '/')
-          .startsWith(appUrl);
+          .startsWith(appUrl.replace(':80/', '/').replace(':443/', '/'));
 
         if (!navSuccessful) {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;

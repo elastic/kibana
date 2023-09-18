@@ -42,7 +42,10 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
   return {
     originatingApp: PLUGIN_ID,
     localStorageKeyPrefix: 'discover',
+    compressed: true,
+    showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
+    buttonAddFieldVariant: 'toolbar',
     buttonPropsToTriggerFlyout: {
       contentProps: {
         id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
@@ -87,10 +90,6 @@ export interface DiscoverSidebarResponsiveProps {
    * hits fetched from ES, displayed in the doc table
    */
   documents$: DataDocuments$;
-  /**
-   * Has been toggled closed
-   */
-  isClosed?: boolean;
   /**
    * Callback function when selecting a field
    */
@@ -380,7 +379,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       ref={initializeUnifiedFieldListSidebarContainerApi}
       variant={fieldListVariant}
       getCreationOptions={getCreationOptions}
-      isSidebarCollapsed={props.isClosed}
       services={fieldListSidebarServices}
       dataView={selectedDataView}
       trackUiMetric={trackUiMetric}
