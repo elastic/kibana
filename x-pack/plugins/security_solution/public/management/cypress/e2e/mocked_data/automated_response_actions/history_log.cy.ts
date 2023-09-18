@@ -10,7 +10,7 @@ import { indexEndpointHosts } from '../../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../../types';
 import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_alerts';
 
-import { login, ROLE } from '../../../tasks/login';
+import { loginWithRole, ROLE } from '../../../tasks/login';
 
 describe('Response actions history page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -19,7 +19,7 @@ describe('Response actions history page', () => {
   const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
 
   before(() => {
-    login(ROLE.endpoint_response_actions_access);
+    loginWithRole(ROLE.endpoint_response_actions_access);
 
     indexEndpointHosts({ numResponseActions: 2 }).then((indexEndpoints) => {
       endpointData = indexEndpoints;
