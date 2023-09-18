@@ -125,7 +125,9 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -175,7 +177,9 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -225,7 +229,9 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -403,7 +409,9 @@ exports[`DatatableComponent it renders custom row height if set to another value
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -453,7 +461,9 @@ exports[`DatatableComponent it renders custom row height if set to another value
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -503,7 +513,9 @@ exports[`DatatableComponent it renders custom row height if set to another value
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -674,7 +686,9 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -724,7 +738,9 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -774,7 +790,9 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -947,7 +965,9 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -997,7 +1017,9 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {
@@ -1047,7 +1069,9 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
                 "label": "Sort descending",
               },
             },
-            "cellActions": Array [],
+            "cellActions": Array [
+              [Function],
+            ],
             "display": <div
               css={
                 Object {

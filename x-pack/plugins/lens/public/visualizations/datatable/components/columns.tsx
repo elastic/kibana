@@ -14,13 +14,13 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
+import { pluginServices } from '@kbn/dashboard-plugin/public';
 import type {
   Datatable,
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { pluginServices } from '@kbn/dashboard-plugin/public';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
@@ -62,7 +62,6 @@ export const createGridColumns = (
     memo[id] = { name, index: i, meta };
     return memo;
   }, {});
-
   const getContentData = ({
     rowIndex,
     columnId,
@@ -75,8 +74,6 @@ export const createGridColumns = (
     const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
     return { rowValue, contentsIsDefined, cellContent };
   };
-
-  const { notifications } = pluginServices.getServices();
 
   return visibleColumns.map((field) => {
     const { name, index: colIndex } = columnsReverseLookup[field];
@@ -179,12 +176,6 @@ export const createGridColumns = (
       const copyActionText = i18n.translate('xpack.lens.table.triggerAction.copyToClipboard', {
         defaultMessage: 'Copy to clipboard',
       });
-      const copyForAriaLabel = i18n.translate('xpack.lens.table.triggerAction.copyToClipboard', {
-        defaultMessage: 'Copy to clipboard',
-        values: {
-          cellContent,
-        },
-      });
 
       if (!contentsIsDefined) {
         return null;
@@ -203,9 +194,10 @@ export const createGridColumns = (
 
       return (
         <Component
-          aria-label={copyForAriaLabel}
+          aria-label={copyActionText}
           data-test-subj="lensDatatableCopyToClipboard"
           onClick={() => {
+            const { notifications } = pluginServices.getServices();
             try {
               copyToClipboard(cellContent);
               notifications.toasts.addInfo(toastTitle.copyToClipboard.success);

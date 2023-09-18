@@ -98,7 +98,7 @@ describe('getContentData', () => {
         handleFilterClick: () => {},
         columnFilterable: [true],
       });
-      expect(cellActions).toHaveLength(2);
+      expect(cellActions).toHaveLength(3);
     });
 
     it('should not include filter actions if column not filterable', () => {
@@ -106,21 +106,21 @@ describe('getContentData', () => {
         handleFilterClick: () => {},
         columnFilterable: [false],
       });
-      expect(cellActions).toHaveLength(0);
+      expect(cellActions).toHaveLength(1);
     });
 
     it('should not include filter actions if no filter handler defined', () => {
       const [{ cellActions }] = callCreateGridColumns({
         columnFilterable: [true],
       });
-      expect(cellActions).toHaveLength(0);
+      expect(cellActions).toHaveLength(1);
     });
 
     it('should include cell value actions', () => {
       const [{ cellActions }] = callCreateGridColumns({
         columnCellValueActions: [[cellValueAction]],
       });
-      expect(cellActions).toHaveLength(1);
+      expect(cellActions).toHaveLength(2);
     });
 
     it('should include all actions', () => {
@@ -129,7 +129,7 @@ describe('getContentData', () => {
         columnFilterable: [true],
         columnCellValueActions: [[cellValueAction]],
       });
-      expect(cellActions).toHaveLength(3);
+      expect(cellActions).toHaveLength(4);
     });
 
     it('should render filterFor as first action', () => {
@@ -160,7 +160,7 @@ describe('getContentData', () => {
       });
       const wrapper = renderCellAction(cellActions, 2);
       expect(wrapper?.find('Component').prop('data-test-subj')).toEqual(
-        'lensDatatableCellAction-test'
+        'lensDatatableCopyToClipboard'
       );
     });
   });
