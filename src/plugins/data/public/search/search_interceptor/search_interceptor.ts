@@ -308,9 +308,9 @@ export class SearchInterceptor {
     // 1) POST /<index pattern>/_async_search/
     // 2..n) GET /_async_search/<async search identifier>
     //
-    // First request contains useful request meta for tools like Inspector.
-    // Preserve and project first request meta into responses.
-    let firstRequestMeta;
+    // First request contains useful request params for tools like Inspector.
+    // Preserve and project first request params into responses.
+    let firstRequestParams;
 
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
@@ -318,8 +318,8 @@ export class SearchInterceptor {
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
       tap((response) => {
-        if (!firstRequestMeta && response.requestParams) {
-          firstRequestMeta = response.requestParams;
+        if (!firstRequestParams && response.requestParams) {
+          firstRequestParams = response.requestParams;
         }
 
         id = response.id;
@@ -329,10 +329,10 @@ export class SearchInterceptor {
         }
       }),
       map((response) => {
-        return firstRequestMeta
+        return firstRequestParams
           ? {
               ...response,
-              requestParams: firstRequestMeta,
+              requestParams: firstRequestParams,
             }
           : response;
       }),
