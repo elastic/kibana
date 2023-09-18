@@ -103,7 +103,7 @@ describe('<ThreatIntelligenceOverview />', () => {
     );
   });
 
-  it('should render 0 field enriched', () => {
+  it('should render 0 fields enriched', () => {
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
       threatMatchesCount: 1,
@@ -113,11 +113,11 @@ describe('<ThreatIntelligenceOverview />', () => {
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
     expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent(
-      '0 field enriched with threat intelligence'
+      '0 fields enriched with threat intelligence'
     );
   });
 
-  it('should render 0 match detected', () => {
+  it('should render 0 matches detected', () => {
     (useFetchThreatIntelligence as jest.Mock).mockReturnValue({
       loading: false,
       threatMatchesCount: 0,
@@ -126,7 +126,7 @@ describe('<ThreatIntelligenceOverview />', () => {
 
     const { getByTestId } = render(renderThreatIntelligenceOverview(panelContextValue));
 
-    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent('0 threat match detected');
+    expect(getByTestId(CONTENT_TEST_ID)).toHaveTextContent('0 threat matches detected');
   });
 
   it('should render loading', () => {
