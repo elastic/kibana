@@ -129,10 +129,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.applyForceRefresh;
   }
 
-  isFieldAware(): boolean {
-    return true;
-  }
-
   isQueryAware(): boolean {
     return true;
   }

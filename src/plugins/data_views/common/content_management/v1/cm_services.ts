@@ -27,6 +27,7 @@ const dataViewAttributesSchema = schema.object(
       schema.arrayOf(
         schema.object({
           value: schema.string(),
+          clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         })
       )
     ),
@@ -54,6 +55,7 @@ const dataViewSavedObjectSchema = savedObjectSchema(dataViewAttributesSchema);
 const dataViewCreateOptionsSchema = schema.object({
   id: createOptionsSchemas.id,
   initialNamespaces: createOptionsSchemas.initialNamespaces,
+  overwrite: schema.maybe(createOptionsSchemas.overwrite),
 });
 
 const dataViewSearchOptionsSchema = schema.object({

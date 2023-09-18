@@ -39,6 +39,7 @@ export interface Field {
   null_value?: string;
   dimension?: boolean;
   default_field?: boolean;
+  runtime?: boolean | string;
 
   // Fields specific of the aggregate_metric_double type
   metrics?: string[];
@@ -256,7 +257,11 @@ export function processFieldsWithWildcard(fields: Fields): Fields {
   const newFields: Fields = [];
   for (const field of fields) {
     const objectTypeField = processFieldWithoutObjectType(field);
-    newFields.push({ ...objectTypeField });
+    // adding object_type for fields under a group type
+    if (objectTypeField.type === 'group' && objectTypeField.fields) {
+      objectTypeField.fields = processFieldsWithWildcard(objectTypeField.fields);
+    }
+    newFields.push(objectTypeField);
   }
   return newFields;
 }
@@ -264,7 +269,7 @@ export function processFieldsWithWildcard(fields: Fields): Fields {
 export function processFieldWithoutObjectType(field: Field): Field {
   const hasWildcard = field.name.includes('*');
   const hasObjectType = field.object_type;
-  if (hasWildcard && !hasObjectType) {
+  if (hasWildcard && !hasObjectType && field.type !== 'object') {
     return { ...field, type: 'object', object_type: field.type };
   } else {
     return { ...field };

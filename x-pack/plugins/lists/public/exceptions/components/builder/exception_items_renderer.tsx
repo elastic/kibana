@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
@@ -34,6 +34,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import deepEqual from 'fast-deep-equal';
 
 import { AndOrBadge } from '../and_or_badge';
 
@@ -41,7 +42,6 @@ import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
 import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
-
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
 `;
@@ -89,10 +89,6 @@ export interface ExceptionBuilderProps {
   listId: string | undefined;
   listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
-  listTypeSpecificIndexPatternFilter?: (
-    pattern: DataViewBase,
-    type: ExceptionListType
-  ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
   ruleName?: string;
   isDisabled?: boolean;
@@ -115,7 +111,6 @@ export const ExceptionBuilderComponent = ({
   listId,
   listNamespaceType,
   listType,
-  listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
   exceptionItemName,
@@ -131,6 +126,7 @@ export const ExceptionBuilderComponent = ({
     disableNested: isNestedDisabled,
     disableOr: isOrDisabled,
   });
+  const [areAllEntriesDeleted, setAreAllEntriesDeleted] = useState<boolean>(false);
 
   const {
     addNested,
@@ -252,6 +248,7 @@ export const ExceptionBuilderComponent = ({
         // just add a default entry to it
         if (updatedExceptions.length === 0) {
           setDefaultExceptions(item);
+          setAreAllEntriesDeleted(true);
         } else if (updatedExceptions.length > 0 && exceptionListItemSchema.is(item)) {
           setUpdateExceptionsToDelete([...exceptionsToDelete, item]);
         } else {
@@ -394,12 +391,36 @@ export const ExceptionBuilderComponent = ({
     }
   }, [exceptions, handleAddNewExceptionItem]);
 
+  /**
+   * This component relies on the "exceptionListItems" to pre-fill its entries,
+   *  but any subsequent updates to the entries are not reflected back to
+   * the "exceptionListItems". To ensure correct behavior, we need to only
+   * fill the entries from the "exceptionListItems" during initialization.
+   *
+   * In the initialization phase, if there are "exceptionListItems" with
+   * pre-filled entries, the exceptions array will be empty. However,
+   * there are cases where the "exceptionListItems" may not be sent
+   * correctly during initialization, leading to the exceptions
+   * array being filled with empty entries. Therefore, we need to
+   *  check if the exception is correctly populated with a valid
+   * "field" when the "exceptionListItems" has entries. that's why
+   * "exceptionsEntriesPopulated" is used
+   *
+   * It's important to differentiate this case from when the user
+   * deletes all the entries and the "exceptionListItems" has pre-filled values.
+   * that's why "allEntriesDeleted" is used
+   *
+   *  deepEqual(exceptionListItems, exceptions) to handle the exceptionListItems in
+   * the EventFiltersFlyout
+   */
   useEffect(() => {
-    if (exceptionListItems.length > 0) {
+    if (!exceptionListItems.length || deepEqual(exceptionListItems, exceptions)) return;
+    const exceptionsEntriesPopulated = exceptions.some((exception) =>
+      exception.entries.some((entry) => entry.field)
+    );
+    if (!exceptionsEntriesPopulated && !areAllEntriesDeleted)
       setUpdateExceptions(exceptionListItems);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [areAllEntriesDeleted, exceptionListItems, exceptions, setUpdateExceptions]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
@@ -435,7 +456,6 @@ export const ExceptionBuilderComponent = ({
                 isOnlyItem={exceptions.length === 1}
                 key={getExceptionListItemId(exceptionListItem, index)}
                 listType={listType}
-                listTypeSpecificIndexPatternFilter={listTypeSpecificIndexPatternFilter}
                 onChangeExceptionItem={handleExceptionItemChange}
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onlyShowListOperators={containsValueListEntry(exceptions)}

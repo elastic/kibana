@@ -28,7 +28,7 @@ export function AlertFlyout(props: Props) {
     () =>
       triggersActionsUI &&
       triggersActionsUI.getAddRuleFlyout({
-        consumer: 'infrastructure',
+        consumer: 'alerts',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
         ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,

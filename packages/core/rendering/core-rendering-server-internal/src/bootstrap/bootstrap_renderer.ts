@@ -63,7 +63,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       if (authenticated) {
         const userSettingDarkMode = await userSettingsService?.getUserSettingDarkMode(request);
 
-        if (userSettingDarkMode) {
+        if (userSettingDarkMode !== undefined) {
           darkMode = userSettingDarkMode;
         } else {
           darkMode = await uiSettingsClient.get('theme:darkMode');

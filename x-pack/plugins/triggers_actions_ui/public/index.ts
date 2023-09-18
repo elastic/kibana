@@ -89,6 +89,7 @@ export {
   hasMustacheTokens,
   templateActionVariable,
   updateActionConnector,
+  executeAction,
 } from './application/lib';
 
 export type { ActionGroupWithCondition } from './application/sections';
@@ -115,6 +116,7 @@ export {
   getIndexOptions,
   firstFieldOption,
   getTimeFieldOptions,
+  getTimeOptions,
   GroupByExpression,
   COMPARATORS,
   connectorDeprecatedMessage,
@@ -147,3 +149,5 @@ export const getNotifyWhenOptions = async () => {
 };
 
 export { transformRule } from './application/lib/rule_api/common_transformations';
+
+export { validateActionFilterQuery } from './application/lib/value_validators';

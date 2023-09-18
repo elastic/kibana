@@ -11,19 +11,20 @@ import {
   CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiEmptyPrompt,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPageHeader,
+  EuiPageTemplate,
+  EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -53,6 +54,9 @@ export const WatchListPage = () => {
     history,
     links: { watcherGettingStartedUrl },
   } = useAppContext();
+  const [query, setQuery] = useState('');
+  const [queryError, setQueryError] = useState<string | null>(null);
+
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
@@ -62,7 +66,6 @@ export const WatchListPage = () => {
     pageIndex: 0,
     pageSize: PAGINATION.initialPageSize,
   });
-  const [query, setQuery] = useState('');
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb]);
@@ -174,24 +177,20 @@ export const WatchListPage = () => {
 
   if (isWatchesLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageTemplate.EmptyPrompt>
         <SectionLoading>
           <FormattedMessage
             id="xpack.watcher.sections.watchList.loadingWatchesDescription"
             defaultMessage="Loading watches…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 
   const errorCode = getPageErrorCode(error);
   if (errorCode) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <PageError errorCode={errorCode} />
-      </EuiPageContent>
-    );
+    return <PageError errorCode={errorCode} />;
   } else if (error) {
     return (
       <GenericPageError
@@ -222,22 +221,20 @@ export const WatchListPage = () => {
     );
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.emptyPromptTitle"
-                defaultMessage="You don’t have any watches yet"
-              />
-            </h1>
-          }
-          body={emptyPromptBody}
-          actions={createWatchContextMenu}
-          data-test-subj="emptyPrompt"
-        />
-      </EuiPageContent>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.emptyPromptTitle"
+              defaultMessage="You don’t have any watches yet"
+            />
+          </h1>
+        }
+        body={emptyPromptBody}
+        actions={createWatchContextMenu}
+        data-test-subj="emptyPrompt"
+      />
     );
   }
 
@@ -447,14 +444,18 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = (search: { queryText: string }) => {
-      setQuery(search.queryText);
-      return true;
+    const handleOnChange = ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+      if (!searchError) {
+        setQuery(queryText);
+        setQueryError(null);
+      } else {
+        setQueryError(searchError.message);
+      }
     };
 
     const searchConfig = {
-      query,
       onChange: handleOnChange,
+      query,
       box: {
         incremental: true,
       },
@@ -506,6 +507,25 @@ export const WatchListPage = () => {
           }}
           selection={selectionConfig}
           isSelectable={true}
+          childrenBetween={
+            queryError && (
+              <>
+                <EuiCallOut
+                  data-test-subj="watcherListSearchError"
+                  iconType="warning"
+                  color="danger"
+                  title={
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchList.watchTable.errorOnSearch"
+                      defaultMessage="Invalid search: {queryError}"
+                      values={{ queryError }}
+                    />
+                  }
+                />
+                <EuiSpacer />
+              </>
+            )
+          }
           message={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"

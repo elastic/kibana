@@ -6,13 +6,21 @@
  * Side Public License, v 1.
  */
 
-export type { SortOrder } from '../common/types';
-export type { SavedSearch, SaveSavedSearchOptions } from './services/saved_searches';
-
-export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
-
-export { VIEW_MODE } from '../common';
 import { SavedSearchPublicPlugin } from './plugin';
+
+export type { SortOrder } from '../common/types';
+export type {
+  SavedSearch,
+  SaveSavedSearchOptions,
+  SearchByReferenceInput,
+  SearchByValueInput,
+  SavedSearchByValueAttributes,
+  SavedSearchAttributeService,
+  SavedSearchUnwrapMetaInfo,
+  SavedSearchUnwrapResult,
+} from './services/saved_searches';
+export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
+export { VIEW_MODE } from '../common';
 export type { SavedSearchPublicPluginStart } from './plugin';
 
 export function plugin() {

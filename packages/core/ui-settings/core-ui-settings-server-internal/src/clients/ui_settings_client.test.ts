@@ -64,7 +64,12 @@ describe('ui settings', () => {
       await uiSettings.setMany({ one: 'value' });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: 'value' });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        { one: 'value' },
+        { refresh: false }
+      );
     });
 
     it('updates several values in one operation', async () => {
@@ -72,10 +77,15 @@ describe('ui settings', () => {
       await uiSettings.setMany({ one: 'value', another: 'val' });
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: 'value',
-        another: 'val',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        {
+          one: 'value',
+          another: 'val',
+        },
+        { refresh: false }
+      );
     });
 
     it('automatically creates the savedConfig if it is missing', async () => {
@@ -159,9 +169,14 @@ describe('ui settings', () => {
       await uiSettings.set('one', 'value');
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: 'value',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        {
+          one: 'value',
+        },
+        { refresh: false }
+      );
     });
 
     it('validates value if a schema presents', async () => {
@@ -202,7 +217,12 @@ describe('ui settings', () => {
       await uiSettings.remove('one');
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        { one: null },
+        { refresh: false }
+      );
     });
 
     it('does not fail validation', async () => {
@@ -246,7 +266,12 @@ describe('ui settings', () => {
       await uiSettings.removeMany(['one']);
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        { one: null },
+        { refresh: false }
+      );
     });
 
     it('updates several values in one operation', async () => {
@@ -254,11 +279,16 @@ describe('ui settings', () => {
       await uiSettings.removeMany(['one', 'two', 'three']);
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
-        one: null,
-        two: null,
-        three: null,
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        ID,
+        {
+          one: null,
+          two: null,
+          three: null,
+        },
+        { refresh: false }
+      );
     });
 
     it('does not fail validation', async () => {

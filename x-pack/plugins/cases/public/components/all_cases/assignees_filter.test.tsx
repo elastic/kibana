@@ -8,12 +8,14 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import type { AssigneesFilterPopoverProps } from './assignees_filter';
 import { AssigneesFilterPopover } from './assignees_filter';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 
 jest.mock('../../containers/user_profiles/api');
 
@@ -308,5 +310,32 @@ describe('AssigneesFilterPopover', () => {
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
     expect(screen.queryByText('No assignees')).not.toBeInTheDocument();
+  });
+
+  it('shows warning message when reaching maximum limit to filter', async () => {
+    const maxAssignees = Array(MAX_ASSIGNEES_FILTER_LENGTH).fill(userProfiles[0]);
+    const props = {
+      ...defaultProps,
+      selectedAssignees: maxAssignees,
+    };
+    appMockRender.render(<AssigneesFilterPopover {...props} />);
+
+    await waitFor(async () => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(
+        screen.getByText(`${MAX_ASSIGNEES_FILTER_LENGTH} filters selected`)
+      ).toBeInTheDocument();
+    });
+
+    await waitForEuiPopoverOpen();
+
+    expect(
+      screen.getByText(
+        `You've selected the maximum number of ${MAX_ASSIGNEES_FILTER_LENGTH} assignees`
+      )
+    ).toBeInTheDocument();
+
+    expect(screen.getByTitle('No assignees')).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByTitle('No assignees')).toHaveAttribute('aria-disabled', 'true');
   });
 });

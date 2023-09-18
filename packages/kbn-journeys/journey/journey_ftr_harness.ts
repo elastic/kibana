@@ -17,6 +17,10 @@ import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
 import { EsArchiver, KibanaServer, Es, RetryService } from '@kbn/ftr-common-functional-services';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 import { Auth } from '../services/auth';
 import { getInputDelays } from '../services/input_delays';
@@ -25,6 +29,7 @@ import { KibanaUrl } from '../services/kibana_url';
 import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
+import { getNewPageObject } from '../services/page';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
@@ -54,8 +59,30 @@ export class JourneyFtrHarness {
 
   private apm: apmNode.Agent | null = null;
 
+  // Update the Telemetry and APM global labels to link traces with journey
+  private async updateTelemetryAndAPMLabels(labels: { [k: string]: string }) {
+    this.log.info(`Updating telemetry & APM labels: ${JSON.stringify(labels)}`);
+
+    await this.kibanaServer.request({
+      path: '/internal/core/_settings',
+      method: 'PUT',
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'ftr',
+      },
+      body: { telemetry: { labels } },
+    });
+  }
+
   private async setupApm() {
     const kbnTestServerEnv = this.config.get(`kbnTestServer.env`);
+
+    const journeyLabels: { [k: string]: string } = Object.fromEntries(
+      kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS.split(',').map((kv: string) => kv.split('='))
+    );
+
+    // Update labels before start for consistency b/w APM services
+    await this.updateTelemetryAndAPMLabels(journeyLabels);
 
     this.apm = apmNode.start({
       serviceName: 'functional test runner',
@@ -240,9 +267,8 @@ export class JourneyFtrHarness {
       return await block();
     }
 
-    const span = this.apm?.startSpan(name, type ?? null, {
-      childOf: this.currentTransaction,
-    });
+    const span = this.currentTransaction.startSpan(name, type ?? null);
+
     if (!span) {
       return await block();
     }
@@ -358,7 +384,11 @@ export class JourneyFtrHarness {
       throw new Error('performance service is not properly initialized');
     }
 
+    const isServerlessProject = !!this.config.get('serverless');
+    const kibanaPage = getNewPageObject(isServerlessProject, page, this.log);
+
     this.#_ctx = this.journeyConfig.getExtendedStepCtx({
+      kibanaPage,
       page,
       log: this.log,
       inputDelays: getInputDelays(),
@@ -415,11 +445,8 @@ export class JourneyFtrHarness {
         ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
         : message.text();
 
-      if (
-        url.includes('kbn-ui-shared-deps-npm.dll.js') &&
-        text.includes('moment construction falls')
-      ) {
-        // ignore errors from moment about constructing dates with invalid formats
+      if (url.includes('kbn-ui-shared-deps-npm.dll.js')) {
+        // ignore errors/warning from kbn-ui-shared-deps-npm.dll.js
         return;
       }
 

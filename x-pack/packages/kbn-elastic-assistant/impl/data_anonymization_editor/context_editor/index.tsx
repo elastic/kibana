@@ -17,11 +17,6 @@ import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './typ
 
 export const DEFAULT_PAGE_SIZE = 10;
 
-const pagination = {
-  initialPageSize: DEFAULT_PAGE_SIZE,
-  pageSizeOptions: [5, DEFAULT_PAGE_SIZE, 25, 50],
-};
-
 const defaultSort: SortConfig = {
   sort: {
     direction: 'desc',
@@ -33,7 +28,9 @@ export interface Props {
   allow: string[];
   allowReplacement: string[];
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
+  onReset?: () => void;
   rawData: Record<string, string[]> | null;
+  pageSize?: number;
 }
 
 const search: EuiSearchBarProps = {
@@ -58,7 +55,9 @@ const ContextEditorComponent: React.FC<Props> = ({
   allow,
   allowReplacement,
   onListUpdated,
+  onReset,
   rawData,
+  pageSize = DEFAULT_PAGE_SIZE,
 }) => {
   const [selected, setSelection] = useState<ContextEditorRow[]>([]);
   const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
@@ -89,17 +88,25 @@ const ContextEditorComponent: React.FC<Props> = ({
     setTimeout(() => setSelection(rows), 0); // updates selection in the component state
   }, [rows]);
 
+  const pagination = useMemo(() => {
+    return {
+      initialPageSize: pageSize,
+      pageSizeOptions: [5, DEFAULT_PAGE_SIZE, 25, 50],
+    };
+  }, [pageSize]);
+
   const toolbar = useMemo(
     () => (
       <Toolbar
         onListUpdated={onListUpdated}
         onlyDefaults={rawData == null}
+        onReset={onReset}
         onSelectAll={onSelectAll}
         selected={selected}
         totalFields={rows.length}
       />
     ),
-    [onListUpdated, onSelectAll, rawData, rows.length, selected]
+    [onListUpdated, onReset, onSelectAll, rawData, rows.length, selected]
   );
 
   return (

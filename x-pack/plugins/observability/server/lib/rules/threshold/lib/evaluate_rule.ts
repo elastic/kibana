@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { MetricExpressionParams } from '../../../../../common/threshold_rule/types';
 import { isCustom } from './metric_expression_params';
-import { getIntervalInSeconds } from '../utils';
+import { AdditionalContext, getIntervalInSeconds } from '../utils';
+import { SearchConfigurationType } from '../threshold_executor';
 import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
 import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
-import { AdditionalContext } from '../utils';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
   groupBy: string | undefined | string[];
-  filterQuery?: string;
-  filterQueryText?: string;
+  searchConfiguration: SearchConfigurationType;
 }
 
 export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
@@ -39,6 +38,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   esClient: ElasticsearchClient,
   params: Params,
   dataView: string,
+  timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   logger: Logger,
@@ -46,7 +46,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   timeframe?: { start?: number; end: number },
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
-  const { criteria, groupBy, filterQuery } = params;
+  const { criteria, groupBy, searchConfiguration } = params;
 
   return Promise.all(
     criteria.map(async (criterion) => {
@@ -64,8 +64,9 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         esClient,
         criterion,
         dataView,
+        timeFieldName,
         groupBy,
-        filterQuery,
+        searchConfiguration.query.query,
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
@@ -77,8 +78,9 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         esClient,
         criterion,
         dataView,
+        timeFieldName,
         groupBy,
-        filterQuery,
+        searchConfiguration.query.query,
         logger,
         calculatedTimerange,
         missingGroups

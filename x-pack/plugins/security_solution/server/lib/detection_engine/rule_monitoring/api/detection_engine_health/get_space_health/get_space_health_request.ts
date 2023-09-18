@@ -9,7 +9,7 @@ import moment from 'moment';
 import type {
   GetSpaceHealthRequest,
   GetSpaceHealthRequestBody,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { validateHealthInterval } from '../health_interval';
 
 export const validateGetSpaceHealthRequest = (

@@ -17,6 +17,7 @@ export type {
   FileDataVisualizerSpec,
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
+  DataComparisonSpec,
 } from './application';
 export type {
   GetAdditionalLinksParams,

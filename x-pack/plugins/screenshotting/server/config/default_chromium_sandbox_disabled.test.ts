@@ -33,3 +33,32 @@ describe('getDefaultChromiumSandboxDisabled', () => {
     );
   });
 });
+
+describe('Docker', () => {
+  const mockOs = { os: 'linux', dist: 'Ubuntu Linux', release: '20.01' };
+
+  it('Non-Docker', async () => {
+    (getos as jest.Mock).mockImplementation((cb) => cb(null, mockOs));
+
+    await expect(getDefaultChromiumSandboxDisabled()).resolves.toHaveProperty(
+      'disableSandbox',
+      false
+    );
+  });
+
+  it('Elastic Docker container', async () => {
+    // setup: mock environment variables
+    const env = { ...process.env };
+    process.env.ELASTIC_CONTAINER = 'true';
+
+    (getos as jest.Mock).mockImplementation((cb) => cb(null, mockOs));
+
+    await expect(getDefaultChromiumSandboxDisabled()).resolves.toHaveProperty(
+      'disableSandbox',
+      true
+    );
+
+    // cleanup: restore the environment variables
+    process.env = env;
+  });
+});

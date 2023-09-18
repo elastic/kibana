@@ -22,12 +22,13 @@ const label = {
 /**
  * A button that acts to add an item from the library to a solution, typically through a modal.
  */
-export const AddFromLibraryButton = ({ onClick, ...rest }: Props) => (
+export const AddFromLibraryButton = ({ onClick, size = 'm', ...rest }: Props) => (
   <ToolbarButton
     {...rest}
     type="empty"
     onClick={onClick}
     iconType="folderOpen"
+    size={size}
     label={label.getLibraryButtonLabel()}
   />
 );

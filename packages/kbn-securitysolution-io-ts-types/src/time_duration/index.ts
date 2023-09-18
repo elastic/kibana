@@ -16,20 +16,14 @@ import { Either } from 'fp-ts/lib/Either';
  */
 
 type TimeUnits = 's' | 'm' | 'h' | 'd' | 'w' | 'y';
-interface TimeDurationWithAllowedDurations {
-  allowedDurations: Array<[number, TimeUnits]>;
-  allowedUnits?: never;
-}
-interface TimeDurationWithAllowedUnits {
-  allowedUnits: TimeUnits[];
-  allowedDurations?: never;
-}
 
-type TimeDurationType = TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits;
+interface TimeDurationType {
+  allowedUnits: TimeUnits[];
+}
 
 const isTimeSafe = (time: number) => time >= 1 && Number.isSafeInteger(time);
 
-export const TimeDuration = ({ allowedUnits, allowedDurations }: TimeDurationType) => {
+export const TimeDuration = ({ allowedUnits }: TimeDurationType) => {
   return new t.Type<string, string, unknown>(
     'TimeDuration',
     t.string.is,
@@ -42,17 +36,7 @@ export const TimeDuration = ({ allowedUnits, allowedDurations }: TimeDurationTyp
           if (!isTimeSafe(time)) {
             return t.failure(input, context);
           }
-          if (allowedDurations) {
-            for (const [allowedTime, allowedUnit] of allowedDurations) {
-              if (!isTimeSafe(allowedTime)) {
-                return t.failure(allowedDurations, context);
-              }
-              if (allowedTime === time && allowedUnit === unit) {
-                return t.success(input);
-              }
-            }
-            return t.failure(input, context);
-          } else if (allowedUnits.includes(unit as TimeUnits)) {
+          if (allowedUnits.includes(unit as TimeUnits)) {
             return t.success(input);
           } else {
             return t.failure(input, context);

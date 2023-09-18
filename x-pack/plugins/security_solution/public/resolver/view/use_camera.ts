@@ -47,7 +47,7 @@ export function useCamera({ id }: { id: string }): {
   const projectionMatrixAtTime = useSelector(
     useCallback(
       (state: State) => {
-        return selectors.projectionMatrix(state.analyzer.analyzerById[id]);
+        return selectors.projectionMatrix(state.analyzer[id]);
       },
       [id]
     )
@@ -72,11 +72,9 @@ export function useCamera({ id }: { id: string }): {
     projectionMatrixAtTime(sideEffectors.timestamp())
   );
 
-  const userIsPanning = useSelector((state: State) =>
-    selectors.userIsPanning(state.analyzer.analyzerById[id])
-  );
+  const userIsPanning = useSelector((state: State) => selectors.userIsPanning(state.analyzer[id]));
   const isAnimatingAtTime = useSelector((state: State) =>
-    selectors.isAnimating(state.analyzer.analyzerById[id])
+    selectors.isAnimating(state.analyzer[id])
   );
 
   const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();

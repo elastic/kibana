@@ -14,7 +14,6 @@ import {
   EuiPageBody,
   EuiFlexGrid,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
@@ -141,7 +140,8 @@ export function Beat({ summary, metrics, ...props }) {
         <EuiPanel>
           <SummaryStatus metrics={summarytStatsBot} data-test-subj="beatSummaryStatus02" />
         </EuiPanel>
-        <EuiPageContent>
+        <EuiSpacer size="m" />
+        <EuiPanel>
           <EuiScreenReaderOnly>
             <h1>
               <FormattedMessage id="xpack.monitoring.beats.beat.heading" defaultMessage="Beat" />
@@ -155,7 +155,7 @@ export function Beat({ summary, metrics, ...props }) {
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

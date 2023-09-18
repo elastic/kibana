@@ -1,9 +1,15 @@
 {
   "transform.get_transform": {
     "url_params": {
-      "from": 0,
-      "size": 0,
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
+      "from": "",
+      "size": [
+        "100"
+      ],
       "exclude_generated": "__flag__"
     },
     "methods": [
@@ -13,6 +19,10 @@
       "_transform/{transform_id}",
       "_transform"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-transform.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

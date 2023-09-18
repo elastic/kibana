@@ -25,13 +25,14 @@ import {
   BucketProperties,
 } from '../../../../../common/elasticsearch_util';
 import {
+  DataFilters,
   ESTermSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../../util/valid_string_config';
 import { ITermJoinSource } from '../types';
-import type { IESAggSource } from '../../es_agg_source';
+import type { IESAggSource, ESAggsSourceSyncMeta } from '../../es_agg_source';
 import { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
 import { isTermSourceComplete } from './is_term_source_complete';
@@ -39,7 +40,8 @@ import { isTermSourceComplete } from './is_term_source_complete';
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
-type ESTermSourceSyncMeta = Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
+type ESTermSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<ESTermSourceDescriptor, 'indexPatternId' | 'size' | 'term'>;
 
 export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
   const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
@@ -184,12 +186,9 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     return `es_table ${this.getIndexPatternId()}`;
   }
 
-  getFieldNames(): string[] {
-    return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
-  }
-
-  getSyncMeta(): ESTermSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESTermSourceSyncMeta {
     return {
+      ...super.getSyncMeta(dataFilters),
       indexPatternId: this._descriptor.indexPatternId,
       size: this._descriptor.size,
       term: this._descriptor.term,

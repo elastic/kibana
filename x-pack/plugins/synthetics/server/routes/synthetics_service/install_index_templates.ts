@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SyntheticsServerSetup } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
 export const installIndexTemplatesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -18,7 +18,7 @@ export const installIndexTemplatesRoute: SyntheticsRestApiRouteFactory = () => (
   },
 });
 
-export async function installSyntheticsIndexTemplates(server: UptimeServerSetup) {
+export async function installSyntheticsIndexTemplates(server: SyntheticsServerSetup) {
   // no need to add error handling here since fleetSetupCompleted is already wrapped in try/catch and will log
   // warning if setup fails to complete
   await server.fleet.fleetSetupCompleted();

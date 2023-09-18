@@ -89,6 +89,10 @@ const AlertRequired = rt.type({
   }),
 });
 const AlertOptional = rt.partial({
+  event: rt.partial({
+    action: schemaString,
+    kind: schemaString,
+  }),
   kibana: rt.partial({
     alert: rt.partial({
       action_group: schemaString,
@@ -117,6 +121,7 @@ const AlertOptional = rt.partial({
     }),
     version: schemaString,
   }),
+  tags: schemaStringArray,
 });
 
 // prettier-ignore

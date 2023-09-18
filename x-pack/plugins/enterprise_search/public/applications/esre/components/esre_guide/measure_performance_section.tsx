@@ -33,7 +33,7 @@ const steps: EuiContainedStepProps[] = [
     children: (
       <FormattedMessage
         id="xpack.enterpriseSearch.esre.measurePerformanceSection.step1.description"
-        defaultMessage="Visit {behavioralAnalytics} and create your first collection"
+        defaultMessage="Visit {behavioralAnalytics} and create your first collection."
         values={{
           behavioralAnalytics: (
             <EuiLinkTo

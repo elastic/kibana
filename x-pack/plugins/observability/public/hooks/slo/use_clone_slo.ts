@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
-
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { v1 as uuidv1 } from 'uuid';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -24,7 +23,7 @@ export function useCloneSlo() {
     CreateSLOResponse,
     string,
     { slo: CreateSLOInput; originalSloId?: string },
-    { previousSloList: FindSLOResponse | undefined }
+    { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
     ['cloneSlo'],
     ({ slo }: { slo: CreateSLOInput; originalSloId?: string }) => {
@@ -33,34 +32,35 @@ export function useCloneSlo() {
     },
     {
       onMutate: async ({ slo, originalSloId }) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(sloKeys.lists());
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const latestQueriesData = (
-          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) ?? []
-        ).at(0);
-        const [queryKey, data] = latestQueriesData ?? [];
+        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
+          queryKey: sloKeys.lists(),
+          exact: false,
+        });
+        const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
-        const originalSlo = data?.results?.find((el) => el.id === originalSloId);
+        const originalSlo = previousData?.results?.find((el) => el.id === originalSloId);
         const optimisticUpdate = {
-          ...data,
+          page: previousData?.page ?? 1,
+          perPage: previousData?.perPage ?? 25,
+          total: previousData?.total ? previousData.total + 1 : 1,
           results: [
-            ...(data?.results ?? []),
+            ...(previousData?.results ?? []),
             { ...originalSlo, name: slo.name, id: uuidv1(), summary: undefined },
           ],
-          total: data?.total ? data.total + 1 : 1,
         };
 
-        // Optimistically update to the new value
-        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
 
-        // Return a context object with the snapshotted value
-        return { previousSloList: data };
+        return { queryKey, previousData };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
       onError: (_err, { slo }, context) => {
-        if (context?.previousSloList) {
-          queryClient.setQueryData(sloKeys.lists(), context.previousSloList);
+        if (context?.previousData && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
         }
         toasts.addDanger(
           i18n.translate('xpack.observability.slo.clone.errorNotification', {
@@ -76,7 +76,6 @@ export function useCloneSlo() {
             values: { name: slo.name },
           })
         );
-        queryClient.invalidateQueries(sloKeys.lists());
       },
     }
   );

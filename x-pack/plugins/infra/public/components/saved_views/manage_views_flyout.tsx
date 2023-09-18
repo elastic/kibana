@@ -24,21 +24,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
-import { MetricsExplorerView } from '../../../common/metrics_explorer_views';
-import type { InventoryView } from '../../../common/inventory_views';
-import { UseInventoryViewsResult } from '../../hooks/use_inventory_views';
-import { UseMetricsExplorerViewsResult } from '../../hooks/use_metrics_explorer_views';
+import { SavedViewOperations, SavedViewItem } from '../../../common/saved_views';
 
-type View = InventoryView | MetricsExplorerView;
-type UseViewResult = UseInventoryViewsResult | UseMetricsExplorerViewsResult;
-
-export interface ManageViewsFlyoutProps {
-  views: UseViewResult['views'];
+export interface ManageViewsFlyoutProps<TSavedViewState extends SavedViewItem> {
+  views?: SavedViewItem[];
   loading: boolean;
   onClose(): void;
-  onMakeDefaultView: UseViewResult['setDefaultViewById'];
-  onSwitchView: UseViewResult['switchViewById'];
-  onDeleteView: UseViewResult['deleteViewById'];
+  onMakeDefaultView: SavedViewOperations<TSavedViewState>['setDefaultViewById'];
+  onSwitchView: SavedViewOperations<TSavedViewState>['switchViewById'];
+  onDeleteView: SavedViewOperations<TSavedViewState>['deleteViewById'];
 }
 
 interface DeleteConfimationProps {
@@ -50,18 +44,18 @@ const searchConfig = {
   box: { incremental: true },
 };
 
-export function ManageViewsFlyout({
+export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
   onClose,
   views = [],
   onSwitchView,
   onMakeDefaultView,
   onDeleteView,
   loading,
-}: ManageViewsFlyoutProps) {
+}: ManageViewsFlyoutProps<TSavedViewState>) {
   // Add name as top level property to allow in memory search
   const namedViews = useMemo(() => views.map(addOwnName), [views]);
 
-  const renderName = (name: string, item: View) => (
+  const renderName = (name: string, item: SavedViewItem) => (
     <EuiButtonEmpty
       key={item.id}
       data-test-subj="infraRenderNameButton"
@@ -74,7 +68,7 @@ export function ManageViewsFlyout({
     </EuiButtonEmpty>
   );
 
-  const renderDeleteAction = (item: View) => {
+  const renderDeleteAction = (item: SavedViewItem) => {
     return (
       <DeleteConfimation
         key={item.id}
@@ -86,7 +80,7 @@ export function ManageViewsFlyout({
     );
   };
 
-  const renderMakeDefaultAction = (item: View) => {
+  const renderMakeDefaultAction = (item: SavedViewItem) => {
     return (
       <EuiButtonIcon
         key={item.id}
@@ -100,7 +94,7 @@ export function ManageViewsFlyout({
     );
   };
 
-  const columns: Array<EuiBasicTableColumn<View>> = [
+  const columns: Array<EuiBasicTableColumn<SavedViewItem>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.infra.openView.columnNames.name', { defaultMessage: 'Name' }),
@@ -193,4 +187,7 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
 /**
  * Helpers
  */
-const addOwnName = (view: View) => ({ ...view, name: view.attributes.name });
+const addOwnName = <TSavedViewState extends SavedViewItem>(view: TSavedViewState) => ({
+  ...view,
+  name: view.attributes.name,
+});

@@ -11,8 +11,8 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 
-import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
+import type { RuleToImport } from '../../../../../common/api/detection_engine/rule_management';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 import { requestContextMock } from '../../routes/__mocks__';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
@@ -874,6 +874,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -918,6 +919,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -926,6 +928,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -976,6 +979,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -984,6 +988,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1041,6 +1046,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -1049,6 +1055,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1108,6 +1115,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -1116,6 +1124,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1216,6 +1225,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
         {
           id: '789',
@@ -1224,6 +1234,7 @@ describe('utils', () => {
           name: 'name',
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);

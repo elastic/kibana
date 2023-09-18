@@ -8063,3 +8063,2523 @@ Object {
   "status": "HEALTHY",
 }
 `;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 1`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 2`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 3`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 4`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 5`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 6`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 7`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 8`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 9`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 10`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 11`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 12`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 13`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 14`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 15`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 16`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 17`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 18`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 19`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 20`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 21`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 22`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 23`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 24`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 25`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 26`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 27`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 28`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 29`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 30`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 31`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 32`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 33`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 34`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 35`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 36`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 37`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 38`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 39`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 40`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 41`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 42`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 43`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 44`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 45`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 46`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 47`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 48`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 49`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 50`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 51`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 52`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 53`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 54`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 55`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 56`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 57`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 58`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 59`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 60`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 61`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 62`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 63`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 64`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 65`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 66`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 67`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 68`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 69`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 70`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 71`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 72`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 73`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 74`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 75`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 76`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 77`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 78`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 79`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 80`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 81`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 82`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 83`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 84`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 85`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 86`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 87`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 88`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 89`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 90`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 91`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 92`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 93`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 94`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 95`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 96`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 97`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 98`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 99`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 100`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 101`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 102`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 103`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 104`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 105`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 106`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 107`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 108`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 109`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 110`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 111`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 112`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 113`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 114`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 115`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 116`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 117`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 118`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 119`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 120`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 121`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 122`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 123`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 124`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 125`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 126`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 127`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 128`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 129`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 130`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 131`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 132`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 133`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 134`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 135`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 136`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 137`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 138`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 139`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 140`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 141`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 142`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 143`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 144`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 145`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 146`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 147`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 148`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 149`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 150`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 151`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 152`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 153`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 154`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 155`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 156`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 157`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 158`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 159`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 160`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 161`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 162`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 163`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 164`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 165`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 166`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 167`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 168`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 169`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 170`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 171`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 172`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 173`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 174`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 175`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 176`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 177`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 178`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 179`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;
+
+exports[`FetchHistoricalSummary filters with the 'instanceId' when provided 180`] = `
+Object {
+  "date": Any<ClockDate>,
+  "errorBudget": Object {
+    "consumed": 0.6,
+    "initial": 0.05,
+    "isEstimated": false,
+    "remaining": 0.4,
+  },
+  "sliValue": 0.97,
+  "status": "HEALTHY",
+}
+`;

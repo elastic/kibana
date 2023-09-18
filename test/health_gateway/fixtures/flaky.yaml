@@ -4,8 +4,8 @@ server:
 
 kibana:
   hosts:
-    - ${KIBANA_URL}/api/status/ok
-    - ${KIBANA_URL}/api/status/flaky?session=${SESSION}
+    - ${KIBANA_URL}/health/ok
+    - ${KIBANA_URL}/health/flaky?session=${SESSION}
 
 logging:
   root:

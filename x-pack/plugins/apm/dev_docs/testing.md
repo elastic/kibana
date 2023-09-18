@@ -116,13 +116,13 @@ TODO: We could try moving this tests to the new e2e tests located at `x-pack/plu
 **Start server**
 
 ```
-node scripts/functional_tests_server --config x-pack/test/functional/config.base.js
+node scripts/functional_tests_server --config x-pack/test/functional/apps/apm/config.ts
 ```
 
 **Run tests**
 
 ```
-node scripts/functional_test_runner --config x-pack/test/functional/config.base.js --grep='APM specs'
+node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/config.ts --grep='APM specs'
 ```
 
 APM tests are located in `x-pack/test/functional/apps/apm`.

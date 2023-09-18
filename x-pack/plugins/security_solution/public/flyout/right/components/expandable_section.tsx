@@ -6,8 +6,9 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
-import type { VFC } from 'react';
-import React from 'react';
+import type { ReactElement } from 'react';
+import React, { type VFC } from 'react';
+import { useAccordionState } from '../hooks/use_accordion_state';
 
 export const HEADER_TEST_ID = 'Header';
 export const CONTENT_TEST_ID = 'Content';
@@ -20,7 +21,7 @@ export interface DescriptionSectionProps {
   /**
    * Title value to render in the header of the accordion
    */
-  title: string;
+  title: ReactElement;
   /**
    * React component to render in the expandable section of the accordion
    */
@@ -33,7 +34,7 @@ export interface DescriptionSectionProps {
 
 /**
  * Component used to render multiple sections in the Overview tab
- * - Description
+ * - About
  * - Investigation
  * - Visualizations
  * - Insights
@@ -46,6 +47,8 @@ export const ExpandableSection: VFC<DescriptionSectionProps> = ({
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
 
+  const { renderContent, toggle, state } = useAccordionState(expanded);
+
   const headerDataTestSub = dataTestSub + HEADER_TEST_ID;
   const contentDataTestSub = dataTestSub + CONTENT_TEST_ID;
 
@@ -56,10 +59,10 @@ export const ExpandableSection: VFC<DescriptionSectionProps> = ({
   );
 
   return (
-    <EuiAccordion id={accordionId} buttonContent={header} initialIsOpen={expanded}>
+    <EuiAccordion forceState={state} onToggle={toggle} id={accordionId} buttonContent={header}>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="none" direction="column" data-test-subj={contentDataTestSub}>
-        {children}
+        {renderContent && children}
       </EuiFlexGroup>
     </EuiAccordion>
   );

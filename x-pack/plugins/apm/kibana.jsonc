@@ -9,14 +9,16 @@
     "browser": true,
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
+      "apmDataAccess",
       "data",
       "dashboard",
       "controls",
       "embeddable",
       "features",
-      "infra",
+      "logsShared",
       "inspector",
       "licensing",
+      "metricsDataAccess",
       "observability",
       "observabilityShared",
       "exploratoryView",
@@ -25,10 +27,10 @@
       "share",
       "unifiedSearch",
       "dataViews",
-      "advancedSettings",
       "lens",
       "maps",
-      "uiActions"
+      "uiActions",
+      "observabilityAIAssistant"
     ],
     "optionalPlugins": [
       "actions",
@@ -36,8 +38,10 @@
       "cases",
       "charts",
       "cloud",
+      "discover",
       "fleet",
       "fieldFormats",
+      "infra",
       "home",
       "ml",
       "security",
@@ -45,16 +49,19 @@
       "taskManager",
       "usageCollection",
       "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
-      "licenseManagement"
+      "licenseManagement",
+      "profiling",
+      "profilingDataAccess"
     ],
     "requiredBundles": [
+      "advancedSettings",
       "fleet",
       "kibanaReact",
       "kibanaUtils",
       "ml",
       "observability",
-      "esUiShared",
-      "maps"
+      "maps",
+      "observabilityAIAssistant"
     ]
   }
 }

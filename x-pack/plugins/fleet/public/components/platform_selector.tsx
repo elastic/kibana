@@ -43,6 +43,7 @@ interface Props {
   hasFleetServer?: boolean;
   enrollToken?: string | undefined;
   fullCopyButton?: boolean;
+  fleetServerHost?: string;
   onCopy?: () => void;
 }
 
@@ -64,6 +65,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   isManaged,
   enrollToken,
   hasFleetServer,
+  fleetServerHost,
   fullCopyButton,
   onCopy,
 }) => {
@@ -83,6 +85,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 
   // In case of fleet server installation or standalone agent without
   // Kubernetes integration in the policy use reduced platform options
+  // If it has Cloud Shell URL, then it should show platform options with Cloudshell in it
   const isReduced = hasFleetServer || (!isManaged && !hasK8sIntegration);
 
   const getPlatformOptions = useCallback(() => {
@@ -204,6 +207,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               onCopy={onCopy}
               onDownload={onCopy}
               enrollmentAPIKey={enrollToken}
+              fleetServerHost={fleetServerHost}
             />
             <EuiSpacer size="s" />
           </>
@@ -220,6 +224,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 <EuiSpacer size="m" />
               </EuiText>
             )}
+
             <EuiCodeBlock
               onClick={onTextAreaClick}
               fontSize="m"
@@ -231,6 +236,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             >
               <CommandCode>{commandsByPlatform[platform]}</CommandCode>
             </EuiCodeBlock>
+
             <EuiSpacer size="s" />
             {fullCopyButton && (
               <EuiCopy textToCopy={commandsByPlatform[platform]}>

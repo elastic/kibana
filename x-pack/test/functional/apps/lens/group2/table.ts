@@ -42,6 +42,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should able to sort a last_value column correctly in a table', async () => {
+      // configure last_value with a keyword field
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'last_value',
+        field: 'geo.dest',
+      });
+
+      await PageObjects.lens.changeTableSortingBy(3, 'ascending');
+      await PageObjects.lens.waitForVisualization();
+      expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('CN');
+
+      await PageObjects.lens.changeTableSortingBy(3, 'descending');
+      await PageObjects.lens.waitForVisualization();
+      expect(await PageObjects.lens.getDatatableCellText(0, 3)).to.eql('PH');
+
+      // now configure a new one with an ip field
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'last_value',
+        field: 'ip',
+      });
+      await PageObjects.lens.changeTableSortingBy(4, 'ascending');
+      await PageObjects.lens.waitForVisualization();
+      expect(await PageObjects.lens.getDatatableCellText(0, 4)).to.eql('78.83.247.30');
+      // Change the sorting
+      await PageObjects.lens.changeTableSortingBy(4, 'descending');
+      await PageObjects.lens.waitForVisualization();
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('169.228.188.120');
+
+      await retry.try(async () => {
+        await PageObjects.lens.changeTableSortingBy(4, 'none');
+        await PageObjects.lens.waitForVisualization();
+        expect(await PageObjects.lens.isDatatableHeaderSorted(0)).to.eql(false);
+      });
+
+      // clear all metrics and reconfigure the default
+      await PageObjects.lens.removeDimension('lnsDatatable_metrics');
+      await PageObjects.lens.removeDimension('lnsDatatable_metrics');
+      await PageObjects.lens.removeDimension('lnsDatatable_metrics');
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+    });
+
     it('should able to use filters cell actions in table', async () => {
       const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
       await retry.try(async () => {

@@ -8,6 +8,7 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { decompressFromBase64 } from 'lz-string';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -21,8 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const deployment = getService('deployment');
 
-  // Failing: See https://github.com/elastic/kibana/issues/158465
-  describe.skip('shared links', function describeIndexTests() {
+  describe('shared links', function describeIndexTests() {
     let baseUrl: string;
 
     async function setup({ storeStateInSessionStorage }: { storeStateInSessionStorage: boolean }) {
@@ -75,14 +75,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
-          const lz =
-            'N4IgjgrgpgTgniAXKSsGJCANCANgQwDsBzCfYqJEAa2nhAF8cBnAexgBckBtbkAAQ4BLALZRmHfCIAO2EABNxAYxABdVTiWtcEEYWY8N' +
-            'IIYUUAPKrlbEJ%2BZgAsAtACo5JjrABu%2BXFXwQOVjkAMyFcDxgDRG4jeXxJADUhKAB3AEl5S2tbBxc5YTEAJSIKJFBgmFYRKgAmAAY' +
-            'ARgBWRzqATkcGtoAVOoA2RABmBsQAFlGAOjrpgC18oIx65taOmsHuhoAOIZHxqdnGHBgoCvF7NMII719kEGvoJD7p6Zxpf2ZKRA4YaAY' +
-            'GIA%3D';
           const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
-          expect(actualUrl).to.contain(`&lz=${lz}`);
+          const urlSearchParams = new URLSearchParams(actualUrl);
+          expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+            query: {
+              language: 'kuery',
+              query: '',
+            },
+            sort: [['@timestamp', 'desc']],
+            columns: [],
+            index: 'logstash-*',
+            interval: 'auto',
+            filters: [],
+            dataViewId: 'logstash-*',
+            timeRange: {
+              from: '2015-09-19T06:31:44.000Z',
+              to: '2015-09-23T18:31:44.000Z',
+            },
+            refreshInterval: {
+              value: 60000,
+              pause: true,
+            },
+          });
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {

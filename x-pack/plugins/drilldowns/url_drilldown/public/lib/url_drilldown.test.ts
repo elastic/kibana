@@ -18,6 +18,7 @@ import { of } from '@kbn/kibana-utils-plugin/common';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 const mockDataPoints = [
   {
@@ -85,6 +86,9 @@ const createDrilldown = (isExternalUrlValid: boolean = true) => {
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
     settings: settingsServiceMock.createSetupContract(),
+    theme: () => {
+      return themeServiceMock.createStartContract();
+    },
   });
   return drilldown;
 };

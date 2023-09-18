@@ -1,5 +1,11 @@
 {
   "ml.explain_data_frame_analytics": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET",
       "POST"
@@ -8,6 +14,10 @@
       "_ml/data_frame/analytics/_explain",
       "_ml/data_frame/analytics/{id}/_explain"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/explain-dfanalytics.html"
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/explain-dfanalytics.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

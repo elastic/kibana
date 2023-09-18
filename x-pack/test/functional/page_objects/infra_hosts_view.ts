@@ -12,14 +12,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   return {
-    async clickTryHostViewLink() {
-      return await testSubjects.click('inventory-hostsView-link');
-    },
-
-    async clickTryHostViewBadge() {
-      return await testSubjects.click('inventory-hostsView-link-badge');
-    },
-
     async clickTableOpenFlyoutButton() {
       return testSubjects.click('hostsView-flyout-button');
     },
@@ -29,48 +21,31 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickSelectedHostsButton() {
-      return testSubjects.click('infraUseHostsTableButton');
+      return testSubjects.click('hostsViewTableSelectHostsFilterButton');
     },
 
     async clickSelectedHostsAddFilterButton() {
-      return testSubjects.click('infraHostsTableAddFilterButton');
+      return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
     },
 
-    async clickProcessesFlyoutTab() {
-      return testSubjects.click('hostsView-flyout-tabs-processes');
-    },
-
-    async clickLogsFlyoutTab() {
-      return testSubjects.click('hostsView-flyout-tabs-logs');
-    },
-
-    async clickProcessesTableExpandButton() {
-      return testSubjects.click('infraProcessRowButton');
-    },
-
-    async clickFlyoutUptimeLink() {
-      return testSubjects.click('hostsView-flyout-uptime-link');
-    },
-
-    async clickFlyoutApmServicesLink() {
-      return testSubjects.click('hostsView-flyout-apm-services-link');
-    },
-
-    async clickAddMetadataFilter() {
-      return testSubjects.click('hostsView-flyout-metadata-add-filter');
-    },
-
-    async clickRemoveMetadataFilter() {
-      return testSubjects.click('hostsView-flyout-metadata-remove-filter');
-    },
-
     async getBetaBadgeExists() {
       return testSubjects.exists('infra-beta-badge');
     },
+
+    // Inventory UI
+    async clickTryHostViewLink() {
+      return await testSubjects.click('inventory-hostsView-link');
+    },
+
+    async clickTryHostViewBadge() {
+      return await testSubjects.click('inventory-hostsView-link-badge');
+    },
+
+    // Splash screen
 
     async getHostsLandingPageDisabled() {
       const container = await testSubjects.find('hostView-no-enable-access');
@@ -124,7 +99,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async selectedHostsButtonExist() {
-      return testSubjects.exists('infraUseHostsTableButton');
+      return testSubjects.exists('hostsViewTableSelectHostsFilterButton');
     },
 
     async getMetricsTrendContainer() {
@@ -133,6 +108,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
 
     async getChartsContainer() {
       return testSubjects.find('hostsView-metricChart');
+    },
+
+    async getAllHostDetailLinks() {
+      return testSubjects.findAll('hostsViewTableEntryTitleLink');
     },
 
     // Metrics Tab
@@ -177,47 +156,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const element = await container.findByTestSubject(`hostsViewKPI-${type}`);
       const div = await element.findByClassName('echMetricText__value');
       return div.getAttribute('title');
-    },
-
-    // Flyout Tabs
-    getMetadataTab() {
-      return testSubjects.find('hostsView-flyout-tabs-metadata');
-    },
-
-    async getMetadataTabName() {
-      const tabElement = await this.getMetadataTab();
-      const tabTitle = await tabElement.findByClassName('euiTab__content');
-      return tabTitle.getVisibleText();
-    },
-
-    async getAppliedFilter() {
-      const filter = await testSubjects.find(
-        "filter-badge-'host.architecture: arm64' filter filter-enabled filter-key-host.architecture filter-value-arm64 filter-unpinned filter-id-0"
-      );
-      return filter.getVisibleText();
-    },
-
-    async getRemoveFilterExist() {
-      return testSubjects.exists('hostsView-flyout-metadata-remove-filter');
-    },
-
-    async getProcessesTabContentTitle(index: number) {
-      const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
-      return processesListElements[index].findByCssSelector('dt');
-    },
-
-    async getProcessesTabContentTotalValue() {
-      const processesListElements = await testSubjects.findAll('infraProcessesSummaryTableItem');
-      return processesListElements[0].findByCssSelector('dd');
-    },
-
-    getProcessesTable() {
-      return testSubjects.find('infraProcessesTable');
-    },
-
-    async getProcessesTableBody() {
-      const processesTable = await this.getProcessesTable();
-      return processesTable.findByCssSelector('tbody');
     },
 
     // Logs Tab

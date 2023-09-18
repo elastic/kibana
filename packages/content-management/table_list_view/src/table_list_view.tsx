@@ -7,7 +7,7 @@
  */
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import {
   TableListViewTable,
   type TableListViewTableProps,
@@ -81,6 +81,10 @@ export const TableListView = <T extends UserContentCommonSchema>({
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
   const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
+  const onFetchSuccess = useCallback(() => {
+    setHasInitialFetchReturned(true);
+  }, []);
+
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
       <KibanaPageTemplate.Header
@@ -115,11 +119,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           contentEditor={contentEditor}
           titleColumnName={titleColumnName}
           withoutPageTemplateWrapper={withoutPageTemplateWrapper}
-          onFetchSuccess={() => {
-            if (!hasInitialFetchReturned) {
-              setHasInitialFetchReturned(true);
-            }
-          }}
+          onFetchSuccess={onFetchSuccess}
           setPageDataTestSubject={setPageDataTestSubject}
         />
       </KibanaPageTemplate.Section>

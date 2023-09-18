@@ -54,16 +54,16 @@ If you create a rule in the {observability} app, its alerts are not visible in
 | <<apm-alerts, APM and User Experience>>
 | Detect complex conditions in *APM* data and trigger built-in actions when the conditions are met.
 
-| {observability-guide}/create-alerts.html[Logs rules]
+| {observability-guide}/logs-threshold-alert.html[Logs rules]
 | Detect complex conditions in the {logs-app}.
 
-| {observability-guide}/create-alerts.html[Metrics rules]
+| {observability-guide}/metrics-threshold-alert.html[Metrics rules]
 | Detect complex conditions in the {metrics-app}.
 
-| <<kibana-alerts,{stack-monitor-app}>>
-| Provide {kib} alerting rules out-of-the box to notify you of potential issues in the {stack}.
+| {observability-guide}/slo-burn-rate-alert.html[SLO burn rate rule]
+| Detect when the burn rate is above a defined threshold.
 
-| {observability-guide}/create-alerts.html[Uptime rules]
+| {observability-guide}/monitor-status-alert.html[Uptime rules]
 | Detect complex conditions in the {uptime-app}.
 
 |===

@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_PREPACKAGED_URL } from '../../../../../../common/constants';
@@ -18,7 +19,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { installPrepackagedTimelines } from './helpers';
 
-import { checkTimelinesStatus, checkTimelineStatusRt } from '../../../utils/check_timelines_status';
+import { checkTimelinesStatus } from '../../../utils/check_timelines_status';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 

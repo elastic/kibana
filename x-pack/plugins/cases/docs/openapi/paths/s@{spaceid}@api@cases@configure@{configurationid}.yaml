@@ -17,28 +17,7 @@ patch:
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            closure_type:
-              $ref: '../components/schemas/closure_types.yaml'
-            connector:
-              description: An object that contains the connector configuration.
-              type: object
-              properties:
-                $ref: '../components/schemas/case_configure_connector_properties.yaml'
-              required:
-                - fields
-                - id
-                - name
-                - type
-            version:
-              description: >
-                The version of the connector. To retrieve the version value, use
-                the get configuration API.
-              type: string
-              example: WzIwMiwxXQ==
-          required: 
-            - version
+          $ref: '../components/schemas/update_case_configuration_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.

@@ -8,7 +8,7 @@
 import { get } from 'lodash/fp';
 
 import type { RiskScore, RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { RuleMetadata } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleMetadata } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SignalSource } from '../../types';
 
 export interface BuildRiskScoreFromMappingProps {

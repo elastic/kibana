@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ServiceAsset } from '../assets';
 import { Entity } from '../entity';
 import { ApmFields } from './apm_fields';
 import { Instance } from './instance';
@@ -16,6 +17,15 @@ export class Service extends Entity<ApmFields> {
       ...this.fields,
       ['service.node.name']: instanceName,
       'host.name': instanceName,
+    });
+  }
+
+  asset() {
+    return new ServiceAsset({
+      'asset.kind': 'service',
+      'asset.id': this.fields['service.name']!,
+      'asset.name': this.fields['service.name'],
+      'asset.ean': `service:${this.fields['service.name']}`,
     });
   }
 }

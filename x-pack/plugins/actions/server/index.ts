@@ -22,10 +22,11 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  FindActionResult,
 } from './types';
+
+export type { FindConnectorResult as FindActionResult } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 

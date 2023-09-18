@@ -142,6 +142,21 @@
             "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.QuerySuggestionGetFnArgs.suggestionsAbstraction",
+            "type": "Object",
+            "tags": [],
+            "label": "suggestionsAbstraction",
+            "description": [],
+            "signature": [
+              "SuggestionsAbstraction",
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

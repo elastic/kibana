@@ -6,10 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IKibanaResponse, SavedObject } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SyntheticsParamRequest } from '../../../common/runtime_types';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SyntheticsParamRequest, SyntheticsParams } from '../../../common/runtime_types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -26,7 +27,12 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request, response, server }): Promise<any> => {
+  handler: async ({
+    savedObjectsClient,
+    request,
+    response,
+    server,
+  }): Promise<IKibanaResponse<SyntheticsParams>> => {
     try {
       const { id: _spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
@@ -39,9 +45,18 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
         id: string;
       };
 
-      const result = await savedObjectsClient.update(syntheticsParamType, id, data);
+      const { value } = data;
+      const {
+        id: responseId,
+        attributes: { key, tags, description },
+        namespaces,
+      } = (await savedObjectsClient.update(
+        syntheticsParamType,
+        id,
+        data
+      )) as SavedObject<SyntheticsParams>;
 
-      return { data: result };
+      return response.ok({ body: { id: responseId, key, tags, description, namespaces, value } });
     } catch (error) {
       if (error.output?.statusCode === 404) {
         const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

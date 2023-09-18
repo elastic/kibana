@@ -8,10 +8,11 @@
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { Query } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -20,16 +21,31 @@ import type {
   IndexPattern,
   VisualizationMap,
   DatasourceMap,
+  DragDropOperation,
 } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
-import type { LayerType } from '../../common/types';
+import type { DateRange, LayerType } from '../../common/types';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import type { LensAppServices } from '../app_plugin/types';
+
+const getQueryFromContext = (
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  data: LensAppServices['data']
+) => {
+  if ('searchQuery' in context && context.searchQuery) {
+    return context.searchQuery;
+  }
+  if ('query' in context && context.query) {
+    return context.query;
+  }
+  return data.query.queryString.getQuery();
+};
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -93,22 +109,22 @@ export const getPreloadedState = ({
     };
   }
 
-  const state = {
+  const query = !initialContext
+    ? data.query.queryString.getDefaultQuery()
+    : getQueryFromContext(initialContext, data);
+
+  const state: LensAppState = {
     ...initialState,
     isLoading: true,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    query: !initialContext
-      ? data.query.queryString.getDefaultQuery()
-      : 'searchQuery' in initialContext && initialContext.searchQuery
-      ? initialContext.searchQuery
-      : (data.query.queryString.getQuery() as Query),
+    query: query as Query,
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
       ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId(),
+    searchSessionId: data.search.session.getSessionId() || '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
       embeddableEditorIncomingState?.originatingApp ||
@@ -124,7 +140,18 @@ export const getPreloadedState = ({
   return state;
 };
 
+export interface SetExecutionContextPayload {
+  query?: Query;
+  filters?: Filter[];
+  searchSessionId?: string;
+  resolvedDateRange?: DateRange;
+}
+
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
+export const setExecutionContext = createAction<SetExecutionContextPayload>(
+  'lens/setExecutionContext'
+);
+export const initExisting = createAction<Partial<LensAppState>>('lens/initExisting');
 export const onActiveDataChange = createAction<{
   activeData: TableInspectorAdapter;
 }>('lens/onActiveDataChange');
@@ -133,11 +160,8 @@ export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
 export const applyChanges = createAction<void>('lens/applyChanges');
 export const setChangesApplied = createAction<boolean>('lens/setChangesApplied');
-export const updateState = createAction<{
-  updater: (prevState: LensAppState) => LensAppState;
-}>('lens/updateState');
 export const updateDatasourceState = createAction<{
-  updater: unknown | ((prevState: unknown) => unknown);
+  newDatasourceState: unknown;
   datasourceId: string;
   clearStagedPreview?: boolean;
   dontSyncLinkedDimensions?: boolean;
@@ -145,6 +169,7 @@ export const updateDatasourceState = createAction<{
 export const updateVisualizationState = createAction<{
   visualizationId: string;
   newState: unknown;
+  dontSyncLinkedDimensions?: boolean;
 }>('lens/updateVisualizationState');
 
 export const insertLayer = createAction<{
@@ -176,8 +201,8 @@ export const switchAndCleanDatasource = createAction<{
 export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
-  redirectCallback: (savedObjectId?: string) => void;
-  history: History<unknown>;
+  redirectCallback?: (savedObjectId?: string) => void;
+  history?: History<unknown>;
 }>('lens/loadInitial');
 export const initEmpty = createAction(
   'initEmpty',
@@ -218,6 +243,11 @@ export const addLayer = createAction<{
   extraArg: unknown;
   ignoreInitialValues?: boolean;
 }>('lens/addLayer');
+export const onDropToDimension = createAction<{
+  source: DragDropIdentifier;
+  target: DragDropOperation;
+  dropType: DropType;
+}>('lens/onDropToDimension');
 
 export const setLayerDefaultDimension = createAction<{
   layerId: string;
@@ -249,14 +279,15 @@ export const registerLibraryAnnotationGroup = createAction<{
 }>('lens/registerLibraryAnnotationGroup');
 
 export const lensActions = {
+  initExisting,
   setState,
+  setExecutionContext,
   onActiveDataChange,
   setSaveable,
   enableAutoApply,
   disableAutoApply,
   applyChanges,
   setChangesApplied,
-  updateState,
   updateDatasourceState,
   updateVisualizationState,
   insertLayer,
@@ -274,6 +305,7 @@ export const lensActions = {
   removeLayers,
   removeOrClearLayer,
   addLayer,
+  onDropToDimension,
   cloneLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
@@ -288,6 +320,18 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
   const { datasourceMap, visualizationMap } = storeDeps;
   return createReducer<LensAppState>(initialState, {
     [setState.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+    [setExecutionContext.type]: (state, { payload }: PayloadAction<SetExecutionContextPayload>) => {
+      return {
+        ...state,
+        ...payload,
+      };
+    },
+    [initExisting.type]: (state, { payload }: PayloadAction<Partial<LensAppState>>) => {
       return {
         ...state,
         ...payload,
@@ -323,46 +367,6 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     },
     [setChangesApplied.type]: (state, { payload: applied }) => {
       state.changesApplied = applied;
-    },
-    [updateState.type]: (
-      state,
-      {
-        payload: { updater },
-      }: {
-        payload: {
-          updater: (prevState: LensAppState) => LensAppState;
-        };
-      }
-    ) => {
-      let newState: LensAppState = updater(current(state) as LensAppState);
-
-      if (newState.activeDatasourceId) {
-        const { datasourceState, visualizationState } = syncLinkedDimensions(
-          newState,
-          visualizationMap,
-          datasourceMap
-        );
-
-        newState = {
-          ...newState,
-          visualization: {
-            ...newState.visualization,
-            state: visualizationState,
-          },
-          datasourceStates: {
-            ...newState.datasourceStates,
-            [newState.activeDatasourceId]: {
-              ...newState.datasourceStates[newState.activeDatasourceId],
-              state: datasourceState,
-            },
-          },
-        };
-      }
-
-      return {
-        ...newState,
-        stagedPreview: undefined,
-      };
     },
     [cloneLayer.type]: (
       state,
@@ -633,53 +637,35 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload,
       }: {
         payload: {
-          updater: unknown | ((prevState: unknown) => unknown);
+          newDatasourceState: unknown;
           datasourceId: string;
           clearStagedPreview?: boolean;
           dontSyncLinkedDimensions: boolean;
         };
       }
     ) => {
-      const currentState = current(state);
+      if (payload.clearStagedPreview) {
+        state.stagedPreview = undefined;
+      }
 
-      const newAppState: LensAppState = {
-        ...currentState,
-        datasourceStates: {
-          ...currentState.datasourceStates,
-          [payload.datasourceId]: {
-            state:
-              typeof payload.updater === 'function'
-                ? payload.updater(currentState.datasourceStates[payload.datasourceId].state)
-                : payload.updater,
-            isLoading: false,
-          },
-        },
-        stagedPreview: payload.clearStagedPreview ? undefined : currentState.stagedPreview,
+      state.datasourceStates[payload.datasourceId] = {
+        state: payload.newDatasourceState,
+        isLoading: false,
       };
 
       if (payload.dontSyncLinkedDimensions) {
-        return newAppState;
+        return;
       }
+
+      const currentState = current(state);
 
       const {
         datasourceState: syncedDatasourceState,
         visualizationState: syncedVisualizationState,
-      } = syncLinkedDimensions(newAppState, visualizationMap, datasourceMap, payload.datasourceId);
+      } = syncLinkedDimensions(currentState, visualizationMap, datasourceMap, payload.datasourceId);
 
-      return {
-        ...newAppState,
-        visualization: {
-          ...newAppState.visualization,
-          state: syncedVisualizationState,
-        },
-        datasourceStates: {
-          ...newAppState.datasourceStates,
-          [payload.datasourceId]: {
-            state: syncedDatasourceState,
-            isLoading: false,
-          },
-        },
-      };
+      state.visualization.state = syncedVisualizationState;
+      state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
     },
     [updateVisualizationState.type]: (
       state,
@@ -689,6 +675,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         payload: {
           visualizationId: string;
           newState: unknown;
+          dontSyncLinkedDimensions?: boolean;
         };
       }
     ) => {
@@ -705,6 +692,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state.visualization.state = payload.newState;
 
       if (!state.activeDatasourceId) {
+        return;
+      }
+
+      if (payload.dontSyncLinkedDimensions) {
         return;
       }
 
@@ -853,8 +844,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       state,
       payload: PayloadAction<{
         initialInput?: LensEmbeddableInput;
-        redirectCallback: (savedObjectId?: string) => void;
-        history: History<unknown>;
+        redirectCallback?: (savedObjectId?: string) => void;
+        history?: History<unknown>;
       }>
     ) => state,
     [initEmpty.type]: (
@@ -1020,6 +1011,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         state.visualization.state =
           typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
       }
+
       layerIds.forEach((layerId) => {
         const [layerDatasourceId] =
           Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
@@ -1112,6 +1104,87 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
       state.visualization.state = syncedVisualizationState;
+    },
+    [onDropToDimension.type]: (
+      state,
+      {
+        payload: { source, target, dropType },
+      }: {
+        payload: {
+          source: DragDropIdentifier;
+          target: DragDropOperation;
+          dropType: DropType;
+        };
+      }
+    ) => {
+      if (!state.visualization.activeId) {
+        return state;
+      }
+
+      const activeVisualization = visualizationMap[state.visualization.activeId];
+      const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+
+      const { groups } = activeVisualization.getConfiguration({
+        layerId: target.layerId,
+        frame: framePublicAPI,
+        state: state.visualization.state,
+      });
+
+      const [layerDatasourceId, layerDatasource] =
+        Object.entries(datasourceMap).find(
+          ([datasourceId, datasource]) =>
+            state.datasourceStates[datasourceId] &&
+            datasource
+              .getLayers(state.datasourceStates[datasourceId].state)
+              .includes(target.layerId)
+        ) || [];
+
+      let newDatasourceState;
+
+      if (layerDatasource && layerDatasourceId) {
+        newDatasourceState = layerDatasource?.onDrop({
+          state: state.datasourceStates[layerDatasourceId].state,
+          source,
+          target: {
+            ...(target as unknown as DragDropOperation),
+            filterOperations:
+              groups.find(({ groupId: gId }) => gId === target.groupId)?.filterOperations ||
+              Boolean,
+          },
+          targetLayerDimensionGroups: groups,
+          dropType,
+          indexPatterns: framePublicAPI.dataViews.indexPatterns,
+        });
+        if (!newDatasourceState) {
+          return;
+        }
+        state.datasourceStates[layerDatasourceId].state = newDatasourceState;
+      }
+
+      activeVisualization.onDrop = activeVisualization.onDrop?.bind(activeVisualization);
+      const newVisualizationState = (activeVisualization.onDrop || onDropForVisualization)?.(
+        {
+          prevState: state.visualization.state,
+          frame: framePublicAPI,
+          target,
+          source,
+          dropType,
+          group: groups.find(({ groupId: gId }) => gId === target.groupId),
+        },
+        activeVisualization
+      );
+      state.visualization.state = newVisualizationState;
+
+      if (layerDatasourceId) {
+        const {
+          datasourceState: syncedDatasourceState,
+          visualizationState: syncedVisualizationState,
+        } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
+
+        state.datasourceStates[layerDatasourceId].state = syncedDatasourceState;
+        state.visualization.state = syncedVisualizationState;
+      }
+      state.stagedPreview = undefined;
     },
     [setLayerDefaultDimension.type]: (
       state,

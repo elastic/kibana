@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Chart, Settings, AreaSeries } from '@elastic/charts';
+import { Chart, Settings, AreaSeries, TooltipType, Tooltip } from '@elastic/charts';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
 import React, { useContext } from 'react';
 import {
@@ -46,7 +46,8 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
     <EuiFlexGroup gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>
         <Chart size={{ height: 18, width: 40 }}>
-          <Settings theme={theme} showLegend={false} tooltip="none" />
+          <Tooltip type={TooltipType.None} />
+          <Settings theme={theme} showLegend={false} />
           <AreaSeries
             id={id}
             data={timeseries}

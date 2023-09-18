@@ -25,8 +25,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { DisplayType } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../common/types/api';
-import { DisplayType } from '../../../../../../common/types/connectors';
 import { LicensingLogic } from '../../../../shared/licensing';
 
 import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
@@ -142,7 +143,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
     case DisplayType.TOGGLE:
-      if (key === 'document_level_security' && !hasPlatinumLicense) {
+      if (key === 'use_document_level_security') {
         return (
           <DocumentLevelSecurityPanel
             toggleSwitch={
@@ -157,24 +158,26 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                     }}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <PlatinumLicensePopover
-                    button={
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
-                          'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
-                          {
-                            defaultMessage: 'Open licensing popover',
-                          }
-                        )}
-                        iconType="questionInCircle"
-                        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                      />
-                    }
-                    closePopover={() => setIsPopoverOpen(false)}
-                    isPopoverOpen={isPopoverOpen}
-                  />
-                </EuiFlexItem>
+                {!hasPlatinumLicense && (
+                  <EuiFlexItem grow={false}>
+                    <PlatinumLicensePopover
+                      button={
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
+                            {
+                              defaultMessage: 'Open licensing popover',
+                            }
+                          )}
+                          iconType="questionInCircle"
+                          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                        />
+                      }
+                      closePopover={() => setIsPopoverOpen(false)}
+                      isPopoverOpen={isPopoverOpen}
+                    />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             }
           />

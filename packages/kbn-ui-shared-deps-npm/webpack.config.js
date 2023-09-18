@@ -83,6 +83,7 @@ module.exports = (_, argv) => {
         '@elastic/numeral',
         '@emotion/cache',
         '@emotion/react',
+        '@hello-pangea/dnd/dist/dnd.js',
         '@tanstack/react-query',
         '@tanstack/react-query-devtools',
         'classnames',
@@ -96,7 +97,6 @@ module.exports = (_, argv) => {
         'moment-timezone/data/packed/latest.json',
         'moment',
         'react-ace',
-        'react-beautiful-dnd',
         'react-dom',
         'react-dom/server',
         'react-router-dom',
@@ -134,6 +134,19 @@ module.exports = (_, argv) => {
               loader: UiSharedDepsNpm.publicPathLoader,
               options: {
                 key: 'kbn-ui-shared-deps-npm',
+              },
+            },
+          ],
+        },
+        // @hello-pangea/dnd emits optional chaining that confuses webpack.
+        // We need to transform it using babel before going further
+        {
+          test: /@hello-pangea\/dnd\/dist\/dnd\.js$/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                plugins: [require.resolve('@babel/plugin-proposal-optional-chaining')],
               },
             },
           ],

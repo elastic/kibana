@@ -1,0 +1,692 @@
+# -----
+# Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+# -----
+t1_analyst:
+  cluster:
+  indices:
+    - names:
+        - ".alerts-security*"
+        - ".siem-signals-*"
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - metrics-endpoint.metadata_current_*
+        - ".fleet-agents*"
+        - ".fleet-actions*"
+      privileges:
+        - read
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - read
+        - read_alerts
+        - endpoint_list_read
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - read
+      resources: "*"
+    - application: actions
+      privileges:
+        - read
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - read
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - read
+        - run_saved_queries
+      resources: "*"
+
+t2_analyst:
+  cluster:
+  indices:
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - .lists*
+        - .items*
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - read
+        - read_alerts
+        - endpoint_list_read
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - read
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - read
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - read
+        - run_saved_queries
+      resources: "*"
+
+t3_analyst:
+  cluster:
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+      privileges:
+        - read
+        - write
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+      privileges:
+        - read
+        - write
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - crud_alerts
+        - endpoint_list_all
+        - trusted_applications_all
+        - event_filters_all
+        - host_isolation_exceptions_all
+        - blocklist_all
+        - policy_management_read # Elastic Defend Policy Management
+        - host_isolation_all
+        - process_operations_all
+        - actions_log_management_all # Response actions history
+        - file_operations_all
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - read
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+
+threat_intelligence_analyst:
+  cluster:
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - .lists*
+        - .items*
+        - packetbeat-*
+        - winlogbeat-*
+      privileges:
+        - read
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+      privileges:
+        - read
+        - write
+        - maintenance
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - read
+        - read_alerts
+        - endpoint_list_read
+        - blocklist_all
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - read
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - read
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+
+rule_author:
+  cluster:
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+      privileges:
+        - read
+        - write
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .internal.preview.alerts-security*
+        - .preview.alerts-security*
+      privileges:
+        - read
+        - write
+        - maintenance
+        - view_index_metadata
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - crud_alerts
+        - policy_management_all
+        - endpoint_list_all
+        - trusted_applications_all
+        - event_filters_all
+        - host_isolation_exceptions_read
+        - blocklist_all
+        - actions_log_management_read
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - read
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+
+soc_manager:
+  cluster:
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+      privileges:
+        - read
+        - write
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+      privileges:
+        - read
+        - write
+        - manage
+    - names:
+        - .lists*
+        - .items*
+      privileges:
+        - read
+        - write
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - crud_alerts
+        - policy_management_all
+        - endpoint_list_all
+        - trusted_applications_all
+        - event_filters_all
+        - host_isolation_exceptions_all
+        - blocklist_all
+        - host_isolation_all
+        - process_operations_all
+        - actions_log_management_all
+        - file_operations_all
+        - execute_operations_all
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - all
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+
+detections_admin:
+  cluster:
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - .lists*
+        - .items*
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+      privileges:
+        - read
+        - write
+        - manage
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+  applications:
+    - application: ml
+      privileges:
+        - all
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - crud_alerts
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - read
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: dev_tools
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+
+platform_engineer:
+  cluster:
+    - manage
+  indices:
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - .lists*
+        - .items*
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+      privileges:
+        - all
+  applications:
+    - application: ml
+      privileges:
+        - all
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - crud_alerts
+        - policy_management_all
+        - endpoint_list_all
+        - trusted_applications_all
+        - event_filters_all
+        - host_isolation_exceptions_all
+        - blocklist_all
+        - actions_log_management_read
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - all
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: fleet
+      privileges:
+        - all
+      resources: "*"
+    - application: fleetv2
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+
+endpoint_operations_analyst:
+  cluster:
+  indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - .lists*
+        - .items*
+      privileges:
+        - read
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+      privileges:
+        - read
+        - write
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - policy_management_all
+        - endpoint_list_all
+        - trusted_applications_all
+        - event_filters_all
+        - host_isolation_exceptions_all
+        - blocklist_all
+        - host_isolation_all
+        - process_operations_all
+        - actions_log_management_all # Response History
+        - file_operations_all
+        - execute_operations_all # Execute
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - all
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+    - application: fleet
+      privileges:
+        - all
+      resources: "*"
+    - application: fleetv2
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+
+endpoint_policy_manager:
+  cluster:
+  indices:
+    - names:
+        - metrics-endpoint.metadata_current_*
+        - .fleet-agents*
+        - .fleet-actions*
+      privileges:
+        - read
+    - names:
+        - apm-*-transaction*
+        - traces-apm*
+        - auditbeat-*
+        - endgame-*
+        - filebeat-*
+        - logs-*
+        - packetbeat-*
+        - winlogbeat-*
+        - .lists*
+        - .items*
+      privileges:
+        - read
+    - names:
+        - .alerts-security*
+        - .siem-signals-*
+        - .preview.alerts-security*
+        - .internal.preview.alerts-security*
+      privileges:
+        - read
+        - write
+        - manage
+  applications:
+    - application: ml
+      privileges:
+        - read
+      resources: "*"
+    - application: siem
+      privileges:
+        - all
+        - read_alerts
+        - crud_alerts
+        - policy_management_all
+        - trusted_applications_all
+        - event_filters_all
+        - host_isolation_exceptions_all
+        - blocklist_all
+        - endpoint_list_all
+      resources: "*"
+    - application: securitySolutionCases
+      privileges:
+        - all
+      resources: "*"
+    - application: actions
+      privileges:
+        - all
+      resources: "*"
+    - application: builtInAlerts
+      privileges:
+        - all
+      resources: "*"
+    - application: osquery
+      privileges:
+        - all
+      resources: "*"
+    - application: fleet
+      privileges:
+        - all
+      resources: "*"
+    - application: fleetv2
+      privileges:
+        - all
+      resources: "*"
+    - application: spaces
+      privileges:
+        - all
+      resources: "*"
+

@@ -15,6 +15,7 @@ import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge } from 'lodash';
 import React, { ReactNode } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -66,6 +67,13 @@ const mockPlugin = {
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+    },
+  },
+  share: {
+    url: {
+      locators: {
+        get: jest.fn(),
+      },
     },
   },
 };
@@ -144,20 +152,22 @@ export function MockApmPluginStorybook({
   });
 
   return (
-    <EuiThemeProvider darkMode={false}>
-      <KibanaReactContext.Provider>
-        <ApmPluginContext.Provider value={contextMock}>
-          <APMServiceContext.Provider value={serviceContextValue}>
-            <RouterProvider router={apmRouter as any} history={history2}>
-              <MockTimeRangeContextProvider>
-                <ApmTimeRangeMetadataContextProvider>
-                  {children}
-                </ApmTimeRangeMetadataContextProvider>
-              </MockTimeRangeContextProvider>
-            </RouterProvider>
-          </APMServiceContext.Provider>
-        </ApmPluginContext.Provider>
-      </KibanaReactContext.Provider>
-    </EuiThemeProvider>
+    <IntlProvider locale="en">
+      <EuiThemeProvider darkMode={false}>
+        <KibanaReactContext.Provider>
+          <ApmPluginContext.Provider value={contextMock}>
+            <APMServiceContext.Provider value={serviceContextValue}>
+              <RouterProvider router={apmRouter as any} history={history2}>
+                <MockTimeRangeContextProvider>
+                  <ApmTimeRangeMetadataContextProvider>
+                    {children}
+                  </ApmTimeRangeMetadataContextProvider>
+                </MockTimeRangeContextProvider>
+              </RouterProvider>
+            </APMServiceContext.Provider>
+          </ApmPluginContext.Provider>
+        </KibanaReactContext.Provider>
+      </EuiThemeProvider>
+    </IntlProvider>
   );
 }

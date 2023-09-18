@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
+import React, { FC, useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -31,8 +31,14 @@ import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { CytoscapeContext } from './cytoscape';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { checkPermission } from '../../../../capabilities/check_capabilities';
-import { useMlLocator, useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
+import {
+  useMlLocator,
+  useNotifications,
+  useNavigateToPath,
+  useMlKibana,
+  useIsServerless,
+} from '../../../../contexts/kibana';
 import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
@@ -42,34 +48,40 @@ import {
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 
 interface Props {
-  details: any;
+  details: Record<string, any>;
   getNodeData: any;
   modelId?: string;
   updateElements: (nodeId: string, nodeLabel: string, destIndexNode?: string) => void;
   refreshJobsCallback: () => void;
 }
 
-function getListItems(details: object): EuiDescriptionListProps['listItems'] {
-  return Object.entries(details).map(([key, value]) => {
-    let description;
-    if (key === 'create_time') {
-      description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
-    } else {
-      description =
-        typeof value === 'object' ? (
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-            {JSON.stringify(value, null, 2)}
-          </EuiCodeBlock>
-        ) : (
-          value
-        );
+function getListItemsFactory(isServerless: boolean) {
+  return (details: Record<string, any>): EuiDescriptionListProps['listItems'] => {
+    if (isServerless) {
+      delete details.license_level;
     }
 
-    return {
-      title: key,
-      description,
-    };
-  });
+    return Object.entries(details).map(([key, value]) => {
+      let description;
+      if (key === 'create_time') {
+        description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
+      } else {
+        description =
+          typeof value === 'object' ? (
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+              {JSON.stringify(value, null, 2)}
+            </EuiCodeBlock>
+          ) : (
+            value
+          );
+      }
+
+      return {
+        title: key,
+        description,
+      };
+    });
+  };
 }
 
 export const Controls: FC<Props> = React.memo(
@@ -79,9 +91,12 @@ export const Controls: FC<Props> = React.memo(
     const [isPopoverOpen, setPopover] = useState<boolean>(false);
     const [didUntag, setDidUntag] = useState<boolean>(false);
 
-    const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
-    const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
+    const canCreateDataFrameAnalytics: boolean = usePermissionCheck('canCreateDataFrameAnalytics');
+    const canDeleteDataFrameAnalytics: boolean = usePermissionCheck('canDeleteDataFrameAnalytics');
     const deleteAction = useDeleteAction(canDeleteDataFrameAnalytics);
+    const isServerless = useIsServerless();
+    const getListItems = useMemo(() => getListItemsFactory(isServerless), [isServerless]);
+
     const {
       closeDeleteJobCheckModal,
       deleteItem,
@@ -93,6 +108,17 @@ export const Controls: FC<Props> = React.memo(
       openModal,
       openDeleteJobCheckModal,
     } = deleteAction;
+
+    const {
+      services: {
+        share,
+        application: { navigateToUrl, capabilities },
+      },
+    } = useMlKibana();
+
+    const hasIngestPipelinesCapabilities =
+      capabilities.management?.ingest?.ingest_pipelines === true;
+
     const { toasts } = useNotifications();
     const mlLocator = useMlLocator()!;
     const navigateToPath = useNavigateToPath();
@@ -124,14 +150,26 @@ export const Controls: FC<Props> = React.memo(
       } else {
         toasts.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
-            defaultMessage:
-              'To create a job from this index please create a data view for {indexTitle}.',
+            defaultMessage: 'To create a job from this index create a data view for {indexTitle}.',
             values: { indexTitle: nodeLabel },
           })
         );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodeLabel]);
+
+    const onManagePipeline = useCallback(async () => {
+      const ingestPipelineLocator = share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR');
+      if (ingestPipelineLocator && nodeLabel !== null) {
+        const path = await ingestPipelineLocator.getUrl({
+          page: 'pipeline_list',
+        });
+
+        // Passing pipelineId here because pipeline_list is not recognizing pipelineId params
+        await navigateToUrl(`${path}/?pipeline=${nodeLabel}`);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [share.url.locators, nodeLabel]);
 
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
@@ -262,6 +300,22 @@ export const Controls: FC<Props> = React.memo(
             </EuiContextMenuItem>,
           ]
         : []),
+      ...(modelId !== nodeLabel &&
+      nodeType === JOB_MAP_NODE_TYPES.INGEST_PIPELINE &&
+      hasIngestPipelinesCapabilities
+        ? [
+            <EuiContextMenuItem
+              key={`${nodeId}-view-pipeline`}
+              icon="pipelineApp"
+              onClick={onManagePipeline}
+            >
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.flyout.viewIngestPipelineButton"
+                defaultMessage="View ingest pipeline"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
     ];
 
     return (
@@ -298,7 +352,7 @@ export const Controls: FC<Props> = React.memo(
             </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
-            {nodeType !== JOB_MAP_NODE_TYPES.TRAINED_MODEL && (
+            {nodeType !== JOB_MAP_NODE_TYPES.TRAINED_MODEL && items.length > 0 ? (
               <EuiPopover
                 button={button}
                 isOpen={isPopoverOpen}
@@ -308,7 +362,7 @@ export const Controls: FC<Props> = React.memo(
               >
                 <EuiContextMenuPanel items={items} />
               </EuiPopover>
-            )}
+            ) : null}
           </EuiFlyoutFooter>
         </EuiFlyout>
         {isDeleteJobCheckModalVisible && item && (

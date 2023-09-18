@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 import {
@@ -18,7 +17,7 @@ import {
   euiPaletteWarm,
   euiPaletteForStatus,
   euiPaletteForTemperature,
-  euiPaletteComplimentary,
+  euiPaletteComplementary,
   euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
@@ -263,9 +262,7 @@ export const buildPalettes: (
 ) => Record<string, PaletteDefinition> = (legacyColorsService) => {
   return {
     default: {
-      title: i18n.translate('charts.palettes.defaultPaletteLabel', {
-        defaultMessage: 'Default',
-      }),
+      title: i18n.translate('charts.palettes.defaultPaletteLabel', { defaultMessage: 'Default' }),
       ...buildRoundRobinCategoricalWithMappedColors(),
     },
     status: {
@@ -280,7 +277,7 @@ export const buildPalettes: (
       title: i18n.translate('charts.palettes.complimentaryLabel', {
         defaultMessage: 'Complimentary',
       }),
-      ...buildGradient('complimentary', euiPaletteComplimentary),
+      ...buildGradient('complimentary', euiPaletteComplementary),
     },
     negative: {
       title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),

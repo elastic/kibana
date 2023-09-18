@@ -99,6 +99,11 @@ export interface TableListViewKibanaDependencies {
     overlays: {
       openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
+    theme: {
+      theme$: Observable<{
+        readonly darkMode: boolean;
+      }>;
+    };
   };
   /**
    * Handler from the '@kbn/kibana-react-plugin/public' Plugin

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useMlKibana } from './kibana_context';
 
-export const useIsServerless = () => {
-  const isServerless = useMlKibana().services.mlServices.isServerless;
-  return useMemo(() => isServerless(), [isServerless]);
-};
+export function useIsServerless(): boolean {
+  return useMlKibana().services.mlServices.isServerless;
+}

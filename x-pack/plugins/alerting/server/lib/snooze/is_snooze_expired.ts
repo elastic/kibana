@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { RRule, Weekday } from 'rrule';
+import { RRule, Weekday } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
 import { isSnoozeActive } from './is_snooze_active';
-import { parseByWeekday } from '../rrule';
 
 export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
   if (isSnoozeActive(snooze)) {
@@ -23,12 +22,12 @@ export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
       ...rRule,
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
-      wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
-      byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
+      byweekday: rRule.byweekday ?? null,
+      wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
-    const nextOccurrence = recurrenceRule.after(new Date(now), true);
+    const nextOccurrence = recurrenceRule.after(new Date(now));
     return !nextOccurrence;
   } catch (e) {
     throw new Error(`Failed to process RRule ${rRule}: ${e}`);

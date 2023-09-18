@@ -212,7 +212,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"degraded\" | \"unavailable\" | \"critical\" | \"available\""
+              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
             ],
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,

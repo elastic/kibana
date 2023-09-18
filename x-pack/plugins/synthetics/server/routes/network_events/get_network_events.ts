@@ -7,11 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { getNetworkEvents } from '../../legacy_uptime/lib/requests/get_network_events';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 
-export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.NETWORK_EVENTS,
   validate: {

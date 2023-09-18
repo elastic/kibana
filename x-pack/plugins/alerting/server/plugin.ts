@@ -52,9 +52,12 @@ import {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
+import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { ServerlessPluginSetup } from '@kbn/serverless/server';
+
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -96,6 +99,8 @@ import {
 } from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
+import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -137,6 +142,7 @@ export interface PluginSetupContract {
   getSecurityHealth: () => Promise<SecurityHealth>;
   getConfig: () => AlertingRulesConfig;
   frameworkAlerts: PublicFrameworkAlertsService;
+  getDataStreamAdapter: () => DataStreamAdapter;
 }
 
 export interface PluginStartContract {
@@ -144,6 +150,7 @@ export interface PluginStartContract {
 
   getAllTypes: RuleTypeRegistry['getAllTypes'];
   getType: RuleTypeRegistry['get'];
+  getAlertIndicesAlias: GetAlertIndicesAlias;
 
   getRulesClientWithRequest(request: KibanaRequest): RulesClientApi;
 
@@ -166,6 +173,8 @@ export interface AlertingPluginsSetup {
   monitoringCollection: MonitoringCollectionSetup;
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
+  unifiedSearch: UnifiedSearchServerPluginSetup;
+  serverless?: ServerlessPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -203,6 +212,7 @@ export class AlertingPlugin {
   private inMemoryMetrics: InMemoryMetrics;
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
+  private dataStreamAdapter?: DataStreamAdapter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -226,6 +236,14 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
+
+    const useDataStreamForAlerts = !!plugins.serverless;
+    this.dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
+    this.logger.info(
+      `using ${
+        this.dataStreamAdapter.isUsingDataStreams() ? 'datastreams' : 'indexes and aliases'
+      } for persisting alerts`
+    );
 
     core.capabilities.registerProvider(() => {
       return {
@@ -262,6 +280,7 @@ export class AlertingPlugin {
         logger: this.logger,
         pluginStop$: this.pluginStop$,
         kibanaVersion: this.kibanaVersion,
+        dataStreamAdapter: this.dataStreamAdapter!,
         elasticsearchClientPromise: core
           .getStartServices()
           .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
@@ -343,7 +362,9 @@ export class AlertingPlugin {
       router,
       licenseState: this.licenseState,
       usageCounter: this.usageCounter,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       encryptedSavedObjects: plugins.encryptedSavedObjects,
+      config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
     });
 
     return {
@@ -394,7 +415,7 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, 'minimumScheduleInterval'),
+          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute']),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
@@ -411,6 +432,7 @@ export class AlertingPlugin {
           return Promise.resolve(errorResult(`Framework alerts service not available`));
         },
       },
+      getDataStreamAdapter: () => this.dataStreamAdapter!,
     };
   }
 
@@ -459,6 +481,7 @@ export class AlertingPlugin {
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
@@ -470,6 +493,7 @@ export class AlertingPlugin {
       authorization: alertingAuthorizationClientFactory,
       eventLogger: this.eventLogger,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
+      maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -553,6 +577,7 @@ export class AlertingPlugin {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getType: ruleTypeRegistry!.get.bind(this.ruleTypeRegistry),
       getAllTypes: ruleTypeRegistry!.getAllTypes.bind(this.ruleTypeRegistry!),
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>

@@ -10,12 +10,12 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 import type {
   SecuredFeature,
   SubFeaturePrivilege,
   SubFeaturePrivilegeGroup,
 } from '../../../../model';
-import type { EffectiveFeaturePrivileges } from './privilege_summary_calculator';
 
 interface Props {
   feature: SecuredFeature;

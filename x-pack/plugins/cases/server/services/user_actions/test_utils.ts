@@ -12,18 +12,18 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { omit, get } from 'lodash';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type {
+  UserActionAction,
+  CaseUserActionWithoutReferenceIds,
+  ConnectorUserAction,
+} from '../../../common/types/domain';
+import { UserActionActions, CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import type {
-  CaseUserActionWithoutReferenceIds,
-  ConnectorUserAction,
-  ActionCategory,
-} from '../../../common/api';
-import { CaseSeverity, CaseStatuses, Actions } from '../../../common/api';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
@@ -57,7 +57,7 @@ export const createConnectorUserAction = (
   const { id, ...restConnector } = createConnectorObject().connector;
   return {
     ...createUserActionSO({
-      action: Actions.create,
+      action: UserActionActions.create,
       payload: { connector: restConnector },
       type: 'connector',
       connectorId: id,
@@ -67,7 +67,7 @@ export const createConnectorUserAction = (
 };
 
 export const createUserActionSO = ({
-  action = Actions.create,
+  action = UserActionActions.create,
   attributesOverrides,
   commentId,
   connectorId,
@@ -76,7 +76,7 @@ export const createUserActionSO = ({
   type,
   references = [],
 }: {
-  action?: ActionCategory;
+  action?: UserActionAction;
   type?: string;
   payload?: Record<string, unknown>;
   attributesOverrides?: Partial<CaseUserActionWithoutReferenceIds>;
@@ -151,7 +151,7 @@ export const updateConnectorUserAction = ({
   const { id, ...restConnector } = createJiraConnector();
   return {
     ...createUserActionSO({
-      action: Actions.update,
+      action: UserActionActions.update,
       payload: { connector: restConnector },
       type: 'connector',
       connectorId: id,
@@ -168,7 +168,7 @@ export const pushConnectorUserAction = ({
   const { connector_id: connectorId, ...restExternalService } = createExternalService();
   return {
     ...createUserActionSO({
-      action: Actions.push_to_service,
+      action: UserActionActions.push_to_service,
       payload: { externalService: restExternalService },
       pushedConnectorId: connectorId,
       type: 'pushed',
@@ -181,7 +181,7 @@ export const createCaseUserAction = (): SavedObject<CaseUserActionWithoutReferen
   const { id, ...restConnector } = createJiraConnector();
   return {
     ...createUserActionSO({
-      action: Actions.create,
+      action: UserActionActions.create,
       payload: {
         connector: restConnector,
         title: 'a title',
@@ -201,7 +201,7 @@ export const createCaseUserAction = (): SavedObject<CaseUserActionWithoutReferen
 export const createPersistableStateUserAction = () => {
   return {
     ...createUserActionSO({
-      action: Actions.create,
+      action: UserActionActions.create,
       commentId: 'persistable-state-test-id',
       payload: {
         comment: {
@@ -218,7 +218,7 @@ export const createPersistableStateUserAction = () => {
 export const createExternalReferenceUserAction = () => {
   return {
     ...createUserActionSO({
-      action: Actions.create,
+      action: UserActionActions.create,
       commentId: 'external-reference-test-id',
       payload: {
         comment: omit(externalReferenceAttachmentSO, 'externalReferenceId'),

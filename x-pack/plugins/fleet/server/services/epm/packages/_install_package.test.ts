@@ -124,6 +124,8 @@ describe('_installPackage', () => {
           disableILMPolicies: true,
           disableProxies: false,
           fleetServerStandalone: false,
+          onlyAllowAgentUpgradeToKnownVersions: false,
+          capabilities: [],
         },
       })
     );
@@ -176,6 +178,8 @@ describe('_installPackage', () => {
           disableProxies: false,
           disableILMPolicies: false,
           fleetServerStandalone: false,
+          onlyAllowAgentUpgradeToKnownVersions: false,
+          capabilities: [],
         },
       })
     );

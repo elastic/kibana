@@ -13,7 +13,7 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiFlexGrid,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -122,7 +122,7 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
           <EuiPanel>{data.nodeSummary && <DetailStatus stats={data.nodeSummary} />}</EuiPanel>
           <EuiSpacer size="m" />
           <AlertsCallout alerts={alerts} />
-          <EuiPageContent>
+          <EuiPageSection>
             <EuiFlexGrid columns={2} gutterSize="s">
               {metricsToShow.map((metric, index) => (
                 <EuiFlexItem key={index}>
@@ -136,7 +136,7 @@ export const LogStashNodePage: React.FC<ComponentProps> = ({ clusters }) => {
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     </LogstashTemplate>

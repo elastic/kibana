@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
+import type { AreaSeriesStyle, RecursivePartial, SettingsProps } from '@elastic/charts';
 import { Axis, AreaSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
@@ -21,7 +21,7 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  useThemes,
   Wrapper,
   ChartWrapper,
 } from './common';
@@ -81,15 +81,15 @@ export const AreaChartBaseComponent = ({
   height: string | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
 }) => {
-  const theme = useTheme();
+  const themes = useThemes();
   const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const xAxisId = `group-${data[0].key}-x`;
   const yAxisId = `group-${data[0].key}-y`;
-  const settings = {
+  const settings: SettingsProps = {
     ...chartDefaultSettings,
-    theme,
+    ...themes,
     ...get('configs.settings', chartConfigs),
   };
   return chartConfigs.width && chartConfigs.height ? (

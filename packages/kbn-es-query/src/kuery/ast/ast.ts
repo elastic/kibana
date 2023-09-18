@@ -57,6 +57,18 @@ export const fromKueryExpression = (
 };
 
 /**
+ * Given a KQL AST node, generate the corresponding KQL expression.
+ * @public
+ * @param node
+ */
+export function toKqlExpression(node: KueryNode): string {
+  if (nodeTypes.function.isNode(node)) return nodeTypes.function.toKqlExpression(node);
+  if (nodeTypes.literal.isNode(node)) return nodeTypes.literal.toKqlExpression(node);
+  if (nodeTypes.wildcard.isNode(node)) return nodeTypes.wildcard.toKqlExpression(node);
+  throw new Error(`Unknown KQL node type: "${node.type}"`);
+}
+
+/**
  * @params {String} indexPattern
  * @params {Object} config - contains the dateFormatTZ
  *

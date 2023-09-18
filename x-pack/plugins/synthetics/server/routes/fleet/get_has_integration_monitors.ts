@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 
 export const getHasIntegrationMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

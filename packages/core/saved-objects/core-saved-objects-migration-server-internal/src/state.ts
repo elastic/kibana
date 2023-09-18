@@ -14,6 +14,7 @@ import type {
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
 import type { IndexMapping, IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
@@ -186,6 +187,9 @@ export interface BaseState extends ControlState {
    * }
    */
   readonly indexTypesMap: IndexTypesMap;
+
+  /** Capabilities of the ES cluster we're using */
+  readonly esCapabilities: ElasticsearchCapabilities;
 }
 
 export interface InitState extends BaseState {
@@ -374,6 +378,7 @@ export interface CheckTargetMappingsState extends PostInitState {
 export interface UpdateTargetMappingsPropertiesState extends PostInitState {
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES';
+  readonly updatedTypesQuery: Option.Option<QueryDslQueryContainer>;
 }
 
 export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInitState {

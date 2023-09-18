@@ -7,6 +7,7 @@
  */
 
 import { DropType } from '../types';
+import { DragDropAction } from './providers';
 
 export interface HumanData {
   label: string;
@@ -57,45 +58,34 @@ export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => 
 
 export type RegisteredDropTargets = Record<string, DropIdentifier | undefined> | undefined;
 
-/**
- * The shape of the drag / drop context.
- */
 export interface DragContextState {
   /**
    * The item being dragged or undefined.
    */
   dragging?: DraggingIdentifier;
-
   /**
    * keyboard mode
    */
   keyboardMode: boolean;
   /**
-   * keyboard mode
+   * currently selected drop target
    */
-  setKeyboardMode: (mode: boolean) => void;
-  /**
-   * Set the item being dragged.
-   */
-  setDragging: (dragging?: DraggingIdentifier) => void;
-
   activeDropTarget?: DropIdentifier;
-
+  /**
+   * currently registered drop targets
+   */
   dropTargetsByOrder: RegisteredDropTargets;
-
-  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
-
-  setA11yMessage: (message: string) => void;
-  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
 
   /**
    * Customizable data-test-subj prefix
    */
   dataTestSubjPrefix: string;
-
-  /**
-   * A custom callback for telemetry
-   * @param event
-   */
-  onTrackUICounterEvent?: (event: string) => void;
 }
+
+export type CustomMiddleware = (action: DragDropAction) => void;
+
+export type DragContextValue = [
+  state: DragContextState,
+  dispatch: React.Dispatch<DragDropAction>,
+  customMiddleware?: CustomMiddleware
+];

@@ -8,23 +8,18 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreTheme, I18nStart } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { OpenSearchPanel } from './open_search_panel';
 
 let isOpen = false;
 
 export function showOpenSearchPanel({
-  I18nContext,
   onOpenSavedSearch,
-  theme$,
   services,
 }: {
-  I18nContext: I18nStart['Context'];
   onOpenSavedSearch: (id: string) => void;
-  theme$: Observable<CoreTheme>;
   services: DiscoverServices;
 }) {
   if (isOpen) {
@@ -41,13 +36,11 @@ export function showOpenSearchPanel({
 
   document.body.appendChild(container);
   const element = (
-    <I18nContext>
+    <KibanaRenderContextProvider theme={services.core.theme} i18n={services.core.i18n}>
       <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>
-          <OpenSearchPanel onClose={onClose} onOpenSavedSearch={onOpenSavedSearch} />
-        </KibanaThemeProvider>
+        <OpenSearchPanel onClose={onClose} onOpenSavedSearch={onOpenSavedSearch} />
       </KibanaContextProvider>
-    </I18nContext>
+    </KibanaRenderContextProvider>
   );
   ReactDOM.render(element, container);
 }

@@ -26,7 +26,7 @@ import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { initialInputData, sampleOutputData } from './mocks/data';
 import { createStore } from '../../store';
 import { useGetInitialUrlParamValue } from '../../utils/global_query_string/helpers';
-import { TEST_IDS } from './constants';
+import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
 import {
   controlGroupFilterInputMock$,
   controlGroupFilterOutputMock$,
@@ -304,7 +304,7 @@ describe(' Filter Group Component ', () => {
       );
     });
 
-    it('should save controls successfully', async () => {
+    it('should not rebuild controls while saving controls when controls are in desired order', async () => {
       render(<TestComponent />);
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
       await openContextMenu();
@@ -314,7 +314,9 @@ describe(' Filter Group Component ', () => {
       const newInputData = {
         ...initialInputData,
         panels: {
+          // status as  persistent controls is first in the position with order as 0
           '0': initialInputData.panels['0'],
+          '1': initialInputData.panels['1'],
         },
       } as ControlGroupInput;
 
@@ -329,10 +331,51 @@ describe(' Filter Group Component ', () => {
         // edit model gone
         expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
 
-        // check if upsert was called correctely
-        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(1);
+        // check if upsert was called correctly
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(0);
+      });
+    });
+
+    it('should  rebuild and save controls successfully when controls are not in desired order', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+      await openContextMenu();
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+
+      // modify controls
+      const newInputData = {
+        ...initialInputData,
+        panels: {
+          '0': {
+            ...initialInputData.panels['0'],
+            // status is second in position.
+            // this will force the rebuilding of controls
+            order: 1,
+          },
+          '1': {
+            ...initialInputData.panels['1'],
+            order: 0,
+          },
+        },
+      } as ControlGroupInput;
+
+      updateControlGroupInputMock(newInputData);
+
+      // clear any previous calls to the API
+      controlGroupMock.addOptionsListControl.mockClear();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+
+      await waitFor(() => {
+        // edit model gone
+        expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
+
+        // check if upsert was called correctly
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
+        // field id is not required to be passed  when creating a control
+        const { id, ...expectedInputData } = initialInputData.panels['0'].explicitInput;
         expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
-          ...initialInputData.panels['0'].explicitInput,
+          ...expectedInputData,
         });
       });
     });
@@ -363,17 +406,18 @@ describe(' Filter Group Component ', () => {
       await waitFor(() => {
         // edit model gone
         expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
-        // check if upsert was called correctely
+        // check if upsert was called correctly
         expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
         expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
-          hideExclude: true,
-          hideSort: true,
-          hidePanelTitles: true,
-          placeholder: '',
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           ...DEFAULT_DETECTION_PAGE_FILTERS[0],
         });
+
+        // field id is not required to be passed  when creating a control
+        const { id, ...expectedInputData } = initialInputData.panels['3'].explicitInput;
+
         expect(controlGroupMock.addOptionsListControl.mock.calls[1][0]).toMatchObject({
-          ...initialInputData.panels['3'].explicitInput,
+          ...expectedInputData,
         });
       });
     });
@@ -595,18 +639,12 @@ describe(' Filter Group Component ', () => {
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
       expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
       expect(controlGroupMock.addOptionsListControl.mock.calls[0][1]).toMatchObject({
-        hideExclude: true,
-        hideSort: true,
-        hidePanelTitles: true,
-        placeholder: '',
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
         ...DEFAULT_DETECTION_PAGE_FILTERS[0],
       });
 
       expect(controlGroupMock.addOptionsListControl.mock.calls[1][1]).toMatchObject({
-        hideExclude: true,
-        hideSort: true,
-        hidePanelTitles: true,
-        placeholder: '',
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
         fieldName: 'abc',
       });
 

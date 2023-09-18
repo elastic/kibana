@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ActionTypeConnector } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
+import type { ActionTypeConnector } from '../../../../common/types/domain';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import type { ActionConnector } from '../../../containers/configure/types';
 import type { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
 import { connectorsMock, actionTypesMock } from '../../../common/mock/connectors';

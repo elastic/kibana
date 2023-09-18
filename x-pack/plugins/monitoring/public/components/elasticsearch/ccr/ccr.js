@@ -11,8 +11,7 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPanel,
   EuiIcon,
   EuiIconTip,
   EuiTextColor,
@@ -312,9 +311,7 @@ export const Ccr = (props) => {
             />
           </h1>
         </EuiScreenReaderOnly>
-        <EuiPageContent>
-          <EuiPageContentBody>{renderTable()}</EuiPageContentBody>
-        </EuiPageContent>
+        <EuiPanel>{renderTable()}</EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

@@ -13,6 +13,7 @@ import {
   niceTimeFormatByDay,
   Settings,
   timeFormatter,
+  Tooltip,
 } from '@elastic/charts';
 import {
   useEuiTheme,
@@ -80,20 +81,20 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
 
   return (
     <Chart>
+      <Tooltip
+        headerFormatter={({ value }) => (
+          <>
+            <FormattedDate value={value} month="short" day="numeric" />
+            {', '}
+            <FormattedTime value={value} />
+          </>
+        )}
+      />
       <Settings
         theme={charts.theme.useChartsTheme()}
         baseTheme={charts.theme.useChartsBaseTheme()}
         showLegend={false}
         legendPosition="right"
-        tooltip={{
-          headerFormatter: ({ value }) => (
-            <>
-              <FormattedDate value={value} month="short" day="numeric" />
-              {', '}
-              <FormattedTime value={value} />
-            </>
-          ),
-        }}
       />
       <AreaSeries
         // EuiChart is using this id in the tooltip label
@@ -109,7 +110,13 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         tickFormat={timeFormatter(niceTimeFormatByDay(2))}
         ticks={4}
       />
-      <Axis ticks={3} id="left-axis" position="left" showGridLines domain={{ min: 0, max: 100 }} />
+      <Axis
+        ticks={3}
+        id="left-axis"
+        position="left"
+        gridLine={{ visible: true }}
+        domain={{ min: 0, max: 100 }}
+      />
     </Chart>
   );
 };

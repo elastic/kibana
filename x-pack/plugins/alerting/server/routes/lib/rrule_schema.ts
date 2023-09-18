@@ -13,7 +13,11 @@ export const rRuleSchema = schema.object({
   dtstart: schema.string({ validate: validateSnoozeStartDate }),
   tzid: schema.string(),
   freq: schema.maybe(
-    schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
+    schema.number({
+      validate: (freq: number) => {
+        if (freq < 0 || freq > 3) return 'rRule freq must be 0, 1, 2, or 3';
+      },
+    })
   ),
   interval: schema.maybe(
     schema.number({

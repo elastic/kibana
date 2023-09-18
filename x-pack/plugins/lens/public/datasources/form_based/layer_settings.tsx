@@ -15,6 +15,7 @@ import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
 const samplingValues = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 
@@ -93,6 +94,9 @@ export function LayerSettingsPanel({
           currentValue={currentValue}
           data-test-subj="lns-indexPattern-random-sampling-slider"
           onChange={(newSamplingValue) => {
+            if (newSamplingValue < 1) {
+              trackUiCounterEvents('apply_random_sampling');
+            }
             setState({
               ...state,
               layers: {
@@ -115,6 +119,9 @@ export function LayerSettingsPanel({
           };
           const newLayers = { ...state.layers };
           newLayers[layerId] = newLayer;
+          trackUiCounterEvents(
+            newLayer.ignoreGlobalFilters ? `ignore_global_filters` : `use_global_filters`
+          );
           setState({ ...state, layers: newLayers });
         }}
       />

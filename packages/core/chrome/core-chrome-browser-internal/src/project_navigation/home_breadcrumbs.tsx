@@ -9,6 +9,7 @@
 import { ChromeProjectBreadcrumb } from '@kbn/core-chrome-browser';
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 export const createHomeBreadcrumb = ({
   homeHref,
@@ -17,7 +18,8 @@ export const createHomeBreadcrumb = ({
 }): ChromeProjectBreadcrumb => {
   return {
     text: <EuiIcon type="home" />,
-    title: 'Home',
+    title: i18n.translate('core.ui.chrome.breadcrumbs.homeLink', { defaultMessage: 'Home' }),
     href: homeHref,
+    'data-test-subj': 'breadcrumb-home',
   };
 };

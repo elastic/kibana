@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { PromiseType } from 'utility-types';
 import { CertResult, GetCertsParams, Ping } from '../../common/runtime_types';
 import {
   getCertsRequestBody,
   processCertsResult,
 } from '../../common/requests/get_certs_request_body';
-import { UptimeEsClient } from '../legacy_uptime/lib/lib';
+import type { UptimeEsClient } from '../lib';
 
 export const getSyntheticsCerts = async (
   requestParams: GetCertsParams & { uptimeEsClient: UptimeEsClient }
@@ -19,6 +20,8 @@ export const getSyntheticsCerts = async (
 
   return processCertsResult(result);
 };
+
+export type CertificatesResults = PromiseType<ReturnType<typeof getCertsResults>>;
 
 const getCertsResults = async (
   requestParams: GetCertsParams & { uptimeEsClient: UptimeEsClient }

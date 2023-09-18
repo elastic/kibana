@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,11 +13,10 @@ import { CoreStart } from '@kbn/core/public';
 
 import {
   EuiButtonEmpty,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -29,7 +28,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesPluginStart, SpacesContextProps } from '@kbn/spaces-plugin/public';
+import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { PLUGIN_ID } from '../../../../../../common/constants/app';
 
@@ -41,9 +40,7 @@ import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { getMlGlobalServices } from '../../../../app';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
-import { mlApiServicesProvider } from '../../../../services/ml_api_service';
 
-import { HttpService } from '../../../../services/http_service';
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
 
@@ -57,11 +54,17 @@ export const JobsListPage: FC<{
   data: DataPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
-}> = ({ coreStart, share, history, spacesApi, data, usageCollection, fieldFormats }) => {
-  const mlApiServices = useMemo(
-    () => mlApiServicesProvider(new HttpService(coreStart.http)),
-    [coreStart.http]
-  );
+  isServerless: boolean;
+}> = ({
+  coreStart,
+  share,
+  history,
+  spacesApi,
+  data,
+  usageCollection,
+  fieldFormats,
+  isServerless,
+}) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
@@ -70,9 +73,14 @@ export const JobsListPage: FC<{
   const I18nContext = coreStart.i18n.Context;
   const theme$ = coreStart.theme.theme$;
 
+  const mlServices = useMemo(
+    () => getMlGlobalServices(coreStart.http, isServerless, usageCollection),
+    [coreStart.http, isServerless, usageCollection]
+  );
+
   const check = async () => {
     try {
-      await checkGetManagementMlJobsResolver(mlApiServices);
+      await checkGetManagementMlJobsResolver(mlServices);
     } catch (e) {
       if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
         setIsPlatinumOrTrialLicense(false);
@@ -122,12 +130,12 @@ export const JobsListPage: FC<{
               usageCollection,
               fieldFormats,
               spacesApi,
-              mlServices: getMlGlobalServices(coreStart.http, usageCollection),
+              mlServices,
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>
               <Router history={history}>
-                <EuiPageHeader
+                <EuiPageTemplate.Header
                   pageTitle={
                     <FormattedMessage
                       id="xpack.ml.management.jobsList.jobsListTitle"
@@ -142,11 +150,13 @@ export const JobsListPage: FC<{
                   }
                   rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
                   bottomBorder
+                  paddingSize={'none'}
                 />
 
                 <EuiSpacer size="l" />
 
-                <EuiPageContentBody
+                <EuiPageTemplate.Section
+                  paddingSize={'none'}
                   id="kibanaManagementMLSection"
                   data-test-subj="mlPageStackManagementJobsList"
                 >
@@ -178,7 +188,7 @@ export const JobsListPage: FC<{
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
-                </EuiPageContentBody>
+                </EuiPageTemplate.Section>
               </Router>
             </ContextWrapper>
           </KibanaContextProvider>

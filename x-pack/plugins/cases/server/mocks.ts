@@ -6,26 +6,28 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
-import type {
-  CasePostRequest,
-  CommentAttributes,
-  CommentRequestAlertType,
-  CommentRequestUserType,
-  ConnectorMappings,
-  UserActionAttributes,
-} from '../common/api';
-import {
-  Actions,
-  ActionTypes,
-  CaseSeverity,
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-} from '../common/api';
+
 import { SECURITY_SOLUTION_OWNER } from '../common/constants';
 import type { CasesStart } from './types';
 import { createCasesClientMock } from './client/mocks';
 import type { CaseSavedObjectTransformed } from './common/types/case';
+import type {
+  ActionsAttachmentPayload,
+  AlertAttachmentPayload,
+  AttachmentAttributes,
+  ConnectorMappings,
+  UserActionAttributes,
+  UserCommentAttachmentPayload,
+} from '../common/types/domain';
+import {
+  UserActionActions,
+  UserActionTypes,
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  AttachmentType,
+} from '../common/types/domain';
+import type { CasePostRequest } from '../common/types/api';
 
 const lensPersistableState = {
   attributes: {
@@ -306,13 +308,13 @@ export const mockCasesErrorTriggerData = [
   },
 ];
 
-export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
+export const mockCaseComments: Array<SavedObject<AttachmentAttributes>> = [
   {
     type: 'cases-comment',
     id: 'mock-comment-1',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
-      type: CommentType.user,
+      type: AttachmentType.user,
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -344,7 +346,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-2',
     attributes: {
       comment: 'Well I decided to update my comment. So what? Deal with it.',
-      type: CommentType.user,
+      type: AttachmentType.user,
       created_at: '2019-11-25T21:55:14.633Z',
       created_by: {
         full_name: 'elastic',
@@ -377,7 +379,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     id: 'mock-comment-3',
     attributes: {
       comment: 'Wow, good luck catching that bad meanie!',
-      type: CommentType.user,
+      type: AttachmentType.user,
       created_at: '2019-11-25T22:32:30.608Z',
       created_by: {
         full_name: 'elastic',
@@ -408,7 +410,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-4',
     attributes: {
-      type: CommentType.alert,
+      type: AttachmentType.alert,
       index: 'test-index',
       alertId: 'test-id',
       created_at: '2019-11-25T22:32:30.608Z',
@@ -445,7 +447,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-5',
     attributes: {
-      type: CommentType.alert,
+      type: AttachmentType.alert,
       index: 'test-index-2',
       alertId: 'test-id-2',
       created_at: '2019-11-25T22:32:30.608Z',
@@ -482,7 +484,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-6',
     attributes: {
-      type: CommentType.alert,
+      type: AttachmentType.alert,
       index: 'test-index-3',
       alertId: 'test-id-3',
       created_at: '2019-11-25T22:32:30.608Z',
@@ -519,7 +521,7 @@ export const mockCaseComments: Array<SavedObject<CommentAttributes>> = [
     type: 'cases-comment',
     id: 'mock-comment-7',
     attributes: {
-      type: CommentType.persistableState,
+      type: AttachmentType.persistableState,
       persistableStateAttachmentTypeId: '.lens',
       persistableStateAttachmentState: lensPersistableState,
       owner: 'cases',
@@ -552,8 +554,8 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-1',
     attributes: {
-      type: ActionTypes.description,
-      action: Actions.update,
+      type: UserActionTypes.description,
+      action: UserActionActions.update,
       payload: { description: 'test' },
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
@@ -578,11 +580,11 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-2',
     attributes: {
-      type: ActionTypes.comment,
-      action: Actions.update,
+      type: UserActionTypes.comment,
+      action: UserActionActions.update,
       payload: {
         comment: {
-          type: CommentType.persistableState,
+          type: AttachmentType.persistableState,
           persistableStateAttachmentTypeId: '.test',
           persistableStateAttachmentState: {},
           owner: 'cases',
@@ -611,11 +613,11 @@ export const mockUsersActions: Array<SavedObject<UserActionAttributes>> = [
     type: 'cases-user-actions',
     id: 'mock-user-action-3',
     attributes: {
-      type: ActionTypes.comment,
-      action: Actions.update,
+      type: UserActionTypes.comment,
+      action: UserActionActions.update,
       payload: {
         comment: {
-          type: CommentType.persistableState,
+          type: AttachmentType.persistableState,
           persistableStateAttachmentTypeId: '.lens',
           persistableStateAttachmentState: lensPersistableState,
           owner: 'cases',
@@ -658,24 +660,39 @@ export const newCase: CasePostRequest = {
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const comment: CommentRequestUserType = {
+export const comment: UserCommentAttachmentPayload = {
   comment: 'a comment',
-  type: CommentType.user as const,
+  type: AttachmentType.user as const,
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const alertComment: CommentRequestAlertType = {
+export const actionComment: ActionsAttachmentPayload = {
+  type: AttachmentType.actions,
+  comment: 'I just isolated the host!',
+  actions: {
+    targets: [
+      {
+        hostname: 'host1',
+        endpointId: '001',
+      },
+    ],
+    type: 'isolate',
+  },
+  owner: 'cases',
+};
+
+export const alertComment: AlertAttachmentPayload = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
   rule: {
     id: 'rule-id-1',
     name: 'rule-name-1',
   },
-  type: CommentType.alert as const,
+  type: AttachmentType.alert as const,
   owner: SECURITY_SOLUTION_OWNER,
 };
 
-export const multipleAlert: CommentRequestAlertType = {
+export const multipleAlert: AlertAttachmentPayload = {
   ...alertComment,
   alertId: ['test-id-3', 'test-id-4', 'test-id-5'],
   index: ['test-index-3', 'test-index-4', 'test-index-5'],

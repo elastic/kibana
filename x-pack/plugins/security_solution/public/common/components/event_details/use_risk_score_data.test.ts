@@ -20,7 +20,7 @@ const defaultResult = {
   data: [],
   inspect: {},
   isInspected: false,
-  isLicenseValid: true,
+  isAuthorized: true,
   isModuleEnabled: true,
   refetch: () => {},
   totalCount: 0,
@@ -55,7 +55,7 @@ describe('useRiskScoreData', () => {
     expect(result.current).toEqual({
       hostRisk: defaultRisk,
       userRisk: defaultRisk,
-      isLicenseValid: true,
+      isAuthorized: true,
     });
   });
 

@@ -7,7 +7,7 @@
 
 import { RiskWeightTypes, RiskCategories } from '../../../common/risk_engine';
 import {
-  buildCategoryScoreAssignment,
+  buildCategoryAssignment,
   buildCategoryWeights,
   buildWeightingOfScoreByCategory,
 } from './risk_weights';
@@ -17,37 +17,47 @@ describe('buildCategoryWeights', () => {
     const result = buildCategoryWeights();
 
     expect(result).toEqual([
-      { host: 1, type: RiskWeightTypes.riskCategory, user: 1, value: RiskCategories.alerts },
+      { host: 1, type: RiskWeightTypes.riskCategory, user: 1, value: RiskCategories.category_1 },
     ]);
   });
 
   it('allows user weights to override defaults', () => {
     const result = buildCategoryWeights([
-      { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1, user: 0.2 },
+      {
+        type: RiskWeightTypes.riskCategory,
+        value: RiskCategories.category_1,
+        host: 0.1,
+        user: 0.2,
+      },
     ]);
 
     expect(result).toEqual([
-      { host: 0.1, type: RiskWeightTypes.riskCategory, user: 0.2, value: RiskCategories.alerts },
+      {
+        host: 0.1,
+        type: RiskWeightTypes.riskCategory,
+        user: 0.2,
+        value: RiskCategories.category_1,
+      },
     ]);
   });
 
   it('uses default category weights if unspecified in user-provided weight', () => {
     const result = buildCategoryWeights([
-      { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1 },
+      { type: RiskWeightTypes.riskCategory, value: RiskCategories.category_1, host: 0.1 },
     ]);
 
     expect(result).toEqual([
-      { host: 0.1, type: RiskWeightTypes.riskCategory, user: 1, value: RiskCategories.alerts },
+      { host: 0.1, type: RiskWeightTypes.riskCategory, user: 1, value: RiskCategories.category_1 },
     ]);
   });
 });
 
-describe('buildCategoryScoreAssignment', () => {
+describe('buildCategoryAssignment', () => {
   it('builds the expected assignment statement', () => {
-    const result = buildCategoryScoreAssignment();
+    const result = buildCategoryAssignment();
 
     expect(result).toMatchInlineSnapshot(
-      `"if (inputs[i].category == 'signal') { results['alerts_score'] += current_score; } else { results['other_score'] += current_score; }"`
+      `"if (inputs[i].category == 'signal') { results['category_1_score'] += current_score; results['category_1_count'] += 1; }"`
     );
   });
 });
@@ -83,7 +93,12 @@ describe('buildWeightingOfScoreByCategory', () => {
   it('returns specified weight when a category weight is provided', () => {
     const result = buildWeightingOfScoreByCategory({
       userWeights: [
-        { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1, user: 0.2 },
+        {
+          type: RiskWeightTypes.riskCategory,
+          value: RiskCategories.category_1,
+          host: 0.1,
+          user: 0.2,
+        },
       ],
       identifierType: 'host',
     });
@@ -96,7 +111,7 @@ describe('buildWeightingOfScoreByCategory', () => {
   it('returns a default weight when a category weight is provided but not the one being used', () => {
     const result = buildWeightingOfScoreByCategory({
       userWeights: [
-        { type: RiskWeightTypes.riskCategory, value: RiskCategories.alerts, host: 0.1 },
+        { type: RiskWeightTypes.riskCategory, value: RiskCategories.category_1, host: 0.1 },
       ],
       identifierType: 'user',
     });

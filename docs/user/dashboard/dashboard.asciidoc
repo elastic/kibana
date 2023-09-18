@@ -295,7 +295,7 @@ To make changes without changing the original version, open the panel menu, then
 
 * *Convert to Lens* &mdash; Opens *TSVB* and aggregation-based visualizations in *Lens*.
 
-* *Edit panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
+* *Panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
 
 * *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
 
@@ -391,7 +391,7 @@ For more information about {kib} and {es} filters, refer to <<kibana-concepts-an
 
 To apply a panel-level time filter:
 
-. Open the panel menu, then select *More > Edit panel settings*.
+. Open the panel menu, then select *More > Panel settings*.
 
 . Select *Apply a custom time range*.
 

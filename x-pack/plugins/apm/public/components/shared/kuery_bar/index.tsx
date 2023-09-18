@@ -80,8 +80,8 @@ export function KueryBar(props: {
             transaction {transactions}
             metric {metrics}
             error {errors}
-            other {transactions, errors and metrics}
-          } (E.g. {queryExample})`,
+            other {transactions, errors, and metrics}
+          } (e.g. {queryExample})`,
       values: {
         queryExample: example,
         event: processorEvent,

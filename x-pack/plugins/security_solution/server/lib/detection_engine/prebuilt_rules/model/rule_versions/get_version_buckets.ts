@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import type { PrebuiltRuleAsset } from '../rule_assets/prebuilt_rule_asset';
 
@@ -31,14 +31,25 @@ export interface VersionBuckets {
      */
     target: PrebuiltRuleAsset;
   }>;
+  /**
+   * All available rules
+   * (installed and not installed)
+   */
+  totalAvailableRules: PrebuiltRuleAsset[];
 }
 
 export const getVersionBuckets = (ruleVersionsMap: Map<string, RuleVersions>): VersionBuckets => {
   const currentRules: RuleResponse[] = [];
   const installableRules: PrebuiltRuleAsset[] = [];
+  const totalAvailableRules: PrebuiltRuleAsset[] = [];
   const upgradeableRules: VersionBuckets['upgradeableRules'] = [];
 
   ruleVersionsMap.forEach(({ current, target }) => {
+    if (target != null) {
+      // If this rule is available in the package
+      totalAvailableRules.push(target);
+    }
+
     if (current != null) {
       // If this rule is installed
       currentRules.push(current);
@@ -62,5 +73,6 @@ export const getVersionBuckets = (ruleVersionsMap: Map<string, RuleVersions>): V
     currentRules,
     installableRules,
     upgradeableRules,
+    totalAvailableRules,
   };
 };

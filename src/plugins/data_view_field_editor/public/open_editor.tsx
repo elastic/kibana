@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { euiFlyoutClassname } from './constants';
 import type { ApiService } from './lib/api';
@@ -21,7 +22,7 @@ import type {
   FieldFormatsStart,
   DataViewField,
 } from './shared_imports';
-import { createKibanaReactContext, toMountPoint } from './shared_imports';
+import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
 /**
@@ -72,12 +73,13 @@ export const getFieldEditorOpener =
     apiService,
   }: Dependencies) =>
   (options: OpenFieldEditorOptions): CloseEditor => {
-    const { uiSettings, overlays, docLinks, notifications, settings } = core;
+    const { uiSettings, overlays, docLinks, notifications, settings, theme } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
       docLinks,
       http: core.http,
       settings,
+      theme,
     });
 
     let overlayRef: OverlayRef | null = null;
@@ -152,14 +154,7 @@ export const getFieldEditorOpener =
 
       let field: Field | undefined;
       if (dataViewField) {
-        if (isExistingRuntimeField && dataViewField.runtimeField!.type === 'composite') {
-          // Composite runtime subfield
-          const [compositeName] = fieldNameToEdit!.split('.');
-          field = {
-            name: compositeName,
-            ...dataView.getRuntimeField(compositeName)!,
-          };
-        } else if (isExistingRuntimeField) {
+        if (isExistingRuntimeField) {
           // Runtime field
           field = {
             name: fieldNameToEdit!,
@@ -202,7 +197,7 @@ export const getFieldEditorOpener =
               uiSettings={uiSettings}
             />
           </KibanaReactContextProvider>,
-          { theme$: core.theme.theme$ }
+          { theme: core.theme, i18n: core.i18n }
         ),
         {
           className: euiFlyoutClassname,

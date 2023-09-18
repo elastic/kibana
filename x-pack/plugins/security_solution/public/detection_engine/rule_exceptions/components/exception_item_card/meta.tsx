@@ -22,13 +22,10 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import styled from 'styled-components';
 
+import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { SecurityPageName } from '../../../../../common/constants';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/rule_exceptions';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
-import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
 
 const StyledFlexItem = styled(EuiFlexItem)`
   border-right: 1px solid #d3dae6;
@@ -66,14 +63,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
           key={reference.id}
         >
           <EuiToolTip content={reference.name} anchorClassName="eui-textTruncate">
-            <SecuritySolutionLinkAnchor
-              data-test-subj="ruleName"
-              deepLinkId={SecurityPageName.rules}
-              path={getRuleDetailsTabUrl(reference.id, RuleDetailTabs.alerts)}
-              external
-            >
-              {reference.name}
-            </SecuritySolutionLinkAnchor>
+            <LinkToRuleDetails external referenceId={reference.id} referenceName={reference.name} />
           </EuiToolTip>
         </EuiContextMenuItem>
       ));
@@ -136,15 +126,12 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                     key={listAndReferences.id}
                   >
                     <EuiToolTip content={listAndReferences.name} anchorClassName="eui-textTruncate">
-                      <SecuritySolutionLinkAnchor
-                        data-test-subj="ruleName"
-                        deepLinkId={SecurityPageName.exceptions}
-                        // TODO: Update to list details URL once available
-                        path={`/details/${listAndReferences?.list_id}`}
+                      <LinkToListDetails
+                        dataTestSubj="link-to-exception-list"
+                        linkTitle={listAndReferences.name}
+                        listId={listAndReferences?.list_id}
                         external
-                      >
-                        {listAndReferences.name}
-                      </SecuritySolutionLinkAnchor>
+                      />
                     </EuiToolTip>
                   </EuiContextMenuItem>,
                 ]}

@@ -23,7 +23,7 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json:
+        application/json:
           schema:
             $ref: '../components/schemas/case_response_properties.yaml'
           examples:
@@ -36,7 +36,7 @@ post:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
   servers:
-     - url: https://localhost:5601
+    - url: https://localhost:5601
 
 delete:
   summary: Deletes one or more cases.
@@ -50,14 +50,8 @@ delete:
     - cases
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/ids.yaml'
     - $ref: '../components/parameters/space_id.yaml'
-    - name: ids
-      description: The cases that you want to removed. All non-ASCII characters must be URL encoded.
-      in: query
-      required: true
-      schema:
-        type: string
-      example: d4e7abb0-b462-11ec-9a8d-698504725a43
   responses:
     '204':
       description: Indicates a successful call.
@@ -109,7 +103,7 @@ patch:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
   servers:
-        - url: https://localhost:5601
+    - url: https://localhost:5601
 
 servers:
-      - url: https://localhost:5601
+  - url: https://localhost:5601

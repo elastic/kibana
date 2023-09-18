@@ -40,6 +40,8 @@ Notice something awry? Select a service or trace and dive deeper with:
 * <<spans>>
 * <<errors>>
 * <<metrics>>
+* <<infrastructure>>
+* <<logs>>
 
 TIP: Want to learn more about the Elastic APM ecosystem?
 See the {apm-guide-ref}/apm-overview.html[APM Overview].
@@ -63,3 +65,7 @@ include::spans.asciidoc[]
 include::errors.asciidoc[]
 
 include::metrics.asciidoc[]
+
+include::infrastructure.asciidoc[]
+
+include::logs.asciidoc[]

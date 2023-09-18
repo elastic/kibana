@@ -18,9 +18,9 @@ import {
   RequestHandler,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { map$ } from '@kbn/std';
-import { RouteConfigOptions } from '@kbn/core-http-server';
+import { schema } from '@kbn/config-schema';
+import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
 import {
   StreamingResponseHandler,
   BatchRequestData,
@@ -55,8 +55,7 @@ export interface BfetchServerSetup {
       context: RequestHandlerContext
     ) => StreamingResponseHandler<Payload, Response>,
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    pluginRouter?: ReturnType<CoreSetup['http']['createRouter']>,
-    options?: RouteConfigOptions<'get' | 'post' | 'put' | 'delete'>
+    pluginRouter?: ReturnType<CoreSetup['http']['createRouter']>
   ) => void;
 }
 
@@ -119,17 +118,18 @@ export class BfetchServerPlugin
       router: ReturnType<CoreSetup['http']['createRouter']>;
       logger: Logger;
     }): BfetchServerSetup['addStreamingResponseRoute'] =>
-    (path, handler, method = 'POST', pluginRouter, options) => {
+    (path, handler, method = 'POST', pluginRouter) => {
       const httpRouter = pluginRouter || router;
-
       const routeDefinition = {
-        path: `/${removeLeadingSlash(path)}`,
+        version: BFETCH_ROUTE_VERSION_LATEST,
         validate: {
-          body: schema.any(),
-          query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
+          request: {
+            body: schema.any(),
+            query: schema.object({ compress: schema.boolean({ defaultValue: false }) }),
+          },
         },
-        options,
       };
+
       const routeHandler: RequestHandler<unknown, Query> = async (
         context: RequestHandlerContext,
         request: KibanaRequest<unknown, Query, any>,
@@ -146,16 +146,24 @@ export class BfetchServerPlugin
 
       switch (method) {
         case 'GET':
-          httpRouter.get(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .get({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         case 'POST':
-          httpRouter.post(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .post({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         case 'PUT':
-          httpRouter.put(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .put({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         case 'DELETE':
-          httpRouter.delete(routeDefinition, routeHandler);
+          httpRouter.versioned
+            .delete({ access: 'internal', path: `/${removeLeadingSlash(path)}` })
+            .addVersion(routeDefinition, routeHandler);
           break;
         default:
           throw new Error(`Handler for method ${method} is not defined`);

@@ -9,13 +9,17 @@ import React, { useMemo } from 'react';
 import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
 import { capitalize } from 'lodash/fp';
-import type { CaseField, ActionType, ThirdPartyField } from '../../containers/configure/types';
+import type {
+  ConnectorMappingSource,
+  ConnectorMappingActionType,
+  ConnectorMappingTarget,
+} from '../../containers/configure/types';
 
 export interface RowProps {
   isLoading: boolean;
-  casesField: CaseField;
-  selectedActionType: ActionType;
-  selectedThirdParty: ThirdPartyField;
+  casesField: ConnectorMappingSource;
+  selectedActionType: ConnectorMappingActionType;
+  selectedThirdParty: ConnectorMappingTarget;
 }
 
 const FieldMappingRowComponent: React.FC<RowProps> = ({

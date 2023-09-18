@@ -7,23 +7,23 @@
 import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
-import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
-import {
-  MonitorFields,
-  EncryptedSyntheticsMonitor,
-  ConfigKey,
-  ServiceLocationErrors,
-  SourceType,
-} from '../../../common/runtime_types';
-import type { MonitorUpdateEvent } from '../../legacy_uptime/lib/telemetry/types';
+import type { MonitorUpdateEvent } from '../../telemetry/types';
 
-import { TelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/sender';
+import { TelemetryEventsSender } from '../../telemetry/sender';
 import {
   MONITOR_UPDATE_CHANNEL,
   MONITOR_CURRENT_CHANNEL,
   MONITOR_ERROR_EVENTS_CHANNEL,
-} from '../../legacy_uptime/lib/telemetry/constants';
-import { MonitorErrorEvent } from '../../legacy_uptime/lib/telemetry/types';
+} from '../../telemetry/constants';
+import { MonitorErrorEvent } from '../../telemetry/types';
+import {
+  MonitorFields,
+  EncryptedSyntheticsMonitorAttributes,
+  ConfigKey,
+  ServiceLocationErrors,
+  SourceType,
+} from '../../../common/runtime_types';
+import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
 
 export function sendTelemetryEvents(
   logger: Logger,
@@ -67,7 +67,7 @@ export function formatTelemetryEvent({
   deletedAt,
   errors,
 }: {
-  monitor: SavedObject<EncryptedSyntheticsMonitor>;
+  monitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
   stackVersion: string;
   isInlineScript: boolean;
   lastUpdatedAt?: string;
@@ -108,8 +108,8 @@ export function formatTelemetryEvent({
 }
 
 export function formatTelemetryUpdateEvent(
-  currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
+  currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
   stackVersion: string,
   isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
@@ -123,7 +123,7 @@ export function formatTelemetryUpdateEvent(
 
   return formatTelemetryEvent({
     stackVersion,
-    monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitor>,
+    monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitorAttributes>,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
     isInlineScript,
@@ -132,7 +132,7 @@ export function formatTelemetryUpdateEvent(
 }
 
 export function formatTelemetryDeleteEvent(
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
   stackVersion: string,
   deletedAt: string,
   isInlineScript: boolean,
@@ -146,7 +146,7 @@ export function formatTelemetryDeleteEvent(
 
   return formatTelemetryEvent({
     stackVersion,
-    monitor: previousMonitor as SavedObject<EncryptedSyntheticsMonitor>,
+    monitor: previousMonitor as SavedObject<EncryptedSyntheticsMonitorAttributes>,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
     deletedAt,

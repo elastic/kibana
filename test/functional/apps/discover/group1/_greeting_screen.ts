@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    it('should create adhoc data view when there are no data view', async () => {
+    it('should create a data view when there are no data views', async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('management');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -57,9 +57,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const timestampField = await testSubjects.find('timestampField');
         return !(await timestampField.elementHasClass('euiComboBox-isDisabled'));
       });
-      await testSubjects.click('exploreIndexPatternButton');
+      await testSubjects.click('saveIndexPatternButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(false);
+
+      await PageObjects.discover.createAdHocDataView('log', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.discover.isAdHocDataViewSelected()).to.be(true);
+
+      expect(await PageObjects.discover.getIndexPatterns()).to.eql(['log*\nTemporary', 'logs*']);
     });
   });
 }

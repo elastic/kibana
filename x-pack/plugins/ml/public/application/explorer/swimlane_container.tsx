@@ -28,8 +28,9 @@ import {
   Position,
   ScaleType,
   Settings,
-  TooltipSettings,
+  TooltipProps,
   TooltipValue,
+  Tooltip,
 } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -243,6 +244,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
+    swimlaneLimit > (perPage ?? 5) &&
     onPaginationChange &&
     fromPage &&
     perPage;
@@ -368,7 +370,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   ) as ElementClickListener;
 
-  const tooltipOptions: TooltipSettings = useMemo(
+  const tooltipOptions = useMemo<TooltipProps>(
     () => ({
       placement: 'auto',
       fallbackPlacements: ['left'],
@@ -439,6 +441,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 >
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
+                      <Tooltip {...tooltipOptions} />
                       <Settings
                         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
@@ -447,7 +450,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}
-                        tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
                       />

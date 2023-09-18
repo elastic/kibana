@@ -7,7 +7,7 @@
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
-import type { LogViewReference } from '../log_views';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import type { TimeRange } from '../time';
 import type { InfraClientCoreSetup } from '../../public/types';
 

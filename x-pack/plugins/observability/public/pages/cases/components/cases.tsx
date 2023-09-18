@@ -7,13 +7,13 @@
 
 import React, { Suspense, useState } from 'react';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
-import { casesPath, observabilityFeatureId } from '../../../../common';
+import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
 import { LazyAlertsFlyout } from '../../..';
-import { paths } from '../../../config/paths';
+import { CASES_PATH, paths } from '../../../../common/locators/paths';
 
 export interface CasesProps {
   permissions: CasesPermissions;
@@ -45,14 +45,14 @@ export function Cases({ permissions }: CasesProps) {
   return (
     <>
       <CasesList
-        basePath={casesPath}
+        basePath={CASES_PATH}
         features={{ alerts: { sync: false, isExperimental: false } }}
         owner={[observabilityFeatureId]}
         permissions={permissions}
         ruleDetailsNavigation={{
-          href: (ruleId) => prepend(paths.observability.ruleDetails(ruleId)),
+          href: (ruleId) => prepend(paths.observability.ruleDetails(ruleId || '')),
           onClick: (ruleId, ev) => {
-            const ruleLink = prepend(paths.observability.ruleDetails(ruleId));
+            const ruleLink = prepend(paths.observability.ruleDetails(ruleId || ''));
 
             if (ev != null) {
               ev.preventDefault();

@@ -135,7 +135,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         newField &&
           supportedTypes.includes(newField.type) &&
           newField.aggregatable &&
-          isTimeSeriesCompatible(type, newField.timeSeriesMetric) &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },

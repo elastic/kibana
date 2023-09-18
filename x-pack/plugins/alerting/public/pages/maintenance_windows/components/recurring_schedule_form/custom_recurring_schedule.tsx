@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import { css } from '@emotion/react';
 import {
@@ -17,7 +18,7 @@ import {
   MultiButtonGroupFieldValue,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
-import { CREATE_FORM_CUSTOM_FREQUENCY, Frequency, WEEKDAY_OPTIONS } from '../../constants';
+import { CREATE_FORM_CUSTOM_FREQUENCY, WEEKDAY_OPTIONS } from '../../constants';
 import * as i18n from '../../translations';
 import { getInitialByWeekday } from '../../helpers/get_initial_by_weekday';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
@@ -105,7 +106,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
           <EuiSpacer size="s" />
         </>
       ) : null}
-      {recurringSchedule?.customFrequency === Frequency.WEEKLY ||
+      {Number(recurringSchedule?.customFrequency) === Frequency.WEEKLY ||
       recurringSchedule?.frequency === Frequency.DAILY ? (
         <UseField
           path="recurringSchedule.byweekday"
@@ -137,7 +138,7 @@ export const CustomRecurringSchedule: React.FC = React.memo(() => {
         />
       ) : null}
 
-      {recurringSchedule?.customFrequency === Frequency.MONTHLY ? (
+      {Number(recurringSchedule?.customFrequency) === Frequency.MONTHLY ? (
         <UseField
           path="recurringSchedule.bymonth"
           componentProps={{

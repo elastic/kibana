@@ -19,7 +19,7 @@ import { FullRequestComponent } from './full_request_component';
 
 /**
  * @param parametrizedComponentFactories a dict of the following structure
- * that will be used as a fall back for pattern parameters (i.e.: {indices})
+ * that will be used as a fall back for pattern parameters (i.e.: {index})
  * {
  *   indices: function (part, parent) {
  *      return new SharedComponent(part, parent)
@@ -33,7 +33,7 @@ export class UrlPatternMatcher {
     // We'll group endpoints by the methods which are attached to them,
     //to avoid suggesting endpoints that are incompatible with the
     //method that the user has entered.
-    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
+    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE', 'PATCH'].forEach((method) => {
       this[method] = {
         rootComponent: new SharedComponent('ROOT'),
         parametrizedComponentFactories: parametrizedComponentFactories || {

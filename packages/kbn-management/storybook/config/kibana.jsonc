@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/management-storybook-config",
+  "owner": "@elastic/platform-deployment-management",
+  "devOnly": true
+}

@@ -30,6 +30,13 @@ export const useStyles = () => {
         font-weight: ${euiTheme.font.weight.bold};
       }
     }
+    & .euiDataGrid__leftControls {
+      > .euiButtonEmpty:hover:not(:disabled),
+      .euiButtonEmpty:focus {
+        text-decoration: none;
+        cursor: default;
+      }
+    }
     & .euiButtonIcon {
       color: ${euiTheme.colors.primary};
     }

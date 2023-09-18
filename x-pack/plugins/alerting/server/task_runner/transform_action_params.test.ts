@@ -31,7 +31,7 @@ describe('transformActionParams', () => {
       empty1: null,
       empty2: undefined,
       date: '2019-02-12T21:01:22.479Z',
-      message: 'Value "{{params.foo}}" exists',
+      message: 'Value "{{rule.params.foo}}" exists',
     };
     const result = transformActionParams({
       actionsPlugin,

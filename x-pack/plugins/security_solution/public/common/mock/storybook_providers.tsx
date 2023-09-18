@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { AssistantProvider } from '@kbn/elastic-assistant';
 import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
@@ -43,9 +40,31 @@ const coreMock = {
   application: {
     getUrlForApp: () => {},
   },
+  data: {
+    query: {
+      filterManager: {},
+    },
+  },
   uiSettings,
+  notifications: {
+    toasts: {
+      addError: () => {},
+      addSuccess: () => {},
+      addWarning: () => {},
+      remove: () => {},
+    },
+  },
+  timelines: {
+    getHoverActions: () => ({
+      getAddToTimelineButton: () => {},
+      getColumnToggleButton: () => {},
+      getCopyButton: () => {},
+      getFilterForValueButton: () => {},
+      getFilterOutValueButton: () => {},
+      getOverflowButton: () => {},
+    }),
+  },
 } as unknown as CoreStart;
-
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
 /**
@@ -55,10 +74,6 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  */
 export const StorybookProviders: React.FC = ({ children }) => {
   const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  const actionTypeRegistry = actionTypeRegistryMock.create();
-  const mockGetInitialConversations = jest.fn(() => ({}));
-  const mockGetComments = jest.fn(() => []);
-  const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 
   return (
     <I18nProvider>
@@ -66,22 +81,7 @@ export const StorybookProviders: React.FC = ({ children }) => {
         <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-              <AssistantProvider
-                actionTypeRegistry={actionTypeRegistry}
-                augmentMessageCodeBlocks={jest.fn()}
-                baseAllow={[]}
-                baseAllowReplacement={[]}
-                defaultAllow={[]}
-                defaultAllowReplacement={[]}
-                getComments={mockGetComments}
-                getInitialConversations={mockGetInitialConversations}
-                setConversations={jest.fn()}
-                setDefaultAllow={jest.fn()}
-                setDefaultAllowReplacement={jest.fn()}
-                http={mockHttp}
-              >
-                {children}
-              </AssistantProvider>
+              {children}
             </ThemeProvider>
           </ReduxStoreProvider>
         </CellActionsProvider>

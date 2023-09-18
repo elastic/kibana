@@ -11,5 +11,5 @@ export enum RiskWeightTypes {
 }
 
 export enum RiskCategories {
-  alerts = 'alerts',
+  category_1 = 'category_1',
 }

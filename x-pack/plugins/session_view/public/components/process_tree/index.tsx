@@ -15,6 +15,7 @@ import type { AlertStatusEventEntityIdMap, Process, ProcessEventsPage } from '..
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
+import { SessionViewTelemetryKey } from '../../types';
 
 type FetchFunction = () => void;
 
@@ -60,6 +61,8 @@ export interface ProcessTreeDeps {
   onJumpToOutput: (entityId: string) => void;
   showTimestamp?: boolean;
   verboseMode?: boolean;
+
+  trackEvent(name: SessionViewTelemetryKey): void;
 }
 
 export const ProcessTree = ({
@@ -79,6 +82,7 @@ export const ProcessTree = ({
   updatedAlertsStatus,
   onShowAlertDetails,
   onJumpToOutput,
+  trackEvent,
   showTimestamp = true,
   verboseMode = false,
 }: ProcessTreeDeps) => {
@@ -130,7 +134,8 @@ export const ProcessTree = ({
       scrollerRef.current.scrollTop = 0;
     }
     setForceRerender(Math.random());
-  }, [sessionLeader]);
+    trackEvent('collapse_tree');
+  }, [sessionLeader, trackEvent]);
 
   useEffect(() => {
     if (setSearchResults) {
@@ -184,6 +189,7 @@ export const ProcessTree = ({
             verboseMode={verboseMode}
             searchResults={searchResults}
             handleCollapseProcessTree={handleCollapseProcessTree}
+            trackEvent={trackEvent}
             loadPreviousButton={
               hasPreviousPage ? (
                 <ProcessTreeLoadMoreButton

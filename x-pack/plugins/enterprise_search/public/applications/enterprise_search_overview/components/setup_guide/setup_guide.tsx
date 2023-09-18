@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ENTERPRISE_SEARCH_OVERVIEW_PLUGIN } from '../../../../../common/constants';
-import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
@@ -34,7 +34,7 @@ export const SetupGuide: React.FC = () => (
           defaultMessage: 'Getting started with Enterprise Search',
         })}
         width="1280"
-        height-="720"
+        height="720"
       />
     </a>
 

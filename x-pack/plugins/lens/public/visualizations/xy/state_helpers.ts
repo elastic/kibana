@@ -10,13 +10,13 @@ import type { SavedObjectReference } from '@kbn/core/public';
 import {
   EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-common';
 import { v4 as uuidv4 } from 'uuid';
-import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import { validateQuery } from '@kbn/visualization-ui-components/public';
+import { validateQuery } from '@kbn/visualization-ui-components';
 import { DataViewsState } from '../../state_management';
 import { FramePublicAPI, DatasourcePublicAPI, AnnotationGroups } from '../../types';
 import {
@@ -83,7 +83,7 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
   if (isAnnotationsLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
-  if (isDataLayer(layer) && layer.splitAccessor) {
+  if (isDataLayer(layer) && layer.splitAccessor && !layer.collapseFn) {
     return null;
   }
   return (

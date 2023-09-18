@@ -1,6 +1,6 @@
 get:
   summary: Retrieves a SLO
-  operationId: getSlo
+  operationId: getSloOp
   description: >
     You must have the `read` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
@@ -10,6 +10,12 @@ get:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/space_id.yaml
     - $ref: ../components/parameters/slo_id.yaml
+    - name: instanceId
+      in: query
+      description: the specific instanceId used by the summary calculation
+      schema:
+        type: string
+      example: 'host-abcde'
   responses:
     '200':
       description: Successful request
@@ -19,20 +25,32 @@ get:
             $ref: '../components/schemas/slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
 
 put:
   summary: Updates an SLO
-  operationId: updateSlo
+  operationId: updateSloOp
   description: >
     You must have the `write` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
@@ -57,20 +75,32 @@ put:
             $ref: '../components/schemas/slo_response.yaml'
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
 
 delete:
   summary: Deletes an SLO
-  operationId: deleteSlo
+  operationId: deleteSloOp
   description: >
     You must have the `write` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.
@@ -85,13 +115,25 @@ delete:
       description: Successful request
     '400':
       description: Bad request
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
-      content: 
+      content:
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

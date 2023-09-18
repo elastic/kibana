@@ -78,7 +78,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('Without custom pipeline', () => {
+    describe('With custom pipeline', () => {
       before(() =>
         es.ingest.putPipeline({
           id: CUSTOM_PIPELINE,

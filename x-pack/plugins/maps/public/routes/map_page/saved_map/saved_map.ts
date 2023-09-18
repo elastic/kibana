@@ -45,6 +45,7 @@ import {
   getSavedObjectsTagging,
   getTimeFilter,
   getUsageCollection,
+  getServerless,
 } from '../../../kibana_services';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
@@ -331,15 +332,23 @@ export class SavedMap {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
-    const breadcrumbs = getBreadcrumbs({
-      pageTitle: this._getPageTitle(),
-      isByValue: this.isByValue(),
-      getHasUnsavedChanges: this.hasUnsavedChanges,
-      originatingApp: this._originatingApp,
-      getAppNameFromId: this._getStateTransfer().getAppNameFromId,
-      history,
-    });
-    getCoreChrome().setBreadcrumbs(breadcrumbs);
+    if (getServerless()) {
+      // TODO: https://github.com/elastic/kibana/issues/163488
+      // for now, serverless breadcrumbs only set the title,
+      // the rest of the breadcrumbs are handled by the serverless navigation
+      // the serverless navigation is not yet aware of the byValue/originatingApp context
+      getServerless()!.setBreadcrumbs({ text: this._getPageTitle() });
+    } else {
+      const breadcrumbs = getBreadcrumbs({
+        pageTitle: this._getPageTitle(),
+        isByValue: this.isByValue(),
+        getHasUnsavedChanges: this.hasUnsavedChanges,
+        originatingApp: this._originatingApp,
+        getAppNameFromId: this._getStateTransfer().getAppNameFromId,
+        history,
+      });
+      getCoreChrome().setBreadcrumbs(breadcrumbs);
+    }
   }
 
   public getSavedObjectId(): string | undefined {

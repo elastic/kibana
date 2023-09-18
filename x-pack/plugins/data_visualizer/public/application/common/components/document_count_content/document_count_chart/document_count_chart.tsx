@@ -22,17 +22,14 @@ import {
 import moment from 'moment';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import type { LogRateHistogramItem } from '@kbn/aiops-utils';
+
 import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 
-export interface DocumentCountChartPoint {
-  time: number | string;
-  value: number;
-}
-
 interface Props {
   width?: number;
-  chartPoints: DocumentCountChartPoint[];
+  chartPoints: LogRateHistogramItem[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
   interval?: number;

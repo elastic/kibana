@@ -20,3 +20,12 @@ export const ACTION_RESPONSES_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.action.
 export const DEFAULT_PLATFORM = 'linux,windows,darwin';
 
 export const CASE_ATTACHMENT_TYPE_ID = 'osquery';
+
+export const API_VERSIONS = {
+  public: {
+    v1: '2023-10-31',
+  },
+  internal: {
+    v1: '1',
+  },
+};

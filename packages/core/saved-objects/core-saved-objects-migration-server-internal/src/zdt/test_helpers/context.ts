@@ -11,6 +11,7 @@ import {
   ElasticsearchClientMock,
   elasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   SavedObjectTypeRegistry,
   type SavedObjectsMigrationConfigType,
@@ -38,7 +39,7 @@ export const createMigrationConfigMock = (
   retryAttempts: 5,
   zdt: {
     metaPickupSyncDelaySec: 120,
-    runOnNonMigratorNodes: false,
+    runOnRoles: ['migrator'],
   },
   ...parts,
 });
@@ -67,6 +68,7 @@ export const createContextMock = (
     batchSize: 1000,
     discardCorruptObjects: false,
     nodeRoles: { migrator: true, ui: false, backgroundTasks: false },
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
     ...parts,
   };
 };

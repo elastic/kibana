@@ -6,7 +6,7 @@
  */
 
 import { Server } from '@hapi/hapi';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import {
   CoreStart,
   Plugin,
@@ -18,13 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
 import {
   DISCOVER_APP_TARGET,
   LOGS_APP_TARGET,
   LOGS_FEATURE_ID,
   METRICS_FEATURE_ID,
 } from '../common/constants';
-import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { configDeprecations, getInfraDeprecationsFactory } from './deprecations';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -32,7 +32,6 @@ import { initInfraServer } from './infra_server';
 import { FrameworkFieldsAdapter } from './lib/adapters/fields/framework_fields_adapter';
 import { InfraServerPluginSetupDeps, InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
-import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
 import { registerRuleTypes } from './lib/alerting';
@@ -41,20 +40,12 @@ import {
   METRICS_RULES_ALERT_CONTEXT,
 } from './lib/alerting/register_rule_types';
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
-import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { makeGetMetricIndices } from './lib/metrics/make_get_metric_indices';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import { InfraSourceStatus } from './lib/source_status';
-import {
-  inventoryViewSavedObjectType,
-  logViewSavedObjectType,
-  metricsExplorerViewSavedObjectType,
-} from './saved_objects';
+import { inventoryViewSavedObjectType, metricsExplorerViewSavedObjectType } from './saved_objects';
 import { InventoryViewsService } from './services/inventory_views';
-import { LogEntriesService } from './services/log_entries';
-import { LogViewsService } from './services/log_views';
 import { MetricsExplorerViewsService } from './services/metrics_explorer_views';
 import { RulesService } from './services/rules';
 import {
@@ -65,24 +56,23 @@ import {
   InfraPluginStart,
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
+import { mapSourceToLogView } from './utils/map_source_to_log_view';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     // Setting variants only allowed in the Serverless offering, otherwise always default `logs-ui` value
-    logs: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.object({
+    logs: offeringBasedSchema({
+      serverless: schema.object({
         app_target: schema.oneOf(
           [schema.literal(LOGS_APP_TARGET), schema.literal(DISCOVER_APP_TARGET)],
           { defaultValue: LOGS_APP_TARGET }
         ),
       }),
-      schema.never(),
-      {
-        defaultValue: { app_target: LOGS_APP_TARGET },
-      }
-    ),
+      options: {
+        defaultValue: { app_target: LOGS_APP_TARGET } as const, // "as const" is required for TS to not generalize `app_target: string`
+      },
+    }),
     alerting: schema.object({
       inventory_threshold: schema.object({
         group_by_page_size: schema.number({ defaultValue: 5_000 }),
@@ -138,7 +128,6 @@ export class InfraServerPlugin
   private logsRules: RulesService;
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
-  private logViews: LogViewsService;
   private metricsExplorerViews: MetricsExplorerViewsService;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
@@ -157,7 +146,6 @@ export class InfraServerPlugin
     );
 
     this.inventoryViews = new InventoryViewsService(this.logger.get('inventoryViews'));
-    this.logViews = new LogViewsService(this.logger.get('logViews'));
     this.metricsExplorerViews = new MetricsExplorerViewsService(
       this.logger.get('metricsExplorerViews')
     );
@@ -165,23 +153,30 @@ export class InfraServerPlugin
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
+    const metricsClient = plugins.metricsDataAccess.client;
+    metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(
+        options.savedObjectsClient,
+        'default'
+      );
+      return sourceConfiguration.configuration.metricAlias;
+    });
     const sources = new InfraSources({
       config: this.config,
+      metricsClient,
     });
     const sourceStatus = new InfraSourceStatus(
       new InfraElasticsearchSourceStatusAdapter(framework),
-      {
-        sources,
-      }
+      { sources }
     );
+
+    // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
-    const logViews = this.logViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews.setup();
 
-    // register saved object types
+    // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
     core.savedObjects.registerType(inventoryViewSavedObjectType);
-    core.savedObjects.registerType(logViewSavedObjectType);
     core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
@@ -191,10 +186,7 @@ export class InfraServerPlugin
       fields: new InfraFieldsDomain(new FrameworkFieldsAdapter(framework), {
         sources,
       }),
-      logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
-        framework,
-        getStartServices: () => core.getStartServices(),
-      }),
+      logEntries: plugins.logsShared.logEntries,
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
     };
 
@@ -203,11 +195,13 @@ export class InfraServerPlugin
       framework,
       sources,
       sourceStatus,
+      metricsClient,
       ...domainLibs,
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
+      getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
       alertsLocator: plugins.share.url.locators.get(alertsLocatorID),
@@ -215,6 +209,19 @@ export class InfraServerPlugin
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
     plugins.features.registerKibanaFeature(LOGS_FEATURE);
+
+    // Register an handler to retrieve the fallback logView starting from a source configuration
+    plugins.logsShared.logViews.registerLogViewFallbackHandler(async (sourceId, { soClient }) => {
+      const sourceConfiguration = await sources.getInfraSourceConfiguration(soClient, sourceId);
+      return mapSourceToLogView(sourceConfiguration);
+    });
+    plugins.logsShared.logViews.setLogViewsStaticConfig({
+      messageFields: this.config.sources?.default?.fields?.message,
+    });
+
+    plugins.logsShared.registerUsageCollectorActions({
+      countLogs: () => UsageCollector.countLogs(),
+    });
 
     plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
       {
@@ -247,9 +254,6 @@ export class InfraServerPlugin
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
-    const logEntriesService = new LogEntriesService();
-    logEntriesService.setup(core, plugins);
-
     // register deprecated source configuration fields
     core.deprecations.registerDeprecations({
       getDeprecations: getInfraDeprecationsFactory(sources),
@@ -258,27 +262,14 @@ export class InfraServerPlugin
     return {
       defineInternalSourceConfiguration: sources.defineInternalSourceConfiguration.bind(sources),
       inventoryViews,
-      logViews,
       metricsExplorerViews,
     } as InfraPluginSetup;
   }
 
-  start(core: CoreStart, plugins: InfraServerPluginStartDeps) {
+  start(core: CoreStart) {
     const inventoryViews = this.inventoryViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
-    });
-
-    const logViews = this.logViews.start({
-      infraSources: this.libs.sources,
-      savedObjects: core.savedObjects,
-      dataViews: plugins.dataViews,
-      elasticsearch: core.elasticsearch,
-      config: {
-        messageFields:
-          this.config.sources?.default?.fields?.message ??
-          defaultLogViewsStaticConfig.messageFields,
-      },
     });
 
     const metricsExplorerViews = this.metricsExplorerViews.start({
@@ -288,9 +279,7 @@ export class InfraServerPlugin
 
     return {
       inventoryViews,
-      logViews,
       metricsExplorerViews,
-      getMetricIndices: makeGetMetricIndices(this.libs.sources),
     };
   }
 

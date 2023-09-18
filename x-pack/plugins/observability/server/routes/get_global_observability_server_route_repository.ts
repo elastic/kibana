@@ -7,7 +7,6 @@
 
 import { ObservabilityConfig } from '..';
 import { compositeSloRouteRepository } from './composite_slo/route';
-import { observabilityCoPilotRouteRepository } from './copilot/route';
 import { rulesRouteRepository } from './rules/route';
 import { sloRouteRepository } from './slo/route';
 
@@ -18,7 +17,6 @@ export function getObservabilityServerRouteRepository(config: ObservabilityConfi
     ...rulesRouteRepository,
     ...sloRouteRepository,
     ...(isCompositeSloFeatureEnabled ? compositeSloRouteRepository : {}),
-    ...observabilityCoPilotRouteRepository,
   };
   return repository;
 }

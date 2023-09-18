@@ -10,7 +10,7 @@ import type { IConfigService } from '@kbn/config';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ServerStart } from '../server';
 import { KibanaConfig } from './kibana_config';
-import { RootRoute } from './routes';
+import { StatusHandler } from './handlers';
 
 interface KibanaServiceStartDependencies {
   server: ServerStart;
@@ -34,7 +34,17 @@ export class KibanaService {
   }
 
   async start({ server }: KibanaServiceStartDependencies) {
-    server.addRoute(new RootRoute(this.kibanaConfig, this.logger));
+    const statusHandler = new StatusHandler(this.kibanaConfig, this.logger);
+    server.addRoute({
+      method: 'GET',
+      path: '/',
+      handler: statusHandler.handler,
+    });
+    server.addRoute({
+      method: 'GET',
+      path: '/api/status',
+      handler: statusHandler.handler,
+    });
     this.logger.info('Server is ready');
   }
 

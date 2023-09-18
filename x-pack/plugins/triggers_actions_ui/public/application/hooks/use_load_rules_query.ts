@@ -45,6 +45,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       filters.ruleStatuses,
       filters.ruleLastRunOutcomes,
       filters.ruleParams,
+      filters.kueryNode,
       page,
       sort,
       {
@@ -63,6 +64,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
         ruleParamsFilter: filters.ruleParams,
         ruleStatusesFilter: filters.ruleStatuses,
         tagsFilter: filters.tags,
+        kueryNode: filters.kueryNode,
         sort,
       });
     },

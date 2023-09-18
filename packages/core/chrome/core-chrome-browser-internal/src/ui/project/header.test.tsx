@@ -8,6 +8,7 @@
 
 import { EuiHeader } from '@elastic/eui';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -20,11 +21,14 @@ describe('Header', () => {
     application: mockApplication,
     breadcrumbs$: Rx.of([]),
     actionMenu$: Rx.of(undefined),
-    kibanaDocLink: 'app/help/doclinks',
+    docLinks: docLinksServiceMock.createStartContract(),
     globalHelpExtensionMenuLinks$: Rx.of([]),
+    headerBanner$: Rx.of(),
     helpExtension$: Rx.of(undefined),
     helpSupportUrl$: Rx.of('app/help'),
+    helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
+    projectsUrl$: Rx.of('/projects/'),
     kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
     navControlsLeft$: Rx.of([]),
@@ -57,7 +61,7 @@ describe('Header', () => {
     const toggleNav = async () => {
       fireEvent.click(await screen.findByTestId('toggleNavButton')); // click
 
-      expect(screen.queryAllByText('Hello, goodbye!')).toHaveLength(0); // title is not shown
+      expect(await screen.findByText('Hello, goodbye!')).not.toBeVisible();
 
       fireEvent.click(await screen.findByTestId('toggleNavButton')); // click again
 
@@ -67,5 +71,16 @@ describe('Header', () => {
     await toggleNav();
     await toggleNav();
     await toggleNav();
+  });
+
+  it('displays the link to projects', async () => {
+    render(
+      <ProjectHeader {...mockProps}>
+        <EuiHeader>Hello, world!</EuiHeader>
+      </ProjectHeader>
+    );
+
+    const projectsLink = await screen.getByTestId('projectsLink');
+    expect(projectsLink).toHaveAttribute('href', '/projects/');
   });
 });

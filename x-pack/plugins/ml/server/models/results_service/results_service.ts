@@ -683,7 +683,11 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const rangeFilter = {
       range: {
-        [timefield]: { gte: start, lte: end },
+        [timefield]: {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis',
+        },
       },
     };
 

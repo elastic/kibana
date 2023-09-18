@@ -7,28 +7,23 @@
 
 import {
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
+  EuiIcon,
   EuiInMemoryTable,
   EuiSearchBarProps,
   type HorizontalAlignment,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useToggle from 'react-use/lib/useToggle';
 import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
-
-interface Row {
-  name: string;
-  value: string | string[] | undefined;
-}
+import { ExpandableContent } from '../../components/expandable_content';
+import { type Field, getRowsWithPins } from './utils';
+import { AddMetadataPinToRow } from './add_pin_to_row';
 
 export interface Props {
-  rows: Row[];
+  rows: Field[];
   loading: boolean;
   showActionsColumn?: boolean;
   search?: string;
@@ -65,12 +60,43 @@ const LOADING = i18n.translate('xpack.infra.metadataEmbeddable.loading', {
   defaultMessage: 'Loading...',
 });
 
+const LOCAL_STORAGE_PINNED_METADATA_ROWS = 'hostsView:pinnedMetadataRows';
+
 export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn }: Props) => {
   const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
   const [metadataSearch, setMetadataSearch] = useState(search);
+  const [fieldsWithPins, setFieldsWithPins] = useState(rows);
+
+  const [pinnedItems, setPinnedItems] = useLocalStorage<Array<Field['name']>>(
+    LOCAL_STORAGE_PINNED_METADATA_ROWS,
+    []
+  );
+
+  useMemo(() => {
+    if (pinnedItems) {
+      setFieldsWithPins(getRowsWithPins(rows, pinnedItems) ?? rows);
+    }
+  }, [rows, pinnedItems]);
 
   const defaultColumns = useMemo(
     () => [
+      {
+        field: 'value',
+        name: <EuiIcon type="pin" />,
+        align: 'center' as HorizontalAlignment,
+        width: '5%',
+        sortable: false,
+        showOnHover: true,
+        render: (_name: string, item: Field) => {
+          return (
+            <AddMetadataPinToRow
+              fieldName={item.name}
+              pinnedItems={pinnedItems ?? []}
+              onPinned={setPinnedItems}
+            />
+          );
+        },
+      },
       {
         field: 'name',
         name: FIELD_LABEL,
@@ -81,12 +107,12 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
       {
         field: 'value',
         name: VALUE_LABEL,
-        width: '55%',
+        width: '50%',
         sortable: false,
-        render: (_name: string, item: Row) => <ExpandableContent values={item.value} />,
+        render: (_name: string, item: Field) => <ExpandableContent values={item.value} />,
       },
     ],
-    []
+    [pinnedItems, setPinnedItems]
   );
 
   const debouncedSearchOnChange = useMemo(
@@ -115,7 +141,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
   const searchBar: EuiSearchBarProps = {
     onChange: searchBarOnChange,
     box: {
-      'data-test-subj': 'infraHostMetadataSearchBarInput',
+      'data-test-subj': 'infraAssetDetailsMetadataSearchBarInput',
       incremental: true,
       schema: true,
       placeholder: SEARCH_PLACEHOLDER,
@@ -134,7 +160,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
               sortable: false,
               showOnHover: true,
               align: 'center' as HorizontalAlignment,
-              render: (_name: string, item: Row) => {
+              render: (_name: string, item: Field) => {
                 return <AddMetadataFilterButton item={item} />;
               },
             },
@@ -145,73 +171,22 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
 
   return (
     <EuiInMemoryTable
-      data-test-subj="infraMetadataTable"
+      data-test-subj="infraAssetDetailsMetadataTable"
       tableLayout={'fixed'}
       responsive={false}
       columns={columns}
-      items={rows}
+      items={fieldsWithPins}
       rowProps={{ className: 'euiTableRow-hasActions' }}
       search={searchBar}
       loading={loading}
       error={searchError ? `${searchError.message}` : ''}
       message={
         loading ? (
-          <div data-test-subj="infraHostMetadataLoading">{LOADING}</div>
+          <div data-test-subj="infraAssetDetailsMetadataLoading">{LOADING}</div>
         ) : (
-          <div data-test-subj="infraHostMetadataNoData">{NO_METADATA_FOUND}</div>
+          <div data-test-subj="infraAssetDetailsMetadataNoData">{NO_METADATA_FOUND}</div>
         )
       }
     />
-  );
-};
-
-interface ExpandableContentProps {
-  values: string | string[] | undefined;
-}
-const ExpandableContent = (props: ExpandableContentProps) => {
-  const { values } = props;
-  const [isExpanded, toggle] = useToggle(false);
-
-  const list = Array.isArray(values) ? values : [values];
-  const [first, ...others] = list;
-  const hasOthers = others.length > 0;
-  const shouldShowMore = hasOthers && !isExpanded;
-
-  return (
-    <EuiFlexGroup
-      gutterSize={'xs'}
-      responsive={false}
-      alignItems={'baseline'}
-      wrap={true}
-      direction="column"
-    >
-      <div>
-        {first}
-        {shouldShowMore && (
-          <>
-            {' ... '}
-            <EuiLink data-test-subj="infraExpandableContentCountMoreLink" onClick={toggle}>
-              <FormattedMessage
-                id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
-                defaultMessage="+{count} more"
-                values={{
-                  count: others.length,
-                }}
-              />
-            </EuiLink>
-          </>
-        )}
-      </div>
-      {isExpanded && others.map((item, index) => <EuiFlexItem key={index}>{item}</EuiFlexItem>)}
-      {hasOthers && isExpanded && (
-        <EuiFlexItem>
-          <EuiLink data-test-subj="infraExpandableContentShowLessLink" onClick={toggle}>
-            {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
-              defaultMessage: 'Show less',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
   );
 };

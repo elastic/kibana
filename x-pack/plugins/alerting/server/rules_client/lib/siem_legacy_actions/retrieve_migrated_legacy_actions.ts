@@ -15,7 +15,11 @@ import { transformFromLegacyActions } from './transform_legacy_actions';
 
 type RetrieveMigratedLegacyActions = (
   context: RulesClientContext,
-  { ruleId }: { ruleId: string }
+  { ruleId }: { ruleId: string },
+  validateLegacyActions: (
+    legacyActions: RawRuleAction[],
+    legacyActionsReferences: SavedObjectReference[]
+  ) => Promise<void>
 ) => Promise<{ legacyActions: RawRuleAction[]; legacyActionsReferences: SavedObjectReference[] }>;
 
 /**
@@ -27,7 +31,8 @@ type RetrieveMigratedLegacyActions = (
  */
 export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = async (
   context,
-  { ruleId }
+  { ruleId },
+  validateLegacyActions
 ) => {
   const { unsecuredSavedObjectsClient } = context;
   try {
@@ -71,17 +76,19 @@ export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = asyn
       return { legacyActions: [], legacyActionsReferences: [] };
     }
 
-    await Promise.all([
-      // If the legacy notification rule type ("siem.notification") exist,
-      // migration and cleanup are needed
-      siemNotificationsExist && deleteRule(context, { id: siemNotification.data[0].id }),
-      // Delete the legacy sidecar SO if it exists
-      legacyRuleNotificationSOsExist &&
-        unsecuredSavedObjectsClient.delete(
-          legacyRuleActionsSavedObjectType,
-          legacyRuleActionsSO.saved_objects[0].id
-        ),
-    ]);
+    const deleteLegacyActions = async () => {
+      await Promise.all([
+        // If the legacy notification rule type ("siem.notification") exist,
+        // migration and cleanup are needed
+        siemNotificationsExist && deleteRule(context, { id: siemNotification.data[0].id }),
+        // Delete the legacy sidecar SO if it exists
+        legacyRuleNotificationSOsExist &&
+          unsecuredSavedObjectsClient.delete(
+            legacyRuleActionsSavedObjectType,
+            legacyRuleActionsSO.saved_objects[0].id
+          ),
+      ]);
+    };
 
     // If legacy notification sidecar ("siem-detection-engine-rule-actions")
     // exist, migration is needed
@@ -95,22 +102,28 @@ export const retrieveMigratedLegacyActions: RetrieveMigratedLegacyActions = asyn
         legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'no_actions' ||
         legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'rule'
       ) {
+        await deleteLegacyActions();
         return { legacyActions: [], legacyActionsReferences: [] };
       }
 
-      return {
-        legacyActions: transformFromLegacyActions(
-          legacyRuleActionsSO.saved_objects[0].attributes,
-          legacyRuleActionsSO.saved_objects[0].references
-        ),
-        legacyActionsReferences:
-          // only action references need to be saved
-          legacyRuleActionsSO.saved_objects[0].references.filter(({ type }) => type === 'action') ??
-          [],
-      };
+      const legacyActions = transformFromLegacyActions(
+        legacyRuleActionsSO.saved_objects[0].attributes,
+        legacyRuleActionsSO.saved_objects[0].references
+      );
+      // only action references need to be saved
+      const legacyActionsReferences =
+        legacyRuleActionsSO.saved_objects[0].references.filter(({ type }) => type === 'action') ??
+        [];
+      await validateLegacyActions(legacyActions, legacyActionsReferences);
+
+      // Delete legacy actions only after the validation
+      await deleteLegacyActions();
+      return { legacyActions, legacyActionsReferences };
     }
+    await deleteLegacyActions();
   } catch (e) {
     context.logger.debug(`Migration has failed for rule ${ruleId}: ${e.message}`);
+    throw e;
   }
 
   return { legacyActions: [], legacyActionsReferences: [] };

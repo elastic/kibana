@@ -72,10 +72,6 @@ const LegacyAlertOptional = rt.partial({
   ecs: rt.partial({
     version: schemaString,
   }),
-  event: rt.partial({
-    action: schemaString,
-    kind: schemaString,
-  }),
   kibana: rt.partial({
     alert: rt.partial({
       risk_score: schemaNumber,
@@ -113,7 +109,6 @@ const LegacyAlertOptional = rt.partial({
       workflow_user: schemaString,
     }),
   }),
-  tags: schemaStringArray,
 });
 
 // prettier-ignore

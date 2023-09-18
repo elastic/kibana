@@ -13,7 +13,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkError } from '../../../../../routes/utils';
 import { createBulkErrorObject } from '../../../../../routes/utils';
-import type { RuleToImport } from '../../../../../../../../common/detection_engine/rule_management';
+import type { RuleToImport } from '../../../../../../../../common/api/detection_engine/rule_management';
 import type {
   ActionRules,
   ConflictError,

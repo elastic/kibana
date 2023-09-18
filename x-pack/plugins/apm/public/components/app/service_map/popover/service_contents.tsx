@@ -16,8 +16,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { NodeDataDefinition } from 'cytoscape';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -43,7 +43,11 @@ export function ServiceContents({
   const nodeData = elementData as NodeDataDefinition;
   const apmRouter = useApmRouter();
 
-  const { query } = useApmParams('/*');
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
 
   if (
     !('rangeFrom' in query && 'rangeTo' in query) ||

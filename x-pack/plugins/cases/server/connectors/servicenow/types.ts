@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceNowITSMFieldsType } from '../../../common/api';
+import type { ServiceNowITSMFieldsType } from '../../../common/types/domain';
 import type { ICasesConnector } from '../types';
 
 interface CorrelationValues {

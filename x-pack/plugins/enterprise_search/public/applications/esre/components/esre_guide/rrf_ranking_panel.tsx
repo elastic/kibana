@@ -39,7 +39,7 @@ const steps: EuiContainedStepProps[] = [
         external
       >
         {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step1.rrfDocsLinkText', {
-          defaultMessage: 'Reciprocal Rank Fusion documentations',
+          defaultMessage: 'Reciprocal Rank Fusion documentation',
         })}
       </EuiLink>
     ),

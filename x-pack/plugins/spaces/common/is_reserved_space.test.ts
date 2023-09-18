@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Space } from '.';
 import { isReservedSpace } from './is_reserved_space';
-import type { Space } from './types';
 
 test('it returns true for reserved spaces', () => {
   const space: Space = {

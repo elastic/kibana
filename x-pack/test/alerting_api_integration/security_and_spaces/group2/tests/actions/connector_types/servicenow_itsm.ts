@@ -120,6 +120,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',
@@ -141,6 +142,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',
@@ -174,6 +176,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         expect(createdConnector).to.eql({
           id: createdConnector.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',
@@ -195,6 +198,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         expect(fetchedConnector).to.eql({
           id: fetchedConnector.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',

@@ -13,6 +13,9 @@ import {
   Heatmap,
   GeometryValue,
   XYChartSeriesIdentifier,
+  Tooltip,
+  TooltipAction,
+  TooltipValue,
 } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -120,6 +123,7 @@ describe('HeatmapComponent', function () {
       uiState,
       onClickValue: jest.fn(),
       onSelectRange: jest.fn(),
+      onClickMultiValue: jest.fn(),
       datatableUtilities: createDatatableUtilitiesMock(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
@@ -287,7 +291,7 @@ describe('HeatmapComponent', function () {
 
   it('defaults on displaying the tooltip', () => {
     const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.Follow });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.Follow);
   });
 
   it('hides the legend if the showTooltip is false', async () => {
@@ -296,7 +300,7 @@ describe('HeatmapComponent', function () {
       args: { ...wrapperProps.args, showTooltip: false },
     } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.None });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
   it('not renders the component if no value accessor is given', () => {
@@ -441,6 +445,69 @@ describe('HeatmapComponent', function () {
       const settingsComponent = component.find(Settings);
       expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
       expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
+  });
+
+  describe('tooltip', () => {
+    it('should not have actions if chart is not interactive', () => {
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} interactive={false} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions');
+      expect(actions).toBeUndefined();
+    });
+    it('should have tooltip actions when the chart is fully configured and interactive', () => {
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions');
+      expect(actions?.length).toBe(1);
+      expect(actions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            onSelect: expect.any(Function),
+            disabled: expect.any(Function),
+          }),
+        ])
+      );
+    });
+
+    it('selecting correct actions calls a callback with correct filter data', () => {
+      const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+      const tooltip = component.find(Tooltip);
+      const actions = tooltip.prop('actions') as TooltipAction[];
+      actions[0].onSelect!(
+        [
+          {
+            label: 'Dest',
+            datum: {
+              x: 'a',
+              y: 'd',
+              value: 0,
+              originalIndex: 0,
+            },
+          } as TooltipValue,
+          {
+            label: 'Test',
+            datum: {
+              x: 'a',
+              y: 'd',
+              value: 0,
+              originalIndex: 0,
+            },
+          } as TooltipValue,
+        ],
+        []
+      );
+      expect(wrapperProps.onClickMultiValue).toHaveBeenCalledWith({
+        data: [
+          {
+            cells: [
+              { column: 1, row: 0 },
+              { column: 2, row: 0 },
+            ],
+            table: wrapperProps.data,
+          },
+        ],
+      });
     });
   });
 });

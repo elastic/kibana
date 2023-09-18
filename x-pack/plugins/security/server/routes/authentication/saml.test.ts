@@ -10,6 +10,7 @@ import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineSAMLRoutes } from './saml';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { AuthenticationResult, SAMLLogin } from '../../authentication';
@@ -17,7 +18,6 @@ import { authenticationServiceMock } from '../../authentication/authentication_s
 import type { SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
-import { defineSAMLRoutes } from './saml';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
@@ -54,6 +54,7 @@ describe('SAML authentication routes', () => {
 
     it('correctly defines route.', () => {
       expect(routeConfig.options).toEqual({
+        access: 'public',
         authRequired: false,
         xsrfRequired: false,
         tags: [ROUTE_TAG_CAN_REDIRECT, ROUTE_TAG_AUTH_FLOW],

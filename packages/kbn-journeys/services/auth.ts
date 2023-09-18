@@ -102,4 +102,8 @@ export class Auth {
   public isCloud() {
     return this.config.get('servers.kibana.hostname') !== 'localhost';
   }
+
+  public isServerless() {
+    return !!this.config.get('serverless');
+  }
 }

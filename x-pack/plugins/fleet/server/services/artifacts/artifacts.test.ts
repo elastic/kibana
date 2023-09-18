@@ -18,7 +18,7 @@ import { ArtifactsElasticsearchError } from '../../errors';
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
 
-import { newArtifactToElasticsearchProperties } from './mappings';
+import { newArtifactToElasticsearchProperties, uniqueIdFromArtifact } from './mappings';
 
 import {
   generateArtifactEsGetSingleHitMock,
@@ -29,6 +29,7 @@ import {
 } from './mocks';
 import {
   bulkCreateArtifacts,
+  bulkDeleteArtifacts,
   createArtifact,
   deleteArtifact,
   encodeArtifactContent,
@@ -186,14 +187,22 @@ describe('When using the artifacts services', () => {
     });
 
     it('should create and return a multiple big artifacts', async () => {
-      const { ...generatedArtifact1 } = generateArtifactMock({ encodedSize: 5_000_500 });
-      const newBigArtifact1 = generatedArtifact1;
-      const { ...generatedArtifact2 } = generateArtifactMock({ encodedSize: 500 });
-      const newBigArtifact2 = generatedArtifact2;
-      const { ...generatedArtifact3 } = generateArtifactMock({ encodedSize: 233 });
-      const newBigArtifact3 = generatedArtifact3;
-      const { ...generatedArtifact4 } = generateArtifactMock({ encodedSize: 7_000_000 });
-      const newBigArtifact4 = generatedArtifact4;
+      const newBigArtifact1 = generateArtifactMock({
+        encodedSize: 5_000_500,
+        decodedSha256: '1234',
+      });
+      const newBigArtifact2 = generateArtifactMock({
+        encodedSize: 500,
+        decodedSha256: '2345',
+      });
+      const newBigArtifact3 = generateArtifactMock({
+        encodedSize: 233,
+        decodedSha256: '3456',
+      });
+      const newBigArtifact4 = generateArtifactMock({
+        encodedSize: 7_000_000,
+        decodedSha256: '4567',
+      });
 
       const { artifacts } = await bulkCreateArtifacts(esClientMock, [
         newBigArtifact1,
@@ -267,22 +276,22 @@ describe('When using the artifacts services', () => {
 
       expect(artifact1).toEqual({
         ...newBigArtifact1,
-        id: expect.any(String),
+        id: uniqueIdFromArtifact(newBigArtifact1),
         created: expect.any(String),
       });
       expect(artifact2).toEqual({
         ...newBigArtifact2,
-        id: expect.any(String),
+        id: uniqueIdFromArtifact(newBigArtifact2),
         created: expect.any(String),
       });
       expect(artifact3).toEqual({
         ...newBigArtifact3,
-        id: expect.any(String),
+        id: uniqueIdFromArtifact(newBigArtifact3),
         created: expect.any(String),
       });
       expect(artifact4).toEqual({
         ...newBigArtifact4,
-        id: expect.any(String),
+        id: uniqueIdFromArtifact(newBigArtifact4),
         created: expect.any(String),
       });
     });
@@ -335,6 +344,54 @@ describe('When using the artifacts services', () => {
       setEsClientMethodResponseToError(esClientMock, 'delete');
 
       await expect(deleteArtifact(esClientMock, '123')).rejects.toBeInstanceOf(
+        ArtifactsElasticsearchError
+      );
+    });
+  });
+
+  describe('and calling `bulkDeleteArtifacts()`', () => {
+    it('should delete single artifact', async () => {
+      bulkDeleteArtifacts(esClientMock, ['123']);
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            delete: {
+              _id: '123',
+              _index: FLEET_SERVER_ARTIFACTS_INDEX,
+            },
+          },
+        ],
+      });
+    });
+
+    it('should delete all the artifacts', async () => {
+      bulkDeleteArtifacts(esClientMock, ['123', '231']);
+
+      expect(esClientMock.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        body: [
+          {
+            delete: {
+              _id: '123',
+              _index: FLEET_SERVER_ARTIFACTS_INDEX,
+            },
+          },
+          {
+            delete: {
+              _id: '231',
+              _index: FLEET_SERVER_ARTIFACTS_INDEX,
+            },
+          },
+        ],
+      });
+    });
+
+    it('should throw an ArtifactElasticsearchError if one is encountered', async () => {
+      setEsClientMethodResponseToError(esClientMock, 'bulk');
+
+      await expect(bulkDeleteArtifacts(esClientMock, ['123'])).rejects.toBeInstanceOf(
         ArtifactsElasticsearchError
       );
     });

@@ -9,7 +9,7 @@ import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { MetricExplorerCustomMetricAggregations } from '../../../../common/threshold_rule/metrics_explorer';
-import { MetricExpressionCustomMetric } from '../../../../common/threshold_rule/types';
+import { CustomThresholdExpressionMetric } from '../../../../common/threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
@@ -19,13 +19,15 @@ import {
 } from './use_metrics_explorer_options';
 
 const DEFAULT_TIME_RANGE = {};
+const DEFAULT_TIMESTAMP = '@timestamp';
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
   filterQuery?: string,
   groupBy?: string | string[],
-  timeRange: TimeRange = DEFAULT_TIME_RANGE
+  timeRange: TimeRange = DEFAULT_TIME_RANGE,
+  timeFieldName: string = DEFAULT_TIMESTAMP
 ) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
 
@@ -41,8 +43,7 @@ export const useMetricsExplorerChartData = (
           ? {
               aggregation: 'custom',
               custom_metrics:
-                expression?.customMetrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ??
-                [],
+                expression?.metrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ?? [],
               equation: expression.equation,
             }
           : { field: expression.metric, aggregation: expression.aggType },
@@ -55,7 +56,7 @@ export const useMetricsExplorerChartData = (
       expression.equation,
       expression.metric,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(expression.customMetrics),
+      JSON.stringify(expression.metrics),
       filterQuery,
       groupBy,
     ]
@@ -69,13 +70,16 @@ export const useMetricsExplorerChartData = (
       interval: `>=${timeSize || 1}${timeUnit}`,
       fromTimestamp,
       toTimestamp,
+      timeFieldName,
     };
-  }, [timeRange, timeSize, timeUnit]);
+  }, [timeRange.from, timeRange.to, timeSize, timeUnit, timeFieldName]);
 
   return useMetricsExplorerData(options, derivedIndexPattern, timestamps);
 };
 
-const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {
+const mapMetricThresholdMetricToMetricsExplorerMetric = (
+  metric: CustomThresholdExpressionMetric
+) => {
   if (metric.aggType === 'count') {
     return {
       name: metric.name,

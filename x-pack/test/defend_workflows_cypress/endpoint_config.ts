@@ -9,7 +9,7 @@ import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoi
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { ExperimentalFeatures } from '@kbn/security-solution-plugin/common/experimental_features';
-import { DefendWorkflowsCypressEndpointTestRunner } from './runner';
+import { DefendWorkflowsCypressCliTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const defendWorkflowsCypressConfig = await readConfigFile(require.resolve('./config.ts'));
@@ -43,6 +43,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(enabledFeatureFlags)}`,
       ],
     },
-    testRunner: DefendWorkflowsCypressEndpointTestRunner,
+    testRunner: DefendWorkflowsCypressCliTestRunner,
   };
 }

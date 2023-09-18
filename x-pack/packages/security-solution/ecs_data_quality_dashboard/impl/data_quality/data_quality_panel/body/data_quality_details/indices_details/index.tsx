@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -23,6 +24,7 @@ import { PatternRollup, SelectedIndex } from '../../../../types';
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -52,7 +54,9 @@ export interface Props {
   patterns: string[];
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
-  theme: Theme;
+  startDate?: string | null;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -66,6 +70,7 @@ export interface Props {
 const IndicesDetailsComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
@@ -77,7 +82,9 @@ const IndicesDetailsComponent: React.FC<Props> = ({
   patterns,
   selectedIndex,
   setSelectedIndex,
+  startDate,
   theme,
+  baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => (
@@ -87,6 +94,7 @@ const IndicesDetailsComponent: React.FC<Props> = ({
         <Pattern
           addSuccessToast={addSuccessToast}
           canUserCreateAndReadCases={canUserCreateAndReadCases}
+          endDate={endDate}
           formatBytes={formatBytes}
           formatNumber={formatNumber}
           getGroupByFieldsOnClick={getGroupByFieldsOnClick}
@@ -98,7 +106,9 @@ const IndicesDetailsComponent: React.FC<Props> = ({
           patternRollup={patternRollups[pattern]}
           selectedIndex={selectedIndex}
           setSelectedIndex={setSelectedIndex}
+          startDate={startDate}
           theme={theme}
+          baseTheme={baseTheme}
           updatePatternIndexNames={updatePatternIndexNames}
           updatePatternRollup={updatePatternRollup}
         />

@@ -21,6 +21,7 @@ export const registerBootstrapRoute = ({
       path: '/bootstrap.js',
       options: {
         tags: ['api'],
+        access: 'public',
       },
       validate: false,
     },
@@ -44,6 +45,7 @@ export const registerBootstrapRoute = ({
       options: {
         authRequired: 'optional',
         tags: ['api'],
+        access: 'public',
       },
       validate: false,
     },

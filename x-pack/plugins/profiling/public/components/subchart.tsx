@@ -16,6 +16,7 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  Tooltip,
 } from '@elastic/charts';
 import {
   EuiBadge,
@@ -31,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { StackFrameMetadata } from '../../common/profiling';
+import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
@@ -134,7 +135,7 @@ export function SubChart({
           </EuiFlexGroup>
 
           {hasMoreFrames && !!onShowMoreClick && (
-            <EuiButton onClick={onShowMoreClick}>
+            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onShowMoreClick}>
               {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
                 defaultMessage: 'Show more',
               })}
@@ -184,13 +185,13 @@ export function SubChart({
           </EuiFlexItem>
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
             {showFrames ? (
-              <EuiLink onClick={() => onShowMoreClick?.()}>
+              <EuiLink data-test-subj="profilingSubChartLink" onClick={() => onShowMoreClick?.()}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             ) : category === OTHER_BUCKET_LABEL ? (
               <EuiText size="s">{label}</EuiText>
             ) : (
-              <EuiLink href={href}>
+              <EuiLink data-test-subj="profilingSubChartLink" href={href}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             )}
@@ -218,12 +219,8 @@ export function SubChart({
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
-          <Settings
-            showLegend={false}
-            tooltip={{ showNullValues: false }}
-            baseTheme={chartsBaseTheme}
-            theme={chartsTheme}
-          />
+          <Tooltip showNullValues={false} />
+          <Settings showLegend={false} baseTheme={chartsBaseTheme} theme={chartsTheme} />
           <AreaSeries
             id={category}
             name={category}
@@ -263,7 +260,7 @@ export function SubChart({
           <Axis
             id="left-axis"
             position="left"
-            showGridLines
+            gridLine={{ visible: true }}
             tickFormat={(d) => (showAxes ? Number(d).toFixed(0) : '')}
             style={
               showAxes

@@ -12,7 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { getEmptyString } from '../../../../common/components/empty_value';
 import { ProviderContainer } from '../../../../common/components/drag_and_drop/provider_container';
 

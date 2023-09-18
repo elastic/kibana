@@ -8,17 +8,22 @@
 import React, { useCallback, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Query, TimeRange } from '@kbn/es-query';
+import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { useAlertDataView } from '../../hooks/use_alert_data_view';
 import { TriggersAndActionsUiServices } from '../../..';
+import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
+
+const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 
 // TODO Share buildEsQuery to be used between AlertsSearchBar and AlertsStateTable component https://github.com/elastic/kibana/issues/144615
 export function AlertsSearchBar({
   appName,
   disableQueryLanguageSwitcher = false,
   featureIds,
+  ruleTypeId,
   query,
   filters,
   onQueryChange,
@@ -40,6 +45,14 @@ export function AlertsSearchBar({
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { value: dataView, loading, error } = useAlertDataView(featureIds);
+  const {
+    value: aadFields,
+    loading: fieldsLoading,
+    error: fieldsError,
+  } = useRuleAADFields(ruleTypeId);
+
+  const indexPatterns =
+    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataView;
 
   const onSearchQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {
@@ -72,7 +85,10 @@ export function AlertsSearchBar({
     <SearchBar
       appName={appName}
       disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
-      indexPatterns={loading || error ? NO_INDEX_PATTERNS : [dataView!]}
+      // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
+      indexPatterns={
+        loading || error || fieldsLoading || fieldsError ? NO_INDEX_PATTERNS : indexPatterns
+      }
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}
@@ -89,6 +105,7 @@ export function AlertsSearchBar({
       showSubmitButton={showSubmitButton}
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}
+      suggestionsAbstraction={SA_ALERTS}
     />
   );
 }

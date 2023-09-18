@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getDefaultOnFailureConfiguration } from '@kbn/ml-plugin/public/application/components/ml_inference/state';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../services/ml/api';
 
@@ -16,22 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
     id: model.name,
   }));
 
-  describe('trained models', function () {
-    before(async () => {
-      for (const model of trainedModels) {
-        await ml.api.importTrainedModel(model.id, model.name);
-      }
-
-      await ml.api.createTestTrainedModels('classification', 15, true);
-      await ml.api.createTestTrainedModels('regression', 15);
-    });
-
-    after(async () => {
-      await ml.api.stopAllTrainedModelDeploymentsES();
-      await ml.api.deleteAllTrainedModelsES();
-      await ml.api.cleanMlIndices();
-    });
-
+  // Failing: See https://github.com/elastic/kibana/issues/165083
+  // Failing: See https://github.com/elastic/kibana/issues/165084
+  describe.skip('trained models', function () {
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {
@@ -51,6 +39,58 @@ export default function ({ getService }: FtrProviderContext) {
       description: '',
       modelTypes: ['regression', 'tree_ensemble'],
     };
+
+    const modelWithoutPipelineDataExpectedValues = {
+      name: `ml-inference-${modelWithoutPipelineData.modelId}`,
+      duplicateName: `ml-inference-${modelWithoutPipelineData.modelId}-duplicate`,
+      description: `Uses the pre-trained data frame analytics model ${modelWithoutPipelineData.modelId} to infer against the data that is being ingested in the pipeline`,
+      duplicateDescription: 'Edited description',
+      inferenceConfig: {
+        regression: {
+          results_field: 'predicted_value',
+          num_top_feature_importance_values: 0,
+        },
+      },
+      inferenceConfigDuplicate: {
+        regression: {
+          results_field: 'predicted_value_for_duplicate',
+          num_top_feature_importance_values: 0,
+        },
+      },
+      editedInferenceConfig: {
+        regression: {
+          results_field: 'predicted_value_for_duplicate',
+          num_top_feature_importance_values: 0,
+        },
+      },
+      fieldMap: {},
+      editedFieldMap: {
+        incoming_field: 'old_field',
+      },
+    };
+
+    before(async () => {
+      for (const model of trainedModels) {
+        await ml.api.importTrainedModel(model.id, model.name);
+      }
+
+      await ml.api.createTestTrainedModels('classification', 15, true);
+      await ml.api.createTestTrainedModels('regression', 15);
+
+      // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
+      await ml.api.assureMlStatsIndexExists();
+    });
+
+    after(async () => {
+      await ml.api.stopAllTrainedModelDeploymentsES();
+      await ml.api.deleteAllTrainedModelsES();
+      await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
+      await ml.api.deleteIngestPipeline(
+        modelWithoutPipelineDataExpectedValues.duplicateName,
+        false
+      );
+      await ml.api.cleanMlIndices();
+    });
 
     describe('for ML user with read-only access', () => {
       before(async () => {
@@ -74,8 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159283
-    describe.skip('for ML power user', () => {
+    describe('for ML power user', () => {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
@@ -114,6 +153,129 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertInferenceConfigTabContent();
         await ml.trainedModelsTable.assertStatsTabContent();
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
+      });
+
+      it('deploys the trained model with default values', async () => {
+        await ml.testExecution.logTestStep('should display the trained model in the table');
+        await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
+        await ml.testExecution.logTestStep(
+          'should not show collapsed actions menu for the model in the table'
+        );
+        await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
+          modelWithoutPipelineData.modelId,
+          false
+        );
+        await ml.testExecution.logTestStep('should show deploy action for the model in the table');
+        await ml.trainedModelsTable.assertModelDeployActionButtonExists(
+          modelWithoutPipelineData.modelId,
+          true
+        );
+        await ml.testExecution.logTestStep('should open the deploy model flyout');
+        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
+          modelWithoutPipelineData.modelId
+        );
+        await ml.testExecution.logTestStep('should complete the deploy model Details step');
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails({
+          name: modelWithoutPipelineDataExpectedValues.name,
+          description: modelWithoutPipelineDataExpectedValues.description,
+          // If no metadata is provided, the target field will default to empty string
+          targetField: '',
+        });
+        await ml.testExecution.logTestStep('should complete the deploy model Pipeline Config step');
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutPipelineConfig({
+          inferenceConfig: modelWithoutPipelineDataExpectedValues.inferenceConfig,
+          fieldMap: modelWithoutPipelineDataExpectedValues.fieldMap,
+        });
+        await ml.testExecution.logTestStep(
+          'should complete the deploy model pipeline On Failure step'
+        );
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutOnFailure(
+          getDefaultOnFailureConfiguration()
+        );
+        await ml.testExecution.logTestStep(
+          'should complete the deploy model pipeline Create pipeline step'
+        );
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
+          description: modelWithoutPipelineDataExpectedValues.description,
+          processors: [
+            {
+              inference: {
+                model_id: modelWithoutPipelineData.modelId,
+                ignore_failure: false,
+                inference_config: modelWithoutPipelineDataExpectedValues.inferenceConfig,
+                on_failure: getDefaultOnFailureConfiguration(),
+              },
+            },
+          ],
+        });
+      });
+
+      it('deploys the trained model with custom values', async () => {
+        await ml.testExecution.logTestStep('should display the trained model in the table');
+        await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
+        await ml.testExecution.logTestStep(
+          'should not show collapsed actions menu for the model in the table'
+        );
+        await ml.trainedModelsTable.assertModelCollapsedActionsButtonExists(
+          modelWithoutPipelineData.modelId,
+          false
+        );
+        await ml.testExecution.logTestStep('should show deploy action for the model in the table');
+        await ml.trainedModelsTable.assertModelDeployActionButtonExists(
+          modelWithoutPipelineData.modelId,
+          true
+        );
+        await ml.testExecution.logTestStep('should open the deploy model flyout');
+        await ml.trainedModelsTable.openTrainedModelsInferenceFlyout(
+          modelWithoutPipelineData.modelId
+        );
+        await ml.testExecution.logTestStep('should complete the deploy model Details step');
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutDetails(
+          {
+            name: modelWithoutPipelineDataExpectedValues.duplicateName,
+            description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
+            targetField: 'myTargetField',
+          },
+          true
+        );
+        await ml.testExecution.logTestStep('should complete the deploy model Pipeline Config step');
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutPipelineConfig(
+          {
+            inferenceConfig: modelWithoutPipelineDataExpectedValues.inferenceConfig,
+            editedInferenceConfig: modelWithoutPipelineDataExpectedValues.editedInferenceConfig,
+            fieldMap: modelWithoutPipelineDataExpectedValues.fieldMap,
+            editedFieldMap: modelWithoutPipelineDataExpectedValues.editedFieldMap,
+          },
+          true
+        );
+        await ml.testExecution.logTestStep(
+          'should complete the deploy model pipeline On Failure step'
+        );
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutOnFailure(
+          getDefaultOnFailureConfiguration(),
+          true
+        );
+        await ml.testExecution.logTestStep(
+          'should complete the deploy model pipeline Create pipeline step'
+        );
+        await ml.deployDFAModelFlyout.completeTrainedModelsInferenceFlyoutCreateStep({
+          description: modelWithoutPipelineDataExpectedValues.duplicateDescription,
+          processors: [
+            {
+              inference: {
+                field_map: {
+                  incoming_field: 'old_field',
+                },
+                ignore_failure: true,
+                if: "ctx?.network?.name == 'Guest'",
+                model_id: modelWithoutPipelineData.modelId,
+                inference_config: modelWithoutPipelineDataExpectedValues.inferenceConfigDuplicate,
+                tag: 'tag',
+                target_field: 'myTargetField',
+              },
+            },
+          ],
+        });
       });
 
       it('displays the built-in model with only Test action enabled', async () => {

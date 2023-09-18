@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { PageSimpleStringStream } from './containers/app/pages/page_simple_string_stream';
 import { PageReducerStream } from './containers/app/pages/page_reducer_stream';
 
@@ -24,8 +25,8 @@ interface RouteDef {
 
 export const routes: RouteSectionDef[] = [
   {
-    title: 'response stream',
-    id: 'responseStream',
+    title: PLUGIN_NAME,
+    id: PLUGIN_ID,
     items: [
       {
         title: 'Simple string stream',

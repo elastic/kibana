@@ -37,11 +37,13 @@ import {
 
 import {
   ENDPOINT_LIST_URL,
-  EXCEPTION_FILTER,
+  INTERNAL_EXCEPTION_FILTER,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import { toError, toPromise } from '../fp_utils';
+
+const version = '2023-10-31';
 
 /**
  * Add new ExceptionList
@@ -62,6 +64,7 @@ const addExceptionList = async ({
     body: JSON.stringify(list),
     method: 'POST',
     signal,
+    version,
   });
 
 const addExceptionListWithValidation = async ({
@@ -105,6 +108,7 @@ const addExceptionListItem = async ({
     body: JSON.stringify(listItem),
     method: 'POST',
     signal,
+    version,
   });
 
 const addExceptionListItemWithValidation = async ({
@@ -148,6 +152,7 @@ const updateExceptionList = async ({
     body: JSON.stringify(list),
     method: 'PUT',
     signal,
+    version,
   });
 
 const updateExceptionListWithValidation = async ({
@@ -191,6 +196,7 @@ const updateExceptionListItem = async ({
     body: JSON.stringify(listItem),
     method: 'PUT',
     signal,
+    version,
   });
 
 const updateExceptionListItemWithValidation = async ({
@@ -247,6 +253,7 @@ const fetchExceptionLists = async ({
     method: 'GET',
     query,
     signal,
+    version,
   });
 };
 
@@ -298,6 +305,7 @@ const fetchExceptionListById = async ({
     method: 'GET',
     query: { id, namespace_type: namespaceType },
     signal,
+    version,
   });
 
 const fetchExceptionListByIdWithValidation = async ({
@@ -361,6 +369,7 @@ const fetchExceptionListsItemsByListIds = async ({
     method: 'GET',
     query,
     signal,
+    version,
   });
 };
 
@@ -414,6 +423,7 @@ const fetchExceptionListItemById = async ({
     method: 'GET',
     query: { id, namespace_type: namespaceType },
     signal,
+    version,
   });
 
 const fetchExceptionListItemByIdWithValidation = async ({
@@ -450,6 +460,7 @@ const deleteExceptionListById = async ({
     method: 'DELETE',
     query: { id, namespace_type: namespaceType },
     signal,
+    version,
   });
 
 const deleteExceptionListByIdWithValidation = async ({
@@ -486,6 +497,7 @@ const deleteExceptionListItemById = async ({
     method: 'DELETE',
     query: { id, namespace_type: namespaceType },
     signal,
+    version,
   });
 
 const deleteExceptionListItemByIdWithValidation = async ({
@@ -518,6 +530,7 @@ const addEndpointExceptionList = async ({
   http.fetch<ExceptionListItemSchema>(ENDPOINT_LIST_URL, {
     method: 'POST',
     signal,
+    version,
   });
 
 const addEndpointExceptionListWithValidation = async ({
@@ -561,6 +574,7 @@ export const exportExceptionList = async ({
       include_expired_exceptions: includeExpiredExceptions,
     },
     signal,
+    version,
   });
 
 /**
@@ -579,8 +593,9 @@ export const getExceptionFilterFromExceptionListIds = async ({
   http,
   signal,
 }: GetExceptionFilterFromExceptionListIdsProps): Promise<ExceptionFilterResponse> =>
-  http.fetch(EXCEPTION_FILTER, {
+  http.fetch(INTERNAL_EXCEPTION_FILTER, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       exception_list_ids: exceptionListIds,
       type: 'exception_list_ids',
@@ -607,8 +622,9 @@ export const getExceptionFilterFromExceptions = async ({
   chunkSize,
   signal,
 }: GetExceptionFilterFromExceptionsProps): Promise<ExceptionFilterResponse> =>
-  http.fetch(EXCEPTION_FILTER, {
+  http.fetch(INTERNAL_EXCEPTION_FILTER, {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({
       exceptions,
       type: 'exception_items',
@@ -645,4 +661,5 @@ export const duplicateExceptionList = async ({
       include_expired_exceptions: includeExpiredExceptions,
     },
     signal,
+    version,
   });

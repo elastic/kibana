@@ -106,7 +106,8 @@ export function GeoIndexPatternSelect(props: Props) {
   }
 
   const IndexPatternSelect = getIndexPatternSelectComponent();
-  const error = !hasGeoFields
+  const isDataViewInvalid = !props.dataView ? false : !hasGeoFields;
+  const error = isDataViewInvalid
     ? i18n.translate('xpack.maps.noGeoFieldInIndexPattern.message', {
         defaultMessage: 'Data view does not contain any geospatial fields',
       })
@@ -116,9 +117,9 @@ export function GeoIndexPatternSelect(props: Props) {
     <>
       {_renderNoIndexPatternWarning()}
 
-      <EuiFormRow label={getDataViewLabel()} isInvalid={!hasGeoFields} error={error}>
+      <EuiFormRow label={getDataViewLabel()} isInvalid={isDataViewInvalid} error={error}>
         <IndexPatternSelect
-          isInvalid={!hasGeoFields}
+          isInvalid={isDataViewInvalid}
           isDisabled={noDataViews}
           indexPatternId={props.dataView?.id ? props.dataView.id : ''}
           onChange={_onIndexPatternSelect}

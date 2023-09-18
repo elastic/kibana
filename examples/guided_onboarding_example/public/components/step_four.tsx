@@ -12,11 +12,7 @@ import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiCode,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection, EuiCode } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 
 interface StepFourProps {
@@ -41,7 +37,7 @@ export const StepFour: React.FC<StepFourProps> = ({
 
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -50,8 +46,8 @@ export const StepFour: React.FC<StepFourProps> = ({
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <p>
             <FormattedMessage
@@ -74,7 +70,7 @@ export const StepFour: React.FC<StepFourProps> = ({
         >
           Complete step 4
         </EuiButton>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

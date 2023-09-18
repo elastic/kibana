@@ -1,11 +1,21 @@
 {
   "ilm.move_to_step": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
-      "_ilm/move/{indices}"
+      "_ilm/move/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-move-to-step.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-move-to-step.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

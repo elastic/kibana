@@ -15,13 +15,10 @@ import { Router, Route } from '@kbn/shared-ux-router';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
+  EuiPageSidebar,
   EuiTitle,
   EuiSideNav,
 } from '@elastic/eui';
@@ -37,16 +34,14 @@ const Home = () => (
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Bar home page section title</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Wow what a home page this is!</EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>Bar home page section title</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiPageSection>Wow what a home page this is!</EuiPageSection>
+    </EuiPageSection>
   </EuiPageBody>
 );
 
@@ -59,16 +54,14 @@ const PageA = () => (
         </EuiTitle>
       </EuiPageHeaderSection>
     </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Page A section title</h2>
-          </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Page A&apos;s content goes here</EuiPageContentBody>
-    </EuiPageContent>
+    <EuiPageSection>
+      <EuiPageHeader>
+        <EuiTitle>
+          <h2>Page A section title</h2>
+        </EuiTitle>
+      </EuiPageHeader>
+      <EuiPageSection>Page A&apos;s content goes here</EuiPageSection>
+    </EuiPageSection>
   </EuiPageBody>
 );
 
@@ -109,9 +102,9 @@ const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
 const FooApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
     <EuiPage>
-      <EuiPageSideBar>
+      <EuiPageSidebar>
         <Nav navigateToApp={coreStart.application.navigateToApp} />
-      </EuiPageSideBar>
+      </EuiPageSidebar>
       <Route path="/" exact render={() => <Redirect to="/home" />} />
       <Route path="/home" exact component={Home} />
       <Route path="/page-a" component={PageA} />

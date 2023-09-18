@@ -40,6 +40,7 @@ export const useSendGetEndpointProcessesRequest = (
       ResponseActionApiResponse<GetProcessesActionOutputContent>
     >(GET_PROCESSES_ROUTE, {
       body: JSON.stringify(getRunningProcessesData),
+      version: '2023-10-31',
     });
   }, customOptions);
 };

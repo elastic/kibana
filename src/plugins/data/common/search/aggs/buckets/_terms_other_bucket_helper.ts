@@ -22,7 +22,9 @@ import { IAggType } from '../agg_type';
 import { IAggConfig } from '../agg_config';
 import { createSamplerAgg } from '../utils/sampler';
 
-export const OTHER_BUCKET_SEPARATOR = '╰┄►';
+const MISSING_KEY_STRING = '__missing__';
+export const OTHER_NESTED_BUCKET_SEPARATOR = '╰┄►';
+const otherBucketRegexp = new RegExp(`^${OTHER_NESTED_BUCKET_SEPARATOR}`);
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -56,10 +58,11 @@ const getAggResultBuckets = (
   aggWithOtherBucket: IAggConfig,
   key: string
 ) => {
-  const keyParts = key.split(OTHER_BUCKET_SEPARATOR);
+  const keyParts = key.split(OTHER_NESTED_BUCKET_SEPARATOR);
   let responseAgg = response;
   for (const i in keyParts) {
-    if (keyParts[i] || keyParts[i] === '') {
+    // enable also the empty string
+    if (keyParts[i] != null) {
       const responseAggs: Array<Record<string, any>> = values(responseAgg);
       // If you have multi aggs, we cannot just assume the first one is the `other` bucket,
       // so we need to loop over each agg until we find it.
@@ -75,8 +78,13 @@ const getAggResultBuckets = (
             return bucketKey === keyParts[i];
           });
           if (aggResultBucket) {
-            responseAgg = aggResultBucket;
-            break;
+            // this is a special check in order to avoid an overwrite when
+            // there's an empty string term at root level for the data request
+            // as the other request will default to empty string category as well
+            if (!responseAgg?.[aggWithOtherBucket.id] || keyParts[i] !== '') {
+              responseAgg = aggResultBucket;
+              break;
+            }
           }
         }
       }
@@ -94,19 +102,20 @@ const getAggResultBuckets = (
  * @param aggId: id of the aggregation with missing bucket
  */
 const getAggConfigResultMissingBuckets = (responseAggs: any, aggId: string) => {
-  const missingKey = '__missing__';
-  let resultBuckets: Array<Record<string, any>> = [];
+  const resultBuckets: Array<Record<string, any>> = [];
   if (responseAggs[aggId]) {
     const matchingBucket = responseAggs[aggId].buckets.find(
-      (bucket: Record<string, any>) => bucket.key === missingKey
+      (bucket: Record<string, any>) => bucket.key === MISSING_KEY_STRING
     );
-    if (matchingBucket) resultBuckets.push(matchingBucket);
+    if (matchingBucket) {
+      resultBuckets.push(matchingBucket);
+    }
     return resultBuckets;
   }
   each(responseAggs, (agg) => {
     if (agg.buckets) {
       each(agg.buckets, (bucket) => {
-        resultBuckets = [...resultBuckets, ...getAggConfigResultMissingBuckets(bucket, aggId)];
+        resultBuckets.push(...getAggConfigResultMissingBuckets(bucket, aggId));
       });
     }
   });
@@ -124,7 +133,7 @@ const getOtherAggTerms = (requestAgg: Record<string, any>, key: string, otherAgg
   return requestAgg['other-filter'].filters.filters[key].bool.must_not
     .filter(
       (filter: Record<string, any>) =>
-        filter.match_phrase && filter.match_phrase[otherAgg.params.field.name]
+        filter.match_phrase && filter.match_phrase[otherAgg.params.field.name] != null // mind empty strings!
     )
     .map((filter: Record<string, any>) => filter.match_phrase[otherAgg.params.field.name]);
 };
@@ -197,7 +206,11 @@ export const buildOtherBucketAgg = (
   ) => {
     // make sure there are actually results for the buckets
     const agg = aggregations[aggId];
-    if (!agg || !agg.buckets.length) {
+    if (
+      !agg ||
+      // buckets can be either an array or an object in case there's also a filter at the same level
+      (Array.isArray(agg.buckets) ? !agg.buckets.length : !Object.values(agg.buckets).length)
+    ) {
       noAggBucketResults = true;
       return;
     }
@@ -220,7 +233,7 @@ export const buildOtherBucketAgg = (
           bucket,
           newAgg.id,
           newFilters,
-          `${key}${OTHER_BUCKET_SEPARATOR}${bucketKey.toString()}`
+          `${key}${OTHER_NESTED_BUCKET_SEPARATOR}${bucketKey.toString()}`
         );
       });
       return;
@@ -229,7 +242,7 @@ export const buildOtherBucketAgg = (
     const hasScriptedField = !!aggWithOtherBucket.params.field?.scripted;
     const hasMissingBucket = !!aggWithOtherBucket.params.missingBucket;
     const hasMissingBucketKey = agg.buckets.some(
-      (bucket: { key: string }) => bucket.key === '__missing__'
+      (bucket: { key: string }) => bucket.key === MISSING_KEY_STRING
     );
     if (
       aggWithOtherBucket.params.field &&
@@ -246,7 +259,7 @@ export const buildOtherBucketAgg = (
 
     // create not filters for all the buckets
     each(agg.buckets, (bucket) => {
-      if (bucket.key === '__missing__') return;
+      if (bucket.key === MISSING_KEY_STRING) return;
       const filter = currentAgg.createFilter(currentAgg.getKey(bucket, bucket.key));
       filter.meta.negate = true;
       filters.push(filter);
@@ -302,7 +315,7 @@ export const mergeOtherBucketAggResponse = (
     'buckets' in aggregationsRoot!['other-filter'] ? aggregationsRoot!['other-filter'].buckets : {};
   each(buckets, (bucket, key) => {
     if (!bucket.doc_count || key === undefined) return;
-    const bucketKey = key.replace(new RegExp(`^${OTHER_BUCKET_SEPARATOR}`), '');
+    const bucketKey = key.replace(otherBucketRegexp, '');
     const aggResultBuckets = getAggResultBuckets(
       aggsConfig,
       updatedAggregationsRoot,
@@ -319,7 +332,7 @@ export const mergeOtherBucketAggResponse = (
 
     if (
       aggResultBuckets.some(
-        (aggResultBucket: Record<string, any>) => aggResultBucket.key === '__missing__'
+        (aggResultBucket: Record<string, any>) => aggResultBucket.key === MISSING_KEY_STRING
       )
     ) {
       bucket.filters.push(
@@ -330,7 +343,6 @@ export const mergeOtherBucketAggResponse = (
   });
   return updatedResponse;
 };
-
 export const updateMissingBucket = (
   response: estypes.SearchResponse<any>,
   aggConfigs: IAggConfigs,
@@ -342,7 +354,7 @@ export const updateMissingBucket = (
     agg.id
   );
   aggResultBuckets.forEach((bucket) => {
-    bucket.key = '__missing__';
+    bucket.key = MISSING_KEY_STRING;
   });
   return updatedResponse;
 };
@@ -384,7 +396,7 @@ export const createOtherBucketPostFlightRequest = (
     inspectorRequestAdapter,
     abortSignal,
     searchSessionId,
-    disableShardFailureWarning
+    disableWarningToasts
   ) => {
     if (!resp.aggregations) return resp;
     const nestedSearchSource = searchSource.createChild();
@@ -394,11 +406,11 @@ export const createOtherBucketPostFlightRequest = (
 
       nestedSearchSource.setField('aggs', filterAgg);
 
-      const { rawResponse: response } = await lastValueFrom(
+      const { rawResponse: otherResponse } = await lastValueFrom(
         nestedSearchSource.fetch$({
           abortSignal,
           sessionId: searchSessionId,
-          disableShardFailureWarning,
+          disableWarningToasts,
           inspector: {
             adapter: inspectorRequestAdapter,
             title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
@@ -416,7 +428,7 @@ export const createOtherBucketPostFlightRequest = (
       resp = mergeOtherBucketAggResponse(
         aggConfigs,
         resp,
-        response,
+        otherResponse,
         aggConfig,
         filterAgg(),
         otherFilterBuilder

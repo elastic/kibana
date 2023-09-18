@@ -8,7 +8,8 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import styled from 'styled-components';
-import { LoadPrePackagedRulesButton } from './load_prepackaged_rules_button';
+import { useUserData } from '../../user_info';
+import { AddElasticRulesButton } from './add_elastic_rules_button';
 import * as i18n from './translations';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -18,6 +19,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 EmptyPrompt.displayName = 'EmptyPrompt';
 
 const PrePackagedRulesPromptComponent = () => {
+  const [{ loading, canUserCRUD }] = useUserData();
   return (
     <EmptyPrompt
       data-test-subj="rulesEmptyPrompt"
@@ -26,9 +28,10 @@ const PrePackagedRulesPromptComponent = () => {
       actions={
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
-            <LoadPrePackagedRulesButton
+            <AddElasticRulesButton
+              isDisabled={!canUserCRUD || loading}
               fill={true}
-              data-test-subj="load-prebuilt-rules"
+              data-test-subj="add-elastc-rules-empty-empty-prompt-button"
               showBadge={false}
             />
           </EuiFlexItem>

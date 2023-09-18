@@ -6,20 +6,20 @@
  */
 
 import moment from 'moment';
-import { RRule } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import sinon from 'sinon';
 import { RRuleRecord } from '../../types';
 import { isSnoozeActive } from './is_snooze_active';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
-describe('isSnoozeExpired', () => {
+describe('isSnoozeActive', () => {
   afterAll(() => fakeTimer.restore());
 
   test('snooze is NOT active byweekday', () => {
     // Set the current time as:
     //   - Feb 27 2023 08:15:00 GMT+0000 - Monday
-    fakeTimer = sinon.useFakeTimers(new Date('2023-02-27T06:15:00.000Z'));
+    fakeTimer = sinon.useFakeTimers(new Date('2023-02-27T08:15:00.000Z'));
 
     // Try to get snooze end time with:
     //   - Start date of: Feb 24 2023 23:00:00 GMT+0000 - Friday
@@ -30,7 +30,7 @@ describe('isSnoozeExpired', () => {
       rRule: {
         byweekday: ['SA'],
         tzid: 'Europe/Madrid',
-        freq: RRule.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         dtstart: '2023-02-24T23:00:00.000Z',
       } as RRuleRecord,
@@ -54,7 +54,7 @@ describe('isSnoozeExpired', () => {
       rRule: {
         byweekday: ['SA'],
         tzid: 'Europe/Madrid',
-        freq: RRule.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         dtstart: '2023-02-24T23:00:00.000Z',
       } as RRuleRecord,
@@ -84,7 +84,7 @@ describe('isSnoozeExpired', () => {
       rRule: {
         byweekday: ['SA'],
         tzid: 'Europe/Madrid',
-        freq: RRule.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         dtstart: '2023-02-24T23:00:00.000Z',
       } as RRuleRecord,
@@ -108,7 +108,7 @@ describe('isSnoozeExpired', () => {
       rRule: {
         byweekday: ['SA'],
         tzid: 'Europe/Madrid',
-        freq: RRule.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         dtstart: '2023-02-24T23:00:00.000Z',
       } as RRuleRecord,
@@ -117,7 +117,7 @@ describe('isSnoozeExpired', () => {
     expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`
       Object {
         "id": "9141dc1f-ed85-4656-91e4-119173105432",
-        "lastOccurrence": 2023-03-04T00:00:00.000Z,
+        "lastOccurrence": 2023-03-03T23:00:00.000Z,
         "snoozeEndTime": 2023-03-06T06:00:00.000Z,
       }
     `);
@@ -136,7 +136,7 @@ describe('isSnoozeExpired', () => {
     const snoozeA = {
       duration: moment('2023-01', 'YYYY-MM').daysInMonth() * 24 * 60 * 60 * 1000, // 1 month
       rRule: {
-        freq: 0,
+        freq: Frequency.YEARLY,
         interval: 1,
         bymonthday: [1],
         bymonth: [1],
@@ -164,7 +164,7 @@ describe('isSnoozeExpired', () => {
         bymonthday: [1],
         bymonth: [1],
         tzid: 'Europe/Madrid',
-        freq: RRule.MONTHLY,
+        freq: Frequency.MONTHLY,
         interval: 1,
         dtstart: '2023-01-01T00:00:00.000Z',
       } as RRuleRecord,
@@ -195,7 +195,7 @@ describe('isSnoozeExpired', () => {
         bymonthday: [1],
         bymonth: [1],
         tzid: 'Europe/Madrid',
-        freq: RRule.MONTHLY,
+        freq: Frequency.MONTHLY,
         interval: 1,
         dtstart: '2023-01-01T00:00:00.000Z',
       } as RRuleRecord,
@@ -221,7 +221,7 @@ describe('isSnoozeExpired', () => {
         bymonthday: [1],
         bymonth: [1],
         tzid: 'Europe/Madrid',
-        freq: RRule.MONTHLY,
+        freq: Frequency.MONTHLY,
         interval: 1,
         dtstart: '2023-01-01T00:00:00.000Z',
       } as RRuleRecord,

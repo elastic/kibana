@@ -4,26 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UMServerLibs } from '../legacy_uptime/lib/lib';
+
+import { ILicense } from '@kbn/licensing-plugin/server';
 import {
-  SyntheticsRestApiRouteFactory,
-  SyntheticsStreamingRouteFactory,
-  SyntheticsRoute,
-  SyntheticsRouteHandler,
-} from '../legacy_uptime/routes';
+  LICENSE_MISSING_ERROR,
+  LICENSE_NOT_ACTIVE_ERROR,
+  LICENSE_NOT_SUPPORTED_ERROR,
+} from '../../common/constants';
+import { SyntheticsRestApiRouteFactory, SyntheticsRoute, SyntheticsRouteHandler } from './types';
 
 export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
-  libs: UMServerLibs,
-  routeCreator: SyntheticsRestApiRouteFactory | SyntheticsStreamingRouteFactory
+  routeCreator: SyntheticsRestApiRouteFactory
 ): SyntheticsRoute<ClientContract> => {
-  const restRoute = routeCreator(libs);
+  const restRoute = routeCreator();
   const { handler, method, path, options, ...rest } = restRoute;
   const licenseCheckHandler: SyntheticsRouteHandler<ClientContract> = async ({
     context,
     response,
     ...restProps
   }) => {
-    const { statusCode, message } = libs.license((await context.licensing).license);
+    const { statusCode, message } = licenseCheck((await context.licensing).license);
     if (statusCode === 200) {
       return handler({
         context,
@@ -49,5 +49,38 @@ export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
     options,
     handler: licenseCheckHandler,
     ...rest,
+  };
+};
+
+export interface UMLicenseStatusResponse {
+  statusCode: number;
+  message: string;
+}
+export type UMLicenseCheck = (
+  license?: Pick<ILicense, 'isActive' | 'hasAtLeast'>
+) => UMLicenseStatusResponse;
+
+export const licenseCheck: UMLicenseCheck = (license) => {
+  if (license === undefined) {
+    return {
+      message: LICENSE_MISSING_ERROR,
+      statusCode: 400,
+    };
+  }
+  if (!license.hasAtLeast('basic')) {
+    return {
+      message: LICENSE_NOT_SUPPORTED_ERROR,
+      statusCode: 401,
+    };
+  }
+  if (license.isActive === false) {
+    return {
+      message: LICENSE_NOT_ACTIVE_ERROR,
+      statusCode: 403,
+    };
+  }
+  return {
+    message: 'License is valid and active',
+    statusCode: 200,
   };
 };

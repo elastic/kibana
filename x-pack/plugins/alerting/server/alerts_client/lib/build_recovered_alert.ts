@@ -6,6 +6,7 @@
  */
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -22,8 +23,9 @@ interface BuildRecoveredAlertOpts<
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
   recoveryActionGroup: string;
-  payload?: AlertData;
+  payload?: DeepPartial<AlertData>;
   timestamp: string;
+  kibanaVersion: string;
 }
 
 /**
@@ -44,6 +46,7 @@ export const buildRecoveredAlert = <
   timestamp,
   payload,
   recoveryActionGroup,
+  kibanaVersion,
 }: BuildRecoveredAlertOpts<
   AlertData,
   LegacyState,
@@ -51,7 +54,7 @@ export const buildRecoveredAlert = <
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
-  const cleanedPayload = payload ? stripFrameworkFields(payload) : {};
+  const cleanedPayload = stripFrameworkFields(payload);
   return deepmerge.all(
     [
       alert,
@@ -59,6 +62,9 @@ export const buildRecoveredAlert = <
       {
         // Update the timestamp to reflect latest update time
         '@timestamp': timestamp,
+        event: {
+          action: 'close',
+        },
         kibana: {
           alert: {
             // Set the recovery action group
@@ -78,16 +84,34 @@ export const buildRecoveredAlert = <
               ? { duration: { us: legacyAlert.getState().duration } }
               : {}),
             // Set end time
-            ...(legacyAlert.getState().end ? { end: legacyAlert.getState().end } : {}),
+            ...(legacyAlert.getState().end
+              ? {
+                  end: legacyAlert.getState().end,
+                  time_range: {
+                    // this should get merged with a time_range.gte
+                    lte: legacyAlert.getState().end,
+                  },
+                }
+              : {}),
 
             // Fields that are explicitly not updated:
             // instance.id
             // action_group
             // uuid - recovered alerts should carry over previous UUID
             // start - recovered alerts should keep the initial start time
+            // workflow_status - recovered alerts should keep the initial workflow_status
           },
           space_ids: rule.kibana?.space_ids,
+          // Set latest kibana version
+          version: kibanaVersion,
         },
+        tags: Array.from(
+          new Set([
+            ...((cleanedPayload?.tags as string[]) ?? []),
+            ...(alert.tags ?? []),
+            ...(rule.kibana?.alert.rule.tags ?? []),
+          ])
+        ),
       },
     ],
     { arrayMerge: (_, sourceArray) => sourceArray }

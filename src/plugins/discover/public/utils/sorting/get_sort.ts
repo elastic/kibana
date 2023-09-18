@@ -9,7 +9,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { getDefaultSort, getSortArray, SortInput } from '../../../common/utils/sorting';
 
 /**

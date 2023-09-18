@@ -29,7 +29,11 @@ export const renderApp = (bootDeps: BootDeps) => {
   render(
     <I18nContext>
       <KibanaContextProvider
-        services={{ uiSettings: bootDeps.uiSettings, settings: bootDeps.settings }}
+        services={{
+          uiSettings: bootDeps.uiSettings,
+          settings: bootDeps.settings,
+          theme: bootDeps.theme,
+        }}
       >
         <KibanaThemeProvider theme$={theme$}>
           <App {...appDeps} />

@@ -69,7 +69,6 @@ const fieldSubTypeSchema = schema.object({
   nested: schema.maybe(schema.object({ path: schema.string() })),
 });
 
-// @ts-expect-error
 const FieldDescriptorSchema = schema.object({
   aggregatable: schema.boolean(),
   name: schema.string(),
@@ -87,9 +86,13 @@ const FieldDescriptorSchema = schema.object({
       schema.literal('summary'),
       schema.literal('counter'),
       schema.literal('gauge'),
+      schema.literal('position'),
     ])
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
+  conflictDescriptions: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+  ),
 });
 
 const validate: FullValidationConfig<any, any, any> = {
@@ -98,7 +101,6 @@ const validate: FullValidationConfig<any, any, any> = {
     // not available to get request
     body: schema.maybe(schema.object({ index_filter: schema.any() })),
   },
-  /*
   response: {
     200: {
       body: schema.object({
@@ -107,86 +109,95 @@ const validate: FullValidationConfig<any, any, any> = {
       }),
     },
   },
-  */
 };
 
-const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, response) => {
-  const { asCurrentUser } = (await context.core).elasticsearch.client;
-  const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
-  const {
-    pattern,
-    meta_fields: metaFields,
-    type,
-    rollup_index: rollupIndex,
-    allow_no_index: allowNoIndex,
-    include_unmapped: includeUnmapped,
-  } = request.query;
-
-  // not available to get request
-  const indexFilter = request.body?.index_filter;
-
-  let parsedFields: string[] = [];
-  let parsedMetaFields: string[] = [];
-  try {
-    parsedMetaFields = parseFields(metaFields);
-    parsedFields = parseFields(request.query.fields ?? []);
-  } catch (error) {
-    return response.badRequest();
-  }
-
-  try {
-    const { fields, indices } = await indexPatterns.getFieldsForWildcard({
+const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
+  (isRollupsEnabled) => async (context, request, response) => {
+    const { asCurrentUser } = (await context.core).elasticsearch.client;
+    const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+    const {
       pattern,
-      metaFields: parsedMetaFields,
+      meta_fields: metaFields,
       type,
-      rollupIndex,
-      fieldCapsOptions: {
-        allow_no_indices: allowNoIndex || false,
-        includeUnmapped,
-      },
-      indexFilter,
-      ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
-    });
+      rollup_index: rollupIndex,
+      allow_no_index: allowNoIndex,
+      include_unmapped: includeUnmapped,
+    } = request.query;
 
-    const body: { fields: FieldDescriptorRestResponse[]; indices: string[] } = { fields, indices };
+    // not available to get request
+    const indexFilter = request.body?.index_filter;
 
-    return response.ok({
-      body,
-      headers: {
-        'content-type': 'application/json',
-      },
-    });
-  } catch (error) {
-    if (
-      typeof error === 'object' &&
-      !!error?.isBoom &&
-      !!error?.output?.payload &&
-      typeof error?.output?.payload === 'object'
-    ) {
-      const payload = error?.output?.payload;
-      return response.notFound({
-        body: {
-          message: payload.message,
-          attributes: payload,
+    let parsedFields: string[] = [];
+    let parsedMetaFields: string[] = [];
+    try {
+      parsedMetaFields = parseFields(metaFields);
+      parsedFields = parseFields(request.query.fields ?? []);
+    } catch (error) {
+      return response.badRequest();
+    }
+
+    try {
+      const { fields, indices } = await indexPatterns.getFieldsForWildcard({
+        pattern,
+        metaFields: parsedMetaFields,
+        type,
+        rollupIndex,
+        fieldCapsOptions: {
+          allow_no_indices: allowNoIndex || false,
+          includeUnmapped,
+        },
+        indexFilter,
+        ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
+      });
+
+      const body: { fields: FieldDescriptorRestResponse[]; indices: string[] } = {
+        fields,
+        indices,
+      };
+
+      return response.ok({
+        body,
+        headers: {
+          'content-type': 'application/json',
         },
       });
-    } else {
-      return response.notFound();
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        !!error?.isBoom &&
+        !!error?.output?.payload &&
+        typeof error?.output?.payload === 'object'
+      ) {
+        const payload = error?.output?.payload;
+        return response.notFound({
+          body: {
+            message: payload.message,
+            attributes: payload,
+          },
+        });
+      } else {
+        return response.notFound();
+      }
     }
-  }
-};
+  };
 
-export const registerFieldForWildcard = (
+export const registerFieldForWildcard = async (
   router: IRouter,
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
-  >
+  >,
+  isRollupsEnabled: () => boolean
 ) => {
+  const configuredHandler = handler(isRollupsEnabled);
+
   // handler
-  router.versioned.put({ path, access }).addVersion({ version, validate }, handler);
-  router.versioned.post({ path, access }).addVersion({ version, validate }, handler);
+  router.versioned.put({ path, access }).addVersion({ version, validate }, configuredHandler);
+  router.versioned.post({ path, access }).addVersion({ version, validate }, configuredHandler);
   router.versioned
     .get({ path, access })
-    .addVersion({ version, validate: { request: { query: querySchema } } }, handler);
+    .addVersion(
+      { version, validate: { request: { query: querySchema }, response: validate.response } },
+      configuredHandler
+    );
 };

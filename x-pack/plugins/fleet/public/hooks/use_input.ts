@@ -9,6 +9,8 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
+import type { KafkaTopicWhenType, ValueOf } from '../../common/types';
+
 export interface FormInput {
   validate: () => boolean;
 }
@@ -82,6 +84,33 @@ export function useInput(
   };
 }
 
+export function useRadioInput(defaultValue: string, disabled = false) {
+  const [value, setValue] = useState<string>(defaultValue);
+  const [hasChanged, setHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (value !== defaultValue) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
+
+  const onChange = useCallback(setValue, [setValue]);
+
+  return {
+    props: {
+      idSelected: value,
+      onChange,
+      disabled,
+    },
+    setValue,
+    value,
+    hasChanged,
+  };
+}
+
 export function useSwitchInput(defaultValue = false, disabled = false) {
   const [value, setValue] = useState<boolean>(defaultValue);
   const [hasChanged, setHasChanged] = useState(false);
@@ -116,24 +145,25 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
   };
 }
 
-export function useComboInput(
+function useCustomInput<T>(
   id: string,
-  defaultValue: string[] = [],
-  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined,
+  defaultValue: T,
+  validate?: (
+    value: T
+  ) => Array<{ message: string; index?: number; condition?: boolean }> | undefined,
   disabled = false
 ) {
-  const [value, setValue] = useState<string[]>(defaultValue);
-  const [errors, setErrors] = useState<Array<{ message: string; index?: number }> | undefined>();
+  const [value, setValue] = useState<T>(defaultValue);
+  const [errors, setErrors] = useState<
+    Array<{ message: string; index?: number; condition?: boolean }> | undefined
+  >();
   const [hasChanged, setHasChanged] = useState(false);
 
   useEffect(() => {
     if (hasChanged) {
       return;
     }
-    if (
-      value.length !== defaultValue.length ||
-      value.some((val, idx) => val !== defaultValue[idx])
-    ) {
+    if (JSON.stringify(value) !== JSON.stringify(defaultValue)) {
       setHasChanged(true);
     }
   }, [hasChanged, value, defaultValue]);
@@ -152,10 +182,10 @@ export function useComboInput(
   }, [validate, value]);
 
   const onChange = useCallback(
-    (newValues: string[]) => {
-      setValue(newValues);
+    (newValue: T) => {
+      setValue(newValue);
       if (errors && validate) {
-        setErrors(validate(newValues));
+        setErrors(validate(newValue));
       }
     },
     [validate, errors]
@@ -176,12 +206,58 @@ export function useComboInput(
     },
     value,
     clear: () => {
-      setValue([]);
+      setValue(defaultValue);
     },
     setValue,
     validate: validateCallback,
     hasChanged,
   };
+}
+
+export function useComboInput(
+  id: string,
+  defaultValue: string[] = [],
+  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined,
+  disabled = false
+) {
+  return useCustomInput<string[]>(id, defaultValue, validate, disabled);
+}
+
+export function useKeyValueInput(
+  id: string,
+  defaultValue: Array<{ key: string; value: string }> = [],
+  validate?: (
+    value: Array<{ key: string; value: string }>
+  ) =>
+    | Array<{ message: string; index: number; hasKeyError: boolean; hasValueError: boolean }>
+    | undefined,
+  disabled = false
+) {
+  return useCustomInput<Array<{ key: string; value: string }>>(
+    id,
+    defaultValue,
+    validate,
+    disabled
+  );
+}
+
+type Topic = Array<{
+  topic: string;
+  when?: {
+    type?: ValueOf<KafkaTopicWhenType>;
+    condition?: string;
+  };
+}>;
+
+export function useTopicsInput(
+  id: string,
+  defaultValue: Topic = [],
+  validate?: (
+    value: Topic
+  ) => Array<{ message: string; index: number; condition?: boolean }> | undefined,
+  disabled = false
+) {
+  return useCustomInput<Topic>(id, defaultValue, validate, disabled);
 }
 
 export function useNumberInput(

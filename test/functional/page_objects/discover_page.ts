@@ -370,13 +370,14 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleSidebarCollapse() {
-    return await this.testSubjects.click('collapseSideBarButton');
+    return await this.testSubjects.click('unifiedFieldListSidebar__toggle');
   }
 
   public async closeSidebar() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.toggleSidebarCollapse();
-      await this.testSubjects.missingOrFail('discover-sidebar');
+      await this.testSubjects.click('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.missingOrFail('fieldList');
     });
   }
 
@@ -477,7 +478,9 @@ export class DiscoverPageObject extends FtrService {
   public async isAdHocDataViewSelected() {
     const dataView = await this.getCurrentlySelectedDataView();
     await this.testSubjects.click('discover-dataView-switch-link');
-    return this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+    const hasBadge = await this.testSubjects.exists(`dataViewItemTempBadge-${dataView}`);
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return hasBadge;
   }
 
   public async selectIndexPattern(indexPattern: string) {
@@ -498,11 +501,9 @@ export class DiscoverPageObject extends FtrService {
     return items;
   }
 
-  public async selectTextBaseLang(lang: 'SQL') {
+  public async selectTextBaseLang() {
     await this.testSubjects.click('discover-dataView-switch-link');
-    await this.find.clickByCssSelector(
-      `[data-test-subj="text-based-languages-switcher"] [title="${lang}"]`
-    );
+    await this.testSubjects.click('select-text-based-language-panel');
     await this.header.waitUntilLoadingHasFinished();
   }
 

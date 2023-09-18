@@ -22,13 +22,15 @@ const localStorage = new Storage(window.localStorage);
 
 export async function mountManagementSection(
   coreSetup: CoreSetup<PluginsDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  isServerless: boolean
 ) {
   const { element, setBreadcrumbs, history } = params;
   const { http, getStartServices } = coreSetup;
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
   const {
+    analytics,
     application,
     chrome,
     docLinks,
@@ -51,6 +53,7 @@ export async function mountManagementSection(
     fieldFormats,
     savedObjectsManagement,
     savedSearch,
+    contentManagement,
   } = plugins;
   const { docTitle } = chrome;
 
@@ -61,6 +64,7 @@ export async function mountManagementSection(
 
   // AppCore/AppPlugins to be passed on as React context
   const appDependencies: AppDependencies = {
+    analytics,
     application,
     chrome,
     data,
@@ -86,9 +90,10 @@ export async function mountManagementSection(
     fieldFormats,
     savedObjectsManagement,
     savedSearch,
+    contentManagement,
   };
 
-  const unmountAppCallback = renderApp(element, appDependencies);
+  const unmountAppCallback = renderApp(element, appDependencies, isServerless);
 
   return () => {
     docTitle.reset();

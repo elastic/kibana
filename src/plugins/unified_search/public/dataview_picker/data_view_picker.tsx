@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
@@ -73,7 +73,7 @@ export interface DataViewPickerProps {
    */
   onDataViewCreated?: () => void;
 
-  onCreateDefaultAdHocDataView?: (pattern: string) => void;
+  onCreateDefaultAdHocDataView?: (dataViewSpec: DataViewSpec) => void;
   /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages

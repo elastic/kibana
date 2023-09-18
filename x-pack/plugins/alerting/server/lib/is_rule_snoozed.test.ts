@@ -6,7 +6,8 @@
  */
 
 import sinon from 'sinon';
-import { RRule } from 'rrule';
+import moment from 'moment-timezone';
+import { Frequency } from '@kbn/rrule';
 import { isRuleSnoozed } from './is_rule_snoozed';
 import { RRuleRecord } from '../types';
 
@@ -14,6 +15,7 @@ const DATE_9999 = '9999-12-31T12:34:56.789Z';
 const DATE_1970 = '1970-01-01T00:00:00.000Z';
 const DATE_2019 = '2019-01-01T00:00:00.000Z';
 const DATE_2019_PLUS_6_HOURS = '2019-01-01T06:00:00.000Z';
+const DATE_2019_IN_ASIA = '2018-12-31T16:00:00.000Z';
 const DATE_2020 = '2020-01-01T00:00:00.000Z';
 const DATE_2020_MINUS_1_HOUR = '2019-12-31T23:00:00.000Z';
 const DATE_2020_MINUS_1_MONTH = '2019-12-01T00:00:00.000Z';
@@ -94,7 +96,7 @@ describe('isRuleSnoozed', () => {
         rRule: {
           dtstart: DATE_2019,
           tzid: 'UTC',
-          freq: RRule.DAILY,
+          freq: Frequency.DAILY,
           interval: 1,
         } as RRuleRecord,
       },
@@ -106,7 +108,7 @@ describe('isRuleSnoozed', () => {
         rRule: {
           dtstart: DATE_2019_PLUS_6_HOURS,
           tzid: 'UTC',
-          freq: RRule.DAILY,
+          freq: Frequency.DAILY,
           interval: 1,
         } as RRuleRecord,
       },
@@ -118,7 +120,7 @@ describe('isRuleSnoozed', () => {
         rRule: {
           dtstart: DATE_2020_MINUS_1_HOUR,
           tzid: 'UTC',
-          freq: RRule.HOURLY,
+          freq: Frequency.HOURLY,
           interval: 1,
         } as RRuleRecord,
       },
@@ -131,7 +133,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.HOURLY,
+          freq: Frequency.HOURLY,
           interval: 1,
           tzid: 'UTC',
           count: 8761,
@@ -145,7 +147,7 @@ describe('isRuleSnoozed', () => {
         duration: 60 * 1000,
 
         rRule: {
-          freq: RRule.HOURLY,
+          freq: Frequency.HOURLY,
           interval: 1,
           tzid: 'UTC',
           count: 25,
@@ -159,7 +161,7 @@ describe('isRuleSnoozed', () => {
         duration: 60 * 1000,
 
         rRule: {
-          freq: RRule.YEARLY,
+          freq: Frequency.YEARLY,
           interval: 1,
           tzid: 'UTC',
           count: 60,
@@ -175,7 +177,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.HOURLY,
+          freq: Frequency.HOURLY,
           interval: 1,
           tzid: 'UTC',
           until: DATE_9999,
@@ -188,7 +190,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.HOURLY,
+          freq: Frequency.HOURLY,
           interval: 1,
           tzid: 'UTC',
           until: DATE_2020_MINUS_1_HOUR,
@@ -204,7 +206,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.WEEKLY,
+          freq: Frequency.WEEKLY,
           interval: 1,
           tzid: 'UTC',
           byweekday: ['MO', 'WE', 'FR'], // Jan 1 2020 was a Wednesday
@@ -217,7 +219,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.WEEKLY,
+          freq: Frequency.WEEKLY,
           interval: 1,
           tzid: 'UTC',
           byweekday: ['TU', 'TH', 'SA', 'SU'],
@@ -230,7 +232,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.WEEKLY,
+          freq: Frequency.WEEKLY,
           interval: 1,
           tzid: 'UTC',
           byweekday: ['MO', 'WE', 'FR'],
@@ -244,7 +246,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.WEEKLY,
+          freq: Frequency.WEEKLY,
           interval: 1,
           tzid: 'UTC',
           byweekday: ['MO', 'WE', 'FR'],
@@ -261,7 +263,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.MONTHLY,
+          freq: Frequency.MONTHLY,
           interval: 1,
           tzid: 'UTC',
           byweekday: ['+1WE'], // Jan 1 2020 was the first Wednesday of the month
@@ -274,7 +276,7 @@ describe('isRuleSnoozed', () => {
       {
         duration: 60 * 1000,
         rRule: {
-          freq: RRule.MONTHLY,
+          freq: Frequency.MONTHLY,
           interval: 1,
           tzid: 'UTC',
           byweekday: ['+2WE'],
@@ -286,35 +288,39 @@ describe('isRuleSnoozed', () => {
   });
 
   test('using a timezone, returns as expected for a recurring snooze on a day of the week', () => {
-    const snoozeScheduleA = [
-      {
-        duration: 60 * 1000,
-        rRule: {
-          freq: RRule.WEEKLY,
-          interval: 1,
-          byweekday: ['WE'],
-          tzid: 'Asia/Taipei',
-          dtstart: DATE_2019,
-        } as RRuleRecord,
-      },
-    ];
+    try {
+      const snoozeScheduleA = [
+        {
+          duration: 60 * 1000,
+          rRule: {
+            freq: Frequency.WEEKLY,
+            interval: 1,
+            byweekday: ['WE'],
+            tzid: 'Asia/Taipei',
+            dtstart: DATE_2019_IN_ASIA,
+          } as RRuleRecord,
+        },
+      ];
 
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(true);
-    const snoozeScheduleB = [
-      {
-        duration: 60 * 1000,
-        rRule: {
-          freq: RRule.WEEKLY,
-          interval: 1,
-          byweekday: ['WE'],
-          byhour: [0],
-          byminute: [0],
-          tzid: 'UTC',
-          dtstart: DATE_2019,
-        } as RRuleRecord,
-      },
-    ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(true);
+      expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(false);
+      const snoozeScheduleB = [
+        {
+          duration: 60 * 1000,
+          rRule: {
+            freq: Frequency.WEEKLY,
+            interval: 1,
+            byweekday: ['WE'],
+            byhour: [0],
+            byminute: [0],
+            tzid: 'UTC',
+            dtstart: DATE_2019,
+          } as RRuleRecord,
+        },
+      ];
+      expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(true);
+    } catch (e) {
+      throw new Error(`In timezone ${process.env.TZ ?? moment.tz.guess()}: ${e}`);
+    }
   });
 
   test('returns as expected for a manually skipped recurring snooze', () => {
@@ -324,7 +330,7 @@ describe('isRuleSnoozed', () => {
         rRule: {
           dtstart: DATE_2019,
           tzid: 'UTC',
-          freq: RRule.DAILY,
+          freq: Frequency.DAILY,
           interval: 1,
         } as RRuleRecord,
         skipRecurrences: [DATE_2020],
@@ -337,7 +343,7 @@ describe('isRuleSnoozed', () => {
         rRule: {
           dtstart: DATE_2019,
           tzid: 'UTC',
-          freq: RRule.DAILY,
+          freq: Frequency.DAILY,
           interval: 1,
         } as RRuleRecord,
         skipRecurrences: [DATE_2020_MINUS_1_MONTH],
@@ -350,7 +356,7 @@ describe('isRuleSnoozed', () => {
         rRule: {
           dtstart: DATE_2020,
           tzid: 'UTC',
-          freq: RRule.DAILY,
+          freq: Frequency.DAILY,
           interval: 1,
         } as RRuleRecord,
         skipRecurrences: [DATE_2020],
@@ -363,7 +369,7 @@ describe('isRuleSnoozed', () => {
         rRule: {
           dtstart: DATE_2020_MINUS_6_HOURS,
           tzid: 'UTC',
-          freq: RRule.HOURLY,
+          freq: Frequency.HOURLY,
           interval: 5,
         } as RRuleRecord,
         skipRecurrences: [DATE_2020_MINUS_1_HOUR],

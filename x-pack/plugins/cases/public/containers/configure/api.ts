@@ -7,15 +7,14 @@
 
 import { isEmpty } from 'lodash/fp';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
+import type { ConfigurationPatchRequest, ConfigurationRequest } from '../../../common/types/api';
 import type {
   ActionConnector,
   ActionTypeConnector,
-  ConfigurationPatchRequest,
-  ConfigurationRequest,
   Configuration,
   Configurations,
-} from '../../../common/api';
+} from '../../../common/types/domain';
+import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
 import { getCaseConfigurationDetailsUrl } from '../../../common/api';
 import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';

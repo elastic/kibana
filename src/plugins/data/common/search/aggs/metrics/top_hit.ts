@@ -14,6 +14,7 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { flattenHit, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
+import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopHit extends BaseAggParams {
   field: string;
@@ -256,5 +257,6 @@ export const getTopHitMetricAgg = () => {
       }
       return values;
     },
+    createFilter: createTopHitFilter,
   });
 };

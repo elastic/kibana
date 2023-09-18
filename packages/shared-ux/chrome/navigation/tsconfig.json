@@ -26,6 +26,7 @@
     "@kbn/default-nav-devtools",
     "@kbn/shared-ux-storybook-mock",
     "@kbn/core-http-browser",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*"

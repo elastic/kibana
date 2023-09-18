@@ -137,6 +137,7 @@ describe('When using `upload` response action', () => {
           'Content-Type': undefined,
         },
         path: UPLOAD_ROUTE,
+        version: '2023-10-31',
       });
     });
 

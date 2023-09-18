@@ -13,6 +13,7 @@ import * as privateLocationsHooks from '../settings/private_locations/hooks/use_
 import * as settingsHooks from '../../contexts/synthetics_settings_context';
 import { SyntheticsSettingsContextValues } from '../../contexts/synthetics_settings_context';
 import { fireEvent } from '@testing-library/react';
+import { kibanaService } from '../../../../utils/kibana_service';
 
 describe('GettingStartedPage', () => {
   beforeEach(() => {
@@ -81,9 +82,7 @@ describe('GettingStartedPage', () => {
           loading: false,
         },
         agentPolicies: {
-          data: {
-            total: 0,
-          },
+          data: [],
           isAddingNewPrivateLocation: true,
         },
       },
@@ -108,10 +107,7 @@ describe('GettingStartedPage', () => {
           loading: false,
         },
         agentPolicies: {
-          data: {
-            total: 1,
-            items: [{}],
-          },
+          data: [{}],
           isAddingNewPrivateLocation: true,
         },
       },
@@ -140,10 +136,7 @@ describe('GettingStartedPage', () => {
             loading: false,
           },
           agentPolicies: {
-            data: {
-              total: 1,
-              items: [{}],
-            },
+            data: [{}],
             isAddingNewPrivateLocation: true,
           },
         },
@@ -162,5 +155,24 @@ describe('GettingStartedPage', () => {
     expect(
       await findByText(/You do not have sufficient permissions to perform this action./)
     ).toBeInTheDocument();
+  });
+
+  it('should call enablement API and redirect to monitors', function () {
+    render(<GettingStartedPage />, {
+      state: {
+        syntheticsEnablement: {
+          loading: false,
+          enablement: {
+            canEnable: false,
+            isEnabled: false,
+          },
+        },
+      },
+    });
+
+    // page is loaded
+    expect(kibanaService.core.application.navigateToApp).toHaveBeenCalledWith('synthetics', {
+      path: '/monitors',
+    });
   });
 });

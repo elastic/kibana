@@ -8,10 +8,10 @@ import { ColumnarViewModel } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { compact, range, sum, uniqueId } from 'lodash';
+import { describeFrameType, FrameType } from '@kbn/profiling-utils';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
-import { ElasticFlameGraph } from '../../../common/flamegraph';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
-import { describeFrameType, FrameType } from '../../../common/profiling';
 import { ComparisonMode } from '../../components/normalization_menu';
 import { getInterpolationValue } from './get_interpolation_value';
 
@@ -31,7 +31,7 @@ export function getFlamegraphModel({
   colorSuccess,
   colorDanger,
   colorNeutral,
-  comparisonMode,
+  comparisonMode = ComparisonMode.Absolute,
   comparison,
   baseline,
 }: {
@@ -40,7 +40,7 @@ export function getFlamegraphModel({
   colorSuccess: string;
   colorDanger: string;
   colorNeutral: string;
-  comparisonMode: ComparisonMode;
+  comparisonMode?: ComparisonMode;
   baseline?: number;
   comparison?: number;
 }): {

@@ -86,7 +86,7 @@ export const createFromHostEsSearchResponseMock =
         max_score: 0,
         hits: [
           {
-            _index: '.fleet-files-foo-000001',
+            _index: '.fleet-fileds-fromhost-meta-foo-000001',
             _id: '123',
             _score: 1.0,
             _source: {

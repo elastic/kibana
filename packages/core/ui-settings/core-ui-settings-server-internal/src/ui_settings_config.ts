@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { ConfigDeprecationProvider } from '@kbn/config';
 
@@ -17,6 +17,7 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
 
 const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
+  publicApiEnabled: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: false }) }),
 });
 
 export type UiSettingsConfigType = TypeOf<typeof configSchema>;

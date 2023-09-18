@@ -6,7 +6,7 @@
  */
 
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
-import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/detection_engine/rule_management';
+import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type {
   FieldsOrUndefined,
@@ -14,7 +14,7 @@ import type {
   PerPageOrUndefined,
   QueryFilterOrUndefined,
   SortOrderOrUndefined,
-} from '../../../../../../common/detection_engine/schemas/common';
+} from '../../../../../../common/api/detection_engine';
 
 import type { RuleParams } from '../../../rule_schema';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';

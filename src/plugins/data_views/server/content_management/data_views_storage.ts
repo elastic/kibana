@@ -31,6 +31,7 @@ export class DataViewsStorage extends SOContentStorage<DataViewCrudTypes> {
         'allowNoIndex',
         'name',
       ],
+      mSearchAdditionalSearchFields: ['name'],
     });
   }
 }

@@ -7,6 +7,8 @@
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { appIds } from '@kbn/management-cards-navigation';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
@@ -40,38 +42,47 @@ export class ServerlessSearchPlugin
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
+        let user: AuthenticatedUser | undefined;
+        try {
+          const response = await security.authc.getCurrentUser();
+          user = response;
+        } catch {
+          user = undefined;
+        }
 
-        const userProfile = await security.userProfiles.getCurrent();
-
-        return await renderApp(element, coreStart, { userProfile, ...services });
+        return await renderApp(element, coreStart, { user, ...services });
       },
     });
+
     core.application.register({
-      id: 'serverlessIndexingApi',
-      title: i18n.translate('xpack.serverlessSearch.app.indexingApi.title', {
-        defaultMessage: 'Indexing API',
+      id: 'serverlessConnectors',
+      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+        defaultMessage: 'Connectors',
       }),
-      appRoute: '/app/indexing_api',
+      appRoute: '/app/connectors',
+      searchable: false,
       async mount({ element }: AppMountParameters) {
-        const { renderApp } = await import('./application/indexing_api');
+        const { renderApp } = await import('./application/connectors');
         const [coreStart, services] = await core.getStartServices();
-        const { security } = services;
+
         docLinks.setDocLinks(coreStart.docLinks.links);
-
-        const userProfile = await security.userProfiles.getCurrent();
-
-        return await renderApp(element, coreStart, { userProfile, ...services });
+        return await renderApp(element, coreStart, { ...services });
       },
     });
+
     return {};
   }
 
   public start(
     core: CoreStart,
-    { serverless }: ServerlessSearchPluginStartDependencies
+    { serverless, management, cloud }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
-    serverless.setSideNavComponent(createComponent(core, { serverless }));
+    serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
+    management.setupCardsNavigation({
+      enabled: true,
+      hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+    });
     return {};
   }
 

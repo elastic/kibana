@@ -23,6 +23,7 @@ export async function loadRulesWithKueryFilter({
   ruleStatusesFilter,
   tagsFilter,
   sort = { field: 'name', direction: 'asc' },
+  kueryNode,
 }: LoadRulesProps): Promise<{
   page: number;
   perPage: number;
@@ -38,6 +39,7 @@ export async function loadRulesWithKueryFilter({
     ruleParamsFilter,
     ruleStatusesFilter,
     searchText,
+    kueryNode,
   });
 
   const res = await http.post<

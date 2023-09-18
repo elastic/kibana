@@ -23,14 +23,21 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
+import { PLUGIN_ID } from '../common';
+import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
+import { ObservabilityOnboardingPluginLocators } from './locators';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
 
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
+  discover: DiscoverSetup;
   observability: ObservabilityPublicSetup;
+  share: SharePluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
@@ -46,15 +53,19 @@ export class ObservabilityOnboardingPlugin
       ObservabilityOnboardingPluginStart
     >
 {
+  private locators?: ObservabilityOnboardingPluginLocators;
+
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,
     plugins: ObservabilityOnboardingPluginSetupDeps
   ) {
+    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
-    } = this.ctx.config.get<ObservabilityOnboardingConfig>();
+      serverless: { enabled: isServerlessEnabled },
+    } = config;
 
     const pluginSetupDeps = plugins;
 
@@ -62,8 +73,10 @@ export class ObservabilityOnboardingPlugin
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
       core.application.register({
-        navLinkStatus: AppNavLinkStatus.hidden,
-        id: 'observabilityOnboarding',
+        navLinkStatus: isServerlessEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+        id: PLUGIN_ID,
         title: 'Observability Onboarding',
         order: 8500,
         euiIconType: 'logoObservability',
@@ -87,13 +100,28 @@ export class ObservabilityOnboardingPlugin
             deps: pluginSetupDeps,
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
+            config,
           });
         },
       });
     }
+
+    this.locators = {
+      onboarding: plugins.share.url.locators.create(
+        new ObservabilityOnboardingLocatorDefinition()
+      ),
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
   public start(
     core: CoreStart,
     plugins: ObservabilityOnboardingPluginStartDeps
-  ) {}
+  ) {
+    return {
+      locators: this.locators,
+    };
+  }
 }

@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { persistedLogViewReferenceRT } from '../../../../log_views';
+import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,

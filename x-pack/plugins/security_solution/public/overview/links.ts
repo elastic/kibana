@@ -55,6 +55,7 @@ export const gettingStartedLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
+  sideNavIcon: 'launch',
   skipUrlState: true,
   hideTimeline: true,
 };
@@ -87,6 +88,7 @@ export const entityAnalyticsLinks: LinkItem = {
   path: ENTITY_ANALYTICS_PATH,
   capabilities: [`${SERVER_APP_ID}.entity-analytics`],
   isBeta: false,
+  licenseType: 'platinum',
   globalSearchKeywords: [ENTITY_ANALYTICS],
 };
 

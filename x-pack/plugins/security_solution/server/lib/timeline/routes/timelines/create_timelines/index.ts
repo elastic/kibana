@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
@@ -16,7 +17,7 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { createTimelineSchema } from '../../../schemas/timelines';
+import { createTimelineSchema } from '../../../../../../common/api/timeline';
 import {
   buildFrameworkRequest,
   CompareTimelinesStatus,
@@ -24,6 +25,7 @@ import {
 } from '../../../utils/common';
 import { DEFAULT_ERROR } from '../../../utils/failure_cases';
 import { createTimelines } from './helpers';
+import type { CreateTimelinesResponse } from '../../../../../../common/api/timeline';
 
 export * from './helpers';
 
@@ -42,7 +44,7 @@ export const createTimelinesRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<CreateTimelinesResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       try {

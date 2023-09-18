@@ -9,17 +9,15 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 
-import {
-  QueryObserverBaseResult,
-  UseMutateAsyncFunction,
-  UseMutateFunction,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import {
+  MutationContext,
+  SavedViewResult,
+  ServerError,
+  UpdateViewParams,
+} from '../../common/saved_views';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
 import {
   CreateMetricsExplorerViewAttributesRequestPayload,
@@ -31,41 +29,12 @@ import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
-interface UpdateViewParams {
-  id: string;
-  attributes: UpdateMetricsExplorerViewAttributesRequestPayload;
-}
-
-export interface UseMetricsExplorerViewsResult {
-  views?: MetricsExplorerView[];
-  currentView?: MetricsExplorerView | null;
-  createView: UseMutateAsyncFunction<
-    MetricsExplorerView,
-    ServerError,
-    CreateMetricsExplorerViewAttributesRequestPayload
-  >;
-  deleteViewById: UseMutateFunction<null, ServerError, string, MutationContext>;
-  fetchViews: QueryObserverBaseResult<MetricsExplorerView[]>['refetch'];
-  updateViewById: UseMutateAsyncFunction<MetricsExplorerView, ServerError, UpdateViewParams>;
-  switchViewById: (id: MetricsExplorerViewId) => void;
-  setDefaultViewById: UseMutateFunction<
-    MetricsSourceConfigurationResponse,
-    ServerError,
-    string,
-    MutationContext
-  >;
-  isCreatingView: boolean;
-  isFetchingCurrentView: boolean;
-  isFetchingViews: boolean;
-  isUpdatingView: boolean;
-}
-
-type ServerError = IHttpFetchError<ResponseErrorBody>;
-
-interface MutationContext {
-  id?: string;
-  previousViews?: MetricsExplorerView[];
-}
+export type UseMetricsExplorerViewsResult = SavedViewResult<
+  MetricsExplorerView,
+  MetricsExplorerViewId,
+  CreateMetricsExplorerViewAttributesRequestPayload,
+  MetricsSourceConfigurationResponse
+>;
 
 const queryKeys = {
   find: ['metrics-explorer-views-find'] as const,
@@ -122,7 +91,7 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     MetricsSourceConfigurationResponse,
     ServerError,
     string,
-    MutationContext
+    MutationContext<MetricsExplorerView>
   >({
     mutationFn: (id) => updateSourceConfiguration({ metricsExplorerDefaultView: id }),
     /**
@@ -167,7 +136,7 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
   const { mutateAsync: updateViewById, isLoading: isUpdatingView } = useMutation<
     MetricsExplorerView,
     ServerError,
-    UpdateViewParams
+    UpdateViewParams<UpdateMetricsExplorerViewAttributesRequestPayload>
   >({
     mutationFn: ({ id, attributes }) =>
       metricsExplorerViews.client.updateMetricsExplorerView(id, attributes),
@@ -179,7 +148,12 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     },
   });
 
-  const { mutate: deleteViewById } = useMutation<null, ServerError, string, MutationContext>({
+  const { mutate: deleteViewById } = useMutation<
+    null,
+    ServerError,
+    string,
+    MutationContext<MetricsExplorerView>
+  >({
     mutationFn: (id: string) => metricsExplorerViews.client.deleteMetricsExplorerView(id),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list

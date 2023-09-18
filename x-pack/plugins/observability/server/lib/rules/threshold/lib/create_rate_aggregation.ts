@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { TIMESTAMP_FIELD } from '../../../../../common/threshold_rule/constants';
 import { calculateRateTimeranges } from '../utils';
 
 export const createRateAggsBucketScript = (
@@ -31,7 +30,7 @@ export const createRateAggsBucketScript = (
 };
 
 export const createRateAggsBuckets = (
-  timeframe: { start: number; end: number },
+  timeframe: { start: number; end: number; timeFieldName: string },
   id: string,
   field: string
 ) => {
@@ -44,7 +43,7 @@ export const createRateAggsBuckets = (
     [`${id}_first_bucket`]: {
       filter: {
         range: {
-          [TIMESTAMP_FIELD]: {
+          [timeframe.timeFieldName]: {
             gte: moment(firstBucketRange.from).toISOString(),
             lt: moment(firstBucketRange.to).toISOString(),
           },
@@ -55,7 +54,7 @@ export const createRateAggsBuckets = (
     [`${id}_second_bucket`]: {
       filter: {
         range: {
-          [TIMESTAMP_FIELD]: {
+          [timeframe.timeFieldName]: {
             gte: moment(secondBucketRange.from).toISOString(),
             lt: moment(secondBucketRange.to).toISOString(),
           },

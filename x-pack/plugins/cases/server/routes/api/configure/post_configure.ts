@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { ConfigurationRequestRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import { ConfigurationRequestRt } from '../../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../../common/api';
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { configureApiV1 } from '../../../../common/types/api';
 
 export const postCaseConfigureRoute = createCasesRoute({
   method: 'post',
@@ -19,9 +21,10 @@ export const postCaseConfigureRoute = createCasesRoute({
 
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
+      const res: configureApiV1.CreateConfigureResponse = await client.configure.create(query);
 
       return response.ok({
-        body: await client.configure.create(query),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

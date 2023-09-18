@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
@@ -14,7 +15,7 @@ const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-defau
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'header']);
   const retry = getService('retry');
   const es = getService('es');
   const supertest = getService('supertest');
@@ -28,6 +29,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       log.debug('Check CSP plugin is initialized');
       const response = await supertest
         .get('/internal/cloud_security_posture/status?check=init')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
       expect(response.body).to.eql({ isPluginInitialized: true });
       log.debug('CSP plugin is initialized');
@@ -83,6 +85,24 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     filterBy: async (type: 'passed' | 'failed') =>
       testSubjects.click(type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'),
   };
+
+  const createNotInstalledObject = (notInstalledSubject: string) => ({
+    getElement() {
+      return testSubjects.find(notInstalledSubject);
+    },
+
+    async navigateToAction(actionTestSubject: string) {
+      return await retry.try(async () => {
+        await testSubjects.click(actionTestSubject);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const result = await testSubjects.exists('createPackagePolicy_pageTitle');
+
+        if (!result) {
+          throw new Error('Integration installation page not found');
+        }
+      });
+    },
+  });
 
   const createTableObject = (tableTestSubject: string) => ({
     getElement() {
@@ -193,6 +213,22 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     );
   };
 
+  const navigateToVulnerabilities = async () => {
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/vulnerabilities',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
+  const navigateToMisconfigurations = async () => {
+    await PageObjects.common.navigateToUrl(
+      'securitySolution', // Defined in Security Solution plugin
+      'cloud_security_posture/findings/configurations',
+      { shouldUseHashForSubUrl: false }
+    );
+  };
+
   const latestFindingsTable = createTableObject('latest_findings_table');
   const resourceFindingsTable = createTableObject('resource_findings_table');
   const findingsByResourceTable = {
@@ -208,12 +244,18 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       await link.click();
     },
   };
+  const notInstalledVulnerabilities = createNotInstalledObject('cnvm-integration-not-installed');
+  const notInstalledCSP = createNotInstalledObject('cloud_posture_page_package_not_installed');
 
   return {
     navigateToLatestFindingsPage,
+    navigateToVulnerabilities,
+    navigateToMisconfigurations,
     latestFindingsTable,
     resourceFindingsTable,
     findingsByResourceTable,
+    notInstalledVulnerabilities,
+    notInstalledCSP,
     index,
     waitForPluginInitialized,
     distributionBar,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { v4 as uuidV4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
@@ -242,7 +242,7 @@ export const EndpointStatusActionResult = memo<
                 'xpack.securitySolution.endpointResponseActions.status.lastActive',
                 { defaultMessage: 'Last active' }
               )}
-              value={endpointDetails.metadata['@timestamp']}
+              value={endpointDetails.last_checkin}
             />
           </ConsoleCodeBlock>
         ),
@@ -252,7 +252,7 @@ export const EndpointStatusActionResult = memo<
       <EuiDescriptionList
         compressed
         type="column"
-        className="descriptionList-20_80"
+        columnWidths={[1, 4]}
         listItems={statusData}
         data-test-subj={'agent-status-console-output'}
       />

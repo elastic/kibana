@@ -21,6 +21,7 @@ import type { NodeDataStatus } from '../../types';
 /**
  * Icon representing a process node.
  */
+// eslint-disable-next-line react/display-name
 export const CubeForProcess = memo(function ({
   id,
   className,

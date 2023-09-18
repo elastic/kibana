@@ -6,14 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import { journeyScreenshotBlocksHandler } from '../../legacy_uptime/routes/pings/journey_screenshot_blocks';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { IKibanaResponse } from '@kbn/core-http-server';
+import { isRight } from 'fp-ts/Either';
+import * as t from 'io-ts';
+import { getJourneyScreenshotBlocks } from '../../legacy_uptime/lib/requests/get_journey_screenshot_blocks';
+import { ScreenshotBlockDoc } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 
-export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory = (
-  libs: UMServerLibs
-) => ({
+export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
@@ -25,3 +26,30 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
     return await journeyScreenshotBlocksHandler(routeProps);
   },
 });
+
+export const journeyScreenshotBlocksHandler = async ({
+  response,
+  request,
+  uptimeEsClient,
+}: RouteContext): Promise<IKibanaResponse<ScreenshotBlockDoc[]>> => {
+  const { hashes: blockIds } = request.body;
+
+  if (!isStringArray(blockIds)) return response.badRequest();
+
+  const result = await getJourneyScreenshotBlocks({
+    blockIds,
+    uptimeEsClient,
+  });
+
+  if (result.length === 0) {
+    return response.notFound();
+  }
+
+  return response.ok({
+    body: result,
+  });
+};
+
+function isStringArray(data: unknown): data is string[] {
+  return isRight(t.array(t.string).decode(data));
+}

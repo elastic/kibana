@@ -19,7 +19,7 @@ describe('createCopyToClipboardCellActionFactory', () => {
   const copyToClipboardActionFactory = createCopyToClipboardCellActionFactory({ services });
   const copyToClipboardAction = copyToClipboardActionFactory({ id: 'testAction' });
   const context = {
-    data: [{ field: { name: 'user.name', type: 'text' }, value: 'the value' }],
+    data: [{ field: { name: 'user.name', type: 'string' }, value: 'the value' }],
   } as CellActionExecutionContext;
 
   beforeEach(() => {

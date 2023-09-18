@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSetAlertTagsRequestMock } from '../../../../../common/detection_engine/schemas/request/set_alert_tags_schema.mock';
+import { getSetAlertTagsRequestMock } from '../../../../../common/api/detection_engine/alert_tags/mocks';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../common/constants';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
@@ -27,12 +27,14 @@ describe('setAlertTagsRoute', () => {
       request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_ALERT_TAGS_URL,
-        body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2']),
+        body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2'], ['test-id']),
       });
 
-      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
-        getSuccessfulSignalUpdateResponse()
-      );
+      context.core.elasticsearch.client.asCurrentUser.bulk.mockResponse({
+        errors: false,
+        took: 0,
+        items: [{ update: { result: 'updated', status: 200, _index: 'test-index' } }],
+      });
 
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
@@ -45,7 +47,7 @@ describe('setAlertTagsRoute', () => {
       request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_ALERT_TAGS_URL,
-        body: getSetAlertTagsRequestMock(['tag-1'], ['tag-1']),
+        body: getSetAlertTagsRequestMock(['tag-1'], ['tag-1'], ['test-id']),
       });
 
       context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
@@ -65,14 +67,37 @@ describe('setAlertTagsRoute', () => {
         status_code: 400,
       });
     });
-  });
 
-  describe('500s', () => {
-    test('returns 500 if ', async () => {
+    test('returns 400 if no alert ids are provided', async () => {
       request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_ALERT_TAGS_URL,
         body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2']),
+      });
+
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
+        getSuccessfulSignalUpdateResponse()
+      );
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+
+      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
+        new Error('Test error')
+      );
+
+      expect(response.body).toEqual({
+        message: [`No alert ids were provided`],
+        status_code: 400,
+      });
+    });
+  });
+
+  describe('500s', () => {
+    test('returns 500 if asCurrentUser throws error', async () => {
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_TAGS_URL,
+        body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2'], ['test-id']),
       });
 
       context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(

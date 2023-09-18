@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FlyoutPanel } from './types';
+import { FlyoutPanelProps } from './types';
 
 export enum ActionType {
   openFlyout = 'open_flyout',
@@ -24,22 +24,22 @@ export type Action =
   | {
       type: ActionType.openFlyout;
       payload: {
-        right?: FlyoutPanel;
-        left?: FlyoutPanel;
-        preview?: FlyoutPanel;
+        right?: FlyoutPanelProps;
+        left?: FlyoutPanelProps;
+        preview?: FlyoutPanelProps;
       };
     }
   | {
       type: ActionType.openRightPanel;
-      payload: FlyoutPanel;
+      payload: FlyoutPanelProps;
     }
   | {
       type: ActionType.openLeftPanel;
-      payload: FlyoutPanel;
+      payload: FlyoutPanelProps;
     }
   | {
       type: ActionType.openPreviewPanel;
-      payload: FlyoutPanel;
+      payload: FlyoutPanelProps;
     }
   | {
       type: ActionType.closeRightPanel;

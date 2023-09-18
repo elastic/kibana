@@ -27,8 +27,7 @@ export const OverviewGridItem = ({
   monitor: MonitorOverviewItem;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
-  const locationName =
-    useLocationName({ locationId: monitor.location?.id })?.label || monitor.location?.id;
+  const locationName = useLocationName(monitor);
 
   const { timestamp } = useStatusByLocationOverview(monitor.configId, locationName);
 
@@ -36,6 +35,7 @@ export const OverviewGridItem = ({
     locationId: monitor.location?.id,
     monitorId: monitor.id,
     timestamp,
+    schedule: monitor.schedule,
   });
   return (
     <MetricItem

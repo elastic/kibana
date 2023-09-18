@@ -11,6 +11,7 @@ import { EuiPanel, EuiText } from '@elastic/eui';
 import { CountUntil } from '../../../../components/count_until';
 import { Page } from '../../../../components/page';
 import { useDeps } from '../../../../hooks/use_deps';
+import { Sidebar } from '../../sidebar';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
@@ -19,7 +20,7 @@ export const PageCountUntil: React.FC<Props> = () => {
   const { plugins } = useDeps();
 
   return (
-    <Page title={'Count Until'}>
+    <Page title={'Count Until'} sidebar={<Sidebar />}>
       <EuiText>
         This demo sends a single number N using <code>fetchStreaming</code> to the server. The
         server will stream back N number of messages with 1 second delay each containing a number

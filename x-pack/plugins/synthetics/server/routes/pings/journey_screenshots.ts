@@ -6,14 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { journeyScreenshotHandler } from '../../queries/journey_screenshots';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import { journeyScreenshotHandler } from '../../legacy_uptime/routes/pings/journey_screenshots';
 
-export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = (
-  libs: UMServerLibs
-) => ({
+export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT,
   validate: {

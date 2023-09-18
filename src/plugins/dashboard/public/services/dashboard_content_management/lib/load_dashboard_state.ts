@@ -10,6 +10,7 @@ import { has } from 'lodash';
 
 import { Filter, Query } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
@@ -19,9 +20,11 @@ import {
   type DashboardOptions,
   convertSavedPanelsToPanelMap,
 } from '../../../../common';
+import { migrateDashboardInput } from './migrate_dashboard_input';
 import { DashboardCrudTypes } from '../../../../common/content_management';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { convertNumberToDashboardVersion } from './dashboard_versioning';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -57,17 +60,23 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  const { item: rawDashboardContent, meta: resolveMeta } = await contentManagement.client.get<
-    DashboardCrudTypes['GetIn'],
-    DashboardCrudTypes['GetOut']
-  >({ contentTypeId: DASHBOARD_CONTENT_ID, id });
-  if (!rawDashboardContent.version) {
+  const { item: rawDashboardContent, meta: resolveMeta } = await contentManagement.client
+    .get<DashboardCrudTypes['GetIn'], DashboardCrudTypes['GetOut']>({
+      contentTypeId: DASHBOARD_CONTENT_ID,
+      id,
+    })
+    .catch((e) => {
+      throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+    });
+
+  if (!rawDashboardContent || !rawDashboardContent.version) {
     return {
       dashboardInput: newDashboardState,
       dashboardFound: false,
       dashboardId: savedObjectId,
     };
   }
+
   /**
    * Inject saved object references back into the saved object attributes
    */
@@ -112,6 +121,7 @@ export const loadDashboardState = async ({
     optionsJSON,
     panelsJSON,
     timeFrom,
+    version,
     timeTo,
     title,
   } = attributes;
@@ -130,11 +140,8 @@ export const loadDashboardState = async ({
   const options: DashboardOptions = optionsJSON ? JSON.parse(optionsJSON) : undefined;
   const panels = convertSavedPanelsToPanelMap(panelsJSON ? JSON.parse(panelsJSON) : []);
 
-  return {
-    resolveMeta,
-    dashboardFound: true,
-    dashboardId: savedObjectId,
-    dashboardInput: {
+  const { dashboardInput, anyMigrationRun } = migrateDashboardInput(
+    {
       ...DEFAULT_DASHBOARD_INPUT,
       ...options,
 
@@ -154,6 +161,17 @@ export const loadDashboardState = async ({
       controlGroupInput:
         attributes.controlGroupInput &&
         rawControlGroupAttributesToControlGroupInput(attributes.controlGroupInput),
+
+      version: convertNumberToDashboardVersion(version),
     },
+    embeddable
+  );
+
+  return {
+    resolveMeta,
+    dashboardInput,
+    anyMigrationRun,
+    dashboardFound: true,
+    dashboardId: savedObjectId,
   };
 };

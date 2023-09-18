@@ -130,8 +130,8 @@ describe('FleetToHostFilesClient', () => {
     expect(createEsFileClientMock).toHaveBeenCalledWith({
       elasticsearchClient: esClientMock,
       logger: loggerMock,
-      metadataIndex: '.fleet-filedelivery-meta-foo',
-      blobStorageIndex: '.fleet-filedelivery-data-foo',
+      metadataIndex: '.fleet-fileds-tohost-meta-foo',
+      blobStorageIndex: '.fleet-fileds-tohost-data-foo',
       maxSizeBytes: 12345,
       indexIsAlias: true,
     });

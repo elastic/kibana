@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FieldPicker, FieldOptionValue } from '@kbn/visualization-ui-components/public';
+import { FieldPicker, FieldOptionValue } from '@kbn/visualization-ui-components';
 
 import { type FieldOptionCompatible, FieldSelect, FieldSelectProps } from './field_select';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';

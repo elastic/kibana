@@ -23,29 +23,17 @@ export interface OnVisDropProps<T> {
   group?: VisualizationDimensionGroupConfig;
 }
 
-export function shouldRemoveSource(source: DragDropIdentifier, dropType: DropType) {
-  return (
-    isOperation(source) &&
-    (dropType === 'move_compatible' ||
-      dropType === 'move_incompatible' ||
-      dropType === 'combine_incompatible' ||
-      dropType === 'combine_compatible' ||
-      dropType === 'replace_compatible' ||
-      dropType === 'replace_incompatible')
-  );
-}
-
 export function onDropForVisualization<T, P = unknown, E = unknown>(
   props: OnVisDropProps<T>,
   activeVisualization: Visualization<T, P, E>
 ) {
-  const { prevState, target, frame, source, group } = props;
+  const { prevState, target, frame, source, group, dropType } = props;
   const { layerId, columnId, groupId } = target;
 
   const previousColumn =
     isOperation(source) && group?.requiresPreviousColumnOnDuplicate ? source.columnId : undefined;
 
-  const newVisState = activeVisualization.setDimension({
+  let newVisState = activeVisualization.setDimension({
     columnId,
     groupId,
     layerId,
@@ -53,6 +41,22 @@ export function onDropForVisualization<T, P = unknown, E = unknown>(
     previousColumn,
     frame,
   });
+
+  if (
+    isOperation(source) &&
+    (dropType === 'move_compatible' ||
+      dropType === 'move_incompatible' ||
+      dropType === 'combine_incompatible' ||
+      dropType === 'combine_compatible' ||
+      dropType === 'replace_compatible' ||
+      dropType === 'replace_incompatible')
+  )
+    newVisState = activeVisualization.removeDimension({
+      layerId: source.layerId,
+      columnId: source.columnId,
+      prevState: newVisState,
+      frame,
+    });
 
   return newVisState;
 }

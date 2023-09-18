@@ -1,10 +1,23 @@
 {
   "indices.rollover": {
     "url_params": {
-      "timeout": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "dry_run": "__flag__",
-      "master_timeout": "",
-      "wait_for_active_shards": ""
+      "master_timeout": [
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "-1",
+        "0"
+      ],
+      "wait_for_active_shards": [
+        "all",
+        "index-setting"
+      ]
     },
     "methods": [
       "POST"
@@ -13,6 +26,10 @@
       "{alias}/_rollover",
       "{alias}/_rollover/{new_index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-rollover-index.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

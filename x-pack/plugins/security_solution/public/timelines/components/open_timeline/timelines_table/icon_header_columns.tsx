@@ -12,8 +12,8 @@ import { ACTION_COLUMN_WIDTH } from './common_styles';
 import { getNotesCount, getPinnedEventCount } from '../helpers';
 import * as i18n from '../translations';
 import type { FavoriteTimelineResult, OpenTimelineResult } from '../types';
-import type { TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline/api';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import type { TimelineTypeLiteralWithNull } from '../../../../../common/api/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 /**
  * Returns the columns that have icon headers

@@ -8,13 +8,9 @@
 import { isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 
-import { MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
-import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
-import {
-  CasesFindRequestRt,
-  decodeWithExcessOrThrow,
-  CasesFindResponseRt,
-} from '../../../common/api';
+import type { CasesFindRequest, CasesFindResponse } from '../../../common/types/api';
+import { CasesFindRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
@@ -24,16 +20,6 @@ import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesFindQueryParams } from '../types';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
-
-/**
- * Throws an error if the user tries to filter by more than MAX_CATEGORY_FILTER_LENGTH categories.
- */
-function throwIfCategoryParamTooLong(category?: string[] | string) {
-  if (Array.isArray(category) && category.length > MAX_CATEGORY_FILTER_LENGTH)
-    throw Boom.badRequest(
-      `Too many categories provided. The maximum allowed is ${MAX_CATEGORY_FILTER_LENGTH}`
-    );
-}
 
 /**
  * Retrieves a case and optionally its comments.
@@ -54,8 +40,6 @@ export const find = async (
 
   try {
     const queryParams = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
-
-    throwIfCategoryParamTooLong(queryParams.category);
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -79,7 +63,7 @@ export const find = async (
     const queryArgs: CasesFindQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
-      sortByField: queryParams.sortField,
+      sortField: queryParams.sortField,
       status: queryParams.status,
       severity: queryParams.severity,
       owner: queryParams.owner,

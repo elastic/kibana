@@ -46,7 +46,7 @@ describe('createFilterInDiscoverCellActionFactory', () => {
   });
 
   const context = {
-    data: [{ field: { name: 'user.name', type: 'text' }, value: 'the value' }],
+    data: [{ field: { name: 'user.name', type: 'string' }, value: 'the value' }],
   } as SecurityCellActionExecutionContext;
 
   it('should return display name', () => {

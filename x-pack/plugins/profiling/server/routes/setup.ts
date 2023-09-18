@@ -7,8 +7,12 @@
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
-import { getClient } from './compat';
-import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
+import { getRoutePaths } from '../../common';
+import {
+  areResourcesSetup,
+  createDefaultSetupState,
+  mergePartialSetupStates,
+} from '../../common/setup';
 import {
   enableResourceManagement,
   setMaximumBuckets,
@@ -18,9 +22,9 @@ import {
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
-  updateApmPolicy,
-  validateApmPolicy,
+  removeProfilingFromApmPackagePolicy,
   validateCollectorPackagePolicy,
+  validateProfilingInApmPackagePolicy,
   validateSymbolizerPackagePolicy,
 } from '../lib/setup/fleet_policies';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
@@ -28,12 +32,7 @@ import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { setSecurityRole, validateSecurityRole } from '../lib/setup/security_role';
 import { ProfilingSetupOptions } from '../lib/setup/types';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { getRoutePaths } from '../../common';
-import {
-  areResourcesSetup,
-  createDefaultSetupState,
-  mergePartialSetupStates,
-} from '../../common/setup';
+import { getClient } from './compat';
 
 export function registerSetupRoute({
   router,
@@ -42,7 +41,7 @@ export function registerSetupRoute({
   dependencies,
 }: RouteRegisterParameters) {
   const paths = getRoutePaths();
-  // Check if Elasticsearch and Fleet are setup for Universal Profiling
+  // Check if Elasticsearch and Fleet are set up for Universal Profiling
   router.get(
     {
       path: paths.HasSetupESResources,
@@ -57,6 +56,11 @@ export function registerSetupRoute({
           esClient,
           request,
           useDefaultAuth: true,
+        });
+        const clientWithProfilingAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: false,
         });
 
         const setupOptions: ProfilingSetupOptions = {
@@ -83,36 +87,47 @@ export function registerSetupRoute({
             },
           });
         }
-
-        state.data.available = await hasProfilingData(setupOptions);
-        if (state.data.available) {
-          return response.ok({
-            body: {
-              has_setup: true,
-              has_data: state.data.available,
-            },
-          });
-        }
-
         const verifyFunctions = [
-          isApmPackageInstalled,
-          validateApmPolicy,
-          validateCollectorPackagePolicy,
           validateMaximumBuckets,
           validateResourceManagement,
           validateSecurityRole,
+          validateCollectorPackagePolicy,
           validateSymbolizerPackagePolicy,
+          validateProfilingInApmPackagePolicy,
         ];
-        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+
+        const partialStates = await Promise.all([
+          ...verifyFunctions.map((fn) => fn(setupOptions)),
+          hasProfilingData({
+            ...setupOptions,
+            client: clientWithProfilingAuth,
+          }),
+        ]);
+
         const mergedState = mergePartialSetupStates(state, partialStates);
 
         return response.ok({
           body: {
             has_setup: areResourcesSetup(mergedState),
             has_data: mergedState.data.available,
+            pre_8_9_1_data: mergedState.resources.pre_8_9_1_data,
           },
         });
       } catch (error) {
+        // We cannot fully check the status of all resources
+        // to make sure Profiling has been set up and has data
+        // for users with monitor privileges. This privileges
+        // is needed to call the profiling ES plugin for example.
+        if (error?.meta?.statusCode === 403) {
+          return response.ok({
+            body: {
+              has_setup: true,
+              pre_8_9_1_data: false,
+              has_data: true,
+              unauthorized: true,
+            },
+          });
+        }
         return handleRouteHandlerError({
           error,
           logger,
@@ -163,38 +178,57 @@ export function registerSetupRoute({
           });
         }
 
-        const verifyFunctions = [
-          isApmPackageInstalled,
-          validateApmPolicy,
-          validateCollectorPackagePolicy,
-          validateMaximumBuckets,
-          validateResourceManagement,
-          validateSecurityRole,
-          validateSymbolizerPackagePolicy,
-        ];
-        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+        const partialStates = await Promise.all(
+          [
+            validateResourceManagement,
+            validateSecurityRole,
+            validateMaximumBuckets,
+            validateCollectorPackagePolicy,
+            validateSymbolizerPackagePolicy,
+            validateProfilingInApmPackagePolicy,
+          ].map((fn) => fn(setupOptions))
+        );
         const mergedState = mergePartialSetupStates(state, partialStates);
 
-        if (areResourcesSetup(mergedState)) {
+        const executeAdminFunctions = [
+          ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
+          ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
+          ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),
+        ];
+
+        const executeViewerFunctions = [
+          ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
+          ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+          ...(mergedState.policies.apm.profilingEnabled
+            ? [removeProfilingFromApmPackagePolicy]
+            : []),
+        ];
+
+        if (!executeAdminFunctions.length && !executeViewerFunctions.length) {
           return response.ok();
         }
 
-        const executeFunctions = [
-          installLatestApmPackage,
-          updateApmPolicy,
-          createCollectorPackagePolicy,
-          createSymbolizerPackagePolicy,
-          enableResourceManagement,
-          setSecurityRole,
-          setMaximumBuckets,
-        ];
-        await Promise.all(executeFunctions.map((fn) => fn(setupOptions)));
+        await Promise.all(executeAdminFunctions.map((fn) => fn(setupOptions)));
+        await Promise.all(executeViewerFunctions.map((fn) => fn(setupOptions)));
+
+        if (dependencies.telemetryUsageCounter) {
+          dependencies.telemetryUsageCounter.incrementCounter({
+            counterName: `POST ${paths.HasSetupESResources}`,
+            counterType: 'success',
+          });
+        }
 
         // We return a status code of 202 instead of 200 because enabling
         // resource management in Elasticsearch is an asynchronous action
         // and is not guaranteed to complete before Kibana sends a response.
         return response.accepted();
       } catch (error) {
+        if (dependencies.telemetryUsageCounter) {
+          dependencies.telemetryUsageCounter.incrementCounter({
+            counterName: `POST ${paths.HasSetupESResources}`,
+            counterType: 'error',
+          });
+        }
         return handleRouteHandlerError({
           error,
           logger,
@@ -204,7 +238,7 @@ export function registerSetupRoute({
       }
     }
   );
-  // Show users the instructions on how to setup Universal Profiling agents
+  // Show users the instructions on how to set up Universal Profiling agents
   router.get(
     {
       path: paths.SetupDataCollectionInstructions,
@@ -214,10 +248,12 @@ export function registerSetupRoute({
     async (context, request, response) => {
       try {
         const apmServerHost = dependencies.setup.cloud?.apm?.url;
+        const stackVersion = dependencies.stackVersion;
         const setupInstructions = await getSetupInstructions({
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
           apmServerHost,
+          stackVersion,
         });
 
         return response.ok({ body: setupInstructions });

@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -21,10 +22,13 @@ import { IlmPhasesEmptyPrompt } from '../../../ilm_phases_empty_prompt';
 import { IndicesDetails } from './indices_details';
 import { StorageDetails } from './storage_details';
 import { PatternRollup, SelectedIndex } from '../../../types';
+import { useDataQualityContext } from '../../data_quality_context';
 
 export interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -52,7 +56,8 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: Theme;
+  startDate?: string | null;
+  theme?: PartialTheme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -66,6 +71,7 @@ export interface Props {
 const DataQualityDetailsComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
@@ -75,17 +81,20 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   patternIndexNames,
   patternRollups,
   patterns,
+  startDate,
   theme,
+  baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const [selectedIndex, setSelectedIndex] = useState<SelectedIndex | null>(null);
 
   const onIndexSelected = useCallback(async ({ indexName, pattern }: SelectedIndex) => {
     setSelectedIndex({ indexName, pattern });
   }, []);
 
-  if (ilmPhases.length === 0) {
+  if (isILMAvailable && ilmPhases.length === 0) {
     return <IlmPhasesEmptyPrompt />;
   }
 
@@ -97,12 +106,14 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         onIndexSelected={onIndexSelected}
         patterns={patterns}
         theme={theme}
+        baseTheme={baseTheme}
         patternRollups={patternRollups}
       />
 
       <IndicesDetails
         addSuccessToast={addSuccessToast}
         canUserCreateAndReadCases={canUserCreateAndReadCases}
+        endDate={endDate}
         formatBytes={formatBytes}
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
@@ -111,10 +122,12 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
         theme={theme}
+        baseTheme={baseTheme}
         patternIndexNames={patternIndexNames}
         patternRollups={patternRollups}
         selectedIndex={selectedIndex}
         setSelectedIndex={setSelectedIndex}
+        startDate={startDate}
         updatePatternIndexNames={updatePatternIndexNames}
         updatePatternRollup={updatePatternRollup}
       />

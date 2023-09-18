@@ -12,7 +12,7 @@ import { renderHook, cleanup } from '@testing-library/react-hooks';
 import {
   LogLevel,
   RuleExecutionEventType,
-} from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import { useExecutionEvents } from './use_execution_events';
 import { useToasts } from '../../../../common/lib/kibana';

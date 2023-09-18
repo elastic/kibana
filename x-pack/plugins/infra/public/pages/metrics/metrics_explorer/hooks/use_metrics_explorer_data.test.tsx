@@ -20,10 +20,7 @@ import {
   resp,
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
-import {
-  MetricsExplorerOptions,
-  MetricsExplorerTimestampsRT,
-} from './use_metrics_explorer_options';
+import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
 import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 
@@ -56,7 +53,7 @@ const renderUseMetricsExplorerDataHook = () => {
       options: MetricsExplorerOptions;
       source: MetricsSourceConfigurationProperties | undefined;
       derivedIndexPattern: DataViewBase;
-      timestamps: MetricsExplorerTimestampsRT;
+      timestamps: MetricsExplorerTimestamp;
     }) =>
       useMetricsExplorerData(
         props.options,

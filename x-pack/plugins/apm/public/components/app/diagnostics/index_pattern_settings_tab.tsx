@@ -36,7 +36,7 @@ export function DiagnosticsIndexPatternSettings() {
     !indexTemplatesByIndexPattern ||
     indexTemplatesByIndexPattern?.length === 0
   ) {
-    return null;
+    return <EuiText>No settings to display</EuiText>;
   }
 
   const elms = indexTemplatesByIndexPattern.map(
@@ -102,9 +102,7 @@ export function DiagnosticsIndexPatternSettings() {
   );
 }
 
-export function getIndexPatternTabStatus(
-  diagnosticsBundle?: DiagnosticsBundle
-) {
+export function getIsIndexPatternTabOk(diagnosticsBundle?: DiagnosticsBundle) {
   if (!diagnosticsBundle) {
     return true;
   }

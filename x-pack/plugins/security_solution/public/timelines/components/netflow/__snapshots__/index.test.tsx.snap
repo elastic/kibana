@@ -229,8 +229,8 @@ tr:hover .c3:focus::before {
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
+                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -239,12 +239,12 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
                               class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
+                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
+                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-user_name-first_last"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
@@ -307,8 +307,8 @@ tr:hover .c3:focus::before {
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
+                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -317,12 +317,12 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
                               class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
+                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
+                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-process_name-rat"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
@@ -394,8 +394,8 @@ tr:hover .c3:focus::before {
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
+                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -404,12 +404,12 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
                               class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
+                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
+                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_duration-1000000"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
@@ -466,8 +466,8 @@ tr:hover .c3:focus::before {
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
+                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -476,12 +476,12 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
                               class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
+                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
+                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_start-2018-11-12T19:03:25_836Z"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
@@ -534,8 +534,8 @@ tr:hover .c3:focus::before {
                         data-test-subj="draggableWrapperDiv"
                       >
                         <div
-                          data-rbd-droppable-context-id="0"
-                          data-rbd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
+                          data-rfd-droppable-context-id="0"
+                          data-rfd-droppable-id="droppableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
                         >
                           <div
                             class="draggable-keyboard-wrapper"
@@ -544,12 +544,12 @@ tr:hover .c3:focus::before {
                             tabindex="0"
                           >
                             <div
-                              aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                              aria-describedby="rfd-hidden-text-0-hidden-text-0"
                               class="c3"
-                              data-rbd-drag-handle-context-id="0"
-                              data-rbd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
-                              data-rbd-draggable-context-id="0"
-                              data-rbd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
+                              data-rfd-drag-handle-context-id="0"
+                              data-rfd-drag-handle-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
+                              data-rfd-draggable-context-id="0"
+                              data-rfd-draggable-id="draggableId.content.duration-event-start-end-default-draggable-test-abcd-event_end-2018-11-12T19:03:25_936Z"
                               data-test-subj="providerContainer"
                               draggable="false"
                               role="button"
@@ -616,8 +616,8 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggableWrapperDiv"
                           >
                             <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
+                              data-rfd-droppable-context-id="0"
+                              data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -626,12 +626,12 @@ tr:hover .c3:focus::before {
                                 tabindex="0"
                               >
                                 <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                   class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
+                                  data-rfd-drag-handle-context-id="0"
+                                  data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
+                                  data-rfd-draggable-context-id="0"
+                                  data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_direction-outgoing"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -694,8 +694,8 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggableWrapperDiv"
                           >
                             <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
+                              data-rfd-droppable-context-id="0"
+                              data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -704,12 +704,12 @@ tr:hover .c3:focus::before {
                                 tabindex="0"
                               >
                                 <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                   class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
+                                  data-rfd-drag-handle-context-id="0"
+                                  data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
+                                  data-rfd-draggable-context-id="0"
+                                  data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_protocol-http"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -767,8 +767,8 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggableWrapperDiv"
                           >
                             <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_bytes-100"
+                              data-rfd-droppable-context-id="0"
+                              data-rfd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_bytes-100"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -777,12 +777,12 @@ tr:hover .c3:focus::before {
                                 tabindex="0"
                               >
                                 <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                   class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
+                                  data-rfd-drag-handle-context-id="0"
+                                  data-rfd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
+                                  data-rfd-draggable-context-id="0"
+                                  data-rfd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_bytes-100"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -833,8 +833,8 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggableWrapperDiv"
                           >
                             <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_packets-3"
+                              data-rfd-droppable-context-id="0"
+                              data-rfd-droppable-id="droppableId.content.network-default-draggable-test-abcd-network_packets-3"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -843,12 +843,12 @@ tr:hover .c3:focus::before {
                                 tabindex="0"
                               >
                                 <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                   class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
+                                  data-rfd-drag-handle-context-id="0"
+                                  data-rfd-drag-handle-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
+                                  data-rfd-draggable-context-id="0"
+                                  data-rfd-draggable-id="draggableId.content.network-default-draggable-test-abcd-network_packets-3"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -899,8 +899,8 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggableWrapperDiv"
                           >
                             <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
+                              data-rfd-droppable-context-id="0"
+                              data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -909,12 +909,12 @@ tr:hover .c3:focus::before {
                                 tabindex="0"
                               >
                                 <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                   class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
+                                  data-rfd-drag-handle-context-id="0"
+                                  data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
+                                  data-rfd-draggable-context-id="0"
+                                  data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_transport-tcp"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -972,8 +972,8 @@ tr:hover .c3:focus::before {
                             data-test-subj="draggableWrapperDiv"
                           >
                             <div
-                              data-rbd-droppable-context-id="0"
-                              data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
+                              data-rfd-droppable-context-id="0"
+                              data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
                             >
                               <div
                                 class="draggable-keyboard-wrapper"
@@ -982,12 +982,12 @@ tr:hover .c3:focus::before {
                                 tabindex="0"
                               >
                                 <div
-                                  aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                  aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                   class="c3"
-                                  data-rbd-drag-handle-context-id="0"
-                                  data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
-                                  data-rbd-draggable-context-id="0"
-                                  data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
+                                  data-rfd-drag-handle-context-id="0"
+                                  data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
+                                  data-rfd-draggable-context-id="0"
+                                  data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-network_community_id-we_live_in_a"
                                   data-test-subj="providerContainer"
                                   draggable="false"
                                   role="button"
@@ -1092,8 +1092,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1102,12 +1102,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.formatted-ip-data-provider-test-source_ip-192_168_1_2-abcd"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -1221,8 +1221,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1231,12 +1231,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_continent_name-North America"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -1289,8 +1289,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1299,12 +1299,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_name-United States"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -1367,8 +1367,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1377,12 +1377,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_country_iso_code-US"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -1435,8 +1435,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1445,12 +1445,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_region_name-Georgia"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -1503,8 +1503,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1513,12 +1513,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-source_geo_city_name-Atlanta"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -1589,8 +1589,8 @@ tr:hover .c3:focus::before {
                                   data-test-subj="draggableWrapperDiv"
                                 >
                                   <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
+                                    data-rfd-droppable-context-id="0"
+                                    data-rfd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
                                   >
                                     <div
                                       class="draggable-keyboard-wrapper"
@@ -1599,12 +1599,12 @@ tr:hover .c3:focus::before {
                                       tabindex="0"
                                     >
                                       <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                        aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                         class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
+                                        data-rfd-drag-handle-context-id="0"
+                                        data-rfd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
+                                        data-rfd-draggable-context-id="0"
+                                        data-rfd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_bytes-60"
                                         data-test-subj="providerContainer"
                                         draggable="false"
                                         role="button"
@@ -1668,8 +1668,8 @@ tr:hover .c3:focus::before {
                                   data-test-subj="draggableWrapperDiv"
                                 >
                                   <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
+                                    data-rfd-droppable-context-id="0"
+                                    data-rfd-droppable-id="droppableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
                                   >
                                     <div
                                       class="draggable-keyboard-wrapper"
@@ -1678,12 +1678,12 @@ tr:hover .c3:focus::before {
                                       tabindex="0"
                                     >
                                       <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                        aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                         class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
+                                        data-rfd-drag-handle-context-id="0"
+                                        data-rfd-drag-handle-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
+                                        data-rfd-draggable-context-id="0"
+                                        data-rfd-draggable-id="draggableId.content.source-arrow-default-draggable-test-abcd-source_packets-2"
                                         data-test-subj="providerContainer"
                                         draggable="false"
                                         role="button"
@@ -1776,8 +1776,8 @@ tr:hover .c3:focus::before {
                                   data-test-subj="draggableWrapperDiv"
                                 >
                                   <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
+                                    data-rfd-droppable-context-id="0"
+                                    data-rfd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
                                   >
                                     <div
                                       class="draggable-keyboard-wrapper"
@@ -1786,12 +1786,12 @@ tr:hover .c3:focus::before {
                                       tabindex="0"
                                     >
                                       <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                        aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                         class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
+                                        data-rfd-drag-handle-context-id="0"
+                                        data-rfd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
+                                        data-rfd-draggable-context-id="0"
+                                        data-rfd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_bytes-40"
                                         data-test-subj="providerContainer"
                                         draggable="false"
                                         role="button"
@@ -1855,8 +1855,8 @@ tr:hover .c3:focus::before {
                                   data-test-subj="draggableWrapperDiv"
                                 >
                                   <div
-                                    data-rbd-droppable-context-id="0"
-                                    data-rbd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
+                                    data-rfd-droppable-context-id="0"
+                                    data-rfd-droppable-id="droppableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
                                   >
                                     <div
                                       class="draggable-keyboard-wrapper"
@@ -1865,12 +1865,12 @@ tr:hover .c3:focus::before {
                                       tabindex="0"
                                     >
                                       <div
-                                        aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                        aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                         class="c3"
-                                        data-rbd-drag-handle-context-id="0"
-                                        data-rbd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
-                                        data-rbd-draggable-context-id="0"
-                                        data-rbd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
+                                        data-rfd-drag-handle-context-id="0"
+                                        data-rfd-drag-handle-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
+                                        data-rfd-draggable-context-id="0"
+                                        data-rfd-draggable-id="draggableId.content.destination-arrow-default-draggable-test-abcd-destination_packets-1"
                                         data-test-subj="providerContainer"
                                         draggable="false"
                                         role="button"
@@ -1971,8 +1971,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -1981,12 +1981,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.formatted-ip-data-provider-test-destination_ip-10_1_2_3-abcd"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -2100,8 +2100,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -2110,12 +2110,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_continent_name-North America"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -2168,8 +2168,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -2178,12 +2178,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_name-United States"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -2246,8 +2246,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -2256,12 +2256,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_country_iso_code-US"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -2314,8 +2314,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -2324,12 +2324,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_region_name-New York"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -2382,8 +2382,8 @@ tr:hover .c3:focus::before {
                                               data-test-subj="draggableWrapperDiv"
                                             >
                                               <div
-                                                data-rbd-droppable-context-id="0"
-                                                data-rbd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
+                                                data-rfd-droppable-context-id="0"
+                                                data-rfd-droppable-id="droppableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
                                               >
                                                 <div
                                                   class="draggable-keyboard-wrapper"
@@ -2392,12 +2392,12 @@ tr:hover .c3:focus::before {
                                                   tabindex="0"
                                                 >
                                                   <div
-                                                    aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                                                    aria-describedby="rfd-hidden-text-0-hidden-text-0"
                                                     class="c3"
-                                                    data-rbd-drag-handle-context-id="0"
-                                                    data-rbd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
-                                                    data-rbd-draggable-context-id="0"
-                                                    data-rbd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
+                                                    data-rfd-drag-handle-context-id="0"
+                                                    data-rfd-drag-handle-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
+                                                    data-rfd-draggable-context-id="0"
+                                                    data-rfd-draggable-id="draggableId.content.geo-field-values-default-draggable-test-abcd-destination_geo_city_name-New York"
                                                     data-test-subj="providerContainer"
                                                     draggable="false"
                                                     role="button"
@@ -2464,8 +2464,8 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rbd-droppable-context-id="0"
-                      data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
                     >
                       <div
                         class="draggable-keyboard-wrapper"
@@ -2474,12 +2474,12 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
                           class="c3"
-                          data-rbd-drag-handle-context-id="0"
-                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
-                          data-rbd-draggable-context-id="0"
-                          data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_fingerprints_ja3_hash-tls_fingerprints_ja3_hash-value"
                           data-test-subj="providerContainer"
                           draggable="false"
                           role="button"
@@ -2566,8 +2566,8 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rbd-droppable-context-id="0"
-                      data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
                     >
                       <div
                         class="draggable-keyboard-wrapper"
@@ -2576,12 +2576,12 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
                           class="c3"
-                          data-rbd-drag-handle-context-id="0"
-                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
-                          data-rbd-draggable-context-id="0"
-                          data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_client_certificate_fingerprint_sha1-tls_client_certificate_fingerprint_sha1-value"
                           data-test-subj="providerContainer"
                           draggable="false"
                           role="button"
@@ -2668,8 +2668,8 @@ tr:hover .c3:focus::before {
                     data-test-subj="draggableWrapperDiv"
                   >
                     <div
-                      data-rbd-droppable-context-id="0"
-                      data-rbd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                      data-rfd-droppable-context-id="0"
+                      data-rfd-droppable-id="droppableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
                     >
                       <div
                         class="draggable-keyboard-wrapper"
@@ -2678,12 +2678,12 @@ tr:hover .c3:focus::before {
                         tabindex="0"
                       >
                         <div
-                          aria-describedby="rbd-hidden-text-0-hidden-text-0"
+                          aria-describedby="rfd-hidden-text-0-hidden-text-0"
                           class="c3"
-                          data-rbd-drag-handle-context-id="0"
-                          data-rbd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
-                          data-rbd-draggable-context-id="0"
-                          data-rbd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                          data-rfd-drag-handle-context-id="0"
+                          data-rfd-drag-handle-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
+                          data-rfd-draggable-context-id="0"
+                          data-rfd-draggable-id="draggableId.content.draggable-badge-default-draggable-test-abcd-tls_server_certificate_fingerprint_sha1-tls_server_certificate_fingerprint_sha1-value"
                           data-test-subj="providerContainer"
                           draggable="false"
                           role="button"

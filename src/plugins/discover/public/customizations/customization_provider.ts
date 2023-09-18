@@ -49,7 +49,9 @@ export const useDiscoverCustomizationService = ({
     };
   });
 
-  return customizationService;
+  const isInitialized = Boolean(customizationService);
+
+  return { customizationService, isInitialized };
 };
 
 export const useDiscoverCustomization$ = <TCustomizationId extends DiscoverCustomizationId>(

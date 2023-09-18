@@ -23,6 +23,7 @@ const EMPTY_SHOULD_WARN = {
 export const createBucketSelector = (
   condition: MetricExpressionParams,
   alertOnGroupDisappear: boolean = false,
+  timeFieldName: string,
   groupBy?: string | string[],
   lastPeriodEnd?: number
 ) => {
@@ -70,7 +71,7 @@ export const createBucketSelector = (
   };
 
   if (hasGroupBy && alertOnGroupDisappear && lastPeriodEnd) {
-    const wrappedPeriod = createLastPeriod(lastPeriodEnd, condition);
+    const wrappedPeriod = createLastPeriod(lastPeriodEnd, condition, timeFieldName);
     aggs.lastPeriod = wrappedPeriod.lastPeriod;
     aggs.missingGroup = {
       bucket_script: {

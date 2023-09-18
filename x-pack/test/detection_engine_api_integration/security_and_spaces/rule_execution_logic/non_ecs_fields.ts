@@ -56,8 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/154277
-  describe.skip('Non ECS fields in alert document source', () => {
+  describe('Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
@@ -232,7 +231,7 @@ export default ({ getService }: FtrProviderContext) => {
       // invalid ECS field is getting removed
       expect(alertSource).toHaveProperty('threat.enrichments', []);
 
-      expect(alertSource).toHaveProperty('threat.indicator.port', 443);
+      expect(alertSource).toHaveProperty(['threat', 'indicator.port'], 443);
     });
 
     // source client.bytes is text, ECS mapping for client.bytes is long
@@ -257,9 +256,10 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alertSource).toHaveProperty('client.nat.port', '3000');
     });
 
-    // we don't validate it because geo_point is very complex type with many various representations: array, different object, string with few valid patterns
-    // more on geo_point type https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html
-    it('should fail creating alert when ECS field mapping is geo_point', async () => {
+    // We don't validate it because geo_point is very complex type with many various representations: array,
+    // different object, string with few valid patterns.
+    // More on geo_point type https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-point.html
+    it('should not fail creating alert when ECS field mapping is geo_point', async () => {
       const document = {
         client: {
           geo: {
@@ -269,11 +269,10 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { errors } = await indexAndCreatePreviewAlert(document);
+      const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
 
-      expect(errors).toContain(
-        'Bulk Indexing of signals failed: failed to parse field [client.geo.location] of type [geo_point]'
-      );
+      expect(errors).toEqual([]);
+      expect(alertSource).toHaveProperty('client.geo.location', 'test test');
     });
 
     it('should strip invalid boolean values and left valid ones', async () => {

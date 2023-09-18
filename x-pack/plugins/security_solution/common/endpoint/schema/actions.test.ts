@@ -8,16 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
-import {
-  EndpointActionListRequestSchema,
-  NoParametersRequestSchema,
-  KillOrSuspendProcessRequestSchema,
-  ExecuteActionRequestSchema,
-  UploadActionRequestSchema,
-} from './actions';
 import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
 import type { HapiReadableStream } from '../../../server/types';
+import { EndpointActionListRequestSchema, UploadActionRequestSchema } from '../../api/endpoint';
+import {
+  KillOrSuspendProcessRequestSchema,
+  NoParametersRequestSchema,
+} from '../../api/endpoint/actions/common/base';
+import { ExecuteActionRequestSchema } from '../../api/endpoint/actions/execute_route';
 
+// NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
 describe('actions schemas', () => {
   describe('Endpoint action list API Schema', () => {
     it('should work without any query keys ', () => {

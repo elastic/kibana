@@ -7,15 +7,22 @@
 import { stripFrameworkFields } from './strip_framework_fields';
 
 describe('stripFrameworkFields', () => {
+  test('should return empty object if payload is undefined', () => {
+    expect(stripFrameworkFields()).toEqual({});
+  });
+
   test('should do nothing if payload has no framework fields', () => {
     const payload = { field1: 'test', kibana: { alert: { not_a_framework_field: 2 } } };
     expect(stripFrameworkFields(payload)).toEqual(payload);
   });
 
-  test(`should allow allowed fields like "kibana.alert.reason"`, () => {
+  test(`should allow fields from the allowlist`, () => {
     const payload = {
       field1: 'test',
-      kibana: { alert: { not_a_framework_field: 2, reason: 'because i said so' } },
+      kibana: {
+        alert: { not_a_framework_field: 2, reason: 'because i said so', workflow_status: 'custom' },
+      },
+      tags: ['taggity-tag'],
     };
     expect(stripFrameworkFields(payload)).toEqual(payload);
   });

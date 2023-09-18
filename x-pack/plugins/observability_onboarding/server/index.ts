@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import {
   PluginConfigDescriptor,
   PluginInitializerContext,
@@ -16,6 +16,12 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  serverless: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.literal(true),
+      options: { defaultValue: schema.contextRef('serverless') },
+    }),
+  }),
 });
 
 export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
@@ -24,6 +30,7 @@ export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
   exposeToBrowser: {
     ui: true,
+    serverless: true,
   },
   schema: configSchema,
 };

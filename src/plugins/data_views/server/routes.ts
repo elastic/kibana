@@ -20,12 +20,13 @@ export function registerRoutes(
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >,
+  isRollupsEnabled: () => boolean,
   dataViewRestCounter?: UsageCounter
 ) {
   const router = http.createRouter();
 
   routes.forEach((route) => route(router, getStartServices, dataViewRestCounter));
 
-  registerFieldForWildcard(router, getStartServices);
+  registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
 }

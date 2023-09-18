@@ -9,10 +9,9 @@
 
 import { cloneDeep, unset, flow } from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
+import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
-import type { CaseAttributes } from '../../../common/api';
-import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 
 import {
   CONNECTOR_ID_REFERENCE_NAME,
@@ -28,6 +27,7 @@ import { CASE_TYPE_INDIVIDUAL } from './constants';
 import { pipeMigrations } from './utils';
 import type { ConnectorPersistedFields } from '../../common/types/connectors';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import type { CaseAttributes } from '../../../common/types/domain';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
