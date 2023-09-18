@@ -22,7 +22,6 @@ import { ISearchStrategy } from '../../types';
 import { getDefaultSearchParams } from '../es_search';
 import { getIgnoreThrottled } from '../ese_search/request_utils';
 import { getCommonDefaultAsyncGetParams } from '../common/async_utils';
-import { getRequestMeta } from '../common/request_meta';
 
 export const eqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
@@ -80,7 +79,7 @@ export const eqlSearchStrategyProvider = (
 
         return toEqlKibanaSearchResponse(
           response as TransportResult<EqlSearchResponse>,
-          id ? undefined : getRequestMeta(response.meta)
+          response.meta?.request?.params,
         );
       };
 

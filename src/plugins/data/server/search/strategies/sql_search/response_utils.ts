@@ -16,7 +16,7 @@ export function toAsyncKibanaSearchResponse(
   response: SqlQueryResponse,
   startTime: number,
   warning?: string,
-  requestMeta?: RequestMeta
+  requestParams?: RequestMeta
 ): SqlSearchStrategyResponse {
   return {
     id: response.id,
@@ -25,6 +25,6 @@ export function toAsyncKibanaSearchResponse(
     isRunning: response.is_running,
     took: Date.now() - startTime,
     ...(warning ? { warning } : {}),
-    ...(requestMeta ? { requestMeta } : {}),
+    ...(requestParams ? { requestParams } : {}),
   };
 }

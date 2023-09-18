@@ -318,8 +318,8 @@ export class SearchInterceptor {
       abortSignal: searchAbortController.getSignal(),
     }).pipe(
       tap((response) => {
-        if (!firstRequestMeta && response.requestMeta) {
-          firstRequestMeta = response.requestMeta;
+        if (!firstRequestMeta && response.requestParams) {
+          firstRequestMeta = response.requestParams;
         }
 
         id = response.id;
@@ -332,7 +332,7 @@ export class SearchInterceptor {
         return firstRequestMeta
           ? {
               ...response,
-              requestMeta: firstRequestMeta,
+              requestParams: firstRequestMeta,
             }
           : response;
       }),

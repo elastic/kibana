@@ -26,13 +26,13 @@ export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
  */
 export function toKibanaSearchResponse(
   rawResponse: estypes.SearchResponse<unknown>,
-  requestMeta?: RequestMeta
+  requestParams?: RequestMeta
 ) {
   return {
     rawResponse,
     isPartial: false,
     isRunning: false,
-    ...(requestMeta ? { requestMeta } : {}),
+    ...(requestParams ? { requestParams } : {}),
     ...getTotalLoaded(rawResponse),
   };
 }

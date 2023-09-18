@@ -16,13 +16,13 @@ import { EqlSearchStrategyResponse } from '../../../../common';
  */
 export function toEqlKibanaSearchResponse(
   response: TransportResult<EqlSearchResponse>,
-  requestMeta?: RequestMeta
+  requestParams?: RequestMeta
 ): EqlSearchStrategyResponse {
   return {
     id: response.body.id,
     rawResponse: response,
     isPartial: response.body.is_partial,
     isRunning: response.body.is_running,
-    ...(requestMeta ? { requestMeta } : {}),
+    ...(requestParams ? { requestParams } : {}),
   };
 }

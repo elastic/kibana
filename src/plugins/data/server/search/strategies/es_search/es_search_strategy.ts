@@ -15,7 +15,6 @@ import type { SearchUsage } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from './request_utils';
 import { shimHitsTotal, toKibanaSearchResponse } from './response_utils';
 import { searchUsageObserver } from '../../collectors/search/usage';
-import { getRequestMeta } from '../common/request_meta';
 
 export const esSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -57,7 +56,7 @@ export const esSearchStrategyProvider = (
           meta: true,
         });
         const response = shimHitsTotal(body, options);
-        return toKibanaSearchResponse(response, getRequestMeta(meta));
+        return toKibanaSearchResponse(response, meta?.request?.params);
       } catch (e) {
         throw getKbnServerError(e);
       }

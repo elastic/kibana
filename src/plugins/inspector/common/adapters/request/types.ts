@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
+
 /**
  * The status a request can have.
  */
@@ -53,6 +55,6 @@ export interface RequestStatistic {
 
 export interface Response {
   json?: object;
-  requestMeta?: unknown;
+  requestParams?: ConnectionRequestParams;
   time?: number;
 }

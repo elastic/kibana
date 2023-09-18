@@ -8,10 +8,10 @@
 
 import { RequestStatus, Response } from './types';
 
-export function moveRequestMetaToTopLevel(status: RequestStatus, response: Response) {
+export function moveRequestParamsToTopLevel(status: RequestStatus, response: Response) {
   if (status === RequestStatus.ERROR) {
-    const requestMeta = response.json?.err?.requestMeta;
-    if (!requestMeta) {
+    const requestParams = response.json?.err?.requestParams;
+    if (!requestParams) {
       return response;
     }
 
@@ -19,24 +19,24 @@ export function moveRequestMetaToTopLevel(status: RequestStatus, response: Respo
       ...response.json,
       err: { ...response.json.err },
     };
-    delete json.err.requestMeta;
+    delete json.err.requestParams;
     return {
       ...response,
       json,
-      requestMeta,
+      requestParams,
     };
   }
 
-  const requestMeta = response.json?.requestMeta;
-  if (!requestMeta) {
+  const requestParams = response.json?.requestParams;
+  if (!requestParams) {
     return response;
   }
 
   const json = { ...response.json };
-  delete json.requestMeta;
+  delete json.requestParams;
   return {
     ...response,
     json,
-    requestMeta,
+    requestParams,
   };
 }

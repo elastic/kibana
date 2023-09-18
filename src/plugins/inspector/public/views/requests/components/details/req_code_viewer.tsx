@@ -12,6 +12,7 @@
 /* eslint-disable @elastic/eui/href-or-on-click */
 
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
@@ -21,7 +22,7 @@ import { InspectorPluginStartDeps } from '../../../../plugin';
 
 interface RequestCodeViewerProps {
   indexPattern?: string;
-  requestMeta?: requestMeta;
+  requestParams?: ConnectionRequestParams;
   json: string;
 }
 
@@ -40,21 +41,21 @@ const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearc
 /**
  * @internal
  */
-export const RequestCodeViewer = ({ indexPattern, requestMeta, json }: RequestCodeViewerProps) => {
+export const RequestCodeViewer = ({ indexPattern, requestParams, json }: RequestCodeViewerProps) => {
   const { services } = useKibana<InspectorPluginStartDeps>();
 
   const navigateToUrl = services.application?.navigateToUrl;
 
   function getValue() {
-    if (!requestMeta) {
+    if (!requestParams) {
       return json;
     }
 
-    const fullPath = requestMeta.querystring
-      ? `${requestMeta.path}?${requestMeta.querystring}`
-      : requestMeta.path;
+    const fullPath = requestParams.querystring
+      ? `${requestParams.path}?${requestParams.querystring}`
+      : requestParams.path;
 
-    return `${requestMeta.method} ${fullPath}\n${json}`;
+    return `${requestParams.method} ${fullPath}\n${json}`;
   }
 
   const value = getValue();
@@ -66,7 +67,7 @@ export const RequestCodeViewer = ({ indexPattern, requestMeta, json }: RequestCo
   // Check if both the Dev Tools UI and the Console UI are enabled.
   const canShowDevTools =
     services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;
-  const shouldShowDevToolsLink = !!(requestMeta && canShowDevTools);
+  const shouldShowDevToolsLink = !!(requestParams && canShowDevTools);
   const handleDevToolsLinkClick = useCallback(
     () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
     [consoleHref, navigateToUrl]

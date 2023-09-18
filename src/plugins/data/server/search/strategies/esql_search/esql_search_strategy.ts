@@ -10,7 +10,6 @@ import { from } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy } from '../../types';
-import { getRequestMeta } from '../common/request_meta';
 
 export const esqlSearchStrategyProvider = (
   logger: Logger,
@@ -46,12 +45,12 @@ export const esqlSearchStrategyProvider = (
             meta: true,
           }
         );
-        const requestMeta = getRequestMeta(meta);
+        const transportRequestParams = meta?.request?.params;
         return {
           rawResponse: body,
           isPartial: false,
           isRunning: false,
-          ...(requestMeta ? { requestMeta } : {}),
+          ...(transportRequestParams ? { requestParams: transportRequestParams } : {}),
           warning: headers?.warning,
         };
       } catch (e) {

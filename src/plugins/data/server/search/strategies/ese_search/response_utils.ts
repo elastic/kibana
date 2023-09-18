@@ -15,7 +15,7 @@ import { getTotalLoaded } from '../es_search';
 export function toAsyncKibanaSearchResponse(
   response: AsyncSearchResponse,
   warning?: string,
-  requestMeta?: RequestMeta
+  requestParams?: RequestMeta
 ) {
   return {
     id: response.id,
@@ -23,7 +23,7 @@ export function toAsyncKibanaSearchResponse(
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),
-    ...(requestMeta ? { requestMeta } : {}),
+    ...(requestParams ? { requestParams } : {}),
     ...getTotalLoaded(response.response),
   };
 }

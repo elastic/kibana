@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { moveRequestMetaToTopLevel } from './move_request_meta_to_top_level';
+import { moveRequestParamsToTopLevel } from './move_request_params_to_top_level';
 import { RequestStatus } from './types';
 
-describe('moveRequestMetaToTopLevel', () => {
+describe('moveRequestParamsToTopLevel', () => {
   test('should move request meta from error response', () => {
     expect(
-      moveRequestMetaToTopLevel(RequestStatus.ERROR, {
+      moveRequestParamsToTopLevel(RequestStatus.ERROR, {
         json: {
           attributes: {},
           err: {
             message: 'simulated error',
-            requestMeta: {
+            requestParams: {
               method: 'POST',
               path: '/_query',
             },
@@ -32,7 +32,7 @@ describe('moveRequestMetaToTopLevel', () => {
           message: 'simulated error',
         },
       },
-      requestMeta: {
+      requestParams: {
         method: 'POST',
         path: '/_query',
       },
@@ -42,10 +42,10 @@ describe('moveRequestMetaToTopLevel', () => {
 
   test('should move request meta from ok response', () => {
     expect(
-      moveRequestMetaToTopLevel(RequestStatus.OK, {
+      moveRequestParamsToTopLevel(RequestStatus.OK, {
         json: {
           rawResponse: {},
-          requestMeta: {
+          requestParams: {
             method: 'POST',
             path: '/_query',
           },
@@ -56,7 +56,7 @@ describe('moveRequestMetaToTopLevel', () => {
       json: {
         rawResponse: {},
       },
-      requestMeta: {
+      requestParams: {
         method: 'POST',
         path: '/_query',
       },

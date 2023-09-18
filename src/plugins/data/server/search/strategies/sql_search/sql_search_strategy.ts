@@ -21,7 +21,6 @@ import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
-import { getRequestMeta } from '../common/request_meta';
 
 export const sqlSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
@@ -85,7 +84,7 @@ export const sqlSearchStrategyProvider = (
         body,
         startTime,
         headers?.warning,
-        id ? undefined : getRequestMeta(meta)
+        meta?.request?.params
       );
     };
 

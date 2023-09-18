@@ -7,21 +7,22 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { KibanaResponseFactory } from '@kbn/core/server';
 import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {
   public errBody?: Record<string, any>;
-  public requestMeta?: unknown;
+  public requestParams?: ConnectionRequestParams;
   constructor(
     message: string,
     public readonly statusCode: number,
     errBody?: Record<string, any>,
-    requestMeta?: unknown
+    requestParams?: ConnectionRequestParams
   ) {
     super(message);
     this.errBody = errBody;
-    this.requestMeta = requestMeta;
+    this.requestParams = requestParams;
   }
 }
 
@@ -51,7 +52,7 @@ export function reportServerError(res: KibanaResponseFactory, err: KbnServerErro
     body: {
       message: err.message,
       attributes: err.errBody?.error,
-      ...(err.requestMeta ? { requestMeta: err.requestMeta } : {}),
+      ...(err.requestParams ? { requestParams: err.requestParams } : {}),
     },
   });
 }

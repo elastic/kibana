@@ -34,7 +34,6 @@ import {
   shimHitsTotal,
 } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
-import { getRequestMeta } from '../common/request_meta';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
@@ -82,7 +81,7 @@ export const enhancedEsSearchStrategyProvider = (
       return toAsyncKibanaSearchResponse(
         { ...body, response },
         headers?.warning,
-        id ? undefined : getRequestMeta(meta)
+        meta?.request?.params
       );
     };
 
@@ -136,10 +135,10 @@ export const enhancedEsSearchStrategyProvider = (
       );
 
       const response = esResponse.body as estypes.SearchResponse<any>;
-      const requestMeta = getRequestMeta(esResponse.meta);
+      const requestParams = esResponse.meta?.request?.params;
       return {
         rawResponse: shimHitsTotal(response, options),
-        ...(requestMeta ? { requestMeta } : {}),
+        ...(requestParams ? { requestParams } : {}),
         ...getTotalLoaded(response),
       };
     } catch (e) {
