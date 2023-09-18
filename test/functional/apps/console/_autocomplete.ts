@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('HTTP methods', async () => {
         const suggestions = {
           G: ['GET'],
-          P: ['PUT', 'POST'],
+          P: ['PUT', 'POST', 'PATCH'],
           D: ['DELETE'],
           H: ['HEAD'],
         };
@@ -234,6 +234,8 @@ GET _search
             dELETE dELETe dELEtE dELEte dELeTE dELeTe dELetE dELete dElETE dElETe dElEtE dElEte dEleTE dEleTe dEletE dElete
             deLETE deLETe deLEtE deLEte deLeTE deLeTe deLetE deLete delETE delETe delEtE delEte deleTE deleTe deletE delete
             HEAD HEAd HEaD HEad HeAD HeAd HeaD Head hEAD hEAd hEaD hEad heAD heAd heaD head
+            PATCH PATCh PATcH PATch PAtCH PAtCh PAtcH PAtch PaTCH PaTCh PaTcH PaTch PatCH PatCh PatcH Patch pATCH pATCh pATcH
+            pATch pAtCH pAtCh pAtcH pAtch paTCH paTCh paTcH paTch patCH patCh patcH patch
             `.split(/\s+/m)
           ),
           20 // 20 of 112 (approx. one-fifth) should be enough for testing
@@ -271,13 +273,44 @@ GET _search
         for (const char of ['/', '_']) {
           await PageObjects.console.sleepForDebouncePeriod();
           log.debug('Key type "%s"', char);
-          await PageObjects.console.enterText(char); // e.g. 'GET .kibana/' -> 'GET .kibana/_'
+          await PageObjects.console.enterText(char); // i.e. 'GET .kibana/' -> 'GET .kibana/_'
         }
 
         await retry.waitFor('autocomplete to be visible', () =>
           PageObjects.console.isAutocompleteVisible()
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      });
+
+      it('should activate auto-complete for multiple indices after comma in URL', async () => {
+        await PageObjects.console.enterText('GET /_cat/indices/.kibana');
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type ","');
+        await PageObjects.console.enterText(','); // i.e. 'GET /_cat/indices/.kibana,'
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type Ctrl+SPACE');
+        await PageObjects.console.pressCtrlSpace();
+
+        await retry.waitFor('autocomplete to be visible', () =>
+          PageObjects.console.isAutocompleteVisible()
+        );
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      });
+
+      it('should not activate auto-complete after comma following endpoint in URL', async () => {
+        await PageObjects.console.enterText('GET _search');
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type ","');
+        await PageObjects.console.enterText(','); // i.e. 'GET _search,'
+
+        await PageObjects.console.sleepForDebouncePeriod();
+        log.debug('Key type Ctrl+SPACE');
+        await PageObjects.console.pressCtrlSpace();
+
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
     });
 
