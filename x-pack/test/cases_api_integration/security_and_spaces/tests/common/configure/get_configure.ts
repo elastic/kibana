@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -46,11 +47,22 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a configuration', async () => {
-      await createConfiguration(supertest);
+      const customFields = {
+        customFields: [
+          { key: 'hello', label: 'text', type: CustomFieldTypes.TEXT, required: false },
+          { key: 'goodbye', label: 'toggle', type: CustomFieldTypes.TOGGLE, required: true },
+        ],
+      };
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: customFields,
+        })
+      );
       const configuration = await getConfiguration({ supertest });
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration[0]);
-      expect(data).to.eql(getConfigurationOutput());
+      expect(data).to.eql(getConfigurationOutput(false, customFields));
     });
 
     it('should get a single configuration', async () => {

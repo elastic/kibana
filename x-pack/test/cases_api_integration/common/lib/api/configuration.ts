@@ -38,6 +38,7 @@ export const getConfigurationRequest = ({
     } as CaseConnector,
     closure_type: 'close-by-user',
     owner: 'securitySolutionFixture',
+    customFields: [],
     ...overrides,
   };
 };
