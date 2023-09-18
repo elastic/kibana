@@ -36,6 +36,8 @@ jest.mock('../..', () => {
 });
 jest.mock('../../audit_logging');
 
+jest.mock('../../package_policies/populate_package_policy_assigned_agents_count');
+
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
