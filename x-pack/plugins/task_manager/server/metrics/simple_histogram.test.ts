@@ -176,4 +176,21 @@ describe('SimpleHistogram', () => {
 
     expect(histogram.get(true)).toEqual([]);
   });
+
+  test('should correctly serialize histogram data', () => {
+    const histogram = new SimpleHistogram(100, 10);
+    histogram.record(23);
+    histogram.record(34);
+    histogram.record(21);
+    histogram.record(56);
+    histogram.record(78);
+    histogram.record(33);
+    histogram.record(99);
+    histogram.record(1);
+    histogram.record(2);
+    expect(histogram.serialize()).toEqual({
+      counts: [2, 0, 2, 2, 0, 1, 0, 1, 0, 1],
+      values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+    });
+  });
 });
