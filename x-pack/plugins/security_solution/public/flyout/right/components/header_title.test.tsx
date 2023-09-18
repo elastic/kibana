@@ -17,7 +17,6 @@ import {
   FLYOUT_HEADER_TITLE_TEST_ID,
 } from './test_ids';
 import { HeaderTitle } from './header_title';
-import { EVENT_DETAILS } from './translations';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
@@ -118,6 +117,6 @@ describe('<HeaderTitle />', () => {
 
     const { getByTestId } = renderHeader(contextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(EVENT_DETAILS);
+    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Event details');
   });
 });
