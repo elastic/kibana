@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
-import { login } from '../../../tasks/login';
-import { getAgentListTable, visitFleetAgentList } from '../../../screens';
-import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
-import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import {
+  getAgentListTable,
+  visitFleetAgentList,
+} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens';
+import { getEndpointManagementPageList } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
+import { ensureResponseActionAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management';
 
 describe(
   'App Features for Security Complete PLI with Endpoint Complete Addon',

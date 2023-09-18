@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '@kbn/security-solution-plugin/common/endpoint/service/response_actions/constants';
-import { login } from '../../../tasks/login';
-import { getNoPrivilegesPage } from '../../../screens/endpoint_management/common';
-import { getEndpointManagementPageList } from '../../../screens/endpoint_management';
-import { ensureResponseActionAuthzAccess } from '../../../tasks/endpoint_management';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import { getNoPrivilegesPage } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/common';
+import { ensureResponseActionAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management';
+import { getEndpointManagementPageList } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
 
 describe(
-  'App Features for Security Complete PLI',
+  'App Features for Security Essential PLI',
   {
     env: {
-      ftrConfig: { productTypes: [{ product_line: 'security', product_tier: 'complete' }] },
+      ftrConfig: {
+        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+      },
     },
   },
   () => {
@@ -44,7 +46,7 @@ describe(
     }
 
     for (const { url, title } of deniedPages) {
-      it(`should not allow access to ${title}`, () => {
+      it(`should NOT allow access to ${title}`, () => {
         cy.visit(url);
         getNoPrivilegesPage().should('exist');
       });

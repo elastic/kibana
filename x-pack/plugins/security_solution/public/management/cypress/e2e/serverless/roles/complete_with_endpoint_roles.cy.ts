@@ -6,10 +6,10 @@
  */
 
 import { pick } from 'lodash';
-import { login } from '../../../tasks/login';
-import { ServerlessRoleName } from '../../../../../../../shared/lib';
+import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import type { ServerlessRoleName } from '../../../../../../../../test_serverless/shared/lib';
+import type { EndpointArtifactPageId } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
 import {
-  EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
@@ -21,21 +21,19 @@ import {
   openRowActionMenu,
   visitEndpointList,
   visitPolicyList,
-} from '../../../screens/endpoint_management';
+} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
   getAgentListTable,
   visitFleetAgentList,
-} from '../../../screens';
+} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens';
 import {
   getConsoleHelpPanelResponseActionTestSubj,
   openConsoleHelpPanel,
-} from '../../../screens/endpoint_management/response_console';
-import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
-import {
-  CyIndexEndpointHosts,
-  indexEndpointHosts,
-} from '../../../tasks/endpoint_management/index_endpoint_hosts';
+} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/response_console';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/policy_details';
+import type { CyIndexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',

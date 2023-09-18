@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import { login } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 import {
   getConsoleActionMenuItem,
   getUnIsolateActionMenuItem,
   openRowActionMenu,
   visitEndpointList,
-} from '../../screens/endpoint_management';
-import {
-  CyIndexEndpointHosts,
-  indexEndpointHosts,
-} from '../../tasks/endpoint_management/index_endpoint_hosts';
+} from '../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
+import type { CyIndexEndpointHosts } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'When on the Endpoint List in Security Essentials PLI',

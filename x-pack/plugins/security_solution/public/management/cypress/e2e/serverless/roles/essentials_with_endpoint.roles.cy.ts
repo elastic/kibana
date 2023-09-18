@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import { login } from '../../../tasks/login';
+import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import type { EndpointArtifactPageId } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
 import {
   getNoPrivilegesPage,
   getArtifactListEmptyStateAddButton,
   getEndpointManagementPageMap,
   getEndpointManagementPageList,
-  EndpointArtifactPageId,
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
   ensurePolicyListPageAuthzAccess,
-} from '../../../screens/endpoint_management';
+} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management';
 import {
   ensurePermissionDeniedScreen,
   getAgentListTable,
   visitFleetAgentList,
-} from '../../../screens';
-import { ServerlessRoleName } from '../../../../../../../shared/lib';
-import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/endpoint_management/policy_details';
-import {
-  CyIndexEndpointHosts,
-  indexEndpointHosts,
-} from '../../../tasks/endpoint_management/index_endpoint_hosts';
+} from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens';
+import type { ServerlessRoleName } from '../../../../../../../../test_serverless/shared/lib';
+import { ensurePolicyDetailsPageAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/policy_details';
+import type { CyIndexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'Roles for Security Essential PLI with Endpoint Essentials addon',

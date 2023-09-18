@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IndexedFleetEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { login } from '../../tasks/login';
-import { visitPolicyDetails } from '../../screens/endpoint_management/policy_details';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { login } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import { visitPolicyDetails } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/screens/endpoint_management/policy_details';
 
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
