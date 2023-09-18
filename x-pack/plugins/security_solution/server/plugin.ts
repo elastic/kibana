@@ -96,6 +96,7 @@ import { featureUsageService } from './endpoint/services/feature_usage';
 import { actionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
+import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
@@ -168,6 +169,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUiSettings(core.uiSettings, experimentalFeatures);
     appFeaturesService.init(plugins.features);
 
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+
     this.ruleMonitoringService.setup(core, plugins);
 
     if (experimentalFeatures.riskScoringPersistence) {
@@ -176,6 +179,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,
         taskManager: plugins.taskManager,
+        telemetry: core.analytics,
       });
     }
 

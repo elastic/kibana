@@ -18,7 +18,8 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDataStreamAdapter } from '@kbn/alerting-plugin/server';
-
+import { parseIntervalAsSecond } from '@kbn/task-manager-plugin/server/lib/intervals';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AfterKeys, IdentifierType } from '../../../../common/risk_engine';
 import type { StartPlugins } from '../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
@@ -49,11 +50,13 @@ export const registerRiskScoringTask = ({
   kibanaVersion,
   logger,
   taskManager,
+  telemetry,
 }: {
   getStartServices: StartServicesAccessor<StartPlugins>;
   kibanaVersion: string;
   logger: Logger;
   taskManager: TaskManagerSetupContract | undefined;
+  telemetry: AnalyticsServiceSetup;
 }): void => {
   if (!taskManager) {
     logger.info('Task Manager is unavailable; skipping risk engine task registration.');
@@ -91,7 +94,7 @@ export const registerRiskScoringTask = ({
       title: 'Entity Analytics Risk Engine - Risk Scoring Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
-      createTaskRunner: createTaskRunnerFactory({ logger, getRiskScoreService }),
+      createTaskRunner: createTaskRunnerFactory({ logger, getRiskScoreService, telemetry }),
     },
   });
 };
@@ -153,10 +156,12 @@ export const runTask = async ({
   getRiskScoreService,
   logger,
   taskInstance,
+  telemetry,
 }: {
   logger: Logger;
   getRiskScoreService: GetRiskScoreService;
   taskInstance: ConcreteTaskInstance;
+  telemetry: AnalyticsServiceSetup;
 }): Promise<{
   state: RiskScoringTaskState;
 }> => {
@@ -237,17 +242,47 @@ export const runTask = async ({
 
   updatedState.scoresWritten = scoresWritten;
 
+  const taskCompletedTime = moment().utc().toISOString();
+
+  const taskCompletionTimeSeconds = moment(taskCompletedTime).diff(
+    moment(taskExecutionTime),
+    'seconds'
+  );
+
+  let isRunMoreThanInteval = false;
+  const intervalSeconds = taskInstance?.schedule?.interval;
+  if (intervalSeconds) {
+    isRunMoreThanInteval = taskCompletionTimeSeconds > parseIntervalAsSecond(intervalSeconds);
+  }
+
+  const telemetryEvent = {
+    scoresWritten,
+    taskCompletionTimeSeconds,
+    isRunMoreThanInteval,
+  };
+
+  telemetry.reportEvent('risk_score_execution_success', telemetryEvent);
+
   log('task run completed');
+  log(JSON.stringify(telemetryEvent));
   return {
     state: updatedState,
   };
 };
 
 const createTaskRunnerFactory =
-  ({ logger, getRiskScoreService }: { logger: Logger; getRiskScoreService: GetRiskScoreService }) =>
+  ({
+    logger,
+    getRiskScoreService,
+    telemetry,
+  }: {
+    logger: Logger;
+    getRiskScoreService: GetRiskScoreService;
+    telemetry: AnalyticsServiceSetup;
+  }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     return {
-      run: async () => runTask({ getRiskScoreService, logger, taskInstance }),
+      run: async () => runTask({ getRiskScoreService, logger, taskInstance, telemetry }),
       cancel: async () => {},
     };
   };
