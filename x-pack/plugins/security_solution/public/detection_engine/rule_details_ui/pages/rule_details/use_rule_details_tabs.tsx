@@ -86,11 +86,11 @@ export const useRuleDetailsTabs = ({
 
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const canReadEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
+  const canCrudEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
 
   const canWriteEndpointExceptions = useMemo(
-    () => !listsConfigLoading && !needsListsConfiguration && canReadEndpointExceptions,
-    [canReadEndpointExceptions, listsConfigLoading, needsListsConfiguration]
+    () => !listsConfigLoading && !needsListsConfiguration && canCrudEndpointExceptions,
+    [canCrudEndpointExceptions, listsConfigLoading, needsListsConfiguration]
   );
 
   useEffect(() => {

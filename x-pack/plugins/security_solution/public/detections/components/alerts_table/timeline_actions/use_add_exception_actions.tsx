@@ -78,11 +78,11 @@ export const useAlertExceptionActions = ({
 
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
-  const canReadEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
+  const canCrudEndpointExceptions = useHasSecurityCapability('crudEndpointExceptions');
 
   const canWriteEndpointExceptions = useMemo(
-    () => !listsConfigLoading && !needsListsConfiguration && canReadEndpointExceptions,
-    [canReadEndpointExceptions, listsConfigLoading, needsListsConfiguration]
+    () => !listsConfigLoading && !needsListsConfiguration && canCrudEndpointExceptions,
+    [canCrudEndpointExceptions, listsConfigLoading, needsListsConfiguration]
   );
   // Endpoint exceptions are available for:
   // Serverless Endpoint Essentials/Complete PLI and
