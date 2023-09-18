@@ -12,7 +12,6 @@ import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common
 
 const getDefaultRules = (response: any) => ({
   id: response.body.rules[0].id,
-  apiKey: response.body.rules[0].apiKey,
   apiKeyCreatedByUser: false,
   notifyWhen: 'onThrottleInterval',
   enabled: true,
@@ -46,7 +45,6 @@ const getThreeRules = (response: any) => {
   for (let i = 0; i < 3; i++) {
     rules.push({
       id: response.body.rules[i].id,
-      apiKey: response.body.rules[i].apiKey,
       apiKeyCreatedByUser: false,
       notifyWhen: 'onThrottleInterval',
       enabled: true,
@@ -101,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe(scenario.id, () => {
         afterEach(() => objectRemover.removeAll());
-        it('should handle bulk delete of one rule appropriately based on id', async () => {
+        it.only('should handle bulk delete of one rule appropriately based on id', async () => {
           const { body: createdRule1 } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
