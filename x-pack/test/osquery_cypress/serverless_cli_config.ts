@@ -24,7 +24,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...securitySolutionCypressConfig.get('esTestCluster.serverArgs'),
         'http.host=0.0.0.0',
-        `--xpack.fleet.internal.fleetServerStandalone=true`,
       ],
     },
 
@@ -35,8 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
         `--xpack.fleet.packages.0.name=osquery_manager`,
         `--xpack.fleet.packages.0.version=latest`,
-        `--xpack.fleet.internal.fleetServerStandalone=true`,
-        '--server.ssl.enabled=true',
       ],
     },
 

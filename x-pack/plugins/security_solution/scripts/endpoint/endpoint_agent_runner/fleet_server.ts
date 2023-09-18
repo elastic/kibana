@@ -457,7 +457,6 @@ const addFleetServerHostToFleetSettings = async (
       is_default: !exitingFleetServerHostUrl,
     };
 
-    console.log({ newFleetHostEntry });
     const { item } = await kbnClient
       .request<PostFleetServerHostsResponse>({
         method: 'POST',
@@ -491,10 +490,8 @@ ${chalk.bold(chalk.cyan('xpack.fleet.internal.fleetServerStandalone: false'))}
     log.verbose(item);
     log.indent(-4);
 
-    console.log({ item });
     return item;
   } catch (error) {
-    console.log({ error });
     log.error(dump(error));
     log.indent(-4);
     throw error;
