@@ -57,7 +57,7 @@ export const findCspRuleTemplateRequest = schema.object({
       schema.literal('metadata.benchmark.rule_number'),
     ],
     {
-      defaultValue: 'metadata.name',
+      defaultValue: 'metadata.benchmark.rule_number',
     }
   ),
 
