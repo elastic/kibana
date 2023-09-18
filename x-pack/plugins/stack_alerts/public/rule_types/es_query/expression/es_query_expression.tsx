@@ -351,6 +351,7 @@ export const EsQueryExpression: React.FC<
           (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
+        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
       />
 
       <EuiSpacer />

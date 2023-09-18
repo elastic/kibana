@@ -6,146 +6,216 @@
  */
 
 import * as React from 'react';
-import { shallow } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import { GroupByExpression } from './group_by_over';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { render, screen, fireEvent, configure } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 describe('group by expression', () => {
-  it('renders with builtin group by types', () => {
+  configure({ testIdAttribute: 'data-test-subj' });
+  it('renders with builtin group by types', async () => {
     const onChangeSelectedTermField = jest.fn();
     const onChangeSelectedGroupBy = jest.fn();
     const onChangeSelectedTermSize = jest.fn();
-    const wrapper = shallow(
-      <GroupByExpression
-        errors={{ termSize: [], termField: [] }}
-        fields={[]}
-        groupBy={'all'}
-        onChangeSelectedGroupBy={onChangeSelectedGroupBy}
-        onChangeSelectedTermField={onChangeSelectedTermField}
-        onChangeSelectedTermSize={onChangeSelectedTermSize}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="overExpressionSelect"]')).toMatchInlineSnapshot(`
-      <EuiSelect
-        data-test-subj="overExpressionSelect"
-        onChange={[Function]}
-        options={
-          Array [
-            Object {
-              "text": "all documents",
-              "value": "all",
-            },
-            Object {
-              "text": "top",
-              "value": "top",
-            },
-          ]
-        }
-        value="all"
-      />
-    `);
-  });
-
-  it('renders with aggregation type fields', () => {
-    const onChangeSelectedTermField = jest.fn();
-    const onChangeSelectedGroupBy = jest.fn();
-    const onChangeSelectedTermSize = jest.fn();
-    const wrapper = shallow(
-      <GroupByExpression
-        errors={{ termSize: [], termField: [] }}
-        fields={[
-          {
-            normalizedType: 'number',
-            name: 'test',
-            type: 'long',
-            searchable: true,
-            aggregatable: true,
-          },
-        ]}
-        groupBy={'top'}
-        onChangeSelectedGroupBy={onChangeSelectedGroupBy}
-        onChangeSelectedTermField={onChangeSelectedTermField}
-        onChangeSelectedTermSize={onChangeSelectedTermSize}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="fieldsExpressionSelect"]')).toMatchInlineSnapshot(`
-        <EuiSelect
-          data-test-subj="fieldsExpressionSelect"
-          isInvalid={false}
-          onBlur={[Function]}
-          onChange={[Function]}
-          options={
-            Array [
-              Object {
-                "text": "Select a field",
-                "value": "",
-              },
-              Object {
-                "text": "test",
-                "value": "test",
-              },
-            ]
-          }
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[]}
+          groupBy={'all'}
+          onChangeSelectedGroupBy={onChangeSelectedGroupBy}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+          onChangeSelectedTermSize={onChangeSelectedTermSize}
         />
-    `);
-  });
-
-  it('renders with default aggreagation type preselected if no aggType was set', () => {
-    const onChangeSelectedTermField = jest.fn();
-    const onChangeSelectedGroupBy = jest.fn();
-    const onChangeSelectedTermSize = jest.fn();
-    const wrapper = shallow(
-      <GroupByExpression
-        errors={{ termSize: [], termField: [] }}
-        fields={[]}
-        groupBy={'all'}
-        onChangeSelectedGroupBy={onChangeSelectedGroupBy}
-        onChangeSelectedTermField={onChangeSelectedTermField}
-        onChangeSelectedTermSize={onChangeSelectedTermSize}
-      />
+      </IntlProvider>
     );
-    wrapper.simulate('click');
-    expect(wrapper.find('[value="all"]').length > 0).toBeTruthy();
-    expect(
-      wrapper.contains(
-        <FormattedMessage
-          id="xpack.triggersActionsUI.common.expressionItems.groupByType.overButtonLabel"
-          defaultMessage="over"
-        />
-      )
-    ).toBeTruthy();
+    fireEvent.click(screen.getByTestId('groupByExpression'));
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+
+    expect(screen.getByRole('option', { name: 'all documents' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'top' })).toBeInTheDocument();
   });
 
   it('clears selected agg field if fields does not contain current selection', async () => {
     const onChangeSelectedTermField = jest.fn();
-    const wrapper = mountWithIntl(
-      <GroupByExpression
-        errors={{ termSize: [], termField: [] }}
-        fields={[
-          {
-            normalizedType: 'number',
-            name: 'test',
-            type: 'long',
-            searchable: true,
-            aggregatable: true,
-          },
-        ]}
-        termField="notavailable"
-        groupBy={'all'}
-        onChangeSelectedGroupBy={() => {}}
-        onChangeSelectedTermSize={() => {}}
-        onChangeSelectedTermField={onChangeSelectedTermField}
-      />
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'test',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termField="notavailable"
+          groupBy={'top'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(undefined);
+  });
+
+  it('clears selected agg field if there is unknown field', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'test',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termField={['test', 'unknown']}
+          groupBy={'top'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(undefined);
+  });
+
+  it('clears selected agg field if groupBy field is all', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'test',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termField={['test']}
+          groupBy={'all'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(1);
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(undefined);
+  });
 
-    expect(onChangeSelectedTermField).toHaveBeenCalledWith('');
+  it('calls onChangeSelectedTermField when a termField is selected', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'field1',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+            {
+              normalizedType: 'number',
+              name: 'field2',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termSize={1}
+          groupBy={'top'}
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+        />
+      </IntlProvider>
+    );
+
+    expect(onChangeSelectedTermField).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('groupByExpression'));
+
+    expect(await screen.findByText(/You are in a dialog/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+
+    const option1 = screen.getByText('field1');
+    expect(option1).toBeInTheDocument();
+    fireEvent.click(option1);
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith('field1');
+
+    const option2 = screen.getByText('field2');
+    expect(option2).toBeInTheDocument();
+    fireEvent.click(option2);
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith('field2');
+  });
+
+  it('calls onChangeSelectedTermField when multiple termFields are selected', async () => {
+    const onChangeSelectedTermField = jest.fn();
+    render(
+      <IntlProvider locale="en">
+        <GroupByExpression
+          errors={{ termSize: [], termField: [] }}
+          fields={[
+            {
+              normalizedType: 'number',
+              name: 'field1',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+            {
+              normalizedType: 'number',
+              name: 'field2',
+              type: 'long',
+              searchable: true,
+              aggregatable: true,
+            },
+          ]}
+          termSize={1}
+          groupBy="top"
+          onChangeSelectedGroupBy={() => {}}
+          onChangeSelectedTermSize={() => {}}
+          onChangeSelectedTermField={onChangeSelectedTermField}
+          canSelectMultiTerms={true}
+        />
+      </IntlProvider>
+    );
+    expect(onChangeSelectedTermField).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('groupByExpression'));
+
+    expect(await screen.findByText(/You are in a dialog/)).toBeInTheDocument();
+
+    // dropdown is closed
+    expect(screen.queryByText('field1')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
+
+    // dropdown is open
+    expect(screen.getByText('field1')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('field1'));
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith('field1');
+
+    fireEvent.click(screen.getByText('field2'));
+    expect(onChangeSelectedTermField).toHaveBeenCalledTimes(2);
+    expect(onChangeSelectedTermField).toHaveBeenCalledWith(['field1', 'field2']);
   });
 });
