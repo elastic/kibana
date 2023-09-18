@@ -17360,7 +17360,6 @@
     "xpack.idxMgmt.dataStreamDetailPanel.generationToolTip": "为数据流创建的后备索引的累积计数",
     "xpack.idxMgmt.dataStreamDetailPanel.healthTitle": "运行状况",
     "xpack.idxMgmt.dataStreamDetailPanel.healthToolTip": "数据流的当前后备索引的运行状况",
-    "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage": "无",
     "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle": "索引生命周期策略",
     "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip": "用于管理数据流数据的索引生命周期策略",
     "xpack.idxMgmt.dataStreamDetailPanel.indexTemplateTitle": "索引模板",
