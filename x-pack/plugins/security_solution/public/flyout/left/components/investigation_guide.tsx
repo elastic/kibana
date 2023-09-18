@@ -26,10 +26,6 @@ export const InvestigationGuide: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
-  if (!dataFormattedForFieldBrowser || error) {
-    return null;
-  }
-
   if (loading) {
     return (
       <EuiFlexGroup
@@ -45,7 +41,7 @@ export const InvestigationGuide: React.FC = () => {
 
   return (
     <>
-      {basicAlertData.ruleId && ruleNote ? (
+      {!error && basicAlertData.ruleId && ruleNote ? (
         <InvestigationGuideView
           basicData={basicAlertData}
           ruleNote={ruleNote}
@@ -53,25 +49,25 @@ export const InvestigationGuide: React.FC = () => {
           showFullView={true}
         />
       ) : (
-        <div data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
+        <p data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.investigationGuideNoData"
-            defaultMessage="An investigation guide has not been created for this rule. Refer to this {documentation} to learn more about adding investigation guides."
+            id="xpack.securitySolution.flyout.left.investigation.noDataDescription"
+            defaultMessage="There’s no investigation guide for this rule. {documentation} to add one."
             values={{
               documentation: (
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params"
+                  href="https://www.elastic.co/guide/en/security/current/rules-ui-management.html#edit-rules-settings"
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.documentDetails.investigationGuideDocumentationLink"
-                    defaultMessage="documentation"
+                    id="xpack.securitySolution.flyout.left.investigation.noDataLinkText"
+                    defaultMessage="Edit the rule's settings"
                   />
                 </EuiLink>
               ),
             }}
           />
-        </div>
+        </p>
       )}
     </>
   );

@@ -278,6 +278,7 @@
     {
       "groupName": "platform security modules",
       "matchPackageNames": [
+        "css.escape",
         "node-forge",
         "formik",
         "@types/node-forge",
@@ -285,7 +286,8 @@
         "tough-cookie",
         "@types/tough-cookie",
         "xml-crypto",
-        "@types/xml-crypto"
+        "@types/xml-crypto",
+        "@kayahr/text-encoding"
       ],
       "reviewers": [
         "team:kibana-security"

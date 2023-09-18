@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CORRELATIONS_SAME_SOURCE_ALERTS } from '../../shared/translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID } from './test_ids';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
@@ -38,7 +38,6 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
     originalEventId,
     scopeId,
   });
-  const title = `${dataCount} ${CORRELATIONS_SAME_SOURCE_ALERTS(dataCount)}`;
 
   if (error) {
     return null;
@@ -46,11 +45,23 @@ export const RelatedAlertsBySameSourceEvent: React.VFC<RelatedAlertsBySameSource
 
   return (
     <CorrelationsDetailsAlertsTable
-      title={title}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.sourceAlertsTitle"
+          defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by source event"
+          values={{ count: dataCount }}
+        />
+      }
       loading={loading}
       alertIds={data}
       scopeId={scopeId}
       eventId={eventId}
+      noItemsMessage={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.sourceAlertsNoDataDescription"
+          defaultMessage="No related source events."
+        />
+      }
       data-test-subj={CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TEST_ID}
     />
   );

@@ -17,7 +17,7 @@ import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';
-import { aggregateRulesRoute } from './aggregate_rules';
+import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
 import { findRulesRoute, findInternalRulesRoute } from './find_rules';
@@ -47,6 +47,7 @@ import { cloneRuleRoute } from './clone_rule';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
+import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/create_maintenance_window';
 import { getMaintenanceWindowRoute } from './maintenance_window/get_maintenance_window';
@@ -129,4 +130,5 @@ export function defineRoutes(opts: RouteOptions) {
   registerRulesValueSuggestionsRoute(router, licenseState, config$!);
   registerFieldsRoute(router, licenseState);
   bulkGetMaintenanceWindowRoute(router, licenseState);
+  getScheduleFrequencyRoute(router, licenseState);
 }

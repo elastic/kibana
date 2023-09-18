@@ -7,10 +7,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { find } from 'lodash/fp';
 import { EuiTreeView } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
-import { ANALYZER_PREVIEW_TITLE } from './translations';
-import { ANCESTOR_ID, RULE_PARAMETERS_INDEX } from '../../shared/constants/field_names';
+import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
 import { useRightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
@@ -38,7 +38,7 @@ export const AnalyzerPreview: React.FC = () => {
   const processDocumentId =
     documentId && Array.isArray(documentId.values) ? documentId.values[0] : '';
 
-  const index = find({ category: 'kibana', field: RULE_PARAMETERS_INDEX }, data);
+  const index = find({ category: 'kibana', field: RULE_INDICES }, data);
   const indices = index?.values ?? [];
 
   const { statsNodes } = useAlertPrevalenceFromProcessTree({
@@ -67,7 +67,12 @@ export const AnalyzerPreview: React.FC = () => {
       <EuiTreeView
         items={items}
         display="compressed"
-        aria-label={ANALYZER_PREVIEW_TITLE}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.flyout.right.visualizations.analyzerPreview.treeViewAriaLabel',
+          {
+            defaultMessage: 'Analyzer preview',
+          }
+        )}
         showExpansionArrows
       />
     </div>

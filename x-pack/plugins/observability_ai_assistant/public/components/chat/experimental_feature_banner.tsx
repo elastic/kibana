@@ -16,33 +16,32 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import illustration from '../../assets/illustration.svg';
+import illustration from '../../assets/illustration.png';
 
 export function ExperimentalFeatureBanner() {
   return (
-    <>
+    <div>
       <EuiPanel color="warning" paddingSize="s" hasBorder={false}>
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiImage
-              src={illustration}
-              alt="Decorative image"
-              size="xxs"
-              width={100}
-              height={30}
-            />
+            <EuiImage src={illustration} alt="Decorative image" height={30} />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+            <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap>
               <FormattedMessage
                 id="xpack.observabilityAiAssistant.experimentalFunctionBanner.title"
                 defaultMessage="This feature is currently in {techPreview} and may contain issues."
-                values={{ techPreview: <strong>Tech Preview</strong> }}
+                values={{ techPreview: <strong>Technical preview</strong> }}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton color="warning" href="https://ela.st/obs-ai-assistant" target="_blank">
+            <EuiButton
+              data-test-subj="observabilityAiAssistantExperimentalFeatureBannerGiveFeedbackButton"
+              color="warning"
+              href="https://ela.st/obs-ai-assistant"
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.observabilityAiAssistant.experimentalFunctionBanner.feedbackButton',
                 { defaultMessage: 'Give feedback' }
@@ -52,6 +51,6 @@ export function ExperimentalFeatureBanner() {
         </EuiFlexGroup>
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-    </>
+    </div>
   );
 }
