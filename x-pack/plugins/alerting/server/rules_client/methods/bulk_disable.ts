@@ -219,6 +219,7 @@ const bulkDisableRulesWithOCC = async (
 
   return {
     errors,
+    // TODO: delete the casting when we do versioning of bulk disable api
     rules: disabledRules as Array<SavedObjectsBulkUpdateObject<RuleAttributes>>,
     accListSpecificForBulkOperation: [taskIdsToDisable, taskIdsToDelete],
   };

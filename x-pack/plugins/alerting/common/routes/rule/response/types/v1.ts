@@ -13,7 +13,6 @@ import {
   ruleLastRunSchemaV1,
   monitoringSchemaV1,
 } from '..';
-import type { RuleTypeParams, SanitizedRule } from '../../../../../server/types';
 
 export type RuleParams = TypeOf<typeof ruleParamsSchemaV1>;
 export type RuleSnoozeSchedule = TypeOf<typeof ruleSnoozeScheduleSchemaV1>;
@@ -55,5 +54,3 @@ export interface RuleResponse<Params extends RuleParams = never> {
   running?: RuleResponseSchemaType['running'];
   view_in_app_relative_url?: RuleResponseSchemaType['view_in_app_relative_url'];
 }
-
-export type RuleBulkResponse<Params extends RuleTypeParams = never> = SanitizedRule<Params>;

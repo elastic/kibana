@@ -7,7 +7,6 @@
 
 import {
   SavedObjectsClientContract,
-  // SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core/server';

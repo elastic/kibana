@@ -29,7 +29,7 @@ import type {
   BulkDeleteRulesResult,
   BulkDeleteRulesRequestParams,
 } from './types';
-import { bulkDeleteRulesRequestParamsSchema } from '../../../../../common/routes/rule/apis/bulk_delete';
+import { validateCommonBulkOptions } from './validation';
 import type { RuleAttributes } from '../../../../data/rule/types';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -42,9 +42,9 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   options: BulkDeleteRulesRequestParams
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
-    bulkDeleteRulesRequestParamsSchema.validate(options);
+    validateCommonBulkOptions(options);
   } catch (error) {
-    throw Boom.badRequest(`Error validating create data - ${error.message}`);
+    throw Boom.badRequest(`Error validating bulk delete data - ${error.message}`);
   }
 
   const { ids, filter } = options;

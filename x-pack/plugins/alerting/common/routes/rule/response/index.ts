@@ -20,7 +20,6 @@ export {
 export type {
   RuleParams,
   RuleResponse,
-  RuleBulkResponse,
   RuleSnoozeSchedule,
   RuleLastRun,
   Monitoring,
@@ -73,7 +72,6 @@ export type {
 export type {
   RuleParams as RuleParamsV1,
   RuleResponse as RuleResponseV1,
-  RuleBulkResponse as RuleBulkResponseV1,
   RuleSnoozeSchedule as RuleSnoozeScheduleV1,
   RuleLastRun as RuleLastRunV1,
   Monitoring as MonitoringV1,
