@@ -7,6 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { aws4Interceptor } from 'aws4-axios';
 import { initBedrockDashboard } from './create_dashboard';
 import {
   BedrockRunActionParamsSchema,
@@ -19,7 +20,7 @@ import type {
   BedrockRunActionParams,
   BedrockRunActionResponse,
 } from '../../../common/bedrock/types';
-import { SUB_ACTION } from '../../../common/bedrock/constants';
+import { DEFAULT_BEDROCK_REGION, SUB_ACTION } from '../../../common/bedrock/constants';
 import {
   BedrockDashboardActionParams,
   BedrockDashboardActionResponse,
@@ -28,16 +29,24 @@ import {
 export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockSecrets> {
   private url;
   private model;
-  private key;
-  private secret;
+  private interceptor;
 
   constructor(params: ServiceParams<BedrockConfig, BedrockSecrets>) {
     super(params);
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
-    this.key = this.secrets.accessKey;
-    this.secret = this.secrets.secret;
+
+    this.interceptor = aws4Interceptor({
+      options: {
+        region: DEFAULT_BEDROCK_REGION,
+        service: 'bedrock',
+      },
+      credentials: {
+        accessKeyId: this.secrets.accessKey,
+        secretAccessKey: this.secrets.secret,
+      },
+    });
 
     this.registerSubActions();
   }
@@ -75,16 +84,16 @@ export class BedrockConnector extends SubActionConnector<BedrockConfig, BedrockS
   }
 
   public async runApi({ body }: BedrockRunActionParams): Promise<BedrockRunActionResponse> {
+    console.log('url', `${this.url}/model/${this.model}/invoke`);
     const response = await this.request({
       url: `${this.url}/model/${this.model}/invoke`,
       method: 'post',
       responseSchema: BedrockRunActionResponseSchema,
       data: body,
       headers: {
-        ['access-key']: this.key,
-        secret: this.secret,
-        ['content-type']: 'application/json',
+        accept: '*/*',
       },
+      interceptor: this.interceptor,
     });
     return response.data;
   }

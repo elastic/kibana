@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
+import { InternalAxiosRequestConfig } from 'axios';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -36,6 +37,7 @@ export type SubActionRequestParams<R> = {
   url: string;
   responseSchema: Type<R>;
   method?: Method;
+  interceptor?: (config: InternalAxiosRequestConfig<R>) => Promise<InternalAxiosRequestConfig<R>>;
 } & AxiosRequestConfig;
 
 export type IService<Config, Secrets> = new (

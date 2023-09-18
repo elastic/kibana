@@ -12,9 +12,14 @@ import { EuiLink } from '@elastic/eui';
 import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_URL } from '../../../common/bedrock/constants';
 import * as i18n from './translations';
 
-export const DEFAULT_BODY = `{
-   "prompt": "\n\nHuman:Hi there, how old is the moon? \n\nAssistant:",
-}`;
+const human = '\n\nHuman:';
+const assistant = '\n\nAssistant:';
+
+export const DEFAULT_BODY = JSON.stringify({
+  prompt: `${human} Hello world! ${assistant}`,
+  max_tokens_to_sample: 300,
+  stop_sequences: [human],
+});
 
 export const bedrockConfig: ConfigFieldSchema[] = [
   {
