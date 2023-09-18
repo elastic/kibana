@@ -28,19 +28,19 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --tag               Image tag of ESS to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
-      --image             Full path of ESS image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
+      --tag               Image tag of ES serverless to run from ${SERVERLESS_REPO} [default: ${SERVERLESS_TAG}]
+      --image             Full path of ES serverless image to run, has precedence over tag. [default: ${SERVERLESS_IMG}]
       
-      --background        Start ESS without attaching to the first node's logs
+      --background        Start ES serverless without attaching to the first node's logs
       --basePath          Path to the directory where the ES cluster will store data
       --clean             Remove existing file system object store before running
-      --kill              Kill running ESS nodes if detected on startup
+      --kill              Kill running ES serverless nodes if detected on startup
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
-      --ssl               Enable HTTP SSL on Elasticsearch
+      --ssl               Enable HTTP SSL on the ES cluster
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
       
-      -E                  Additional key=value settings to pass to Elasticsearch
+      -E                  Additional key=value settings to pass to ES
       -F                  Absolute paths for files to mount into containers
 
     Examples:
