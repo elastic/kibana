@@ -86,7 +86,7 @@ export function useModelActions({
       .then((result) => {
         let canManagePipelines = false;
         if (isSecurityHasPrivilegesResponse(result)) {
-          canManagePipelines = result.cluster.manage_ingest_pipelines;
+          canManagePipelines = result.hasPrivileges.cluster.manage_ingest_pipelines;
         }
         if (isMounted) {
           setCanManageIngestPipelines(canManagePipelines);

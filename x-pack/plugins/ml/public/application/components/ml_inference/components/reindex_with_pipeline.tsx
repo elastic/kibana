@@ -198,9 +198,8 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
             ableToReindex = privilege.securityDisabled === true;
           }
           if (isSecurityHasPrivilegesResponse(privilege)) {
-            ableToReindex = privilege.has_all_requested === true;
+            ableToReindex = privilege.hasPrivileges.has_all_requested === true;
           }
-
           setCanReindex(ableToReindex);
         } catch (e) {
           const error = extractErrorMessage(e);

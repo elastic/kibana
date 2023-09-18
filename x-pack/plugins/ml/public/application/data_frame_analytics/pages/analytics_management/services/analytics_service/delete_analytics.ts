@@ -156,7 +156,7 @@ export const canDeleteIndex = async (
       canDelete = privilege.securityDisabled === true;
     }
     if (isSecurityHasPrivilegesResponse(privilege)) {
-      canDelete = privilege.has_all_requested === true;
+      canDelete = privilege.hasPrivileges.has_all_requested === true;
     }
     return canDelete;
   } catch (e) {

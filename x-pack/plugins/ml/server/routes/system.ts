@@ -82,7 +82,7 @@ export function systemRoutes(
             const body = await asCurrentUser.security.hasPrivileges({ body: request.body });
             return response.ok({
               body: {
-                ...body,
+                hasPrivileges: body,
                 upgradeInProgress,
               },
             });
