@@ -145,6 +145,6 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
         ownFocus: false,
       }
     );
-    overlayTracker?.openOverlay(handle, { focusPanelId: embeddable.id });
+    overlayTracker?.openOverlay(handle);
   }
 }
