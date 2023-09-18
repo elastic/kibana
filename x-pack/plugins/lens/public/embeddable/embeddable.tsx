@@ -754,6 +754,10 @@ export class Embeddable
     return String(language).toUpperCase();
   }
 
+  /**
+   * Gets the Lens embeddable's datasource and visualization states
+   * updates the embeddable input
+   */
   async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
@@ -794,16 +798,31 @@ export class Embeddable
        * Here we are converting the by reference panels to by value when user is inline editing
        */
       this.updateInput({ attributes: attrs, savedObjectId: undefined });
-      // should load again the user messages, otherwise the embeddable state is stuck in an error state
+      /**
+       * Should load again the user messages,
+       * otherwise the embeddable state is stuck in an error state
+       */
       this.loadUserMessages(attrs);
     }
   }
 
+  /**
+   * Callback which allows the navigation to the editor.
+   * Used for the Edit in Lens link inside the inline editing flyout.
+   */
   private async navigateToLensEditor() {
+    const executionContext = this.getExecutionContext();
+    /**
+     * The origininating app variable is very important for the Save and Return button
+     * of the editor to work properly.
+     * The best way to get it dynamically is from the execution context but for the dashboard
+     * it needs to be pluralized
+     */
     const transferState = {
-      // ToDo: this must come from the consumers of the embeddable
-      // Change it to be a prop when we add support for inline editing outside from the dashboard
-      originatingApp: 'dashboards',
+      originatingApp:
+        executionContext?.type === 'dashboard'
+          ? 'dashboards'
+          : executionContext?.type ?? 'dashboards',
       valueInput: this.getExplicitInput(),
       embeddableId: this.id,
       searchSessionId: this.getInput().searchSessionId,
@@ -1469,7 +1488,10 @@ export class Embeddable
     this.updateOutput({
       defaultTitle: this.savedVis.title,
       defaultDescription: this.savedVis.description,
-      editable: this.getIsEditable() && !this.isTextBasedLanguage(),
+      /** lens visualizations allow inline editing action
+       *  navigation to the editor is allowed through the flyout
+       */
+      editable: false,
       title,
       description,
       editPath: getEditPath(savedObjectId),

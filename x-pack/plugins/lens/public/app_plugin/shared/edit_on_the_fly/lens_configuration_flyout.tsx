@@ -274,7 +274,7 @@ export function LensEditConfigurationFlyout({
             </EuiFlexItem>
             {navigateToLensEditor && (
               <EuiFlexItem grow={false}>
-                <EuiLink onClick={navigateToLensEditor}>
+                <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
                   {i18n.translate('xpack.lens.config.editLinkLabel', {
                     defaultMessage: 'Edit in Lens',
                   })}
