@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.jobConfig,
             testData.datafeedConfig
           );
-          await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.navigateToApp();
         });
 
         after(async () => {
