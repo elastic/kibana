@@ -81,12 +81,7 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(
-        body,
-        startTime,
-        headers?.warning,
-        meta?.request?.params
-      );
+      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning, meta?.request?.params);
     };
 
     const cancel = async () => {

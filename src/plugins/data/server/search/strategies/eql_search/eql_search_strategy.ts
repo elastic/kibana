@@ -79,7 +79,7 @@ export const eqlSearchStrategyProvider = (
 
         return toEqlKibanaSearchResponse(
           response as TransportResult<EqlSearchResponse>,
-          (response as TransportResult<EqlSearchResponse>).meta?.request?.params,
+          (response as TransportResult<EqlSearchResponse>).meta?.request?.params
         );
       };
 

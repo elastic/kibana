@@ -41,7 +41,11 @@ const openInSearchProfilerLabel = i18n.translate('inspector.requests.openInSearc
 /**
  * @internal
  */
-export const RequestCodeViewer = ({ indexPattern, requestParams, json }: RequestCodeViewerProps) => {
+export const RequestCodeViewer = ({
+  indexPattern,
+  requestParams,
+  json,
+}: RequestCodeViewerProps) => {
   const { services } = useKibana<InspectorPluginStartDeps>();
 
   const navigateToUrl = services.application?.navigateToUrl;
