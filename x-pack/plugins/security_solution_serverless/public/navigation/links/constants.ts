@@ -39,6 +39,7 @@ export enum ExternalPageName {
   // Ref: packages/default-nav/ml/default_navigation.ts
   mlOverview = 'ml:overview',
   mlNotifications = 'ml:notifications',
+  mlMemoryUsage = 'ml:memoryUsage',
   mlAnomalyDetection = 'ml:anomalyDetection',
   mlAnomalyExplorer = 'ml:anomalyExplorer',
   mlSingleMetricViewer = 'ml:singleMetricViewer',

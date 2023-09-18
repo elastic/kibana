@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.10.1>>
 * <<release-notes-8.10.0>>
 * <<release-notes-8.9.2>>
 * <<release-notes-8.9.1>>
@@ -48,10 +49,48 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.10.1]]
+== {kib} 8.10.1
+
+The 8.10.1 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.10.1]]
+=== Bug Fixes
+
+Dashboard::
+* Fixes content editor flyout footer ({kibana-pull}165907[#165907]).
+Elastic Security::
+For the Elastic Security 8.10.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Show snapshot version in agent upgrade modal and allow custom values ({kibana-pull}165978[#165978]).
+Observability::
+* Fix(slo): Use comma-separarted list of source index for transform ({kibana-pull}166294[#166294]).
+Presentation::
+* Fixes air-gapped enviroment hitting `400` error when loading fonts for layer ({kibana-pull}165986[#165986]).
+
 [[release-notes-8.10.0]]
 == {kib} 8.10.0
 
+IMPORTANT: {kib} 8.10.0 has been withdrawn.
+
 For information about the {kib} 8.10.0 release, review the following information.
+
+[float]
+[[security-updates-v8.10.0]]
+=== Security Updates
+
+* An issue was discovered by Elastic whereby sensitive information is recorded
+in {kib} logs in the event of an error. The issue impacts only {kib} version
+8.10.0 when logging in the JSON layout or when the pattern layout is configured
+to log the `%meta` pattern.
++
+The issue is resolved in {kib} 8.10.1. Version 8.10.0 has been removed from our
+download sites.
++
+For more information, see our related
+https://discuss.elastic.co/t/kibana-8-10-1-security-update/343287[security
+announcement].
 
 [float]
 [[breaking-changes-8.10.0]]
@@ -393,6 +432,28 @@ Discover::
 == {kib} 8.9.0
 
 For information about the {kib} 8.9.0 release, review the following information.
+
+[float]
+[[known-issues-8.9.0]]
+=== Known issues
+
+// tag::known-issue-160116[]
+[discrete]
+.Changes to Lens visualizations do not appear in the saved object.
+[%collapsible]
+====
+*Details* +
+Changes to Lens visualizations do not appear in the saved object. 
+
+*Impact* +
+When you remove fields from Lens visualizations, then save your changes, the removed fields continue to appear in the Lens visualization saved objects. 
+For example, when you remove runtime fields from a Lens visualization and {kib}, then inspect the Lens visualization saved object, the runtime fields continue to appear and an error message appears.
+
+*Workaround* +
+In 8.10.0, we are addressing this issue by merging the existing and changed saved object instead of replacing the saved object.
+
+====
+// end::known-issue-161249[]
 
 [float]
 [[breaking-changes-8.9.0]]

@@ -43,7 +43,7 @@ export default function ({
       await browser.setScreenshotSize(1000, 500);
       // adding this navigate adds the timestamp hash to the url which invalidates previous
       // session.  If we don't do this, the colors on the visualizations are different and the screenshots won't match.
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     after(async function () {
