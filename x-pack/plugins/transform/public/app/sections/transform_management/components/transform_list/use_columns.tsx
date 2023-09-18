@@ -284,7 +284,7 @@ export const useColumns = (
         if (progress === undefined && isBatchTransform === true) {
           return null;
         }
-        if (!item.stats) return NoStatsFallbackComponent;
+        if (!item.stats) return <NoStatsFallbackComponent />;
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">

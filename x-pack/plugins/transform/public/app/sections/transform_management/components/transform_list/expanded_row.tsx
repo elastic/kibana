@@ -71,7 +71,7 @@ const NoStatsFallbackTabContent = ({
         title={
           <FormattedMessage
             id="xpack.transform.transformList.noStatsAvailable"
-            defaultMessage="No stats available for this tranform."
+            defaultMessage="No stats available for this transform."
           />
         }
       />

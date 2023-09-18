@@ -71,7 +71,7 @@ export const getDeleteActionDisabledMessage = ({
 
   const disabled = items.some(transformCanNotBeDeleted);
 
-  if (disabled || disabled) {
+  if (disabled) {
     return isBulkAction === true
       ? i18n.translate('xpack.transform.transformList.deleteBulkActionDisabledToolTipContent', {
           defaultMessage: 'One or more selected transforms must be stopped in order to be deleted.',
