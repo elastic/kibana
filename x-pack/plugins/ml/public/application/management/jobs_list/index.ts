@@ -25,6 +25,7 @@ const renderApp = (
   share: SharePluginStart,
   data: DataPublicPluginStart,
   fieldFormats: FieldFormatsStart,
+  isServerless: boolean,
   spacesApi?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
@@ -37,6 +38,7 @@ const renderApp = (
       spacesApi,
       usageCollection,
       fieldFormats,
+      isServerless,
     }),
     element
   );
@@ -48,7 +50,8 @@ const renderApp = (
 export async function mountApp(
   core: CoreSetup<MlStartDependencies>,
   params: ManagementAppMountParams,
-  deps: { usageCollection?: UsageCollectionSetup }
+  deps: { usageCollection?: UsageCollectionSetup },
+  isServerless: boolean
 ) {
   const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -60,6 +63,7 @@ export async function mountApp(
     pluginsStart.share,
     pluginsStart.data,
     pluginsStart.fieldFormats,
+    isServerless,
     pluginsStart.spaces,
     deps.usageCollection
   );
