@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
+      await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
     });
 
     it('should convert a by value TSVB viz to a Lens viz', async () => {

@@ -70,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by reference TSVB viz to a Lens viz', async () => {
-      await dashboard.goToApp();
+      await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickVisType('metrics');

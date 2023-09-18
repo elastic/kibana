@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await dashboard.goToApp(); // required for svl until dashboard PO navigation is fixed
+      await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
       await dashboard.gotoDashboardEditMode('Convert to Lens - TSVB - Gauge');
       await timePicker.setDefaultAbsoluteRange();
     });
