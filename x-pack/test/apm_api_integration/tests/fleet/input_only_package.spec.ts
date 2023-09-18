@@ -115,7 +115,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       it('has permissions in the agent policy', async () => {
-        console.log({ permissions });
         expect(permissions).to.eql({
           cluster: ['cluster:monitor/main'],
           indices: [
