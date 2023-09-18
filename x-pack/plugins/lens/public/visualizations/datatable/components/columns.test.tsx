@@ -12,6 +12,7 @@ import { ReactNode } from 'react';
 import { FormatFactory } from '../../../../common/types';
 import type { LensCellValueAction } from '../../../types';
 import { createGridColumns } from './columns';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const table: Datatable = {
   type: 'datatable',
@@ -34,6 +35,8 @@ const cellValueAction: LensCellValueAction = {
   execute: () => {},
 };
 
+const notifications = notificationServiceMock.createStartContract();
+
 type CreateGridColumnsParams = Parameters<typeof createGridColumns>;
 const callCreateGridColumns = (
   params: Partial<{
@@ -51,8 +54,9 @@ const callCreateGridColumns = (
     headerRowHeight: CreateGridColumnsParams[11];
     headerRowLines: CreateGridColumnsParams[12];
     columnCellValueActions: CreateGridColumnsParams[13];
-    closeCellPopover: CreateGridColumnsParams[14];
-    columnFilterable: CreateGridColumnsParams[15];
+    toasts: CreateGridColumnsParams[14];
+    closeCellPopover: CreateGridColumnsParams[15];
+    columnFilterable: CreateGridColumnsParams[16];
   }> = {}
 ) =>
   createGridColumns(
@@ -70,6 +74,7 @@ const callCreateGridColumns = (
     params.headerRowHeight ?? 'auto',
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
+    params.toasts ?? notifications.toasts,
     params.closeCellPopover ?? jest.fn(),
     params.columnFilterable ?? []
   );
