@@ -42,7 +42,7 @@ const HOST_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID);
 
 describe('<EntitiesDetails />', () => {
   it('renders entities details correctly', () => {
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <LeftPanelContext.Provider value={mockContextValue}>
           <EntitiesDetails />
@@ -52,6 +52,7 @@ describe('<EntitiesDetails />', () => {
     expect(getByTestId(ENTITIES_DETAILS_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no data message if user name and host name are not available', () => {
@@ -69,6 +70,9 @@ describe('<EntitiesDetails />', () => {
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
+      'Host and user information are unavailable for this alert.'
+    );
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });
@@ -96,6 +100,9 @@ describe('<EntitiesDetails />', () => {
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ENTITIES_DETAILS_NO_DATA_TEST_ID)).toHaveTextContent(
+      'Host and user information are unavailable for this alert.'
+    );
     expect(queryByTestId(USER_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(HOST_TEST_ID)).not.toBeInTheDocument();
   });

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Update Saved Query Schema
-  version: '2023-10-31
+  version: '2023-10-31'
 paths: { }
 components:
   parameters:
@@ -11,12 +11,6 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/UpdateSavedQueryRequestParams'
-    UpdateSavedQueryRequestQueryBody:
-      name: query
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/UpdateSavedQueryRequestBody'
   schemas:
     UpdateSavedQueryRequestParams:
       type: object

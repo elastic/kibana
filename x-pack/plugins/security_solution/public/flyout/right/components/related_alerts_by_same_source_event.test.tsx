@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   SUMMARY_ROW_ICON_TEST_ID,
@@ -31,6 +32,13 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID
 );
 
+const renderRelatedAlertsBySameSourceEvent = () =>
+  render(
+    <IntlProvider locale="en">
+      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
+    </IntlProvider>
+  );
+
 describe('<RelatedAlertsBySameSourceEvent />', () => {
   it('should render many related alerts correctly', () => {
     (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
@@ -39,9 +47,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
       dataCount: 2,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsBySameSourceEvent();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -56,9 +62,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsBySameSourceEvent();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -71,9 +75,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
       loading: true,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsBySameSourceEvent();
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
 
@@ -83,9 +85,7 @@ describe('<RelatedAlertsBySameSourceEvent />', () => {
       error: true,
     });
 
-    const { container } = render(
-      <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
-    );
+    const { container } = renderRelatedAlertsBySameSourceEvent();
     expect(container).toBeEmptyDOMElement();
   });
 });

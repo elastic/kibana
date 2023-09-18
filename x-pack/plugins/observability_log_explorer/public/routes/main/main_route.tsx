@@ -5,34 +5,42 @@
  * 2.0.
  */
 
-import { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import React from 'react';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import React, { useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export interface ObservablityLogExplorerMainRouteProps {
+  appParams: AppMountParameters;
   core: CoreStart;
-  history: ScopedHistory;
-  logExplorer: LogExplorerPluginStart;
-  observabilityShared: ObservabilitySharedPluginStart;
-  serverless?: ServerlessPluginStart;
 }
 
 export const ObservablityLogExplorerMainRoute = ({
+  appParams,
   core,
-  history,
-  logExplorer,
-  observabilityShared,
-  serverless,
 }: ObservablityLogExplorerMainRouteProps) => {
+  const { services } = useKibanaContextForPlugin();
+  const { logExplorer, observabilityShared, serverless } = services;
   useBreadcrumbs(noBreadcrumbs, core.chrome, serverless);
 
+  const { history, setHeaderActionMenu, theme$ } = appParams;
+
+  const [state$] = useState(() => new BehaviorSubject({}));
+
   return (
-    <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
-      <logExplorer.LogExplorer scopedHistory={history} />
-    </ObservabilityLogExplorerPageTemplate>
+    <>
+      <LogExplorerTopNavMenu
+        setHeaderActionMenu={setHeaderActionMenu}
+        services={services}
+        state$={state$}
+        theme$={theme$}
+      />
+      <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
+        <logExplorer.LogExplorer scopedHistory={history} state$={state$} />
+      </ObservabilityLogExplorerPageTemplate>
+    </>
   );
 };

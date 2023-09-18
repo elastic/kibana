@@ -7,20 +7,26 @@
 
 import type { FleetAuthzRouter } from '../../services/security';
 
+import { API_VERSIONS } from '../../../common/constants';
+
 import { DATA_STREAM_API_ROUTES } from '../../constants';
 
 import { getListHandler } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List of data streams
-  router.get(
-    {
+  router.versioned
+    .get({
       path: DATA_STREAM_API_ROUTES.LIST_PATTERN,
-      validate: false,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    getListHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: false,
+      },
+      getListHandler
+    );
 };
