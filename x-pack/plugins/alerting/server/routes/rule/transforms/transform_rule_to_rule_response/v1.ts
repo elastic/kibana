@@ -49,11 +49,21 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   consumer: rule.consumer,
   schedule: rule.schedule,
   actions: rule.actions.map(
-    ({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
+    ({
+      group,
+      id,
+      actionTypeId,
+      params,
+      frequency,
+      uuid,
+      alertsFilter,
+      useAlertDataForTemplate,
+    }) => ({
       group,
       id,
       params,
       connector_type_id: actionTypeId,
+      use_alert_data_for_template: useAlertDataForTemplate ?? false,
       ...(frequency
         ? {
             frequency: {

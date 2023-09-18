@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { templateActionVariable } from '../lib';
@@ -21,6 +22,7 @@ interface Props {
   label: string;
   helpText?: string;
   errors?: string[];
+  http?: HttpStart;
 }
 
 export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({

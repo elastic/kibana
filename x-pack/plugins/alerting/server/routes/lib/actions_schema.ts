@@ -68,7 +68,7 @@ export const actionsSchema = schema.arrayOf(
         ),
       })
     ),
-    version: schema.maybe(schema.number()),
+    use_alert_data_for_template: schema.maybe(schema.boolean()),
   }),
   { defaultValue: [] }
 );

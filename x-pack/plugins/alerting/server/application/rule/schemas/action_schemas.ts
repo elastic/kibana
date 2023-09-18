@@ -65,6 +65,7 @@ export const actionDomainSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionDomainAlertsFilterSchema),
+  useAlertDataAsTemplate: schema.maybe(schema.boolean()),
 });
 
 /**
@@ -89,4 +90,5 @@ export const actionSchema = schema.object({
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });

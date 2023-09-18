@@ -32,6 +32,10 @@ export const EmailParamsFields = ({
   onBlur = noop,
   showEmailSubjectAndMessage = true,
   useDefaultMessage,
+  ruleTypeId,
+  http,
+  useAlertDataForTemplate,
+  setActionUseAlertDataForTemplate,
 }: ActionParamsProps<EmailActionParams>) => {
   const isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
   const { to, cc, bcc, subject, message } = actionParams;
@@ -252,6 +256,10 @@ export const EmailParamsFields = ({
             }
           )}
           errors={(errors.message ?? []) as string[]}
+          ruleTypeId={ruleTypeId}
+          http={http}
+          useAlertDataForTemplate={useAlertDataForTemplate}
+          setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
         />
       )}
     </>

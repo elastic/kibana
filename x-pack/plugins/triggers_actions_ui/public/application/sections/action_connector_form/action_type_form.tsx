@@ -72,6 +72,7 @@ export type ActionTypeFormProps = {
   onAddConnector: () => void;
   onConnectorSelected: (id: string) => void;
   onDeleteAction: () => void;
+  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionAlertsFilterProperty: (
@@ -91,7 +92,7 @@ export type ActionTypeFormProps = {
   defaultNotifyWhenValue?: RuleNotifyWhenType;
   featureId: string;
   producerId: string;
-  ruleTypeId?: string;
+  ruleTypeId: string;
   hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<
@@ -120,6 +121,7 @@ export const ActionTypeForm = ({
   onAddConnector,
   onConnectorSelected,
   onDeleteAction,
+  setActionUseAlertDataForTemplate,
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
@@ -148,7 +150,7 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
-    http: { basePath },
+    http,
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -465,13 +467,15 @@ export const ActionTypeForm = ({
             <Suspense fallback={null}>
               <ParamsFieldsComponent
                 actionParams={actionItem.params as any}
+                useAlertDataForTemplate={actionItem.useAlertDataForTemplate}
                 index={index}
                 errors={actionParamsErrors.errors}
+                setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
                 editAction={(key: string, value: RuleActionParam, i: number) => {
                   setWarning(
                     validateParamsForWarnings(
                       value,
-                      basePath.publicBaseUrl,
+                      http.basePath.publicBaseUrl,
                       availableActionVariables
                     )
                   );
@@ -487,6 +491,8 @@ export const ActionTypeForm = ({
                 useDefaultMessage={useDefaultMessage}
                 actionConnector={actionConnector}
                 executionMode={ActionConnectorMode.ActionForm}
+                ruleTypeId={ruleTypeId}
+                http={http}
               />
               {warning ? (
                 <>

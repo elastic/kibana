@@ -8,6 +8,7 @@
 import type { Moment } from 'moment';
 import type { ComponentType, ReactNode, RefObject } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -214,6 +215,7 @@ export interface ActionParamsProps<TParams> {
   index: number;
   editAction: (key: string, value: RuleActionParam, index: number) => void;
   errors: IErrorObject;
+  ruleTypeId: string;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   useDefaultMessage?: boolean;
@@ -223,6 +225,9 @@ export interface ActionParamsProps<TParams> {
   showEmailSubjectAndMessage?: boolean;
   executionMode?: ActionConnectorMode;
   onBlur?: (field?: string) => void;
+  http: HttpStart;
+  useAlertDataForTemplate?: boolean;
+  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
 }
 
 export interface Pagination {
