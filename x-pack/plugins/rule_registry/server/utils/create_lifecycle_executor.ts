@@ -143,7 +143,6 @@ export const createLifecycleExecutor =
         wrapped: previousState as State,
         trackedAlerts: {},
         trackedAlertsRecovered: {},
-        isLifecycleAlert: true,
       })
     )(wrappedStateRt<State>().decode(previousState));
 
@@ -419,7 +418,6 @@ export const createLifecycleExecutor =
         wrapped: wrappedExecutorResult?.state ?? ({} as State),
         trackedAlerts: writeAlerts ? nextTrackedAlerts : {},
         trackedAlertsRecovered: writeAlerts ? nextTrackedAlertsRecovered : {},
-        isLifecycleAlert: true,
       },
     };
   };

@@ -37,9 +37,9 @@ export const untrackRuleAlerts = async (
 
       const untrackedAlertIds = Object.keys(untrackedAlerts);
 
-      const { isLifecycleAlert } = taskInstance.state?.alertTypeState ?? {
-        isLifecycleAlert: false,
-      };
+      const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+      const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
 
       // Untrack Stack alerts
       // TODO: Replace this loop with an Alerts As Data implmentation when Stack Rules use Alerts As Data
@@ -54,7 +54,7 @@ export const untrackRuleAlerts = async (
           ruleId: id,
           ruleName: attributes.name,
           ruleRevision: attributes.revision,
-          ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId),
+          ruleType,
           consumer: attributes.consumer,
           instanceId: alertId,
           alertUuid,
@@ -78,7 +78,6 @@ export const untrackRuleAlerts = async (
 
       // Untrack Lifecycle alerts (Alerts As Data-enabled)
       if (isLifecycleAlert) {
-        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
         const alertsClient = await context.alertsService?.createAlertsClient({
           namespace: context.namespace!,
           rule: {

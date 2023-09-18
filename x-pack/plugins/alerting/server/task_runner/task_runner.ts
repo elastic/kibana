@@ -793,18 +793,6 @@ export class TaskRunner<
     });
   }
 
-  async runUntrack(): Promise<RuleTaskRunResult> {
-    if (this.ruleType.executor.untrackLifecycleAlerts) {
-      await this.ruleType.executor.untrackLifecycleAlerts();
-    }
-    return {
-      state: {},
-      hasError: false,
-      monitoring: undefined,
-      schedule: undefined,
-    };
-  }
-
   async run(): Promise<RuleTaskRunResult> {
     if (this.isUntrack) {
       return this.runUntrack();
