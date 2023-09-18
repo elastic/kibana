@@ -275,10 +275,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       } else if (code && language === 'esql') {
         monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
         const parser = createAstGenerator();
-        const { errors: parserErrors } = parser.getAst(
+        const { ast, errors: parserErrors } = parser.getAst(
           editorModel.current,
           new monaco.Position(0, 1)
         );
+        console.log({ ast });
 
         if (parserErrors.length) {
           const monacoErrors = parserErrors.map((e) => {

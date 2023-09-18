@@ -14,6 +14,28 @@ import { AstListener } from '../ast/ast_factory';
 
 const ROOT_STATEMENT = 'singleStatement';
 
+function createParserListener(debug: boolean = false) {
+  const parserListener = new AstListener();
+  if (debug) {
+    let indentation = 0;
+    for (const prop of Object.getOwnPropertyNames(AstListener.prototype)) {
+      // @ts-expect-error
+      if (typeof parserListener[prop] === 'function' && /^(enter|exit)/.test(prop)) {
+        // @ts-expect-error
+        const oldFn = parserListener[prop];
+        // @ts-expect-error
+        parserListener[prop] = (...args) => {
+          indentation = Math.max(indentation + (/^exit/.test(prop) ? -1 : 0), 0);
+          console.log(`${Array(indentation).fill('\t').join('')}${prop}`);
+          indentation = indentation + (/^enter/.test(prop) ? 1 : 0);
+          return oldFn?.bind(parserListener)(...args);
+        };
+      }
+    }
+  }
+  return parserListener;
+}
+
 export function createAstGenerator() {
   return {
     getAst: (model: monaco.editor.IReadOnlyModel, position: monaco.Position) => {
@@ -22,12 +44,13 @@ export function createAstGenerator() {
       if (!text) {
         return { ast: [], errors: [] };
       }
-      const inputStream = CharStreams.fromString(text);
+      const inputStream = CharStreams.fromString(text.toLowerCase());
       const errorListener = new ANTLREErrorListener();
-      const parseListener = new AstListener();
+      const parseListener = createParserListener(true);
       const parser = getParser(inputStream, errorListener, parseListener);
 
       parser[ROOT_STATEMENT]();
+
       const ast = parseListener.getAstAndErrors();
       return ast;
     },

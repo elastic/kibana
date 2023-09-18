@@ -8,7 +8,7 @@
 
 import { CharStreams, type CodePointCharStream } from 'antlr4ts';
 import { monaco } from '../../monaco_imports';
-import { AutocompleteListener } from '../lib/autocomplete/autocomplete_listener';
+// import { AutocompleteListener } from '../lib/autocomplete/autocomplete_listener';
 import type { BaseWorkerDefinition } from '../../types';
 import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
 import { ANTLREErrorListener } from '../../common/error_listener';
@@ -47,13 +47,20 @@ export class ESQLWorker implements BaseWorkerDefinition {
     inputStream: CodePointCharStream | undefined
   ) {
     if (inputStream) {
-      const errorListener = new ANTLREErrorListener();
-      const parseListener = new AutocompleteListener();
-      const parser = getParser(inputStream, errorListener, parseListener);
+      // const errorListener = new ANTLREErrorListener();
+      // const parseListener = new AutocompleteListener();
+      // const parser = getParser(inputStream, errorListener, parseListener);
 
-      parser[ROOT_STATEMENT]();
+      // parser[ROOT_STATEMENT]();
 
-      return parseListener.getAutocompleteSuggestions();
+      // return parseListener.getAutocompleteSuggestions();
+      return {
+        suggestions: [],
+        userDefinedVariables: {
+          sourceIdentifiers: [],
+          policyIdentifiers: [],
+        },
+      };
     }
   }
 
