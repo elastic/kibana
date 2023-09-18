@@ -92,7 +92,7 @@ export interface TableListViewTableProps<
   editItem?(item: T): void;
 
   /**
-   * Handler to set edit action visiblity, and content editor readonly state per item. If not provided all items are considered editable.
+   * Handler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable.
    */
   itemIsEditable?(item: T): boolean;
 
@@ -146,6 +146,7 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
 export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
+  managed?: boolean;
   references: SavedObjectsReference[];
   type: string;
   attributes: {
@@ -459,7 +460,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      const isEditable = itemIsEditable?.(item) ?? true;
+      const isEditable = !item.managed && (itemIsEditable?.(item) ?? true);
 
       const close = openContentEditor({
         item: {
@@ -562,7 +563,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (v) => itemIsEditable?.(v) ?? true,
+          available: (v) => !v.managed && (itemIsEditable?.(v) ?? true),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
           'data-test-subj': `edit-action`,
