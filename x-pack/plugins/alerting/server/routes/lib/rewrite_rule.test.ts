@@ -60,7 +60,7 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
     lastExecutionDate: DATE_2020,
     lastDuration: 1000,
   },
-  actions: [defaultAction],
+  actions: [defaultAction, systemAction],
   scheduledTaskId: 'xyz456',
   snoozeSchedule: [],
   isSnoozedUntil: null,
@@ -92,27 +92,35 @@ describe('rewriteRule', () => {
     }
   });
 
-  it('should rewrite default actions correctly', () => {
-    const rewritten = rewriteRule(sampleRule);
-    for (const rewrittenAction of rewritten.actions) {
-      expect(Object.keys(rewrittenAction)).toEqual(
-        expect.arrayContaining(['group', 'id', 'connector_type_id', 'params', 'frequency'])
-      );
-
-      expect(
-        Object.keys((rewrittenAction as Omit<RuleDefaultAction, 'actionTypeId'>).frequency!)
-      ).toEqual(expect.arrayContaining(['summary', 'notify_when', 'throttle']));
-    }
-  });
-
-  it('should rewrite system actions correctly', () => {
-    const rewritten = rewriteRule({ ...sampleRule, actions: [systemAction] });
-    expect(Object.keys(rewritten.actions[0])).toEqual(
-      expect.arrayContaining(['id', 'connector_type_id', 'params', 'uuid', 'type'])
-    );
-
-    expect(Object.keys(rewritten.actions[0])).not.toEqual(
-      expect.arrayContaining(['group', 'frequency', 'alertsFilter'])
-    );
+  it('should rewrite actions correctly', () => {
+    const res = rewriteRule(sampleRule);
+    expect(res.actions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "alerts_filter": Object {
+            "query": Object {
+              "dsl": "{}",
+              "filters": Array [],
+              "kql": "test:1",
+            },
+          },
+          "connector_type_id": "bbb",
+          "frequency": Object {
+            "notify_when": "onThrottleInterval",
+            "summary": false,
+            "throttle": "1m",
+          },
+          "group": "default",
+          "id": "aaa",
+          "params": Object {},
+        },
+        Object {
+          "connector_type_id": "bbb",
+          "id": "system-action",
+          "params": Object {},
+          "uuid": "123",
+        },
+      ]
+    `);
   });
 });

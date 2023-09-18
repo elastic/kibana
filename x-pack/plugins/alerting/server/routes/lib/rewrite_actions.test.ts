@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { RuleActionTypes } from '../../../common';
-import { rewriteActionsReq, rewriteActionsRes } from './rewrite_actions';
+import { rewriteActionsReq, rewriteActionsRes, rewriteActionsResLegacy } from './rewrite_actions';
 
 describe('rewrite Actions', () => {
   const isSystemAction = (id: string) => id === 'system-action-id';
@@ -179,6 +180,34 @@ describe('rewrite Actions', () => {
 
     it('returns an empty array if the actions are empty', () => {
       expect(rewriteActionsReq([], isSystemAction)).toEqual([]);
+    });
+  });
+
+  describe('rewriteActionsResLegacy', () => {
+    const action = {
+      actionTypeId: 'test',
+      group: 'default',
+      id: '2',
+      params: {
+        foo: true,
+      },
+      type: RuleActionTypes.DEFAULT,
+    };
+
+    const systemAction = {
+      actionTypeId: 'test-2',
+      id: 'system_action-id',
+      params: {
+        foo: true,
+      },
+      type: RuleActionTypes.SYSTEM,
+    };
+
+    it('removes the type from the actions', () => {
+      expect(rewriteActionsResLegacy([action, systemAction])).toEqual([
+        omit(action, 'type'),
+        omit(systemAction, 'type'),
+      ]);
     });
   });
 });

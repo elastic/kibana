@@ -7,7 +7,8 @@
 import { omit } from 'lodash';
 import { isSystemAction } from '../../../common/system_actions/is_system_action';
 
-import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
+import { RuleTypeParams, SanitizedRule, RuleLastRun, SanitizedRuleResponse } from '../../types';
+import { AsApiContract } from './rewrite_request_case';
 
 export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
   const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;
@@ -39,7 +40,9 @@ export const rewriteRule = ({
   lastRun,
   nextRun,
   ...rest
-}: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
+}: SanitizedRule<RuleTypeParams> & {
+  activeSnoozes?: string[];
+}): AsApiContract<SanitizedRuleResponse<RuleTypeParams>> => ({
   ...rest,
   rule_type_id: alertTypeId,
   created_by: createdBy,
@@ -61,18 +64,17 @@ export const rewriteRule = ({
   },
   actions: actions.map((action) => {
     if (isSystemAction(action)) {
-      const { actionTypeId, ...restSystemAction } = action;
+      const { actionTypeId, type, ...restSystemAction } = action;
       return { ...restSystemAction, connector_type_id: action.actionTypeId };
     }
 
-    const { group, id, actionTypeId, params, frequency, uuid, alertsFilter, type } = action;
+    const { group, id, actionTypeId, params, frequency, uuid, alertsFilter } = action;
 
     return {
       group,
       id,
       params,
       connector_type_id: actionTypeId,
-      ...(type && { type }),
       ...(frequency
         ? {
             frequency: {
