@@ -84,7 +84,7 @@ export const SetAISearchChromeSearchDocsSection: React.FC = () => (
                             data-telemetry-id="entSearch-aiSearch-documentation-searchLabsRepoLink"
                             target="_blank"
                             href={docLinks.searchLabsRepo}
-                            external={true}
+                            external
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.learn.searchLabsRepoLinkText',
@@ -127,7 +127,7 @@ export const SetAISearchChromeSearchDocsSection: React.FC = () => (
                             data-telemetry-id="entSearch-aiSearch-documentation-aiSearchDocLink"
                             target="_blank"
                             href={docLinks.aiSearchDoc}
-                            external={true}
+                            external
                           >
                             {i18n.translate(
                               'xpack.enterpriseSearch.aiSearch.aiSearchDocsSection.doc.aiSearchDocLinkText',

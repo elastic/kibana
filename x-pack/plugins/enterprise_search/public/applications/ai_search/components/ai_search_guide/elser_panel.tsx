@@ -110,9 +110,12 @@ export const ElserPanel: React.FC = () => (
               values={{
                 elser: (
                   <EuiLink target="_blank" href={docLinks.elser} external={false}>
-                    {i18n.translate('xpack.enterpriseSearch.aiSearch.elser.description.elserLinkText', {
-                      defaultMessage: 'Elastic Learned Sparse Encoder v2',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.aiSearch.elser.description.elserLinkText',
+                      {
+                        defaultMessage: 'Elastic Learned Sparse Encoder v2',
+                      }
+                    )}
                   </EuiLink>
                 ),
               }}
