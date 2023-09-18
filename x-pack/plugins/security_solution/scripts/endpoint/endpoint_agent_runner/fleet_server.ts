@@ -53,7 +53,7 @@ import { dump } from './utils';
 import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
-const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet-server.yml');
+const FLEET_SERVER_CUSTOM_CONFIG = resolve(__dirname, './fleet_server.yml');
 
 export const runFleetServerIfNeeded = async (): Promise<
   { fleetServerContainerId: string; fleetServerAgentPolicyId: string } | undefined
