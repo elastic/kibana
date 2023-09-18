@@ -60,9 +60,21 @@ describe('test helper methods', () => {
     const typeK8s = getBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
     expect(typeK8s).toMatch('cis_k8s');
   });
+
   it('get benchmark type filter based on a benchmark id', () => {
     const typeFilter = getBenchmarkTypeFilter('cis_eks');
     expect(typeFilter).toMatch('csp-rule-template.attributes.metadata.benchmark.id: "cis_eks"');
+  });
+
+  it('should return a string with the correct filter when given a benchmark type and section', () => {
+    const type = 'cis_k8s';
+    const section = 'API Server';
+    const expectedFilter =
+      'csp-rule-template.attributes.metadata.benchmark.id: "cis_k8s" AND csp-rule-template.attributes.metadata.section: "API Server"';
+
+    const result = getBenchmarkTypeFilter(type, section);
+
+    expect(result).toEqual(expectedFilter);
   });
 
   describe('cleanupCredentials', () => {
