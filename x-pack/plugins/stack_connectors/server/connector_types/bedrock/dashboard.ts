@@ -9,11 +9,11 @@ import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 
-export const dashboardTitle = `Generative AI Token Usage`;
+export const dashboardTitle = `AWS Bedrock Token Usage`;
 
-export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAttributes> => {
+export const getBedrockDashboard = (dashboardId: string): SavedObject<DashboardAttributes> => {
   const ids: Record<string, string> = {
-    genAiSavedObjectId: dashboardId,
+    bedrockSavedObjectId: dashboardId,
     tokens: uuidv4(),
     totalTokens: uuidv4(),
     tag: uuidv4(),
@@ -23,7 +23,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
       description: 'Displays OpenAI token consumption per Kibana user',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"kibana.saved_objects: { type_id  : \\".gen-ai\\" } ","language":"kuery"},"filter":[]}',
+          '{"query":{"query":"kibana.saved_objects: { type_id  : \\".bedrock\\" } ","language":"kuery"},"filter":[]}',
       },
       optionsJSON:
         '{"useMargins":true,"syncColors":false,"syncCursor":true,"syncTooltips":false,"hidePanelTitles":false}',
@@ -125,7 +125,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                     yLeft: 0,
                     yRight: 0,
                   },
-                  yTitle: 'Sum of GenAi Completion + Prompt Tokens',
+                  yTitle: 'Sum of Bedrock Completion + Prompt Tokens',
                   axisTitlesVisibilitySettings: {
                     x: true,
                     yLeft: true,
@@ -133,7 +133,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                   },
                 },
                 query: {
-                  query: 'kibana.saved_objects:{ type_id: ".gen-ai"   }',
+                  query: 'kibana.saved_objects:{ type_id: ".bedrock"   }',
                   language: 'kuery',
                 },
                 filters: [],
@@ -146,7 +146,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                             label: 'GenAI Completion Tokens',
                             dataType: 'number',
                             operationType: 'sum',
-                            sourceField: 'kibana.action.execution.gen_ai.usage.completion_tokens',
+                            sourceField: 'kibana.action.execution.bedrock.usage.completion_tokens',
                             isBucketed: false,
                             scale: 'ratio',
                             params: {
@@ -177,10 +177,10 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                               includeIsRegex: false,
                               excludeIsRegex: false,
                               orderAgg: {
-                                label: 'Sum of kibana.action.execution.gen_ai.usage.total_tokens',
+                                label: 'Sum of kibana.action.execution.bedrock.usage.total_tokens',
                                 dataType: 'number',
                                 operationType: 'sum',
-                                sourceField: 'kibana.action.execution.gen_ai.usage.total_tokens',
+                                sourceField: 'kibana.action.execution.bedrock.usage.total_tokens',
                                 isBucketed: false,
                                 scale: 'ratio',
                                 params: {
@@ -192,10 +192,10 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                             customLabel: true,
                           },
                           'b0e390e4-d754-4eb4-9fcc-4347dadda394': {
-                            label: 'GenAi Prompt Tokens',
+                            label: 'Bedrock Prompt Tokens',
                             dataType: 'number',
                             operationType: 'sum',
-                            sourceField: 'kibana.action.execution.gen_ai.usage.prompt_tokens',
+                            sourceField: 'kibana.action.execution.bedrock.usage.prompt_tokens',
                             isBucketed: false,
                             scale: 'ratio',
                             params: {
@@ -233,10 +233,10 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                     sourceFilters: [],
                     fieldFormats: {},
                     runtimeFieldMap: {
-                      'kibana.action.execution.gen_ai.usage.completion_tokens': {
+                      'kibana.action.execution.bedrock.usage.completion_tokens': {
                         type: 'long',
                       },
-                      'kibana.action.execution.gen_ai.usage.prompt_tokens': {
+                      'kibana.action.execution.bedrock.usage.prompt_tokens': {
                         type: 'long',
                       },
                     },
@@ -298,7 +298,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                   ],
                 },
                 query: {
-                  query: 'kibana.saved_objects: { type_id  : ".gen-ai" } ',
+                  query: 'kibana.saved_objects: { type_id  : ".bedrock" } ',
                   language: 'kuery',
                 },
                 filters: [],
@@ -337,7 +337,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                             label: 'Sum of GenAI Total Tokens',
                             dataType: 'number',
                             operationType: 'sum',
-                            sourceField: 'kibana.action.execution.gen_ai.usage.total_tokens',
+                            sourceField: 'kibana.action.execution.bedrock.usage.total_tokens',
                             isBucketed: false,
                             scale: 'ratio',
                             params: {
@@ -374,7 +374,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
                     sourceFilters: [],
                     fieldFormats: {},
                     runtimeFieldMap: {
-                      'kibana.action.execution.gen_ai.usage.total_tokens': {
+                      'kibana.action.execution.bedrock.usage.total_tokens': {
                         type: 'long',
                       },
                     },
@@ -397,7 +397,7 @@ export const getGenAiDashboard = (dashboardId: string): SavedObject<DashboardAtt
     },
     coreMigrationVersion: '8.8.0',
     created_at: '2023-06-01T19:00:04.629Z',
-    id: ids.genAiSavedObjectId,
+    id: ids.bedrockSavedObjectId,
     managed: false,
     type: 'dashboard',
     typeMigrationVersion: '8.7.0',

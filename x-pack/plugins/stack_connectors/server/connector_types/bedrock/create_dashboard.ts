@@ -8,14 +8,14 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { Logger } from '@kbn/logging';
-import { getGenAiDashboard } from './dashboard';
+import { getBedrockDashboard } from './dashboard';
 
 export interface OutputError {
   message: string;
   statusCode: number;
 }
 
-export const initGenAiDashboard = async ({
+export const initBedrockDashboard = async ({
   logger,
   savedObjectsClient,
   dashboardId,
@@ -50,7 +50,7 @@ export const initGenAiDashboard = async ({
   try {
     await savedObjectsClient.create<DashboardAttributes>(
       'dashboard',
-      getGenAiDashboard(dashboardId).attributes,
+      getBedrockDashboard(dashboardId).attributes,
       {
         overwrite: true,
         id: dashboardId,
