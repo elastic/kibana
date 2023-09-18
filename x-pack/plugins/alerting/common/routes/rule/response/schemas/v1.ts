@@ -110,6 +110,7 @@ export const ruleExecutionStatusSchema = schema.object({
       reason: schema.oneOf([
         schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
+        schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
       ]),
       message: schema.string(),
     })
@@ -136,6 +137,7 @@ export const ruleLastRunSchema = schema.object({
         schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
         schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
+        schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
       ])
     )
   ),

@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiCheckbox,
   EuiEmptyPrompt,
+  EuiFormErrorText,
   EuiFormRow,
   EuiIcon,
   EuiLink,
@@ -21,7 +22,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { ISearchSource } from '@kbn/data-plugin/common';
+import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
@@ -40,7 +41,6 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
-import { RuleFlyoutKueryBar } from '../rule_kql_filter/kuery_bar';
 import { MetricsExplorerGroupBy } from './components/group_by';
 import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
 
@@ -62,11 +62,20 @@ export const defaultExpression = {
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
-  const { data, dataViews, dataViewEditor, docLinks } = useKibana().services;
+  const {
+    data,
+    dataViews,
+    dataViewEditor,
+    docLinks,
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana().services;
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
+  const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const derivedIndexPattern = useMemo<DataViewBase>(
@@ -81,7 +90,7 @@ export default function Expressions(props: Props) {
     const initSearchSource = async () => {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
 
-      if (!ruleParams.searchConfiguration) {
+      if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
         const defaultDataView = await data.dataViews.getDefaultDataView();
@@ -96,9 +105,33 @@ export default function Expressions(props: Props) {
         const createdSearchSource = await data.search.searchSource.create(
           initialSearchConfiguration
         );
-        setRuleParams('searchConfiguration', initialSearchConfiguration);
+        setRuleParams('searchConfiguration', {
+          ...initialSearchConfiguration,
+          ...(ruleParams.searchConfiguration?.query && {
+            query: ruleParams.searchConfiguration.query,
+          }),
+        });
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
+
+        if (createdSearchSource.getField('index')) {
+          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+          if (!timeFieldName) {
+            setDataViewTimeFieldError(
+              i18n.translate(
+                'xpack.observability.threshold.rule.alertFlyout.dataViewError.noTimestamp',
+                {
+                  defaultMessage:
+                    'The selected data view does not have a timestamp field, please select another data view.',
+                }
+              )
+            );
+          } else {
+            setDataViewTimeFieldError(undefined);
+          }
+        } else {
+          setDataViewTimeFieldError(undefined);
+        }
       } catch (error) {
         setParamsError(error);
       }
@@ -106,7 +139,31 @@ export default function Expressions(props: Props) {
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search.searchSource, data.dataViews]);
+  }, [data.search.searchSource, data.dataViews, dataView]);
+
+  useEffect(() => {
+    if (ruleParams.criteria && ruleParams.criteria.length) {
+      setTimeSize(ruleParams.criteria[0].timeSize);
+      setTimeUnit(ruleParams.criteria[0].timeUnit);
+    } else {
+      preFillAlertCriteria();
+    }
+
+    if (!ruleParams.filterQuery) {
+      preFillAlertFilter();
+    }
+
+    if (!ruleParams.groupBy) {
+      preFillAlertGroupBy();
+    }
+
+    if (typeof ruleParams.alertOnNoData === 'undefined') {
+      setRuleParams('alertOnNoData', true);
+    }
+    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
+      setRuleParams('alertOnGroupDisappear', true);
+    }
+  }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (metadata?.currentOptions?.metrics) {
@@ -123,7 +180,7 @@ export default function Expressions(props: Props) {
     (newDataView: DataView) => {
       const ruleCriteria = (ruleParams.criteria ? ruleParams.criteria.slice() : []).map(
         (criterion) => {
-          criterion.customMetrics?.forEach((metric) => {
+          criterion.metrics?.forEach((metric) => {
             metric.field = undefined;
           });
           return criterion;
@@ -168,10 +225,10 @@ export default function Expressions(props: Props) {
   );
 
   const onFilterChange = useCallback(
-    (filter: any) => {
-      setRuleParams('filterQuery', filter);
+    ({ query }: { query?: Query }) => {
+      setRuleParams('searchConfiguration', { ...ruleParams.searchConfiguration, query });
     },
-    [setRuleParams]
+    [setRuleParams, ruleParams.searchConfiguration]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -241,15 +298,27 @@ export default function Expressions(props: Props) {
   const preFillAlertFilter = useCallback(() => {
     const md = metadata;
     if (md && md.currentOptions?.filterQuery) {
-      setRuleParams('filterQuery', md.currentOptions.filterQuery);
+      setRuleParams('searchConfiguration', {
+        ...ruleParams.searchConfiguration,
+        query: {
+          query: md.currentOptions.filterQuery,
+          language: 'kuery',
+        },
+      });
     } else if (md && md.currentOptions?.groupBy && md.series) {
       const { groupBy } = md.currentOptions;
-      const filter = Array.isArray(groupBy)
+      const query = Array.isArray(groupBy)
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
         : `${groupBy}: "${md.series.id}"`;
-      setRuleParams('filterQuery', filter);
+      setRuleParams('searchConfiguration', {
+        ...ruleParams.searchConfiguration,
+        query: {
+          query,
+          language: 'kuery',
+        },
+      });
     }
-  }, [metadata, setRuleParams]);
+  }, [metadata, setRuleParams, ruleParams.searchConfiguration]);
 
   const preFillAlertGroupBy = useCallback(() => {
     const md = metadata;
@@ -257,30 +326,6 @@ export default function Expressions(props: Props) {
       setRuleParams('groupBy', md.currentOptions.groupBy);
     }
   }, [metadata, setRuleParams]);
-
-  useEffect(() => {
-    if (ruleParams.criteria && ruleParams.criteria.length) {
-      setTimeSize(ruleParams.criteria[0].timeSize);
-      setTimeUnit(ruleParams.criteria[0].timeUnit);
-    } else {
-      preFillAlertCriteria();
-    }
-
-    if (!ruleParams.filterQuery) {
-      preFillAlertFilter();
-    }
-
-    if (!ruleParams.groupBy) {
-      preFillAlertGroupBy();
-    }
-
-    if (typeof ruleParams.alertOnNoData === 'undefined') {
-      setRuleParams('alertOnNoData', true);
-    }
-    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      setRuleParams('alertOnGroupDisappear', true);
-    }
-  }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasGroupBy = useMemo(
     () => ruleParams.groupBy && ruleParams.groupBy.length > 0,
@@ -337,9 +382,9 @@ export default function Expressions(props: Props) {
   }
 
   const placeHolder = i18n.translate(
-    'xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder',
+    'xpack.observability.threshold.rule.alertFlyout.searchBar.placeholder',
     {
-      defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+      defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
 
@@ -363,6 +408,11 @@ export default function Expressions(props: Props) {
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
+      {dataViewTimeFieldError && (
+        <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
+          {dataViewTimeFieldError}
+        </EuiFormErrorText>
+      )}
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
@@ -373,13 +423,27 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <RuleFlyoutKueryBar
+      <SearchBar
+        appName="Custom threshold rule"
+        iconType="search"
         placeholder={placeHolder}
-        derivedIndexPattern={derivedIndexPattern}
-        onChange={debouncedOnFilterChange}
-        onSubmit={onFilterChange}
-        value={ruleParams.filterQuery}
+        indexPatterns={dataView ? [dataView] : undefined}
+        showQueryInput={true}
+        showQueryMenu={false}
+        showFilterBar={false}
+        showDatePicker={false}
+        showSubmitButton={false}
+        displayStyle="inPage"
+        onQueryChange={debouncedOnFilterChange}
+        onQuerySubmit={onFilterChange}
+        dataTestSubj="thresholdRuleUnifiedSearchBar"
+        query={ruleParams.searchConfiguration?.query as Query}
       />
+      {errors.filterQuery && (
+        <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
+          {errors.filterQuery}
+        </EuiFormErrorText>
+      )}
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
@@ -421,7 +485,7 @@ export default function Expressions(props: Props) {
                 <ExpressionChart
                   expression={e}
                   derivedIndexPattern={derivedIndexPattern}
-                  filterQuery={ruleParams.filterQuery}
+                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
                   timeFieldName={dataView?.timeFieldName}
                 />

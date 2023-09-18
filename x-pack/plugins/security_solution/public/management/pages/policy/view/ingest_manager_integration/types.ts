@@ -6,8 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { StartPlugins } from '../../../../../types';
-import type { UpsellingService } from '../../../../..';
 
 export interface FleetUiExtensionGetterOptions {
   coreStart: CoreStart;

@@ -552,6 +552,28 @@
           },
           {
             "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.i18n",
+            "type": "Object",
+            "tags": [],
+            "label": "i18n",
+            "description": [
+              "\nInternationalisation service"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-i18n-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nBrowserPluginApi",
+                "section": "def-common.I18nStart",
+                "text": "I18nStart"
+              }
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
             "id": "def-public.AiopsAppDependencies.fieldStats",
             "type": "Object",
             "tags": [],
@@ -654,6 +676,20 @@
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppDependencies.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -737,6 +773,22 @@
             "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ChangePointDetectionAppStateProps.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/change_point_detection/change_point_detection_root.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -816,6 +868,22 @@
                 "section": "def-public.AiopsAppDependencies",
                 "text": "AiopsAppDependencies"
               }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogCategorizationAppStateProps.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_app_state.tsx",
             "deprecated": false,
@@ -912,6 +980,22 @@
             "label": "stickyHistogram",
             "description": [
               "Option to make main histogram sticky"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisAppStateProps.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
             ],
             "signature": [
               "boolean | undefined"
@@ -1150,6 +1234,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.LogRateAnalysisContentWrapperProps.isServerless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isServerless",
+            "description": [
+              "Optional flag to indicate whether kibana is running in serverless"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

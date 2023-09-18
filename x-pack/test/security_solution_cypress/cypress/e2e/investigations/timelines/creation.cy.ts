@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { tag } from '../../../tags';
 
 import { getTimeline } from '../../../objects/timeline';
 
@@ -43,7 +42,7 @@ import {
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 
-describe.skip('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+describe.skip('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     deleteTimelines();
     login();
@@ -57,7 +56,7 @@ describe.skip('Create a timeline from a template', { tags: [tag.ESS, tag.SERVERL
 
   it(
     'Should have the same query and open the timeline modal',
-    { tags: tag.BROKEN_IN_SERVERLESS },
+    { tags: '@brokenInServerless' },
     () => {
       selectCustomTemplates();
       expandEventAction();
@@ -77,7 +76,7 @@ describe('Timelines', (): void => {
   });
 
   describe('Toggle create timeline from plus icon', () => {
-    context('Privileges: CRUD', { tags: tag.ESS }, () => {
+    context('Privileges: CRUD', { tags: '@ess' }, () => {
       beforeEach(() => {
         login();
         visit(OVERVIEW_URL);
@@ -90,7 +89,7 @@ describe('Timelines', (): void => {
       });
     });
 
-    context('Privileges: READ', { tags: tag.ESS }, () => {
+    context('Privileges: READ', { tags: '@ess' }, () => {
       beforeEach(() => {
         login(ROLES.reader);
         visit(OVERVIEW_URL, undefined, ROLES.reader);
@@ -112,7 +111,7 @@ describe('Timelines', (): void => {
 
   describe.skip(
     'Creates a timeline by clicking untitled timeline from bottom bar',
-    { tags: tag.BROKEN_IN_SERVERLESS },
+    { tags: '@brokenInServerless' },
     () => {
       beforeEach(() => {
         login();

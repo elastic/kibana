@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
 
-  describe('Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
+  // Issue: https://github.com/elastic/kibana/issues/165138
+  describe.skip('Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
@@ -81,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [2],
                 timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
+                metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
               },
             ],
             alertOnNoData: true,
@@ -165,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [2],
                 timeSize: 1,
                 timeUnit: 'm',
-                customMetrics: [{ name: 'A', filter: '', aggType: 'count' }],
+                metrics: [{ name: 'A', filter: '', aggType: 'count' }],
               },
             ],
             alertOnNoData: true,

@@ -131,7 +131,7 @@ export class SecurityUsageReportingTask {
         config: this.config,
       });
     } catch (err) {
-      this.logger.error(`failed to retrieve usage records: ${JSON.stringify(err)}`);
+      this.logger.error(`failed to retrieve usage records: ${err}`);
       return;
     }
 
@@ -153,7 +153,7 @@ export class SecurityUsageReportingTask {
           `usage records report was sent successfully: ${usageReportResponse.status}, ${usageReportResponse.statusText}`
         );
       } catch (err) {
-        this.logger.error(`Failed to send usage records report ${JSON.stringify(err)} `);
+        this.logger.error(`Failed to send usage records report ${err} `);
       }
     }
 
