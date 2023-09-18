@@ -7,7 +7,7 @@
 
 import { decode, encode, RisonValue } from '@kbn/rison';
 import * as lz from 'lz-string';
-import { decodeOrThrow } from '../../../common/runtime_types';
+import { decodeOrThrow } from '../runtime_types';
 import { DatasetEncodingError } from './errors';
 import { DatasetSelectionPlain, datasetSelectionPlainRT } from './types';
 

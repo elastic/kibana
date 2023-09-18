@@ -40,6 +40,7 @@ export const createLogExplorerProfileCustomizations =
       await logExplorerMachineModuleLoadable;
 
     const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
+      datasetsClient,
       stateContainer,
       toasts: core.notifications.toasts,
     });

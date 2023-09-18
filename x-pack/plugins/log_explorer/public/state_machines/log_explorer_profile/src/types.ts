@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
-import type { DatasetEncodingError, DatasetSelection } from '../../../utils/dataset_selection';
+import type { DatasetEncodingError, DatasetSelection } from '../../../../common/dataset_selection';
 
 export interface WithDatasetSelection {
   datasetSelection: DatasetSelection;
@@ -50,6 +50,10 @@ export type LogExplorerProfileTypeState =
       context: WithDatasetSelection & WithControlPanels;
     }
   | {
+      value: 'initialized.datasetSelection.validatingSelection';
+      context: WithDatasetSelection & WithControlPanels;
+    }
+  | {
       value: 'initialized.datasetSelection.idle';
       context: WithDatasetSelection & WithControlPanels;
     }
@@ -79,6 +83,9 @@ export type LogExplorerProfileContext = LogExplorerProfileTypeState['context'];
 export type LogExplorerProfileStateValue = LogExplorerProfileTypeState['value'];
 
 export type LogExplorerProfileEvent =
+  | {
+      type: 'LISTEN_TO_CHANGES';
+    }
   | {
       type: 'UPDATE_DATASET_SELECTION';
       data: DatasetSelection;

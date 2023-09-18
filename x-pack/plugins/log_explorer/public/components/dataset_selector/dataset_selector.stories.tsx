@@ -11,14 +11,14 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
-import { Dataset, Integration } from '../../../common/datasets';
-import { DatasetSelector } from './dataset_selector';
-import { DatasetSelectorProps, DatasetsSelectorSearchParams } from './types';
 import {
   AllDatasetSelection,
   DatasetSelection,
   DatasetSelectionChange,
-} from '../../utils/dataset_selection';
+} from '../../../common/dataset_selection';
+import { Dataset, Integration } from '../../../common/datasets';
+import { DatasetSelector } from './dataset_selector';
+import { DatasetSelectorProps, DatasetsSelectorSearchParams } from './types';
 
 const meta: Meta<typeof DatasetSelector> = {
   component: DatasetSelector,

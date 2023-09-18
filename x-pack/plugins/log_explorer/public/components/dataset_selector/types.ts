@@ -6,6 +6,7 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { DatasetSelection, DatasetSelectionChange } from '../../../common/dataset_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
@@ -15,7 +16,6 @@ import {
   SearchIntegrations,
 } from '../../hooks/use_integrations';
 import { INTEGRATION_PANEL_ID, UNMANAGED_STREAMS_PANEL_ID } from './constants';
-import type { DatasetSelection, DatasetSelectionChange } from '../../utils/dataset_selection';
 
 export interface DatasetSelectorProps {
   /* The generic data stream list */

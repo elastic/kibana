@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AllDatasetSelection } from '../../../utils/dataset_selection';
+import { AllDatasetSelection } from '../../../../common/dataset_selection';
 import { ControlPanels, DefaultLogExplorerProfileState } from './types';
 
 export const DEFAULT_CONTEXT: DefaultLogExplorerProfileState = {

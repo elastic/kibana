@@ -11,7 +11,7 @@ export interface SingleDatasetLocatorParams extends DatasetLocatorParams {
   /**
    * Integration name to be selected.
    */
-  integration: string;
+  integration?: string;
   /**
    * Dataset name to be selected.
    */

@@ -60,7 +60,7 @@ export function InstallElasticAgent() {
   async function onContinue() {
     await locators.singleDatasetLocator.navigate({
       integration: 'system',
-      dataset: 'syslog',
+      dataset: 'system.syslog',
     });
   }
 
