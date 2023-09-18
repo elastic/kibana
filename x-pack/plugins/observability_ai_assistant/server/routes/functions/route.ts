@@ -269,8 +269,7 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/get_dataset_info',
   params: t.type({
     body: t.type({
-      dataview: t.string,
-      fields: t.array(nonEmptyStringRt),
+      index: t.string,
     }),
   }),
   options: {
@@ -279,7 +278,7 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
   handler: async (
     resources
   ): Promise<{
-    dataviews: string[];
+    indices: string[];
     fields: Array<{ name: string; description: string; type: string }>;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
@@ -288,7 +287,7 @@ const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.get_dataset_info(resources.params.body.dataview, resources.params.body.fields);
+    return client.get_dataset_info(resources.params.body.index);
   },
 });
 
