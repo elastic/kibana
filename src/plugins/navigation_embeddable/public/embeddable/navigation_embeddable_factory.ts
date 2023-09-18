@@ -23,17 +23,17 @@ import {
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
 import {
+  NavigationEmbeddableInput,
   NavigationEmbeddableByReferenceInput,
   NavigationEmbeddableEditorFlyoutReturn,
-  NavigationEmbeddableInput,
 } from './types';
+import { extract, inject } from '../../common/embeddable';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import type { NavigationEmbeddable } from './navigation_embeddable';
+import { NavigationEmbeddableAttributes } from '../../common/content_management';
+import { NavEmbeddableStrings } from '../components/navigation_embeddable_strings';
 import { getNavigationEmbeddableAttributeService } from '../services/attribute_service';
 import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
-import { extract, inject } from '../../common/embeddable';
-
-import { NavigationEmbeddableAttributes } from '../../common/content_management';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -156,6 +156,10 @@ export class NavigationEmbeddableFactoryDefinition
 
   public getIconType() {
     return 'link';
+  }
+
+  public getDescription() {
+    return NavEmbeddableStrings.getDescription();
   }
 
   inject = inject;

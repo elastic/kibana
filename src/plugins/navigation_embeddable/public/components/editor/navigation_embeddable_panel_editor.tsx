@@ -124,13 +124,16 @@ const NavigationEmbeddablePanelEditor = ({
           setOrderedLinks(
             orderedLinks.map((link) => {
               if (link.id === linkToEdit.id) {
-                return { ...newLink, order: linkToEdit.order };
+                return { ...newLink, order: linkToEdit.order } as NavigationEmbeddableLink;
               }
               return link;
             })
           );
         } else {
-          setOrderedLinks([...orderedLinks, { ...newLink, order: orderedLinks.length }]);
+          setOrderedLinks([
+            ...orderedLinks,
+            { ...newLink, order: orderedLinks.length } as NavigationEmbeddableLink,
+          ]);
         }
       }
     },
@@ -166,25 +169,25 @@ const NavigationEmbeddablePanelEditor = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm fullWidth>
-          {hasZeroLinks ? (
-            <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
-          ) : (
-            <>
-              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
-                <EuiButtonGroup
-                  options={layoutOptions}
-                  buttonSize="compressed"
-                  idSelected={currentLayout}
-                  onChange={(id) => {
-                    setCurrentLayout(id as NavigationLayoutType);
-                  }}
-                  legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
-                />
-              </EuiFormRow>
-              <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
-                {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
+          <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsTitle()}>
+            <EuiButtonGroup
+              options={layoutOptions}
+              buttonSize="compressed"
+              idSelected={currentLayout}
+              onChange={(id) => {
+                setCurrentLayout(id as NavigationLayoutType);
+              }}
+              legend={NavEmbeddableStrings.editor.panelEditor.getLayoutSettingsLegend()}
+            />
+          </EuiFormRow>
+          <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
+            {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
                     to the focus of the inner elements */}
-                <div>
+            <div>
+              {hasZeroLinks ? (
+                <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
+              ) : (
+                <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable
                       className="navEmbeddableDroppableLinksArea"
@@ -220,10 +223,10 @@ const NavigationEmbeddablePanelEditor = ({
                   >
                     {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
-                </div>
-              </EuiFormRow>
-            </>
-          )}
+                </>
+              )}
+            </div>
+          </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
