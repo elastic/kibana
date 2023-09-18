@@ -77,7 +77,7 @@ export const getLayers = (
     columns,
     rows,
     isDarkMode,
-    visParams.colorMapping
+    visParams
   );
 
   return columns.map((col, layerIndex) => {
@@ -129,10 +129,21 @@ function getColorFromMappingFactory(
   columns: Array<Partial<BucketColumns>>,
   rows: DatatableRow[],
   isDarkMode: boolean,
-  colorMapping?: string
+  visParams: PartitionVisParams
 ): undefined | ((category: string | string[]) => string) {
+  const { colorMapping, dimensions } = visParams;
+
   if (!colorMapping) {
     // return undefined, we will use the legacy color mapping instead
+    return undefined;
+  }
+  // if pie/donut/treemap multimetric or has no buckets use the default color mode
+  if (
+    (chartType === ChartTypes.DONUT ||
+      chartType === ChartTypes.PIE ||
+      chartType === ChartTypes.TREEMAP) &&
+    (!dimensions.buckets || dimensions.buckets?.length === 0 || dimensions.metrics.length > 1)
+  ) {
     return undefined;
   }
   // the mosaic configures the main categories in the second column, instead of the first
