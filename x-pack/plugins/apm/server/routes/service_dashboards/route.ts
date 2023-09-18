@@ -10,6 +10,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { saveServiceDashbord } from './save_service_dashboard';
 import { SavedServiceDashboard } from '../../../common/service_dashboards';
 import { getServiceDashboards } from './get_service_dashboards';
+export const linkToRt = t.union([t.literal('single'), t.literal('multiple')]);
 
 const serviceDashboardSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-dashboard',
@@ -23,9 +24,9 @@ const serviceDashboardSaveRoute = createApmServerRoute({
     body: t.type({
       dashboardSavedObjectId: t.string,
       dashboardTitle: t.string,
-      kuery: t.string,
-      serviceName: t.string,
-      environment: t.union([t.string, t.undefined]),
+      kuery: t.union([t.string, t.undefined]),
+      useContextFilter: t.boolean,
+      linkTo: linkToRt,
     }),
   }),
   options: { tags: ['access:apm', 'access:apm_write'] },

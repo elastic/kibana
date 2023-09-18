@@ -9,26 +9,25 @@ import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmPluginStartDeps } from '../plugin';
 import { FETCH_STATUS } from './use_fetcher';
-import { DashboardItem } from '../../../../../src/plugins/dashboard/common/content_management';
+import { SearchDashboardsResponse } from '../../../../../src/plugins/dashboard/public/services/dashboard_content_management/lib/find_dashboards';
 
-export interface FetcherResult {
-  data?: DashboardItem[];
+export interface SearchDashboardsResult {
+  data: SearchDashboardsResponse['hits'];
   status: FETCH_STATUS;
 }
 
-export function useDashboardFetcher(query?: string): FetcherResult {
+export function useDashboardFetcher(query?: string): SearchDashboardsResult {
   const {
     services: { dashboard },
   } = useKibana<ApmPluginStartDeps>();
 
-  const [result, setResult] = useState({
+  const [result, setResult] = useState<SearchDashboardsResult>({
     data: [],
     status: FETCH_STATUS.NOT_INITIATED,
   });
 
   useEffect(() => {
     const getDashboards = async () => {
-      console.log('getDashboards');
       setResult({
         data: [],
         status: FETCH_STATUS.LOADING,
@@ -41,7 +40,7 @@ export function useDashboardFetcher(query?: string): FetcherResult {
         });
 
         setResult({
-          data: data?.hits ?? [],
+          data: data.hits,
           status: FETCH_STATUS.SUCCESS,
         });
       } catch {

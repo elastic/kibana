@@ -7,12 +7,22 @@
 
 export const APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE = 'apm-service-dashboard';
 
+// Define if the dashboard is linked to single or multiple services
+export enum DashboardTypeEnum {
+  single = 'single',
+  multiple = 'multiple',
+}
+
+export type DashboardType =
+  | DashboardTypeEnum.single
+  | DashboardTypeEnum.multiple;
+
 export interface ServiceDashboard {
   dashboardSavedObjectId: string;
   dashboardTitle: string;
-  serviceName: string;
-  environment?: string;
+  useContextFilter: boolean;
   kuery: string;
+  linkTo: DashboardType;
 }
 
 export interface SavedServiceDashboard extends ServiceDashboard {
