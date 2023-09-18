@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+ 
 export const elasticAgentStandaloneManifest = `---
 # For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
@@ -42,7 +42,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /etc/elastic-agent/inputs.d &&
-      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent/templates.d"
       #    volumeMounts:
       #      - name: external-inputs
       #        mountPath: /etc/elastic-agent/inputs.d
@@ -68,6 +68,10 @@ spec:
                   fieldPath: metadata.name
             - name: STATE_PATH
               value: "/etc/elastic-agent"
+            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.  
+            # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
+            - name: ELASTIC_NETINFO
+              value: "false"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
@@ -389,6 +393,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.  
+            # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
+            - name: ELASTIC_NETINFO
+              value: "false"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
