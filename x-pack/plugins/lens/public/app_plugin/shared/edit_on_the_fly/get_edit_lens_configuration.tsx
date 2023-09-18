@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
-import { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
+import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
