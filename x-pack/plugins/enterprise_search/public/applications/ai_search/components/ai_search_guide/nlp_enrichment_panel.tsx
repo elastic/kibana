@@ -70,9 +70,12 @@ const steps: EuiContainedStepProps[] = [
             shouldNotCreateHref
           >
             <EuiButton iconType="eye">
-              {i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step1.buttonLabel', {
-                defaultMessage: 'View trained models',
-              })}
+              {i18n.translate(
+                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step1.buttonLabel',
+                {
+                  defaultMessage: 'View trained models',
+                }
+              )}
             </EuiButton>
           </EuiLinkTo>
         </EuiFlexItem>

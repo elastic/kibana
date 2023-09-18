@@ -59,9 +59,12 @@ const steps: EuiContainedStepProps[] = [
         shouldNotCreateHref
       >
         <EuiButton>
-          {i18n.translate('xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step2.buttonLabel', {
-            defaultMessage: 'Open Console',
-          })}
+          {i18n.translate(
+            'xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step2.buttonLabel',
+            {
+              defaultMessage: 'Open Console',
+            }
+          )}
         </EuiButton>
       </EuiLinkTo>
     ),

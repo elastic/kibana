@@ -15,8 +15,8 @@ import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpEnrichmentIllustration from '../../../../assets/images/nlp.svg';
 import vectorSearchIllustration from '../../../../assets/images/vector.svg';
 
-import { ElserPanel } from './elser_panel';
 import { AISearchGuideAccordion } from './ai_search_guide_accordion';
+import { ElserPanel } from './elser_panel';
 import { NlpEnrichmentPanel } from './nlp_enrichment_panel';
 import { VectorSearchPanel } from './vector_search_panel';
 
@@ -97,9 +97,12 @@ export const SemanticSearchSection: React.FC = () => {
               id="nlpEnrichmentAccordion"
               data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentAccordion"
               icon={nlpEnrichmentIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.title', {
-                defaultMessage: 'NLP Enrichment',
-              })}
+              title={i18n.translate(
+                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.title',
+                {
+                  defaultMessage: 'NLP Enrichment',
+                }
+              )}
               description={i18n.translate(
                 'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.description',
                 {
