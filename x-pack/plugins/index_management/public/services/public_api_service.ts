@@ -7,7 +7,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { sendRequest, SendRequestResponse } from '../shared_imports';
-import { API_BASE_PATH } from '../../common/constants';
+import { INTERNAL_API_BASE_PATH } from '../../common/constants';
 import { SerializedEnrichPolicy } from '../../common/types';
 
 export interface PublicApiServiceSetup {
@@ -33,7 +33,7 @@ export class PublicApiService {
    */
   getAllEnrichPolicies() {
     return sendRequest(this.http, {
-      path: `${API_BASE_PATH}/enrich_policies`,
+      path: `${INTERNAL_API_BASE_PATH}/enrich_policies`,
       method: 'get',
     });
   }

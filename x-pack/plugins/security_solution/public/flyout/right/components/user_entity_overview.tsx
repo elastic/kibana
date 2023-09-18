@@ -13,10 +13,12 @@ import {
   EuiLink,
   useEuiTheme,
   useEuiFontSize,
+  EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
@@ -25,11 +27,8 @@ import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../common/components/first_last_seen/first_last_seen';
-import {
-  buildUserNamesFilter,
-  RiskScoreEntity,
-  RiskSeverity,
-} from '../../../../common/search_strategy';
+import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../common/components/page';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
@@ -44,6 +43,7 @@ import {
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
+  TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 
@@ -145,13 +145,38 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
 
     return [
       {
-        title: i18n.USER_RISK_CLASSIFICATION,
+        title: (
+          <>
+            {i18n.USER_RISK_CLASSIFICATION}
+            <EuiIconTip
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewButtonLabel"
+                  defaultMessage="Technical preview"
+                />
+              }
+              size="m"
+              type="iInCircle"
+              content={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewTooltip"
+                  defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                />
+              }
+              position="bottom"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+              data-test-subj={TECHNICAL_PREVIEW_ICON_TEST_ID}
+            />
+          </>
+        ),
         description: (
           <>
             {userRiskData ? (
               <RiskScore severity={userRiskData.user.risk.calculated_level} />
             ) : (
-              <RiskScore severity={RiskSeverity.unknown} />
+              getEmptyTagValue()
             )}
           </>
         ),

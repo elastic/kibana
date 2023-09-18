@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { IncomingMessage } from 'http';
 import { notImplemented } from '@hapi/boom';
+import { IncomingMessage } from 'http';
+import * as t from 'io-ts';
+import { MessageRole } from '../../../common';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
 
@@ -41,10 +42,22 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       body: { messages, connectorId, functions },
     } = params;
 
+    const isStartOfConversation =
+      messages.some((message) => message.message.role === MessageRole.Assistant) === false;
+
+    const isRecallFunctionAvailable = functions.some((fn) => fn.name === 'recall') === true;
+
+    const willUseRecall = isStartOfConversation && isRecallFunctionAvailable;
+
     return client.chat({
       messages,
       connectorId,
-      functions,
+      ...(functions.length
+        ? {
+            functions,
+            functionCall: willUseRecall ? 'recall' : undefined,
+          }
+        : {}),
     });
   },
 });

@@ -41,6 +41,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
@@ -117,6 +119,8 @@ export interface VisualizeServices extends CoreStart {
   listingViewRegistry: ListingViewRegistry;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export interface VisInstance {

@@ -23,11 +23,14 @@ export class ApiRoutes {
     registerIndicesRoutes(dependencies);
     registerTemplateRoutes(dependencies);
     registerSettingsRoutes(dependencies);
-    registerStatsRoute(dependencies);
     registerMappingRoute(dependencies);
     registerComponentTemplateRoutes(dependencies);
     registerNodesRoute(dependencies);
     registerEnrichPoliciesRoute(dependencies);
+
+    if (dependencies.config.isIndexStatsEnabled !== false) {
+      registerStatsRoute(dependencies);
+    }
   }
 
   start() {}

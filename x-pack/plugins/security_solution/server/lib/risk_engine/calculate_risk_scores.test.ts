@@ -48,6 +48,34 @@ describe('calculateRiskScores()', () => {
       );
     });
 
+    it('drops an empty object filter if specified by the caller', async () => {
+      params.filter = {};
+      await calculateRiskScores(params);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: expect.not.arrayContaining([{}]),
+            },
+          },
+        })
+      );
+    });
+
+    it('drops an empty array filter if specified by the caller', async () => {
+      params.filter = [];
+      await calculateRiskScores(params);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: expect.not.arrayContaining([[]]),
+            },
+          },
+        })
+      );
+    });
+
     describe('identifierType', () => {
       it('creates aggs for both host and user by default', async () => {
         await calculateRiskScores(params);

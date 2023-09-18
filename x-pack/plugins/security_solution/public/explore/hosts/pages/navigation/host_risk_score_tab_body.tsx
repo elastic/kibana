@@ -74,7 +74,6 @@ export const HostRiskScoreQueryTabBody = ({
     isModuleEnabled,
     loading,
     refetch,
-    isAuthorized,
     totalCount,
   } = useRiskScore({
     filterQuery,
@@ -95,10 +94,6 @@ export const HostRiskScoreQueryTabBody = ({
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
-
-  if (!isAuthorized) {
-    return <>{'TODO: Add RiskScore Upsell'}</>;
-  }
 
   if (riskScoreEngineStatus?.isUpdateAvailable) {
     return <RiskScoreUpdatePanel />;

@@ -1212,6 +1212,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
@@ -1223,6 +1224,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1239,6 +1241,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1250,6 +1253,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1262,6 +1266,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           },
         }),
         {}
@@ -1279,6 +1284,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: 'abc:def', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });
@@ -1329,6 +1335,7 @@ describe('Lens App', () => {
             description: '',
             query: { query: '', language: 'lucene' },
           },
+          namespaces: ['default'],
         });
       });
       act(() => {
@@ -1340,6 +1347,7 @@ describe('Lens App', () => {
               description: '',
               query: { query: '', language: 'lucene' },
             },
+            namespaces: ['default'],
           }
         );
       });

@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const security = getService('security');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  describe('async search with scripted fields', function () {
+  describe('search with scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
       await security.testUser.restoreDefaults();
     });
 
-    it('query should show failed shards callout', async function () {
+    it('query should show incomplete results callout', async function () {
       if (false) {
         /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
          */
@@ -81,11 +81,11 @@ export default function ({ getService, getPageObjects }) {
           'dscNoResultsInterceptedWarningsCallout_warningTitle'
         );
         log.debug(shardMessage);
-        expect(shardMessage).to.be('1 of 3 shards failed');
+        expect(shardMessage).to.be('The data might be incomplete or wrong.');
       });
     });
 
-    it('query should show failed shards badge on dashboard', async function () {
+    it('query should show incomplete results badge on dashboard', async function () {
       await security.testUser.setRoles([
         'test_logstash_reader',
         'global_discover_all',
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.saveSearch('search with warning');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

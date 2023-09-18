@@ -46,8 +46,7 @@ export default function (providerContext: FtrProviderContext) {
       pkgVersion = getResp.body.response.version;
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/156941
-    describe.skip('install', () => {
+    describe('install', () => {
       transforms.forEach((transform) => {
         it(`should have installed the [${transform.id}] transform`, async function () {
           const res = await es.transport.request(

@@ -132,4 +132,51 @@ describe('TableRowActions', () => {
       expect(res).not.toBeEnabled();
     });
   });
+
+  describe('Restart upgrade action', () => {
+    function renderAndGetRestartUpgradeButton({
+      agent,
+      agentPolicy,
+    }: {
+      agent: Agent;
+      agentPolicy?: AgentPolicy;
+    }) {
+      const { utils } = renderTableRowActions({
+        agent,
+        agentPolicy,
+      });
+
+      return utils.queryByTestId('restartUpgradeBtn');
+    }
+
+    it('should render an active button', async () => {
+      const res = renderAndGetRestartUpgradeButton({
+        agent: {
+          active: true,
+          status: 'updating',
+          upgrade_started_at: '2022-11-21T12:27:24Z',
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+
+      expect(res).not.toBe(null);
+      expect(res).toBeEnabled();
+    });
+
+    it('should not render action if agent is not stuck in updating', async () => {
+      const res = renderAndGetRestartUpgradeButton({
+        agent: {
+          active: true,
+          status: 'updating',
+          upgrade_started_at: new Date().toISOString(),
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+        } as AgentPolicy,
+      });
+      expect(res).toBe(null);
+    });
+  });
 });

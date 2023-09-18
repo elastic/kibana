@@ -223,6 +223,9 @@ export const loadRule = (includeResponseActions = false) =>
         : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => response.body);
 
 export const cleanupRule = (id: string) => {
@@ -291,6 +294,9 @@ export const loadAgentPolicy = () =>
       monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: 1209600,
     },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
     url: '/api/fleet/agent_policies',
   }).then((response) => response.body.item);
 
@@ -298,5 +304,8 @@ export const cleanupAgentPolicy = (agentPolicyId: string) =>
   request({
     method: 'POST',
     body: { agentPolicyId },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
     url: '/api/fleet/agent_policies/delete',
   });

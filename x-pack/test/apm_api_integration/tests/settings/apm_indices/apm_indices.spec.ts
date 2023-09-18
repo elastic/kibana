@@ -49,6 +49,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
         error: 'logs-apm*,apm-*',
         metric: 'metrics-apm*,apm-*',
         onboarding: 'apm-*',
+        sourcemap: 'apm-*',
       });
     });
 
