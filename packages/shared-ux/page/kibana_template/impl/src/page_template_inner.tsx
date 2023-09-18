@@ -31,6 +31,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   isEmptyState,
   pageSideBar,
   pageSideBarProps,
+  minHeight = 0,
   ...rest
 }) => {
   let header;
@@ -68,7 +69,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       // the following props can be removed to allow the template to auto-handle
       // the fixed header and banner heights.
       offset={0}
-      minHeight={0}
+      minHeight={minHeight}
       {...rest}
     >
       {sideBar}
