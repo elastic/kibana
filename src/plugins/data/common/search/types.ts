@@ -152,23 +152,6 @@ export interface ISearchOptions {
   transport?: Omit<TransportRequestOptions, 'signal'>;
 }
 
-export interface SearchRequestMeta {
-  /**
-   * Search Request HTTP method.
-   */
-  method: string;
-
-  /**
-   * Search Request HTTP path.
-   */
-  path: string;
-
-  /**
-   * Search Request HTTP querystring.
-   */
-  querystring: string;
-}
-
 /**
  * Same as `ISearchOptions`, but contains only serializable fields, which can
  * be sent over the network.
