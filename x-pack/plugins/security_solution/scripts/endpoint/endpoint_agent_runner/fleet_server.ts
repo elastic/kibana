@@ -309,7 +309,7 @@ export const startFleetServerWithDocker = async ({
 
     if (!isServerless) {
       // fleet server standalone doesnt create agent
-      await addFleetServerHostToFleetSettings(`https://host.docker.internal:${fleetServerPort}`);
+      await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:${fleetServerPort}`);
     }
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);

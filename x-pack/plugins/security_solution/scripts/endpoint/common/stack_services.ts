@@ -103,7 +103,6 @@ class KbnClientExtended extends KbnClient {
 export const createRuntimeServices = async ({
   kibanaUrl,
   elasticsearchUrl,
-  // TODO here?
   // fleetServerUrl = 'https://localhost:8220',
   fleetServerUrl = 'https://host.docker.internal:8220',
   username: _username,

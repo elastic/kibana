@@ -133,16 +133,22 @@ export const getFTRConfig = ({
       }
 
       if (hasFleetServerArgs) {
-        vars.kbnTestServer.serverArgs.push(
-          `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:${fleetServerPort}"]`
-        );
-        vars.kbnTestServer.serverArgs.push(
-          `--xpack.fleet.agents.elasticsearch.host=https://host.docker.internal:${esPort}`
-        );
-
         if (vars.serverless) {
           vars.kbnTestServer.serverArgs.push(
+            `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:${fleetServerPort}"]`
+          );
+          vars.kbnTestServer.serverArgs.push(
+            `--xpack.fleet.agents.elasticsearch.host=https://host.docker.internal:${esPort}`
+          );
+          vars.kbnTestServer.serverArgs.push(
             `--xpack.fleet.agents.elasticsearch.ca_trusted_fingerprint=F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84`
+          );
+        } else {
+          vars.kbnTestServer.serverArgs.push(
+            `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
+          );
+          vars.kbnTestServer.serverArgs.push(
+            `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
           );
         }
       }
