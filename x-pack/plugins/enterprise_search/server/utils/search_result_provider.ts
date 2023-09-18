@@ -116,10 +116,10 @@ export function getSearchResultProvider(
               },
               {
                 keywords: ['esre', 'search'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.esre.name', {
-                  defaultMessage: 'ESRE',
+                name: i18n.translate('xpack.enterpriseSearch.searchProvider.aiSearch.name', {
+                  defaultMessage: 'Search AI',
                 }),
-                serviceType: 'esre',
+                serviceType: 'ai_search',
                 url: AI_SEARCH_PLUGIN.URL,
               },
             ]

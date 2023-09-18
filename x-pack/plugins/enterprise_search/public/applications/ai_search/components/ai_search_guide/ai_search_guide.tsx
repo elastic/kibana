@@ -26,7 +26,7 @@ import simplifyIllustration from '../../../../assets/images/simplify.svg';
 import { SetAiSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
 
-import { AISetAiSearchChromeSearchDocsSection } from './ai_search_docs_section';
+import { SetAISearchChromeSearchDocsSection } from './ai_search_docs_section';
 import { MeasurePerformanceSection } from './measure_performance_section';
 import { RankAggregationSection } from './rank_aggregation_section';
 import { SemanticSearchSection } from './semantic_search_section';
@@ -40,7 +40,7 @@ export const AISearchGuide: React.FC = () => {
       bottomBorder={false}
       pageHeader={{
         pageTitle: i18n.translate('xpack.enterpriseSearch.aiSearch.guide.pageTitle', {
-          defaultMessage: 'Enhance your search with ESRE',
+          defaultMessage: 'Enhance your search with AI',
         }),
       }}
     >
@@ -64,10 +64,10 @@ export const AISearchGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiText>
-              <p data-test-subj="esre-description-text">
+              <p data-test-subj="ai-search-description-text">
                 <FormattedMessage
                   id="xpack.enterpriseSearch.aiSearch.guide.description"
-                  defaultMessage="The Elasticsearch Relevance Engine™ (ESRE) enables developers to build AI search-powered applications using the Elastic platform. ESRE is a set of tools and features that include our proprietary trained ML model ELSER, our vector search and embeddings capabilities, and RRF ranking for combining vector and text search."
+                  defaultMessage="Build AI search-powered applications using the Elastic platform, including our proprietary trained ML model ELSER, our vector search and embeddings capabilities, and RRF ranking for combining vector and text search."
                 />
               </p>
             </EuiText>
@@ -85,7 +85,7 @@ export const AISearchGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiHorizontalRule />
           <EuiFlexItem grow>
-            <AISetAiSearchChromeSearchDocsSection />
+            <SetAISearchChromeSearchDocsSection />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('loads AI Search page', async function () {
         await retry.waitFor(
           'esre header description',
-          async () => await testSubjects.exists('esre-description-text')
+          async () => await testSubjects.exists('ai-search-description-text')
         );
         await a11y.testAppSnapshot();
       });
