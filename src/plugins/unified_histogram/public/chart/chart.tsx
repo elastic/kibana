@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -75,6 +76,7 @@ export interface ChartProps {
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   isOnHistogramMode?: boolean;
+  isChartLoading?: boolean;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -116,6 +118,7 @@ export function Chart({
   lensAdapters,
   lensEmbeddableOutput$,
   isOnHistogramMode,
+  isChartLoading,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -425,6 +428,14 @@ export function Chart({
             })}
             css={histogramCss}
           >
+            {isChartLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="unifiedHistogramProgressBar"
+              />
+            )}
             <HistogramMemoized
               services={services}
               dataView={dataView}
