@@ -45,7 +45,6 @@ export const loadESQL = async (esStore: ElasticsearchStore, logger: Logger): Pro
     );
 
     const response = await esStore.addDocuments([...docs, ...languageDocs]);
-    console.log(JSON.stringify(response, null, 2));
 
     logger.info(
       `Loaded ${response?.length ?? 0} ESQL docs and language docs into the Knowledge Base`
