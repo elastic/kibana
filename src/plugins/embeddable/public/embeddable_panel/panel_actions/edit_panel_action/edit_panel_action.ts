@@ -18,6 +18,7 @@ import {
   EmbeddableInput,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
+  isExplicitInputWithAttributes,
 } from '../../../lib';
 import { ViewMode } from '../../../lib/types';
 import { EmbeddableStart } from '../../../plugin';
@@ -94,9 +95,15 @@ export class EditPanelAction implements Action<ActionContext> {
       }
 
       const oldExplicitInput = embeddable.getExplicitInput();
-      let newExplicitInput: Awaited<ReturnType<typeof factory.getExplicitInput>>;
+      let newExplicitInput: Partial<EmbeddableInput>;
       try {
-        newExplicitInput = await factory.getExplicitInput(oldExplicitInput, embeddable.parent);
+        const explicitInputReturn = await factory.getExplicitInput(
+          oldExplicitInput,
+          embeddable.parent
+        );
+        newExplicitInput = isExplicitInputWithAttributes(explicitInputReturn)
+          ? explicitInputReturn.newInput
+          : explicitInputReturn;
       } catch (e) {
         // error likely means user canceled editing
         return;

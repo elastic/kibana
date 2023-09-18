@@ -49,7 +49,7 @@ export const NavigationEmbeddablePanelEditorLink = ({
 
   const { value: linkLabel, loading: linkLabelLoading } = useAsync(async () => {
     if (!link.destination) {
-      setDestinationError(DashboardLinkStrings.getDashboardErrorLabel());
+      setDestinationError(new Error(DashboardLinkStrings.getDashboardErrorLabel()));
       return;
     }
 

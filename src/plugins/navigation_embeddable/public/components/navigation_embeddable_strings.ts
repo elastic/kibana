@@ -9,6 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const NavEmbeddableStrings = {
+  getDescription: () =>
+    i18n.translate('navigationEmbeddable.description', {
+      defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+    }),
   editor: {
     getAddButtonLabel: () =>
       i18n.translate('navigationEmbeddable.editor.addButtonLabel', {
@@ -37,7 +41,7 @@ export const NavEmbeddableStrings = {
         }),
       getEmptyLinksMessage: () =>
         i18n.translate('navigationEmbeddable.panelEditor.emptyLinksMessage', {
-          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+          defaultMessage: "You haven't added any links yet.",
         }),
       getEmptyLinksTooltip: () =>
         i18n.translate('navigationEmbeddable.panelEditor.emptyLinksTooltip', {

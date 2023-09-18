@@ -65,6 +65,11 @@ export const NavigationLinkInfo: {
   },
 };
 
+export interface NavigationEmbeddableEditorFlyoutReturn {
+  attributes?: unknown;
+  newInput: Partial<NavigationEmbeddableInput>;
+}
+
 export type NavigationEmbeddableByValueInput = {
   attributes: NavigationEmbeddableAttributes;
 } & EmbeddableInput;

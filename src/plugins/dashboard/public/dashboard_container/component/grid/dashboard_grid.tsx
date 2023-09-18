@@ -125,8 +125,7 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       className={classes}
       width={viewportWidth}
       breakpoints={breakpoints}
-      onDragStop={onLayoutChange}
-      onResizeStop={onLayoutChange}
+      onLayoutChange={onLayoutChange}
       isResizable={!expandedPanelId}
       isDraggable={!expandedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
