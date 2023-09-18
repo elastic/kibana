@@ -8,6 +8,7 @@
 
 import { firstValueFrom } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { errors } from '@elastic/elasticsearch';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import type { ExecutionContextSetup } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
@@ -47,7 +48,9 @@ export function registerBsearchRoute(
                   message: err.message,
                   statusCode: err.statusCode,
                   attributes: err.errBody?.error,
-                  requestMeta: err.requestMeta,
+                  // TODO remove 'instanceof errors.ResponseError' check when
+                  // eql strategy throws KbnServerError (like all of the other strategies)
+                  requestMeta: err instanceof errors.ResponseError ? err.meta?.meta?.request?.params : err.requestMeta,
                 };
               })
             )
