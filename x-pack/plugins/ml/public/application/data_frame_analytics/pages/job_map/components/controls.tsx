@@ -38,6 +38,7 @@ import {
   useNavigateToPath,
   useMlKibana,
 } from '../../../../contexts/kibana';
+import { useEnabledFeatures } from '../../../../contexts/ml';
 import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
