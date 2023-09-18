@@ -27,6 +27,10 @@ echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --pas
 docker pull "$SOURCE_IMAGE"
 docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
 docker push "$TARGET_IMAGE"
+
+ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
+ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq -r '.[].Config.Labels["org.opencontainers.image.revision"]')
+
 docker logout docker.elastic.co
 
 echo "Image push to $TARGET_IMAGE successful."
@@ -61,10 +65,6 @@ elif [[ "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
 fi
 
 echo "--- Annotating build with info"
-# annotate the build with some info about the docker image that was re-pushed and the hashes that were tested.
-ORIG_IMG_DATA=$(docker inspect "$SOURCE_IMAGE")
-ELASTIC_COMMIT_HASH=$(echo $ORIG_IMG_DATA | jq -r '.[].Config.Labels["org.opencontainers.image.revision"]')
-
 cat << EOT | buildkite-agent annotate --style "success"
   <h2>Promotion successful!</h2><br/>
   New image: $TARGET_IMAGE<br/>
