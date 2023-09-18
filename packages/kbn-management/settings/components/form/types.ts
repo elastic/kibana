@@ -12,6 +12,8 @@ import type {
 } from '@kbn/management-settings-components-field-row';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { I18nStart } from '@kbn/core-i18n-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 /**
  * Contextual services used by a {@link Form} component.
@@ -19,6 +21,7 @@ import { SettingsStart } from '@kbn/core-ui-settings-browser';
 export interface Services {
   saveChanges: (changes: Record<string, UnsavedFieldChange<SettingType>>) => void;
   showError: (message: string) => void;
+  showReloadPagePrompt: () => void;
 }
 
 /**
@@ -34,6 +37,8 @@ export interface KibanaDependencies {
   settings: {
     client: SettingsStart['client'];
   };
+  theme: ThemeServiceStart;
+  i18nStart: I18nStart;
 }
 
 /**
