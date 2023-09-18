@@ -19,7 +19,10 @@ import {
   checkAuthorizationAndGetTotal,
   migrateLegacyActions,
 } from '../../../../rules_client/lib';
-import { retryIfBulkDeleteConflicts, buildKueryNodeFilter } from '../../../../rules_client/common';
+import {
+  retryIfBulkOperationConflicts,
+  buildKueryNodeFilter,
+} from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type {
   BulkOperationError,
@@ -62,7 +65,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   const { rules, errors, accListSpecificForBulkOperation } = await withSpan(
     { name: 'retryIfBulkOperationConflicts', type: 'rules' },
     () =>
-      retryIfBulkDeleteConflicts({
+      retryIfBulkOperationConflicts({
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
