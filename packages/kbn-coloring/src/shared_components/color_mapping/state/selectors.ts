@@ -9,18 +9,18 @@
 import { getPalette } from '../palette';
 import { RootState } from './color_mapping';
 
-export function getPaletteSelector(getPaletteFn: ReturnType<typeof getPalette>) {
+export function selectPalette(getPaletteFn: ReturnType<typeof getPalette>) {
   return (state: RootState) => getPaletteFn(state.colorMapping.paletteId);
 }
-export function getColorModeSelector(state: RootState) {
+export function selectColorMode(state: RootState) {
   return state.colorMapping.colorMode;
 }
-export function getSpecialAssignmentsSelector(state: RootState) {
+export function selectSpecialAssignments(state: RootState) {
   return state.colorMapping.specialAssignments;
 }
-export function isAutoAssignmentModeSelector(state: RootState) {
+export function selectIsAutoAssignmentMode(state: RootState) {
   return state.colorMapping.assignmentMode === 'auto';
 }
-export function getColorPickerVisibilitySelector(state: RootState) {
+export function selectColorPickerVisibility(state: RootState) {
   return state.ui.colorPicker;
 }

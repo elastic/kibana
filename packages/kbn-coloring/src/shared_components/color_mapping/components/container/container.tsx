@@ -35,17 +35,17 @@ import { NeutralPalette } from '../../palettes/default_palettes';
 import { getUnusedColorForNewAssignment } from '../../config/assignments';
 import { getPalette } from '../../palette';
 import {
-  getColorModeSelector,
-  getPaletteSelector,
-  getSpecialAssignmentsSelector,
-  isAutoAssignmentModeSelector,
+  selectColorMode,
+  selectPalette,
+  selectSpecialAssignments,
+  selectIsAutoAssignmentMode,
 } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
 
 export const MAX_ASSIGNABLE_COLORS = 10;
 
-function getComputedAssignmentsSelector(
+function selectComputedAssignments(
   data: ColorMappingInputData,
   palette: ColorMapping.CategoricalPalette,
   colorMode: ColorMapping.Config['colorMode']
@@ -66,11 +66,11 @@ export function Container(props: {
 
   const getPaletteFn = getPalette(props.palettes, NeutralPalette);
 
-  const palette = useSelector(getPaletteSelector(getPaletteFn));
-  const colorMode = useSelector(getColorModeSelector);
-  const autoAssignmentMode = useSelector(isAutoAssignmentModeSelector);
-  const assignments = useSelector(getComputedAssignmentsSelector(props.data, palette, colorMode));
-  const specialAssignments = useSelector(getSpecialAssignmentsSelector);
+  const palette = useSelector(selectPalette(getPaletteFn));
+  const colorMode = useSelector(selectColorMode);
+  const autoAssignmentMode = useSelector(selectIsAutoAssignmentMode);
+  const assignments = useSelector(selectComputedAssignments(props.data, palette, colorMode));
+  const specialAssignments = useSelector(selectSpecialAssignments);
 
   const canAddNewAssignment = !autoAssignmentMode && assignments.length < MAX_ASSIGNABLE_COLORS;
 

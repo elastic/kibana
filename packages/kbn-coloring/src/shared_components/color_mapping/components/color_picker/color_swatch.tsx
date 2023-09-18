@@ -16,7 +16,7 @@ import { ColorMapping } from '../../config';
 import { getPalette } from '../../palette';
 import { removeGradientColorStep } from '../../state/color_mapping';
 
-import { getColorPickerVisibilitySelector } from '../../state/selectors';
+import { selectColorPickerVisibility } from '../../state/selectors';
 import { colorPickerVisibility, hideColorPickerVisibility } from '../../state/ui';
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
@@ -46,7 +46,7 @@ export const ColorSwatch = ({
   isDarkMode,
   forType,
 }: ColorPickerSwatchProps) => {
-  const colorPickerState = useSelector(getColorPickerVisibilitySelector);
+  const colorPickerState = useSelector(selectColorPickerVisibility);
   const dispatch = useDispatch();
   const colorPickerVisible =
     colorPickerState.index === index &&
