@@ -14,6 +14,7 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { Rule, RuleActionTypes } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -29,7 +30,26 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert: Rule<{
+  const action = {
+    actionTypeId: 'test',
+    group: 'default',
+    id: '2',
+    params: {
+      foo: true,
+    },
+    type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    type: RuleActionTypes.SYSTEM,
+  };
+
+  const rulesClientResponse: Rule<{
     bar: true;
   }> = {
     id: '1',
@@ -40,17 +60,7 @@ describe('getAlertRoute', () => {
     },
     createdAt: new Date(),
     updatedAt: new Date(),
-    actions: [
-      {
-        group: 'default',
-        id: '2',
-        actionTypeId: 'test',
-        params: {
-          foo: true,
-        },
-        type: RuleActionTypes.DEFAULT,
-      },
-    ],
+    actions: [action],
     consumer: 'bar',
     name: 'abc',
     tags: ['foo'],
@@ -70,6 +80,11 @@ describe('getAlertRoute', () => {
     revision: 0,
   };
 
+  const getResponse = {
+    ...rulesClientResponse,
+    actions: [omit(action, 'type')],
+  };
+
   it('gets an alert with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -79,7 +94,7 @@ describe('getAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(rulesClientResponse);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -94,7 +109,7 @@ describe('getAlertRoute', () => {
     expect(rulesClient.get.mock.calls[0][0].id).toEqual('1');
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: mockedAlert,
+      body: getResponse,
     });
   });
 
@@ -106,7 +121,7 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(rulesClientResponse);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -133,7 +148,7 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(rulesClientResponse);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -154,12 +169,64 @@ describe('getAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
+    rulesClient.get.mockResolvedValueOnce(rulesClientResponse);
+
     getAlertRoute(router, licenseState, mockUsageCounter);
+
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);
+
     await handler(context, req, res);
+
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('get', mockUsageCounter);
+  });
+
+  describe('actions', () => {
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      rulesClient.get.mockResolvedValueOnce({
+        ...rulesClientResponse,
+        actions: [action, systemAction],
+      });
+
+      getAlertRoute(router, licenseState);
+
+      const [_, handler] = router.get.mock.calls[0];
+
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient },
+        {
+          params: {
+            id: '1',
+          },
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.actions).toEqual([
+        {
+          actionTypeId: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          actionTypeId: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+        },
+      ]);
+    });
   });
 });

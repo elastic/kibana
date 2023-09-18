@@ -144,7 +144,7 @@ export type RuleAction = RuleDefaultAction | RuleSystemAction;
 
 /**
  * TODO: Remove when all http routes and methods
- * of the rule clients are versioned.
+ * of the rules client are versioned.
  *
  * Actions internally (rules client methods) contains a type (RuleActionTypes).
  * All APIs strip out the type from the actions. This TS type represents that.
@@ -232,7 +232,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
 
 /**
  * TODO: Remove when all http routes and methods
- * of the rule clients are versioned.
+ * of the rules client are versioned.
  *
  * Actions internally (rules client methods) contains a type (RuleActionTypes).
  * All APIs strip out the type from the actions. This TS type represents that.
@@ -262,7 +262,7 @@ export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
 
 /**
  * TODO: Remove when all http routes and methods
- * of the rule clients are versioned.
+ * of the rules client are versioned.
  *
  * Actions internally (rules client methods) contains a type (RuleActionTypes).
  * All APIs strip out the type from the actions. This TS type represents that.
@@ -281,7 +281,7 @@ export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = Sanit
 
 /**
  * TODO: Remove when all http routes and methods
- * of the rule clients are versioned.
+ * of the rules client are versioned.
  *
  * Actions internally (rules client methods) contains a type (RuleActionTypes).
  * All APIs strip out the type from the actions. This TS type represents that.
@@ -289,7 +289,7 @@ export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = Sanit
 
 export type ResolvedSanitizedRuleResponse<Params extends RuleTypeParams = never> = Omit<
   ResolvedSanitizedRule<Params>,
-  'apiKey' | 'actions'
+  'actions'
 > & { actions: SanitizedRuleActionResponse[] };
 
 export type SanitizedRuleConfig = Pick<

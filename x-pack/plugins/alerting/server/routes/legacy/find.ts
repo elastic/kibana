@@ -16,6 +16,7 @@ import { renameKeys } from '../lib/rename_keys';
 import { FindOptions } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+import { rewriteActionsResLegacy } from '../lib/rewrite_actions';
 
 // config definition
 const querySchema = schema.object({
@@ -98,8 +99,12 @@ export const findAlertRoute = (
       }
 
       const findResult = await rulesClient.find({ options, excludeFromPublicApi: true });
+      const findResultData = findResult.data.map((rule) =>
+        Object.assign(rule, { actions: rewriteActionsResLegacy(rule.actions) })
+      );
+
       return res.ok({
-        body: findResult,
+        body: { ...findResult, data: findResultData },
       });
     })
   );

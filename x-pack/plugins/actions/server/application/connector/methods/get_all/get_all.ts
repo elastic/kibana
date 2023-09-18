@@ -93,6 +93,7 @@ export async function getAllSystemActions({
         error,
       })
     );
+
     throw error;
   }
 
@@ -108,15 +109,6 @@ export async function getAllSystemActions({
       isSystemAction: systemAction.isSystemAction,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
-
-  transformedSystemActions.forEach((systemAction) => {
-    // Try to validate the connectors, but don't throw.
-    try {
-      connectorSchema.validate(systemAction);
-    } catch (e) {
-      context.logger.warn(`Error validating systemAction connector: ${systemAction.id}, ${e}`);
-    }
-  });
 
   return await injectExtraFindData({
     kibanaIndices: context.kibanaIndices,

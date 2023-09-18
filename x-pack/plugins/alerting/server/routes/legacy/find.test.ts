@@ -13,6 +13,8 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
+import { RuleActionTypes } from '../../types';
+import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
 
@@ -33,6 +35,66 @@ beforeEach(() => {
 });
 
 describe('findAlertRoute', () => {
+  const action = {
+    actionTypeId: 'test',
+    group: 'default',
+    id: '2',
+    params: {
+      foo: true,
+    },
+    type: RuleActionTypes.DEFAULT,
+  };
+
+  const systemAction = {
+    actionTypeId: 'test-2',
+    id: 'system_action-id',
+    params: {
+      foo: true,
+    },
+    type: RuleActionTypes.SYSTEM,
+  };
+
+  const rule = {
+    id: '1',
+    alertTypeId: '1',
+    schedule: { interval: '10s' },
+    params: {
+      bar: true,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    actions: [action],
+    consumer: 'bar',
+    name: 'abc',
+    tags: ['foo'],
+    enabled: true,
+    muteAll: false,
+    notifyWhen: 'onActionGroupChange' as const,
+    createdBy: '',
+    updatedBy: '',
+    apiKey: '',
+    apiKeyOwner: '',
+    throttle: '30s',
+    mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown' as const,
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
+    revision: 0,
+  };
+
+  const rulesClientResponse = {
+    page: 1,
+    perPage: 1,
+    total: 0,
+    data: [rule],
+  };
+
+  const findResponse = {
+    ...rulesClientResponse,
+    data: [{ ...rule, actions: [omit(action, 'type')] }],
+  };
+
   it('finds alerts with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -43,13 +105,7 @@ describe('findAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_find"`);
 
-    const findResult = {
-      page: 1,
-      perPage: 1,
-      total: 0,
-      data: [],
-    };
-    rulesClient.find.mockResolvedValueOnce(findResult);
+    rulesClient.find.mockResolvedValueOnce(rulesClientResponse);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -63,16 +119,7 @@ describe('findAlertRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toMatchInlineSnapshot(`
-      Object {
-        "body": Object {
-          "data": Array [],
-          "page": 1,
-          "perPage": 1,
-          "total": 0,
-        },
-      }
-    `);
+    await handler(context, req, res);
 
     expect(rulesClient.find).toHaveBeenCalledTimes(1);
     expect(rulesClient.find.mock.calls[0]).toMatchInlineSnapshot(`
@@ -89,7 +136,7 @@ describe('findAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: findResult,
+      body: findResponse,
     });
   });
 
@@ -101,12 +148,7 @@ describe('findAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.find.mockResolvedValueOnce({
-      page: 1,
-      perPage: 1,
-      total: 0,
-      data: [],
-    });
+    rulesClient.find.mockResolvedValueOnce(rulesClientResponse);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -159,10 +201,13 @@ describe('findAlertRoute', () => {
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
     findAlertRoute(router, licenseState, mockUsageCounter);
+    rulesClient.find.mockResolvedValueOnce(rulesClientResponse);
+
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, query: {} }, [
       'ok',
     ]);
+
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('find', mockUsageCounter);
   });
@@ -174,6 +219,8 @@ describe('findAlertRoute', () => {
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
     findAlertRoute(router, licenseState, mockUsageCounter);
+    rulesClient.find.mockResolvedValueOnce(rulesClientResponse);
+
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -187,7 +234,9 @@ describe('findAlertRoute', () => {
       },
       ['ok']
     );
+
     await handler(context, req, res);
+
     expect(trackLegacyTerminology).toHaveBeenCalledTimes(1);
     expect((trackLegacyTerminology as jest.Mock).mock.calls[0][0]).toStrictEqual([
       'alertTypeId:2',
@@ -203,6 +252,8 @@ describe('findAlertRoute', () => {
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
     findAlertRoute(router, licenseState, mockUsageCounter);
+    rulesClient.find.mockResolvedValueOnce(rulesClientResponse);
+
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -214,11 +265,60 @@ describe('findAlertRoute', () => {
       },
       ['ok']
     );
+
     await handler(context, req, res);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
       counterName: `legacyAlertingFieldsUsage`,
       counterType: 'alertingFieldsUsage',
       incrementBy: 1,
+    });
+  });
+
+  describe('actions', () => {
+    it('removes the type from the actions correctly before sending the response', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+      findAlertRoute(router, licenseState, mockUsageCounter);
+      rulesClient.find.mockResolvedValueOnce({
+        ...rulesClientResponse,
+        data: [{ ...rule, actions: [action, systemAction] }],
+      });
+
+      const [, handler] = router.get.mock.calls[0];
+      const [context, req, res] = mockHandlerArguments(
+        { rulesClient },
+        {
+          params: {},
+          query: {
+            fields: ['foo', 'bar'],
+          },
+        },
+        ['ok']
+      );
+
+      const routeRes = await handler(context, req, res);
+
+      // @ts-expect-error: body exists
+      expect(routeRes.body.data[0].actions).toEqual([
+        {
+          actionTypeId: 'test',
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          actionTypeId: 'test-2',
+          id: 'system_action-id',
+          params: {
+            foo: true,
+          },
+        },
+      ]);
     });
   });
 });

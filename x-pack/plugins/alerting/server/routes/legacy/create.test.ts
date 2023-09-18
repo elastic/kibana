@@ -677,6 +677,36 @@ describe('createAlertRoute', () => {
       ]);
     });
 
+    it('does not fails if the system action does not contain a group', async () => {
+      const actionToValidate = {
+        actionTypeId: 'test-2',
+        id: 'system_action-id',
+        params: {
+          foo: true,
+        },
+      };
+
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+      const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+      const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+      createAlertRoute({
+        router,
+        licenseState,
+        encryptedSavedObjects,
+        usageCounter: mockUsageCounter,
+      });
+
+      const [config, _] = router.post.mock.calls[0];
+
+      expect(() =>
+        // @ts-expect-error: body exists
+        config.validate.body.validate({ ...createRequest, actions: [actionToValidate] })
+      ).not.toThrow();
+    });
+
     it('fails if the action contains a type in the request', async () => {
       const actionToValidate = {
         group: 'default',

@@ -404,6 +404,28 @@ describe('updateAlertRoute', () => {
       ]);
     });
 
+    it('does not fails if the system action does not contain a group', async () => {
+      const actionToValidate = {
+        actionTypeId: 'test-2',
+        id: 'system_action-id',
+        params: {
+          foo: true,
+        },
+      };
+
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+
+      updateAlertRoute(router, licenseState);
+
+      const [config, _] = router.put.mock.calls[0];
+
+      expect(() =>
+        // @ts-expect-error: body exists
+        config.validate.body.validate({ ...updateRequest, actions: [actionToValidate] })
+      ).not.toThrow();
+    });
+
     it('fails if the action contains a type in the request', async () => {
       const actionToValidate = {
         group: 'default',

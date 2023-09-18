@@ -36,7 +36,7 @@ const bodySchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   actions: schema.arrayOf(
     schema.object({
-      group: schema.string(),
+      group: schema.maybe(schema.string()),
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
       actionTypeId: schema.maybe(schema.string()),

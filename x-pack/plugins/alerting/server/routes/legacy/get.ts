@@ -12,6 +12,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import type { AlertingRouter } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { rewriteActionsResLegacy } from '../lib/rewrite_actions';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -34,11 +35,15 @@ export const getAlertRoute = (
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
+
       trackLegacyRouteUsage('get', usageCounter);
+
       const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
+      const rulesClientRes = await rulesClient.get({ id, excludeFromPublicApi: true });
+
       return res.ok({
-        body: await rulesClient.get({ id, excludeFromPublicApi: true }),
+        body: { ...rulesClientRes, actions: rewriteActionsResLegacy(rulesClientRes.actions) },
       });
     })
   );
