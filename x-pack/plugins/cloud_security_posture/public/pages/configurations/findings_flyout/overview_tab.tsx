@@ -19,6 +19,7 @@ import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -35,11 +36,6 @@ import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter'
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const isEmpty = (item) => {
-  if (item === undefined || item === null) return true;
-  if (Array.isArray(item) && item.length === 0) return true;
-  if (typeof item === 'object' && Object.keys(item).length === 0) return true;
-};
 const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
@@ -148,6 +144,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
 const getEvidenceList = ({ result }: CspFinding) =>
   [
     {
+      title: '',
       description: (
         <>
           <EuiText color="subdued">
