@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlId: string;
 
     before(async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
