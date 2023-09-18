@@ -21,7 +21,6 @@
     "@kbn/unified-field-list",
     "@kbn/core-application-browser",
     "@kbn/share-plugin",
-    "@kbn/utility-types",
     "@kbn/unified-data-table",
     "@kbn/deeplinks-observability"
   ],
