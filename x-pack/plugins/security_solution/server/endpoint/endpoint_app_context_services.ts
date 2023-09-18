@@ -276,12 +276,4 @@ export class EndpointAppContextService {
 
     return this.startDependencies.createFleetActionsClient('endpoint');
   }
-
-  public async getAppFeaturesService(): Promise<AppFeaturesService> {
-    if (!this.startDependencies?.appFeaturesService) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-
-    return this.startDependencies.appFeaturesService;
-  }
 }
