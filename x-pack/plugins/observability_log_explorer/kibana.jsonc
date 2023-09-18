@@ -22,7 +22,7 @@
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": ["kibanaReact", "observabilityOnboarding"],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": [
       "common",
     ]

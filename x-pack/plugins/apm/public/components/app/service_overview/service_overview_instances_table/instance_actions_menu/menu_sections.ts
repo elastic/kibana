@@ -10,7 +10,7 @@ import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { AllDatasetsLocatorParams } from '@kbn/observability-log-explorer-plugin/common';
+import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import { getNodeLogsHref } from '../../../../shared/links/observability_logs_link';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getInfraHref } from '../../../../shared/links/infra_link';

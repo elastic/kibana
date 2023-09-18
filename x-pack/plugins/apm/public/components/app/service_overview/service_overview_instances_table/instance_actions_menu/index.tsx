@@ -18,7 +18,7 @@ import {
 import {
   AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/observability-log-explorer-plugin/common';
+} from '@kbn/deeplinks-observability/locators';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/es_fields/apm';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';

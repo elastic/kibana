@@ -6,9 +6,6 @@
  */
 
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { LogExplorerNavigationParams } from '@kbn/log-explorer-plugin/common/locators/log_explorer/types';
-
-export type DatasetLocatorParams = LogExplorerNavigationParams;
 
 export interface AppState {
   index?: string;

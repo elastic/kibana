@@ -6,10 +6,10 @@
  */
 
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import type { ObservabilityOnboardingLocatorParams } from './types';
-
-export const OBSERVABILITY_ONBOARDING_LOCATOR =
-  'OBSERVABILITY_ONBOARDING_LOCATOR' as const;
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability/locators';
 
 export class ObservabilityOnboardingLocatorDefinition
   implements LocatorDefinition<ObservabilityOnboardingLocatorParams>

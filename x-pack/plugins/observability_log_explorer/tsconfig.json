@@ -29,7 +29,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/share-plugin",
     "@kbn/io-ts-utils",
-    "@kbn/observability-onboarding-plugin",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": [
     "target/**/*"

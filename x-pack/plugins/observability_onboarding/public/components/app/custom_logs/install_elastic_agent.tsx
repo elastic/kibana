@@ -18,7 +18,7 @@ import { default as React, useCallback, useEffect, useState } from 'react';
 import {
   SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
-} from '@kbn/observability-log-explorer-plugin/common';
+} from '@kbn/deeplinks-observability/locators';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';

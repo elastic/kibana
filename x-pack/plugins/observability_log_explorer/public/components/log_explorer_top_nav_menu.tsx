@@ -25,7 +25,7 @@ import { LogExplorerStateContainer } from '@kbn/log-explorer-plugin/public';
 import {
   OBSERVABILITY_ONBOARDING_LOCATOR,
   ObservabilityOnboardingLocatorParams,
-} from '@kbn/observability-onboarding-plugin/public';
+} from '@kbn/deeplinks-observability/locators';
 import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { css } from '@emotion/react';

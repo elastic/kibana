@@ -25,7 +25,7 @@ import useAsync from 'react-use/lib/useAsync';
 import {
   AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/observability-log-explorer-plugin/common';
+} from '@kbn/deeplinks-observability/locators';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';

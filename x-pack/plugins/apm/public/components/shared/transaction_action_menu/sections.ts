@@ -14,7 +14,7 @@ import url from 'url';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import type { ProfilingLocators } from '@kbn/profiling-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import { AllDatasetsLocatorParams } from '@kbn/observability-log-explorer-plugin/common';
+import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';

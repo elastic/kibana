@@ -7,11 +7,13 @@
 
 import { FilterStateStore } from '@kbn/es-query';
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import {
+  AllDatasetsLocatorParams,
+  SingleDatasetLocatorParams,
+} from '@kbn/deeplinks-observability/locators';
 import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../constants';
 import { AllDatasetsLocatorDefinition } from './all_datasets/all_datasets_locator';
-import { AllDatasetsLocatorParams } from './all_datasets/types';
 import { SingleDatasetLocatorDefinition } from './single_dataset';
-import { SingleDatasetLocatorParams } from './single_dataset/types';
 import { DatasetLocatorDependencies } from './types';
 
 const setup = async () => {

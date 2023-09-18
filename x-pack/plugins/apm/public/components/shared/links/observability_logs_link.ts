@@ -11,7 +11,7 @@ import type {
   LogsLocator,
   DiscoverLogsLocator,
 } from '@kbn/infra-plugin/common/locators';
-import { AllDatasetsLocatorParams } from '@kbn/observability-log-explorer-plugin/common';
+import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import moment from 'moment';
 import { DurationInputObject } from 'moment';

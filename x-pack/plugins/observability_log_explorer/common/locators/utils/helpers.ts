@@ -7,7 +7,8 @@
 
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { AppState, DatasetLocatorParams } from '../types';
+import { DatasetLocatorParams } from '@kbn/deeplinks-observability/locators';
+import { AppState } from '../types';
 
 interface LocatorPathCosntructionParams {
   locatorParams: DatasetLocatorParams;

@@ -8,9 +8,12 @@
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { UnresolvedDatasetSelection } from '@kbn/log-explorer-plugin/common';
 import type { IndexPattern } from '@kbn/io-ts-utils';
+import {
+  SingleDatasetLocatorParams,
+  SINGLE_DATASET_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
 import { DatasetLocatorDependencies } from '../types';
-import { SingleDatasetLocatorParams } from './types';
-import { SINGLE_DATASET_LOCATOR_ID, constructLocatorPath } from '../utils';
+import { constructLocatorPath } from '../utils';
 
 export type SingleDatasetLocator = LocatorPublic<SingleDatasetLocatorParams>;
 
