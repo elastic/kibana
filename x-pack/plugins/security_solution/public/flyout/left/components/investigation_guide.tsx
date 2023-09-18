@@ -26,10 +26,6 @@ export const InvestigationGuide: React.FC = () => {
     dataFormattedForFieldBrowser,
   });
 
-  if (!dataFormattedForFieldBrowser || error) {
-    return null;
-  }
-
   if (loading) {
     return (
       <EuiFlexGroup
@@ -45,7 +41,7 @@ export const InvestigationGuide: React.FC = () => {
 
   return (
     <>
-      {basicAlertData.ruleId && ruleNote ? (
+      {!error && basicAlertData.ruleId && ruleNote ? (
         <InvestigationGuideView
           basicData={basicAlertData}
           ruleNote={ruleNote}
@@ -53,9 +49,9 @@ export const InvestigationGuide: React.FC = () => {
           showFullView={true}
         />
       ) : (
-        <div data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
+        <p data-test-subj={INVESTIGATION_GUIDE_NO_DATA_TEST_ID}>
           <FormattedMessage
-            id="xpack.securitySolution.flyout.investigationGuideNoData"
+            id="xpack.securitySolution.flyout.left.investigation.noDataDescription"
             defaultMessage="There’s no investigation guide for this rule. {documentation} to add one."
             values={{
               documentation: (
@@ -64,14 +60,14 @@ export const InvestigationGuide: React.FC = () => {
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.documentDetails.investigationGuideDocumentationLink"
+                    id="xpack.securitySolution.flyout.left.investigation.noDataLinkText"
                     defaultMessage="Edit the rule's settings"
                   />
                 </EuiLink>
               ),
             }}
           />
-        </div>
+        </p>
       )}
     </>
   );

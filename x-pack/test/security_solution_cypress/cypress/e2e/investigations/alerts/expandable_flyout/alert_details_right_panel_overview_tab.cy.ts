@@ -268,13 +268,13 @@ describe(
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(0)
               .should('be.visible')
-              .and('have.text', '0 threat match detected'); // TODO work on getting proper IoC data to get proper data here
+              .and('have.text', '0 threat matches detected'); // TODO work on getting proper IoC data to get proper data here
 
             // field with threat enrichement
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(1)
               .should('be.visible')
-              .and('have.text', '0 field enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
+              .and('have.text', '0 fields enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
           });
 
         cy.log('should navigate to left panel Threat Intelligence tab');
