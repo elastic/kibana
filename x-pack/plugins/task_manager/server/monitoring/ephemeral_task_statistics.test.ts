@@ -362,7 +362,7 @@ const mockTaskRunEvent = (
 ) => {
   const task = mockTaskInstance(overrides);
   const persistence = TaskPersistence.Recurring;
-  return asTaskRunEvent(task.id, asOk({ task, persistence, result }), timing);
+  return asTaskRunEvent(task.id, asOk({ task, persistence, result, isExpired: false }), timing);
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({
