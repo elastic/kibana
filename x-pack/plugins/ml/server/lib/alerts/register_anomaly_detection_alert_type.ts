@@ -81,7 +81,7 @@ export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAle
       [ALERT_ANOMALY_DETECTION_JOB_ID]: {
         type: ES_FIELD_TYPES.KEYWORD,
         array: false,
-        required: false,
+        required: true,
       },
       [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.INTEGER, array: false, required: false },
       [ALERT_ANOMALY_IS_INTERIM]: { type: ES_FIELD_TYPES.BOOLEAN, array: false, required: false },

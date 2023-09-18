@@ -198,6 +198,7 @@ const generateSchemaLines = ({
         break;
       case 'float':
       case 'integer':
+      case 'double':
         lineWriter.addLine(`${keyToWrite}: ${getSchemaDefinition('schemaNumber', isArray)},`);
         break;
       case 'boolean':
