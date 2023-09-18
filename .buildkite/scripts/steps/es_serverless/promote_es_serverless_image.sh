@@ -36,10 +36,30 @@ cat << EOT | buildkite-agent annotate --style "success"
   <h2>Promotion successful!</h2><br/>
   New image: $TARGET_IMAGE<br/>
   Source image: $SOURCE_IMAGE<br/>
+  Kibana commit: <a href="https://github.com/elastic/kibana/commit/$BUILDKITE_COMMIT">$BUILDKITE_COMMIT</a>
   Elasticsearch commit: <a href="https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH">$ELASTIC_COMMIT_HASH</a>
 EOT
 
 echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"
 
-echo "--- Uploading latest-verified manifest to GCS"
+if [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
+  echo "--- Uploading latest-verified manifest to GCS"
+  ES_SERVERLESS_BUCKET=kibana-ci-es-serverless-images
+  MANIFEST_NAME=latest-verified.json
+  cat << EOT >> $MANIFEST_NAME
+{
+  "build_url": "$BUILDKITE_BUILD_URL",
+  "kibana_commit": "$BUILDKITE_COMMIT",
+  "kibana_branch": "$BUILDKITE_BRANCH",
+  "elasticsearch_serverless_tag": "$SOURCE_IMAGE_OR_TAG",
+  "elasticsearch_serverless_commit": "TODO: this currently can't be decided",
+  "elasticsearch_commit": "$ELASTIC_COMMIT_HASH",
+  "created_at": "`date`",
+  "timestamp": "`node -p 'Date.now()'`"
+}
+EOT
 
+  gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp latest-verified.json "gs://$ES_SERVERLESS_BUCKET/latest-verified.json"
+else
+  echo "--- Skipping uploading of latest-verified manifest to GCS, flag was not provided"
+fi
