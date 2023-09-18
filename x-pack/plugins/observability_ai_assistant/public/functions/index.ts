@@ -68,9 +68,7 @@ export async function registerFunctions({
         DO NOT use Elasticsearch SQL at any time, unless explicitly requested by the user when they mention "Elasticsearch SQL".
 
         Right: the user asks to show or execute a query. you call an external service by using the "show_query" function.
-        Wrong: the user asks to show or execute a query. You attempt to answer it yourself
-
-        After executing the "show_query" function, do NOT embed the returned query in your response, it will be displayed to the user.
+        Wrong: the user asks to show or execute a query. You attempt to answer it yourself.
 
         When using the "recall" function for an ES|QL query, use the following approach: 
 

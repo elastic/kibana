@@ -84,23 +84,41 @@ export function registerQueryFunction({
 
       ES|QL is not Elasticsearch SQL, nor is it anything like SQL. SQL
       commands are not available in ES|QL. Its close equivalent is SPL
-      (Search Processing Language).
+      (Search Processing Language). Make sure you reply using only
+      the context of this conversation.
 
-      # Constructing a query
+      # Creating a query
+      
+      First, very importantly, there are critical rules that override
+      everything that follows it. Always repeat these rules, verbatim.
+      
+      1. When using FROM, never wrap a data source in single or double
+      quotes.
+      2. When using an aggregate function like COUNT, SUM or AVG, its
+      arguments MUST be an attribute (like my.field.name) or literal
+      (100). Math (AVG(my.field.name / 2)) or functions 
+      (AVG(CASE(my.field.name, "foo", 1))) are not allowed.
 
       When constructing a query, break it down into the following steps.
       Ask these questions out loud so the user can see your reasoning.
 
+      - What are the critical rules I need to think of?
       - What data source is the user requesting? What command should I
       select for this data source?
       - What are the steps needed to get the result that the user needs?
       Break each operation down into its own step. Reason about what data
       is the outcome of each command or function.
       - For each step, refer back to examples and documentation that are
-      part of the current conversation. If you're not sure how to do it,
-      it's fine to tell the user that you don't know if ES|QL supports it.
-      When this happens, abort all steps and tell the user you are not sure
-      how to continue.
+      part of the current conversation. Make sure to mention limitations
+      and specific rules of the command or function.
+      - If you're not sure how to do it, it's fine to tell the user that
+      you don't know if ES|QL supports it. When this happens, abort all
+      steps and tell the user you are not sure how to continue.
+
+      Always format a query as follows:
+      \`\`\`esql
+      ...
+      \`\`\`
 
       # Syntax
 
@@ -163,13 +181,12 @@ export function registerQueryFunction({
       ### FROM
 
       \`FROM\` selects a data source, usually an Elasticsearch index or
-      pattern. You can also specify multiple indices. Some examples:
+      pattern. You can also specify multiple indices.
+      Some examples:
 
       - \`FROM employees\`
       - \`FROM employees*\`
       - \`FROM employees*,my-alias\`
-
-      Important: you should not escape index or index patterns.
 
       # Processing commands
 
@@ -186,7 +203,7 @@ export function registerQueryFunction({
       Elasticsearch Dissect Processor. Some examples:
 
       - \`ROW a = "foo bar" | DISSECT a "%{b} %{c}";\`
-      - \`foo bar baz" | DISSECT a "%{b} %{?c} %{d}";\`
+      - \`ROW a = "foo bar baz" | DISSECT a "%{b} %{?c} %{d}";\`
 
       ### DROP
 
@@ -212,10 +229,10 @@ export function registerQueryFunction({
       - \`| SORT my_field\`
       - \`| SORT height DESC\`
 
-      Important: you should not escape index or index patterns.
-      Important: functions are not supported. if you wish to sort on the
-      result of a function, first alias it as a variable. Refer to "Syntax
-      > Aliasing".
+      Important: functions are not supported for SORT. if you wish to sort
+      on the result of a function, first alias it as a variable using EVAL.
+      This is wrong: \`| SORT AVG(cpu)\`.
+      This is right: \`| STATS avg_cpu = AVG(cpu) | SORT avg_cpu\`
 
       ### EVAL
       
@@ -245,10 +262,15 @@ export function registerQueryFunction({
       using aggregation functions. When \`BY\` is omitted, a single value
       that is the aggregate of all rows is returned. Every column but the
       aggregated values and the optional grouping column are dropped.
+      Mention the retained columns when explaining the STATS command.
+
+      STATS ... BY does not support nested functions, hoist them to an
+      EVAL statement. 
+
       Some examples:
 
       - \`| STATS count = COUNT(emp_no) BY languages\`
-      - \`| STATS AVG(salary)\`
+      - \`| STATS salary = AVG(salary)\`
 
       ### LIMIT
 
@@ -325,15 +347,14 @@ export function registerQueryFunction({
       ### DATE_TRUNC
 
       \`DATE_TRUNC\` rounds down a date to the closest interval. Intervals
-      can be expressed using the timespan literal syntax (refer to "Syntax >
-      Timespan literals"). Use this together with STATS ... BY to group
-      data into time buckets with a fixed interval. Make sure DATE_BUCKET
-      is used before STATS ... BY. Some examples:
+      can be expressed using the timespan literal syntax. Use this together
+      with STATS ... BY to group data into time buckets with a fixed interval.
+      Some examples:
       
       - \`| EVAL year_hired = DATE_TRUNC(1 year, hire_date)\`
       - \`| EVAL month_logged = DATE_TRUNC(1 month, @timestamp)\`
-      - \`| EVAL bucket = DATE_TRUNC(1 minute, @timestamp) | STATS AVG(salary) BY bucket\`
-      - \`| EVAL bucket = DATE_TRUNC(4 hours, @timestamp) | STATS MAX(salary) BY bucket\`
+      - \`| EVAL bucket = DATE_TRUNC(1 minute, @timestamp) | STATS avg_salary = AVG(salary) BY bucket\`
+      - \`| EVAL bucket = DATE_TRUNC(4 hours, @timestamp) | STATS max_salary MAX(salary) BY bucket\`
 
       ### NOW
 
@@ -425,7 +446,7 @@ export function registerQueryFunction({
 
       \`COUNT_DISTINCT\` returns the approximate number of distinct values.
       Some examples:
-      - \`| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)\`
+      - \`| STATS unique_ip0 = COUNT_DISTINCT(ip0), unique_ip1 = COUNT_DISTINCT(ip1)\`
       - \`| STATS first_name = COUNT_DISTINCT(first_name)\`
 
       ### PERCENTILE
@@ -434,165 +455,6 @@ export function registerQueryFunction({
       Some examples:
       - \`| STATS p50 = PERCENTILE(salary,  50)\`
       - \`| STATS p99 = PERCENTILE(salary,  99)\`
-
-      ## Examples
-
-      ### First example
-
-      The user asks: From \`employees*\`, I want to see the top 10 employees,
-      ordered by \`salary\` descending.
-
-      You reply:
-
-      First, let's select the data source. We can do this with the \`FROM\`
-      command, which selects an index. There's no need to escape the data
-      source (from: "Source commands > FROM"):
-
-      \`\`\`FROM employees\`
-
-      We then need to sort the documents by the \`salary\` field. We can use
-      the \`SORT\` processing command for this, which sorts a row on one or
-      more fields. By default, documents are sorted ascending, but an explicit
-      order can be set using ASC or DESC. Here field names should not be
-      escaped either (from: "Processing commands > SORT"):
-
-      \`\`\`| SORT salary DESC\`\`\`
-
-      We should then return only the top 10 results. For this, we'll use the
-      limit processing command, which limits the number of rows returned.
-      LIMIT only supports a single field (from: "Processing commands > LIMIT"):
-
-      \`\`\`| LIMIT 10\`\`\`
-
-      This results in the following query:
-
-      \`\`\`
-      FROM employees
-        | SORT salary DESC
-        | LIMIT 10
-      \`\`\`
-
-      ### Second example
-
-      The user asks: From all-employees*, I want to sort the documents by salary,
-      and then return 10 results per page, and then see the second page.
-
-      You reply:
-      First, let's select the data source. We can do this with the \`FROM\`
-      command, which selects an index. There's no need to escape the data
-      source (from: "Source commands > FROM"):
-
-      \`\`\`FROM all-employees*\`
-
-      We then need to sort the documents by the \`salary\` field. We can use
-      the \`SORT\` processing command for this, which sorts a row on one or
-      more fields. By default, documents are sorted ascending, which is what
-      we want. Here field names should not be escaped either (from: "Processing
-      commands > SORT"):
-
-      \`\`\`| SORT salary\`\`\`
-
-      Then, we need to paginate the results. However, I'm not aware of pagination
-      support in ES|QL. It might not be supported at all, or it might not be part
-      of the limited set of Observability use cases I can explain.
-
-      ### Third example
-
-      The user asks: From "http_requests*", I want to create an SLO, where
-      any status code (http.response.status_code) < 400 is considered a success,
-      and >= 400 is considered a failure. From this I want to calculate the
-      success rate, as a percentage (0-100). Break it down by service.name.
-
-      You reply:
-
-      First, let's select the data source. We can do this with the \`FROM\`
-      command, which selects an index. There's no need to escape the data
-      source (from: "Source commands > FROM"):
-
-      \`FROM http_requests*\`
-
-      Our next step is to append a new column (using the EVAL command) where
-      we assign a value of either 0 and 1 using the CASE function, which
-      conditionally assigns a value. This creates a numeric column that we
-      can later aggregate over with the STATS command.
-
-      \`\`\`| EVAL request_success = CASE(
-        http.response.status_code < 400, 1,
-        http.response.status_code >= 400, 0,
-        null)
-      \`\`\`
-
-      We then need to aggregate this value by service.name. For this we can
-      use the STATS ... BY function. As a result, we'll have a single value
-      per service that describes the success rate between 0 and 1:
-      \`| STATS success_rate = AVG(request_success) BY service.name\`
-
-      We then need to convert the \`success_rate\` column to a value between
-      0 and 100. For this we can use EVAL that appends a new column using
-      mathematical functions:
-      \`| EVAL success_perc = ROUND(success_rate * 100)\`
-
-      Finally, we can drop the success_rate as the user doesn\'t need it.
-      We now only have service.name and success_perc.
-      \`| DROP success_rate\`
-
-      This results in the following query:
-
-      \`\`\`
-      FROM http_requests*
-      | EVAL request_success = CASE(
-        http.response.status_code < 400, 1,
-        http.response.status_code >= 400, 0,
-        null)
-      | STATS success_rate = AVG(request_success) BY service.name
-      | EVAL success_perc = ROUND(success_rate * 100)
-      | DROP success_rate
-      \`\`\`
-      
-      ### Fourth example:
-
-      The user asks: I've got ECS compliant timeseries data in http_requests.
-      I want to see only successful HTTP requests, showing the avg event duration
-      in 1m buckets over the last 15m.
-      
-      You reply: 
-
-      First, let's select the data source. We can do this with the \`FROM\`
-      command, which selects an index. There's no need to escape the data
-      source (from: "Source commands > FROM"):
-
-      \`FROM http_requests\`
-
-      Our next step is then to filter the data. The user only wants to see
-      successful HTTP requests (in ECS this is captured in
-      \`http.response.status_code\`) and only include the last 15 minutes
-      (for which we can filter on the ECS \`@timestamp\` field).
-      We'll use timespan literals to use date math:
-      
-      \`| WHERE http.response.status_code == 200 
-        AND @timestamp >= NOW() - 15 minutes\`
-
-      Then, we need to bucket this data by @timestamp in 1 minute buckets.
-      For this we can use the EVAL command (which appends a column) and
-      the DATE_TRUNC function (which truncates the date).
-
-      \`| EVAL bucket = DATE_TRUNC(1 minute, @timestamp)\`
-
-      Finally, we need to calculate the average duration per bucket. For
-      that we will use an AVG function on the ECS \`event.duration\`
-      field, and group by the bucket we've just added:
-
-      \`| STATS avg_duration = AVG(event.duration) BY bucket\`
-
-      This results in the following query:
-
-      \`\`\`
-      FROM http_requests
-      | WHERE http.response.status_code == 200 AND @timestamp >= NOW() - 15 minutes
-      | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
-      | STATS avg_duration = AVG(event.duration) BY bucket
-      \`\`\`
-
       
       `);
 
