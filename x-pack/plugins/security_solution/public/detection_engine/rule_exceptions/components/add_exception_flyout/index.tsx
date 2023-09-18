@@ -130,6 +130,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [rules]);
 
+  const showLoadingSkeleton = useMemo(
+    () => isLoading && isAlertDataLoading && !sharedListToAddTo && !rules?.length,
+    [isAlertDataLoading, isLoading, rules?.length, sharedListToAddTo]
+  );
+  const getRadioSelectionMode = useMemo(() => {
+    if (isBulkAction) return 'add_to_rules';
+    if (rules?.length === 1 || isAlertDataLoading !== undefined) return 'add_to_rule';
+    return 'select_rules_to_add_to';
+  }, [isAlertDataLoading, isBulkAction, rules]);
+
   const getListType = useMemo(() => {
     if (isEndpointItem) return ExceptionListTypeEnum.ENDPOINT;
     if (sharedListToAddTo) return ExceptionListTypeEnum.DETECTION;
@@ -159,14 +169,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     dispatch,
   ] = useReducer(createExceptionItemsReducer(), {
     ...initialState,
-    addExceptionToRadioSelection: isBulkAction
-      ? 'add_to_rules'
-      : rules != null && rules.length === 1
-      ? 'add_to_rule'
-      : 'select_rules_to_add_to',
+    addExceptionToRadioSelection: getRadioSelectionMode,
     listType: getListType,
     selectedRulesToAddTo: rules != null ? rules : [],
   });
+
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
@@ -486,7 +493,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       </FlyoutHeader>
 
       <FlyoutBodySection className="builder-section">
-        <EuiSkeletonText data-test-subj="loadingAddExceptionFlyout" lines={4} isLoading={isLoading}>
+        <EuiSkeletonText
+          data-test-subj="loadingAddExceptionFlyout"
+          lines={4}
+          isLoading={showLoadingSkeleton}
+        >
           {errorSubmitting != null && (
             <>
               <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
