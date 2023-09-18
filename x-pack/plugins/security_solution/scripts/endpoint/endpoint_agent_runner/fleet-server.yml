@@ -1,0 +1,31 @@
+# This config is intended to be used with a stand-alone fleet-server instance for development.
+output:
+  elasticsearch:
+    hosts: '${ELASTICSEARCH_HOSTS:https://host.docker.internal:9200}'
+    service_token: '${ELASTICSEARCH_SERVICE_TOKEN}'
+    ssl.ca_trusted_fingerprint: '${ELASTICSEARCH_CA_TRUSTED_FINGERPRINT}'
+
+fleet:
+  agent:
+    id: '${FLEET_SERVER_AGENT_ID:dev-fleet-server}'
+
+inputs:
+  - type: fleet-server
+    policy.id: '${FLEET_SERVER_POLICY_ID:fleet-server-policy}'
+    server:
+      ssl:
+        enabled: true
+        certificate: /fleet-server.crt
+        key: /fleet-server.key
+#        key_passphrase: /creds/key.pem
+
+logging:
+  to_stderr: true # Force the logging output to stderr
+  pretty: true
+  level: '${LOG_LEVEL:DEBUG}'
+
+# Enables the stats endpoint under http://localhost:5601 by default.
+# Additional stats can be found under http://127.0.0.1:5066/stats and http://127.0.0.1:5066/state
+http.enabled: true
+#http.host: http://127.0.0.1
+#http.port: 5601
