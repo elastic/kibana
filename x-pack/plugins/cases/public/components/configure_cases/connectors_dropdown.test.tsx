@@ -15,6 +15,13 @@ import type { Props } from './connectors_dropdown';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
+import userEvent from '@testing-library/user-event';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+
+const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
+  typeof useApplicationCapabilities
+>;
+jest.mock('../../common/lib/kibana');
 
 describe('ConnectorsDropdown', () => {
   let wrapper: ReactWrapper;
@@ -296,10 +303,12 @@ describe('ConnectorsDropdown', () => {
     expect(tooltips[0]).toBeInTheDocument();
   });
 
-  test('it should hide the "Add New Connector" button when the user lacks the capability to add a new connector', () => {
+  test('it should hide the "Add New Connector" button when the user lacks the capability to add a new connector', async () => {
     const selectedConnector = 'none';
-    const { queryByText } = render(
+    useApplicationCapabilitiesMock().actions = { crud: false, read: true };
+    render(
       <ConnectorsDropdown
+        appendAddConnectorButton={true}
         connectors={[]}
         selectedConnector={selectedConnector}
         disabled={false}
@@ -309,7 +318,7 @@ describe('ConnectorsDropdown', () => {
       { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
     );
 
-    const addNewConnectorButton = queryByText('Add New Connector');
-    expect(addNewConnectorButton).toBeNull();
+    userEvent.click(screen.getByTestId('dropdown-connectors'));
+    expect(screen.queryByTestId('dropdown-connector-add-connector')).not.toBeInTheDocument();
   });
 });
