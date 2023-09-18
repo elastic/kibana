@@ -20,11 +20,12 @@ export function registerGetDatasetInfoFunction({
     {
       name: 'get_dataset_info',
       contexts: ['core'],
-      description: `Use this function to get information about dataviews/datasets available and the fields available on them.
+      description: `Use this function to get information about indices/datasets available and the fields available on them.
 
-      providing empty string as dataview name will retrieve all dataviews
-      if dataview name matches more than a single dataview list of matching dataviews will be provied
-      else list of all fields in this dataview will be given
+      providing empty string as index name will retrieve all indices
+      if index name matches more than a single index list of matching indices will be provided
+      else list of all fields in this index will be given.
+      wildcards can be part of index name.
 
       DO NOT include the user's request. It will be added internally.`,
       descriptionForUser:
@@ -33,30 +34,21 @@ export function registerGetDatasetInfoFunction({
         type: 'object',
         additionalProperties: false,
         properties: {
-          dataview: {
+          index: {
             type: 'string',
             description:
-              'dataview name the user is interested in or empty string to get information about all available dataviews',
-          },
-          fields: {
-            type: 'array',
-            items: {
-              type: 'string',
-              description:
-                'field names user is looking for or empty to get all fields for provided dataview',
-            },
+              'index name the user is interested in or empty string to get information about all available indices',
           },
         },
-        required: ['dataview', 'fields'],
+        required: ['index'],
       } as const,
     },
-    ({ arguments: { dataview, fields }, messages }, signal) => {
+    ({ arguments: { index }, messages }, signal) => {
       return service
         .callApi('POST /internal/observability_ai_assistant/functions/get_dataset_info', {
           params: {
             body: {
-              dataview,
-              fields,
+              index,
             },
           },
           signal,

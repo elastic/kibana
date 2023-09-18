@@ -388,34 +388,40 @@ export class ObservabilityAIAssistantClient {
   };
 
   get_dataset_info = async (
-    dataset: string,
-    fields: string[]
+    index: string
   ): Promise<{
-    dataviews: string[];
+    indices: string[];
     fields: Array<{ name: string; description: string; type: string }>;
   }> => {
     // if empty dataview, get list of all dataviews
-    const dv = dataset !== '' && (await this.dependencies.dataviews.find(dataset));
-    if (!dv || dv.length === 0) {
+
+    let indices: string[] = [];
+
+    try {
+      const body = await this.dependencies.esClient.indices.resolveIndex({
+        name: index,
+        expand_wildcards: 'open',
+      });
+      indices = body.indices.map((i) => i.name);
+    } catch (e) {
+      indices = [];
+    }
+
+    if (index === '') {
       return {
-        dataviews: await this.dependencies.dataviews.getTitles(),
+        indices,
         fields: [],
       };
     }
 
-    if (dv.length > 1) {
-      return {
-        dataviews: dv.map((dataview) => {
-          return dataview.id || dataview.name;
-        }),
-        fields: [],
-      };
-    }
+    const fields = await this.dependencies.dataviews.getFieldsForWildcard({
+      pattern: index,
+    });
 
     // else get all the fields for the found dataview
     return {
-      dataviews: [dv[0].id || dv[0].name],
-      fields: dv[0].fields.map((field) => {
+      indices: [index],
+      fields: fields.map((field) => {
         return {
           name: field.name,
           description: field.customLabel || '',
