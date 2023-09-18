@@ -15,9 +15,9 @@
   padding-left: $euiSizeL;
 }
 
-.actAccordionActionForm .euiAccordion__arrow {
+.actAccordionActionForm .euiAccordion__iconButton {
   transform: translateX($euiSizeM) rotate(0deg) !important;
 }
-.actAccordionActionForm .euiAccordion__arrow[aria-expanded='true'] {
+.actAccordionActionForm .euiAccordion__iconButton.euiAccordion__iconButton-isOpen {
   transform: translateX($euiSizeM) rotate(90deg) !important;
 }
