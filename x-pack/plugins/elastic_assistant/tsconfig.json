@@ -22,6 +22,7 @@
     "@kbn/elastic-assistant",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-logging-server-mocks",
   ],
   "exclude": [
     "target/**/*",
