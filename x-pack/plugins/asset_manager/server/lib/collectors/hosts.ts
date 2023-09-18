@@ -89,6 +89,7 @@ export async function collectK8sNodes({
       'asset.ean': hostEan,
       'kubernetes.node.uid': nodeUid,
       'kubernetes.node.name': nodeName,
+      'agent.type': 'implicit_collector'
     };
 
     if (hostId) {
@@ -202,6 +203,7 @@ export async function collectCloudHosts({
       'asset.name': instanceId,
       'asset.ean': hostEan,
       'asset.children': [],
+      'agent.type': 'implicit_collector'
     };
 
     if (hostId) {
@@ -317,6 +319,7 @@ export async function collectHostsById({
       'asset.name': hostId,
       'asset.ean': hostEan,
       'asset.children': [],
+      'agent.type': 'implicit_collector'
     };
 
     if (hostName) {
@@ -405,6 +408,7 @@ export async function collectHostsByName({
       'asset.ean': hostEan,
       'host.hostname': hostName,
       'asset.children': [],
+      'agent.type': 'implicit_collector'
     };
 
     if (fields['orchestrator.cluster.name']) {

@@ -74,6 +74,7 @@ export async function collectContainers({
       'asset.id': containerId,
       'asset.ean': `container:${containerId}`,
       'asset.parents': [parentEan],
+      'agent.type': 'implicit_collector'
     };
 
     if (nodeName) {
