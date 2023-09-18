@@ -191,7 +191,7 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false,
@@ -454,7 +454,7 @@
               "\nServerless configuration"
             ],
             "signature": [
-              "{ projectId?: string | undefined; }"
+              "{ projectId?: string | undefined; projectName?: string | undefined; }"
             ],
             "path": "x-pack/plugins/cloud/public/types.ts",
             "deprecated": false,
@@ -790,7 +790,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; }"
           ],
           "path": "x-pack/plugins/cloud/public/types.ts",
           "deprecated": false,
@@ -1053,7 +1053,7 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; }"
           ],
           "path": "x-pack/plugins/cloud/server/plugin.ts",
           "deprecated": false,

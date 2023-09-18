@@ -17,6 +17,7 @@ import { countBy } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 type EntityType = 'anomaly_detector' | 'data_frame_analytics' | 'trained_models';
 
@@ -60,6 +61,11 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   onSelectionChange,
   handleDuplicates = false,
 }) => {
+  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
+    'isADEnabled',
+    'isDFAEnabled',
+    'isNLPEnabled',
+  ]);
   const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
   const visColorsBehindText = euiPaletteColorBlindBehindText();
@@ -70,7 +76,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   const fetchOptions = useCallback(async () => {
     try {
       const newOptions: Array<EuiComboBoxOptionOption<string>> = [];
-      if (entityTypes?.anomaly_detector) {
+      if (isADEnabled && entityTypes?.anomaly_detector) {
         const { jobIds: jobIdOptions } = await jobsApi.getAllJobAndGroupIds();
 
         newOptions.push({
@@ -90,7 +96,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
         });
       }
 
-      if (entityTypes?.data_frame_analytics) {
+      if (isDFAEnabled && entityTypes?.data_frame_analytics) {
         const dfa = await dataFrameAnalytics.getDataFrameAnalytics();
         if (dfa.count > 0) {
           newOptions.push({
@@ -110,7 +116,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
         }
       }
 
-      if (entityTypes?.trained_models) {
+      if ((isDFAEnabled || isNLPEnabled) && entityTypes?.trained_models) {
         const models = await trainedModels.getTrainedModels();
         if (models.length > 0) {
           newOptions.push({
@@ -147,6 +153,9 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
     entityTypes,
     visColorsBehindText,
     displayErrorToast,
+    isADEnabled,
+    isDFAEnabled,
+    isNLPEnabled,
   ]);
 
   useMount(function fetchOptionsOnMount() {
