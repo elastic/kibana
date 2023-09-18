@@ -500,7 +500,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     volumeCmds.push(...fileCmds);
   }
 
-  const essResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
+  const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
     acc.push('--volume', `${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
 
     return acc;
@@ -508,7 +508,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   volumeCmds.push(
     ...getESp12Volume(),
-    ...essResources,
+    ...serverlessResources,
 
     '--volume',
     `${
