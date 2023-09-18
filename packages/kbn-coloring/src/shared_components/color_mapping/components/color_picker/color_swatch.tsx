@@ -67,6 +67,7 @@ export const ColorSwatch = ({
       isOpen={colorPickerVisible}
       repositionOnScroll={true}
       closePopover={() => dispatch(hideColorPickerVisibility())}
+      anchorPosition="upLeft"
       button={
         <EuiColorPickerSwatch
           color={colorHex}
