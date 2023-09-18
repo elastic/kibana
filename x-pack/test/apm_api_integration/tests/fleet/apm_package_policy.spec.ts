@@ -30,7 +30,7 @@ import {
   deletePackagePolicy,
   getPackagePolicy,
   setupFleet,
-} from './apm_package_policy_setup';
+} from './helpers';
 import { getBettertest } from '../../common/bettertest';
 import { expectToReject } from '../../common/utils/expect_to_reject';
 
@@ -120,8 +120,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     before(async () => {
       await setupFleet(bettertest);
-      agentPolicyId = await createAgentPolicy(bettertest);
-      packagePolicyId = await createPackagePolicy(bettertest, agentPolicyId);
+      agentPolicyId = await createAgentPolicy({ bettertest });
+      packagePolicyId = await createPackagePolicy({ bettertest, agentPolicyId });
       apmPackagePolicy = await getPackagePolicy(bettertest, packagePolicyId); // make sure to get the latest package policy
     });
 

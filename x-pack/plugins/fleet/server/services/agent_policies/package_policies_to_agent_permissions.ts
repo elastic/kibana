@@ -219,21 +219,20 @@ function universalProfilingPermissions(packagePolicyId: string) {
 }
 
 function apmPermissions(packagePolicyId: string) {
-  const APM_PERMISSIONS = [
-    'auto_configure',
-    'read',
-    'create_doc',
-    'create',
-    'write',
-    'index',
-    'view_index_metadata',
-  ];
-
-  const APM_INDICES = ['traces-*', 'logs-*', 'metrics-*'];
   return [
     packagePolicyId,
     {
-      indices: [{ names: APM_INDICES, privileges: APM_PERMISSIONS }],
+      cluster: ['cluster:monitor/main'],
+      indices: [
+        {
+          names: ['traces-*', 'logs-*', 'metrics-*'],
+          privileges: ['auto_configure', 'create_doc'],
+        },
+        {
+          names: ['traces-apm.sampled-*'],
+          privileges: ['auto_configure', 'create_doc', 'maintenance', 'monitor', 'read'],
+        },
+      ],
     },
   ];
 }
