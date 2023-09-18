@@ -92,7 +92,7 @@ class BreadcrumbService {
       ...this.breadcrumbs.enrichPolicies,
       {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.enrichPolicyCreateLabel', {
-          defaultMessage: 'Create enrich policies',
+          defaultMessage: 'Create enrich policy',
         }),
         href: `/enrich_policies/create`,
       },
