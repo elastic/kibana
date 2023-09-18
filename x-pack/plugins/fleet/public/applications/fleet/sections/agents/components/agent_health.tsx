@@ -194,6 +194,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
               onClick={() => {
                 setIsUpgradeModalOpen(true);
               }}
+              data-test-subj="restartUpgradeBtn"
             >
               <FormattedMessage
                 id="xpack.fleet.agentHealth.restartUpgradeBtn"
