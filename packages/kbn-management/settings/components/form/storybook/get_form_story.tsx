@@ -23,11 +23,11 @@ export const getFormStory = () => {
         getFieldDefinition({
           id,
           setting,
-          params: { isCustom: false, isOverridden: setting.isOverridden },
         })
     );
+    const isSavingEnabled = true;
 
-    return <Form {...{ fields }} />;
+    return <Form {...{ fields, isSavingEnabled }} />;
   };
 
   return Story;

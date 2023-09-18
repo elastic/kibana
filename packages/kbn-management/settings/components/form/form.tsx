@@ -12,21 +12,55 @@ import type { FieldDefinition } from '@kbn/management-settings-types';
 import { FieldRow, OnChangeFn } from '@kbn/management-settings-components-field-row';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n/target/types';
 import { BottomBar } from './bottom_bar';
 import { useServices } from './services';
 
 export interface FormProps {
   fields: Array<FieldDefinition<SettingType>>;
+  isSavingEnabled: boolean;
 }
 
 export const Form = (props: FormProps) => {
-  const { fields } = props;
+  const { fields, isSavingEnabled } = props;
+  const { saveChanges, showError, showReloadPagePrompt } = useServices();
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<
     Record<string, UnsavedFieldChange<SettingType>>
   >({});
 
-  const { saveChanges } = useServices();
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
+  const unsavedChangesCount = Object.keys(unsavedChanges).length;
+  const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
+
+  const saveAll = async () => {
+    setIsLoading(true);
+    if (isEmpty(unsavedChanges)) {
+      return;
+    }
+    try {
+      await saveChanges(unsavedChanges);
+      clearAllUnsaved();
+      const requiresReload = fields.some(
+        (setting) => unsavedChanges.hasOwnProperty(setting.id) && setting.requiresPageReload
+      );
+      if (requiresReload) {
+        showReloadPagePrompt();
+      }
+    } catch (e) {
+      showError(
+        i18n.translate('management.settings.form.saveErrorMessage', {
+          defaultMessage: 'Unable to save',
+        })
+      );
+    }
+    setIsLoading(false);
+  };
+
+  const clearAllUnsaved = () => {
+    setUnsavedChanges({});
+  };
 
   const onChange: OnChangeFn<SettingType> = (id, change) => {
     if (!change?.unsavedValue) {
@@ -36,19 +70,6 @@ export const Form = (props: FormProps) => {
     }
 
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
-  };
-
-  const isSavingEnabled = true;
-
-  const clearAllUnsaved = () => {
-    setUnsavedChanges({});
-  };
-
-  const saveAll = async () => {
-    if (isEmpty(unsavedChanges)) {
-      return;
-    }
-    await saveChanges(unsavedChanges);
   };
 
   const fieldRows = fields.map((field) => {
@@ -61,7 +82,13 @@ export const Form = (props: FormProps) => {
     <Fragment>
       <div>{fieldRows}</div>
       {!isEmpty(unsavedChanges) && (
-        <BottomBar saveAll={saveAll} clearAllUnsaved={clearAllUnsaved} />
+        <BottomBar
+          saveAll={saveAll}
+          clearAllUnsaved={clearAllUnsaved}
+          hasInvalidChanges={hasInvalidChanges}
+          isLoading={isLoading}
+          unsavedChangesCount={unsavedChangesCount}
+        />
       )}
     </Fragment>
   );

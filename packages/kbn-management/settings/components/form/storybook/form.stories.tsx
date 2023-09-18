@@ -24,6 +24,7 @@ export default {
         links={{ deprecationKey: 'link/to/deprecation/docs' }}
         saveChanges={action('saveChanges')}
         showError={action('showError')}
+        showReloadPagePrompt={action('showReloadPagePrompt')}
       >
         <EuiPanel>
           <Story />

@@ -14,6 +14,7 @@ import React, { FC, useContext } from 'react';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
 import type { FormServices, FormKibanaDependencies, Services } from './types';
+import { ReloadPageToast } from './reload_page_toast';
 
 const FormContext = React.createContext<Services | null>(null);
 
@@ -21,10 +22,10 @@ const FormContext = React.createContext<Services | null>(null);
  * React Provider that provides services to a {@link Form} component and its dependents.
  */
 export const FormProvider: FC<FormServices> = ({ children, ...services }) => {
-  const { saveChanges, showError, ...rest } = services;
+  const { saveChanges, showError, showReloadPagePrompt, ...rest } = services;
 
   return (
-    <FormContext.Provider value={{ saveChanges, showError }}>
+    <FormContext.Provider value={{ saveChanges, showError, showReloadPagePrompt }}>
       <FieldRowProvider {...rest}>{children}</FieldRowProvider>
     </FormContext.Provider>
   );
@@ -35,7 +36,7 @@ export const FormProvider: FC<FormServices> = ({ children, ...services }) => {
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}.
  */
 export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...deps }) => {
-  const { settings, ...rest } = deps;
+  const { settings, toasts, docLinks, theme, i18nStart } = deps;
 
   return (
     <FormContext.Provider
@@ -46,11 +47,11 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
           );
           return Promise.all(arr);
         },
-        // TODO:
-        showError: (message: string) => {},
+        showError: (message: string) => toasts.addDanger(message),
+        showReloadPagePrompt: () => toasts.add(ReloadPageToast(theme, i18nStart)),
       }}
     >
-      <FieldRowKibanaProvider {...rest}>{children}</FieldRowKibanaProvider>
+      <FieldRowKibanaProvider {...{ docLinks, toasts }}>{children}</FieldRowKibanaProvider>
     </FormContext.Provider>
   );
 };

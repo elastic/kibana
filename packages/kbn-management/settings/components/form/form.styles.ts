@@ -16,5 +16,14 @@ export const useFormStyles = () => {
     cssFormButton: css`
       width: 100%;
     `,
+    cssFormUnsavedCount: css`
+      @include euiBreakpoint('xs') {
+        display: none;
+      }
+    `,
+    cssFormUnsavedCountMessage: css`
+      box-shadow: -$euiSizeXS 0 $euiColorWarning;
+      padding-left: $euiSizeS;
+    `,
   };
 };
