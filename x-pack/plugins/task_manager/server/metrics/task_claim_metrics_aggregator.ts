@@ -5,17 +5,27 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
 import { isOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRun } from '../task_events';
 import { SimpleHistogram } from './simple_histogram';
-import { SuccessRate, SuccessRateCounter } from './success_rate_counter';
 import { ITaskMetricsAggregator } from './types';
+import { MetricCounterService } from './counter/metric_counter_service';
 
 const HDR_HISTOGRAM_MAX = 30000; // 30 seconds
 const HDR_HISTOGRAM_BUCKET_SIZE = 100; // 100 millis
 
-export type TaskClaimMetric = SuccessRate & {
+enum TaskClaimKeys {
+  SUCCESS = 'success',
+  TOTAL = 'total',
+}
+interface TaskClaimCounts extends JsonObject {
+  [TaskClaimKeys.SUCCESS]: number;
+  [TaskClaimKeys.TOTAL]: number;
+}
+
+export type TaskClaimMetric = TaskClaimCounts & {
   duration: {
     counts: number[];
     values: number[];
@@ -23,30 +33,35 @@ export type TaskClaimMetric = SuccessRate & {
 };
 
 export class TaskClaimMetricsAggregator implements ITaskMetricsAggregator<TaskClaimMetric> {
-  private claimSuccessRate = new SuccessRateCounter();
+  private counter: MetricCounterService<TaskClaimCounts> = new MetricCounterService(
+    Object.values(TaskClaimKeys)
+  );
   private durationHistogram = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
 
   public initialMetric(): TaskClaimMetric {
     return {
-      ...this.claimSuccessRate.initialMetric(),
+      ...this.counter.initialMetrics(),
       duration: { counts: [], values: [] },
     };
   }
   public collect(): TaskClaimMetric {
     return {
-      ...this.claimSuccessRate.get(),
+      ...this.counter.collect(),
       duration: this.serializeHistogram(),
     };
   }
 
   public reset() {
-    this.claimSuccessRate.reset();
+    this.counter.reset();
     this.durationHistogram.reset();
   }
 
   public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
     const success = isOk((taskEvent as TaskRun).event);
-    this.claimSuccessRate.increment(success);
+    if (success) {
+      this.counter.increment(TaskClaimKeys.SUCCESS);
+    }
+    this.counter.increment(TaskClaimKeys.TOTAL);
 
     if (taskEvent.timing) {
       const durationInMs = taskEvent.timing.stop - taskEvent.timing.start;

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
 import {
@@ -15,17 +16,22 @@ import {
 import { RiskScore } from './risk_score';
 import { mockGetFieldsData } from '../mocks/mock_context';
 
+const renderRiskScore = (contextValue: RightPanelContext) =>
+  render(
+    <IntlProvider locale="en">
+      <RightPanelContext.Provider value={contextValue}>
+        <RiskScore />
+      </RightPanelContext.Provider>
+    </IntlProvider>
+  );
+
 describe('<RiskScore />', () => {
   it('should render risk score information', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
     } as unknown as RightPanelContext;
 
-    const { getByTestId } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <RiskScore />
-      </RightPanelContext.Provider>
-    );
+    const { getByTestId } = renderRiskScore(contextValue);
 
     expect(getByTestId(FLYOUT_HEADER_RISK_SCORE_TITLE_TEST_ID)).toBeInTheDocument();
     const riskScore = getByTestId(FLYOUT_HEADER_RISK_SCORE_VALUE_TEST_ID);
@@ -38,11 +44,7 @@ describe('<RiskScore />', () => {
       getFieldsData: jest.fn(),
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <RiskScore />
-      </RightPanelContext.Provider>
-    );
+    const { container } = renderRiskScore(contextValue);
 
     expect(container).toBeEmptyDOMElement();
   });
@@ -52,11 +54,7 @@ describe('<RiskScore />', () => {
       getFieldsData: jest.fn().mockImplementation(() => 123),
     } as unknown as RightPanelContext;
 
-    const { container } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <RiskScore />
-      </RightPanelContext.Provider>
-    );
+    const { container } = renderRiskScore(contextValue);
 
     expect(container).toBeEmptyDOMElement();
   });

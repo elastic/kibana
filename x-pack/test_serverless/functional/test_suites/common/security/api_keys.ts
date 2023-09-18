@@ -24,14 +24,19 @@ async function clearAllApiKeys(esClient: Client, logger: ToolingLog) {
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'apiKeys']);
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'apiKeys']);
   const browser = getService('browser');
   const es = getService('es');
   const log = getService('log');
 
   describe('API keys', () => {
+    before(async () => {
+      await pageObjects.svlCommonPage.login();
+    });
+
     after(async () => {
       await clearAllApiKeys(es, log);
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('should create and delete API keys correctly', async () => {
