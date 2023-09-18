@@ -20,6 +20,7 @@ import type {
   EventAnnotationGroupDeleteOut,
 } from '@kbn/event-annotation-plugin/common';
 import { CONTENT_ID } from '@kbn/event-annotation-plugin/common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CONTENT_ENDPOINT = '/api/content_management/rpc';
@@ -66,6 +67,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('group API', () => {
     before(async () => {
+      await kibanaServer.savedObjects.clean({ types: [EVENT_ANNOTATION_GROUP_TYPE] });
+
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json'
       );
@@ -75,6 +78,8 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json'
       );
+
+      await kibanaServer.savedObjects.clean({ types: [EVENT_ANNOTATION_GROUP_TYPE] });
     });
 
     describe('get', () => {
