@@ -37,6 +37,11 @@ import type {
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
+import {
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+} from '../../../common/endpoint/data_loaders/utils';
+import { fetchKibanaStatus } from './stack_services';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fleet_agent_generator';
 
@@ -136,11 +141,15 @@ export const waitForHostToEnroll = async (
   let found: Agent | undefined;
 
   while (!found && !hasTimedOut()) {
-    found = await fetchFleetAgents(kbnClient, {
-      perPage: 1,
-      kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
-      showInactive: false,
-    }).then((response) => response.items[0]);
+    found = await retryOnError(
+      async () =>
+        fetchFleetAgents(kbnClient, {
+          perPage: 1,
+          kuery: `(local_metadata.host.hostname.keyword : "${hostname}") and (status:online)`,
+          showInactive: false,
+        }).then((response) => response.items[0]),
+      RETRYABLE_TRANSIENT_ERRORS
+    );
 
     if (!found) {
       // sleep and check again
@@ -249,7 +258,7 @@ export const fetchAgentPolicyList = async (
 export const getAgentVersionMatchingCurrentStack = async (
   kbnClient: KbnClient
 ): Promise<string> => {
-  const kbnStatus = await kbnClient.status.get();
+  const kbnStatus = await fetchKibanaStatus(kbnClient);
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
     .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));

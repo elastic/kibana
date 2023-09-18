@@ -8,10 +8,10 @@
 import {
   configureStore,
   getDefaultMiddleware,
-  PreloadedState,
-  Action,
-  Dispatch,
-  MiddlewareAPI,
+  type PreloadedState,
+  type Action,
+  type Dispatch,
+  type MiddlewareAPI,
 } from '@reduxjs/toolkit';
 import { createLogger } from 'redux-logger';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
