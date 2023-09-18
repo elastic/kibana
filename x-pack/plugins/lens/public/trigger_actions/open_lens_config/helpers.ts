@@ -7,7 +7,7 @@
 import React from 'react';
 import './helpers.scss';
 import { IEmbeddable, tracksOverlays } from '@kbn/embeddable-plugin/public';
-import type { OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isLensEmbeddable } from '../utils';
