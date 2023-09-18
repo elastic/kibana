@@ -30,6 +30,9 @@ import {
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPerCoreWatt,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -372,6 +375,43 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: false,
     schema: schema.boolean(),
+    requiresPageReload: false,
+  },
+  [profilingPerCoreWatt]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingName', {
+      defaultMessage: 'Per core watts',
+    }),
+    value: 7,
+    description: i18n.translate('xpack.observability.profilingPerCoreWattUiSettingDescription', {
+      defaultMessage:
+        'The assumed amortized per-core average power consumption (based on 100% CPU Utilization)',
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: false,
+  },
+  [profilingDatacenterPUE]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingName', {
+      defaultMessage: 'Datacenter PUE',
+    }),
+    value: 1.7,
+    description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
+      defaultMessage: 'The assumed PUE(Power Usage Effectiveness) of the datacenter',
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: false,
+  },
+  [profilingCo2PerKWH]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingName', {
+      defaultMessage: 'CO2 per KWH',
+    }),
+    value: 0.379069,
+    description: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingDescription', {
+      defaultMessage: 'The assumed CO2 emissions in kg per kWh',
+    }),
+    schema: schema.number({ min: 0 }),
     requiresPageReload: false,
   },
 };
