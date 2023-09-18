@@ -21,7 +21,7 @@ export interface RegisterAlertParams {
 }
 
 export function registerMlAlerts(alertParams: RegisterAlertParams, enabledFeatures: MlFeatures) {
-  if (enabledFeatures.ad === false) {
+  if (enabledFeatures.ad === true) {
     registerAnomalyDetectionAlertType(alertParams);
     registerJobsMonitoringRuleType(alertParams);
   }
