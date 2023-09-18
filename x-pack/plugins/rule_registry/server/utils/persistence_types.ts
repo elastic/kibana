@@ -25,7 +25,7 @@ export type PersistenceAlertService = <T>(
     _id: string;
     _source: T;
   }>,
-  refresh: boolean,
+  refresh: boolean | 'wait_for',
   maxAlerts?: number,
   enrichAlerts?: (
     alerts: Array<{
