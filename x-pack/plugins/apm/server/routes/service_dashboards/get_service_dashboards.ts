@@ -6,8 +6,6 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { fromKueryExpression } from '@kbn/es-query/src/kuery/ast/ast';
-import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import {
   APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
   SavedServiceDashboard,
@@ -16,41 +14,19 @@ import {
 
 interface Props {
   savedObjectsClient: SavedObjectsClientContract;
-  query: string;
+  filter: string;
 }
 
 export async function getServiceDashboards({
   savedObjectsClient,
-  query,
+  filter,
 }: Props): Promise<SavedServiceDashboard[]> {
   const result = await savedObjectsClient.find<ServiceDashboard>({
     type: APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
     page: 1,
     perPage: 100,
-    filter: query,
+    filter,
   });
-
-  const all = await savedObjectsClient.find<ServiceDashboard>({
-    type: APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
-    page: 1,
-    perPage: 100,
-  });
-
-  const allAttibutes = all.saved_objects.map(
-    ({ id, attributes, updated_at: upatedAt }) => ({
-      id,
-      updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
-      ...attributes,
-    })
-  );
-
-  console.log('all====', allAttibutes);
-
-  // const opt = result.saved_objects.map(
-  //   ({ id, type, attributes, updated_at: upatedAt }) => ({ type, id })
-  // );
-
-  // savedObjectsClient.bulkDelete(opt);
 
   return result.saved_objects.map(
     ({ id, attributes, updated_at: upatedAt }) => ({

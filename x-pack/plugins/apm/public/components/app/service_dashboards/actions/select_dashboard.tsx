@@ -62,9 +62,9 @@ export function SelectDashboard({ onClose }: Props) {
           params: {
             body: {
               dashboardTitle: newDashboard.label,
-              dashboardSavedObjectId: newDashboard.value,
+              dashboardSavedObjectId: newDashboard?.value,
               useContextFilter,
-              linkTo: DashboardTypeEnum.single, //
+              linkTo: DashboardTypeEnum.single, // iteration-1: Only single supported
               serviceName,
             },
           },

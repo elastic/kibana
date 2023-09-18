@@ -70,7 +70,9 @@ const serviceDashboardsRoute = createApmServerRoute({
   ): Promise<{ serviceDashboards: SavedServiceDashboard[] }> => {
     const { context, params } = resources;
     const { serviceName } = params.path;
-    const so_prefix_attributes = `${APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE}.attributes`;
+
+    const soPrefixServiceName = `${APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE}.attributes.serviceName`;
+    const soPrefixLinkTo = `${APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE}.attributes.linkTo`;
 
     const {
       savedObjects: { client: savedObjectsClient },
@@ -79,8 +81,7 @@ const serviceDashboardsRoute = createApmServerRoute({
     const [serviceDashboards] = await Promise.all([
       getServiceDashboards({
         savedObjectsClient,
-        query: `${so_prefix_attributes}.kuery: "service.name\: ${serviceName}"`,
-        // query: `'service.name: ${serviceName}' | single`,
+        filter: `${soPrefixServiceName}:${serviceName} AND ${soPrefixLinkTo}: ${DashboardTypeEnum.single} `,
       }),
     ]);
 

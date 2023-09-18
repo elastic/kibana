@@ -22,7 +22,7 @@ export interface ServiceDashboard {
   dashboardTitle: string;
   useContextFilter: boolean;
   kuery?: string;
-  serviceName?: string;
+  serviceName: string;
   linkTo: DashboardType;
 }
 

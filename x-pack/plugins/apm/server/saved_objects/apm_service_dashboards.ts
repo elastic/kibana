@@ -39,10 +39,10 @@ export const apmServiceDashboards: SavedObjectsType = {
         create: schema.object({
           dashboardSavedObjectId: schema.string(),
           dashboardTitle: schema.string(),
-          kuery: schema.string(),
+          kuery: schema.maybe(schema.string()),
           useContextFilter: schema.boolean(),
           linkTo: schema.string(),
-          serviceName: schema.maybe(schema.string()),
+          serviceName: schema.string(),
         }),
       },
     },
