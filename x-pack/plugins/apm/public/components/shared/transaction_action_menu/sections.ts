@@ -127,24 +127,20 @@ export const getSections = ({
       href: podLogsHref,
       condition: !!podId,
     },
-    ...(nodeLogsLocator
-      ? [
-          {
-            key: 'podMetrics',
-            label: i18n.translate(
-              'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
-              { defaultMessage: 'Pod metrics' }
-            ),
-            href: getInfraHref({
-              app: 'metrics',
-              basePath,
-              path: `/link-to/pod-detail/${podId}`,
-              query: infraMetricsQuery,
-            }),
-            condition: !!podId,
-          },
-        ]
-      : []),
+    {
+      key: 'podMetrics',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
+        { defaultMessage: 'Pod metrics' }
+      ),
+      href: getInfraHref({
+        app: 'metrics',
+        basePath,
+        path: `/link-to/pod-detail/${podId}`,
+        query: infraMetricsQuery,
+      }),
+      condition: !!podId && infraLinksAvailable,
+    },
   ];
 
   const containerActions: Action[] = [
@@ -157,24 +153,20 @@ export const getSections = ({
       href: containerLogsHref,
       condition: !!containerId,
     },
-    ...(nodeLogsLocator
-      ? [
-          {
-            key: 'containerMetrics',
-            label: i18n.translate(
-              'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
-              { defaultMessage: 'Container metrics' }
-            ),
-            href: getInfraHref({
-              app: 'metrics',
-              basePath,
-              path: `/link-to/container-detail/${containerId}`,
-              query: infraMetricsQuery,
-            }),
-            condition: !!containerId,
-          },
-        ]
-      : []),
+    {
+      key: 'containerMetrics',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
+        { defaultMessage: 'Container metrics' }
+      ),
+      href: getInfraHref({
+        app: 'metrics',
+        basePath,
+        path: `/link-to/container-detail/${containerId}`,
+        query: infraMetricsQuery,
+      }),
+      condition: !!containerId && infraLinksAvailable,
+    },
   ];
 
   const hostActions: Action[] = [
@@ -187,25 +179,20 @@ export const getSections = ({
       href: hostLogsHref,
       condition: !!hostName,
     },
-    ...(nodeLogsLocator
-      ? [
-          {
-            key: 'hostMetrics',
-            label: i18n.translate(
-              'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
-              { defaultMessage: 'Host metrics' }
-            ),
-            href: getInfraHref({
-              app: 'metrics',
-              basePath,
-              path: `/link-to/host-detail/${hostName}`,
-              query: infraMetricsQuery,
-            }),
-            condition: !!hostName,
-          },
-        ]
-      : []),
-
+    {
+      key: 'hostMetrics',
+      label: i18n.translate(
+        'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
+        { defaultMessage: 'Host metrics' }
+      ),
+      href: getInfraHref({
+        app: 'metrics',
+        basePath,
+        path: `/link-to/host-detail/${hostName}`,
+        query: infraMetricsQuery,
+      }),
+      condition: !!hostName && infraLinksAvailable,
+    },
     {
       key: 'hostProfilingFlamegraph',
       label: i18n.translate(
@@ -309,61 +296,51 @@ export const getSections = ({
 
   const sectionRecord: SectionRecord = {
     observability: [
-      ...(infraLinksAvailable && infraLocators
-        ? [
-            {
-              key: 'podDetails',
-              title: i18n.translate(
-                'xpack.apm.transactionActionMenu.pod.title',
-                {
-                  defaultMessage: 'Pod details',
-                }
-              ),
-              subtitle: i18n.translate(
-                'xpack.apm.transactionActionMenu.pod.subtitle',
-                {
-                  defaultMessage:
-                    'View logs and metrics for this pod to get further details.',
-                }
-              ),
-              actions: podActions,
-            },
-            {
-              key: 'containerDetails',
-              title: i18n.translate(
-                'xpack.apm.transactionActionMenu.container.title',
-                {
-                  defaultMessage: 'Container details',
-                }
-              ),
-              subtitle: i18n.translate(
-                'xpack.apm.transactionActionMenu.container.subtitle',
-                {
-                  defaultMessage:
-                    'View logs and metrics for this container to get further details.',
-                }
-              ),
-              actions: containerActions,
-            },
-            {
-              key: 'hostDetails',
-              title: i18n.translate(
-                'xpack.apm.transactionActionMenu.host.title',
-                {
-                  defaultMessage: 'Host details',
-                }
-              ),
-              subtitle: i18n.translate(
-                'xpack.apm.transactionActionMenu.host.subtitle',
-                {
-                  defaultMessage:
-                    'View host logs and metrics to get further details.',
-                }
-              ),
-              actions: hostActions,
-            },
-          ]
-        : []),
+      {
+        key: 'podDetails',
+        title: i18n.translate('xpack.apm.transactionActionMenu.pod.title', {
+          defaultMessage: 'Pod details',
+        }),
+        subtitle: i18n.translate(
+          'xpack.apm.transactionActionMenu.pod.subtitle',
+          {
+            defaultMessage:
+              'View logs and metrics for this pod to get further details.',
+          }
+        ),
+        actions: podActions,
+      },
+      {
+        key: 'containerDetails',
+        title: i18n.translate(
+          'xpack.apm.transactionActionMenu.container.title',
+          {
+            defaultMessage: 'Container details',
+          }
+        ),
+        subtitle: i18n.translate(
+          'xpack.apm.transactionActionMenu.container.subtitle',
+          {
+            defaultMessage:
+              'View logs and metrics for this container to get further details.',
+          }
+        ),
+        actions: containerActions,
+      },
+      {
+        key: 'hostDetails',
+        title: i18n.translate('xpack.apm.transactionActionMenu.host.title', {
+          defaultMessage: 'Host details',
+        }),
+        subtitle: i18n.translate(
+          'xpack.apm.transactionActionMenu.host.subtitle',
+          {
+            defaultMessage:
+              'View host logs and metrics to get further details.',
+          }
+        ),
+        actions: hostActions,
+      },
       {
         key: 'traceDetails',
         title: i18n.translate('xpack.apm.transactionActionMenu.trace.title', {

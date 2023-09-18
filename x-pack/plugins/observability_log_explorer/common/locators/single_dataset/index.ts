@@ -6,3 +6,4 @@
  */
 
 export * from './single_dataset_locator';
+export * from './types';

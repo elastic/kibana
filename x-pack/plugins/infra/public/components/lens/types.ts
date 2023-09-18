@@ -22,6 +22,7 @@ export type LensWrapperProps = Omit<
 };
 
 export type BrushEndArgs = Parameters<NonNullable<LensEmbeddableInput['onBrushEnd']>>[0];
+export type OnFilterEvent = Parameters<NonNullable<LensEmbeddableInput['onFilter']>>[0];
 
 export type BaseChartProps = Pick<
   LensWrapperProps,

@@ -6,3 +6,4 @@
  */
 
 export * from './all_datasets_locator';
+export * from './types';

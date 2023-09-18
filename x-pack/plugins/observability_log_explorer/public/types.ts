@@ -10,7 +10,7 @@ import { LogExplorerPluginSetup, LogExplorerPluginStart } from '@kbn/log-explore
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { ObservabilityLogExplorerLocators } from '../common/locators';
 
 export interface ObservabilityLogExplorerPluginSetup {
@@ -32,4 +32,5 @@ export interface ObservabilityLogExplorerStartDeps {
   logExplorer: LogExplorerPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless?: ServerlessPluginStart;
+  share: SharePluginStart;
 }

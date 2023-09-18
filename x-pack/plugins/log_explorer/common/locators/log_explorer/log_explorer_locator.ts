@@ -24,7 +24,7 @@ export class LogExplorerLocatorDefinition implements LocatorDefinition<LogExplor
       title: dataset,
     };
 
-    return await this.deps.discover.locator?.getLocation({
+    return this.deps.discover.locator?.getLocation({
       ...params,
       dataViewId: dataset,
       dataViewSpec,

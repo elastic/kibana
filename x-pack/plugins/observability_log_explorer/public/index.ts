@@ -9,6 +9,9 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { ObservabilityLogExplorerConfig } from '../common/plugin_config';
 import { ObservabilityLogExplorerPlugin } from './plugin';
 
+export { SINGLE_DATASET_LOCATOR_ID, ALL_DATASETS_LOCATOR_ID } from '../common/locators/utils';
+export type { AllDatasetsLocatorParams, SingleDatasetLocatorParams } from '../common/locators';
+
 export function plugin(context: PluginInitializerContext<ObservabilityLogExplorerConfig>) {
   return new ObservabilityLogExplorerPlugin(context);
 }

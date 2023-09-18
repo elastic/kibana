@@ -23,7 +23,6 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
-import type { ObservabilityLogExplorerPluginSetup } from '@kbn/observability-log-explorer-plugin/public/types';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
@@ -35,7 +34,6 @@ export type ObservabilityOnboardingPluginStart = void;
 
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
-  observabilityLogExplorer: ObservabilityLogExplorerPluginSetup;
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
 }

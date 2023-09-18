@@ -85,24 +85,20 @@ export function getMenuSections({
       href: podLogsHref,
       condition: !!podId,
     },
-    ...(infraNodeLocator
-      ? [
-          {
-            key: 'podMetrics',
-            label: i18n.translate(
-              'xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics',
-              { defaultMessage: 'Pod metrics' }
-            ),
-            href: getInfraHref({
-              app: 'metrics',
-              basePath,
-              path: `/link-to/pod-detail/${podId}`,
-              query: infraMetricsQuery,
-            }),
-            condition: !!podId,
-          },
-        ]
-      : []),
+    {
+      key: 'podMetrics',
+      label: i18n.translate(
+        'xpack.apm.serviceOverview.instancesTable.actionMenus.podMetrics',
+        { defaultMessage: 'Pod metrics' }
+      ),
+      href: getInfraHref({
+        app: 'metrics',
+        basePath,
+        path: `/link-to/pod-detail/${podId}`,
+        query: infraMetricsQuery,
+      }),
+      condition: !!podId && !!infraLocators,
+    },
   ];
 
   const containerActions: Action[] = [
@@ -115,24 +111,20 @@ export function getMenuSections({
       href: containerLogsHref,
       condition: !!containerId,
     },
-    ...(infraNodeLocator
-      ? [
-          {
-            key: 'containerMetrics',
-            label: i18n.translate(
-              'xpack.apm.serviceOverview.instancesTable.actionMenus.containerMetrics',
-              { defaultMessage: 'Container metrics' }
-            ),
-            href: getInfraHref({
-              app: 'metrics',
-              basePath,
-              path: `/link-to/container-detail/${containerId}`,
-              query: infraMetricsQuery,
-            }),
-            condition: !!containerId,
-          },
-        ]
-      : []),
+    {
+      key: 'containerMetrics',
+      label: i18n.translate(
+        'xpack.apm.serviceOverview.instancesTable.actionMenus.containerMetrics',
+        { defaultMessage: 'Container metrics' }
+      ),
+      href: getInfraHref({
+        app: 'metrics',
+        basePath,
+        path: `/link-to/container-detail/${containerId}`,
+        query: infraMetricsQuery,
+      }),
+      condition: !!containerId && !!infraLocators,
+    },
   ];
 
   const apmActions: Action[] = [
