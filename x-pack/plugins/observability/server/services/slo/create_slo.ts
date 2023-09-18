@@ -50,6 +50,7 @@ export class CreateSLO {
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
       id: `slo-${slo.id}`,
       document: createTempSummaryDocument(slo),
+      refresh: true,
     });
 
     return this.toResponse(slo);
