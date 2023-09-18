@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { loginServerless } from '../../tasks/login_serverless';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { login } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 
 describe(
   'When displaying the Policy Details in Security Essentials PLI',
@@ -34,7 +34,7 @@ describe(
     });
 
     beforeEach(() => {
-      login();
+      loginServerless();
       visitPolicyDetailsPage(loadedPolicyData.integrationPolicies[0].id);
     });
 

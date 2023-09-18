@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
+import { loginServerless } from '../../tasks/login_serverless';
 import {
   getConsoleActionMenuItem,
   getUnIsolateActionMenuItem,
@@ -41,7 +41,7 @@ describe(
       });
 
       beforeEach(() => {
-        login();
+        loginServerless();
         visitEndpointList();
         openRowActionMenu();
       });

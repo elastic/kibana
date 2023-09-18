@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { loginServerless } from '../../../tasks/login_serverless';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 import { getNoPrivilegesPage } from '../../../screens/common';
 import { getEndpointManagementPageList } from '../../../screens';
 import { ensureResponseActionAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management';
@@ -30,7 +30,7 @@ describe(
     let password: string;
 
     beforeEach(() => {
-      login('endpoint_operations_analyst').then((response) => {
+      loginServerless('endpoint_operations_analyst').then((response) => {
         username = response.username;
         password = response.password;
       });

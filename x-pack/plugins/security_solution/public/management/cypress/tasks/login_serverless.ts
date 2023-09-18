@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
-import { LoginState } from '@kbn/security-plugin/common/login_state';
-import type { ServerlessRoleName } from '../../../../../shared/lib';
-import { STANDARD_HTTP_HEADERS } from '../../../../../shared/lib/security/default_http_headers';
+import type { LoginState } from '@kbn/security-plugin/common/login_state';
+import { ServerlessRoleName } from '../../../../../../test_serverless/shared/lib';
+import { COMMON_API_HEADERS, request } from './common';
 
 /**
  * Send login via API
@@ -22,10 +21,10 @@ const sendApiLoginRequest = (
   password: string
 ): Cypress.Chainable<{ username: string; password: string }> => {
   const baseUrl = Cypress.config().baseUrl;
+  const headers = { ...COMMON_API_HEADERS };
 
   cy.log(`Authenticating [${username}] via ${baseUrl}`);
 
-  const headers = { ...STANDARD_HTTP_HEADERS };
   return request<LoginState>({ headers, url: `${baseUrl}/internal/security/login_state` })
     .then((loginState) => {
       const basicProvider = loginState.body.selector.providers.find(
@@ -63,8 +62,8 @@ interface CyLoginTask {
  * variables.
  * @param user Defaults to `soc_manager`
  */
-export const login: CyLoginTask = (
-  user: ServerlessRoleName | 'elastic' = 'soc_manager'
+export const loginServerless: CyLoginTask = (
+  user: ServerlessRoleName | 'elastic' = ServerlessRoleName.SOC_MANAGER
 ): ReturnType<typeof sendApiLoginRequest> => {
   let username = Cypress.env('KIBANA_USERNAME');
   let password = Cypress.env('KIBANA_PASSWORD');
@@ -81,6 +80,9 @@ export const login: CyLoginTask = (
   }
 };
 
-login.with = (username: string, password: string): ReturnType<typeof sendApiLoginRequest> => {
+loginServerless.with = (
+  username: string,
+  password: string
+): ReturnType<typeof sendApiLoginRequest> => {
   return sendApiLoginRequest(username, password);
 };

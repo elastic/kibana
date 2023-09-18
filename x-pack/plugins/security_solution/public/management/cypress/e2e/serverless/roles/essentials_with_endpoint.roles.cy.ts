@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { loginServerless } from '../../../tasks/login_serverless';
 import { ensurePolicyDetailsPageAuthzAccess } from '../../../screens/policy_details';
-import { login } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 import type { EndpointArtifactPageId } from '../../../screens';
 import {
   getNoPrivilegesPage,
@@ -60,7 +60,7 @@ describe(
         const deniedPages = allPages.filter((page) => page.id !== 'endpointList');
 
         beforeEach(() => {
-          login(roleName);
+          loginServerless(roleName);
         });
 
         it('should have READ access to Endpoint list page', () => {
@@ -89,7 +89,7 @@ describe(
       ];
 
       beforeEach(() => {
-        login('t3_analyst');
+        loginServerless('t3_analyst');
       });
 
       it('should have access to Endpoint list page', () => {
@@ -128,7 +128,7 @@ describe(
       const deniedPages = allPages.filter(({ id }) => id !== 'blocklist' && id !== 'endpointList');
 
       beforeEach(() => {
-        login('threat_intelligence_analyst');
+        loginServerless('threat_intelligence_analyst');
       });
 
       it('should have access to Endpoint list page', () => {
@@ -163,7 +163,7 @@ describe(
       ];
 
       beforeEach(() => {
-        login('rule_author');
+        loginServerless('rule_author');
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -207,7 +207,7 @@ describe(
       const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
       beforeEach(() => {
-        login('soc_manager');
+        loginServerless('soc_manager');
       });
 
       for (const { id, title } of artifactPagesFullAccess) {
@@ -253,7 +253,7 @@ describe(
         const grantedAccessPages = [pageById.endpointList, pageById.policyList];
 
         beforeEach(() => {
-          login(roleName);
+          loginServerless(roleName);
         });
 
         for (const { id, title } of artifactPagesFullAccess) {
