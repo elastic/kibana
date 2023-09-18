@@ -105,6 +105,7 @@ const STANDARD_LIST_TYPES = [
   'osquery-saved-query',
   'osquery-pack',
   'infrastructure-ui-source',
+  'metrics-data-source',
   'metrics-explorer-view',
   'inventory-view',
   'infrastructure-monitoring-log-view',

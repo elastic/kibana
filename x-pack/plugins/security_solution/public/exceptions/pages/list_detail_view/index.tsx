@@ -22,7 +22,7 @@ import type { Rule } from '../../../detection_engine/rule_management/logic/types
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
+import { ListWithSearch, ManageRules, LinkToRuleDetails } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
@@ -109,7 +109,7 @@ export const ListsDetailViewComponent: FC = () => {
           isReadonly={isReadOnly}
           canUserEditList={canUserEditList}
           backOptions={headerBackOptions}
-          securityLinkAnchorComponent={ListDetailsLinkAnchor}
+          securityLinkAnchorComponent={LinkToRuleDetails}
           onEditListDetails={onEditListDetails}
           onExportList={handleExportList}
           onDeleteList={handleDelete}
