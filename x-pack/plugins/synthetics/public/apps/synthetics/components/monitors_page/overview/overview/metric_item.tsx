@@ -64,8 +64,7 @@ export const MetricItem = ({
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
-  const locationName =
-    useLocationName({ locationId: monitor.location.id })?.label || monitor.location?.id;
+  const locationName = useLocationName(monitor);
   const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
     monitor.configId,
     monitor.location.id

@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
@@ -44,7 +45,6 @@ import {
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   TECHNICAL_PREVIEW_ICON_TEST_ID,
 } from './test_ids';
-import { TECHNICAL_PREVIEW_TITLE, TECHNICAL_PREVIEW_MESSAGE } from './translations';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 
 const USER_ICON = 'user';
@@ -149,10 +149,20 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
           <>
             {i18n.USER_RISK_CLASSIFICATION}
             <EuiIconTip
-              title={TECHNICAL_PREVIEW_TITLE}
+              title={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewButtonLabel"
+                  defaultMessage="Technical preview"
+                />
+              }
               size="m"
               type="iInCircle"
-              content={TECHNICAL_PREVIEW_MESSAGE}
+              content={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.insights.entities.userTechnicalPreviewTooltip"
+                  defaultMessage="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
+                />
+              }
               position="bottom"
               iconProps={{
                 className: 'eui-alignTop',
