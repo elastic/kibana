@@ -540,7 +540,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 
 export const deletePackageHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageRequestSchema.params>,
-  undefined,
+  TypeOf<typeof DeletePackageRequestSchema.query>,
   TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
@@ -554,7 +554,7 @@ export const deletePackageHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       esClient,
-      force: request.body?.force,
+      force: request.query?.force,
     });
     const body: DeletePackageResponse = {
       items: res,

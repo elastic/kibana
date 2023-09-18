@@ -1231,6 +1231,14 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "force",
+            "description": "delete package even if policies used by agents",
+            "in": "query"
           }
         ],
         "requestBody": {
@@ -1238,6 +1246,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "deprecated": true,
                 "properties": {
                   "force": {
                     "type": "boolean"

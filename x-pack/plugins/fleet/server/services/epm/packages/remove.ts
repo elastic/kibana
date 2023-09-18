@@ -60,16 +60,17 @@ export async function removeInstallation(options: {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 1,
     perPage: options.force ? SO_SEARCH_LIMIT : 0,
+    withAgentCount: true,
   });
 
   if (total > 0) {
-    if (options.force) {
+    if (options.force || items.every((item) => (item.agents ?? 0) === 0)) {
       // delete package policies
       const ids = items.map((item) => item.id);
       appContextService
         .getLogger()
         .info(
-          `deleting package policies of ${pkgName} package because force flag was enabled: ${ids}`
+          `deleting package policies of ${pkgName} package because not used by agents or force flag was enabled: ${ids}`
         );
       await packagePolicyService.delete(savedObjectsClient, esClient, ids, {
         force: options.force,
