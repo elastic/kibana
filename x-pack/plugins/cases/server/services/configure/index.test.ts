@@ -172,6 +172,7 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "owner": "securitySolution",
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {
@@ -442,6 +443,7 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "owner": "securitySolution",
             "updated_at": "2020-04-09T09:43:51.778Z",
             "updated_by": Object {

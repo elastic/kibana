@@ -77,4 +77,5 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
   owner: SECURITY_SOLUTION_OWNER,
+  customFields: [],
 };

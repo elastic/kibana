@@ -98,6 +98,7 @@ export const ConfigurationRt = rt.intersection([
 
 export const ConfigurationsRt = rt.array(ConfigurationRt);
 
+export type CustomFields = rt.TypeOf<typeof CustomFieldsRt>;
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
