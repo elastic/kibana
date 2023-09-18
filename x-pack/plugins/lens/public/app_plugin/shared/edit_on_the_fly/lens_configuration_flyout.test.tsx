@@ -131,7 +131,7 @@ describe('LensEditConfigurationFlyout', () => {
     };
     const { instance } = await prepareAndMountComponent(newProps);
     expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
-    instance.find('[data-test-subj="collapseFlyoutButton"]').at(1).simulate('click');
+    instance.find('[data-test-subj="cancelFlyoutButton"]').at(1).simulate('click');
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 

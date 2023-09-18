@@ -24,6 +24,11 @@ describe('open config panel action', () => {
       const embeddable = {
         type: 'NOT_LENS',
         isTextBasedLanguage: () => true,
+        getInput: () => {
+          return {
+            viewMode: 'edit',
+          };
+        },
       } as unknown as IEmbeddable;
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
@@ -42,6 +47,12 @@ describe('open config panel action', () => {
       const embeddable = {
         type: DOC_TYPE,
         isTextBasedLanguage: () => true,
+        getInput: () => {
+          return {
+            viewMode: 'edit',
+          };
+        },
+        getIsEditable: () => true,
       } as unknown as IEmbeddable;
       const configurablePanelAction = new ConfigureInLensPanelAction(
         mockStartDependencies,
@@ -61,6 +72,12 @@ describe('open config panel action', () => {
       const embeddable = {
         type: DOC_TYPE,
         isTextBasedLanguage: () => true,
+        getInput: () => {
+          return {
+            viewMode: 'edit',
+          };
+        },
+        getIsEditable: () => true,
         openConfingPanel: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
         getRoot: () => {
           return {

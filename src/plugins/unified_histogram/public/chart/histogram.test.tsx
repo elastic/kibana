@@ -171,7 +171,7 @@ describe('Histogram', () => {
       UnifiedHistogramFetchStatus.loading,
       undefined
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {} });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {} }, undefined);
     expect(buildBucketInterval.buildBucketInterval).not.toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: undefined })
@@ -183,7 +183,7 @@ describe('Histogram', () => {
       UnifiedHistogramFetchStatus.complete,
       100
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters }, undefined);
     expect(buildBucketInterval.buildBucketInterval).toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: mockBucketInterval })
@@ -236,7 +236,7 @@ describe('Histogram', () => {
       UnifiedHistogramFetchStatus.complete,
       100
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters }, undefined);
   });
 
   it('should execute onLoad correctly for textbased language and no Lens suggestions', async () => {
@@ -272,7 +272,7 @@ describe('Histogram', () => {
       UnifiedHistogramFetchStatus.complete,
       20
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters }, undefined);
   });
 
   it('should execute onLoad correctly for textbased language and Lens suggestions', async () => {
@@ -308,6 +308,6 @@ describe('Histogram', () => {
       UnifiedHistogramFetchStatus.complete,
       2
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters }, undefined);
   });
 });

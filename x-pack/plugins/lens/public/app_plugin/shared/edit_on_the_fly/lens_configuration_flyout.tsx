@@ -36,7 +36,6 @@ import {
   selectFramePublicAPI,
   useLensDispatch,
   updateIndexPatterns,
-  applyChanges,
 } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
@@ -216,11 +215,9 @@ export function LensEditConfigurationFlyout({
         core: coreStart,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
-          dispatch(applyChanges());
         },
         replaceIndexPattern: (newIndexPattern, oldId, options) => {
           dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
-          dispatch(applyChanges());
         },
       }),
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
@@ -337,7 +334,7 @@ export function LensEditConfigurationFlyout({
               aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
                 defaultMessage: 'Cancel applied changes',
               })}
-              data-test-subj="collapseFlyoutButton"
+              data-test-subj="cancelFlyoutButton"
             >
               <FormattedMessage id="xpack.lens.config.cancelFlyoutLabel" defaultMessage="Cancel" />
             </EuiButtonEmpty>
@@ -351,6 +348,7 @@ export function LensEditConfigurationFlyout({
               })}
               iconType="check"
               isDisabled={!attributesChanged}
+              data-test-subj="applyFlyoutButton"
             >
               <FormattedMessage
                 id="xpack.lens.config.applyFlyoutLabel"
