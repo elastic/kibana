@@ -8,7 +8,7 @@
 import { lazy } from 'react';
 
 export const RuleDetailsEndpointExceptionsLazy = lazy(() =>
-  import('./endpoint_exceptions').then(({ RuleDetailsEndpointExceptions }) => ({
+  import('./rule_details_endpoint_exceptions').then(({ RuleDetailsEndpointExceptions }) => ({
     default: RuleDetailsEndpointExceptions,
   }))
 );
