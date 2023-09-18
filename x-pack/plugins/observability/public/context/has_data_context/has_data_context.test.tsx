@@ -61,7 +61,7 @@ describe('HasDataContextProvider', () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toMatchObject({
         hasDataMap: {},
-        hasAnyData: undefined,
+        hasAnyData: false,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
@@ -78,6 +78,7 @@ describe('HasDataContextProvider', () => {
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
           alert: { hasData: false, status: 'success' },
+          universal_profiling: { hasData: false, status: 'success' },
         },
         hasAnyData: false,
         isAllRequestsComplete: true,
@@ -114,8 +115,10 @@ describe('HasDataContextProvider', () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
 
         expect(result.current).toEqual({
-          hasDataMap: {},
-          hasAnyData: undefined,
+          hasDataMap: {
+            universal_profiling: { hasData: false, status: 'success' },
+          },
+          hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -139,6 +142,7 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             alert: { hasData: false, status: 'success' },
+            universal_profiling: { hasData: false, status: 'success' },
           },
           hasAnyData: false,
           isAllRequestsComplete: true,
@@ -176,8 +180,8 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns true apm returns true and all other apps return false', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasDataMap: {},
-          hasAnyData: undefined,
+          hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
+          hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -203,6 +207,7 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             alert: { hasData: false, status: 'success' },
+            universal_profiling: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -240,8 +245,8 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns true and all apps return true', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasDataMap: {},
-          hasAnyData: undefined,
+          hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
+          hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -271,6 +276,7 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             alert: { hasData: false, status: 'success' },
+            universal_profiling: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -295,8 +301,8 @@ describe('HasDataContextProvider', () => {
             wrapper,
           });
           expect(result.current).toEqual({
-            hasDataMap: {},
-            hasAnyData: undefined,
+            hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
+            hasAnyData: false,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
@@ -314,6 +320,7 @@ describe('HasDataContextProvider', () => {
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
               alert: { hasData: false, status: 'success' },
+              universal_profiling: { hasData: false, status: 'success' },
             },
             hasAnyData: true,
             isAllRequestsComplete: true,
@@ -340,8 +347,8 @@ describe('HasDataContextProvider', () => {
             wrapper,
           });
           expect(result.current).toEqual({
-            hasDataMap: {},
-            hasAnyData: undefined,
+            hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
+            hasAnyData: false,
             isAllRequestsComplete: false,
             forceUpdate: expect.any(String),
             onRefreshTimeRange: expect.any(Function),
@@ -363,6 +370,7 @@ describe('HasDataContextProvider', () => {
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
               alert: { hasData: false, status: 'success' },
+              universal_profiling: { hasData: false, status: 'success' },
             },
             hasAnyData: false,
             isAllRequestsComplete: true,
@@ -406,8 +414,8 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns true, apm is undefined and all other apps return true', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasDataMap: {},
-          hasAnyData: undefined,
+          hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
+          hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -434,6 +442,7 @@ describe('HasDataContextProvider', () => {
               status: 'success',
             },
             alert: { hasData: false, status: 'success' },
+            universal_profiling: { hasData: false, status: 'success' },
           },
           hasAnyData: true,
           isAllRequestsComplete: true,
@@ -484,8 +493,8 @@ describe('HasDataContextProvider', () => {
       it('hasAnyData returns false and all apps return undefined', async () => {
         const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
         expect(result.current).toEqual({
-          hasDataMap: {},
-          hasAnyData: undefined,
+          hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
+          hasAnyData: false,
           isAllRequestsComplete: false,
           forceUpdate: expect.any(String),
           onRefreshTimeRange: expect.any(Function),
@@ -503,6 +512,7 @@ describe('HasDataContextProvider', () => {
             infra_metrics: { hasData: undefined, status: 'failure' },
             ux: { hasData: undefined, status: 'failure' },
             alert: { hasData: false, status: 'success' },
+            universal_profiling: { hasData: false, status: 'success' },
           },
           hasAnyData: false,
           isAllRequestsComplete: true,
@@ -530,8 +540,8 @@ describe('HasDataContextProvider', () => {
     it('returns if alerts are available', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useHasData(), { wrapper });
       expect(result.current).toEqual({
-        hasDataMap: {},
-        hasAnyData: undefined,
+        hasDataMap: { universal_profiling: { hasData: false, status: 'success' } },
+        hasAnyData: false,
         isAllRequestsComplete: false,
         forceUpdate: expect.any(String),
         onRefreshTimeRange: expect.any(Function),
@@ -548,10 +558,8 @@ describe('HasDataContextProvider', () => {
           infra_logs: { hasData: undefined, status: 'success' },
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
-          alert: {
-            hasData: true,
-            status: 'success',
-          },
+          alert: { hasData: true, status: 'success' },
+          universal_profiling: { hasData: false, status: 'success' },
         },
         hasAnyData: true,
         isAllRequestsComplete: true,
