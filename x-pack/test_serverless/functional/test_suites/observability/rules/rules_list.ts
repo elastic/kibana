@@ -83,79 +83,76 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       );
     });
 
-    it('should display alerts in alphabetical order', async () => {
-      const createdRule1 = await createRule({
+    it('should display rules in alphabetical order', async () => {
+      const rule1 = await createRule({
         supertest,
         name: 'b',
       });
-      const createdRule2 = await createRule({
+      const rule2 = await createRule({
         supertest,
         name: 'c',
       });
-      const createdRule3 = await createRule({
+      const rule3 = await createRule({
         supertest,
         name: 'a',
       });
 
-      ruleIdList = [createdRule1.id, createdRule2.id, createdRule3.id];
+      ruleIdList = [rule1.id, rule2.id, rule3.id];
 
       await refreshRulesList();
       const searchResults = await svlTriggersActionsUI.getRulesList();
 
       expect(searchResults.length).toEqual(3);
-      expect(searchResults[0].name).toEqual('aInventory');
-      expect(searchResults[1].name).toEqual('bInventory');
-      expect(searchResults[2].name).toEqual('cInventory');
+      expect(searchResults[0].name).toEqual(`aInventory`);
+      expect(searchResults[1].name).toEqual(`bInventory`);
+      expect(searchResults[2].name).toEqual(`cInventory`);
     });
 
-    it('should search for alert', async () => {
-      const createdRule1 = await createRule({
+    it('should search for rule', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'some_name',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
       await testSubjects.click('dataGridColumnSelectorButton');
       await testSubjects.click('dataGridColumnSelectorShowAllButton');
 
       const searchResults = await svlTriggersActionsUI.getRulesList();
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
 
       expect(searchResults.length).toEqual(1);
-      expect(searchResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+      expect(searchResults[0].name).toEqual(`${rule1.name}Inventory`);
       expect(searchResults[0].interval).toEqual('1 min');
       expect(searchResults[0].tags).toEqual('2');
       expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
     });
 
-    it('should update alert list on the search clear button click', async () => {
-      const createdRule1 = await createRule({
+    it('should update rule list on the search clear button click', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'b',
       });
 
-      const createdRule2 = await createRule({
+      const rule2 = await createRule({
         supertest,
-        name: 'c',
         tags: [],
       });
 
-      ruleIdList = [createdRule1.id, createdRule2.id];
+      ruleIdList = [rule1.id, rule2.id];
 
       await refreshRulesList();
       await testSubjects.click('dataGridColumnSelectorButton');
       await testSubjects.click('dataGridColumnSelectorShowAllButton');
 
-      await svlTriggersActionsUI.searchRules('b');
+      await svlTriggersActionsUI.searchRules(`${rule1.name}`);
       await find.byCssSelector(
         '.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)'
       );
       await retry.try(async () => {
         const searchResults = await svlTriggersActionsUI.getRulesList();
         expect(searchResults.length).toEqual(1);
-        expect(searchResults[0].name).toEqual('bInventory');
+        expect(searchResults[0].name).toEqual(`${rule1.name}Inventory`);
         expect(searchResults[0].interval).toEqual('1 min');
         expect(searchResults[0].tags).toEqual('2');
         expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -170,11 +167,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const searchResultsAfterClear = await svlTriggersActionsUI.getRulesList();
         expect(searchResultsAfterClear.length).toEqual(2);
-        expect(searchResultsAfterClear[0].name).toEqual('bInventory');
+        expect(searchResultsAfterClear[0].name).toEqual(`${rule1.name}Inventory`);
         expect(searchResultsAfterClear[0].interval).toEqual('1 min');
         expect(searchResultsAfterClear[0].tags).toEqual('2');
         expect(searchResultsAfterClear[0].duration).toMatch(/\d{2,}:\d{2}/);
-        expect(searchResultsAfterClear[1].name).toEqual('cInventory');
+        expect(searchResultsAfterClear[1].name).toEqual(`${rule2.name}Inventory`);
         expect(searchResultsAfterClear[1].interval).toEqual('1 min');
         expect(searchResultsAfterClear[1].tags).toEqual('');
         expect(searchResultsAfterClear[1].duration).toMatch(/\d{2,}:\d{2}/);
@@ -182,52 +179,50 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should search for tags', async () => {
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
         name: 'a',
         tags: ['tag', 'tagtag', 'taggity tag'],
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
       await testSubjects.click('dataGridColumnSelectorButton');
       await testSubjects.click('dataGridColumnSelectorShowAllButton');
 
-      await svlTriggersActionsUI.searchRules(`${createdRule1.name} tag`);
+      await svlTriggersActionsUI.searchRules(`${rule1.name} tag`);
       const searchResults = await svlTriggersActionsUI.getRulesList();
 
       expect(searchResults.length).toEqual(1);
-      expect(searchResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+      expect(searchResults[0].name).toEqual(`${rule1.name}Inventory`);
       expect(searchResults[0].interval).toEqual('1 min');
       expect(searchResults[0].tags).toEqual('3');
       expect(searchResults[0].duration).toMatch(/\d{2,}:\d{2}/);
     });
 
-    it('should display an empty list when search did not return any alerts', async () => {
-      const createdRule1 = await createRule({
+    it('should display an empty list when search did not return any rules', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
       await svlTriggersActionsUI.searchRules(`An Alert That For Sure Doesn't Exist!`);
       expect(await svlTriggersActionsUI.isRulesListDisplayed()).toEqual(true);
     });
 
-    it('should disable single alert', async () => {
-      const createdRule1 = await createRule({
+    it('should disable single rule', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
 
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
@@ -236,24 +231,24 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
       await svlTriggersActionsUI.ensureRuleActionStatusApplied(
-        createdRule1.name,
+        rule1.name,
         'statusDropdown',
         'disabled'
       );
     });
 
-    it('should re-enable single alert', async () => {
-      const createdRule1 = await createRule({
+    it('should re-enable single rule', async () => {
+      const rule1 = await createRule({
         supertest,
         name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
-      await disableRule({ supertest, ruleId: createdRule1.id });
+      await disableRule({ supertest, ruleId: rule1.id });
       await refreshRulesList();
 
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
 
       await testSubjects.click('collapsedItemActions');
 
@@ -267,27 +262,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
       await svlTriggersActionsUI.ensureRuleActionStatusApplied(
-        createdRule1.name,
+        rule1.name,
         'statusDropdown',
         'enabled'
       );
     });
 
-    it('should delete single alert', async () => {
-      const createdRule1 = await createRule({
+    it('should delete single rule', async () => {
+      const rule1 = await createRule({
         supertest,
         name: 'a',
       });
 
-      const createdRule2 = await createRule({
+      const rule2 = await createRule({
         supertest,
         name: 'b',
       });
 
-      ruleIdList = [createdRule1.id, createdRule2.id];
+      ruleIdList = [rule1.id, rule2.id];
 
       await refreshRulesList();
-      await svlTriggersActionsUI.searchRules(createdRule2.name);
+      await svlTriggersActionsUI.searchRules(rule2.name);
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
@@ -300,7 +295,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(toastText).toEqual('Deleted 1 rule');
       });
 
-      await svlTriggersActionsUI.searchRules(createdRule2.name);
+      await svlTriggersActionsUI.searchRules(rule2.name);
       const searchResultsAfterDelete = await svlTriggersActionsUI.getRulesList();
       expect(searchResultsAfterDelete.length).toEqual(0);
     });
@@ -308,7 +303,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     it('should disable all selection', async () => {
       const createdRule1 = await createRule({
         supertest,
-        name: 'b',
       });
 
       ruleIdList = [createdRule1.id];
@@ -334,36 +328,34 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should enable all selection', async () => {
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
-      await disableRule({ supertest, ruleId: createdRule1.id });
+      await disableRule({ supertest, ruleId: rule1.id });
 
       await refreshRulesList();
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
 
-      await testSubjects.click(`checkboxSelectRow-${createdRule1.id}`);
+      await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkEnable');
 
       await svlTriggersActionsUI.ensureRuleActionStatusApplied(
-        createdRule1.name,
+        rule1.name,
         'statusDropdown',
         'enabled'
       );
     });
 
     it('should render percentile column and cells correctly', async () => {
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
       await testSubjects.click('dataGridColumnSelectorButton');
@@ -394,38 +386,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    it.skip('should render interval info icon when schedule interval is less than configured minimum', async () => {
-      const createdRule1 = await createRule({
-        supertest,
-        name: 'b',
-        schedule: { interval: '1s' },
-      });
-
-      const createdRule2 = await createRule({
-        supertest,
-        name: 'c',
-      });
-
-      ruleIdList = [createdRule1.id, createdRule2.id];
-
-      await refreshRulesList();
-      await testSubjects.click('dataGridColumnSelectorButton');
-      await testSubjects.click('dataGridColumnSelectorShowAllButton');
-
-      await testSubjects.existOrFail('ruleInterval-config-icon-0');
-      await testSubjects.missingOrFail('ruleInterval-config-icon-1');
-
-      // open edit flyout when icon is clicked
-      const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
-      await infoIcon.click();
-
-      await testSubjects.click('cancelSaveEditedRuleButton');
-    });
-
     it('should delete all selection', async () => {
       const createdRule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
       ruleIdList = [createdRule1.id];
@@ -450,25 +413,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       expect(searchResultsAfterDelete).toHaveLength(0);
     });
 
-    it('should filter alerts by the status', async () => {
-      const createdRule1 = await createRule({
+    it('should filter rules by the status', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      const failingRule = await createRule({
+      const failedRule = await createRule({
         supertest,
-        name: 'failed_rule',
       });
 
-      ruleIdList = [createdRule1.id, failingRule.id];
+      ruleIdList = [rule1.id, failedRule.id];
 
       await refreshRulesList();
       await testSubjects.click('dataGridColumnSelectorButton');
       await testSubjects.click('dataGridColumnSelectorShowAllButton');
 
       await failRule({
-        ruleId: failingRule.id,
+        ruleId: failedRule.id,
         intervalMilliseconds: 1000,
         numAttempts: 100,
       });
@@ -491,17 +452,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const filterErrorOnlyResults = await svlTriggersActionsUI.getRulesListWithStatus();
         expect(filterErrorOnlyResults.length).toEqual(1);
-        expect(filterErrorOnlyResults[0].name).toEqual(`${failingRule.name}Inventory`);
+        expect(filterErrorOnlyResults[0].name).toEqual(`${failedRule.name}Inventory`);
         expect(filterErrorOnlyResults[0].interval).toEqual('1 min');
         expect(filterErrorOnlyResults[0].status).toEqual('Failed');
         expect(filterErrorOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
       });
     });
 
-    it('should display total alerts by status and error banner only when exists alerts with status error', async () => {
-      const createdRule1 = await createRule({
+    it('should display total rules by status and error banner only when exists rules with status error', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
       await refreshRulesList();
@@ -513,7 +473,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
 
         expect(refreshResults.length).toEqual(1);
-        expect(refreshResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+        expect(refreshResults[0].name).toEqual(`${rule1.name}Inventory`);
         expect(refreshResults[0].interval).toEqual('1 min');
         expect(refreshResults[0].status).toEqual('Succeeded');
         expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -524,15 +484,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       );
       expect(alertsErrorBannerWhenNoErrors).toHaveLength(0);
 
-      const failingRule = await createRule({
+      const failedRule = await createRule({
         supertest,
-        name: 'b',
       });
 
-      ruleIdList = [createdRule1.id, failingRule.id];
+      ruleIdList = [rule1.id, failedRule.id];
 
       await failRule({
-        ruleId: failingRule.id,
+        ruleId: failedRule.id,
         intervalMilliseconds: 1000,
         numAttempts: 100,
       });
@@ -560,7 +519,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('Expand error in rules table when there is rule with an error associated', async () => {
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
         name: 'a',
       });
@@ -573,7 +532,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await refreshRulesList();
         const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
         expect(refreshResults.length).toEqual(1);
-        expect(refreshResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+        expect(refreshResults[0].name).toEqual(`${rule1.name}Inventory`);
         expect(refreshResults[0].interval).toEqual('1 min');
         expect(refreshResults[0].status).toEqual('Succeeded');
         expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
@@ -582,15 +541,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       let expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
       expect(expandRulesErrorLink).toHaveLength(0);
 
-      const failingRule = await createRule({
+      const failedRule = await createRule({
         supertest,
-        name: 'failed_rule',
       });
 
-      ruleIdList = [createdRule1.id, failingRule.id];
+      ruleIdList = [rule1.id, failedRule.id];
 
       await failRule({
-        ruleId: failingRule.id,
+        ruleId: failedRule.id,
         intervalMilliseconds: 1000,
         numAttempts: 100,
       });
@@ -609,15 +567,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       );
     });
 
-    it('should filter alerts by the alert type', async () => {
-      const createdRule1 = await createRule({
+    it('should filter rules by the rule type', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      const createdRule2 = await createRule({
+      const rule2 = await createRule({
         supertest,
-        name: 'b',
         ruleTypeId: 'apm.anomaly',
         params: {
           anomalySeverityType: 'critical',
@@ -627,7 +583,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         },
       });
 
-      ruleIdList = [createdRule1.id, createdRule2.id];
+      ruleIdList = [rule1.id, rule2.id];
 
       await refreshRulesList();
       await testSubjects.click('dataGridColumnSelectorButton');
@@ -650,24 +606,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         const filterInventoryRuleOnlyResults = await svlTriggersActionsUI.getRulesList();
         expect(filterInventoryRuleOnlyResults.length).toEqual(1);
-        expect(filterInventoryRuleOnlyResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+        expect(filterInventoryRuleOnlyResults[0].name).toEqual(`${rule1.name}Inventory`);
         expect(filterInventoryRuleOnlyResults[0].interval).toEqual('1 min');
         expect(filterInventoryRuleOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
       });
     });
 
-    it('should filter alerts by the rule status', async () => {
+    it('should filter rules by the rule status', async () => {
       // Enabled alert
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
       const disabledRule = await createRule({
         supertest,
-        name: 'b',
       });
-
       await disableRule({
         supertest,
         ruleId: disabledRule.id,
@@ -675,7 +628,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       const snoozedRule = await createRule({
         supertest,
-        name: 'c',
       });
 
       await snoozeRule({
@@ -685,7 +637,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       const snoozedAndDisabledRule = await createRule({
         supertest,
-        name: 'd',
       });
       await snoozeRule({
         supertest,
@@ -696,7 +647,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         ruleId: snoozedAndDisabledRule.id,
       });
 
-      ruleIdList = [createdRule1.id, disabledRule.id, snoozedRule.id, snoozedAndDisabledRule.id];
+      ruleIdList = [rule1.id, disabledRule.id, snoozedRule.id, snoozedAndDisabledRule.id];
 
       await refreshRulesList();
       await assertRulesLength(4);
@@ -734,44 +685,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await assertRulesLength(4);
     });
 
-    it('should filter alerts by the tag', async () => {
-      const createdRule1 = await createRule({
+    it('should filter rules by the tag', async () => {
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
         tags: ['a'],
       });
 
-      const createdRule2 = await createRule({
+      const rule2 = await createRule({
         supertest,
-        name: 'b',
         tags: ['b'],
       });
 
-      const createdRule3 = await createRule({
+      const rule3 = await createRule({
         supertest,
-        name: 'c',
         tags: ['a', 'b'],
       });
 
-      const createdRule4 = await createRule({
+      const rule4 = await createRule({
         supertest,
-        name: 'd',
         tags: ['b', 'c'],
       });
 
-      const createdRule5 = await createRule({
+      const rule5 = await createRule({
         supertest,
-        name: 'e',
         tags: ['c'],
       });
 
-      ruleIdList = [
-        createdRule1.id,
-        createdRule2.id,
-        createdRule3.id,
-        createdRule4.id,
-        createdRule5.id,
-      ];
+      ruleIdList = [rule1.id, rule2.id, rule3.id, rule4.id, rule5.id];
 
       await refreshRulesList();
       await testSubjects.click('dataGridColumnSelectorButton');
@@ -811,9 +751,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
       expect(actionId).not.toBe(undefined);
 
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
         actions: [
           {
             group: 'metrics.inventory_threshold.fired',
@@ -830,7 +769,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         ],
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
 
@@ -842,15 +781,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should allow rules to be snoozed using the right side dropdown', async () => {
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
@@ -863,15 +801,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should allow rules to be snoozed indefinitely using the right side dropdown', async () => {
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await refreshRulesList();
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
       await testSubjects.click('ruleSnoozeIndefiniteApply');
@@ -883,21 +820,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should allow snoozed rules to be unsnoozed using the right side dropdown', async () => {
-      const createdRule1 = await createRule({
+      const rule1 = await createRule({
         supertest,
-        name: 'a',
       });
 
-      ruleIdList = [createdRule1.id];
+      ruleIdList = [rule1.id];
 
       await snoozeRule({
         supertest,
-        ruleId: createdRule1.id,
+        ruleId: rule1.id,
       });
 
       await refreshRulesList();
 
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('snoozeButton');
       await testSubjects.click('ruleSnoozeCancel');
@@ -911,7 +847,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(toastText).toEqual('Rule successfully unsnoozed');
       });
 
-      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await svlTriggersActionsUI.searchRules(rule1.name);
 
       await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
       await testSubjects.missingOrFail('rulesListNotifyBadge-snoozedIndefinitely');

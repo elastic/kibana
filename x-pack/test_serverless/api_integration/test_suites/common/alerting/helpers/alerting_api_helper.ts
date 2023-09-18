@@ -116,9 +116,12 @@ export async function createEsQueryRule({
   return body;
 }
 
+import { v4 as uuidv4 } from 'uuid';
+export const generateUniqueKey = () => uuidv4().replace(/-/g, '');
+
 export async function createRule({
   supertest,
-  name,
+  name = generateUniqueKey(),
   actions = [],
   tags = ['foo', 'bar'],
   schedule,
@@ -129,7 +132,7 @@ export async function createRule({
   params,
 }: {
   supertest: SuperTest<Test>;
-  name: string;
+  name?: string;
   consumer?: string;
   actions?: any[];
   tags?: any[];
