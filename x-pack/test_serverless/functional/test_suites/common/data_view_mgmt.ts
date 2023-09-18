@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/165804
   // FLAKY: https://github.com/elastic/kibana/issues/165796
   // FLAKY: https://github.com/elastic/kibana/issues/165425
-  describe.skip('Data View Management', function () {
+  describe('Data View Management', function () {
     describe('disables scripted fields', function () {
       let dataViewId = '';
 
@@ -101,6 +101,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // todo add test to look for spaces header - tableHeaderCell_namespaces_1
+    describe('when in single space mode', function () {
+      let dataViewId = '';
+      before(async () => {
+        await esArchiver.load(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
+
+        const response = await supertest
+          .post(DATA_VIEW_PATH)
+          .set('kbn-xsrf', 'some-xsrf-token')
+          .send({
+            data_view: {
+              title: 'basic_index',
+            },
+            override: true,
+          })
+          .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION);
+        dataViewId = response.body.data_view.id;
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        );
+        await supertest
+          .delete(`${DATA_VIEW_PATH}/${dataViewId}`)
+          .set('kbn-xsrf', 'some-xsrf-token');
+      });
+
+      it('hides spaces UI', async () => {
+        await PageObjects.common.navigateToUrl('management', 'kibana/dataViews', {
+          shouldUseHashForSubUrl: false,
+        });
+        await testSubjects.exists('detail-link-basic_index');
+        await testSubjects.missingOrFail('tableHeaderCell_namespaces_1');
+      });
+    });
   });
 }
