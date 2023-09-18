@@ -16,7 +16,11 @@ import { format } from './formatter';
 import { MonitorFields as MonitorFieldsType } from '../../../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/manual_test_runs/api';
 
-export const RunTestButton = () => {
+export const RunTestButton = ({
+  canUsePublicLocations = true,
+}: {
+  canUsePublicLocations?: boolean;
+}) => {
   const { formState, getValues, handleSubmit } = useFormContext();
 
   const [inProgress, setInProgress] = useState(false);
@@ -56,7 +60,7 @@ export const RunTestButton = () => {
         <EuiButton
           data-test-subj="syntheticsRunTestBtn"
           color="success"
-          disabled={isDisabled}
+          disabled={isDisabled || !canUsePublicLocations}
           aria-label={TEST_NOW_ARIA_LABEL}
           iconType="play"
           onClick={handleSubmit(handleTestNow)}

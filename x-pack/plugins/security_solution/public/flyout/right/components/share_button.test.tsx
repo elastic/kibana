@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { copyToClipboard } from '@elastic/eui';
 import { ShareButton } from './share_button';
@@ -18,15 +19,22 @@ jest.mock('@elastic/eui', () => ({
   EuiCopy: jest.fn(({ children: functionAsChild }) => functionAsChild(jest.fn())),
 }));
 
-describe('ShareButton', () => {
-  const alertUrl = 'https://example.com/alert';
+const alertUrl = 'https://example.com/alert';
 
+const renderShareButton = () =>
+  render(
+    <IntlProvider locale="en">
+      <ShareButton alertUrl={alertUrl} />
+    </IntlProvider>
+  );
+
+describe('ShareButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the share button', () => {
-    render(<ShareButton alertUrl={alertUrl} />);
+    renderShareButton();
 
     expect(screen.getByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
   });
@@ -41,7 +49,7 @@ describe('ShareButton', () => {
       },
     });
 
-    render(<ShareButton alertUrl={alertUrl} />);
+    renderShareButton();
 
     fireEvent.click(screen.getByTestId(FLYOUT_HEADER_SHARE_BUTTON_TEST_ID));
 
