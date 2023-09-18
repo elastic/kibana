@@ -108,7 +108,7 @@ describe('global_toast_list with duplicate elements', () => {
     fireEvent.click(toastDismissButton);
 
     act(() => {
-      // This is so that toast fade out animation has succesfully ran,
+      // This is so that the toast fade out animation has succesfully ran,
       // only after this is the dismiss method invoked
       jest.runAllTimers();
     });

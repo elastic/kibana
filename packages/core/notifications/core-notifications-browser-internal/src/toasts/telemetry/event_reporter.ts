@@ -6,8 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { ComponentProps } from 'react';
+import { EuiToast } from '@elastic/eui';
 import { type AnalyticsServiceStart } from '@kbn/core/public';
 import { EventMetric, FieldType } from './event_types';
+
+type ToastMessageType = ComponentProps<typeof EuiToast>['color'];
+
+interface EventPayload {
+  [FieldType.RECURRENCE_COUNT]: number;
+  [FieldType.TOAST_MESSAGE]: string;
+  [FieldType.TOAST_MESSAGE_TYPE]: ToastMessageType;
+}
 
 export class EventReporter {
   private reportEvent: AnalyticsServiceStart['reportEvent'];
@@ -19,13 +29,16 @@ export class EventReporter {
   onDismissToast({
     recurrenceCount,
     toastMessage,
+    toastMessageType,
   }: {
     recurrenceCount: number;
     toastMessage: string;
+    toastMessageType: ToastMessageType;
   }) {
-    this.reportEvent(EventMetric.TOAST_DISMISSED, {
+    this.reportEvent<EventPayload>(EventMetric.TOAST_DISMISSED, {
       [FieldType.RECURRENCE_COUNT]: recurrenceCount,
       [FieldType.TOAST_MESSAGE]: toastMessage,
+      [FieldType.TOAST_MESSAGE_TYPE]: toastMessageType,
     });
   }
 

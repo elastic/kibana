@@ -60,10 +60,15 @@ export const GlobalToastList: FunctionComponent<Props> = ({
       if (representedToasts) {
         representedToasts.forEach((toast) => dismissToast(toast.id));
 
-        if (representedToasts.length > 1) {
+        // Select the first duplicate toast within the represented toast
+        // given it's identical to all other recurring ones within it's group
+        const { 0: firstDuplicateToast, length: toastRecurrenceCount } = representedToasts;
+
+        if (toastRecurrenceCount > 1) {
           reportEvent.onDismissToast({
-            toastMessage: representedToasts[0].title!,
-            recurrenceCount: representedToasts.length,
+            toastMessage: firstDuplicateToast.title!,
+            recurrenceCount: toastRecurrenceCount,
+            toastMessageType: firstDuplicateToast.color,
           });
         }
       }
