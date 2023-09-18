@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import { CoreSetup, ToastsStart } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import type { IAggType } from '@kbn/data-plugin/public';
@@ -56,6 +56,7 @@ export type DatatableRenderProps = DatatableProps & {
   theme: CoreSetup['theme'];
   interactive: boolean;
   renderComplete: () => void;
+  toasts: ToastsStart;
 
   /**
    * A boolean for each table row, which is true if the row active

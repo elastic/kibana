@@ -41,6 +41,7 @@ export class DatatableVisualization {
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
           paletteService: palettes,
           uiSettings: core.uiSettings,
+          toasts: core.notifications.toasts,
         })
       );
 

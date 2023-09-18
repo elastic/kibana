@@ -14,13 +14,13 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import { pluginServices } from '@kbn/dashboard-plugin/public';
 import type {
   Datatable,
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { ToastsStart } from '@kbn/core/public';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';
@@ -53,6 +53,7 @@ export const createGridColumns = (
   headerRowHeight: 'auto' | 'single' | 'custom',
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
+  toasts: ToastsStart,
   closeCellPopover?: Function,
   columnFilterable?: boolean[]
 ) => {
@@ -62,6 +63,7 @@ export const createGridColumns = (
     memo[id] = { name, index: i, meta };
     return memo;
   }, {});
+
   const getContentData = ({
     rowIndex,
     columnId,
@@ -197,13 +199,12 @@ export const createGridColumns = (
           aria-label={copyActionText}
           data-test-subj="lensDatatableCopyToClipboard"
           onClick={() => {
-            const { notifications } = pluginServices.getServices();
             try {
               copyToClipboard(cellContent);
-              notifications.toasts.addInfo(toastTitle.copyToClipboard.success);
+              toasts.addInfo(toastTitle.copyToClipboard.success);
               closeCellPopover?.();
             } catch (e) {
-              notifications.toasts.add(toastTitle.copyToClipboard.error);
+              toasts.add(toastTitle.copyToClipboard.error);
             }
           }}
           iconType="copyClipboard"

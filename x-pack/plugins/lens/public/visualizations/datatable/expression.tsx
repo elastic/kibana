@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
-import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
+import { IUiSettingsClient, ToastsStart, ThemeServiceStart } from '@kbn/core/public';
 import type {
   Datatable,
   ExpressionRenderDefinition,
@@ -80,6 +80,7 @@ export const getDatatableRenderer = (dependencies: {
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
   theme: ThemeServiceStart;
+  toasts: ToastsStart;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -150,6 +151,7 @@ export const getDatatableRenderer = (dependencies: {
             interactive={isInteractive()}
             theme={dependencies.theme}
             renderComplete={renderComplete}
+            toasts={dependencies.toasts}
           />
         </I18nProvider>
       </KibanaThemeProvider>,
