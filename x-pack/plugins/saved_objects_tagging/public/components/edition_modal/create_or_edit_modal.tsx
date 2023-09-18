@@ -125,7 +125,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 error={validation.errors.name}
               >
                 <EuiFieldText
-                  name="name"
+                  name="tag-name"
                   fullWidth={true}
                   maxLength={tagNameMaxLength}
                   value={tag.name}
