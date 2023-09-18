@@ -371,7 +371,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onCopyQuery={onCopyQuery}
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
-        canSelectMultiTerms={DEFAULT_VALUES.CAN_USE_MULTI_TERMS}
+        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
       />
       <EuiSpacer />
     </Fragment>
