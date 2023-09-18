@@ -27,15 +27,17 @@ export const EnabledFeaturesContext = createContext({
   isNLPEnabled: true,
 });
 
-export const EnabledFeaturesContextProvider: FC<{ isServerless: boolean }> = (props) => {
-  const { children, isServerless } = props;
+export const EnabledFeaturesContextProvider: FC<{ isServerless: boolean }> = ({
+  children,
+  isServerless,
+}) => {
   const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
     'isADEnabled',
     'isDFAEnabled',
     'isNLPEnabled',
   ]);
 
-  const value = {
+  const features: EnabledFeatures = {
     showNodeInfo: !isServerless,
     showFrozenDataTierChoice: !isServerless,
     showMLNavMenu: !isServerless,
@@ -46,7 +48,7 @@ export const EnabledFeaturesContextProvider: FC<{ isServerless: boolean }> = (pr
   };
 
   return (
-    <EnabledFeaturesContext.Provider value={value}>{children}</EnabledFeaturesContext.Provider>
+    <EnabledFeaturesContext.Provider value={features}>{children}</EnabledFeaturesContext.Provider>
   );
 };
 
