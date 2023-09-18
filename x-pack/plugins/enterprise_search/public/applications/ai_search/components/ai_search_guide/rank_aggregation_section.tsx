@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import linearCombinationIllustration from '../../../../assets/images/linear.svg';
 import rrfRankingIllustration from '../../../../assets/images/rrf.svg';
 
-import { EsreGuideAccordion } from './esre_guide_accordion';
+import { AISearchGuideAccordion } from './ai_search_guide_accordion';
 import { LinearCombinationPanel } from './linear_combination_panel';
 import { RrfRankingPanel } from './rrf_ranking_panel';
 
@@ -50,7 +50,7 @@ export const RankAggregationSection: React.FC = () => {
       <EuiFlexItem grow={6}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="rrfRankingAccordion"
               data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingAccordion"
               icon={rrfRankingIllustration}
@@ -67,10 +67,10 @@ export const RankAggregationSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <RrfRankingPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="linearCombinationAccordion"
               data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationAccordion"
               icon={linearCombinationIllustration}
@@ -90,7 +90,7 @@ export const RankAggregationSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <LinearCombinationPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

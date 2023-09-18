@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EsreGuide } from './components/esre_guide/esre_guide';
+import { AISearchGuide } from './components/ai_search_guide/ai_search_guide';
 
 import { EnterpriseSearchAISearch } from '.';
 
@@ -23,6 +23,6 @@ describe('SearchExperiences', () => {
     });
     const wrapper = shallow(<EnterpriseSearchAISearch />);
 
-    expect(wrapper.find(EsreGuide)).toHaveLength(1);
+    expect(wrapper.find(AISearchGuide)).toHaveLength(1);
   });
 });

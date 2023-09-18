@@ -13,7 +13,7 @@ import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { EsreGuide } from './components/esre_guide/esre_guide';
+import { AISearchGuide } from './components/ai_search_guide/ai_search_guide';
 
 import { ROOT_PATH } from './routes';
 
@@ -31,7 +31,7 @@ export const EnterpriseSearchAISearch: React.FC<InitialAppData> = (props) => {
       );
     }
 
-    return <EsreGuide />;
+    return <AISearchGuide />;
   };
 
   return (

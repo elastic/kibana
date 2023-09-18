@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../shared/doc_links';
 
-export const EsreDocsSection: React.FC = () => (
+export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow={4}>
       <EuiFlexGroup direction="column" gutterSize="s">

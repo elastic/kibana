@@ -18,7 +18,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-export interface EsreGuideAccordionProps {
+export interface AISearchGuideAccordionProps {
   id: string;
   icon: IconType;
   title: string;
@@ -28,7 +28,7 @@ export interface EsreGuideAccordionProps {
   currentExpandedId: string | undefined;
 }
 
-export const EsreGuideAccordion: React.FC<EsreGuideAccordionProps> = ({
+export const AISearchGuideAccordion: React.FC<AISearchGuideAccordionProps> = ({
   id,
   icon,
   title,

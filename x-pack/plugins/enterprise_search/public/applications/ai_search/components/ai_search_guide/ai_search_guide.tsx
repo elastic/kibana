@@ -26,12 +26,12 @@ import simplifyIllustration from '../../../../assets/images/simplify.svg';
 import { SetAiSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
 
-import { EsreDocsSection } from './esre_docs_section';
+import { AISetAiSearchChromeSearchDocsSection } from './ai_search_docs_section';
 import { MeasurePerformanceSection } from './measure_performance_section';
 import { RankAggregationSection } from './rank_aggregation_section';
 import { SemanticSearchSection } from './semantic_search_section';
 
-export const EsreGuide: React.FC = () => {
+export const AISearchGuide: React.FC = () => {
   const isMobile = useIsWithinBreakpoints(['xs']);
 
   return (
@@ -85,7 +85,7 @@ export const EsreGuide: React.FC = () => {
           </EuiFlexItem>
           <EuiHorizontalRule />
           <EuiFlexItem grow>
-            <EsreDocsSection />
+            <AISetAiSearchChromeSearchDocsSection />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

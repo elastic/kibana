@@ -16,7 +16,7 @@ import nlpEnrichmentIllustration from '../../../../assets/images/nlp.svg';
 import vectorSearchIllustration from '../../../../assets/images/vector.svg';
 
 import { ElserPanel } from './elser_panel';
-import { EsreGuideAccordion } from './esre_guide_accordion';
+import { AISearchGuideAccordion } from './ai_search_guide_accordion';
 import { NlpEnrichmentPanel } from './nlp_enrichment_panel';
 import { VectorSearchPanel } from './vector_search_panel';
 
@@ -52,7 +52,7 @@ export const SemanticSearchSection: React.FC = () => {
       <EuiFlexItem grow={6}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="elserAccordion"
               data-telemetry-id="entSearch-esre-semanticSearch-elserAccordion"
               initialIsOpen
@@ -70,10 +70,10 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <ElserPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="vectorSearchAccordion"
               data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchAccordion"
               icon={vectorSearchIllustration}
@@ -90,10 +90,10 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <VectorSearchPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EsreGuideAccordion
+            <AISearchGuideAccordion
               id="nlpEnrichmentAccordion"
               data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentAccordion"
               icon={nlpEnrichmentIllustration}
@@ -110,7 +110,7 @@ export const SemanticSearchSection: React.FC = () => {
               onToggle={setCurrentExpandedId}
             >
               <NlpEnrichmentPanel />
-            </EsreGuideAccordion>
+            </AISearchGuideAccordion>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
