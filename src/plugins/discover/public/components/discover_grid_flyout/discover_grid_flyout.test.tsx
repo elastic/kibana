@@ -23,6 +23,17 @@ import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
+import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
+
+const mockFlyoutCustomization: FlyoutCustomization = {
+  id: 'flyout',
+  actions: {},
+};
+
+jest.mock('../../customizations', () => ({
+  ...jest.requireActual('../../customizations'),
+  useDiscoverCustomization: jest.fn(),
+}));
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -93,6 +104,13 @@ describe('Discover flyout', function () {
 
     return { component, props };
   };
+
+  beforeEach(() => {
+    mockFlyoutCustomization.actions.defaultActions = undefined;
+    jest.clearAllMocks();
+
+    (useDiscoverCustomization as jest.Mock).mockImplementation(() => mockFlyoutCustomization);
+  });
 
   it('should be rendered correctly using an data view without timefield', async () => {
     const { component, props } = await mountComponent({});
@@ -205,5 +223,19 @@ describe('Discover flyout', function () {
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
     expect(flyoutTitle.text()).toBe('Expanded row');
+  });
+
+  it('should apply the customization provided for the flyout actions', async () => {
+    mockFlyoutCustomization.actions = {
+      defaultActions: {
+        viewSingleDocument: { disabled: true },
+        viewSurroundingDocument: { disabled: true },
+      },
+    };
+
+    const { component } = await mountComponent({});
+
+    const singleDocumentView = findTestSubject(component, 'docTableRowAction');
+    expect(singleDocumentView.length).toBeFalsy();
   });
 });
