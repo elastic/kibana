@@ -31,7 +31,6 @@
       "maps",
       "uiActions",
       "observabilityAIAssistant",
-      "observabilityLogExplorer"
     ],
     "optionalPlugins": [
       "actions",
@@ -62,7 +61,8 @@
       "ml",
       "observability",
       "maps",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "observabilityLogExplorer"
     ]
   }
 }

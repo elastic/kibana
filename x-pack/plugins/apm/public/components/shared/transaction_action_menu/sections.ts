@@ -13,7 +13,8 @@ import moment from 'moment';
 import url from 'url';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import type { ProfilingLocators } from '@kbn/profiling-plugin/public';
-import type { ObservabilityLogExplorerLocators } from '@kbn/observability-log-explorer-plugin/common/locators';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { AllDatasetsLocatorParams } from '@kbn/observability-log-explorer-plugin/common';
 import { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
@@ -49,7 +50,7 @@ export const getSections = ({
   rangeFrom,
   rangeTo,
   environment,
-  observabilityLogExplorerLocators,
+  allDatasetsLocator,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -61,7 +62,7 @@ export const getSections = ({
   rangeFrom: string;
   rangeTo: string;
   environment: Environment;
-  observabilityLogExplorerLocators: ObservabilityLogExplorerLocators;
+  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
 }) => {
   if (!transaction) return [];
 
@@ -69,7 +70,6 @@ export const getSections = ({
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
   const { nodeLogsLocator, logsLocator } = infraLocators ?? {};
-  const { allDatasetsLocator } = observabilityLogExplorerLocators;
 
   const time = Math.round(transaction.timestamp.us / 1000);
   const infraMetricsQuery = getInfraMetricsQuery(transaction);

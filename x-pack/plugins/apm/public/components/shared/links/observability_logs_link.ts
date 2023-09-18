@@ -11,7 +11,8 @@ import type {
   LogsLocator,
   DiscoverLogsLocator,
 } from '@kbn/infra-plugin/common/locators';
-import type { AllDatasetsLocator } from '@kbn/observability-log-explorer-plugin/common/locators';
+import { AllDatasetsLocatorParams } from '@kbn/observability-log-explorer-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import moment from 'moment';
 import { DurationInputObject } from 'moment';
 
@@ -27,7 +28,7 @@ export const getNodeLogsHref = (
   nodeType: NodeType,
   id: string,
   time: number | undefined,
-  logExplorerLocator: AllDatasetsLocator,
+  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>,
   infraNodeLocator?: NodeLogsLocator | DiscoverNodeLogsLocator
 ): string => {
   if (infraNodeLocator)
@@ -37,7 +38,7 @@ export const getNodeLogsHref = (
       time,
     });
 
-  return logExplorerLocator.getRedirectUrl({
+  return allDatasetsLocator.getRedirectUrl({
     query: getNodeQuery(nodeType, id),
     ...(time
       ? {
@@ -53,7 +54,7 @@ export const getNodeLogsHref = (
 export const getTraceLogsHref = (
   traceId: string,
   time: number | undefined,
-  logExplorerLocator: AllDatasetsLocator,
+  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>,
   infraLogsLocator?: LogsLocator | DiscoverLogsLocator
 ): string => {
   const query = `trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")`;
@@ -64,7 +65,7 @@ export const getTraceLogsHref = (
       time,
     });
 
-  return logExplorerLocator.getRedirectUrl({
+  return allDatasetsLocator.getRedirectUrl({
     query: { language: 'kuery', query },
     ...(time
       ? {

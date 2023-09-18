@@ -58,7 +58,7 @@ export const renderApp = ({
     lens: pluginsStart.lens,
     uiActions: pluginsStart.uiActions,
     observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
-    observabilityLogExplorer: pluginsSetup.observabilityLogExplorer,
+    share: pluginsSetup.share,
   };
 
   // render APM feedback link in global help menu

@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import {
   AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/observability-log-explorer-plugin/public';
+} from '@kbn/observability-log-explorer-plugin/common';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
 

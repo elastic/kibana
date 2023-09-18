@@ -10,6 +10,7 @@ import { SingleDatasetLocator } from './single_dataset';
 
 export * from './single_dataset';
 export * from './all_datasets';
+export * from './utils';
 
 export interface ObservabilityLogExplorerLocators {
   allDatasetsLocator: AllDatasetsLocator;

@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { SingleDatasetLocatorDefinition, AllDatasetsLocatorDefinition } from './locators';
+export {
+  SingleDatasetLocatorDefinition,
+  AllDatasetsLocatorDefinition,
+  SINGLE_DATASET_LOCATOR_ID,
+  ALL_DATASETS_LOCATOR_ID,
+} from './locators';
+
+export type { AllDatasetsLocatorParams, SingleDatasetLocatorParams } from './locators';
