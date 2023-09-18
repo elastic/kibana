@@ -15,6 +15,10 @@ export type {
   XYLayerConfig,
   XYReferenceLinesLayerConfig,
   XYVisualOptions,
+  HeatmapLayerOptions,
+  HeatmapLayerConfig,
+  PieLayerConfig,
+  PieLayerOptions,
 } from './attribute_builder/visualization_types';
 
 export {
@@ -25,6 +29,10 @@ export {
   XYChart,
   XYDataLayer,
   XYReferenceLinesLayer,
+  PieChart,
+  HeatmapChart,
+  PieLayer,
+  HeatmapLayer,
 } from './attribute_builder/visualization_types';
 
 export { LensAttributesBuilder } from './attribute_builder/lens_attributes_builder';

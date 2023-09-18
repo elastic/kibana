@@ -7,8 +7,22 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import { LensAttributesBuilder, XYChart, XYDataLayer } from '@kbn/lens-embeddable-utils';
-import type { LensEmbeddableInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import {
+  LensAttributesBuilder,
+  XYChart,
+  XYDataLayer,
+  MetricChart,
+  MetricLayer,
+  PieChart,
+  HeatmapChart,
+  PieLayer,
+  HeatmapLayer,
+} from '@kbn/lens-embeddable-utils';
+import type {
+  LegendConfigResult,
+  LensEmbeddableInput,
+  LensPublicStart,
+} from '@kbn/lens-plugin/public';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
@@ -33,29 +47,45 @@ export enum SeriesType {
 
 function Lens({
   indexPattern,
-  xyDataLayer,
+  layers,
+  timeField,
+  breakdown,
   start,
   end,
   lens,
+  legend,
+  chartType,
   dataViews,
 }: {
   indexPattern: string;
   xyDataLayer: XYDataLayer;
   start: string;
   end: string;
+  legend?: LegendConfigResult;
+  chartType?: string;
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
+  layers: [any];
+  timeField?: string;
+  breakdown?: string;
 }) {
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return dataViews.create({
-      id: indexPattern,
-      title: indexPattern,
-      timeFieldName: '@timestamp',
-    });
+    return (
+      dataViews.get(indexPattern) ||
+      dataViews.find(indexPattern).then((dataviews) => {
+        if (dataviews.length === 1) return dataviews[0];
+        return;
+      }) ||
+      dataViews.create({
+        id: indexPattern,
+        title: indexPattern,
+        timeFieldName: '@timestamp',
+      })
+    );
   }, [indexPattern]);
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -64,12 +94,110 @@ function Lens({
     return <EuiLoadingSpinner />;
   }
 
+  const createVisualization = () => {
+    const layer = layers[0];
+    switch (chartType) {
+      default:
+        const xyDataLayer = new XYDataLayer({
+          data: layers.map((l) => ({
+            type: 'formula',
+            value: l.formula,
+            label: l.label,
+            format: l.format,
+            seriesType: l.seriesType,
+            showGridLines: l.showGridLines,
+            filter: {
+              language: 'kql',
+              query: l.filter ?? '',
+            },
+          })),
+          options: {
+            buckets: timeField ? { type: 'date_histogram', field: timeField } : undefined,
+            breakdown: breakdown
+              ? { type: 'top_values', params: { size: 10 }, field: breakdown }
+              : undefined,
+          },
+        });
+
+        return new XYChart({
+          visualOptions: {
+            legend,
+          },
+          layers: [xyDataLayer],
+          formulaAPI: formulaAsync.value!.formula,
+          dataView: dataViewAsync.value!,
+        });
+      case 'metric':
+        const metricLayer = new MetricLayer({
+          data: {
+            value: layer.formula,
+            label: layer.label,
+            format: layer.format,
+            filter: {
+              language: 'kql',
+              query: layer.filter ?? '',
+            },
+          },
+          options: {
+            showTitle: true,
+          },
+        });
+
+        return new MetricChart({
+          layers: metricLayer,
+          formulaAPI: formulaAsync.value!.formula,
+          dataView: dataViewAsync.value!,
+        });
+      case 'pie':
+        const pieLayer = new PieLayer({
+          data: layers.map((l) => ({
+            value: layer.formula,
+            label: layer.label,
+            format: layer.format,
+            filter: {
+              language: 'kql',
+              query: layer.filter ?? '',
+            },
+          })),
+          options: {
+            breakdown: { type: 'top_values', params: { size: 10 }, field: breakdown! },
+          },
+        });
+
+        return new PieChart({
+          layers: [pieLayer],
+          formulaAPI: formulaAsync.value!.formula,
+          dataView: dataViewAsync.value!,
+        });
+      case 'heatmap':
+        const heatmapLayer = new HeatmapLayer({
+          data: {
+            value: layer.formula,
+            label: layer.label,
+            format: layer.format,
+            filter: {
+              language: 'kql',
+              query: layer.filter ?? '',
+            },
+          },
+          options: {
+            breakdown_x: { type: 'top_values', params: { size: 10 }, field: timeField! },
+            breakdown_y: { type: 'top_values', params: { size: 10 }, field: breakdown! },
+          },
+        });
+
+        return new HeatmapChart({
+          layers: heatmapLayer,
+          formulaAPI: formulaAsync.value!.formula,
+          dataView: dataViewAsync.value!,
+        });
+    }
+  };
+
+  const visualization = createVisualization();
+
   const attributes = new LensAttributesBuilder({
-    visualization: new XYChart({
-      layers: [xyDataLayer],
-      formulaAPI: formulaAsync.value.formula,
-      dataView: dataViewAsync.value,
-    }),
+    visualization,
   }).build();
 
   const lensEmbeddableInput: Assign<LensEmbeddableInput, { attributes: typeof attributes }> = {
@@ -193,6 +321,25 @@ export function registerLensFunction({
                   },
                   required: ['id'],
                 },
+                seriesType: {
+                  type: 'string',
+                  description:
+                    'this option is only valid for XY chart type. It is very important, that you do NOT set this property for other chart types like pie, heatmap or metric.',
+                  enum: [
+                    SeriesType.Area,
+                    SeriesType.AreaPercentageStacked,
+                    SeriesType.AreaStacked,
+                    SeriesType.Bar,
+                    SeriesType.BarHorizontal,
+                    SeriesType.BarHorizontalPercentageStacked,
+                    SeriesType.BarPercentageStacked,
+                    SeriesType.BarStacked,
+                    SeriesType.Line,
+                  ],
+                },
+                showGridLines: {
+                  type: 'boolean',
+                },
               },
               required: ['label', 'formula', 'format'],
             },
@@ -205,24 +352,28 @@ export function registerLensFunction({
                 type: 'string',
               },
             },
+            description: 'this is required setting for pie chart and optional for other charts. For heatmap chart it defines breakdown on the Y axis.',
             required: ['field'],
+          },
+          legend: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              visibility: {
+                type: 'boolean',
+              },
+              position: {
+                type: 'string',
+                enum: ['left', 'right', 'bottom', 'top'],
+              },
+            },
           },
           indexPattern: {
             type: 'string',
           },
-          seriesType: {
+          timeField: {
             type: 'string',
-            enum: [
-              SeriesType.Area,
-              SeriesType.AreaPercentageStacked,
-              SeriesType.AreaStacked,
-              SeriesType.Bar,
-              SeriesType.BarHorizontal,
-              SeriesType.BarHorizontalPercentageStacked,
-              SeriesType.BarPercentageStacked,
-              SeriesType.BarStacked,
-              SeriesType.Line,
-            ],
+            description: 'time field to use on the x axis if XY chart is used or string field to use on x axis if heatmap chart is used. For other chart types this option should not be set.',
           },
           start: {
             type: 'string',
@@ -231,6 +382,11 @@ export function registerLensFunction({
           end: {
             type: 'string',
             description: 'The end of the time range, in Elasticsearch datemath',
+          },
+          chartType: {
+            type: 'string',
+            description: 'chart type to render, if not set XY chart is assumed',
+            enum: ['XY', 'heatmap', 'pie', 'metric'],
           },
         },
         required: ['layers', 'indexPattern', 'start', 'end'],
@@ -241,34 +397,19 @@ export function registerLensFunction({
         content: {},
       };
     },
-    ({ arguments: { layers, indexPattern, breakdown, seriesType, start, end } }) => {
-      const xyDataLayer = new XYDataLayer({
-        data: layers.map((layer) => ({
-          type: 'formula',
-          value: layer.formula,
-          label: layer.label,
-          format: layer.format,
-          filter: {
-            language: 'kql',
-            query: layer.filter ?? '',
-          },
-        })),
-        options: {
-          seriesType,
-          breakdown: breakdown
-            ? { type: 'top_values', params: { size: 10 }, field: breakdown.field }
-            : undefined,
-        },
-      });
-
+    ({ arguments: { layers, indexPattern, breakdown, timeField, legend, start, end, chartType } }) => {
       return (
         <Lens
           indexPattern={indexPattern}
-          xyDataLayer={xyDataLayer}
+          layers={layers}
+          breakdown={breakdown ? breakdown.field : undefined}
+          timeField={timeField}
           start={start}
           end={end}
           lens={pluginsStart.lens}
           dataViews={pluginsStart.dataViews}
+          legend={legend}
+          chartType={chartType}
         />
       );
     }

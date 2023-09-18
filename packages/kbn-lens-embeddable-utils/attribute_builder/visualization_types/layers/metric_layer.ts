@@ -48,6 +48,11 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
     chartDataView: DataView,
     formulaAPI: FormulaPublicApi
   ): FormBasedPersistedState['layers'] {
+    const columnOrder: string[] = [];
+    if (this.layerConfig.options?.breakdown?.type === 'top_values') {
+      columnOrder.push(BREAKDOWN_COLUMN_NAME);
+    }
+
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [HISTOGRAM_COLUMN_NAME],
       columns: getHistogramColumn({
