@@ -23,6 +23,7 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
@@ -102,6 +103,9 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
+    if (newPackagePolicy?.inputs) {
+      validateEndpointPackagePolicy(newPackagePolicy.inputs);
+    }
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
 
@@ -204,6 +208,8 @@ export const getPackagePolicyUpdateCallback = (
       licenseService,
       logger
     );
+
+    validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
     notifyProtectionFeatureUsage(
       endpointIntegrationData,
