@@ -1043,7 +1043,8 @@ export const UnifiedDataTable = ({
         </div>
         {loadingState !== DataLoadingState.loading &&
           !usedSelectedDocs.length && // hide footer when showing selected documents
-          isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
+          isPaginationEnabled &&
+          !isCompareActive && ( // we hide the footer for Surrounding Documents page
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
               rowCount={rowCount}
