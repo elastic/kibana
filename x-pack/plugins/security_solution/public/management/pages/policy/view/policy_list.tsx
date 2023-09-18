@@ -172,9 +172,9 @@ export const PolicyList = memo(() => {
         ];
       }
 
-      const parsedDate = moment(version, 'YYYY-MM-DD');
+      const parsedDate = moment.utc(version, 'YYYY-MM-DD');
 
-      if (parsedDate < moment().subtract(18, 'months')) {
+      if (parsedDate < moment.utc().subtract(18, 'months')) {
         return [
           'danger',
           parsedDate.format('MMMM DD, YYYY'),
@@ -184,7 +184,7 @@ export const PolicyList = memo(() => {
         ];
       }
 
-      if (parsedDate > moment().subtract(1, 'month')) {
+      if (parsedDate > moment.utc().subtract(1, 'month')) {
         return ['success', parsedDate.format('MMMM DD, YYYY')];
       }
 

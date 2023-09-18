@@ -6,6 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
 
 import type {
   CoreSetup,
@@ -76,6 +77,13 @@ export interface SpacesPluginSetup {
      */
     registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
   };
+
+  /**
+   * Determines whether Kibana supports multiple spaces or only the default space.
+   *
+   * When `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden.
+   */
+  hasOnlyDefaultSpace$: Observable<boolean>;
 }
 
 /**
@@ -84,6 +92,13 @@ export interface SpacesPluginSetup {
 export interface SpacesPluginStart {
   /** Service for interacting with spaces. */
   spacesService: SpacesServiceStart;
+
+  /**
+   * Determines whether Kibana supports multiple spaces or only the default space.
+   *
+   * When `xpack.spaces.maxSpaces` is set to 1 Kibana only supports the default space and any spaces related UI can safely be hidden.
+   */
+  hasOnlyDefaultSpace$: Observable<boolean>;
 }
 
 export class SpacesPlugin
@@ -99,12 +114,15 @@ export class SpacesPlugin
 
   private readonly spacesService: SpacesService;
 
+  private readonly hasOnlyDefaultSpace$: Observable<boolean>;
+
   private spacesServiceStart?: SpacesServiceStart;
 
   private defaultSpaceService?: DefaultSpaceService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
+    this.hasOnlyDefaultSpace$ = this.config$.pipe(map(({ maxSpaces }) => maxSpaces === 1));
     this.log = initializerContext.logger.get();
     this.spacesService = new SpacesService();
     this.spacesClientService = new SpacesClientService((message) => this.log.debug(message));
@@ -195,6 +213,7 @@ export class SpacesPlugin
     return {
       spacesClient: spacesClientSetup,
       spacesService: spacesServiceSetup,
+      hasOnlyDefaultSpace$: this.hasOnlyDefaultSpace$,
     };
   }
 
@@ -208,6 +227,7 @@ export class SpacesPlugin
 
     return {
       spacesService: this.spacesServiceStart,
+      hasOnlyDefaultSpace$: this.hasOnlyDefaultSpace$,
     };
   }
 
