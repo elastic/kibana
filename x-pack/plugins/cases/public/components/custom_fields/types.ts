@@ -12,10 +12,12 @@ export enum CustomFieldTypes {
   TOGGLE = 'toggle',
 }
 
-export interface ConfigPageProps {
-  isLoading: boolean;
+export interface ConfigureCustomFields {
+  key: string;
+  label: string;
+  type: CustomFieldTypes;
+  required: boolean;
 }
-
 export interface CustomFieldBuildType {
   ConfigurePage: React.FC;
 }

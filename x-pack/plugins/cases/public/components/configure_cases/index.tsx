@@ -281,8 +281,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
           <SectionWrapper>
             <EuiFlexItem grow={false}>
               <CustomFields
-                isLoading={false}
-                disabled={false}
+                customFields={[]}
+                isLoading={loadingCaseConfigure}
+                disabled={loadingCaseConfigure}
                 handleAddCustomField={onAddCustomFields}
               />
             </EuiFlexItem>

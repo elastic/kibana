@@ -8,10 +8,12 @@
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { ConfigureCases } from '.';
-import { noUpdateCasesPermissions, TestProviders } from '../../common/mock';
+import { noUpdateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
@@ -595,6 +597,67 @@ describe('ConfigureCases', () => {
       expect(
         wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
       ).toBeFalsy();
+    });
+  });
+
+  describe('custom fields', () => {
+    let appMockRender: AppMockRenderer;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+    });
+
+    it('renders custom field group', () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+    });
+
+    it('opens fly out for when click on add field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('add-custom-field-flyout')).toBeInTheDocument();
+      });
+    });
+
+    it('closes fly out for when click on cancel', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('add-custom-field-flyout')).toBeInTheDocument();
+      });
+
+      userEvent.click(screen.getByTestId('add-custom-field-flyout-cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
+        expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+      });
+    });
+
+    it('closes fly out for when click on save field', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      userEvent.click(screen.getByTestId('add-custom-field'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('add-custom-field-flyout')).toBeInTheDocument();
+      });
+
+      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+
+      userEvent.click(screen.getByTestId('add-custom-field-flyout-save'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('add-custom-field-flyout')).not.toBeInTheDocument();
+        expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+      });
     });
   });
 });

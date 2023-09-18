@@ -5,22 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiButtonEmpty, EuiDescribedFormGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
-
 import { useCasesContext } from '../cases_context/use_cases_context';
-
+import type { ConfigureCustomFields } from './types';
+import type { ListOption } from './draggable';
+import { Draggable } from './draggable';
 export interface Props {
+  customFields: ConfigureCustomFields[];
   disabled: boolean;
   isLoading: boolean;
   handleAddCustomField: () => void;
 }
-const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAddCustomField }) => {
+const CustomFieldsComponent: React.FC<Props> = ({
+  disabled,
+  isLoading,
+  handleAddCustomField,
+  customFields,
+}) => {
   const { permissions } = useCasesContext();
   const canAddCustomFields = permissions.create && permissions.update;
+
+  const currentListValues: ListOption[] = useMemo(() => {
+    if (!customFields) {
+      return [];
+    }
+
+    return customFields.map((field) => {
+      return {
+        id: field.key,
+        content: field.label,
+        type: field.type,
+      };
+    });
+  }, [customFields]);
 
   return canAddCustomFields ? (
     <EuiDescribedFormGroup
@@ -39,7 +60,13 @@ const CustomFieldsComponent: React.FC<Props> = ({ disabled, isLoading, handleAdd
         css={css`
           max-width: 580px;
         `}
-        body={i18n.NO_CUSTOM_FIELDS}
+        body={
+          customFields?.length ? (
+            <Draggable listValues={currentListValues} />
+          ) : (
+            i18n.NO_CUSTOM_FIELDS
+          )
+        }
         actions={
           <EuiButtonEmpty
             isLoading={isLoading}
