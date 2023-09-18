@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Embeddings } from 'langchain/embeddings';
+import { Embeddings } from 'langchain/embeddings/base';
 import { EmbeddingsParams } from 'langchain/dist/embeddings/base';
 
 /**

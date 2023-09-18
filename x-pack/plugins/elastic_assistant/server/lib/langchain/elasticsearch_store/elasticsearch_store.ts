@@ -7,7 +7,7 @@
 
 import { Document } from 'langchain/document';
 import { Callbacks } from 'langchain/callbacks';
-import { VectorStore } from 'langchain/vectorstores';
+import { VectorStore } from 'langchain/vectorstores/base';
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
