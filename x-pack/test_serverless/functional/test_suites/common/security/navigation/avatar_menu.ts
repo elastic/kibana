@@ -11,8 +11,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getService('svlCommonNavigation');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/165694
-  describe.skip('Avatar menu', function () {
+  describe('Avatar menu', function () {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     it('is displayed', async () => {
       await svlCommonNavigation.navigateToKibanaHome();
       await svlCommonPage.assertUserAvatarExists();
