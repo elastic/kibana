@@ -11,7 +11,7 @@ import axios from 'axios';
 import { configValidator, getConnectorType } from '.';
 import { BedrockConfig, BedrockSecrets } from '../../../common/bedrock/types';
 import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/bedrock/constants';
+import { DEFAULT_BEDROCK_MODEL } from '../../../common/bedrock/constants';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -30,7 +30,7 @@ axios.create = jest.fn(() => axios);
 let connectorType: SubActionConnectorType<BedrockConfig, BedrockSecrets>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
-describe('Generative AI Connector', () => {
+describe('Bedrock Connector', () => {
   beforeEach(() => {
     configurationUtilities = actionsConfigMock.create();
     connectorType = getConnectorType();
@@ -43,8 +43,7 @@ describe('Generative AI Connector', () => {
     test('config validation passes when only required fields are provided', () => {
       const config: BedrockConfig = {
         apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_BEDROCK_MODEL,
       };
 
       expect(configValidator(config, { configurationUtilities })).toEqual(config);
@@ -53,39 +52,12 @@ describe('Generative AI Connector', () => {
     test('config validation failed when a url is invalid', () => {
       const config: BedrockConfig = {
         apiUrl: 'example.com/do-something',
-        apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_BEDROCK_MODEL,
       };
       expect(() => {
         configValidator(config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
         '"Error configuring Generative AI action: Error: URL Error: Invalid URL: example.com/do-something"'
-      );
-    });
-
-    test('config validation failed when the OpenAI API provider is empty', () => {
-      const config: BedrockConfig = {
-        apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: '' as OpenAiProviderType,
-        defaultModel: DEFAULT_OPENAI_MODEL,
-      };
-      expect(() => {
-        configValidator(config, { configurationUtilities });
-      }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring Generative AI action: Error: API Provider is not supported"'
-      );
-    });
-
-    test('config validation failed when the OpenAI API provider is invalid', () => {
-      const config: BedrockConfig = {
-        apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiProvider: 'bad-one' as OpenAiProviderType,
-        defaultModel: DEFAULT_OPENAI_MODEL,
-      };
-      expect(() => {
-        configValidator(config, { configurationUtilities });
-      }).toThrowErrorMatchingInlineSnapshot(
-        '"Error configuring Generative AI action: Error: API Provider is not supported: bad-one"'
       );
     });
 
@@ -99,8 +71,7 @@ describe('Generative AI Connector', () => {
 
       const config: BedrockConfig = {
         apiUrl: 'http://mylisteningserver.com:9200/endpoint',
-        apiProvider: OpenAiProviderType.OpenAi,
-        defaultModel: DEFAULT_OPENAI_MODEL,
+        defaultModel: DEFAULT_BEDROCK_MODEL,
       };
 
       expect(() => {
