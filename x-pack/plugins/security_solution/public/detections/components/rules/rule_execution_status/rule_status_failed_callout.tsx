@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
+import { NewChat } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
+import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
 
 interface RuleStatusFailedCallOutProps {
   date: string;
@@ -26,6 +28,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   status,
 }) => {
   const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
+  const getPromptContext = useCallback(async () => message, [message]);
   if (!shouldBeDisplayed) {
     return null;
   }
@@ -59,6 +62,14 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
+        <NewChat
+          category="detection-rules"
+          conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+          description={"Rule's execution failure message"}
+          getPromptContext={getPromptContext}
+          suggestedUserPrompt={'Can you explain this rule execution error and steps to fix?'}
+          tooltip={'Add this rule execution error as context'}
+        />
       </EuiCallOut>
     </div>
   );
