@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { CORRELATIONS_SUPPRESSED_ALERTS } from '../../shared/translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
@@ -38,7 +38,11 @@ export const SuppressedAlerts: React.VFC<SuppressedAlertsProps> = ({
   const title = (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem>
-        {`${alertSuppressionCount} ${CORRELATIONS_SUPPRESSED_ALERTS(alertSuppressionCount)}`}
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.suppressedAlertsTitle"
+          defaultMessage="{count} suppressed {count, plural, =1 {alert} other {alerts}}"
+          values={{ count: alertSuppressionCount }}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiBetaBadge
