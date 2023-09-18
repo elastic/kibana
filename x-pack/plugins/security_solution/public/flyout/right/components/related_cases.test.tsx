@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID,
@@ -24,6 +25,13 @@ const ICON_TEST_ID = SUMMARY_ROW_ICON_TEST_ID(INSIGHTS_CORRELATIONS_RELATED_CASE
 const VALUE_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID);
 const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID);
 
+const renderRelatedCases = () =>
+  render(
+    <IntlProvider locale="en">
+      <RelatedCases eventId={eventId} />
+    </IntlProvider>
+  );
+
 describe('<RelatedCases />', () => {
   it('should render many related cases correctly', () => {
     (useFetchRelatedCases as jest.Mock).mockReturnValue({
@@ -32,7 +40,7 @@ describe('<RelatedCases />', () => {
       dataCount: 2,
     });
 
-    const { getByTestId } = render(<RelatedCases eventId={eventId} />);
+    const { getByTestId } = renderRelatedCases();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -47,7 +55,7 @@ describe('<RelatedCases />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(<RelatedCases eventId={eventId} />);
+    const { getByTestId } = renderRelatedCases();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -60,7 +68,7 @@ describe('<RelatedCases />', () => {
       loading: true,
     });
 
-    const { getByTestId } = render(<RelatedCases eventId={eventId} />);
+    const { getByTestId } = renderRelatedCases();
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
 
@@ -70,7 +78,7 @@ describe('<RelatedCases />', () => {
       error: true,
     });
 
-    const { container } = render(<RelatedCases eventId={eventId} />);
+    const { container } = renderRelatedCases();
     expect(container).toBeEmptyDOMElement();
   });
 });
