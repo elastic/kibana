@@ -30,7 +30,7 @@ export interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
-  disableShardWarnings?: boolean;
+  disableWarningToasts?: boolean;
   getNow?: () => Date;
   executionContext?: KibanaExecutionContext;
   title?: string;
@@ -48,7 +48,7 @@ export const handleRequest = ({
   searchSourceService,
   timeFields,
   timeRange,
-  disableShardWarnings,
+  disableWarningToasts,
   getNow,
   executionContext,
   title,
@@ -110,7 +110,7 @@ export const handleRequest = ({
       requestSearchSource
         .fetch$({
           abortSignal,
-          disableShardFailureWarning: disableShardWarnings,
+          disableWarningToasts,
           sessionId: searchSessionId,
           inspector: {
             adapter: inspectorAdapters.requests,

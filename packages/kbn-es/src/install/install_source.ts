@@ -20,16 +20,7 @@ import { log as defaultLog } from '../utils/log';
 import { cache } from '../utils/cache';
 import { buildSnapshot, archiveForPlatform } from '../utils/build_snapshot';
 import { BASE_PATH } from '../paths';
-
-interface InstallSourceOptions {
-  sourcePath: string;
-  license?: string;
-  password?: string;
-  basePath?: string;
-  installPath?: string;
-  log?: ToolingLog;
-  esArgs?: string[];
-}
+import { InstallSourceOptions } from './types';
 
 /**
  * Installs ES from source

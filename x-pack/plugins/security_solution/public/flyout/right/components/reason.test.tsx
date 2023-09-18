@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { FormattedMessage, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -17,7 +18,6 @@ import { RightPanelContext } from '../context';
 import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { PreviewPanelKey } from '../../preview';
-import { PREVIEW_ALERT_REASON_DETAILS } from './translations';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
@@ -33,28 +33,36 @@ const panelContextValue = {
 
 const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
   render(
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContext}>
-        <Reason />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
+    <IntlProvider locale="en">
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <RightPanelContext.Provider value={panelContext}>
+          <Reason />
+        </RightPanelContext.Provider>
+      </ExpandableFlyoutContext.Provider>
+    </IntlProvider>
   );
 
 describe('<Reason />', () => {
-  it('should render the component', () => {
+  it('should render the component for alert', () => {
     const { getByTestId } = renderReason();
     expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(REASON_TITLE_TEST_ID)).toHaveTextContent('Alert reason');
+    expect(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(REASON_DETAILS_PREVIEW_BUTTON_TEST_ID)).toHaveTextContent(
+      'Show full reason'
+    );
   });
 
-  it('should render null if dataFormattedForFieldBrowser is null', () => {
+  it('should render the component for document', () => {
+    const dataFormattedForFieldBrowser = [...mockDataFormattedForFieldBrowser];
+    dataFormattedForFieldBrowser.shift();
     const panelContext = {
       ...panelContextValue,
-      dataFormattedForFieldBrowser: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = renderReason(panelContext);
-
-    expect(container).toBeEmptyDOMElement();
+      dataFormattedForFieldBrowser,
+    };
+    const { getByTestId } = renderReason(panelContext);
+    expect(getByTestId(REASON_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(REASON_TITLE_TEST_ID)).toHaveTextContent('Document reason');
   });
 
   it('should render no reason if the field is null', () => {
@@ -81,7 +89,12 @@ describe('<Reason />', () => {
         indexName: panelContextValue.indexName,
         scopeId: panelContextValue.scopeId,
         banner: {
-          title: PREVIEW_ALERT_REASON_DETAILS,
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
+              defaultMessage="Preview alert reason"
+            />
+          ),
           backgroundColor: 'warning',
           textColor: 'warning',
         },

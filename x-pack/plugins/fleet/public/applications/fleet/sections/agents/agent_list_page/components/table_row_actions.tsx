@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
 
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
@@ -116,6 +118,24 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>
     );
+
+    if (isStuckInUpdating(agent)) {
+      menuItems.push(
+        <EuiContextMenuItem
+          key="agentRestartUpgradeBtn"
+          icon="refresh"
+          onClick={() => {
+            onUpgradeClick();
+          }}
+          data-test-subj="restartUpgradeBtn"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.restartUpgradeOneButton"
+            defaultMessage="Restart upgrade"
+          />
+        </EuiContextMenuItem>
+      );
+    }
 
     if (agentTamperProtectionEnabled && agent.policy_id) {
       menuItems.push(
