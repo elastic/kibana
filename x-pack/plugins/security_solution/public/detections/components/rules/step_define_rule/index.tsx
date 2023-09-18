@@ -18,7 +18,7 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
@@ -176,6 +176,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
+  const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
+
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
@@ -312,14 +314,41 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         });
       }
     }
+  }, [ruleType, previousRuleType, getFields]);
 
-    // TODO:ESQL fix issue around this
+  /**
+   * ensures when user switches between rule types, written ES|QL query is not getting lost
+   * additional work is required in this code area, as currently switching to EQL will result in query lose
+   */
+  useEffect(() => {
+    const { queryBar: currentQuery } = getFields();
+    if (currentQuery == null) {
+      return;
+    }
+
+    const currentQueryValue = currentQuery.value as DefineStepRule['queryBar'];
+
+    // sets ES|QL query to a default value or earlier added one, when switching to ES|QL rule type
     if (isEsqlRule(ruleType)) {
       if (previousRuleType && !isEsqlRule(previousRuleType)) {
         currentQuery.reset({
-          defaultValue: defaultCustomQuery.forEsqlRules,
+          defaultValue: esqlQueryRef.current ?? defaultCustomQuery.forEsqlRules,
         });
       }
+      // otherwise reset it to default values of other rule types
+    } else if (isEsqlRule(previousRuleType)) {
+      // sets ES|QL query value to reference, so it can be used when user switch back from one rule type to another
+      if (currentQueryValue?.query?.language === 'esql') {
+        esqlQueryRef.current = currentQueryValue;
+      }
+
+      const defaultValue = isThreatMatchRule(ruleType)
+        ? defaultCustomQuery.forThreatMatchRules
+        : defaultCustomQuery.forNormalRules;
+
+      currentQuery.reset({
+        defaultValue,
+      });
     }
   }, [ruleType, previousRuleType, getFields]);
 
@@ -598,11 +627,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const esqlQueryBarConfig = useMemo(
     () => ({
       ...schema.queryBar,
-      label: (
-        <span>
-          {i18n.ESQL_QUERY} <EsqlInfoIcon />
-        </span>
-      ) as unknown as string,
+      label: i18n.ESQL_QUERY,
+      labelAppend: <EsqlInfoIcon />,
     }),
     []
   );
