@@ -224,8 +224,7 @@ function transformToExternalModel(
   const castedAttributes = configuration.attributes as ConfigurationTransformedAttributes;
   const customFields = !configuration.attributes.customFields
     ? []
-    : (configuration.attributes
-        .customFields as ConfigurationSavedObjectTransformed['attributes']['customFields']);
+    : (configuration.attributes.customFields as ConfigurationTransformedAttributes['customFields']);
 
   return {
     ...configuration,

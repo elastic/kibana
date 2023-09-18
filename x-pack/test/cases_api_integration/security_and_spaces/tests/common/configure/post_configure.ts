@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql(getConfigurationOutput());
     });
 
-    it('should create a configuration with default customFields', async () => {
+    it('should create a configuration with no customFields', async () => {
       const { customFields, ...configurationRequest } = getConfigurationRequest();
       const configuration = await createConfiguration(supertest, configurationRequest);
 
