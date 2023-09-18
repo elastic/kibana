@@ -17,7 +17,7 @@ import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 
-import { useIsServerless } from '../../../../serverless_context';
+import { useEnabledFeatures } from '../../../../serverless_context';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import { TransformListRow } from '../../../../common';
@@ -47,7 +47,7 @@ interface Props {
 type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
-  const hideNodeInfo = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const stateValues: StateValues = { ...item.stats };
   delete stateValues.stats;
@@ -64,7 +64,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       description: item.stats.state,
     }
   );
-  if (!hideNodeInfo && item.stats.node !== undefined) {
+  if (showNodeInfo && item.stats.node !== undefined) {
     stateItems.push({
       title: 'node.name',
       description: item.stats.node.name,

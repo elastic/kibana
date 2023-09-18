@@ -7,20 +7,29 @@
 
 import React, { createContext, FC, useContext, useMemo } from 'react';
 
-export const ServerlessContext = createContext({
-  isServerless: false,
+export interface TransformEnabledFeatures {
+  showNodeInfo: boolean;
+  showFrozenDataTierChoice: boolean;
+}
+export const EnabledFeaturesContext = createContext({
+  showNodeInfo: true,
+  showFrozenDataTierChoice: true,
 });
 
-export const ServerlessContextProvider: FC<{ isServerless: boolean }> = (props) => {
-  const { children, isServerless } = props;
+export const EnabledFeaturesContextProvider: FC<{ enabledFeatures: TransformEnabledFeatures }> = (
+  props
+) => {
+  const { children, enabledFeatures } = props;
   return (
-    <ServerlessContext.Provider value={{ isServerless }}>{children}</ServerlessContext.Provider>
+    <EnabledFeaturesContext.Provider value={enabledFeatures}>
+      {children}
+    </EnabledFeaturesContext.Provider>
   );
 };
 
-export function useIsServerless() {
-  const context = useContext(ServerlessContext);
+export function useEnabledFeatures() {
+  const context = useContext(EnabledFeaturesContext);
   return useMemo(() => {
-    return context.isServerless;
+    return context;
   }, [context]);
 }
