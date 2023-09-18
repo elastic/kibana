@@ -102,6 +102,7 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/monaco",
+    "@kbn/observability-log-explorer-plugin",
   ],
   "exclude": ["target/**/*"]
 }

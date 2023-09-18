@@ -33,6 +33,7 @@
     "@kbn/custom-integrations",
     "@kbn/share-plugin",
     "@kbn/utility-types",
+    "@kbn/observability-log-explorer-plugin",
   ],
   "exclude": [
     "target/**/*",
