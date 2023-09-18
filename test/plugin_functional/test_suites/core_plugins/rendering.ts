@@ -230,6 +230,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.projects_url (any)', // It's a string (any because schema.conditional)
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
+        'xpack.cloud.serverless.project_name (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
