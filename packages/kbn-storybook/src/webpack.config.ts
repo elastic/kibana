@@ -123,6 +123,19 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             },
           ],
         },
+        // @hello-pangea/dnd emits optional chaining that confuses webpack.
+        // We need to transform it using babel before going further
+        {
+          test: /@hello-pangea\/dnd\/dist\/dnd\.esm\.js$/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                plugins: [require.resolve('@babel/plugin-proposal-optional-chaining')],
+              },
+            },
+          ],
+        },
       ],
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
