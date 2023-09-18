@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -36,6 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Discover fallback link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+      });
+
       it('should render a button link ', async () => {
         const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
         expect(await discoverLink.isDisplayed()).to.be(true);
@@ -61,7 +66,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.discover.getColumnHeaders()).to.eql(['@timestamp', 'message']);
+          expect(await PageObjects.discover.getColumnHeaders()).to.eql([
+            '@timestamp',
+            'service.name',
+            'host.name',
+            'message',
+          ]);
         });
 
         await retry.try(async () => {
@@ -70,6 +80,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.try(async () => {
           expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+        });
+      });
+    });
+
+    describe('Add data link', () => {
+      before(async () => {
+        await PageObjects.observabilityLogExplorer.navigateTo();
+      });
+
+      it('should render a button link ', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        expect(await onboardingLink.isDisplayed()).to.be(true);
+      });
+
+      it('should navigate to the observability onboarding overview page', async () => {
+        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        onboardingLink.click();
+
+        await retry.try(async () => {
+          const url = await browser.getCurrentUrl();
+          expect(url).to.contain(`/app/observabilityOnboarding`);
         });
       });
     });

@@ -15,9 +15,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const svlSecNavigation = getService('svlSecNavigation');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Cases List', () => {
     before(async () => {
+      await svlCommonPage.login();
+
       await svlSecNavigation.navigateToLandingPage();
 
       await testSubjects.click('solutionSideNavItemLink-cases');
@@ -26,6 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     after(async () => {
       await cases.api.deleteAllCases();
       await cases.casesTable.waitForCasesToBeDeleted();
+      await svlCommonPage.forceLogout();
     });
 
     describe('empty state', () => {
@@ -53,8 +57,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/166027
-      describe.skip('status', () => {
+      describe('status', () => {
         createNCasesBeforeDeleteAllAfter(2, getPageObject, getService);
 
         it('change the status of cases to in-progress correctly', async () => {

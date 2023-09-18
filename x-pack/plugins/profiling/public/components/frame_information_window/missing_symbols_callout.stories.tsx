@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Meta } from '@storybook/react';
 import React from 'react';
-import { FrameType } from '@kbn/profiling-data-access-plugin/common/profiling';
+import { FrameType } from '@kbn/profiling-utils';
 import { MockProfilingDependenciesStorybook } from '../contexts/profiling_dependencies/mock_profiling_dependencies_storybook';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
 

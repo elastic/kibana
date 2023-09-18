@@ -30,12 +30,14 @@ export const FleetPermissionsCallout = () => {
  */
 export const NoPermissionsTooltip = ({
   canEditSynthetics = true,
+  canUsePublicLocations = true,
   children,
 }: {
   canEditSynthetics?: boolean;
+  canUsePublicLocations?: boolean;
   children: ReactNode;
 }) => {
-  const disabledMessage = getRestrictionReasonLabel(canEditSynthetics);
+  const disabledMessage = getRestrictionReasonLabel(canEditSynthetics, canUsePublicLocations);
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>
@@ -47,8 +49,16 @@ export const NoPermissionsTooltip = ({
   return <>{children}</>;
 };
 
-function getRestrictionReasonLabel(canEditSynthetics = true): string | undefined {
-  return !canEditSynthetics ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined;
+function getRestrictionReasonLabel(
+  canEditSynthetics = true,
+  canUsePublicLocations = true
+): string | undefined {
+  const message = !canEditSynthetics ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined;
+  if (message) {
+    return message;
+  }
+
+  return !canUsePublicLocations ? CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS : undefined;
 }
 
 export const NEED_PERMISSIONS_PRIVATE_LOCATIONS = i18n.translate(
@@ -81,5 +91,12 @@ export const CANNOT_PERFORM_ACTION_SYNTHETICS = i18n.translate(
   'xpack.synthetics.monitorManagement.noSyntheticsPermissions',
   {
     defaultMessage: 'You do not have sufficient permissions to perform this action.',
+  }
+);
+
+export const CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS = i18n.translate(
+  'xpack.synthetics.monitorManagement.canUsePublicLocations',
+  {
+    defaultMessage: 'You do not have sufficient permissions to use Elastic managed locations.',
   }
 );
