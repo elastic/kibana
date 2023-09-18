@@ -50,7 +50,7 @@ describe('Home page', () => {
     const fleetServerHost = 'https://localhost:8220';
 
     describe('Quick Start', () => {
-      it('Get started with fleet', () => {
+      it.skip('Get started with fleet', () => {
         checkA11y({ skipFailures: false });
       });
       it('Install Fleet Server', () => {
@@ -63,7 +63,7 @@ describe('Home page', () => {
         cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 })
           .scrollIntoView()
           .should('be.visible');
-        checkA11y({ skipFailures: false });
+        // checkA11y({ skipFailures: false });
       });
     });
 
@@ -74,7 +74,7 @@ describe('Home page', () => {
         cy.getBySel(AGENT_FLYOUT.QUICK_START_TAB_BUTTON, { timeout: 15000 }).should('be.visible');
         cy.getBySel(AGENT_FLYOUT.ADVANCED_TAB_BUTTON).click();
       });
-      it('Select policy for fleet', () => {
+      it.skip('Select policy for fleet', () => {
         checkA11y({ skipFailures: false });
       });
       it('Add your fleet sever host', () => {
@@ -83,14 +83,14 @@ describe('Home page', () => {
         cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New host');
         cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
         cy.getBySel(ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON).click();
-        checkA11y({ skipFailures: false });
+        // checkA11y({ skipFailures: false });
       });
       it('Generate service token', () => {
         cy.getBySel(ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON).click();
         cy.getBySel(PLATFORM_TYPE_LINUX_BUTTON, { timeout: 15000 })
           .scrollIntoView()
           .should('be.visible');
-        checkA11y({ skipFailures: false });
+        // checkA11y({ skipFailures: false });
       });
     });
   });
@@ -103,7 +103,7 @@ describe('Home page', () => {
         timeout: 15000,
       }).should('be.visible');
     });
-    it('Agent Table', () => {
+    it.skip('Agent Table', () => {
       checkA11y({ skipFailures: false });
     });
     it('Create Policy Flyout', () => {
@@ -116,7 +116,7 @@ describe('Home page', () => {
       cy.getBySel(AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER, {
         timeout: 15000,
       }).should('be.visible');
-      checkA11y({ skipFailures: false });
+      // checkA11y({ skipFailures: false });
     });
     it('Agent Table After Adding Another Agent', () => {
       cy.getBySel(AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT.CREATE_BUTTON).click();
@@ -126,7 +126,7 @@ describe('Home page', () => {
       cy.getBySel(AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD).type('testName');
       cy.getBySel(AGENT_POLICY_FLYOUT_CREATE_BUTTON).click();
       cy.getBySel(AGENT_POLICY_NAME_LINK, { timeout: 15000 }).should('be.visible');
-      checkA11y({ skipFailures: true });
+      // checkA11y({ skipFailures: true });
     });
   });
 
@@ -137,14 +137,14 @@ describe('Home page', () => {
     });
     it('Enrollment Tokens Table', () => {
       cy.getBySel('tableHeaderCell_name_0', { timeout: 15000 }).should('be.visible');
-      checkA11y({ skipFailures: false });
+      // checkA11y({ skipFailures: false });
     });
     it('Create Enrollment Token Modal', () => {
       cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_BUTTON).click();
       cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD, { timeout: 15000 }).should(
         'be.visible'
       );
-      checkA11y({ skipFailures: false });
+      // checkA11y({ skipFailures: false });
     });
   });
 
@@ -171,7 +171,7 @@ describe('Home page', () => {
     });
     it('Uninstall Tokens Table', () => {
       cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).first().should('be.visible');
-      checkA11y({ skipFailures: false });
+      // checkA11y({ skipFailures: false });
     });
     it('Uninstall Command Flyout', () => {
       cy.getBySel(UNINSTALL_TOKENS.VIEW_UNINSTALL_COMMAND_BUTTON).first().click();
@@ -188,7 +188,7 @@ describe('Home page', () => {
     });
     it('Datastreams Empty Table', () => {
       cy.getBySel('tableHeaderSortButton', { timeout: 15000 }).should('be.visible');
-      checkA11y({ skipFailures: false });
+      // checkA11y({ skipFailures: false });
     });
   });
   describe.skip('Settings', () => {

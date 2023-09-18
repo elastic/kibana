@@ -108,7 +108,7 @@ export const storyArgs = {
  */
 export const getFieldRowStory = (
   type: SettingType,
-  settingFields: Partial<UiSettingMetadata<SettingType>>
+  settingFields: Partial<UiSettingMetadata<SettingType>> = {}
 ) => {
   const Story = ({
     isCustom,
