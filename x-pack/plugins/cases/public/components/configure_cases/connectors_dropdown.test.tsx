@@ -295,4 +295,21 @@ describe('ConnectorsDropdown', () => {
     );
     expect(tooltips[0]).toBeInTheDocument();
   });
+
+  test('it should hide the "Add New Connector" button when the user lacks the capability to add a new connector', () => {
+    const selectedConnector = 'none';
+    const { queryByText } = render(
+      <ConnectorsDropdown
+        connectors={[]}
+        selectedConnector={selectedConnector}
+        disabled={false}
+        isLoading={false}
+        onChange={() => {}}
+      />,
+      { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
+    );
+
+    const addNewConnectorButton = queryByText('Add New Connector');
+    expect(addNewConnectorButton).toBeNull();
+  });
 });

@@ -119,14 +119,8 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
       [noConnectorOption]
     );
 
-    if (appendAddConnectorButton) {
-      return [
-        ...connectorsFormatted,
-        {
-          ...addNewConnector,
-          disabled: !canSave,
-        },
-      ];
+    if (appendAddConnectorButton && canSave) {
+      return [...connectorsFormatted, addNewConnector];
     }
 
     return connectorsFormatted;
