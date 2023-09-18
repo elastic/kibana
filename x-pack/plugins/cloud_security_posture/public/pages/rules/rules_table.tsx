@@ -58,12 +58,6 @@ export const RulesTable = ({
     style: {
       background: row.metadata.id === selectedRuleId ? euiTheme.colors.highlight : undefined,
     },
-    onClick: (e: MouseEvent) => {
-      const tag = (e.target as HTMLDivElement).tagName;
-      // Ignore checkbox and switch toggle columns
-      if (tag === 'BUTTON' || tag === 'INPUT') return;
-      setSelectedRuleId(row.metadata.id);
-    },
   });
 
   return (
