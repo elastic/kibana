@@ -72,6 +72,8 @@ Presentation::
 [[release-notes-8.10.0]]
 == {kib} 8.10.0
 
+IMPORTANT: {kib} 8.10.0 has been withdrawn.
+
 For information about the {kib} 8.10.0 release, review the following information.
 
 [float]

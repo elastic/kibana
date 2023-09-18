@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('goes back to last opened url', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
       await PageObjects.common.navigateToApp('home');
       await appsMenu.clickLink('Dashboard', { category: 'kibana' });
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('remembers url after switching spaces', async function () {
       // default space
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
 
       await PageObjects.spaceSelector.openSpacesNav();
