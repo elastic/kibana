@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { computeIfGrouping } from './compute_if_grouping';
 export * from './row_to_document';
