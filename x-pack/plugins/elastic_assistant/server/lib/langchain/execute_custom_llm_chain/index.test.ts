@@ -23,7 +23,9 @@ const mockConversationChain = {
 };
 
 jest.mock('langchain/chains', () => ({
-  ConversationalRetrievalQAChain: jest.fn().mockImplementation(() => mockConversationChain),
+  ConversationalRetrievalQAChain: {
+    fromLLM: jest.fn().mockImplementation(() => mockConversationChain),
+  },
 }));
 
 const mockConnectorId = 'mock-connector-id';
@@ -77,7 +79,7 @@ describe('executeCustomLlmChain', () => {
     });
 
     expect(mockConversationChain.call).toHaveBeenCalledWith({
-      input: '\n\nDo you know my name?',
+      question: '\n\nDo you know my name?',
     });
   });
 
@@ -94,7 +96,7 @@ describe('executeCustomLlmChain', () => {
     });
 
     expect(mockConversationChain.call).toHaveBeenCalledWith({
-      input: 'What is my name?',
+      question: 'What is my name?',
     });
   });
 
