@@ -14,7 +14,7 @@ import { allowedExperimentalValues } from '../../../../../../common/experimental
 import { ExperimentalFeaturesService } from '../../../../../services';
 import type { GetAgentPoliciesResponse } from '../../../../../../common';
 import { createFleetTestRendererMock } from '../../../../../mock';
-import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
+import { sendGetAgents, sendGetAgentStatus, sendGetAgentPolicies } from '../../../hooks';
 
 import { AgentListPage } from '.';
 
@@ -49,6 +49,7 @@ jest.mock('../../../hooks', () => ({
   },
   useFleetStatus: jest.fn().mockReturnValue({}),
   sendGetAgentStatus: jest.fn(),
+  sendGetAgentPolicies: jest.fn(),
   sendGetAgentTags: jest.fn().mockReturnValue({ data: { items: ['tag1', 'tag2'] } }),
   useAuthz: jest.fn().mockReturnValue({ fleet: { all: true } }),
   useStartServices: jest.fn().mockReturnValue({
@@ -87,6 +88,7 @@ jest.mock('./components/search_and_filter_bar', () => {
 
 const mockedSendGetAgents = sendGetAgents as jest.Mock;
 const mockedSendGetAgentStatus = sendGetAgentStatus as jest.Mock;
+const mockedSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
 
 function renderAgentList() {
   const renderer = createFleetTestRendererMock();

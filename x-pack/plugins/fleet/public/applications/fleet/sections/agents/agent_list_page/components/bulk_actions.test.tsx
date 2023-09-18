@@ -15,8 +15,6 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
 
-import { sendGetAgents, sendGetAgentPolicies } from '../../../../hooks';
-
 import { AgentBulkActions } from './bulk_actions';
 
 jest.mock('../../../../../../services/experimental_features');
@@ -24,14 +22,9 @@ const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesServic
 
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
-  sendGetAgents: jest.fn(),
-  sendGetAgentPolicies: jest.fn(),
 }));
 
 jest.mock('../../components/agent_reassign_policy_modal');
-
-const mockedSendGetAgents = sendGetAgents as jest.Mock;
-const mockedSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
@@ -56,8 +49,9 @@ describe('AgentBulkActions', () => {
       const selectedAgents: Agent[] = [{ id: 'agent1' }, { id: 'agent2' }] as Agent[];
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 10,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 10,
+        managedAgentIds: [],
         selectionMode: 'manual',
         currentQuery: '',
         selectedAgents,
@@ -89,8 +83,9 @@ describe('AgentBulkActions', () => {
       ] as Agent[];
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 0,
+        managedAgentIds: [],
         selectionMode: 'manual',
         currentQuery: '',
         selectedAgents,
@@ -125,8 +120,9 @@ describe('AgentBulkActions', () => {
       ] as Agent[];
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 0,
+        managedAgentIds: [],
         selectionMode: 'manual',
         currentQuery: '',
         selectedAgents,
@@ -152,32 +148,12 @@ describe('AgentBulkActions', () => {
 
   describe('When in query mode', () => {
     it('should show correct actions for the active agents', async () => {
-      mockedSendGetAgentPolicies.mockResolvedValue({
-        data: {
-          items: [
-            {
-              name: 'Managed agent policy',
-              namespace: 'default',
-              description: '',
-              monitoring_enabled: ['logs', 'metrics'],
-              is_managed: true,
-              id: 'test-managed-policy',
-            },
-          ],
-        },
-      });
-      mockedSendGetAgents.mockResolvedValueOnce({
-        data: {
-          items: [],
-          total: 0,
-          totalInactive: 0,
-        },
-      });
       const selectedAgents: Agent[] = [];
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 0,
+        managedAgentIds: [],
         selectionMode: 'query',
         currentQuery: '(Base query)',
         selectedAgents,
@@ -206,31 +182,11 @@ describe('AgentBulkActions', () => {
 
     it('should show correct actions for the active agents and exclude the managed agents from the count', async () => {
       const selectedAgents: Agent[] = [];
-      mockedSendGetAgentPolicies.mockResolvedValue({
-        data: {
-          items: [
-            {
-              name: 'Managed agent policy',
-              namespace: 'default',
-              description: '',
-              monitoring_enabled: ['logs', 'metrics'],
-              is_managed: true,
-              id: 'test-managed-policy',
-            },
-          ],
-        },
-      });
-      mockedSendGetAgents.mockResolvedValueOnce({
-        data: {
-          items: ['agentId1', 'agentId2'],
-          total: 2,
-          totalInactive: 0,
-        },
-      });
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 0,
+        managedAgentIds: ['agentId1', 'agentId2'],
         selectionMode: 'query',
         currentQuery: '(Base query)',
         selectedAgents,
@@ -259,15 +215,11 @@ describe('AgentBulkActions', () => {
 
     it('should show correct actions when no managed policies exist', async () => {
       const selectedAgents: Agent[] = [];
-      mockedSendGetAgentPolicies.mockResolvedValue({
-        data: {
-          items: [],
-        },
-      });
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 0,
+        managedAgentIds: [],
         selectionMode: 'query',
         currentQuery: '(Base query)',
         selectedAgents,
@@ -295,32 +247,12 @@ describe('AgentBulkActions', () => {
     });
 
     it('should generate a correct kuery to select agents', async () => {
-      mockedSendGetAgentPolicies.mockResolvedValue({
-        data: {
-          items: [
-            {
-              name: 'Managed agent policy',
-              namespace: 'default',
-              description: '',
-              monitoring_enabled: ['logs', 'metrics'],
-              is_managed: true,
-              id: 'test-managed-policy',
-            },
-          ],
-        },
-      });
-      mockedSendGetAgents.mockResolvedValueOnce({
-        data: {
-          items: [],
-          total: 0,
-          totalInactive: 0,
-        },
-      });
       const selectedAgents: Agent[] = [];
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 0,
+        managedAgentIds: [],
         selectionMode: 'query',
         currentQuery: '(Base query)',
         selectedAgents,
@@ -353,31 +285,11 @@ describe('AgentBulkActions', () => {
 
     it('should generate a correct kuery to select agents with managed agents too', async () => {
       const selectedAgents: Agent[] = [];
-      mockedSendGetAgentPolicies.mockResolvedValue({
-        data: {
-          items: [
-            {
-              name: 'Managed agent policy',
-              namespace: 'default',
-              description: '',
-              monitoring_enabled: ['logs', 'metrics'],
-              is_managed: true,
-              id: 'test-managed-policy',
-            },
-          ],
-        },
-      });
-      mockedSendGetAgents.mockResolvedValueOnce({
-        data: {
-          items: [{ id: 'agentId1' }, { id: 'agentId2' }],
-          total: 2,
-          totalInactive: 0,
-        },
-      });
 
       const props = {
-        totalAgents: 10,
-        totalInactiveAgents: 0,
+        totalAgentsPaginated: 10,
+        totalInactiveAgentsPaginated: 0,
+        managedAgentIds: ['agentId1', 'agentId2'],
         selectionMode: 'query',
         currentQuery: '(Base query)',
         selectedAgents,
