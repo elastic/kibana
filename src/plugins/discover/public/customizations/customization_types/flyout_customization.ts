@@ -8,7 +8,6 @@
 
 export interface FlyoutDefaultActionItem {
   disabled?: boolean;
-  order?: number;
 }
 
 export interface FlyoutDefaultActions {
