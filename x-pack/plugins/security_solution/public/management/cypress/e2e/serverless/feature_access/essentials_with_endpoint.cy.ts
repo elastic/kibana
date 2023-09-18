@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 import { loginServerless } from '../../../tasks/login_serverless';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
@@ -12,7 +13,6 @@ import {
   visitFleetAgentList,
 } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/screens';
 import { getEndpointManagementPageMap } from '../../../screens';
-import { ensureResponseActionAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management';
 
 describe(
   'App Features for Security Essentials PLI with Endpoint Essentials Addon',

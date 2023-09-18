@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 import { loginServerless } from '../../../tasks/login_serverless';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getNoPrivilegesPage } from '../../../screens/common';
-import { ensureResponseActionAuthzAccess } from '../../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management';
 import { getEndpointManagementPageList } from '../../../screens';
 
 describe(
