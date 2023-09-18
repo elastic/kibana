@@ -49,6 +49,8 @@ steps:
   - label: ":arrow_up::elastic::arrow_up: Promote docker image"
     command: .buildkite/scripts/steps/es_serverless/promote_es_serverless_image.sh $ES_SERVERLESS_IMAGE
 
+  - wait: ~
+
   - label: 'Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     timeout_in_minutes: 10
