@@ -22,6 +22,6 @@
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "observabilityOnboarding"]
   }
 }

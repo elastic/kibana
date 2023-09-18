@@ -55,6 +55,9 @@ describe('<InvestigationGuide />', () => {
     });
     const { getByTestId } = render(renderInvestigationGuide());
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toHaveTextContent(
+      `There’s no investigation guide for this rule. Edit the rule's settingsExternal link(opens in a new tab or window) to add one.`
+    );
   });
 
   it('should render no data message when there is no rule note', () => {
@@ -64,6 +67,9 @@ describe('<InvestigationGuide />', () => {
     });
     const { getByTestId } = render(renderInvestigationGuide());
     expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_NO_DATA_TEST_ID)).toHaveTextContent(
+      `There’s no investigation guide for this rule. Edit the rule's settingsExternal link(opens in a new tab or window) to add one.`
+    );
   });
 
   it('should render no data message when useInvestigationGuide errors out', () => {
