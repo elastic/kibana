@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IDatasetsClient } from '@kbn/log-explorer-plugin/public/services/datasets';
 import { FilterStateStore } from '@kbn/es-query';
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../constants';
@@ -15,18 +14,9 @@ import { SingleDatasetLocatorDefinition } from './single_dataset';
 import { SingleDatasetLocatorParams } from './single_dataset/types';
 import { DatasetLocatorDependencies } from './types';
 
-const createDatasetsClientMock = (): jest.Mocked<IDatasetsClient> => ({
-  findDatasets: jest.fn(),
-  findIntegrations: jest.fn(),
-  generateDataViewId: jest
-    .fn()
-    .mockImplementation((_integration: string, dataset: string) => dataset),
-});
-
 const setup = async () => {
   const dep: DatasetLocatorDependencies = {
     useHash: false,
-    datasetsClient: createDatasetsClientMock(),
   };
   const allDatasetsLocator = new AllDatasetsLocatorDefinition(dep);
   const singleDatasetLocator = new SingleDatasetLocatorDefinition(dep);
@@ -47,7 +37,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_a=()',
+        path: '/?_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA)',
         state: {},
       });
     });
@@ -62,7 +52,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_g=(time:(from:now-30m,to:now))&_a=()',
+        path: '/?_g=(time:(from:now-30m,to:now))&_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA)',
         state: {},
       });
     });
@@ -79,7 +69,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_a=(query:(language:kuery,query:foo))',
+        path: '/?_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA,query:(language:kuery,query:foo))',
         state: {},
       });
     });
@@ -97,7 +87,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: '/?_g=(refreshInterval:(pause:!f,value:666))&_a=()',
+        path: '/?_g=(refreshInterval:(pause:!f,value:666))&_a=(index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA)',
         state: {},
       });
     });
@@ -113,7 +103,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(columns:!(_source),sort:!(!('timestamp,%20asc')))`,
+        path: `/?_a=(columns:!(_source),index:BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA,sort:!(!('timestamp,%20asc')))`,
         state: {},
       });
     });
@@ -162,6 +152,7 @@ describe('Observability Logs Explorer Locators', () => {
             },
           },
         ],
+        index: 'BQZwpgNmDGAuCWB7AdgFQJ4AcwC4CGEEAlEA',
       });
       expect(_g).toEqual({
         filters: [
@@ -192,7 +183,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(index:'test-*')`,
+        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D)`,
         state: {},
       });
     });
@@ -209,7 +200,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_g=(time:(from:now-30m,to:now))&_a=(index:'test-*')`,
+        path: `/?_g=(time:(from:now-30m,to:now))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D)`,
         state: {},
       });
     });
@@ -229,7 +220,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(index:'test-*',query:(language:kuery,query:foo))`,
+        path: `/?_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D,query:(language:kuery,query:foo))`,
         state: {},
       });
     });
@@ -249,7 +240,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_g=(refreshInterval:(pause:!f,value:666))&_a=(index:'test-*')`,
+        path: `/?_g=(refreshInterval:(pause:!f,value:666))&_a=(index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D)`,
         state: {},
       });
     });
@@ -267,7 +258,7 @@ describe('Observability Logs Explorer Locators', () => {
 
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
-        path: `/?_a=(columns:!(_source),index:'test-*',sort:!(!('timestamp,%20asc')))`,
+        path: `/?_a=(columns:!(_source),index:BQZwpgNmDGAuCWB7AdgLmAEwIay%2BW6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA%3D%3D,sort:!(!('timestamp,%20asc')))`,
         state: {},
       });
     });
@@ -318,7 +309,8 @@ describe('Observability Logs Explorer Locators', () => {
             },
           },
         ],
-        index: 'test-*',
+        index:
+          'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtLGCLHQFRvkA0CsUFVtBkxbtW5AJScipVABVhk8FDhJksgJ4AHMgFdkAJyaIIANzAZxQA==',
       });
       expect(_g).toEqual({
         filters: [
