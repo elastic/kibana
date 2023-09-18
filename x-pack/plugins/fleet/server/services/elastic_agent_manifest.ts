@@ -42,7 +42,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /etc/elastic-agent/inputs.d &&
-      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent/templates.d"
       #    volumeMounts:
       #      - name: external-inputs
       #        mountPath: /etc/elastic-agent/inputs.d
@@ -71,7 +71,7 @@ spec:
             # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.  
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
-              value: "false"            
+              value: "false"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
@@ -396,7 +396,7 @@ spec:
             # The following ELASTIC_NETINFO:false variable will disable the netinfo.enabled option of add-host-metadata processor. This will remove fields host.ip and host.mac.  
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
-              value: "false"             
+              value: "false"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
