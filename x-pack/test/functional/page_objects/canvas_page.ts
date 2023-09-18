@@ -57,6 +57,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
      */
     async loadFirstWorkpad(workpadName: string) {
       log.debug('CanvasPage.loadFirstWorkpad', workpadName);
+      await testSubjects.setValue('tableListSearchBox', workpadName);
       const elem = await testSubjects.find('canvasWorkpadTableWorkpad');
       const text = await elem.getVisibleText();
       expect(text).to.be(workpadName);
