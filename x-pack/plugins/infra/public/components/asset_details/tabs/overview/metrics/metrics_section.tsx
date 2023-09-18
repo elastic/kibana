@@ -87,7 +87,7 @@ export const MetricsSectionCompact = ({
     <MetricsGrid
       assetName={assetName}
       dateRange={dateRange}
-      filterFieldName={nginx.keyField}
+      filterFieldName={host.keyField}
       charts={host.hostMetricFlyoutCharts}
       metricsDataView={metricsDataView}
       logsDataView={logsDataView}
