@@ -26,7 +26,6 @@
     "@kbn/core-application-browser",
     "@kbn/discover-plugin",
     "@kbn/es-query",
-    "@kbn/observability-onboarding-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/share-plugin",
     "@kbn/io-ts-utils",

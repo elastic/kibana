@@ -18,7 +18,6 @@ import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
-import type { ObservabilityLogExplorerLocators } from '@kbn/observability-log-explorer-plugin/common/locators';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -116,12 +115,6 @@ export const infraLocatorsMock: InfraLocators = {
   nodeLogsLocator: sharePluginMock.createLocator(),
 };
 
-export const observabilityLogExplorerLocatorsMock: ObservabilityLogExplorerLocators =
-  {
-    allDatasetsLocator: sharePluginMock.createLocator(),
-    singleDatasetLocator: sharePluginMock.createLocator(),
-  };
-
 const mockCorePlugins = {
   embeddable: {},
   inspector: {},
@@ -144,13 +137,11 @@ export const mockApmPluginContextValue = {
   plugins: mockPlugin,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
-  observabilityLogExplorer: {
-    locators: observabilityLogExplorerLocatorsMock,
-  },
   infra: {
     locators: infraLocatorsMock,
   },
   deps: {},
+  share: sharePluginMock.createSetupContract(),
   unifiedSearch: mockUnifiedSearch,
   uiActions: {
     getTriggerCompatibleActions: () => Promise.resolve([]),
