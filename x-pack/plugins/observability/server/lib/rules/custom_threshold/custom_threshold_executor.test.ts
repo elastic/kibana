@@ -1888,7 +1888,7 @@ const mockLibs: any = {
   },
   logger,
   config: {
-    thresholdRule: {
+    customThresholdRule: {
       groupByPageSize: 10_000,
     },
   },
