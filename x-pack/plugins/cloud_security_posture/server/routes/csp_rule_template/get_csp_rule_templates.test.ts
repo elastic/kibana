@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { getSortedCspRulesTemplates } from './get_csp_rule_template';
 import { CspRuleTemplate } from '../../../common/schemas';
+
 describe('getSortedCspRulesTemplates', () => {
-  it('should return a sorted array of CspRuleTemplate objects based on their metadata.benchmark.rule_number property', () => {
+  it('sorts by metadata.benchmark.rule_number, invalid semantic version still should still get sorted and empty values should be sorted last', () => {
     const cspRulesTemplates = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '2.0.0' } } },
@@ -31,7 +33,7 @@ describe('getSortedCspRulesTemplates', () => {
     ]);
   });
 
-  it('should return an empty array when passed an empty array', () => {
+  it('edge case - returns empty array if input is empty', () => {
     const cspRulesTemplates: CspRuleTemplate[] = [];
 
     const sortedCspRulesTemplates = getSortedCspRulesTemplates(cspRulesTemplates);
@@ -39,7 +41,7 @@ describe('getSortedCspRulesTemplates', () => {
     expect(sortedCspRulesTemplates).toEqual([]);
   });
 
-  it('should return a sorted array of CspRuleTemplate objects when passed an array with one element', () => {
+  it('edge case - returns sorted array even if input only has one element', () => {
     const cspRulesTemplates = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
     ] as CspRuleTemplate[];
@@ -51,7 +53,7 @@ describe('getSortedCspRulesTemplates', () => {
     ]);
   });
 
-  it('should return a sorted array of CspRuleTemplate objects when passed an array with multiple elements, some of which have undefined or null metadata.benchmark.rule_number properties', () => {
+  it('returns sorted array even with undefined or null properties', () => {
     const cspRulesTemplates = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: undefined } } },
@@ -69,7 +71,7 @@ describe('getSortedCspRulesTemplates', () => {
     ]);
   });
 
-  it('should return a sorted array of CspRuleTemplate objects when passed an array with multiple elements, some of which have metadata.benchmark.rule_number properties that are not valid semver strings', () => {
+  it('returns sorted array with invalid semantic versions', () => {
     const cspRulesTemplates = [
       { metadata: { benchmark: { rule_number: '1.0.0' } } },
       { metadata: { benchmark: { rule_number: '2.0' } } },
