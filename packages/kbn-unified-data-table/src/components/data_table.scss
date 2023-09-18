@@ -135,14 +135,6 @@
 
 .unifiedDataTable__descriptionListToken {
   vertical-align: text-bottom;
-
-  // to perform lazy loading for svgs
-  &--empty {
-    display: inline-flex;
-    width: $euiSize;
-    height: $euiSize;
-    overflow: hidden;
-  }
 }
 
 .unifiedDataTable__descriptionListName {

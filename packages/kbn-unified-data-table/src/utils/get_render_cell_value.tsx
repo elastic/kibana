@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
@@ -28,7 +28,7 @@ import type {
   FormattedHit,
 } from '@kbn/discover-utils/types';
 import { formatFieldValue, formatHit, isNestedFieldParent } from '@kbn/discover-utils';
-import { FieldIcon, FieldIconProps, getFieldIconProps } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import type { DataTableColumnTypes } from '../types';
 import { UnifiedDataTableContext } from '../table_context';
 import { defaultMonacoEditorWidth } from '../constants';
@@ -61,7 +61,7 @@ export const getRenderCellValueFn = ({
   columnTypes?: DataTableColumnTypes;
 }) => {
   // same icons across all rows
-  const fieldTokensCache = new Map<string, React.ReactElement | null>();
+  const fieldIconsCache = new Map<string, React.ReactNode>();
 
   return ({
     rowIndex,
@@ -152,28 +152,22 @@ export const getRenderCellValueFn = ({
           className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
         >
           {pairs.map(([key, value, fieldName]) => {
-            let fieldToken = null;
+            let fieldIcon = null;
 
             // only for "Document" column
             if (field?.type === '_source') {
-              if (fieldTokensCache.has(key)) {
-                fieldToken = fieldTokensCache.get(key);
+              if (fieldIconsCache.has(key)) {
+                fieldIcon = fieldIconsCache.get(key);
               } else {
-                const fieldTokenProps = getFieldTokenProps({ dataView, fieldName, columnTypes });
-                fieldToken = fieldTokenProps ? <FieldToken {...fieldTokenProps} /> : null;
-                fieldTokensCache.set(key, fieldToken);
+                fieldIcon = renderFieldToken({ dataView, fieldName, columnTypes });
+                fieldIconsCache.set(key, fieldIcon);
               }
             }
 
             return (
               <Fragment key={key}>
                 <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                  {fieldToken && (
-                    <>
-                      {fieldToken}
-                      &nbsp;
-                    </>
-                  )}
+                  {fieldIcon && <>{fieldIcon}&nbsp;</>}
                   <span className="unifiedDataTable__descriptionListName">{key}</span>
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription
@@ -219,7 +213,7 @@ function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumn
   return json as Record<string, unknown>;
 }
 
-function getFieldTokenProps({
+function renderFieldToken({
   dataView,
   fieldName,
   columnTypes,
@@ -227,47 +221,34 @@ function getFieldTokenProps({
   dataView: DataView;
   fieldName: string | null;
   columnTypes?: DataTableColumnTypes;
-}): FieldIconProps | null {
+}) {
   if (!fieldName) {
     return null;
   }
 
   // for text-based searches
   if (columnTypes) {
-    return columnTypes[fieldName] && columnTypes[fieldName] !== 'unknown' // renders an icon or nothing
-      ? { type: columnTypes[fieldName] }
-      : null;
+    return columnTypes[fieldName] && columnTypes[fieldName] !== 'unknown' ? ( // renders an icon or nothing
+      <FieldIcon type={columnTypes[fieldName]} className="unifiedDataTable__descriptionListToken" />
+    ) : null;
   }
 
   const dataViewField = dataView.getFieldByName(fieldName);
 
   if (dataViewField) {
-    return getFieldIconProps(dataViewField);
+    return (
+      <FieldIcon
+        {...getFieldIconProps(dataViewField)}
+        className="unifiedDataTable__descriptionListToken"
+      />
+    );
   }
 
   if (isNestedFieldParent(fieldName, dataView)) {
-    return { type: 'nested' };
+    return <FieldIcon type="nested" className="unifiedDataTable__descriptionListToken" />;
   }
 
   return null;
-}
-
-function FieldToken(fieldTokenProps: FieldIconProps) {
-  const [isVisible, setIsVisible] = useState<boolean>(false);
-
-  useEffect(() => {
-    window.requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
-  }, [setIsVisible]);
-
-  if (isVisible) {
-    return <FieldIcon {...fieldTokenProps} className="unifiedDataTable__descriptionListToken" />;
-  }
-
-  return (
-    <span className="unifiedDataTable__descriptionListToken unifiedDataTable__descriptionListToken--empty" />
-  );
 }
 
 /**
