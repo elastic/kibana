@@ -301,6 +301,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.workflow_assignees": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.workflow_user": Object {
         "array": false,
         "required": false,

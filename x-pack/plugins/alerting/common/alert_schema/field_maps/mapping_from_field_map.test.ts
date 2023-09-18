@@ -306,6 +306,9 @@ describe('mappingFromFieldMap', () => {
                 workflow_tags: {
                   type: 'keyword',
                 },
+                workflow_assignees: {
+                  type: 'keyword',
+                },
               },
             },
             space_ids: {
