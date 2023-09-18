@@ -103,8 +103,9 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           titlePosition: 'bottom',
         },
         columnType: FORMULA_COLUMN,
-        formula: "unique_count(monitor.check_group, kql='summary: *')",
         format: 'number',
+        field: RECORDS_FIELD,
+        columnFilter: { language: 'kuery', query: 'summary: *' },
       },
       {
         id: 'monitor_successful',
@@ -114,9 +115,9 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         metricStateOptions: {
           titlePosition: 'bottom',
         },
-        columnType: FORMULA_COLUMN,
-        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "up"\')',
         format: 'number',
+        field: RECORDS_FIELD,
+        columnFilter: { language: 'kuery', query: 'summary.down: 0' },
       },
       {
         id: 'monitor_errors',
