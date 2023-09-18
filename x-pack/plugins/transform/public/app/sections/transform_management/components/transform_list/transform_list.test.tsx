@@ -39,7 +39,6 @@ describe('Transform: Transform List <TransformList />', () => {
             transformNodes={1}
             transforms={[]}
             transformsLoading={false}
-            transformsStatsLoading={false}
           />
         </QueryClientProvider>
       </IntlProvider>

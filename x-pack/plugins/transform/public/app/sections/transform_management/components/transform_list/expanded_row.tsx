@@ -11,12 +11,12 @@ import moment from 'moment-timezone';
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiTabbedContent,
-  EuiFlexGroup,
   useEuiTheme,
-  EuiCallOut,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -25,6 +25,9 @@ import { stringHash } from '@kbn/ml-string-hash';
 import { isDefined } from '@kbn/ml-is-defined';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IHttpFetchError } from '@kbn/core-http-browser';
+import { FETCH_STATUS } from '../../../../../../common/types/transform_stats';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useIsServerless } from '../../../../serverless_context';
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
@@ -36,6 +39,7 @@ import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
 import { ExpandedRowHealthPane } from './expanded_row_health_pane';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
+import { ErrorMessageCallout } from '../error_message_callout';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -50,17 +54,30 @@ type Item = SectionItem;
 interface Props {
   item: TransformListRow;
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
-  transformsStatsLoading: boolean;
 }
 
 const NoStatsFallbackTabContent = ({
-  transformsStatsLoading,
+  loading,
+  error,
 }: {
-  transformsStatsLoading: boolean;
+  loading: boolean;
+  error?: IHttpFetchError;
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const content = transformsStatsLoading ? (
+  if (error)
+    return (
+      <ErrorMessageCallout
+        text={
+          <FormattedMessage
+            id="xpack.transform.list.transformStatsErrorPromptTitle"
+            defaultMessage="An error occurred getting the transform stats."
+          />
+        }
+        errorMessage={error}
+      />
+    );
+  const content = loading ? (
     <EuiLoadingSpinner />
   ) : (
     <EuiFlexItem grow={true}>
@@ -84,7 +101,7 @@ const NoStatsFallbackTabContent = ({
   );
 };
 
-export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoading }) => {
+export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const hideNodeInfo = useIsServerless();
 
   const stateItems: Item[] = [];
@@ -92,7 +109,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
     title: 'ID',
     description: item.id,
   });
-  if (item.stats) {
+  if (isTransformListRowWithStats(item)) {
     stateItems.push({
       title: 'state',
       description: item.stats.state,
@@ -172,7 +189,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
   };
 
   const checkpointingItems: Item[] = [];
-  if (item.stats) {
+  if (isTransformListRowWithStats(item)) {
     if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
       checkpointingItems.push({
         title: 'changes_last_detected_at',
@@ -273,7 +290,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
 
   const stats: SectionConfig = {
     title: 'Stats',
-    items: item.stats
+    items: isTransformListRowWithStats(item)
       ? Object.entries(item.stats.stats).map((s) => {
           return { title: s[0].toString(), description: getItemDescription(s[1]) };
         })
@@ -314,10 +331,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
           defaultMessage: 'Stats',
         }
       ),
-      content: item.stats ? (
+      content: isTransformListRowWithStats(item) ? (
         <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
       ) : (
-        <NoStatsFallbackTabContent transformsStatsLoading={transformsStatsLoading} />
+        <NoStatsFallbackTabContent
+          loading={item.stats?.fetchStatus === FETCH_STATUS.LOADING}
+          error={item.stats?.fetchError}
+        />
       ),
     },
     {

@@ -17,7 +17,12 @@ export interface TransformHealthIssue {
   count: number;
   first_occurrence?: number;
 }
-
+export type FetchStatus = 'error' | 'success' | 'loading';
+export enum FETCH_STATUS {
+  ERROR = 'error',
+  SUCCESS = 'success',
+  LOADING = 'loading',
+}
 export interface TransformStats {
   id: TransformId;
   checkpointing: {

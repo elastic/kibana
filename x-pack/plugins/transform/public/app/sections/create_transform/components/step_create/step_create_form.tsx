@@ -31,6 +31,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { FETCH_STATUS } from '../../../../../../common/types/transform_stats';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -246,7 +247,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               ...transformConfig,
               id: transformId,
             },
-            stats: stats.transforms[0],
+            stats: { ...stats.transforms[0], fetchStatus: FETCH_STATUS.SUCCESS },
           }) || 0;
         setProgressPercentComplete(percent);
       } else {

@@ -25,6 +25,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
+import { FETCH_STATUS } from '../../../../../../common/types/transform_stats';
 import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import {
@@ -53,14 +55,16 @@ const StatsUnknown = () => (
     <FormattedMessage id="xpack.transform.transformList.statsUnknown" defaultMessage="Unknown" />
   </EuiText>
 );
+
+const NoStatsFallbackComponent = ({ loading }: { loading: boolean }) => {
+  return loading ? <EuiLoadingSpinner /> : <StatsUnknown />;
+};
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
   transformNodes: number,
-  transformSelection: TransformListRow[],
-  transformsStatsLoading: boolean
+  transformSelection: TransformListRow[]
 ) => {
-  const NoStatsFallbackComponent = transformsStatsLoading ? EuiLoadingSpinner : StatsUnknown;
   const { canStartStopTransform } = useTransformCapabilities();
 
   const { actions, modals } = useActions({
@@ -251,10 +255,10 @@ export const useColumns = (
       sortable: (item: TransformListRow) => item.stats?.state,
       truncateText: true,
       render(item: TransformListRow) {
-        return item.stats ? (
+        return isTransformListRowWithStats(item) ? (
           <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />
         ) : (
-          <NoStatsFallbackComponent />
+          <NoStatsFallbackComponent loading={item.stats?.fetchStatus === FETCH_STATUS.LOADING} />
         );
       },
       width: '100px',
@@ -284,7 +288,10 @@ export const useColumns = (
         if (progress === undefined && isBatchTransform === true) {
           return null;
         }
-        if (!item.stats) return <NoStatsFallbackComponent />;
+        if (!isTransformListRowWithStats(item))
+          return (
+            <NoStatsFallbackComponent loading={item.stats?.fetchStatus === FETCH_STATUS.LOADING} />
+          );
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -306,7 +313,7 @@ export const useColumns = (
                 </EuiFlexItem>
               </>
             )}
-            {!isBatchTransform && item.stats && (
+            {!isBatchTransform && isTransformListRowWithStats(item) && (
               <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   {/* If not stopped, failed or waiting show the animated progress bar */}
@@ -338,10 +345,10 @@ export const useColumns = (
       sortable: (item: TransformListRow) => item.stats?.health.status,
       truncateText: true,
       render(item: TransformListRow) {
-        return item.stats ? (
+        return isTransformListRowWithStats(item) ? (
           <TransformHealthColoredDot healthStatus={item.stats.health.status} />
         ) : (
-          <NoStatsFallbackComponent />
+          <NoStatsFallbackComponent loading={item.stats?.fetchStatus === FETCH_STATUS.LOADING} />
         );
       },
       width: '100px',
