@@ -90,8 +90,9 @@ export interface TableListViewTableProps<
    * Edit action onClick handler. Edit action not provided when property is not provided
    */
   editItem?(item: T): void;
+
   /**
-   * Handler to set edit action visiblity, and content editor readonly state per item.
+   * Handler to set edit action visiblity, and content editor readonly state per item. If not provided all items are considered editable.
    */
   itemIsEditable?(item: T): boolean;
 
@@ -458,7 +459,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
-      const isReadonly = contentEditor.isReadonly || !itemIsEditable?.(item);
+      const isEditable = itemIsEditable?.(item) ?? true;
 
       const close = openContentEditor({
         item: {
@@ -469,7 +470,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...contentEditor,
-        isReadonly,
+        isReadonly: contentEditor.isReadonly || !isEditable,
         onSave:
           contentEditor.onSave &&
           (async (args) => {
