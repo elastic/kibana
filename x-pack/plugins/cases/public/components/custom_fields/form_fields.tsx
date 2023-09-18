@@ -8,21 +8,33 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { EuiSelectOption } from '@elastic/eui';
 import type { CustomFieldTypes, CustomFieldBuildType } from './types';
 import { customFieldTypesValues } from './schema';
-import { FieldTypeSelector } from './field_type/field_type_selector';
 import { builderMap } from './builder';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
 }
 
+const fieldTypeSelectOptions = (): EuiSelectOption[] => {
+  const options = [];
+
+  for (const [id, builder] of Object.entries(builderMap)) {
+    const createdBuilder = builder();
+    options.push({ value: id, text: createdBuilder.label });
+  }
+
+  return options;
+};
+
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
   const [selectedType, setSelectedType] = useState<CustomFieldTypes>(customFieldTypesValues[0]);
+
   const handleTypeChange = useCallback(
-    (val: CustomFieldTypes) => {
-      setSelectedType(val);
+    (e: CustomFieldTypes) => {
+      setSelectedType(e.target.value);
     },
     [setSelectedType]
   );
@@ -44,6 +56,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
   }, [selectedType]);
 
   const ConfigurePage = builtCustomField?.length && builtCustomField[0]?.ConfigurePage;
+  const options = fieldTypeSelectOptions();
 
   return (
     <>
@@ -61,12 +74,14 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
       />
       <UseField
         path="fieldType"
-        component={FieldTypeSelector}
+        component={SelectField}
         componentProps={{
+          euiFieldProps: {
+            options,
+          },
           dataTestSubj: 'custom-field-type-selector',
-          selectedType,
           isLoading: isSubmitting,
-          handleChange: handleTypeChange,
+          onChange: handleTypeChange,
         }}
       />
       {ConfigurePage ? <ConfigurePage /> : null}

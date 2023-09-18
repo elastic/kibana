@@ -47,8 +47,6 @@ const AddFieldFlyoutComponent: React.FC<AddFieldFlyoutProps> = ({
   const handleSaveField = useCallback(async () => {
     const { isValid, data } = await submit();
 
-    console.log('handleSaveField', { isValid, data });
-
     if (isValid) {
       onSaveField(data);
     }

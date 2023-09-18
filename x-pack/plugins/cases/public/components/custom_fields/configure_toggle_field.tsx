@@ -7,24 +7,32 @@
 
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import type { CustomFieldBuilder } from './types';
 import { CustomFieldTypes } from './types';
-import { FieldOptionsSelector } from './field_options/field_options_selector';
+import * as i18n from './translations';
 
 export const configureToggleCustomFieldBuilder: CustomFieldBuilder = () => ({
+  id: CustomFieldTypes.TOGGLE,
+  label: i18n.TOGGLE_LABEL,
   build: () => [
     {
       // eslint-disable-next-line react/display-name
       ConfigurePage: () => (
-        <UseField
-          path="fieldOptions"
-          component={FieldOptionsSelector}
-          componentProps={{
-            dataTestSubj: 'toggle-custom-field-options',
-            selectedType: CustomFieldTypes.TOGGLE,
-          }}
-        />
+        <>
+          <UseField
+            path="fieldOptions"
+            component={CheckBoxField}
+            componentProps={{
+              dataTestSubj: 'text-custom-field-options',
+              label: i18n.FIELD_OPTIONS,
+              euiFieldProps: {
+                label: i18n.FIELD_OPTION_REQUIRED,
+              },
+            }}
+          />
+        </>
       ),
     },
   ],

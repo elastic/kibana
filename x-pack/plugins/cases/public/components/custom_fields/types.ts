@@ -23,6 +23,8 @@ export interface CustomFieldBuildType {
 }
 
 export type CustomFieldBuilder = () => {
+  id: string;
+  label: string;
   build: () => CustomFieldBuildType[];
 };
 
