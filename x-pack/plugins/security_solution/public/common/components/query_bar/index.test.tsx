@@ -16,9 +16,45 @@ import { SearchBar } from '@kbn/unified-search-plugin/public';
 import type { QueryBarComponentProps } from '.';
 import { QueryBar } from '.';
 
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { fields } from '@kbn/data-views-plugin/common/mocks';
+import { useKibana } from '../../lib/kibana';
+
+const getMockIndexPattern = () => ({
+  ...createStubDataView({
+    spec: {
+      id: '1234',
+      title: 'logstash-*',
+      fields: ((): DataViewFieldMap => {
+        const fieldMap: DataViewFieldMap = Object.create(null);
+        for (const field of fields) {
+          fieldMap[field.name] = { ...field };
+        }
+        return fieldMap;
+      })(),
+    },
+  }),
+});
+
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
+jest.mock('../../lib/kibana');
 
 describe('QueryBar ', () => {
+  const mockClearInstanceCache = jest.fn().mockImplementation(({ id }: { id: string }) => {
+    return id;
+  });
+
+  (useKibana as jest.Mock).mockReturnValue({
+    services: {
+      data: {
+        dataViews: {
+          create: jest.fn().mockResolvedValue(getMockIndexPattern()),
+          clearInstanceCache: mockClearInstanceCache,
+        },
+      },
+    },
+  });
   const mockOnChangeQuery = jest.fn();
   const mockOnSubmitQuery = jest.fn();
   const mockOnSavedQuery = jest.fn();
@@ -52,10 +88,10 @@ describe('QueryBar ', () => {
     mockOnSavedQuery.mockClear();
   });
 
-  test('check if we format the appropriate props to QueryBar', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <QueryBar
+  test('check if we format the appropriate props to QueryBar', async () => {
+    await act(async () => {
+      const wrapper = await getWrapper(
+        <Proxy
           dateRangeFrom={DEFAULT_FROM}
           dateRangeTo={DEFAULT_TO}
           hideSavedQuery={false}
@@ -68,143 +104,28 @@ describe('QueryBar ', () => {
           onSubmitQuery={mockOnSubmitQuery}
           onSavedQuery={mockOnSavedQuery}
         />
-      </TestProviders>
-    );
-    const {
-      customSubmitButton,
-      timeHistory,
-      onClearSavedQuery,
-      onFiltersUpdated,
-      onQueryChange,
-      onQuerySubmit,
-      onSaved,
-      onSavedQueryUpdated,
-      ...searchBarProps
-    } = wrapper.find(SearchBar).props();
+      );
 
-    expect(searchBarProps).toEqual({
-      dataTestSubj: undefined,
-      dateRangeFrom: 'now/d',
-      dateRangeTo: 'now/d',
-      displayStyle: undefined,
-      filters: [],
-      indexPatterns: [
-        {
-          fields: [
-            {
-              aggregatable: true,
-              name: '@timestamp',
-              searchable: true,
-              type: 'date',
-            },
-            {
-              aggregatable: true,
-              name: '@version',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.ephemeral_id',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.hostname',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.id',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test1',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test2',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test3',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test4',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test5',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test6',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test7',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'agent.test8',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: true,
-              name: 'host.name',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: false,
-              name: 'nestedField.firstAttributes',
-              searchable: true,
-              type: 'string',
-            },
-            {
-              aggregatable: false,
-              name: 'nestedField.secondAttributes',
-              searchable: true,
-              type: 'string',
-            },
-          ],
-          title: 'filebeat-*,auditbeat-*,packetbeat-*',
-        },
-      ],
-      isLoading: false,
-      isRefreshPaused: true,
-      query: {
-        language: 'kuery',
-        query: 'here: query',
-      },
-      refreshInterval: undefined,
-      savedQuery: undefined,
-      showAutoRefreshOnly: false,
-      showDatePicker: false,
-      showFilterBar: true,
-      showQueryInput: true,
-      showSaveQuery: true,
-      showSubmitButton: false,
+      await waitFor(() => {
+        wrapper.update();
+        const {
+          customSubmitButton,
+          timeHistory,
+          onClearSavedQuery,
+          onFiltersUpdated,
+          onQueryChange,
+          onQuerySubmit,
+          onSaved,
+          onSavedQueryUpdated,
+          ...searchBarProps
+        } = wrapper.find(SearchBar).props();
+        expect((searchBarProps?.indexPatterns ?? [{ id: 'unknown' }])[0].id).toEqual(
+          getMockIndexPattern().id
+        );
+      });
+      // ensure useEffect cleanup is called correctly after component unmounts
+      wrapper.unmount();
+      expect(mockClearInstanceCache).toHaveBeenCalledWith(getMockIndexPattern().id);
     });
   });
 
@@ -294,7 +215,6 @@ describe('QueryBar ', () => {
         const onSubmitQueryRef = searchBarProps.onQuerySubmit;
         const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
         wrapper.setProps({ onSavedQuery: jest.fn() });
-        wrapper.update();
 
         expect(onSavedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
         expect(onChangedQueryRef).toEqual(wrapper.find(SearchBar).props().onQueryChange);

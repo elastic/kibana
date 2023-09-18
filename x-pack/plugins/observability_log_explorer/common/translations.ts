@@ -28,3 +28,10 @@ export const discoverLinkTitle = i18n.translate(
     defaultMessage: 'Discover',
   }
 );
+
+export const onboardingLinkTitle = i18n.translate(
+  'xpack.observabilityLogExplorer.onboardingLinkTitle',
+  {
+    defaultMessage: 'Add data',
+  }
+);
