@@ -12,6 +12,31 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/es_fields/apm';
+import {
+  DataStreamWithoutRollup,
+  DataStreamWithRollup,
+  MetricNotSupportingRollup,
+  MetricRollupIntervals,
+  MetricSupportingRollUp,
+  MetricTypes,
+} from '../types';
+import { RollupInterval } from '../../../../common/rollup';
+
+interface IndicesStatsResponse {
+  shards: {
+    total: number;
+  };
+  all: {
+    total: {
+      docs: {
+        count: number;
+      };
+      store: {
+        size_in_bytes: number;
+      };
+    };
+  };
+}
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -375,6 +400,68 @@ describe('data telemetry collection tasks', () => {
   describe('indices_stats', () => {
     const task = tasks.find((t) => t.name === 'indices_stats');
 
+    const metricSetsSupportingRollUps: MetricSupportingRollUp[] = [
+      MetricTypes.service_destination,
+      MetricTypes.transaction,
+      MetricTypes.service_summary,
+      MetricTypes.service_transaction,
+      MetricTypes.span_breakdown,
+    ];
+
+    const metricSetsNotSupportingRollUps: MetricNotSupportingRollup[] = [
+      MetricTypes.app,
+    ];
+
+    const rollUpIntervals: MetricRollupIntervals[] = [
+      RollupInterval.OneMinute,
+      RollupInterval.TenMinutes,
+      RollupInterval.SixtyMinutes,
+    ];
+
+    const generateMetricStatsResponse = (
+      stats: IndicesStatsResponse
+    ): {
+      dsRollupDictionary: DataStreamWithRollup;
+      dsWithoutRollupDictionary: DataStreamWithoutRollup;
+    } => {
+      const dsRollupDictionary: DataStreamWithRollup =
+        {} as DataStreamWithRollup;
+      const dsWithoutRollupDictionary: DataStreamWithoutRollup =
+        {} as DataStreamWithoutRollup;
+
+      for (const metricSet of metricSetsSupportingRollUps) {
+        for (const bucketSize of rollUpIntervals) {
+          dsRollupDictionary[metricSet] = dsRollupDictionary[metricSet] || {};
+          dsRollupDictionary[metricSet][bucketSize] = {
+            total: {
+              shards: stats.shards.total,
+              docs: { count: stats.all.total.docs.count },
+              store: {
+                size_in_bytes: stats.all.total.store.size_in_bytes,
+              },
+            },
+          };
+        }
+      }
+
+      for (const metricSet of metricSetsNotSupportingRollUps) {
+        dsWithoutRollupDictionary[metricSet] = {
+          total: {
+            shards: stats.shards.total,
+            docs: { count: stats.all.total.docs.count },
+            store: {
+              size_in_bytes: stats.all.total.store.size_in_bytes,
+            },
+          },
+        };
+      }
+
+      return {
+        dsRollupDictionary,
+        dsWithoutRollupDictionary,
+      };
+    };
+
     it('returns a map of index stats', async () => {
       const indicesStats = jest.fn().mockResolvedValue({
         _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
@@ -397,6 +484,17 @@ describe('data telemetry collection tasks', () => {
         },
       };
 
+      const { dsRollupDictionary, dsWithoutRollupDictionary } =
+        generateMetricStatsResponse(statsResponse);
+
+      const metricStatsResponse = {
+        ...statsResponse,
+        metricset: {
+          withRollUp: { ...dsRollupDictionary },
+          withoutRollUp: { ...dsWithoutRollupDictionary },
+        },
+      };
+
       expect(
         await task?.executor({
           indices,
@@ -405,7 +503,7 @@ describe('data telemetry collection tasks', () => {
       ).toEqual({
         indices: {
           ...statsResponse,
-          metric: statsResponse,
+          metric: metricStatsResponse,
           traces: statsResponse,
         },
       });
@@ -431,6 +529,17 @@ describe('data telemetry collection tasks', () => {
           },
         };
 
+        const { dsRollupDictionary, dsWithoutRollupDictionary } =
+          generateMetricStatsResponse(statsResponse);
+
+        const metricStatsResponse = {
+          ...statsResponse,
+          metricset: {
+            withRollUp: { ...dsRollupDictionary },
+            withoutRollUp: { ...dsWithoutRollupDictionary },
+          },
+        };
+
         expect(
           await task?.executor({
             indices,
@@ -439,7 +548,7 @@ describe('data telemetry collection tasks', () => {
         ).toEqual({
           indices: {
             ...statsResponse,
-            metric: statsResponse,
+            metric: metricStatsResponse,
             traces: statsResponse,
           },
         });
