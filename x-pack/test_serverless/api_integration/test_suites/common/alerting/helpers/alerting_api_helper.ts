@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { SuperTest, Test } from 'supertest';
 
 interface CreateEsQueryRuleParams {
@@ -115,24 +116,28 @@ export async function createEsQueryRule({
   return body;
 }
 
-export async function createInventoryRule({
+export async function createRule({
   supertest,
   name,
   actions = [],
   tags = ['foo', 'bar'],
   schedule,
-  consumer,
+  consumer = 'alerts',
   notifyWhen,
   enabled = true,
+  ruleTypeId = 'metrics.alert.inventory.threshold',
+  params,
 }: {
   supertest: SuperTest<Test>;
   name: string;
-  consumer: string;
+  consumer?: string;
   actions?: any[];
   tags?: any[];
   schedule?: { interval: string };
   notifyWhen?: string;
   enabled?: boolean;
+  ruleTypeId?: string;
+  params?: any;
 }) {
   const { body } = await supertest
     .post(`/api/alerting/rule`)
@@ -140,7 +145,7 @@ export async function createInventoryRule({
     .set('x-elastic-internal-origin', 'foo')
     .send({
       enabled,
-      params: {
+      params: params || {
         nodeType: 'host',
         criteria: [
           {
@@ -165,7 +170,7 @@ export async function createInventoryRule({
       },
       tags,
       name,
-      rule_type_id: 'metrics.alert.inventory.threshold',
+      rule_type_id: ruleTypeId,
       actions,
       ...(notifyWhen ? { notify_when: notifyWhen, throttle: '5m' } : {}),
     });
@@ -292,5 +297,29 @@ export async function unmuteRule({
     .post(`/api/alerting/rule/${ruleId}/_unmute_all`)
     .set('kbn-xsrf', 'foo')
     .set('x-elastic-internal-origin', 'foo');
+  return body;
+}
+
+export async function snoozeRule({
+  supertest,
+  ruleId,
+}: {
+  supertest: SuperTest<Test>;
+  ruleId: string;
+}) {
+  const { body } = await supertest
+    .post(`/internal/alerting/rule/${ruleId}/_snooze`)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
+    .send({
+      snooze_schedule: {
+        duration: 100000000,
+        rRule: {
+          count: 1,
+          dtstart: moment().format(),
+          tzid: 'UTC',
+        },
+      },
+    });
   return body;
 }

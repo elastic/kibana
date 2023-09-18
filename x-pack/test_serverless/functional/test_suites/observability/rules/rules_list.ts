@@ -8,8 +8,12 @@
 import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createInventoryRule,
+  createRule,
   disableRule,
+  enableRule,
+  runRule,
+  createIndexConnector,
+  snoozeRule,
 } from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -27,8 +31,41 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await testSubjects.click('manageRulesPageButton');
   }
 
+  async function failRule({
+    ruleId,
+    intervalMilliseconds,
+    numAttempts,
+  }: {
+    ruleId: string;
+    intervalMilliseconds: number;
+    numAttempts: number;
+  }) {
+    for (let i = 0; i < numAttempts; i++) {
+      await runRule({ supertest, ruleId });
+      await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
+
+      await disableRule({ supertest, ruleId });
+      await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
+
+      await refreshRulesList();
+      const result = await svlTriggersActionsUI.getRulesListWithStatus();
+      const rulesStatuses = result.map((item: { status: string }) => item.status);
+      if (rulesStatuses.includes('Failed')) return;
+
+      await enableRule({ supertest, ruleId });
+    }
+  }
+
   describe('Rules list', () => {
     let ruleIdList: string[];
+
+    const assertRulesLength = async (length: number) => {
+      return await retry.try(async () => {
+        const rules = await svlTriggersActionsUI.getRulesList();
+        expect(rules.length).toEqual(length);
+      });
+    };
+
     beforeEach(async () => {
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
@@ -47,19 +84,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should display alerts in alphabetical order', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'b',
       });
-      const createdRule2 = await createInventoryRule({
+      const createdRule2 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'c',
       });
-      const createdRule3 = await createInventoryRule({
+      const createdRule3 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'a',
       });
 
@@ -75,9 +109,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should search for alert', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'some_name',
       });
 
@@ -98,15 +131,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should update alert list on the search clear button click', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'b',
       });
 
-      const createdRule2 = await createInventoryRule({
+      const createdRule2 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'c',
         tags: [],
       });
@@ -151,9 +182,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should search for tags', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'a',
         tags: ['tag', 'tagtag', 'taggity tag'],
       });
@@ -175,9 +205,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should display an empty list when search did not return any alerts', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'a',
       });
 
@@ -189,9 +218,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should disable single alert', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'a',
       });
 
@@ -215,9 +243,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should re-enable single alert', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'a',
       });
 
@@ -247,19 +274,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should delete single alert', async () => {
-      await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'a',
       });
 
-      const createdRule2 = await createInventoryRule({
+      const createdRule2 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'b',
       });
 
-      ruleIdList = [createdRule2.id];
+      ruleIdList = [createdRule1.id, createdRule2.id];
 
       await refreshRulesList();
       await svlTriggersActionsUI.searchRules(createdRule2.name);
@@ -281,9 +306,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should disable all selection', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'b',
       });
 
@@ -310,9 +334,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should enable all selection', async () => {
-      const createdRule1 = await createInventoryRule({
+      const createdRule1 = await createRule({
         supertest,
-        consumer: 'alerts',
         name: 'a',
       });
 
@@ -332,6 +355,566 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         'statusDropdown',
         'enabled'
       );
+    });
+
+    it('should render percentile column and cells correctly', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      ruleIdList = [createdRule1.id];
+
+      await refreshRulesList();
+      await testSubjects.click('dataGridColumnSelectorButton');
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+
+      await testSubjects.existOrFail('rulesTable-P50ColumnName');
+      await testSubjects.existOrFail('P50Percentile');
+
+      await retry.try(async () => {
+        const percentileCell = await find.byCssSelector(
+          '[data-test-subj="P50Percentile"]:nth-of-type(1)'
+        );
+        const percentileCellText = await percentileCell.getVisibleText();
+        expect(percentileCellText).toMatch(/^N\/A|\d{2,}:\d{2}$/);
+
+        await testSubjects.click('percentileSelectablePopover-iconButton');
+        await testSubjects.existOrFail('percentileSelectablePopover-selectable');
+        const searchClearButton = await find.byCssSelector(
+          '[data-test-subj="percentileSelectablePopover-selectable"] li:nth-child(2)'
+        );
+        const ruleResults = await svlTriggersActionsUI.getRulesList();
+        expect(ruleResults[0].duration).toMatch(/^N\/A|\d{2,}:\d{2}$/);
+
+        await searchClearButton.click();
+        await testSubjects.missingOrFail('percentileSelectablePopover-selectable');
+        await testSubjects.existOrFail('rulesTable-P95ColumnName');
+        await testSubjects.existOrFail('P95Percentile');
+      });
+    });
+
+    it.skip('should render interval info icon when schedule interval is less than configured minimum', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'b',
+        schedule: { interval: '1s' },
+      });
+
+      const createdRule2 = await createRule({
+        supertest,
+        name: 'c',
+      });
+
+      ruleIdList = [createdRule1.id, createdRule2.id];
+
+      await refreshRulesList();
+      await testSubjects.click('dataGridColumnSelectorButton');
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+
+      await testSubjects.existOrFail('ruleInterval-config-icon-0');
+      await testSubjects.missingOrFail('ruleInterval-config-icon-1');
+
+      // open edit flyout when icon is clicked
+      const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
+      await infoIcon.click();
+
+      await testSubjects.click('cancelSaveEditedRuleButton');
+    });
+
+    it('should delete all selection', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      ruleIdList = [createdRule1.id];
+
+      await refreshRulesList();
+      await svlTriggersActionsUI.searchRules(createdRule1.name);
+
+      await testSubjects.click(`checkboxSelectRow-${createdRule1.id}`);
+      await testSubjects.click('bulkAction');
+      await testSubjects.click('bulkDelete');
+      await testSubjects.exists('rulesDeleteIdsConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const resultToast = await toasts.getToastElement(1);
+        const toastText = await resultToast.getVisibleText();
+        expect(toastText).toEqual('Deleted 1 rule');
+      });
+
+      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      const searchResultsAfterDelete = await svlTriggersActionsUI.getRulesList();
+      expect(searchResultsAfterDelete).toHaveLength(0);
+    });
+
+    it('should filter alerts by the status', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      const failingRule = await createRule({
+        supertest,
+        name: 'failed_rule',
+      });
+
+      ruleIdList = [createdRule1.id, failingRule.id];
+
+      await refreshRulesList();
+      await testSubjects.click('dataGridColumnSelectorButton');
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+
+      await failRule({
+        ruleId: failingRule.id,
+        intervalMilliseconds: 1000,
+        numAttempts: 100,
+      });
+
+      // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution statuses
+      await retry.try(async () => {
+        await refreshRulesList();
+        await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+        const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
+        expect(refreshResults.map((item: any) => item.status).sort()).toEqual([
+          'Failed',
+          'Succeeded',
+        ]);
+      });
+
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await testSubjects.click('ruleLastRunOutcomeFilterButton');
+      await testSubjects.click('ruleLastRunOutcomefailedFilterOption'); // select Error status filter
+
+      await retry.try(async () => {
+        const filterErrorOnlyResults = await svlTriggersActionsUI.getRulesListWithStatus();
+        expect(filterErrorOnlyResults.length).toEqual(1);
+        expect(filterErrorOnlyResults[0].name).toEqual(`${failingRule.name}Inventory`);
+        expect(filterErrorOnlyResults[0].interval).toEqual('1 min');
+        expect(filterErrorOnlyResults[0].status).toEqual('Failed');
+        expect(filterErrorOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
+      });
+    });
+
+    it('should display total alerts by status and error banner only when exists alerts with status error', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      await refreshRulesList();
+      await testSubjects.click('dataGridColumnSelectorButton');
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+
+      await retry.try(async () => {
+        await refreshRulesList();
+        const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
+
+        expect(refreshResults.length).toEqual(1);
+        expect(refreshResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+        expect(refreshResults[0].interval).toEqual('1 min');
+        expect(refreshResults[0].status).toEqual('Succeeded');
+        expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
+      });
+
+      const alertsErrorBannerWhenNoErrors = await find.allByCssSelector(
+        '[data-test-subj="rulesErrorBanner"]'
+      );
+      expect(alertsErrorBannerWhenNoErrors).toHaveLength(0);
+
+      const failingRule = await createRule({
+        supertest,
+        name: 'b',
+      });
+
+      ruleIdList = [createdRule1.id, failingRule.id];
+
+      await failRule({
+        ruleId: failingRule.id,
+        intervalMilliseconds: 1000,
+        numAttempts: 100,
+      });
+
+      await retry.try(async () => {
+        await refreshRulesList();
+        const alertsErrorBannerExistErrors = await find.allByCssSelector(
+          '[data-test-subj="rulesErrorBanner"]'
+        );
+        expect(alertsErrorBannerExistErrors).toHaveLength(1);
+        expect(
+          await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
+        ).toEqual(' Error found in 1 rule. Show rule with error');
+      });
+
+      await retry.try(async () => {
+        await refreshRulesList();
+        expect(await testSubjects.getVisibleText('totalRulesCount')).toEqual('2 rules');
+        expect(await testSubjects.getVisibleText('totalSucceededRulesCount')).toEqual(
+          'Succeeded: 1'
+        );
+        expect(await testSubjects.getVisibleText('totalFailedRulesCount')).toEqual('Failed: 1');
+        expect(await testSubjects.getVisibleText('totalWarningRulesCount')).toEqual('Warning: 0');
+      });
+    });
+
+    it('Expand error in rules table when there is rule with an error associated', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      await refreshRulesList();
+      await testSubjects.click('dataGridColumnSelectorButton');
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+
+      await retry.try(async () => {
+        await refreshRulesList();
+        const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
+        expect(refreshResults.length).toEqual(1);
+        expect(refreshResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+        expect(refreshResults[0].interval).toEqual('1 min');
+        expect(refreshResults[0].status).toEqual('Succeeded');
+        expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
+      });
+
+      let expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
+      expect(expandRulesErrorLink).toHaveLength(0);
+
+      const failingRule = await createRule({
+        supertest,
+        name: 'failed_rule',
+      });
+
+      ruleIdList = [createdRule1.id, failingRule.id];
+
+      await failRule({
+        ruleId: failingRule.id,
+        intervalMilliseconds: 1000,
+        numAttempts: 100,
+      });
+
+      await retry.try(async () => {
+        await refreshRulesList();
+        expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
+        expect(expandRulesErrorLink).toHaveLength(1);
+      });
+      await refreshRulesList();
+      await testSubjects.click('expandRulesError');
+      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
+      expect(expandedRow).toHaveLength(1);
+      expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).toEqual(
+        'Error from last run\nRule failed to execute because rule ran after it was disabled.'
+      );
+    });
+
+    it('should filter alerts by the alert type', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      const createdRule2 = await createRule({
+        supertest,
+        name: 'b',
+        ruleTypeId: 'apm.anomaly',
+        params: {
+          anomalySeverityType: 'critical',
+          environment: 'ENVIRONMENT_ALL',
+          windowSize: 30,
+          windowUnit: 'm',
+        },
+      });
+
+      ruleIdList = [createdRule1.id, createdRule2.id];
+
+      await refreshRulesList();
+      await testSubjects.click('dataGridColumnSelectorButton');
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await testSubjects.click('ruleTypeFilterButton');
+
+      await retry.try(async () => {
+        const isOpen = await testSubjects.exists('ruleType0Group');
+        if (!isOpen) {
+          await testSubjects.click('ruleTypeFilterButton');
+        }
+
+        expect(await (await testSubjects.find('ruleType0Group')).getVisibleText()).toEqual('Apm');
+      });
+
+      await testSubjects.click('ruleTypemetrics.alert.inventory.thresholdFilterOption');
+
+      await retry.try(async () => {
+        const filterInventoryRuleOnlyResults = await svlTriggersActionsUI.getRulesList();
+        expect(filterInventoryRuleOnlyResults.length).toEqual(1);
+        expect(filterInventoryRuleOnlyResults[0].name).toEqual(`${createdRule1.name}Inventory`);
+        expect(filterInventoryRuleOnlyResults[0].interval).toEqual('1 min');
+        expect(filterInventoryRuleOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
+      });
+    });
+
+    it('should filter alerts by the rule status', async () => {
+      // Enabled alert
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      const disabledRule = await createRule({
+        supertest,
+        name: 'b',
+      });
+
+      await disableRule({
+        supertest,
+        ruleId: disabledRule.id,
+      });
+
+      const snoozedRule = await createRule({
+        supertest,
+        name: 'c',
+      });
+
+      await snoozeRule({
+        supertest,
+        ruleId: snoozedRule.id,
+      });
+
+      const snoozedAndDisabledRule = await createRule({
+        supertest,
+        name: 'd',
+      });
+      await snoozeRule({
+        supertest,
+        ruleId: snoozedAndDisabledRule.id,
+      });
+      await disableRule({
+        supertest,
+        ruleId: snoozedAndDisabledRule.id,
+      });
+
+      ruleIdList = [createdRule1.id, disabledRule.id, snoozedRule.id, snoozedAndDisabledRule.id];
+
+      await refreshRulesList();
+      await assertRulesLength(4);
+
+      // Select only enabled
+      await testSubjects.click('ruleStatusFilterButton');
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
+
+      // Select enabled or disabled (e.g. all)
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(4);
+
+      // Select only disabled
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
+
+      // Select only snoozed
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await testSubjects.click('ruleStatusFilterOption-snoozed');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
+
+      // Select disabled or snoozed
+      await testSubjects.click('ruleStatusFilterOption-disabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(3);
+
+      // Select enabled or disabled or snoozed
+      await testSubjects.click('ruleStatusFilterOption-enabled');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(4);
+    });
+
+    it('should filter alerts by the tag', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+        tags: ['a'],
+      });
+
+      const createdRule2 = await createRule({
+        supertest,
+        name: 'b',
+        tags: ['b'],
+      });
+
+      const createdRule3 = await createRule({
+        supertest,
+        name: 'c',
+        tags: ['a', 'b'],
+      });
+
+      const createdRule4 = await createRule({
+        supertest,
+        name: 'd',
+        tags: ['b', 'c'],
+      });
+
+      const createdRule5 = await createRule({
+        supertest,
+        name: 'e',
+        tags: ['c'],
+      });
+
+      ruleIdList = [
+        createdRule1.id,
+        createdRule2.id,
+        createdRule3.id,
+        createdRule4.id,
+        createdRule5.id,
+      ];
+
+      await refreshRulesList();
+      await testSubjects.click('dataGridColumnSelectorButton');
+      await testSubjects.click('dataGridColumnSelectorShowAllButton');
+
+      await testSubjects.click('ruleTagFilter');
+
+      // Select a -> selected: a
+      await testSubjects.click('ruleTagFilterOption-a');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
+
+      // Unselect a -> selected: none
+      await testSubjects.click('ruleTagFilterOption-a');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(5);
+
+      // Select a, b -> selected: a, b
+      await testSubjects.click('ruleTagFilterOption-a');
+      await testSubjects.click('ruleTagFilterOption-b');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(4);
+
+      // Unselect a, b, select c -> selected: c
+      await testSubjects.click('ruleTagFilterOption-a');
+      await testSubjects.click('ruleTagFilterOption-b');
+      await testSubjects.click('ruleTagFilterOption-c');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
+    });
+
+    it('should not prevent rules with action execution capabilities from being edited', async () => {
+      const actionId = await createIndexConnector({
+        supertest,
+        name: 'Index Connector: Alerting API test',
+        indexName: '.alerts-observability.apm.alerts-default',
+      });
+      expect(actionId).not.toBe(undefined);
+
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+        actions: [
+          {
+            group: 'metrics.inventory_threshold.fired',
+            id: actionId,
+            params: {
+              documents: [{ a: '2' }],
+            },
+            frequency: {
+              notify_when: 'onActiveAlert',
+              throttle: null,
+              summary: false,
+            },
+          },
+        ],
+      });
+
+      ruleIdList = [createdRule1.id];
+
+      await refreshRulesList();
+
+      await retry.try(async () => {
+        const actionButton = await testSubjects.find('selectActionButton');
+        const disabled = await actionButton.getAttribute('disabled');
+        expect(disabled).toEqual(null);
+      });
+    });
+
+    it('should allow rules to be snoozed using the right side dropdown', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      ruleIdList = [createdRule1.id];
+
+      await refreshRulesList();
+      await svlTriggersActionsUI.searchRules(createdRule1.name);
+
+      await testSubjects.click('collapsedItemActions');
+      await testSubjects.click('snoozeButton');
+      await testSubjects.click('ruleSnoozeApply');
+
+      await find.byCssSelector(
+        '[data-test-subj="rulesListNotifyBadge-unsnoozed"]:not(.euiButton-isDisabled)'
+      );
+      await testSubjects.existOrFail('rulesListNotifyBadge-snoozed');
+    });
+
+    it('should allow rules to be snoozed indefinitely using the right side dropdown', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      ruleIdList = [createdRule1.id];
+
+      await refreshRulesList();
+      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await testSubjects.click('collapsedItemActions');
+      await testSubjects.click('snoozeButton');
+      await testSubjects.click('ruleSnoozeIndefiniteApply');
+
+      await find.byCssSelector(
+        '[data-test-subj="rulesListNotifyBadge-unsnoozed"]:not(.euiButton-isDisabled)'
+      );
+      await testSubjects.existOrFail('rulesListNotifyBadge-snoozedIndefinitely');
+    });
+
+    it('should allow snoozed rules to be unsnoozed using the right side dropdown', async () => {
+      const createdRule1 = await createRule({
+        supertest,
+        name: 'a',
+      });
+
+      ruleIdList = [createdRule1.id];
+
+      await snoozeRule({
+        supertest,
+        ruleId: createdRule1.id,
+      });
+
+      await refreshRulesList();
+
+      await svlTriggersActionsUI.searchRules(createdRule1.name);
+      await testSubjects.click('collapsedItemActions');
+      await testSubjects.click('snoozeButton');
+      await testSubjects.click('ruleSnoozeCancel');
+
+      await find.byCssSelector(
+        '[data-test-subj="rulesListNotifyBadge-snoozed"]:not(.euiButton-isDisabled)'
+      );
+      await retry.try(async () => {
+        const resultToast = await toasts.getToastElement(1);
+        const toastText = await resultToast.getVisibleText();
+        expect(toastText).toEqual('Rule successfully unsnoozed');
+      });
+
+      await svlTriggersActionsUI.searchRules(createdRule1.name);
+
+      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozed');
+      await testSubjects.missingOrFail('rulesListNotifyBadge-snoozedIndefinitely');
     });
   });
 };
