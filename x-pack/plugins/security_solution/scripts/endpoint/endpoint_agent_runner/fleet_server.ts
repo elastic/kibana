@@ -245,19 +245,19 @@ export const startFleetServerWithDocker = async ({
       `${ES_CERT_PATH}:/elasticsearch.crt`,
 
       '--volume',
-      `${FLEET_SERVER_CERT_PATH}:/fleet-server.crt`,
+      `${FLEET_SERVER_CERT_PATH}:/fleet_server.crt`,
 
       '--volume',
-      `${FLEET_SERVER_KEY_PATH}:/fleet-server.key`,
+      `${FLEET_SERVER_KEY_PATH}:/fleet_server.key`,
 
       `--env`,
       `FLEET_CA=/ca.crt`,
 
       '--env',
-      'FLEET_SERVER_CERT=/fleet-server.crt',
+      'FLEET_SERVER_CERT=/fleet_server.crt',
 
       '--env',
-      'FLEET_SERVER_CERT_KEY=/fleet-server.key',
+      'FLEET_SERVER_CERT_KEY=/fleet_server.key',
 
       '--env',
       'FLEET_SERVER_ENABLE=1',
