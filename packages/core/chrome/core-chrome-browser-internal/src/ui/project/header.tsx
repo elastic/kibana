@@ -62,6 +62,12 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       top: 2px;
     `,
   },
+  projectName: {
+    link: css`
+      /* TODO: make header layout more flexible? */
+      max-width: 320px;
+    `,
+  },
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
@@ -96,6 +102,7 @@ export interface Props {
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
   projectsUrl$: Observable<string | undefined>;
+  projectName$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -169,6 +176,7 @@ export const ProjectHeader = ({
 }: Props) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
   const projectsUrl = useObservable(observables.projectsUrl$);
+  const projectName = useObservable(observables.projectName$);
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
@@ -206,8 +214,12 @@ export const ProjectHeader = ({
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem>
-                <EuiHeaderLink href={projectsUrl} data-test-subj={'projectsLink'}>
-                  {headerStrings.cloud.linkToProjects}
+                <EuiHeaderLink
+                  href={projectsUrl}
+                  data-test-subj={'projectsLink'}
+                  css={headerCss.projectName.link}
+                >
+                  {projectName ?? headerStrings.cloud.linkToProjects}
                 </EuiHeaderLink>
               </EuiHeaderSectionItem>
 
