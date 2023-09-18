@@ -11,7 +11,6 @@ import React from 'react';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { FieldDefinition, SettingType, UiSetting } from '@kbn/management-settings-types';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import { action } from '@storybook/addon-actions';
 import { Form } from '../form';
 import _settings from './settings.json';
 
@@ -28,13 +27,7 @@ export const getFormStory = () => {
         })
     );
 
-    const save = async () => {
-      alert('Saved!');
-      // Not working:
-      action('Saved');
-    };
-
-    return <Form {...{ fields, save }} />;
+    return <Form {...{ fields }} />;
   };
 
   return Story;

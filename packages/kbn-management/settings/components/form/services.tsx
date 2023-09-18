@@ -9,24 +9,65 @@
 import {
   FieldRowProvider,
   FieldRowKibanaProvider,
-  type FieldRowKibanaDependencies,
-  type FieldRowServices,
 } from '@kbn/management-settings-components-field-row';
-import React, { FC } from 'react';
+import React, { FC, useContext } from 'react';
+import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 
-export type FormServices = FieldRowServices;
-export type FormKibanaDependencies = FieldRowKibanaDependencies;
+import type { FormServices, FormKibanaDependencies, Services } from './types';
+
+const FormContext = React.createContext<Services | null>(null);
 
 /**
  * React Provider that provides services to a {@link Form} component and its dependents.
  */
 export const FormProvider: FC<FormServices> = ({ children, ...services }) => {
+  const { saveChanges, showError, ...rest } = services;
+
+  return (
+    <FormContext.Provider value={{ saveChanges, showError }}>
+      <FieldRowProvider {...rest}>{children}</FieldRowProvider>
+    </FormContext.Provider>
+  );
   return <FieldRowProvider {...services}>{children}</FieldRowProvider>;
 };
 
 /**
  * Kibana-specific Provider that maps Kibana plugins and services to a {@link FormProvider}.
  */
-export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...services }) => {
-  return <FieldRowKibanaProvider {...services}>{children}</FieldRowKibanaProvider>;
+export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...deps }) => {
+  const { settings, ...rest } = deps;
+
+  return (
+    <FormContext.Provider
+      value={{
+        saveChanges: (changes: Record<string, UnsavedFieldChange<SettingType>>) => {
+          const arr = Object.entries(changes).map(([key, value]) =>
+            settings.client.set(key, value)
+          );
+          return Promise.all(arr);
+        },
+        // TODO:
+        showError: (message: string) => {},
+      }}
+    >
+      <FieldRowKibanaProvider {...rest}>{children}</FieldRowKibanaProvider>
+    </FormContext.Provider>
+  );
+};
+
+/**
+ * React hook for accessing pre-wired services.
+ *
+ * @see {@link FormServices}
+ */
+export const useServices = () => {
+  const context = useContext(FormContext);
+
+  if (!context) {
+    throw new Error(
+      'FormContext is missing.  Ensure your component or React root is wrapped with FormProvider.'
+    );
+  }
+
+  return context;
 };

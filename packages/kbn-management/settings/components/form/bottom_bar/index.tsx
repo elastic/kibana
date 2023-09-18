@@ -10,6 +10,7 @@ import React from 'react';
 
 import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useFormStyles } from '../form.styles';
 
 interface BottomBarProps {
   saveAll: () => void;
@@ -17,6 +18,8 @@ interface BottomBarProps {
 }
 
 export const BottomBar = ({ saveAll, clearAllUnsaved }: BottomBarProps) => {
+  const { cssFormButton } = useFormStyles();
+
   return (
     <EuiBottomBar>
       <EuiFlexGroup
@@ -35,14 +38,14 @@ export const BottomBar = ({ saveAll, clearAllUnsaved }: BottomBarProps) => {
             aria-describedby="aria-describedby.countOfUnsavedSettings"
             data-test-subj="advancedSetting-cancelButton"
           >
-            {i18n.translate('advancedSettings.form.cancelButtonLabel', {
+            {i18n.translate('management.settings.form.cancelButtonLabel', {
               defaultMessage: 'Cancel changes',
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            className="mgtAdvancedSettingsForm__button"
+            css={cssFormButton}
             color="success"
             fill
             size="s"
@@ -51,7 +54,7 @@ export const BottomBar = ({ saveAll, clearAllUnsaved }: BottomBarProps) => {
             aria-describedby="aria-describedby.countOfUnsavedSettings"
             data-test-subj="advancedSetting-saveButton"
           >
-            {i18n.translate('advancedSettings.form.saveButtonLabel', {
+            {i18n.translate('management.settings.form.saveButtonLabel', {
               defaultMessage: 'Save changes',
             })}
           </EuiButton>

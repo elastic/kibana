@@ -13,18 +13,20 @@ import { FieldRow, OnChangeFn } from '@kbn/management-settings-components-field-
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { BottomBar } from './bottom_bar';
+import { useServices } from './services';
 
 export interface FormProps {
   fields: Array<FieldDefinition<SettingType>>;
-  save: (changes: Record<string, UnsavedFieldChange<SettingType>>) => void;
 }
 
 export const Form = (props: FormProps) => {
-  const { fields, save } = props;
+  const { fields } = props;
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<
     Record<string, UnsavedFieldChange<SettingType>>
   >({});
+
+  const { saveChanges } = useServices();
 
   const onChange: OnChangeFn<SettingType> = (id, change) => {
     if (!change?.unsavedValue) {
@@ -46,7 +48,7 @@ export const Form = (props: FormProps) => {
     if (isEmpty(unsavedChanges)) {
       return;
     }
-    await save(unsavedChanges);
+    await saveChanges(unsavedChanges);
   };
 
   const fieldRows = fields.map((field) => {

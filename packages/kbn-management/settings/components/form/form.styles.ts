@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { Form } from './form';
+import { css } from '@emotion/react';
 
-export type { FormKibanaDependencies, FormServices } from './types';
+/**
+ * A React hook that provides stateful `css` classes for the {@link Form} component.
+ */
+export const useFormStyles = () => {
+  return {
+    cssFormButton: css`
+      width: 100%;
+    `,
+  };
+};

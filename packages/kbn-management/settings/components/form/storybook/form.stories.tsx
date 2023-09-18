@@ -22,6 +22,8 @@ export default {
       <FormProvider
         showDanger={action('showDanger')}
         links={{ deprecationKey: 'link/to/deprecation/docs' }}
+        saveChanges={action('saveChanges')}
+        showError={action('showError')}
       >
         <EuiPanel>
           <Story />
