@@ -25,10 +25,6 @@ export const ADD_CUSTOM_FIELD = i18n.translate('xpack.cases.customFields.addCust
   defaultMessage: 'Add field',
 });
 
-export const SAVE_AND_ADD_ANOTHER = i18n.translate('xpack.cases.customFields.saveAndAddAnother', {
-  defaultMessage: 'Save and add another',
-});
-
 export const SAVE_FIELD = i18n.translate('xpack.cases.customFields.saveField', {
   defaultMessage: 'Save field',
 });

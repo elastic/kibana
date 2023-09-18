@@ -29,9 +29,10 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { CustomFields } from '../custom_fields';
+import { CustomFields as CustomFieldsComponent } from '../custom_fields';
 import { AddFieldFlyout } from '../custom_fields/add_field_flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
+import type { CustomFields } from '../../../common/types/domain';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -74,6 +75,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetchCaseConfigure,
     setConnector,
     setClosureType,
+    setCustomFields,
   } = useCaseConfigure();
 
   const {
@@ -213,18 +215,23 @@ export const ConfigureCases: React.FC = React.memo(() => {
     setAddFieldFlyoutVisibility(false);
   }, [setAddFieldFlyoutVisibility]);
 
-  const CustomFieldAddFlyout = useMemo(
-    () =>
-      addFieldFlyoutVisible ? (
-        <AddFieldFlyout
-          isLoading={loadingCaseConfigure}
-          disabled={!permissions.create}
-          onCloseFlyout={onCloseAddFieldFlyout}
-          onSaveField={onCloseAddFieldFlyout}
-        />
-      ) : null,
-    [addFieldFlyoutVisible, onCloseAddFieldFlyout, loadingCaseConfigure, permissions]
+  const onCustomFieldCreated = useCallback(
+    (customFieldData: CustomFields) => {
+      setCustomFields(customFieldData);
+
+      setAddFieldFlyoutVisibility(false);
+    },
+    [setAddFieldFlyoutVisibility, setCustomFields]
   );
+
+  const CustomFieldAddFlyout = addFieldFlyoutVisible ? (
+    <AddFieldFlyout
+      isLoading={loadingCaseConfigure}
+      disabled={!permissions.create || !permissions.update}
+      onCloseFlyout={onCloseAddFieldFlyout}
+      onSaveField={onCustomFieldCreated}
+    />
+  ) : null;
 
   return (
     <>
@@ -280,7 +287,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           </SectionWrapper>
           <SectionWrapper>
             <EuiFlexItem grow={false}>
-              <CustomFields
+              <CustomFieldsComponent
                 customFields={[]}
                 isLoading={loadingCaseConfigure}
                 disabled={loadingCaseConfigure}

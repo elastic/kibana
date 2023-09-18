@@ -20,6 +20,7 @@ describe('CustomFields', () => {
     disabled: false,
     isLoading: false,
     handleAddCustomField: jest.fn(),
+    customFields: [],
   };
 
   beforeEach(() => {

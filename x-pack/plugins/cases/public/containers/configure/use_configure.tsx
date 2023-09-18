@@ -10,7 +10,13 @@ import { ConnectorTypes } from '../../../common/types/domain';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
 import * as i18n from './translations';
-import type { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
+import type {
+  ClosureType,
+  CaseConfigure,
+  CaseConnector,
+  CaseConnectorMapping,
+  CustomFields,
+} from './types';
 import { useToasts } from '../../common/lib/kibana';
 import { useCasesContext } from '../../components/cases_context/use_cases_context';
 
@@ -20,6 +26,7 @@ export type ConnectorConfiguration = { connector: CaseConnector } & {
 
 export interface State extends ConnectorConfiguration {
   currentConfiguration: ConnectorConfiguration;
+  customFields: CustomFields;
   firstLoad: boolean;
   loading: boolean;
   mappings: CaseConnectorMapping[];
@@ -63,6 +70,10 @@ export type Action =
   | {
       type: 'setMappings';
       mappings: CaseConnectorMapping[];
+    }
+  | {
+      type: 'setCustomFields';
+      customFields: CustomFields;
     };
 
 export const configureCasesReducer = (state: State, action: Action) => {
@@ -116,6 +127,12 @@ export const configureCasesReducer = (state: State, action: Action) => {
         mappings: action.mappings,
       };
     }
+    case 'setCustomFields': {
+      return {
+        ...state,
+        customFields: action.customFields,
+      };
+    }
     default:
       return state;
   }
@@ -128,6 +145,7 @@ export interface ReturnUseCaseConfigure extends State {
   setConnector: (connector: CaseConnector) => void;
   setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
   setMappings: (newMapping: CaseConnectorMapping[]) => void;
+  setCustomFields: (customFields: CustomFields) => void;
 }
 
 export const initialState: State = {
@@ -138,6 +156,7 @@ export const initialState: State = {
     name: 'none',
     type: ConnectorTypes.none,
   },
+  customFields: [],
   currentConfiguration: {
     closureType: 'close-by-user',
     connector: {
@@ -177,6 +196,14 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     dispatch({
       closureType,
       type: 'setClosureType',
+    });
+  }, []);
+
+  const setCustomFields = useCallback((customFields: CustomFields) => {
+    console.log('use_configure hook dispatch', { customFields });
+    dispatch({
+      customFields,
+      type: 'setCustomFields',
     });
   }, []);
 
@@ -316,6 +343,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
           if (setClosureType) {
             setClosureType(res.closureType);
           }
+          setCustomFields(res.customFields);
           setVersion(res.version);
           setID(res.id);
           setMappings(res.mappings);
@@ -363,6 +391,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       setMappings,
       setCurrentConfiguration,
       toasts,
+      setCustomFields,
     ]
   );
 
@@ -385,5 +414,6 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     setConnector,
     setClosureType,
     setMappings,
+    setCustomFields,
   };
 };

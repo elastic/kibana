@@ -6,9 +6,9 @@
  */
 
 import type { CustomFieldBuilderMap } from './types';
-import { CustomFieldTypes } from './types';
-import { configureTextCustomFieldBuilder } from './configure_text_field';
-import { configureToggleCustomFieldBuilder } from './configure_toggle_field';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import { configureTextCustomFieldBuilder } from './text/configure_text_field';
+import { configureToggleCustomFieldBuilder } from './toggle/configure_toggle_field';
 
 export const builderMap: CustomFieldBuilderMap = {
   [CustomFieldTypes.TEXT]: configureTextCustomFieldBuilder,

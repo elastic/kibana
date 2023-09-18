@@ -10,8 +10,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { EuiSelectOption } from '@elastic/eui';
-import type { CustomFieldTypes, CustomFieldBuildType } from './types';
-import { customFieldTypesValues } from './schema';
+import type { CustomFieldBuildType } from './types';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap } from './builder';
 
 interface FormFieldsProps {
@@ -30,7 +30,7 @@ const fieldTypeSelectOptions = (): EuiSelectOption[] => {
 };
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
-  const [selectedType, setSelectedType] = useState<CustomFieldTypes>(customFieldTypesValues[0]);
+  const [selectedType, setSelectedType] = useState<CustomFieldTypes>(CustomFieldTypes.TEXT);
 
   const handleTypeChange = useCallback(
     (e: CustomFieldTypes) => {
@@ -39,11 +39,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     [setSelectedType]
   );
 
-  const builtCustomField: CustomFieldBuildType[] | null = useMemo(() => {
-    if (!customFieldTypesValues) {
-      return null;
-    }
-
+  const builtCustomField: CustomFieldBuildType | null = useMemo(() => {
     const builder = builderMap[selectedType];
 
     if (builder == null) {
@@ -55,13 +51,13 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
     return customFieldBuilder.build();
   }, [selectedType]);
 
-  const ConfigurePage = builtCustomField?.length && builtCustomField[0]?.ConfigurePage;
+  const ConfigurePage = builtCustomField?.ConfigurePage;
   const options = fieldTypeSelectOptions();
 
   return (
     <>
       <UseField
-        path="fieldLabel"
+        path="label"
         component={Field}
         componentProps={{
           euiFieldProps: {
@@ -73,13 +69,14 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
         }}
       />
       <UseField
-        path="fieldType"
         component={SelectField}
+        path="type"
         componentProps={{
           euiFieldProps: {
             options,
           },
           dataTestSubj: 'custom-field-type-selector',
+          selectedType,
           isLoading: isSubmitting,
           onChange: handleTypeChange,
         }}

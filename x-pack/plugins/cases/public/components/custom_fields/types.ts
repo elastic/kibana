@@ -6,18 +6,8 @@
  */
 
 import type React from 'react';
+import type { CustomFieldTypes } from '../../../common/types/domain';
 
-export enum CustomFieldTypes {
-  TEXT = 'text',
-  TOGGLE = 'toggle',
-}
-
-export interface ConfigureCustomFields {
-  key: string;
-  label: string;
-  type: CustomFieldTypes;
-  required: boolean;
-}
 export interface CustomFieldBuildType {
   ConfigurePage: React.FC;
 }
@@ -25,7 +15,7 @@ export interface CustomFieldBuildType {
 export type CustomFieldBuilder = () => {
   id: string;
   label: string;
-  build: () => CustomFieldBuildType[];
+  build: () => CustomFieldBuildType;
 };
 
 export type CustomFieldBuilderMap = Record<CustomFieldTypes, CustomFieldBuilder>;

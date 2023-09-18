@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { FormFields } from './form_fields';
-import { CustomFieldTypes } from './types';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 export interface CustomFieldFormState {
   isValid: boolean | undefined;
@@ -24,7 +24,7 @@ interface Props {
 
 const FormComponent: React.FC<Props> = ({ onChange }) => {
   const { form } = useForm<FormProps>({
-    defaultValue: { fieldType: CustomFieldTypes.TEXT },
+    defaultValue: { type: CustomFieldTypes.TEXT },
     options: { stripEmptyFields: false },
     schema,
   });

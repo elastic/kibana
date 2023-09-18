@@ -11,11 +11,11 @@ import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import type { ConfigureCustomFields } from './types';
+import type { CustomFields as CustomFieldsDomainType } from '../../../common/types/domain';
 import type { ListOption } from './draggable';
 import { Draggable } from './draggable';
 export interface Props {
-  customFields: ConfigureCustomFields[];
+  customFields: CustomFieldsDomainType;
   disabled: boolean;
   isLoading: boolean;
   handleAddCustomField: () => void;

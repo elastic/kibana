@@ -14,6 +14,7 @@ import type {
   ConnectorMappingTarget,
   ConnectorMappingSource,
   ConnectorMappingActionType,
+  CustomFields,
 } from '../../../common/types/domain';
 import type { CaseUser } from '../types';
 
@@ -25,6 +26,7 @@ export type {
   ConnectorMappingSource,
   ConnectorMappingTarget,
   ClosureType,
+  CustomFields,
 };
 
 export interface CaseConnectorMapping {
@@ -45,4 +47,5 @@ export interface CaseConfigure {
   updatedBy: CaseUser;
   version: string;
   owner: string;
+  customFields: CustomFields;
 }

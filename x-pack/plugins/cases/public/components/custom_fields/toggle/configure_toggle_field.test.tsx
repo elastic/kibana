@@ -9,20 +9,15 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { FormTestComponent } from '../../common/test_utils';
+import { FormTestComponent } from '../../../common/test_utils';
 import { configureToggleCustomFieldBuilder } from './configure_toggle_field';
-import { CustomFieldTypes } from './types';
-import { getConfig } from './field_options/config';
+import * as i18n from '../translations';
 
 describe('configureToggleCustomFieldBuilder ', () => {
   const onSubmit = jest.fn();
   const builder = configureToggleCustomFieldBuilder();
 
-  const BuiltCustomField = builder.build()[0].ConfigurePage;
-
-  const config = getConfig(CustomFieldTypes.TEXT); // field options config
-
-  const checkboxOptions = [...Object.values(config)];
+  const BuiltCustomField = builder.build().ConfigurePage;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,12 +30,7 @@ describe('configureToggleCustomFieldBuilder ', () => {
       </FormTestComponent>
     );
 
-    // fieldOptions
-    expect(screen.getByTestId('toggle-custom-field-options')).toBeInTheDocument();
-
-    for (const option of checkboxOptions) {
-      expect(screen.getByText(option.label)).toBeInTheDocument();
-    }
+    expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
   it('updates field options correctly', async () => {
@@ -50,7 +40,7 @@ describe('configureToggleCustomFieldBuilder ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText(checkboxOptions[0].label));
+    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
 
     userEvent.click(screen.getByText('Submit'));
 

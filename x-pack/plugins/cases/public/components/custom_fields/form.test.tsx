@@ -9,13 +9,12 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import type { BasicOptions } from './field_options/config';
-import { getConfig } from './field_options/config';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { CustomFieldsForm } from './form';
-import { CustomFieldTypes } from './types';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import * as i18n from './translations';
 
 describe('CustomFieldsForm ', () => {
   let appMockRender: AppMockRenderer;
@@ -35,18 +34,13 @@ describe('CustomFieldsForm ', () => {
 
   it('renders text as default custom field type', async () => {
     appMockRender.render(<CustomFieldsForm onChange={onChange} />);
-    const config = getConfig(CustomFieldTypes.TEXT); // field options config
-
-    const checkboxOptions = [...Object.values(config)];
 
     expect(screen.getByTestId('custom-field-type-dropdown')).toBeInTheDocument();
     expect(screen.getByTestId('custom-field-type-text')).toBeInTheDocument();
 
     const fieldOptions = screen.getByTestId('custom-field-options-checkbox-group');
 
-    for (const option of checkboxOptions) {
-      expect(within(fieldOptions).getByText(option.label)).toBeInTheDocument();
-    }
+    expect(within(fieldOptions).getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
   it('renders custom field type options', async () => {
@@ -63,10 +57,6 @@ describe('CustomFieldsForm ', () => {
   it('renders toggle custom field type', async () => {
     appMockRender.render(<CustomFieldsForm onChange={onChange} />);
 
-    const config = getConfig(CustomFieldTypes.TOGGLE) as BasicOptions; // field options config
-
-    const checkboxOptions = [...Object.values(config)];
-
     userEvent.click(screen.getByTestId('custom-field-type-dropdown'));
 
     await waitForEuiPopoverOpen();
@@ -79,8 +69,6 @@ describe('CustomFieldsForm ', () => {
       expect(screen.getByTestId('toggle-custom-field-options')).toBeInTheDocument();
     });
 
-    for (const option of checkboxOptions) {
-      expect(within(fieldOptions).getByText(option.label)).toBeInTheDocument();
-    }
+    expect(within(fieldOptions).getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 });
