@@ -56,6 +56,7 @@ import { notificationsProvider } from './notifications';
 export interface ExtendedSecurityHasPrivilegesResponse
   extends estypes.SecurityHasPrivilegesResponse {
   securityDisabled?: boolean;
+  upgradeInProgress: boolean;
 }
 
 export interface MlInfoResponse {
