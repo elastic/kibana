@@ -139,7 +139,7 @@ describe('expression params validation', () => {
     };
     expect(validateExpression(initialParams).errors.termField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.termField[0]).toBe(
-      'Max. 4 terms can be selected'
+      'Cannot select more than 4 terms'
     );
   });
 
