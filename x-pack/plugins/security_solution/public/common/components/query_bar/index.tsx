@@ -110,21 +110,22 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     useEffect(() => {
+      let dv: DataView;
       if (isDataView(indexPattern)) {
         setDataView(indexPattern);
       } else {
         const createDataView = async () => {
-          const dv = await data.dataViews.create({ title: indexPattern.title });
+          dv = await data.dataViews.create({ title: indexPattern.title });
           setDataView(dv);
         };
         createDataView();
       }
       return () => {
-        if (dataView?.id) {
-          data.dataViews.clearInstanceCache(dataView?.id);
+        if (dv?.id) {
+          data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, dataView?.id, indexPattern]);
+    }, [data.dataViews, indexPattern]);
 
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
