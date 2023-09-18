@@ -179,15 +179,51 @@ describe('ruleType Params validate()', () => {
   });
 
   it('fails for invalid termField', async () => {
+    params.termField = ['term', 'term 2'];
+    params.termSize = 1;
+    expect(onValidate()).not.toThrow();
+
+    params.termField = 'term';
+    params.termSize = 1;
+    expect(onValidate()).not.toThrow();
+
+    // string or array of string
     params.groupBy = 'top';
     params.termField = 42;
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[termField]: expected value of type [string] but got [number]"`
+    expect(onValidate()).toThrow(`[termField]: types that failed validation:
+- [termField.0]: expected value of type [string] but got [number]
+- [termField.1]: expected value of type [array] but got [number]`);
+
+    // no array other than array of stings
+    params.termField = [1, 2, 3];
+    expect(onValidate()).toThrow(
+      `[termField]: types that failed validation:
+- [termField.0]: expected value of type [string] but got [Array]
+- [termField.1.0]: expected value of type [string] but got [number]`
     );
 
+    // no empty string
     params.termField = '';
-    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-      `"[termField]: value has length [0] but it must have a minimum length of [1]."`
+    expect(onValidate()).toThrow(
+      `[termField]: types that failed validation:
+- [termField.0]: value has length [0] but it must have a minimum length of [1].
+- [termField.1]: could not parse array value from json input`
+    );
+
+    // no array with one element -> has to be a string
+    params.termField = ['term'];
+    expect(onValidate()).toThrow(
+      `[termField]: types that failed validation:
+- [termField.0]: expected value of type [string] but got [Array]
+- [termField.1]: array size is [1], but cannot be smaller than [2]`
+    );
+
+    // no array that has more than 4 elements
+    params.termField = ['term', 'term2', 'term3', 'term4', 'term4'];
+    expect(onValidate()).toThrow(
+      `[termField]: types that failed validation:
+- [termField.0]: expected value of type [string] but got [Array]
+- [termField.1]: array size is [5], but cannot be greater than [4]`
     );
   });
 
