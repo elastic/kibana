@@ -14,43 +14,42 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
+const TOOLTIP_CONTENT = i18n.translate(
+  'xpack.securitySolution.globalHeader.assistantHeaderLinkShortcutTooltip',
+  {
+    values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
+    defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
+  }
+);
+const LINK_LABEL = i18n.translate('xpack.securitySolution.globalHeader.assistantHeaderLink', {
+  defaultMessage: 'AI Assistant',
+});
+
 /**
  * Elastic AI Assistant header link
  */
-export const AssistantHeaderLink = React.memo(() => {
-  const { showAssistantOverlay } = useAssistantContext();
-
-  const keyboardShortcut = isMac ? '⌘ ;' : 'Ctrl ;';
-
-  const tooltipContent = i18n.translate(
-    'xpack.securitySolution.globalHeader.assistantHeaderLinkShortcutTooltip',
-    {
-      values: { keyboardShortcut },
-      defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
-    }
-  );
+export const AssistantHeaderLink = () => {
+  const { showAssistantOverlay, assistantAvailability } = useAssistantContext();
 
   const showOverlay = useCallback(
     () => showAssistantOverlay({ showOverlay: true }),
     [showAssistantOverlay]
   );
 
+  if (!assistantAvailability.hasAssistantPrivilege) {
+    return null;
+  }
+
   return (
-    <EuiToolTip content={tooltipContent}>
+    <EuiToolTip content={TOOLTIP_CONTENT}>
       <EuiHeaderLink data-test-subj="assistantHeaderLink" color="primary" onClick={showOverlay}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <AssistantAvatar size="xs" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.securitySolution.globalHeader.assistantHeaderLink', {
-              defaultMessage: 'AI Assistant',
-            })}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{LINK_LABEL}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiHeaderLink>
     </EuiToolTip>
   );
-});
-
-AssistantHeaderLink.displayName = 'AssistantHeaderLink';
+};
