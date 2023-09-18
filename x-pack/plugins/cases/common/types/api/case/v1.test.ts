@@ -40,6 +40,7 @@ import {
   CasesFindResponseRt,
   CasesPatchRequestRt,
 } from './v1';
+import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
 const basicCase: Case = {
   owner: 'cases',
@@ -102,17 +103,17 @@ const basicCase: Case = {
   customFields: [
     {
       key: 'first_custom_field_key',
-      type: 'text',
+      type: CustomFieldTypes.TEXT,
       field: { value: ['this is a text field value', 'this is second'] },
     },
     {
       key: 'second_custom_field_key',
-      type: 'toggle',
+      type: CustomFieldTypes.TOGGLE,
       field: { value: [true] },
     },
     {
       key: 'second_custom_field_key',
-      type: 'text',
+      type: CustomFieldTypes.TEXT,
       field: { value: ['www.example.com'] },
     },
   ],
@@ -138,12 +139,12 @@ describe('CasePostRequestRt', () => {
     customFields: [
       {
         key: 'first_custom_field_key',
-        type: 'text',
+        type: CustomFieldTypes.TEXT,
         field: { value: ['this is a text field value', 'this is second'] },
       },
       {
         key: 'second_custom_field_key',
-        type: 'toggle',
+        type: CustomFieldTypes.TOGGLE,
         field: { value: [true] },
       },
     ],
