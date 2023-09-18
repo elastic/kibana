@@ -6,8 +6,20 @@
  */
 
 import type { LoginState } from '@kbn/security-plugin/common/login_state';
-import { ServerlessRoleName } from '../../../../../../test_serverless/shared/lib';
 import { COMMON_API_HEADERS, request } from './common';
+
+export enum ServerlessUser {
+  T1_ANALYST = 't1_analyst',
+  T2_ANALYST = 't2_analyst',
+  T3_ANALYST = 't3_analyst',
+  THREAT_INTELLIGENCE_ANALYST = 'threat_intelligence_analyst',
+  RULE_AUTHOR = 'rule_author',
+  SOC_MANAGER = 'soc_manager',
+  DETECTIONS_ADMIN = 'detections_admin',
+  PLATFORM_ENGINEER = 'platform_engineer',
+  ENDPOINT_OPERATIONS_ANALYST = 'endpoint_operations_analyst',
+  ENDPOINT_POLICY_MANAGER = 'endpoint_policy_manager',
+}
 
 /**
  * Send login via API
@@ -30,6 +42,7 @@ const sendApiLoginRequest = (
       const basicProvider = loginState.body.selector.providers.find(
         (provider) => provider.type === 'basic'
       );
+
       return request({
         url: `${baseUrl}/internal/security/login`,
         method: 'POST',
@@ -46,7 +59,7 @@ const sendApiLoginRequest = (
 };
 
 interface CyLoginTask {
-  (user?: ServerlessRoleName): ReturnType<typeof sendApiLoginRequest>;
+  (user?: ServerlessUser | 'elastic'): ReturnType<typeof sendApiLoginRequest>;
 
   /**
    * Login using any username/password
@@ -63,18 +76,20 @@ interface CyLoginTask {
  * @param user Defaults to `soc_manager`
  */
 export const loginServerless: CyLoginTask = (
-  user: ServerlessRoleName | 'elastic' = ServerlessRoleName.SOC_MANAGER
+  user: ServerlessUser | 'elastic' = ServerlessUser.SOC_MANAGER
 ): ReturnType<typeof sendApiLoginRequest> => {
-  let username = Cypress.env('KIBANA_USERNAME');
-  let password = Cypress.env('KIBANA_PASSWORD');
+  const username = Cypress.env('KIBANA_USERNAME');
+  const password = Cypress.env('KIBANA_PASSWORD');
 
   if (user && user !== 'elastic') {
-    return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
-      username = loadedUser.username;
-      password = loadedUser.password;
+    throw new Error('Serverless usernames not yet implemented');
 
-      return sendApiLoginRequest(username, password);
-    });
+    // return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
+    //   username = loadedUser.username;
+    //   password = loadedUser.password;
+    //
+    //   return sendApiLoginRequest(username, password);
+    // });
   } else {
     return sendApiLoginRequest(username, password);
   }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { loginServerless } from '../../tasks/login_serverless';
 import {
   getConsoleActionMenuItem,
@@ -12,8 +14,6 @@ import {
   openRowActionMenu,
   visitEndpointList,
 } from '../../screens';
-import type { CyIndexEndpointHosts } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
-import { indexEndpointHosts } from '../../../../../../../test_serverless/functional/test_suites/security/cypress/tasks/endpoint_management/index_endpoint_hosts';
 
 describe(
   'When on the Endpoint List in Security Essentials PLI',
