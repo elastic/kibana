@@ -14,7 +14,6 @@ import {
   RollUpData,
 } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { RollupInterval } from '../../../common/rollup';
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<
   AggregatedTransactionsCounts,
@@ -64,10 +63,11 @@ const capturedMetricStatsSchema: MakeSchemaFrom<CapturedMetricStats, true> = {
   },
 };
 
+// Unfortunately, key does not support ENUMs here like [RollupInterval.OneMinute]
 const rollUpMetricStatsSchema: MakeSchemaFrom<RollUpData, true> = {
-  [RollupInterval.OneMinute]: capturedMetricStatsSchema,
-  [RollupInterval.TenMinutes]: capturedMetricStatsSchema,
-  [RollupInterval.SixtyMinutes]: capturedMetricStatsSchema,
+  '1m': capturedMetricStatsSchema,
+  '10m': capturedMetricStatsSchema,
+  '60m': capturedMetricStatsSchema,
 };
 
 const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] =
