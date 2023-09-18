@@ -167,8 +167,8 @@ export const getRenderCellValueFn = ({
             return (
               <Fragment key={key}>
                 <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
-                  {fieldIcon}
-                  {key}
+                  {fieldIcon && <>{fieldIcon}&nbsp;</>}
+                  <span className="unifiedDataTable__descriptionListName">{key}</span>
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription
                   className="unifiedDataTable__descriptionListDescription"

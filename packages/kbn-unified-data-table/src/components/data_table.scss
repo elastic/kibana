@@ -130,12 +130,16 @@
   margin-inline: 0 0;
   padding-inline: 0;
   background: transparent;
-  font-weight: $euiFontWeightBold;
+  white-space: nowrap; // to don't separate tokens from names
 }
 
 .unifiedDataTable__descriptionListToken {
-  margin-right: $euiSizeXS;
   vertical-align: text-bottom;
+}
+
+.unifiedDataTable__descriptionListName {
+  white-space: normal;
+  font-weight: $euiFontWeightBold;
 }
 
 .unifiedDataTable__descriptionListDescription {
