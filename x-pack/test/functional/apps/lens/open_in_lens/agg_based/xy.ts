@@ -365,7 +365,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.setPercentileValue('99.99', 6);
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       expect(await lens.getWorkspaceErrorCount()).to.eql(0);
     });
