@@ -112,7 +112,6 @@ interface TaskRunnerConstructorParams<
   taskInstance: ConcreteTaskInstance;
   context: TaskRunnerContext;
   inMemoryMetrics: InMemoryMetrics;
-  isUntrack?: boolean;
 }
 
 export class TaskRunner<
@@ -154,14 +153,12 @@ export class TaskRunner<
   private ruleResult: RuleResultService;
   private ruleData?: RuleDataResult<RuleData<Params>>;
   private runDate = new Date();
-  private readonly isUntrack?: boolean;
 
   constructor({
     ruleType,
     taskInstance,
     context,
     inMemoryMetrics,
-    isUntrack,
   }: TaskRunnerConstructorParams<
     Params,
     ExtractedParams,
@@ -195,7 +192,6 @@ export class TaskRunner<
       loggerId
     );
     this.ruleResult = new RuleResultService();
-    this.isUntrack = Boolean(isUntrack);
   }
 
   private async updateRuleSavedObjectPostRun(
@@ -794,10 +790,6 @@ export class TaskRunner<
   }
 
   async run(): Promise<RuleTaskRunResult> {
-    if (this.isUntrack) {
-      return this.runUntrack();
-    }
-
     const {
       params: { alertId: ruleId, spaceId },
       startedAt,

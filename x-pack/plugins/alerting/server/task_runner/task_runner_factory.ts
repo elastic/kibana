@@ -103,8 +103,7 @@ export class TaskRunnerFactory {
       AlertData
     >,
     { taskInstance }: RunContext,
-    inMemoryMetrics: InMemoryMetrics,
-    isUntrack?: boolean
+    inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -124,7 +123,6 @@ export class TaskRunnerFactory {
       taskInstance,
       context: this.taskRunnerContext!,
       inMemoryMetrics,
-      isUntrack,
     });
   }
 }
