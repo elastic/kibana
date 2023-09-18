@@ -17,7 +17,7 @@ export class LogExplorerLocatorDefinition implements LocatorDefinition<LogExplor
 
   constructor(protected readonly deps: LogExplorerLocatorDependencies) {}
 
-  public readonly getLocation = async (params: LogExplorerLocatorParams) => {
+  public readonly getLocation = (params: LogExplorerLocatorParams) => {
     const { dataset } = params;
     const dataViewSpec: DataViewSpec = {
       id: dataset,

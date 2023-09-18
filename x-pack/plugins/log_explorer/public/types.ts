@@ -10,10 +10,8 @@ import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ComponentType } from 'react';
 import { LogExplorerLocators } from '../common/locators';
 import type { LogExplorerProps } from './components/log_explorer';
-import { IDatasetsClient } from './services/datasets';
 
 export interface LogExplorerPluginSetup {
-  datasetsService: IDatasetsClient;
   locators: LogExplorerLocators;
 }
 export interface LogExplorerPluginStart {

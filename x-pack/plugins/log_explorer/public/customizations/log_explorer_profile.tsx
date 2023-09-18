@@ -11,7 +11,6 @@ import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plu
 import React from 'react';
 import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
 import { dynamic } from '../utils/dynamic';
-import { IDatasetsClient } from '../services/datasets';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { LogExplorerStateContainer } from '../components/log_explorer';
 
@@ -21,23 +20,22 @@ const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
   data: DataPublicPluginStart;
-  datasetsClient: IDatasetsClient;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({
-    core,
-    data,
-    datasetsClient,
-    state$,
-  }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({ core, data, state$ }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     // Lazy load dependencies
+    const datasetServiceModuleLoadable = import('../services/datasets');
     const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
 
-    const { initializeLogExplorerProfileStateService, waitForState } =
-      await logExplorerMachineModuleLoadable;
+    const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
+      await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
+
+    const datasetsClient = new DatasetsService().start({
+      http: core.http,
+    }).client;
 
     const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
       datasetsClient,

@@ -10,5 +10,4 @@ import { IDatasetsClient } from './types';
 export const createDatasetsClientMock = (): jest.Mocked<IDatasetsClient> => ({
   findDatasets: jest.fn(),
   findIntegrations: jest.fn(),
-  generateDataViewId: jest.fn(),
 });

@@ -6,18 +6,18 @@
  */
 
 import { DatasetsClient } from './datasets_client';
-import { DatasetsServiceSetup, DatasetsServiceSetupDeps, DatasetsServiceStart } from './types';
+import { DatasetsServiceSetup, DatasetsServiceStart, DatasetsServiceStartDeps } from './types';
 
 export class DatasetsService {
   constructor() {}
 
-  public setup({ http }: DatasetsServiceSetupDeps): DatasetsServiceSetup {
+  public setup(): DatasetsServiceSetup {}
+
+  public start({ http }: DatasetsServiceStartDeps): DatasetsServiceStart {
     const client = new DatasetsClient(http);
 
     return {
       client,
     };
   }
-
-  public start(): DatasetsServiceStart {}
 }

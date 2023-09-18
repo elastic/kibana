@@ -13,18 +13,17 @@ import {
   FindIntegrationsValue,
 } from '../../../common/latest';
 
-export interface DatasetsServiceSetup {
+export type DatasetsServiceSetup = void;
+
+export interface DatasetsServiceStart {
   client: IDatasetsClient;
 }
 
-export interface DatasetsServiceSetupDeps {
+export interface DatasetsServiceStartDeps {
   http: HttpStart;
 }
-
-export type DatasetsServiceStart = void;
 
 export interface IDatasetsClient {
   findDatasets(params?: FindDatasetsRequestQuery): Promise<FindDatasetValue>;
   findIntegrations(params?: FindIntegrationsRequestQuery): Promise<FindIntegrationsValue>;
-  generateDataViewId(integrationName?: string, datasetName?: string): Promise<string>;
 }

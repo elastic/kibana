@@ -43,10 +43,7 @@ export class ObservabilityLogExplorerPlugin
     core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
-    const {
-      share,
-      logExplorer: { datasetsService },
-    } = _pluginsSetup;
+    const { share } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -73,13 +70,11 @@ export class ObservabilityLogExplorerPlugin
     // Register Locators
     const singleDatasetLocator = share.url.locators.create(
       new SingleDatasetLocatorDefinition({
-        datasetsClient: datasetsService,
         useHash,
       })
     );
     const allDatasetsLocator = share.url.locators.create(
       new AllDatasetsLocatorDefinition({
-        datasetsClient: datasetsService,
         useHash,
       })
     );

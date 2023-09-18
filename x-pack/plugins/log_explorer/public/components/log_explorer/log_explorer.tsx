@@ -36,7 +36,6 @@ export const createLogExplorer = ({
   core,
   data,
   discover: { DiscoverContainer },
-  datasetsClient,
 }: CreateLogExplorerArgs) => {
   const overrideServices = {
     data: createDataServiceProxy(data),
@@ -44,7 +43,7 @@ export const createLogExplorer = ({
 
   return ({ scopedHistory, state$ }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, data, state$, datasetsClient })],
+      () => [createLogExplorerProfileCustomizations({ core, data, state$ })],
       [state$]
     );
 

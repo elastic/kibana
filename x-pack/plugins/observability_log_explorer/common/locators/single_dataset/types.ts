@@ -14,6 +14,7 @@ export interface SingleDatasetLocatorParams extends DatasetLocatorParams {
   integration?: string;
   /**
    * Dataset name to be selected.
+   * ex: system.syslog
    */
   dataset: string;
 }

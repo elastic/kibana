@@ -7,7 +7,6 @@
 
 import { HttpStart } from '@kbn/core/public';
 
-import { AllDatasetSelection, SingleDatasetSelection } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATASETS_URL,
@@ -73,24 +72,5 @@ export class DatasetsClient implements IDatasetsClient {
     )(response);
 
     return { items: data.items.map((dataset) => Dataset.create(dataset)) };
-  }
-
-  public async generateDataViewId(integrationName?: string, datasetName?: string) {
-    if (!integrationName || !datasetName) return AllDatasetSelection.create().toDataviewSpec().id;
-
-    const { items } = await this.findIntegrations({
-      nameQuery: integrationName,
-    });
-
-    // There should only be one matching integration with the given name
-    const installedIntegration = items[0];
-
-    const datasetSelection = SingleDatasetSelection.create(
-      installedIntegration.datasets.find((d) => d.title === datasetName)!
-    );
-
-    const dataViewId = datasetSelection.toDataviewSpec().id;
-
-    return dataViewId;
   }
 }

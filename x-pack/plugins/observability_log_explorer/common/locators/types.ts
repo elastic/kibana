@@ -7,7 +7,6 @@
 
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { LogExplorerNavigationParams } from '@kbn/log-explorer-plugin/common/locators/log_explorer/types';
-import type { IDatasetsClient } from '@kbn/log-explorer-plugin/public/services/datasets';
 
 export type DatasetLocatorParams = LogExplorerNavigationParams;
 
@@ -20,6 +19,5 @@ export interface AppState {
 }
 
 export interface DatasetLocatorDependencies {
-  datasetsClient: IDatasetsClient;
   useHash: boolean;
 }

@@ -7,7 +7,7 @@
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { UnresolvedDatasetSelection } from '@kbn/log-explorer-plugin/common';
-import { IndexPattern } from '@kbn/io-ts-utils';
+import type { IndexPattern } from '@kbn/io-ts-utils';
 import { DatasetLocatorDependencies } from '../types';
 import { SingleDatasetLocatorParams } from './types';
 import { SINGLE_DATASET_LOCATOR_ID, constructLocatorPath } from '../utils';
@@ -21,7 +21,7 @@ export class SingleDatasetLocatorDefinition
 
   constructor(protected readonly deps: DatasetLocatorDependencies) {}
 
-  public readonly getLocation = async (params: SingleDatasetLocatorParams) => {
+  public readonly getLocation = (params: SingleDatasetLocatorParams) => {
     const { useHash } = this.deps;
     const { integration, dataset } = params;
 
@@ -34,7 +34,7 @@ export class SingleDatasetLocatorDefinition
 
     const index = unresolvedDatasetSelection.toDataviewSpec().id;
 
-    return await constructLocatorPath({
+    return constructLocatorPath({
       locatorParams: params,
       index,
       useHash,
