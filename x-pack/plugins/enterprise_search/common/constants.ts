@@ -48,13 +48,13 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
 
 export const AI_SEARCH_PLUGIN = {
   ID: 'enterpriseSearchAISearch',
-  NAME: i18n.translate('xpack.enterpriseSearch.esre.productName', {
+  NAME: i18n.translate('xpack.enterpriseSearch.aiSearch.productName', {
     defaultMessage: 'AI Search',
   }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.esre.navTitle', {
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.aiSearch.navTitle', {
     defaultMessage: 'AI Search',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.esre.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.aiSearch.description', {
     defaultMessage:
       'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
   }),

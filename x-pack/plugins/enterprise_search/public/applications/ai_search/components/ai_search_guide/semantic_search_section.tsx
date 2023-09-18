@@ -31,7 +31,7 @@ export const SemanticSearchSection: React.FC = () => {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.semanticSearch.title"
+                  id="xpack.enterpriseSearch.aiSearch.semanticSearch.title"
                   defaultMessage="Set up semantic search"
                 />
               </h2>
@@ -41,7 +41,7 @@ export const SemanticSearchSection: React.FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.semanticSearch.description"
+                  id="xpack.enterpriseSearch.aiSearch.semanticSearch.description"
                   defaultMessage="ESRE combines your choice of these information retrieval tools."
                 />
               </p>
@@ -57,11 +57,11 @@ export const SemanticSearchSection: React.FC = () => {
               data-telemetry-id="entSearch-esre-semanticSearch-elserAccordion"
               initialIsOpen
               icon={elserIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.elserAccordion.title', {
+              title={i18n.translate('xpack.enterpriseSearch.aiSearch.elserAccordion.title', {
                 defaultMessage: 'Elastic Learned Sparse Encoder',
               })}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.elserAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.elserAccordion.description',
                 {
                   defaultMessage: 'Instant semantic search capabilities',
                 }
@@ -77,11 +77,11 @@ export const SemanticSearchSection: React.FC = () => {
               id="vectorSearchAccordion"
               data-telemetry-id="entSearch-esre-semanticSearch-vectorSearchAccordion"
               icon={vectorSearchIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.vectorSearchAccordion.title', {
+              title={i18n.translate('xpack.enterpriseSearch.aiSearch.vectorSearchAccordion.title', {
                 defaultMessage: 'Vector Search',
               })}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.vectorSearchAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.vectorSearchAccordion.description',
                 {
                   defaultMessage: 'Powerful similarity searches for unstructured data',
                 }
@@ -97,11 +97,11 @@ export const SemanticSearchSection: React.FC = () => {
               id="nlpEnrichmentAccordion"
               data-telemetry-id="entSearch-esre-semanticSearch-nlpEnrichmentAccordion"
               icon={nlpEnrichmentIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.title', {
+              title={i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.title', {
                 defaultMessage: 'NLP Enrichment',
               })}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.nlpEnrichmentAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.nlpEnrichmentAccordion.description',
                 {
                   defaultMessage: 'Insightful data enrichment with trained ML models',
                 }

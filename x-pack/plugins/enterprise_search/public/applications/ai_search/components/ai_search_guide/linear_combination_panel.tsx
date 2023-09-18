@@ -28,7 +28,7 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.linearCombinationPanel.step1.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step1.title', {
       defaultMessage: 'Discover how to use linear combination in _search queries',
     }),
     children: (
@@ -39,7 +39,7 @@ const steps: EuiContainedStepProps[] = [
         external
       >
         {i18n.translate(
-          'xpack.enterpriseSearch.esre.linearCombinationPanel.step1.knnSearchCombineLinkText',
+          'xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step1.knnSearchCombineLinkText',
           {
             defaultMessage: 'Combine approximate kNN with other features',
           }
@@ -49,7 +49,7 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.linearCombinationPanel.step2.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step2.title', {
       defaultMessage: 'Try it today in Console',
     }),
     children: (
@@ -59,7 +59,7 @@ const steps: EuiContainedStepProps[] = [
         shouldNotCreateHref
       >
         <EuiButton>
-          {i18n.translate('xpack.enterpriseSearch.esre.linearCombinationPanel.step2.buttonLabel', {
+          {i18n.translate('xpack.enterpriseSearch.aiSearch.linearCombinationPanel.step2.buttonLabel', {
             defaultMessage: 'Open Console',
           })}
         </EuiButton>
@@ -77,7 +77,7 @@ export const LinearCombinationPanel: React.FC = () => (
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.esre.linearCombinationPanel.description"
+              id="xpack.enterpriseSearch.aiSearch.linearCombinationPanel.description"
               defaultMessage="Used to calculate a similarity score or distance between data points. Combines attributes or features using weights, which enables customized relevance factors."
             />
           </p>

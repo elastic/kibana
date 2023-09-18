@@ -32,7 +32,7 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step1.title', {
       defaultMessage: 'Learn how to upload ML models',
     }),
     children: (
@@ -45,7 +45,7 @@ const steps: EuiContainedStepProps[] = [
             external
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.supportedNlpModelsLinkText',
+              'xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step1.supportedNlpModelsLinkText',
               { defaultMessage: 'Supported NLP models' }
             )}
           </EuiLink>
@@ -58,7 +58,7 @@ const steps: EuiContainedStepProps[] = [
             external
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.guideToTrainedModelsLinkText',
+              'xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step1.guideToTrainedModelsLinkText',
               { defaultMessage: 'Guide to trained models' }
             )}
           </EuiLink>
@@ -70,7 +70,7 @@ const steps: EuiContainedStepProps[] = [
             shouldNotCreateHref
           >
             <EuiButton iconType="eye">
-              {i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step1.buttonLabel', {
+              {i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step1.buttonLabel', {
                 defaultMessage: 'View trained models',
               })}
             </EuiButton>
@@ -81,7 +81,7 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step2.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step2.title', {
       defaultMessage: 'Create an index',
     }),
     children: (
@@ -91,7 +91,7 @@ const steps: EuiContainedStepProps[] = [
         shouldNotCreateHref
       >
         <EuiButton iconType="plusInCircle">
-          {i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step2.buttonLabel', {
+          {i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step2.buttonLabel', {
             defaultMessage: 'Create an index',
           })}
         </EuiButton>
@@ -100,21 +100,21 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step3.title', {
       defaultMessage: 'Create an ML inference pipeline',
     }),
     children: (
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.description"
+            id="xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step3.description"
             defaultMessage="Navigate to your index's {pipelinesName} tab to create an inference pipeline that uses your deployed model."
             values={{
               pipelinesName: (
                 <strong>
                   &quot;
                   {i18n.translate(
-                    'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.step3.description.pipelinesName',
+                    'xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.step3.description.pipelinesName',
                     {
                       defaultMessage: 'Pipelines',
                     }
@@ -139,7 +139,7 @@ export const NlpEnrichmentPanel: React.FC = () => (
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.esre.nlpEnrichmentPanel.description"
+              id="xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.description"
               defaultMessage="Use Natural Language Processing (NLP) tools like sentiment analysis, summarization, or Named Entity Recognition to enhance the relevance of your search results. NLP uses several {supportedMlModels} you can load to intelligently analyze and enrich documents with additional fields."
               values={{
                 supportedMlModels: (
@@ -150,7 +150,7 @@ export const NlpEnrichmentPanel: React.FC = () => (
                     external={false}
                   >
                     {i18n.translate(
-                      'xpack.enterpriseSearch.esre.nlpEnrichmentPanel.description.supportedMlModelsLinkText',
+                      'xpack.enterpriseSearch.aiSearch.nlpEnrichmentPanel.description.supportedMlModelsLinkText',
                       {
                         defaultMessage: 'supported ML models',
                       }

@@ -27,12 +27,12 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.measurePerformanceSection.step1.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.measurePerformanceSection.step1.title', {
       defaultMessage: 'Create a collection',
     }),
     children: (
       <FormattedMessage
-        id="xpack.enterpriseSearch.esre.measurePerformanceSection.step1.description"
+        id="xpack.enterpriseSearch.aiSearch.measurePerformanceSection.step1.description"
         defaultMessage="Visit {behavioralAnalytics} and create your first collection."
         values={{
           behavioralAnalytics: (
@@ -42,7 +42,7 @@ const steps: EuiContainedStepProps[] = [
               shouldNotCreateHref
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.esre.measurePerformanceSection.step1.behavioralAnalyticsLinkText',
+                'xpack.enterpriseSearch.aiSearch.measurePerformanceSection.step1.behavioralAnalyticsLinkText',
                 {
                   defaultMessage: 'Behavioral Analytics',
                 }
@@ -55,24 +55,24 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.measurePerformanceSection.step2.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.measurePerformanceSection.step2.title', {
       defaultMessage: 'Integrate the analytics tracker',
     }),
     children: (
       <FormattedMessage
-        id="xpack.enterpriseSearch.esre.measurePerformanceSection.step2.description"
+        id="xpack.enterpriseSearch.aiSearch.measurePerformanceSection.step2.description"
         defaultMessage="After creating a collection, follow the directions on how to integrate our tracker into your application or website."
       />
     ),
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.measurePerformanceSection.step3.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.measurePerformanceSection.step3.title', {
       defaultMessage: 'Review your dashboard',
     }),
     children: (
       <FormattedMessage
-        id="xpack.enterpriseSearch.esre.measurePerformanceSection.step3.description"
+        id="xpack.enterpriseSearch.aiSearch.measurePerformanceSection.step3.description"
         defaultMessage="Our dashboards and tools help you visualize your end-user behavior and measure the performance of your search applications."
       />
     ),
@@ -88,7 +88,7 @@ export const MeasurePerformanceSection: React.FC = () => (
           <EuiTitle>
             <h2>
               <FormattedMessage
-                id="xpack.enterpriseSearch.esre.measurePerformanceSection.title"
+                id="xpack.enterpriseSearch.aiSearch.measurePerformanceSection.title"
                 defaultMessage="Measure your performance"
               />
             </h2>
@@ -98,7 +98,7 @@ export const MeasurePerformanceSection: React.FC = () => (
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.esre.measurePerformanceSection.description"
+                id="xpack.enterpriseSearch.aiSearch.measurePerformanceSection.description"
                 defaultMessage="Use {behavioralAnalytics} dashboards and tools to visualize user behavior and measure the impact of your changes."
                 values={{
                   behavioralAnalytics: (
@@ -109,7 +109,7 @@ export const MeasurePerformanceSection: React.FC = () => (
                       external
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.esre.measurePerformanceSection.behavioralAnalyticsLinkText',
+                        'xpack.enterpriseSearch.aiSearch.measurePerformanceSection.behavioralAnalyticsLinkText',
                         {
                           defaultMessage: 'Behavioral Analytics',
                         }

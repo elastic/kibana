@@ -39,7 +39,7 @@ export const AISearchGuide: React.FC = () => {
       restrictWidth
       bottomBorder={false}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.enterpriseSearch.esre.guide.pageTitle', {
+        pageTitle: i18n.translate('xpack.enterpriseSearch.aiSearch.guide.pageTitle', {
           defaultMessage: 'Enhance your search with ESRE',
         }),
       }}
@@ -66,7 +66,7 @@ export const AISearchGuide: React.FC = () => {
             <EuiText>
               <p data-test-subj="esre-description-text">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.guide.description"
+                  id="xpack.enterpriseSearch.aiSearch.guide.description"
                   defaultMessage="The Elasticsearch Relevance Engine™ (ESRE) enables developers to build AI search-powered applications using the Elastic platform. ESRE is a set of tools and features that include our proprietary trained ML model ELSER, our vector search and embeddings capabilities, and RRF ranking for combining vector and text search."
                 />
               </p>

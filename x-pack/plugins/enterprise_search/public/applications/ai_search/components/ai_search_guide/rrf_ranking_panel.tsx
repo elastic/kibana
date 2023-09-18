@@ -28,7 +28,7 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 const steps: EuiContainedStepProps[] = [
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step1.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step1.title', {
       defaultMessage: 'Discover examples of using RRF in _search queries',
     }),
     children: (
@@ -38,7 +38,7 @@ const steps: EuiContainedStepProps[] = [
         target="_blank"
         external
       >
-        {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step1.rrfDocsLinkText', {
+        {i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step1.rrfDocsLinkText', {
           defaultMessage: 'Reciprocal Rank Fusion documentation',
         })}
       </EuiLink>
@@ -46,7 +46,7 @@ const steps: EuiContainedStepProps[] = [
     status: 'incomplete',
   },
   {
-    title: i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step2.title', {
+    title: i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.title', {
       defaultMessage: 'Try it today in Console',
     }),
     children: (
@@ -56,7 +56,7 @@ const steps: EuiContainedStepProps[] = [
         shouldNotCreateHref
       >
         <EuiButton>
-          {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.step2.buttonLabel', {
+          {i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.step2.buttonLabel', {
             defaultMessage: 'Open Console',
           })}
         </EuiButton>
@@ -74,13 +74,13 @@ export const RrfRankingPanel: React.FC = () => (
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.esre.rrfRankingPanel.description"
+              id="xpack.enterpriseSearch.aiSearch.rrfRankingPanel.description"
               data-telemetry-id="entSearch-esre-semanticSearch-rrfRankingPanel-rrfDocsLink"
               defaultMessage="Use {rrf} to combine rankings from multiple result sets with different relevance indicators, with no fine tuning required."
               values={{
                 rrf: (
                   <EuiLink target="_blank" href={docLinks.rrf} external={false}>
-                    {i18n.translate('xpack.enterpriseSearch.esre.rrfRankingPanel.rrfLinkText', {
+                    {i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingPanel.rrfLinkText', {
                       defaultMessage: 'Reciprocal Rank Fusion (RRF)',
                     })}
                   </EuiLink>

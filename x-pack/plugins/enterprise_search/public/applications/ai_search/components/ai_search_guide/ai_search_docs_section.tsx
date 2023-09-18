@@ -22,7 +22,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
           <EuiTitle>
             <h2>
               <FormattedMessage
-                id="xpack.enterpriseSearch.esre.esreDocsSection.title"
+                id="xpack.enterpriseSearch.aiSearch.esreDocsSection.title"
                 defaultMessage="Dive deeper with the ESRE docs"
               />
             </h2>
@@ -32,7 +32,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.esre.esreDocsSection.description"
+                id="xpack.enterpriseSearch.aiSearch.esreDocsSection.description"
                 defaultMessage="To learn more about how to get started with ESRE, and test these tools with concrete examples, visit the {esreDocumentation}."
                 values={{
                   esreDocumentation: (
@@ -43,7 +43,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                       external
                     >
                       {i18n.translate(
-                        'xpack.enterpriseSearch.esre.esreDocsSection.description.esreLinkText',
+                        'xpack.enterpriseSearch.aiSearch.esreDocsSection.description.esreLinkText',
                         {
                           defaultMessage: 'ESRE documentation',
                         }
@@ -66,7 +66,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                 <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.learn.title"
+                      id="xpack.enterpriseSearch.aiSearch.esreDocsSection.learn.title"
                       defaultMessage="Learn"
                     />
                   </h3>
@@ -76,7 +76,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.learn.description"
+                      id="xpack.enterpriseSearch.aiSearch.esreDocsSection.learn.description"
                       defaultMessage="These are complex subjects, so we've curated some {learningTopics} to help you get started."
                       values={{
                         learningTopics: (
@@ -87,7 +87,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                             external={false}
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.esre.esreDocsSection.learn.learningTopicsLinkText',
+                              'xpack.enterpriseSearch.aiSearch.esreDocsSection.learn.learningTopicsLinkText',
                               {
                                 defaultMessage: 'learning topics',
                               }
@@ -109,7 +109,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                 <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.faq.title"
+                      id="xpack.enterpriseSearch.aiSearch.esreDocsSection.faq.title"
                       defaultMessage="FAQ"
                     />
                   </h3>
@@ -119,7 +119,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.faq.description"
+                      id="xpack.enterpriseSearch.aiSearch.esreDocsSection.faq.description"
                       defaultMessage="Learn what ESRE is (and isn't) from these {frequentlyAskedQuestions}."
                       values={{
                         frequentlyAskedQuestions: (
@@ -130,7 +130,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                             external={false}
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.esre.esreDocsSection.learn.frequentlyAskedQuestionsLinkText',
+                              'xpack.enterpriseSearch.aiSearch.esreDocsSection.learn.frequentlyAskedQuestionsLinkText',
                               {
                                 defaultMessage: 'frequently asked questions',
                               }
@@ -152,7 +152,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                 <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.help.title"
+                      id="xpack.enterpriseSearch.aiSearch.esreDocsSection.help.title"
                       defaultMessage="Help"
                     />
                   </h3>
@@ -162,7 +162,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.enterpriseSearch.esre.esreDocsSection.help.description"
+                      id="xpack.enterpriseSearch.aiSearch.esreDocsSection.help.description"
                       defaultMessage="Need help? Check out the {discussForum}!"
                       values={{
                         discussForum: (
@@ -173,7 +173,7 @@ export const AISetAiSearchChromeSearchDocsSection: React.FC = () => (
                             external={false}
                           >
                             {i18n.translate(
-                              'xpack.enterpriseSearch.esre.esreDocsSection.learn.discussForumLinkText',
+                              'xpack.enterpriseSearch.aiSearch.esreDocsSection.learn.discussForumLinkText',
                               {
                                 defaultMessage: 'ESRE discuss forum',
                               }

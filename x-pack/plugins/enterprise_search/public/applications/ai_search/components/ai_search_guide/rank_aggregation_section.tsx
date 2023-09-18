@@ -29,7 +29,7 @@ export const RankAggregationSection: React.FC = () => {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.rankAggregationSection.title"
+                  id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.title"
                   defaultMessage="Use a rank aggregation method"
                 />
               </h2>
@@ -39,7 +39,7 @@ export const RankAggregationSection: React.FC = () => {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.esre.rankAggregationSection.description"
+                  id="xpack.enterpriseSearch.aiSearch.rankAggregationSection.description"
                   defaultMessage="Optional methods for fusing or combining different rankings to achieve better overall ranking performance."
                 />
               </p>
@@ -54,11 +54,11 @@ export const RankAggregationSection: React.FC = () => {
               id="rrfRankingAccordion"
               data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingAccordion"
               icon={rrfRankingIllustration}
-              title={i18n.translate('xpack.enterpriseSearch.esre.rrfRankingAccordion.title', {
+              title={i18n.translate('xpack.enterpriseSearch.aiSearch.rrfRankingAccordion.title', {
                 defaultMessage: 'RRF hybrid ranking',
               })}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.rrfRankingAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.rrfRankingAccordion.description',
                 {
                   defaultMessage: 'Intelligently combines rankings without configuration',
                 }
@@ -75,13 +75,13 @@ export const RankAggregationSection: React.FC = () => {
               data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationAccordion"
               icon={linearCombinationIllustration}
               title={i18n.translate(
-                'xpack.enterpriseSearch.esre.linearCombinationAccordion.title',
+                'xpack.enterpriseSearch.aiSearch.linearCombinationAccordion.title',
                 {
                   defaultMessage: 'Linear combination',
                 }
               )}
               description={i18n.translate(
-                'xpack.enterpriseSearch.esre.linearCombinationAccordion.description',
+                'xpack.enterpriseSearch.aiSearch.linearCombinationAccordion.description',
                 {
                   defaultMessage: 'Weighted results from multiple rankings',
                 }
