@@ -21,6 +21,7 @@ export const apmServiceDashboards: SavedObjectsType = {
       kuery: { type: 'text' },
       useContextFilter: { type: 'boolean' },
       linkTo: { type: 'keyword' },
+      serviceName: { type: 'keyword' },
     },
   },
   management: {
@@ -41,6 +42,7 @@ export const apmServiceDashboards: SavedObjectsType = {
           kuery: schema.string(),
           useContextFilter: schema.boolean(),
           linkTo: schema.string(),
+          serviceName: schema.maybe(schema.string()),
         }),
       },
     },

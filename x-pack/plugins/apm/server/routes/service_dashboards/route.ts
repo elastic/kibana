@@ -8,9 +8,18 @@
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { saveServiceDashbord } from './save_service_dashboard';
-import { SavedServiceDashboard } from '../../../common/service_dashboards';
+import {
+  APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
+  DashboardTypeEnum,
+  SavedServiceDashboard,
+} from '../../../common/service_dashboards';
 import { getServiceDashboards } from './get_service_dashboards';
-export const linkToRt = t.union([t.literal('single'), t.literal('multiple')]);
+import { fromKueryExpression } from '../../../../../../packages/kbn-es-query';
+
+const linkToRt = t.union([
+  t.literal(DashboardTypeEnum.single),
+  t.literal(DashboardTypeEnum.multiple),
+]);
 
 const serviceDashboardSaveRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/service-dashboard',
@@ -25,6 +34,7 @@ const serviceDashboardSaveRoute = createApmServerRoute({
       dashboardSavedObjectId: t.string,
       dashboardTitle: t.string,
       kuery: t.union([t.string, t.undefined]),
+      serviceName: t.union([t.string, t.undefined]),
       useContextFilter: t.boolean,
       linkTo: linkToRt,
     }),
@@ -57,22 +67,24 @@ const serviceDashboardsRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{ serviceSpecificDashboards: SavedServiceDashboard[] }> => {
+  ): Promise<{ serviceDashboards: SavedServiceDashboard[] }> => {
     const { context, params } = resources;
     const { serviceName } = params.path;
+    const so_prefix_attributes = `${APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE}.attributes`;
 
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
 
-    const [serviceSpecificDashboards] = await Promise.all([
+    const [serviceDashboards] = await Promise.all([
       getServiceDashboards({
         savedObjectsClient,
-        serviceName,
+        query: `${so_prefix_attributes}.kuery: "service.name\: ${serviceName}"`,
+        // query: `'service.name: ${serviceName}' | single`,
       }),
     ]);
 
-    return { serviceSpecificDashboards };
+    return { serviceDashboards };
   },
 });
 

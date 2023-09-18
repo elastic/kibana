@@ -22,6 +22,13 @@ export async function saveServiceDashbord({
   serviceDashboardId,
   serviceDashboard,
 }: Options): Promise<SavedServiceDashboard> {
+  const t = {
+    dashboardSavedObjectId: 'id-2',
+    dashboardTitle: 'title-2',
+    useContextFilter: false,
+    kuery: 'link to',
+    linkTo: 'single',
+  };
   const {
     id,
     attributes,
@@ -32,10 +39,7 @@ export async function saveServiceDashbord({
         serviceDashboardId,
         serviceDashboard
       )
-    : savedObjectsClient.create(
-        APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE,
-        serviceDashboard
-      ));
+    : savedObjectsClient.create(APM_SERVICE_DASHBOARD_SAVED_OBJECT_TYPE, t));
   return {
     id,
     ...(attributes as ServiceDashboard),

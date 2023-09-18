@@ -21,7 +21,8 @@ export interface ServiceDashboard {
   dashboardSavedObjectId: string;
   dashboardTitle: string;
   useContextFilter: boolean;
-  kuery: string;
+  kuery?: string;
+  serviceName?: string;
   linkTo: DashboardType;
 }
 

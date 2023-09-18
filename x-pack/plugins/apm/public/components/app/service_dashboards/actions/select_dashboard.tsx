@@ -15,6 +15,8 @@ import {
   EuiSwitch,
   EuiModalBody,
   EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
@@ -22,6 +24,9 @@ import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { DashboardItem } from '../../../../../../../../src/plugins/dashboard/common/content_management';
+import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
+import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 
 interface Props {
   onClose: () => void;
@@ -33,7 +38,10 @@ export function SelectDashboard({ onClose }: Props) {
   } = useApmPluginContext();
 
   const { data, status } = useDashboardFetcher();
-  const [selectedDashboard, setSelectedDashboard] = useState([]);
+  const [useContextFilter, setUseContextFilter] = useState(true);
+  const [selectedDashboard, setSelectedDashboard] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([]);
 
   const {
     path: { serviceName },
@@ -49,15 +57,14 @@ export function SelectDashboard({ onClose }: Props) {
   const onSave = useCallback(
     async function () {
       const [newDashboard] = selectedDashboard;
-      // setIsLoading(true);
       try {
         await callApmApi('POST /internal/apm/service-dashboard', {
           params: {
             body: {
               dashboardTitle: newDashboard.label,
               dashboardSavedObjectId: newDashboard.value,
-              kuery: '',
-              environment: '',
+              useContextFilter,
+              linkTo: DashboardTypeEnum.single, //
               serviceName,
             },
           },
@@ -113,31 +120,37 @@ export function SelectDashboard({ onClose }: Props) {
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiComboBox
-          isLoading={status === FETCH_STATUS.LOADING}
-          isDisabled={status === FETCH_STATUS.LOADING}
-          placeholder={i18n.translate(
-            'xpack.apm.serviceDashboards.selectDashboard.placeholder',
-            {
-              defaultMessage: 'Select dasbboard',
-            }
-          )}
-          singleSelection={{ asPlainText: true }}
-          options={data?.map((dashboardItem) => ({
-            label: dashboardItem.attributes.title,
-            value: dashboardItem.id,
-          }))}
-          selectedOptions={selectedDashboard}
-          onChange={(newSelection) => setSelectedDashboard(newSelection)}
-          isClearable={true}
-        />
+        <EuiFlexGroup direction="column" justifyContent="center">
+          <EuiComboBox
+            isLoading={status === FETCH_STATUS.LOADING}
+            isDisabled={status === FETCH_STATUS.LOADING}
+            placeholder={i18n.translate(
+              'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+              {
+                defaultMessage: 'Select dasbboard',
+              }
+            )}
+            singleSelection={{ asPlainText: true }}
+            options={data?.map((dashboardItem: DashboardItem) => ({
+              label: dashboardItem.attributes.title,
+              value: dashboardItem.id,
+            }))}
+            selectedOptions={selectedDashboard}
+            onChange={(newSelection) => setSelectedDashboard(newSelection)}
+            isClearable={true}
+          />
 
-        <EuiSwitch
-          label="Filter by service and environment"
-          onChange={() => console.log('r')}
-          checked={false}
-          compressed
-        />
+          <EuiSwitch
+            label={i18n.translate(
+              'xpack.apm.dashboard.addDashboard.useContextFilterLabel',
+              {
+                defaultMessage: 'Filter by `service` and `environment`',
+              }
+            )}
+            onChange={() => setUseContextFilter(!useContextFilter)}
+            checked={useContextFilter}
+          />
+        </EuiFlexGroup>
       </EuiModalBody>
 
       <EuiModalFooter>
