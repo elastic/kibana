@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { z } from 'zod';
 import { pagination } from '../model/pagination';
-import { timerange } from '../model/timerange';
+import { timelineRequestBasicOptionsSchema } from './request_basic';
 
-export const requestPaginated = z.object({
-  defaultIndex: z.array(z.string()).optional(),
+export const requestPaginated = timelineRequestBasicOptionsSchema.extend({
   pagination,
-  timerange,
 });

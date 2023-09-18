@@ -11,10 +11,11 @@ import { runtimeMappings } from '../model/runtime_mappings';
 import { timerange } from '../model/timerange';
 
 export const timelineRequestBasicOptionsSchema = z.object({
+  indexType: z.string().optional(),
   timerange: timerange.optional(),
   filterQuery,
   defaultIndex: z.array(z.string()).optional(),
-  factoryQueryType: z.string().optional(),
   entityType: z.enum(['events', 'sessions']).optional(),
   runtimeMappings,
+  params: z.any().optional(),
 });

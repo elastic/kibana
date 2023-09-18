@@ -39,6 +39,7 @@ export interface TimelineEventsAllStrategyResponse extends IEsSearchResponse {
 }
 
 type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
+
 export interface TimelineEventsAllRequestOptions extends TimelineRequestOptionsPaginated {
   authFilter?: JsonObject;
   excludeEcsData?: boolean;

@@ -15,12 +15,9 @@ import {
 import { ENHANCED_ES_SEARCH_STRATEGY, ISearchOptions } from '@kbn/data-plugin/common';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { Logger } from '@kbn/logging';
-import {
-  TimelineFactoryQueryTypes,
-  TimelineStrategyResponseType,
-  TimelineStrategyRequestType,
-  EntityType,
-} from '../../../common/search_strategy/timeline';
+import { z } from 'zod';
+import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
+import { TimelineFactoryQueryTypes, EntityType } from '../../../common/search_strategy/timeline';
 import { timelineFactory } from './factory';
 import { TimelineFactory } from './factory/types';
 import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';
@@ -29,18 +26,17 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
   data: PluginStart,
   logger: Logger,
   security?: SecurityPluginSetup
-): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): ISearchStrategy<z.input<typeof searchStrategyRequestSchema>, any> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
   return {
     search: (request, options, deps) => {
-      const factoryQueryType = request.factoryQueryType;
       const entityType = request.entityType;
 
-      if (factoryQueryType == null) {
-        throw new Error('factoryQueryType is required');
-      }
+      const searchStrategyRequest = searchStrategyRequestSchema.parse(request);
 
-      const queryFactory: TimelineFactory<T> = timelineFactory[factoryQueryType];
+      const queryFactory: TimelineFactory<T> =
+        timelineFactory[searchStrategyRequest.factoryQueryType];
 
       if (entityType != null && entityType === EntityType.SESSIONS) {
         return timelineSessionsSearchStrategy({
@@ -51,7 +47,14 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           queryFactory,
         });
       } else {
-        return timelineSearchStrategy({ es, request, options, deps, queryFactory, logger });
+        return timelineSearchStrategy({
+          es,
+          request: searchStrategyRequest,
+          options,
+          deps,
+          queryFactory,
+          logger,
+        });
       }
     },
     cancel: async (id, options, deps) => {
@@ -70,7 +73,7 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory,
 }: {
   es: ISearchStrategy;
-  request: TimelineStrategyRequestType<T>;
+  request: z.infer<typeof searchStrategyRequestSchema>;
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
@@ -96,7 +99,7 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory,
 }: {
   es: ISearchStrategy;
-  request: TimelineStrategyRequestType<T>;
+  request: z.infer<typeof searchStrategyRequestSchema>;
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;

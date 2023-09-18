@@ -7,14 +7,11 @@
 
 import { z } from 'zod';
 import { filterQuery } from '../model/filter_query';
-import { pagination } from '../model/pagination';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { sort } from '../model/sort';
-import { timerange } from '../model/timerange';
+import { requestPaginated } from './request_paginated';
 
-export const timelineEqlRequestOptionsSchema = z.object({
-  defaultIndex: z.array(z.string()).optional(),
-  timerange,
+export const timelineEqlRequestOptionsSchema = requestPaginated.extend({
   sort,
   filterQuery,
   eventCategoryField: z.string().optional(),
@@ -22,7 +19,6 @@ export const timelineEqlRequestOptionsSchema = z.object({
   timestampField: z.string().optional(),
   fieldRequested: z.array(z.string()),
   size: z.number().optional(),
-  pagination,
   runTimeMappings: runtimeMappings.optional(),
 });
 

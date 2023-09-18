@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { TimelineEventsQueries } from '../../../search_strategy';
 import { language } from '../model/language';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { sortItem } from '../model/sort';
@@ -37,6 +38,7 @@ export const timelineEventsAllSchema = requestPaginated.extend({
     .optional(),
   runtimeMappings,
   language,
+  factoryQueryType: z.literal(TimelineEventsQueries.all),
 });
 
 export type TimelineEventsAllOptionsInput = z.input<typeof timelineEventsAllSchema>;

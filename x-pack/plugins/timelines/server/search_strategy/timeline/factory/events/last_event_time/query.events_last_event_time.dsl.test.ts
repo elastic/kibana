@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TimelineEventsQueries } from '../../../../../../common/search_strategy';
 import { LastEventIndexKey } from '../../../../../../common/api/search_strategy/timeline/events_last_event_time';
 import { buildLastEventTimeQuery } from './query.events_last_event_time.dsl';
 
@@ -15,6 +16,7 @@ describe('buildLastEventTimeQuery', () => {
       indexKey: LastEventIndexKey.ipDetails,
       details: { ip: '12345567' },
       defaultIndex,
+      factoryQueryType: TimelineEventsQueries.lastEventTime,
     });
     expect(query).toMatchInlineSnapshot(`
       Object {

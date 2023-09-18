@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { TimelineEventsQueries } from '../../../search_strategy';
 import { timelineRequestBasicOptionsSchema } from './request_basic';
 
 export enum LastEventIndexKey {
@@ -37,6 +38,7 @@ export const timelineEventsLastEventTimeRequestSchema = timelineRequestBasicOpti
       userName: z.string().nullable().optional(),
       ip: z.string().nullable().optional(),
     }),
+    factoryQueryType: z.literal(TimelineEventsQueries.lastEventTime),
   });
 
 export type TimelineEventsLastEventTimeRequestOptionsInput = z.input<

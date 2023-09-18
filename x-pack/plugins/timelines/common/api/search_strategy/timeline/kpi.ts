@@ -6,9 +6,12 @@
  */
 
 import { z } from 'zod';
+import { TimelineEventsQueries } from '../../../search_strategy';
 import { timelineRequestBasicOptionsSchema } from './request_basic';
 
-export const timelineKpiRequestOptionsSchema = timelineRequestBasicOptionsSchema;
+export const timelineKpiRequestOptionsSchema = timelineRequestBasicOptionsSchema.extend({
+  factoryQueryType: z.literal(TimelineEventsQueries.kpi),
+});
 
 export type TimelineKpiRequestOptionsInput = z.input<typeof timelineKpiRequestOptionsSchema>;
 

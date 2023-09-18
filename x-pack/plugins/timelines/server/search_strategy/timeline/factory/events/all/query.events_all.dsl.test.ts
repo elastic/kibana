@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../../../common/search_strategy';
+import { Direction, TimelineEventsQueries } from '../../../../../../common/search_strategy';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 
 describe('buildTimelineEventsAllQuery', () => {
   it('should return ip details query if index key is ipDetails', () => {
     const defaultIndex = ['.siem-signals-default'];
     const query = buildTimelineEventsAllQuery({
+      factoryQueryType: TimelineEventsQueries.all,
       fields: [],
       defaultIndex,
       filterQuery: '',

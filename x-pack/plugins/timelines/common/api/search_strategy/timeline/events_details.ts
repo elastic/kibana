@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { TimelineEventsQueries } from '../../../search_strategy';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { requestPaginated } from './request_paginated';
 
@@ -14,6 +15,7 @@ export const timelineEventsDetailsSchema = requestPaginated.partial().extend({
   eventId: z.string(),
   authFilter: z.object({}).optional(),
   runtimeMappings,
+  factoryQueryType: z.literal(TimelineEventsQueries.details),
 });
 
 export type TimelineEventsDetailsRequestOptionsInput = z.input<typeof timelineEventsDetailsSchema>;

@@ -9,17 +9,20 @@ import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import { ESQuery } from '../../typed_json';
 import {
   TimelineEventsQueries,
-  TimelineEventsAllRequestOptions,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
   EntityType,
 } from './events';
 import { PaginationInputPaginated, TimerangeInput, SortField } from '../common';
 import type { RunTimeMappings } from './events/eql';
+import {
+  TimelineEventsAllOptionsInput,
+  TimelineEventsDetailsRequestOptionsInput,
+  TimelineEventsLastEventTimeRequestOptionsInput,
+  TimelineKpiRequestOptionsInput,
+} from '../../api/search_strategy';
 
 export * from './events';
 
@@ -58,11 +61,11 @@ export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
 
 export type TimelineStrategyRequestType<T extends TimelineFactoryQueryTypes> =
   T extends TimelineEventsQueries.all
-    ? TimelineEventsAllRequestOptions
+    ? TimelineEventsAllOptionsInput
     : T extends TimelineEventsQueries.details
-    ? TimelineEventsDetailsRequestOptions
+    ? TimelineEventsDetailsRequestOptionsInput
     : T extends TimelineEventsQueries.kpi
-    ? TimelineRequestBasicOptions
+    ? TimelineKpiRequestOptionsInput
     : T extends TimelineEventsQueries.lastEventTime
-    ? TimelineEventsLastEventTimeRequestOptions
+    ? TimelineEventsLastEventTimeRequestOptionsInput
     : never;
