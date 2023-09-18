@@ -14,6 +14,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import type { SampleDatasetSchema, DataIndexSchema } from './lib/sample_dataset_registry_types';
 import { dateToIso8601IgnoringTime } from './lib/translate_timestamp';
 import { createIndexName } from './lib/create_index_name';
@@ -206,7 +207,12 @@ export class SampleDataInstaller {
               ...dataIndex.indexSettings,
             },
           },
-          mappings: { properties: dataIndex.fields },
+          mappings: {
+            properties: dataIndex.fields,
+            dynamic_templates: dataIndex.dynamicTemplates as Array<
+              Record<string, MappingDynamicTemplate>
+            >,
+          },
           aliases,
         });
       }

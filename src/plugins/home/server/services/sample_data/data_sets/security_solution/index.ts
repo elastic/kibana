@@ -31,7 +31,7 @@ const securitysolutionAlertsIngestPipelineDescription = i18n.translate(
   }
 );
 
-const securitysolutionAuditbeatIngestPipelineDescription = i18n.translate(
+const securitysolutionIngestPipelineDescription = i18n.translate(
   'home.sampleData.securitySolutionSpecAuditbeatIngestPipelineDescription',
   {
     defaultMessage: 'This adjust @timestamp field to the time when data was ingested.',
@@ -66,7 +66,40 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
         },
         pipeline: {
           id: 'Security_Solution_auditbeat_sample_data_ingest_pipeline',
-          description: securitysolutionAuditbeatIngestPipelineDescription,
+          description: securitysolutionIngestPipelineDescription,
+          processors: [
+            {
+              set: {
+                field: '@timestamp',
+                value: ['{{ _ingest.timestamp }}'],
+                ignore_failure: true,
+              },
+            },
+          ],
+        },
+      },
+      {
+        id: 'logs',
+        dataPath: path.join(__dirname, './logs.json.gz'),
+        fields: alertsFieldMappings,
+        timeFields: ['@timestamp', 'alert.actions.createdAt'],
+        currentTimeMarker: '2018-01-09T00:00:00',
+        preserveDayOfWeekTimeOfDay: true,
+        deleteAliasWhenRemoved: true,
+        aliases: {
+          'logs-sample-data': {},
+        },
+        indexSettings: {
+          default_pipeline: 'Security_Solution_logs_sample_data_ingest_pipeline',
+          mapping: {
+            total_fields: {
+              limit: 10000,
+            },
+          },
+        },
+        pipeline: {
+          id: 'Security_Solution_logs_sample_data_ingest_pipeline',
+          description: securitysolutionIngestPipelineDescription,
           processors: [
             {
               set: {
@@ -82,7 +115,44 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
         id: 'alerts',
         dataPath: path.join(__dirname, './alerts.json.gz'),
         fields: alertsFieldMappings,
-        timeFields: ['@timestamp', 'alert.actions.createdAt'],
+        dynamicTemplates: [
+          {
+            'container.labels': {
+              path_match: 'container.labels.*',
+              mapping: {
+                type: 'keyword',
+              },
+              match_mapping_type: 'string',
+            },
+          },
+          {
+            'winlog.user_data': {
+              path_match: 'winlog.user_data.*',
+              mapping: {
+                type: 'keyword',
+              },
+              match_mapping_type: 'string',
+            },
+          },
+          {
+            'winlog.event_data': {
+              path_match: 'winlog.user_data.*',
+              mapping: {
+                type: 'keyword',
+              },
+              match_mapping_type: 'string',
+            },
+          },
+          {
+            strings_as_keyword: {
+              mapping: {
+                type: 'keyword',
+              },
+              match_mapping_type: 'string',
+            },
+          },
+        ],
+        timeFields: ['@timestamp', 'alert.actions.createdAt', 'updated_at', 'alert.createdAt'],
         currentTimeMarker: '2018-01-09T00:00:00',
         preserveDayOfWeekTimeOfDay: true,
         aliases: {
@@ -91,6 +161,11 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
         deleteAliasWhenRemoved: false,
         indexSettings: {
           default_pipeline: 'Security_Solution_alerts_sample_data_ingest_pipeline',
+          mapping: {
+            total_fields: {
+              limit: 10000,
+            },
+          },
         },
         pipeline: {
           id: 'Security_Solution_alerts_sample_data_ingest_pipeline',
@@ -100,6 +175,27 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
               set: {
                 field: 'kibana.space_ids',
                 value: [spaceId],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'kibana.alert.workflow_status',
+                value: ['open'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'kibana.alert.severity',
+                value: ['critical'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'kibana.alert.rule.name',
+                value: ['Malware Prevention Alert'],
                 ignore_failure: true,
               },
             },
@@ -119,15 +215,22 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
             },
             {
               set: {
-                field: 'agent.type',
-                value: ['endpoint'],
+                field: 'alert.createdAt',
+                value: ['{{ _ingest.timestamp }}'],
                 ignore_failure: true,
               },
             },
             {
               set: {
-                field: 'event.kind',
-                value: ['signal'],
+                field: 'updated_at',
+                value: ['{{ _ingest.timestamp }}'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'agent.type',
+                value: ['endpoint'],
                 ignore_failure: true,
               },
             },

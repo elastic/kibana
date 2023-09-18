@@ -37,6 +37,23 @@ const dataIndexSchema = schema.object({
   // Object defining Elasticsearch field mappings (contents of index.mappings.type.properties)
   fields: schema.recordOf(schema.string(), schema.any()),
 
+  dynamicTemplates: schema.maybe(
+    schema.arrayOf(
+      schema.recordOf(
+        schema.string(),
+        schema.object({
+          mapping: schema.object({ type: schema.string() }),
+          match: schema.maybe(schema.string()),
+          match_mapping_type: schema.maybe(schema.string()),
+          match_pattern: schema.maybe(schema.string()),
+          path_match: schema.maybe(schema.string()),
+          path_unmatch: schema.maybe(schema.string()),
+          unmatch: schema.maybe(schema.string()),
+        })
+      )
+    )
+  ),
+
   // times fields that will be updated relative to now when data is installed
   timeFields: schema.arrayOf(schema.string()),
 
