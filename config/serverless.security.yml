@@ -2,7 +2,6 @@
 
 ## Disable plugins
 enterpriseSearch.enabled: false
-discover.headlessLocation: 'securitySolutionUI'
 xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observability.enabled: false
@@ -32,3 +31,6 @@ xpack.fleet.internal.capabilities: ['security']
 # Serverless security specific options
 xpack.securitySolution.enableExperimental:
   - discoverInTimeline
+
+xpack.securitySolution.hostDiscover: true
+discover.headless: true

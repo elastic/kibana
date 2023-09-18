@@ -8,11 +8,17 @@
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import { useHistogramCustomization } from './use_histogram_customizations';
 import { useSearchBarCustomizations } from './use_search_bar_customizations';
+import { useFlyoutCustomizations } from './use_flyout_customizations';
 
 export const useSetDiscoverCustomizationCallbacks = (): CustomizationCallback[] => {
   const searchBarCustomizationCallback = useSearchBarCustomizations();
 
   const histogramCustomizationCallback = useHistogramCustomization();
+  const flyoutCustomizationCallback = useFlyoutCustomizations();
 
-  return [searchBarCustomizationCallback, histogramCustomizationCallback];
+  return [
+    searchBarCustomizationCallback,
+    histogramCustomizationCallback,
+    flyoutCustomizationCallback,
+  ];
 };

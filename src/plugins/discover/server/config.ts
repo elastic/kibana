@@ -9,9 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  headlessLocation: schema.maybe(
-    schema.oneOf([schema.literal('securitySolutionUI'), schema.literal('observability')])
-  ),
+  headless: schema.maybe(schema.boolean()),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -127,8 +127,6 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
   constructor(protected readonly deps: DiscoverAppLocatorDependencies) {}
 
   public readonly getLocation = async (params: DiscoverAppLocatorParams) => {
-    console.log('app locator');
-
     const {
       useHash = this.deps.useHash,
       filters,

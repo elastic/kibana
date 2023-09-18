@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './search_bar_customization';
-export * from './top_nav_customization';
-export * from './histogram_customization';
-export * from './flyout_customization';
+export interface FlyoutCustomization {
+  id: 'flyout';
+  docLinksDisabled?: boolean;
+}

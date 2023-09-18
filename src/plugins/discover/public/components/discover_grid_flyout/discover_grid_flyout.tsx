@@ -32,6 +32,7 @@ import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
+import { useDiscoverCustomization } from '../../customizations';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -72,6 +73,7 @@ export function DiscoverGridFlyout({
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isPlainRecord = isTextBasedQuery(query);
+  const flyoutCustomization = useDiscoverCustomization('flyout');
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
@@ -136,7 +138,7 @@ export function DiscoverGridFlyout({
 
           <EuiSpacer size="s" />
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            {!isPlainRecord && (
+            {!isPlainRecord && flyoutCustomization?.docLinksDisabled !== true && (
               <>
                 <EuiHideFor sizes={['xs', 's', 'm']}>
                   <EuiFlexItem grow={false}>

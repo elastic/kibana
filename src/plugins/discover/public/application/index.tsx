@@ -18,16 +18,9 @@ export interface RenderAppProps {
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
   isDev: boolean;
-  config: { headlessLocation?: string };
 }
 
-export const renderApp = ({
-  element,
-  services,
-  profileRegistry,
-  isDev,
-  config,
-}: RenderAppProps) => {
+export const renderApp = ({ element, services, profileRegistry, isDev }: RenderAppProps) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();
@@ -48,7 +41,6 @@ export const renderApp = ({
       profileRegistry={profileRegistry}
       history={history}
       isDev={isDev}
-      config={config}
     />,
     {
       theme: core.theme,

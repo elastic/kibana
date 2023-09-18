@@ -113,6 +113,7 @@ export const configSchema = schema.object({
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
+  hostDiscover: schema.maybe(schema.boolean({ defaultValue: false })),
 
   /**
    * The Max number of Bytes allowed for the `upload` endpoint response action

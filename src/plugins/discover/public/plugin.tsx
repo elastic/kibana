@@ -15,7 +15,6 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -209,7 +208,7 @@ export interface DiscoverStartPlugins {
 export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
-  private config: { headlessLocation?: string };
+  private config: { headless?: boolean };
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private profileRegistry = createProfileRegistry();
@@ -284,67 +283,66 @@ export class DiscoverPlugin
           })
       )
     );
-    const navLinkStatus =
-      this.config.headlessLocation !== undefined ? AppNavLinkStatus.hidden : undefined;
 
-    core.application.register({
-      id: PLUGIN_ID,
-      title: 'Discover',
-      updater$: appStateUpdater$,
-      order: 1000,
-      euiIconType: 'logoKibana',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      navLinkStatus,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, discoverStartPlugins] = await core.getStartServices();
-        setScopedHistory(params.history);
-        setHeaderActionMenuMounter(params.setHeaderActionMenu);
-        syncHistoryLocations();
-        appMounted();
+    if (this.config.headless !== true) {
+      core.application.register({
+        id: PLUGIN_ID,
+        title: 'Discover',
+        updater$: appStateUpdater$,
+        order: 1000,
+        euiIconType: 'logoKibana',
+        defaultPath: '#/',
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, discoverStartPlugins] = await core.getStartServices();
+          setScopedHistory(params.history);
+          setHeaderActionMenuMounter(params.setHeaderActionMenu);
+          syncHistoryLocations();
+          appMounted();
 
-        // dispatch synthetic hash change event to update hash history objects
-        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-        const unlistenParentHistory = params.history.listen(() => {
-          window.dispatchEvent(new HashChangeEvent('hashchange'));
-        });
+          // dispatch synthetic hash change event to update hash history objects
+          // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+          const unlistenParentHistory = params.history.listen(() => {
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
+          });
 
-        const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
-          locator: this.locator!,
-          contextLocator: this.contextLocator!,
-          singleDocLocator: this.singleDocLocator!,
-        });
+          const { locator, contextLocator, singleDocLocator } = await getProfileAwareLocators({
+            locator: this.locator!,
+            contextLocator: this.contextLocator!,
+            singleDocLocator: this.singleDocLocator!,
+          });
 
-        const services = buildServices(
-          coreStart,
-          discoverStartPlugins,
-          this.initializerContext,
-          locator,
-          contextLocator,
-          singleDocLocator
-        );
+          const services = buildServices(
+            coreStart,
+            discoverStartPlugins,
+            this.initializerContext,
+            locator,
+            contextLocator,
+            singleDocLocator
+          );
 
-        // make sure the data view list is up to date
-        await discoverStartPlugins.dataViews.clearCache();
+          // make sure the data view list is up to date
+          await discoverStartPlugins.dataViews.clearCache();
 
-        const { renderApp } = await import('./application');
-        // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
-        // due to EUI bug https://github.com/elastic/eui/pull/5152
-        params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp({
-          element: params.element,
-          services,
-          profileRegistry: this.profileRegistry,
-          isDev,
-          config: this.config,
-        });
-        return () => {
-          unlistenParentHistory();
-          unmount();
-          appUnMounted();
-        };
-      },
-    });
+          const { renderApp } = await import('./application');
+          // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
+          // due to EUI bug https://github.com/elastic/eui/pull/5152
+          params.element.classList.add('dscAppWrapper');
+          const unmount = renderApp({
+            element: params.element,
+            services,
+            profileRegistry: this.profileRegistry,
+            isDev,
+          });
+          return () => {
+            unlistenParentHistory();
+            unmount();
+            appUnMounted();
+          };
+        },
+      });
+    }
+
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
       return `#${path}`;
     });

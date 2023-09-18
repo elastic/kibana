@@ -21,13 +21,11 @@ import { ViewAlertRoute } from './view_alert';
 import type { CustomizationCallback } from '../customizations';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
-import { useHeadlessRoutes } from './use_headless';
 
 interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
-  config?: { headlessLocation?: string };
 }
 
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
@@ -35,8 +33,6 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
     (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
     [prefix]
   );
-  const { config } = mainRouteProps;
-  useHeadlessRoutes(config);
   return (
     <Routes>
       <Route path={prefixPath('context/:dataViewId/:id')}>
@@ -96,7 +92,6 @@ export interface DiscoverRouterProps {
   profileRegistry: DiscoverProfileRegistry;
   history: History;
   isDev: boolean;
-  config?: { headlessLocation?: string };
 }
 
 export const DiscoverRouter = ({

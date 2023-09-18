@@ -26,7 +26,7 @@ export const createMockConfig = (): ConfigType => {
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,
-
+    hostDiscover: false,
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
   };

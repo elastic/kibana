@@ -25,7 +25,7 @@ export interface LocatorServiceScopedClient {
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
-    headlessLocation: true,
+    headless: true,
   },
   schema: configSchema,
 };
