@@ -108,7 +108,7 @@ export async function getEditLensConfiguration(
      */
     const saveByRef = useCallback(
       async (attrs: Document) => {
-        const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement.client);
+        const savedObjectStore = new SavedObjectIndexStore(lensServices.contentManagement);
         await savedObjectStore.save({
           ...attrs,
           savedObjectId,

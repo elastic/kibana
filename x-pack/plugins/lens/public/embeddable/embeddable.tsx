@@ -611,21 +611,29 @@ export class Embeddable
   private _userMessages: UserMessage[] = [];
 
   // loads all available user messages
-  private loadUserMessages() {
+  private loadUserMessages(attrs?: Document) {
     const userMessages: UserMessage[] = [];
+    const viz = attrs ?? this.savedVis;
+    const activeVisualizationState = attrs
+      ? attrs.state.visualization
+      : this.activeVisualizationState;
+
+    const activeDatasourceState = attrs
+      ? attrs.state.datasourceStates[this.activeDatasourceId ?? 'formBased']
+      : this.activeDatasourceState;
 
     userMessages.push(
       ...getApplicationUserMessages({
-        visualizationType: this.savedVis?.visualizationType,
+        visualizationType: viz?.visualizationType,
         visualization: {
-          state: this.activeVisualizationState,
+          state: activeVisualizationState,
           activeId: this.activeVisualizationId,
         },
         visualizationMap: this.deps.visualizationMap,
         activeDatasource: this.activeDatasource,
         activeDatasourceState: {
-          isLoading: !this.activeDatasourceState,
-          state: this.activeDatasourceState,
+          isLoading: !activeDatasourceState,
+          state: activeDatasourceState,
         },
         dataViews: {
           indexPatterns: this.indexPatterns,
@@ -635,7 +643,7 @@ export class Embeddable
       })
     );
 
-    if (!this.savedVis) {
+    if (!viz) {
       return userMessages;
     }
     const mergedSearchContext = this.getMergedSearchContext();
@@ -648,14 +656,14 @@ export class Embeddable
       datasourceLayers: getDatasourceLayers(
         {
           [this.activeDatasourceId!]: {
-            isLoading: !this.activeDatasourceState,
-            state: this.activeDatasourceState,
+            isLoading: !activeDatasourceState,
+            state: activeDatasourceState,
           },
         },
         this.deps.datasourceMap,
         this.indexPatterns
       ),
-      query: this.savedVis.state.query,
+      query: viz.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',
@@ -665,15 +673,15 @@ export class Embeddable
     };
 
     userMessages.push(
-      ...(this.activeDatasource?.getUserMessages(this.activeDatasourceState, {
+      ...(this.activeDatasource?.getUserMessages(activeDatasourceState, {
         setState: () => {},
         frame: frameDatasourceAPI,
         visualizationInfo: this.activeVisualization?.getVisualizationInfo?.(
-          this.activeVisualizationState,
+          activeVisualizationState,
           frameDatasourceAPI
         ),
       }) ?? []),
-      ...(this.activeVisualization?.getUserMessages?.(this.activeVisualizationState, {
+      ...(this.activeVisualization?.getUserMessages?.(activeVisualizationState, {
         frame: frameDatasourceAPI,
       }) ?? [])
     );
@@ -786,6 +794,8 @@ export class Embeddable
        * Here we are converting the by reference panels to by value when user is inline editing
        */
       this.updateInput({ attributes: attrs, savedObjectId: undefined });
+      // should load again the user messages, otherwise the embeddable state is stuck in an error state
+      this.loadUserMessages(attrs);
     }
   }
 

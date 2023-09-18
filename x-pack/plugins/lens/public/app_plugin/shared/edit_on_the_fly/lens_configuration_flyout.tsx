@@ -31,7 +31,14 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
+import {
+  useLensSelector,
+  selectFramePublicAPI,
+  useLensDispatch,
+  updateIndexPatterns,
+  applyChanges,
+} from '../../../state_management';
+import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 
 import type { DatasourceMap, VisualizationMap } from '../../../types';
@@ -41,6 +48,7 @@ import type { LensInspector } from '../../../lens_inspector_service';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import { extractReferencesFromState } from '../../../utils';
 import type { Document } from '../../../persistence';
+import { createIndexPatternService } from '../../../data_views_service/service';
 
 export interface EditConfigPanelProps {
   coreStart: CoreStart;
@@ -103,6 +111,7 @@ export function LensEditConfigurationFlyout({
   const activeDatasource = datasourceMap[datasourceId];
   const { euiTheme } = useEuiTheme();
   const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+  const dispatch = useLensDispatch();
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);
@@ -199,6 +208,24 @@ export function LensEditConfigurationFlyout({
     datasourceMap,
   ]);
 
+  const indexPatternService = useMemo(
+    () =>
+      createIndexPatternService({
+        dataViews: startDependencies.dataViews,
+        uiActions: startDependencies.uiActions,
+        core: coreStart,
+        updateIndexPatterns: (newIndexPatternsState, options) => {
+          dispatch(updateIndexPatterns(newIndexPatternsState));
+          dispatch(applyChanges());
+        },
+        replaceIndexPattern: (newIndexPattern, oldId, options) => {
+          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
+          dispatch(applyChanges());
+        },
+      }),
+    [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
+  );
+
   const framePublicAPI = useLensSelector((state) => {
     const newState = {
       ...state,
@@ -219,6 +246,7 @@ export function LensEditConfigurationFlyout({
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
     hideLayerHeader: datasourceId === 'textBased',
+    indexPatternService,
   };
   return (
     <>
@@ -249,18 +277,6 @@ export function LensEditConfigurationFlyout({
             </EuiFlexItem>
             {navigateToLensEditor && (
               <EuiFlexItem grow={false}>
-                {/* <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="pencil" size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiLink onClick={navigateToLensEditor}>
-                    {i18n.translate('xpack.lens.config.editLinkLabel', {
-                      defaultMessage: 'Edit in Lens',
-                    })}
-                  </EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup> */}
                 <EuiLink onClick={navigateToLensEditor}>
                   {i18n.translate('xpack.lens.config.editLinkLabel', {
                     defaultMessage: 'Edit in Lens',
