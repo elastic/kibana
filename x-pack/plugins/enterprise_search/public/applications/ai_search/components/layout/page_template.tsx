@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { ESRE_PLUGIN } from '../../../../../common/constants';
-import { SetEsreChrome } from '../../../shared/kibana_chrome';
+import { AI_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { SetAiSearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../../shared/layout';
 import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
@@ -23,10 +23,10 @@ export const EnterpriseSearchEsrePageTemplate: React.FC<PageTemplateProps> = ({
     <EnterpriseSearchPageTemplateWrapper
       {...pageTemplateProps}
       solutionNav={{
-        name: ESRE_PLUGIN.NAME,
+        name: AI_SEARCH_PLUGIN.NAME,
         items: useEnterpriseSearchNav(),
       }}
-      setPageChrome={pageChrome && <SetEsreChrome trail={pageChrome} />}
+      setPageChrome={pageChrome && <SetAiSearchChrome trail={pageChrome} />}
     >
       {pageViewTelemetry && (
         <SendEnterpriseSearchTelemetry action="viewed" metric={pageViewTelemetry} />

@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EsreGuide } from './components/esre_guide/esre_guide';
 
-import { EnterpriseSearchEsre } from '.';
+import { EnterpriseSearchAISearch } from '.';
 
 describe('SearchExperiences', () => {
   it('renders the ESRE guide', () => {
@@ -21,7 +21,7 @@ describe('SearchExperiences', () => {
       errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
-    const wrapper = shallow(<EnterpriseSearchEsre />);
+    const wrapper = shallow(<EnterpriseSearchAISearch />);
 
     expect(wrapper.find(EsreGuide)).toHaveLength(1);
   });

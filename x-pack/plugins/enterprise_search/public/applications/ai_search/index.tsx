@@ -17,7 +17,7 @@ import { EsreGuide } from './components/esre_guide/esre_guide';
 
 import { ROOT_PATH } from './routes';
 
-export const EnterpriseSearchEsre: React.FC<InitialAppData> = (props) => {
+export const EnterpriseSearchAISearch: React.FC<InitialAppData> = (props) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 

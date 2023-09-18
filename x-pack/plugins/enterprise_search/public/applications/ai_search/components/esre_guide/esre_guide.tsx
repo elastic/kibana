@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import analyticsIllustration from '../../../../assets/images/analytics.svg';
 import scalableIllustration from '../../../../assets/images/scalable.svg';
 import simplifyIllustration from '../../../../assets/images/simplify.svg';
-import { SetEsreChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetAiSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchEsrePageTemplate } from '../layout/page_template';
 
 import { EsreDocsSection } from './esre_docs_section';

@@ -14258,7 +14258,7 @@
     "xpack.enterpriseSearch.nav.contentTitle": "内容",
     "xpack.enterpriseSearch.nav.elasticsearchTitle": "Elasticsearch",
     "xpack.enterpriseSearch.nav.enterpriseSearchOverviewTitle": "概览",
-    "xpack.enterpriseSearch.nav.esreTitle": "ESRE",
+    "xpack.enterpriseSearch.nav.aiSearchTitle": "AI Search",
     "xpack.enterpriseSearch.nav.searchApplicationsTitle": "搜索应用程序",
     "xpack.enterpriseSearch.nav.searchIndicesTitle": "索引",
     "xpack.enterpriseSearch.nav.workplaceSearchTitle": "Workplace Search",

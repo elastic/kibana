@@ -19,7 +19,7 @@ import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
-  ESRE_PLUGIN,
+  AI_SEARCH_PLUGIN,
 } from '../../common/constants';
 
 type ServiceDefinition =
@@ -120,7 +120,7 @@ export function getSearchResultProvider(
                   defaultMessage: 'ESRE',
                 }),
                 serviceType: 'esre',
-                url: ESRE_PLUGIN.URL,
+                url: AI_SEARCH_PLUGIN.URL,
               },
             ]
           : []),

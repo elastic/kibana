@@ -19,7 +19,7 @@ import {
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ESRE_PLUGIN,
+  AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -63,13 +63,13 @@ export const useEnterpriseSearchNav = () => {
           }),
         },
         {
-          id: 'esre',
-          name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
-            defaultMessage: 'ESRE',
+          id: 'aiSearch',
+          name: i18n.translate('xpack.enterpriseSearch.nav.aiSearchTitle', {
+            defaultMessage: 'AI Search',
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            to: ESRE_PLUGIN.URL,
+            to: AI_SEARCH_PLUGIN.URL,
           }),
         },
       ],

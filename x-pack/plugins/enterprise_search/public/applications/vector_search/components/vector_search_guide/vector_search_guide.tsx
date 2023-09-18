@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ESRE_PLUGIN } from '../../../../../common/constants';
+import { AI_SEARCH_PLUGIN } from '../../../../../common/constants';
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { docLinks } from '../../../shared/doc_links';
@@ -206,7 +206,7 @@ export const VectorSearchGuide: React.FC = () => {
           <EuiFlexGroup gutterSize="l" direction="column">
             <EuiCard
               onClick={() =>
-                application.navigateToApp(ESRE_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1'))
+                application.navigateToApp(AI_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1'))
               }
               layout="horizontal"
               titleSize="s"

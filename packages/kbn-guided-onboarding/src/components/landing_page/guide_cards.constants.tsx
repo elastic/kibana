@@ -50,7 +50,7 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Build a semantic search experience',
     }),
     navigateTo: {
-      appId: 'enterpriseSearchEsre',
+      appId: 'enterpriseSearchAISearch',
     },
     telemetryId: 'onboarding--search--semantic',
     order: 4,

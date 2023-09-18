@@ -152,12 +152,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
     });
-    describe('ESRE', () => {
+    describe('AI Search', () => {
       before(async () => {
-        await common.navigateToApp('enterprise_search/esre');
+        await common.navigateToApp('enterprise_search/ai_search');
       });
 
-      it('loads ESRE page', async function () {
+      it('loads AI Search page', async function () {
         await retry.waitFor(
           'esre header description',
           async () => await testSubjects.exists('esre-description-text')
