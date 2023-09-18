@@ -230,7 +230,7 @@ export function LensEditConfigurationFlyout({
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
                     <h2 id="Edit visualization">
-                      {i18n.translate('xpack.lens.config.editLabel', {
+                      {i18n.translate('xpack.lens.config.editVisualizationLabel', {
                         defaultMessage: 'Edit visualization',
                       })}
                     </h2>
