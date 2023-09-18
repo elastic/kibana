@@ -17,6 +17,7 @@ post:
           description: The properties vary depending on the connector type.
           oneOf:
             - $ref: '../components/schemas/create_connector_request_cases_webhook.yaml'
+            - $ref: '../components/schemas/create_connector_request_d3security.yaml'
             - $ref: '../components/schemas/create_connector_request_email.yaml'
             - $ref: '../components/schemas/create_connector_request_genai.yaml'
             - $ref: '../components/schemas/create_connector_request_index.yaml'
@@ -38,8 +39,14 @@ post:
           discriminator:
             propertyName: connector_type_id
         examples:
+          createEmailConnectorRequest:
+            $ref: '../components/examples/create_email_connector_request.yaml'
           createIndexConnectorRequest:
             $ref: '../components/examples/create_index_connector_request.yaml'
+          createWebhookConnectorRequest:
+            $ref: '../components/examples/create_webhook_connector_request.yaml'
+          createXmattersConnectorRequest:
+            $ref: '../components/examples/create_xmatters_connector_request.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -48,8 +55,14 @@ post:
           schema:
             $ref: '../components/schemas/connector_response_properties.yaml'
           examples:
+            createEmailConnectorResponse:
+              $ref: '../components/examples/create_email_connector_response.yaml'
             createIndexConnectorResponse:
               $ref: '../components/examples/create_index_connector_response.yaml'
+            createWebhookConnectorResponse:
+              $ref: '../components/examples/create_webhook_connector_response.yaml'
+            createXmattersConnectorResponse:
+              $ref: '../components/examples/create_xmatters_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
   servers:

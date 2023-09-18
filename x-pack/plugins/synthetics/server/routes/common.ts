@@ -81,7 +81,7 @@ export const getMonitors = async (
     monitorQueryIds,
   } = context.request.query;
 
-  const filterStr = await getMonitorFilters({
+  const { filtersStr } = await getMonitorFilters({
     filter,
     monitorTypes,
     tags,
@@ -100,7 +100,7 @@ export const getMonitors = async (
     sortOrder,
     searchFields: SEARCH_FIELDS,
     search: query ? `${query}*` : undefined,
-    filter: filterStr,
+    filter: filtersStr,
     searchAfter,
     fields,
   };
@@ -129,7 +129,7 @@ export const getMonitorFilters = async ({
 }) => {
   const locationFilter = await parseLocationFilter(context, locations);
 
-  return [
+  const filtersStr = [
     filter,
     getKqlFilter({ field: 'tags', values: tags }),
     getKqlFilter({ field: 'project_id', values: projects }),
@@ -140,6 +140,7 @@ export const getMonitorFilters = async ({
   ]
     .filter((f) => !!f)
     .join(' AND ');
+  return { filtersStr, locationFilter };
 };
 
 export const getKqlFilter = ({
@@ -172,7 +173,7 @@ export const getKqlFilter = ({
 
 const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {
   if (!locations || locations?.length === 0) {
-    return '';
+    return;
   }
 
   const { allLocations } = await getAllLocations(context);
@@ -183,7 +184,7 @@ const parseLocationFilter = async (context: RouteContext, locations?: string | s
       .filter((val) => !!val);
   }
 
-  return findLocationItem(locations, allLocations)?.id ?? '';
+  return [findLocationItem(locations, allLocations)?.id ?? ''];
 };
 
 export const findLocationItem = (

@@ -5,6 +5,7 @@
   },
   "exclude": [
     "cypress.config.ts",
+    "serverless_cypress.config.ts",
     "target/**/*",
   ],
   "include": [
@@ -15,6 +16,7 @@
     "scripts/**/**.json",
     "server/**/*",
     "cypress.config.ts",
+    "serverless_cypress.config.ts",
     "../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/**.json",
@@ -74,6 +76,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/monaco",
-    "@kbn/io-ts-utils"
+    "@kbn/io-ts-utils",
   ]
 }

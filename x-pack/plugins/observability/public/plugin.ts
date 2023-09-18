@@ -39,6 +39,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import {
@@ -51,6 +52,11 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
@@ -100,6 +106,7 @@ export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -110,6 +117,7 @@ export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
   charts: ChartsPluginStart;
+  contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -120,6 +128,7 @@ export interface ObservabilityPublicPluginsStart {
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -129,6 +138,7 @@ export interface ObservabilityPublicPluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
+  aiops: AiopsPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -290,6 +300,14 @@ export class Plugin
         icon: 'logoObservability',
         path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
+        isVisible: (capabilities) => {
+          const obs = capabilities.catalogue[observabilityFeatureId];
+          const uptime = capabilities.catalogue.uptime;
+          const infra = capabilities.catalogue.infra;
+          const apm = capabilities.catalogue.apm;
+
+          return obs || uptime || infra || apm;
+        },
       });
     }
 

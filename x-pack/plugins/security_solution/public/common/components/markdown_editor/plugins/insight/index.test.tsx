@@ -134,35 +134,21 @@ describe('insight component renderer', () => {
 describe('plugin', () => {
   it('renders insightsUpsellingMessage when provided', () => {
     const insightsUpsellingMessage = 'test message';
-    const result = plugin({ licenseIsPlatinum: false, insightsUpsellingMessage });
+    const result = plugin({ insightsUpsellingMessage });
 
     expect(result.button.label).toEqual(insightsUpsellingMessage);
   });
 
   it('disables the button when insightsUpsellingMessage is provided', () => {
     const insightsUpsellingMessage = 'test message';
-    const result = plugin({ licenseIsPlatinum: false, insightsUpsellingMessage });
+    const result = plugin({ insightsUpsellingMessage });
 
     expect(result.button.isDisabled).toBeTruthy();
   });
 
-  it('disables the button when license is not Platinum', () => {
-    const result = plugin({ licenseIsPlatinum: false, insightsUpsellingMessage: null });
-
-    expect(result.button.isDisabled).toBeTruthy();
-  });
-
-  it('show investigate message when license is Platinum', () => {
-    const result = plugin({ licenseIsPlatinum: true, insightsUpsellingMessage: null });
+  it('show investigate message when insightsUpsellingMessage is not provided', () => {
+    const result = plugin({ insightsUpsellingMessage: null });
 
     expect(result.button.label).toEqual('Investigate');
-  });
-
-  it('show upsell message when license is not Platinum', () => {
-    const result = plugin({ licenseIsPlatinum: false, insightsUpsellingMessage: null });
-
-    expect(result.button.label).toEqual(
-      'Upgrade to platinum to make use of insights in investigation guides'
-    );
   });
 });

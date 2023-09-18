@@ -7,33 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { PackagePolicy, PackagePolicyInput } from '../../common';
+import type {
+  CloudFormationProps,
+  CloudSecurityIntegrationAwsAccountType,
+} from '../components/agent_enrollment_flyout/types';
 
 import { useKibanaVersion } from './use_kibana_version';
 import { useGetSettings } from './use_request';
 
-type AwsAccountType = 'single_account' | 'organization_account';
-
-const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
-
-const getAwsAccountType = (input?: PackagePolicyInput): AwsAccountType | undefined =>
-  input?.streams[0].vars?.['aws.account_type']?.value;
+const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
 
 export const useCreateCloudFormationUrl = ({
   enrollmentAPIKey,
-  cloudFormationTemplateUrl,
-  packagePolicy,
+  cloudFormationProps,
 }: {
   enrollmentAPIKey: string | undefined;
-  cloudFormationTemplateUrl: string;
-  packagePolicy?: PackagePolicy;
+  cloudFormationProps: CloudFormationProps | undefined;
 }) => {
   const { data, isLoading } = useGetSettings();
 
   const kibanaVersion = useKibanaVersion();
-
-  const awsInput = packagePolicy?.inputs?.find((input) => input.type === CLOUDBEAT_AWS);
-  const awsAccountType = getAwsAccountType(awsInput) || '';
 
   let isError = false;
   let error: string | undefined;
@@ -56,13 +49,13 @@ export const useCreateCloudFormationUrl = ({
   }
 
   const cloudFormationUrl =
-    enrollmentAPIKey && fleetServerHost && cloudFormationTemplateUrl
+    enrollmentAPIKey && fleetServerHost && cloudFormationProps?.templateUrl
       ? createCloudFormationUrl(
-          cloudFormationTemplateUrl,
+          cloudFormationProps?.templateUrl,
           enrollmentAPIKey,
           fleetServerHost,
           kibanaVersion,
-          awsAccountType
+          cloudFormationProps?.awsAccountType
         )
       : undefined;
 
@@ -79,7 +72,7 @@ const createCloudFormationUrl = (
   enrollmentToken: string,
   fleetUrl: string,
   kibanaVersion: string,
-  awsAccountType: string
+  awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined
 ) => {
   let cloudFormationUrl;
 
@@ -89,8 +82,15 @@ const createCloudFormationUrl = (
     .replace('KIBANA_VERSION', kibanaVersion);
 
   if (cloudFormationUrl.includes('ACCOUNT_TYPE')) {
-    cloudFormationUrl = cloudFormationUrl.replace('ACCOUNT_TYPE', awsAccountType);
+    cloudFormationUrl = cloudFormationUrl.replace(
+      'ACCOUNT_TYPE',
+      getAwsAccountType(awsAccountType)
+    );
   }
 
   return new URL(cloudFormationUrl).toString();
+};
+
+const getAwsAccountType = (awsAccountType: CloudSecurityIntegrationAwsAccountType | undefined) => {
+  return awsAccountType ? awsAccountType : CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE;
 };

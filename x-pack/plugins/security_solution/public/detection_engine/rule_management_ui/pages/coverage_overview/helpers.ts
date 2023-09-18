@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
+import type {
+  CoverageOverviewRuleActivity,
+  CoverageOverviewRuleSource,
+} from '../../../../../common/api/detection_engine';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../../rule_management/model/coverage_overview/mitre_technique';
 import { coverageOverviewCardColorThresholds } from './constants';
@@ -22,3 +27,19 @@ export const getCardBackgroundColor = (value: number) => {
     }
   }
 };
+
+export const extractSelected = <
+  T extends CoverageOverviewRuleSource | CoverageOverviewRuleActivity
+>(
+  options: Array<{ checked?: string; label: T }>
+): T[] => {
+  return options.filter((option) => option.checked === 'on').map((option) => option.label);
+};
+
+export const populateSelected = (
+  allOptions: EuiSelectableOption[],
+  selected: string[]
+): EuiSelectableOption[] =>
+  allOptions.map((option) =>
+    selected.includes(option.label) ? { ...option, checked: 'on' } : option
+  );

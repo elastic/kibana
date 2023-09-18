@@ -1,0 +1,56 @@
+---
+id: kbn-management/settings/SectionRegistry
+slug: /kbn-management/settings/section-registry/
+title: Section Registry
+description: A registry which allows a consumer to add sections to Advanced Settings.
+tags: ['management', 'settings']
+date: 2023-08-04
+---
+
+This registry is fairly straightforward: it allows a consumer to add a section to the Advanced Settings page.  This registry would be consumed by a plugin and exposed on the `start` and `setup` contracts:
+
+```ts
+
+const registry = new SectionRegistry();
+
+export class PluginBar
+  implements Plugin<PluginBarSetup, PluginBarStart, PluginBarSetupDeps, PluginBarStartDeps>
+{
+  public setup(
+    _core: CoreSetup,
+    _setupDeps: PluginFooSetupDeps
+  ) {
+    return {
+      sectionRegistry: sectionRegistry.setup,
+    };
+  }
+
+  public start(
+    _core: CoreStart,
+    _startDeps: PluginFooStartDeps
+  ) {
+    return {
+      sectionRegistry: sectionRegistry.start,
+    };
+  }
+}
+
+export class PluginFoo
+  implements Plugin<PluginFooSetup, PluginFooStart, PluginFooSetupDeps, PluginFooStartDeps>
+{
+  public setup(
+    core: CoreSetup,
+    { pluginBar: { sectionRegistry } }: PluginFooSetupDeps
+  ) {
+    const Component = (props: RegistryComponentProps) => <SomeComponent {...props} />;
+
+    const queryMatch = (query: string) => {
+      const searchTerm = query.toLowerCase();
+      return SEARCH_TERMS.some((term) => term.indexOf(searchTerm) >= 0);
+    };
+
+    sectionRegistry.setup.addGlobalSection(Component, queryMatch);
+  }
+}
+
+```

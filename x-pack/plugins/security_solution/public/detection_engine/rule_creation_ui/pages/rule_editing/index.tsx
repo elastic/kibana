@@ -20,7 +20,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
@@ -163,7 +162,6 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
   const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
     savedQueryId: rule?.saved_id,
     ruleType: rule?.type,
-    onError: noop,
   });
 
   // Since in the edit step we start with an existing rule, we assume that

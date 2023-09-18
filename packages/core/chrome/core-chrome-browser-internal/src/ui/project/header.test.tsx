@@ -29,6 +29,7 @@ describe('Header', () => {
     helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
     projectsUrl$: Rx.of('/projects/'),
+    projectName$: Rx.of('My Project'),
     kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
     navControlsLeft$: Rx.of([]),
@@ -61,7 +62,7 @@ describe('Header', () => {
     const toggleNav = async () => {
       fireEvent.click(await screen.findByTestId('toggleNavButton')); // click
 
-      expect(screen.queryAllByText('Hello, goodbye!')).toHaveLength(0); // title is not shown
+      expect(await screen.findByText('Hello, goodbye!')).not.toBeVisible();
 
       fireEvent.click(await screen.findByTestId('toggleNavButton')); // click again
 
@@ -82,5 +83,6 @@ describe('Header', () => {
 
     const projectsLink = await screen.getByTestId('projectsLink');
     expect(projectsLink).toHaveAttribute('href', '/projects/');
+    expect(projectsLink).toHaveTextContent('My Project');
   });
 });

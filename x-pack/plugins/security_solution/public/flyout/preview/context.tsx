@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, memo, useContext, useMemo } from 'react';
+import type { DataViewBase } from '@kbn/es-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useEventDetails } from '../shared/hooks/use_event_details';
+import { FlyoutError } from '../shared/components/flyout_error';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import type { PreviewPanelProps } from '.';
 
 export interface PreviewPanelContext {
@@ -25,6 +30,14 @@ export interface PreviewPanelContext {
    * Rule id if preview is rule details
    */
   ruleId: string;
+  /**
+   * Index pattern for rule details
+   */
+  indexPattern: DataViewBase;
+  /**
+   * An object with top level fields from the ECS object
+   */
+  dataAsNestedObject: Ecs;
 }
 
 export const PreviewPanelContext = createContext<PreviewPanelContext | undefined>(undefined);
@@ -36,30 +49,43 @@ export type PreviewPanelProviderProps = {
   children: React.ReactNode;
 } & Partial<PreviewPanelProps['params']>;
 
-export const PreviewPanelProvider = ({
-  id,
-  indexName,
-  scopeId,
-  ruleId,
-  children,
-}: PreviewPanelProviderProps) => {
-  const contextValue = useMemo(
-    () =>
-      id && indexName && scopeId
-        ? {
-            eventId: id,
-            indexName,
-            scopeId,
-            ruleId: ruleId ?? '',
-          }
-        : undefined,
-    [id, indexName, scopeId, ruleId]
-  );
+export const PreviewPanelProvider = memo(
+  ({ id, indexName, scopeId, ruleId, children }: PreviewPanelProviderProps) => {
+    const { dataAsNestedObject, indexPattern, loading } = useEventDetails({
+      eventId: id,
+      indexName,
+    });
 
-  return (
-    <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>
-  );
-};
+    const contextValue = useMemo(
+      () =>
+        id && indexName && scopeId && dataAsNestedObject
+          ? {
+              eventId: id,
+              indexName,
+              scopeId,
+              ruleId: ruleId ?? '',
+              indexPattern,
+              dataAsNestedObject,
+            }
+          : undefined,
+      [id, indexName, scopeId, ruleId, indexPattern, dataAsNestedObject]
+    );
+
+    if (loading) {
+      return <FlyoutLoading />;
+    }
+
+    if (!contextValue) {
+      return <FlyoutError />;
+    }
+
+    return (
+      <PreviewPanelContext.Provider value={contextValue}>{children}</PreviewPanelContext.Provider>
+    );
+  }
+);
+
+PreviewPanelProvider.displayName = 'PreviewPanelProvider';
 
 export const usePreviewPanelContext = (): PreviewPanelContext => {
   const contextValue = useContext(PreviewPanelContext);

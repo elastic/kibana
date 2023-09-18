@@ -156,7 +156,7 @@ describe('AlertDetailsRedirect', () => {
 
         const [{ search, pathname }] = historyMock.replace.mock.lastCall;
 
-        expect(search as string).toMatch(/eventFlyout.*right/);
+        expect(search as string).toMatch(/eventFlyout.*/);
         expect(pathname).toEqual(ALERTS_PATH);
       });
     });

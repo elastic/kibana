@@ -10,14 +10,14 @@ import React from 'react';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import type { UserProfileData } from '../../common';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { UserAPIClient } from '../management';
-import { securityMock } from '../mocks';
 import { Providers } from './account_management_app';
 import { AccountManagementPage } from './account_management_page';
 import * as UserProfileImports from './user_profile/user_profile';
 import { UserProfileAPIClient } from './user_profile/user_profile_api_client';
+import type { UserProfileData } from '../../common';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { UserAPIClient } from '../management';
+import { securityMock } from '../mocks';
 
 const UserProfileMock = jest.spyOn(UserProfileImports, 'UserProfile');
 

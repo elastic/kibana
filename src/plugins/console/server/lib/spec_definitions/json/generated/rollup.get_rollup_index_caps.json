@@ -1,11 +1,21 @@
 {
   "rollup.get_rollup_index_caps": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "{index}/_rollup/data"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-rollup-index-caps.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-get-rollup-index-caps.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

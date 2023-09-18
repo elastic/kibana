@@ -1,21 +1,26 @@
 {
   "mtermvectors": {
     "url_params": {
-      "ids": [],
-      "term_statistics": "__flag__",
-      "field_statistics": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "ids": "",
       "fields": [],
+      "field_statistics": "__flag__",
       "offsets": "__flag__",
-      "positions": "__flag__",
       "payloads": "__flag__",
-      "preference": "random",
-      "routing": "",
+      "positions": "__flag__",
+      "preference": "",
       "realtime": "__flag__",
+      "routing": "",
+      "term_statistics": "__flag__",
       "version": "",
       "version_type": [
         "internal",
         "external",
-        "external_gte"
+        "external_gte",
+        "force"
       ]
     },
     "methods": [
@@ -26,6 +31,10 @@
       "_mtermvectors",
       "{index}/_mtermvectors"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-multi-termvectors.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

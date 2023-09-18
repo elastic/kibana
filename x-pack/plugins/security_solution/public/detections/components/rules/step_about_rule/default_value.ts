@@ -26,6 +26,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
   references: [''],
   falsePositives: [''],
+  investigationFields: [],
   license: '',
   ruleNameOverride: '',
   tags: [],

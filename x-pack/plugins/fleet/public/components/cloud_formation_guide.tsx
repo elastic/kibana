@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { CloudSecurityIntegrationAwsAccountType } from './agent_enrollment_flyout/types';
+
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
@@ -23,7 +25,11 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
   </EuiLink>
 );
 
-export const CloudFormationGuide = () => {
+export const CloudFormationGuide = ({
+  awsAccountType,
+}: {
+  awsAccountType?: CloudSecurityIntegrationAwsAccountType;
+}) => {
   return (
     <EuiText>
       <p>
@@ -44,12 +50,21 @@ export const CloudFormationGuide = () => {
       </p>
       <EuiText size="s" color="subdued">
         <ol>
-          <li>
-            <FormattedMessage
-              id="xpack.fleet.cloudFormation.guide.steps.login"
-              defaultMessage="Ensure you are logged in as an admin in the AWS Account you want to onboard"
-            />
-          </li>
+          {awsAccountType === 'organization-account' ? (
+            <li>
+              <FormattedMessage
+                id="xpack.fleet.cloudFormation.guide.steps.organizationLogin"
+                defaultMessage="Log in as an admin in the management account of the AWS Organization you want to onboard"
+              />
+            </li>
+          ) : (
+            <li>
+              <FormattedMessage
+                id="xpack.fleet.cloudFormation.guide.steps.login"
+                defaultMessage="Log in as an admin in the AWS account you want to onboard"
+              />
+            </li>
+          )}
           <li>
             <FormattedMessage
               id="xpack.fleet.cloudFormation.guide.steps.launch"

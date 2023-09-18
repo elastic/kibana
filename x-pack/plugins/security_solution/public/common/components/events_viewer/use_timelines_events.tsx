@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { isCompleteResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
@@ -32,8 +32,6 @@ import type { RunTimeMappings } from '../../store/sourcerer/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
 import type { ESQuery } from '../../../../common/typed_json';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { ERROR_TIMELINE_EVENTS } from './translations';
 import type { AlertWorkflowStatus } from '../../types';
 import { getSearchTransactionName, useStartTransaction } from '../../lib/apm/use_start_transaction';
 export type InspectResponse = Inspect & { response: string[] };
@@ -220,7 +218,6 @@ export const useTimelineEventsHandler = ({
     loadPage: wrappedLoadPage,
     updatedAt: 0,
   });
-  const { addWarning } = useAppToasts();
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null, onNextHandler?: OnNextResponseHandler) => {
@@ -233,7 +230,7 @@ export const useTimelineEventsHandler = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
-          const { endTracking } = startTracking();
+          startTracking();
           const abortSignal = abortCtrl.current.signal;
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
@@ -261,8 +258,6 @@ export const useTimelineEventsHandler = ({
                       totalCount: response.totalCount,
                       updatedAt: Date.now(),
                     };
-                    setUpdated(newTimelineResponse.updatedAt);
-                    setTotalCount(newTimelineResponse.totalCount);
                     if (onNextHandler) onNextHandler(newTimelineResponse);
                     return newTimelineResponse;
                   });
@@ -272,11 +267,6 @@ export const useTimelineEventsHandler = ({
                   setFilterStatus(request.filterStatus);
                   setLoading(false);
 
-                  searchSubscription$.current.unsubscribe();
-                } else if (isErrorResponse(response)) {
-                  setLoading(false);
-                  endTracking('invalid');
-                  addWarning(ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();
                 }
               },
@@ -294,19 +284,7 @@ export const useTimelineEventsHandler = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [
-      skip,
-      data,
-      setTotalCount,
-      entityType,
-      dataViewId,
-      setUpdated,
-      addWarning,
-      startTracking,
-      dispatch,
-      id,
-      prevFilterStatus,
-    ]
+    [skip, data, entityType, dataViewId, startTracking, dispatch, id, prevFilterStatus]
   );
 
   useEffect(() => {
@@ -391,6 +369,13 @@ export const useTimelineEventsHandler = ({
     runtimeMappings,
     filterStatus,
   ]);
+
+  useEffect(() => {
+    if (timelineResponse.totalCount > -1) {
+      setUpdated(timelineResponse.updatedAt);
+      setTotalCount(timelineResponse.totalCount);
+    }
+  }, [setTotalCount, setUpdated, timelineResponse]);
 
   const timelineEventsSearchHandler = useCallback(
     (onNextHandler?: OnNextResponseHandler) => {

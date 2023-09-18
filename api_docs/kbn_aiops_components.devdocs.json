@@ -23,15 +23,13 @@
         "parentPluginId": "@kbn/aiops-components",
         "id": "def-common.DocumentCountChart",
         "type": "Function",
-        "tags": [
-          "constructor"
-        ],
+        "tags": [],
         "label": "DocumentCountChart",
         "description": [
-          "\nDocument count chart with draggable brushes to select time ranges\nby default use `Baseline` and `Deviation` for the badge names"
+          "\nDocument count chart with draggable brushes to select time ranges\nby default use `Baseline` and `Deviation` for the badge names\n"
         ],
         "signature": [
-          "({ dependencies, brushSelectionUpdateHandler, width, chartPoints, chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval, chartPointsSplitLabel, isBrushCleared, autoAnalysisStart, barColorOverride, barStyleAccessor, barHighlightColorOverride, deviationBrush, baselineBrush, }: React.PropsWithChildren<",
+          "(props: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/aiops-components",
             "scope": "common",
@@ -50,8 +48,10 @@
             "id": "def-common.DocumentCountChart.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  dependencies,\n  brushSelectionUpdateHandler,\n  width,\n  chartPoints,\n  chartPointsSplit,\n  timeRangeEarliest,\n  timeRangeLatest,\n  interval,\n  chartPointsSplitLabel,\n  isBrushCleared,\n  autoAnalysisStart,\n  barColorOverride,\n  barStyleAccessor,\n  barHighlightColorOverride,\n  deviationBrush = {},\n  baselineBrush = {},\n}",
-            "description": [],
+            "label": "props",
+            "description": [
+              "DocumentCountChart component props"
+            ],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -69,22 +69,22 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The DocumentCountChart component."
+        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/aiops-components",
         "id": "def-common.DualBrush",
         "type": "Function",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "DualBrush",
         "description": [
-          "\nDualBrush React Component\nDual brush component that overlays the document count chart"
+          "\nDualBrush React Component\nDual brush component that overlays the document count chart\n"
         ],
         "signature": [
-          "({\n  /**\n   * Min and max numeric timestamps for the two brushes\n   */\n  windowParameters,\n  /**\n   * Min timestamp for x domain\n   */\n  min,\n  /**\n   * Max timestamp for x domain\n   */\n  max,\n  /**\n   * Callback function whenever the brush changes\n   */\n  onChange,\n  /**\n   * Margin left\n   */\n  marginLeft,\n  /**\n   * Nearest timestamps to snap to the brushes to\n   */\n  snapTimestamps,\n  /**\n   * Width\n   */\n  width,\n}: DualBrushProps) => JSX.Element"
+          "(props: React.PropsWithChildren<DualBrushProps>) => JSX.Element"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
         "deprecated": false,
@@ -93,12 +93,14 @@
           {
             "parentPluginId": "@kbn/aiops-components",
             "id": "def-common.DualBrush.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  /**\n   * Min and max numeric timestamps for the two brushes\n   */\n  windowParameters,\n  /**\n   * Min timestamp for x domain\n   */\n  min,\n  /**\n   * Max timestamp for x domain\n   */\n  max,\n  /**\n   * Callback function whenever the brush changes\n   */\n  onChange,\n  /**\n   * Margin left\n   */\n  marginLeft,\n  /**\n   * Nearest timestamps to snap to the brushes to\n   */\n  snapTimestamps,\n  /**\n   * Width\n   */\n  width,\n}",
-            "description": [],
+            "label": "props",
+            "description": [
+              "DualBrushProps component props"
+            ],
             "signature": [
-              "DualBrushProps"
+              "React.PropsWithChildren<DualBrushProps>"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx",
             "deprecated": false,
@@ -115,15 +117,13 @@
         "parentPluginId": "@kbn/aiops-components",
         "id": "def-common.DualBrushAnnotation",
         "type": "Function",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "DualBrushAnnotation",
         "description": [
-          "\nDualBrushAnnotation React Component\nDual brush annotation component that overlays the document count chart"
+          "\nDualBrushAnnotation React Component\nDual brush annotation component that overlays the document count chart\n"
         ],
         "signature": [
-          "({ id, min, max, style }: React.PropsWithChildren<BrushAnnotationProps>) => JSX.Element"
+          "(props: React.PropsWithChildren<BrushAnnotationProps>) => JSX.Element"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush_annotation.tsx",
         "deprecated": false,
@@ -134,8 +134,10 @@
             "id": "def-common.DualBrushAnnotation.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ id, min, max, style }",
-            "description": [],
+            "label": "props",
+            "description": [
+              "BrushAnnotationProps component props"
+            ],
             "signature": [
               "React.PropsWithChildren<BrushAnnotationProps>"
             ],
@@ -154,15 +156,13 @@
         "parentPluginId": "@kbn/aiops-components",
         "id": "def-common.ProgressControls",
         "type": "Function",
-        "tags": [
-          "type"
-        ],
+        "tags": [],
         "label": "ProgressControls",
         "description": [
-          "\nProgressControls React Component\nComponent with ability to Run & cancel analysis\nby default use `Baseline` and `Deviation` for the badge name"
+          "\nProgressControls React Component\nComponent with ability to Run & cancel analysis\nby default uses `Baseline` and `Deviation` for the badge name\n"
         ],
         "signature": [
-          "({ children, isBrushCleared, progress, progressMessage, onRefresh, onCancel, onReset, isRunning, shouldRerunAnalysis, runAnalysisDisabled, }: React.PropsWithChildren<ProgressControlProps>) => JSX.Element"
+          "(props: React.PropsWithChildren<ProgressControlProps>) => JSX.Element"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/progress_controls/progress_controls.tsx",
         "deprecated": false,
@@ -173,8 +173,10 @@
             "id": "def-common.ProgressControls.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  isBrushCleared,\n  progress,\n  progressMessage,\n  onRefresh,\n  onCancel,\n  onReset,\n  isRunning,\n  shouldRerunAnalysis,\n  runAnalysisDisabled = false,\n}",
-            "description": [],
+            "label": "props",
+            "description": [
+              "ProgressControls component props"
+            ],
             "signature": [
               "React.PropsWithChildren<ProgressControlProps>"
             ],
@@ -193,12 +195,12 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/aiops-components",
-        "id": "def-common.DocumentCountChartPoint",
+        "id": "def-common.BrushSettings",
         "type": "Interface",
         "tags": [],
-        "label": "DocumentCountChartPoint",
+        "label": "BrushSettings",
         "description": [
-          "\nDatum for the bar chart"
+          "\nBrush settings"
         ],
         "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
         "deprecated": false,
@@ -206,15 +208,15 @@
         "children": [
           {
             "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.DocumentCountChartPoint.time",
-            "type": "CompoundType",
+            "id": "def-common.BrushSettings.label",
+            "type": "string",
             "tags": [],
-            "label": "time",
+            "label": "label",
             "description": [
-              "\nTime of bucket"
+              "\nOptional label name for brush"
             ],
             "signature": [
-              "string | number"
+              "string | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
@@ -222,12 +224,34 @@
           },
           {
             "parentPluginId": "@kbn/aiops-components",
-            "id": "def-common.DocumentCountChartPoint.value",
+            "id": "def-common.BrushSettings.annotationStyle",
+            "type": "Object",
+            "tags": [],
+            "label": "annotationStyle",
+            "description": [
+              "\nOptional style for brush"
+            ],
+            "signature": [
+              "RecursivePartial",
+              "<",
+              "RectAnnotationStyle",
+              "> | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.BrushSettings.badgeWidth",
             "type": "number",
             "tags": [],
-            "label": "value",
+            "label": "badgeWidth",
             "description": [
-              "\nNumber of doc count for that time bucket"
+              "\nOptional width for brush"
+            ],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
@@ -304,61 +328,21 @@
             "tags": [],
             "label": "brushSelectionUpdateHandler",
             "description": [
-              "Optional callback function which gets called the brush selection has changed"
+              "Optional callback for handling brush selection updates"
             ],
             "signature": [
-              "((windowParameters: ",
               {
-                "pluginId": "@kbn/aiops-utils",
+                "pluginId": "@kbn/aiops-components",
                 "scope": "common",
-                "docId": "kibKbnAiopsUtilsPluginApi",
-                "section": "def-common.WindowParameters",
-                "text": "WindowParameters"
+                "docId": "kibKbnAiopsComponentsPluginApi",
+                "section": "def-common.BrushSelectionUpdateHandler",
+                "text": "BrushSelectionUpdateHandler"
               },
-              ", force: boolean) => void) | undefined"
+              " | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/aiops-components",
-                "id": "def-common.DocumentCountChartProps.brushSelectionUpdateHandler.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "windowParameters",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/aiops-utils",
-                    "scope": "common",
-                    "docId": "kibKbnAiopsUtilsPluginApi",
-                    "section": "def-common.WindowParameters",
-                    "text": "WindowParameters"
-                  }
-                ],
-                "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/aiops-components",
-                "id": "def-common.DocumentCountChartProps.brushSelectionUpdateHandler.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "force",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/aiops-components",
@@ -387,11 +371,11 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-components",
+                "pluginId": "@kbn/aiops-utils",
                 "scope": "common",
-                "docId": "kibKbnAiopsComponentsPluginApi",
-                "section": "def-common.DocumentCountChartPoint",
-                "text": "DocumentCountChartPoint"
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.LogRateHistogramItem",
+                "text": "LogRateHistogramItem"
               },
               "[]"
             ],
@@ -410,11 +394,11 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/aiops-components",
+                "pluginId": "@kbn/aiops-utils",
                 "scope": "common",
-                "docId": "kibKbnAiopsComponentsPluginApi",
-                "section": "def-common.DocumentCountChartPoint",
-                "text": "DocumentCountChartPoint"
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.LogRateHistogramItem",
+                "text": "LogRateHistogramItem"
               },
               "[] | undefined"
             ],
@@ -570,7 +554,13 @@
               "Optional settings override for the 'deviation' brush"
             ],
             "signature": [
-              "BrushSettings",
+              {
+                "pluginId": "@kbn/aiops-components",
+                "scope": "common",
+                "docId": "kibKbnAiopsComponentsPluginApi",
+                "section": "def-common.BrushSettings",
+                "text": "BrushSettings"
+              },
               " | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
@@ -587,7 +577,13 @@
               "Optional settings override for the 'baseline' brush"
             ],
             "signature": [
-              "BrushSettings",
+              {
+                "pluginId": "@kbn/aiops-components",
+                "scope": "common",
+                "docId": "kibKbnAiopsComponentsPluginApi",
+                "section": "def-common.BrushSettings",
+                "text": "BrushSettings"
+              },
               " | undefined"
             ],
             "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
@@ -599,7 +595,95 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/aiops-components",
+        "id": "def-common.BrushSelectionUpdateHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "BrushSelectionUpdateHandler",
+        "description": [
+          "\nCallback function which gets called when the brush selection has changed\n"
+        ],
+        "signature": [
+          "(windowParameters: ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.WindowParameters",
+            "text": "WindowParameters"
+          },
+          ", force: boolean, logRateAnalysisType: ",
+          {
+            "pluginId": "@kbn/aiops-utils",
+            "scope": "common",
+            "docId": "kibKbnAiopsUtilsPluginApi",
+            "section": "def-common.LogRateAnalysisType",
+            "text": "LogRateAnalysisType"
+          },
+          ") => void"
+        ],
+        "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.BrushSelectionUpdateHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "windowParameters",
+            "description": [
+              "Baseline and deviation time ranges."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/aiops-utils",
+                "scope": "common",
+                "docId": "kibKbnAiopsUtilsPluginApi",
+                "section": "def-common.WindowParameters",
+                "text": "WindowParameters"
+              }
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.BrushSelectionUpdateHandler.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "force",
+            "description": [
+              "Force update"
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-components",
+            "id": "def-common.BrushSelectionUpdateHandler.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "logRateAnalysisType",
+            "description": [
+              "`spike` or `dip` based on median log rate bucket size"
+            ],
+            "signature": [
+              "\"spike\" | \"dip\""
+            ],
+            "path": "x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

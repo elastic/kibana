@@ -15,5 +15,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./templates'));
     loadTestFile(require.resolve('./component_templates'));
     loadTestFile(require.resolve('./cluster_nodes'));
+    loadTestFile(require.resolve('./index_details'));
   });
 }

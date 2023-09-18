@@ -1,7 +1,14 @@
 {
   "ccr.follow": {
     "url_params": {
-      "wait_for_active_shards": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "wait_for_active_shards": [
+        "all",
+        "index-setting"
+      ]
     },
     "methods": [
       "PUT"
@@ -9,6 +16,10 @@
     "patterns": [
       "{index}/_ccr/follow"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-put-follow.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-put-follow.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

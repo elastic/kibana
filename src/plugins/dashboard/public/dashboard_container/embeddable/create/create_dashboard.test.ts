@@ -51,12 +51,30 @@ test('throws error when provided validation function returns invalid', async () 
   }).rejects.toThrow('Dashboard failed saved object result validation');
 });
 
-test('returns undefined when provided validation function returns redireted', async () => {
+test('returns undefined when provided validation function returns redirected', async () => {
   const creationOptions: DashboardCreationOptions = {
     validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
   };
   const dashboard = await createDashboard(creationOptions, 0, 'test-id');
   expect(dashboard).toBeUndefined();
+});
+
+/**
+ * Because the getInitialInput function may have side effects, we only want to call it once we are certain that the
+ * the loaded saved object passes validation.
+ *
+ * This is especially relevant in the Dashboard App case where calling the getInitialInput function removes the _a
+ * param from the URL. In alais match situations this caused a bug where the state from the URL wasn't properly applied
+ * after the redirect.
+ */
+test('does not get initial input when provided validation function returns redirected', async () => {
+  const creationOptions: DashboardCreationOptions = {
+    validateLoadedSavedObject: jest.fn().mockImplementation(() => 'redirected'),
+    getInitialInput: jest.fn(),
+  };
+  const dashboard = await createDashboard(creationOptions, 0, 'test-id');
+  expect(dashboard).toBeUndefined();
+  expect(creationOptions.getInitialInput).not.toHaveBeenCalled();
 });
 
 test('pulls state from dashboard saved object when given a saved object id', async () => {

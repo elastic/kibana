@@ -50,7 +50,12 @@ export function MaintenanceWindowCallout({
 
   if (activeMaintenanceWindows.some(({ status }) => status === MaintenanceWindowStatus.Running)) {
     return (
-      <EuiCallOut title={MAINTENANCE_WINDOW_RUNNING} color="warning" iconType="iInCircle">
+      <EuiCallOut
+        title={MAINTENANCE_WINDOW_RUNNING}
+        color="warning"
+        iconType="iInCircle"
+        data-test-subj="maintenanceWindowCallout"
+      >
         {MAINTENANCE_WINDOW_RUNNING_DESCRIPTION}
       </EuiCallOut>
     );

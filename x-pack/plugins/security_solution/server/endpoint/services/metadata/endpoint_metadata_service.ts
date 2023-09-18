@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import type { Agent, AgentPolicy, AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
@@ -170,7 +170,7 @@ export class EndpointMetadataService {
       fleetAgent = await this.getFleetAgent(fleetServices.agent, fleetAgentId);
     } catch (error) {
       if (error instanceof FleetAgentNotFoundError) {
-        this.logger?.warn(`agent with id ${fleetAgentId} not found`);
+        this.logger?.debug(`agent with id ${fleetAgentId} not found`);
       } else {
         throw error;
       }
@@ -295,7 +295,7 @@ export class EndpointMetadataService {
         },
       },
       last_checkin:
-        _fleetAgent?.last_checkin || new Date(endpointMetadata['@timestamp']).toISOString(),
+        fleetAgent?.last_checkin || new Date(endpointMetadata['@timestamp']).toISOString(),
     };
   }
 
@@ -438,12 +438,16 @@ export class EndpointMetadataService {
         const agentPolicy = agentPoliciesMap[_agent.policy_id!];
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const endpointPolicy = endpointPoliciesMap[_agent.policy_id!];
-        // add the agent status from the fleet runtime field to
-        // the agent object
+
+        const runtimeFields: Partial<typeof _agent> = {
+          status: doc?.fields?.status?.[0],
+          last_checkin: doc?.fields?.last_checkin?.[0],
+        };
         const agent: typeof _agent = {
           ..._agent,
-          status: doc?.fields?.status?.[0] as AgentStatus,
+          ...runtimeFields,
         };
+
         hosts.push(
           await this.enrichHostMetadata(fleetServices, metadata, agent, agentPolicy, endpointPolicy)
         );

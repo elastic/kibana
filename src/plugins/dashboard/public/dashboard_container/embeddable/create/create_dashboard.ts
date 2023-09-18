@@ -91,6 +91,7 @@ export const createDashboard = async (
     reduxEmbeddablePackage,
     searchSessionId,
     savedObjectResult?.dashboardInput,
+    savedObjectResult.anyMigrationRun,
     dashboardCreationStartTime,
     undefined,
     creationOptions,
@@ -137,7 +138,6 @@ export const initializeDashboard = async ({
     useUnifiedSearchIntegration,
     useSessionStorageIntegration,
   } = creationOptions ?? {};
-  const overrideInput = getInitialInput?.();
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -161,6 +161,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
+  const overrideInput = getInitialInput?.();
   const initialInput: DashboardContainerInput = cloneDeep({
     ...DEFAULT_DASHBOARD_INPUT,
     ...(loadDashboardReturn?.dashboardInput ?? {}),

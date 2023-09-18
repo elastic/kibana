@@ -1,11 +1,22 @@
 {
   "clear_scroll": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],
     "patterns": [
-      "_search/scroll"
+      "_search/scroll",
+      "_search/scroll/{scroll_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/clear-scroll-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/clear-scroll-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

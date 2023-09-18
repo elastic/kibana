@@ -53,6 +53,7 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   RuleAuthorArray,
+  InvestigationFields,
   RuleDescription,
   RuleFalsePositiveArray,
   RuleFilterArray,
@@ -116,6 +117,7 @@ export const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
+    investigation_fields: InvestigationFields,
     // Throttle
     throttle: RuleActionThrottle,
   },

@@ -23,8 +23,8 @@ const Template: ComponentStory<typeof Component> = (props: FunctionListPopover) 
 };
 
 const defaultProps: FunctionListPopover = {
-  functions: [],
   onSelectFunction: () => {},
+  disabled: false,
 };
 
 export const ConversationList = Template.bind({});

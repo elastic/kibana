@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { find } from 'lodash/fp';
 import { useMemo } from 'react';
+import { ORIGINAL_EVENT_ID } from '../constants/field_names';
 import { useAlertPrevalence } from '../../../common/containers/alerts/use_alert_prevalence';
 import { isActiveTimeline } from '../../../helpers';
 
 export interface UseFetchRelatedAlertsBySameSourceEventParams {
   /**
-   * An array of field objects with category and value
+   * Value of the kibana.alert.original_event.id field
    */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
+  originalEventId: string;
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -44,21 +43,12 @@ export interface UseFetchRelatedAlertsBySameSourceEventResult {
  * Returns the number of alerts for the same source event (and the loading, error statuses as well as the alerts count)
  */
 export const useFetchRelatedAlertsBySameSourceEvent = ({
-  dataFormattedForFieldBrowser,
+  originalEventId,
   scopeId,
 }: UseFetchRelatedAlertsBySameSourceEventParams): UseFetchRelatedAlertsBySameSourceEventResult => {
-  const { field, values } = useMemo(
-    () =>
-      find(
-        { category: 'kibana', field: 'kibana.alert.original_event.id' },
-        dataFormattedForFieldBrowser
-      ) || { field: '', values: [] },
-    [dataFormattedForFieldBrowser]
-  );
-
   const { loading, error, count, alertIds } = useAlertPrevalence({
-    field,
-    value: values,
+    field: ORIGINAL_EVENT_ID,
+    value: originalEventId,
     isActiveTimelines: isActiveTimeline(scopeId),
     signalIndexName: null,
     includeAlertIds: true,

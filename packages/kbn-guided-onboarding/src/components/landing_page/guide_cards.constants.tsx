@@ -104,8 +104,7 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Collect and analyze my logs',
     }),
     navigateTo: {
-      appId: 'integrations',
-      path: '/browse?q=log',
+      appId: 'observabilityOnboarding',
     },
     telemetryId: 'onboarding--observability--logs',
     order: 2,
@@ -170,6 +169,20 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--observability--synthetics',
     order: 14,
+  },
+  {
+    solution: 'observability',
+    icon: 'visBarHorizontal',
+    title: i18n.translate(
+      'guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title',
+      { defaultMessage: 'Optimize my workloads with Universal Profiling' }
+    ),
+    navigateTo: {
+      appId: 'profiling',
+      path: '/add-data-instructions',
+    },
+    telemetryId: 'onboarding--observability--profiling',
+    order: 15,
   },
   {
     solution: 'security',

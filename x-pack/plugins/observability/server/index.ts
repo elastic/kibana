@@ -20,6 +20,7 @@ import {
 } from '../common/utils/unwrap_es_response';
 
 export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
+export { getParsedFilterQuery } from './utils/get_parsed_filtered_query';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
@@ -49,7 +50,7 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
-  thresholdRule: schema.object({
+  customThresholdRule: schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),

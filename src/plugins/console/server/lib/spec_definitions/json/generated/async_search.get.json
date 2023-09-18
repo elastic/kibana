@@ -1,9 +1,19 @@
 {
   "async_search.get": {
     "url_params": {
-      "wait_for_completion_timeout": "",
-      "keep_alive": "",
-      "typed_keys": "__flag__"
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "keep_alive": [
+        "-1",
+        "0"
+      ],
+      "typed_keys": "__flag__",
+      "wait_for_completion_timeout": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
@@ -11,6 +21,10 @@
     "patterns": [
       "_async_search/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/async-search.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

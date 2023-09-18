@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
@@ -12,6 +14,7 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   getAlertUrl,
+  observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { schema } from '@kbn/config-schema';
@@ -148,5 +151,7 @@ export const registerSyntheticsTLSCheckRule = (
       return { state: updateState(ruleState, foundCerts) };
     },
     alerts: UptimeRuleTypeAlertDefinition,
+    getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+      observabilityPaths.ruleDetails(rule.id),
   });
 };

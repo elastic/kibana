@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { advancedSettingsMock } from '@kbn/advanced-settings-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import {
@@ -18,10 +17,14 @@ import { SpacesPlugin } from './plugin';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
-    it('should register the spaces API and the space selector app', () => {
+    it('should register the space selector app when buildFlavor is traditional', () => {
       const coreSetup = coreMock.createSetup();
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        {},
+        { buildFlavor: 'traditional' }
+      );
 
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
+      const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {});
 
       expect(coreSetup.application.register).toHaveBeenCalledWith(
@@ -34,7 +37,23 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should register the management and feature catalogue sections when the management and home plugins are both available', () => {
+    it('should not register the space selector app when buildFlavor is serverless', () => {
+      const coreSetup = coreMock.createSetup();
+
+      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
+      plugin.setup(coreSetup, {});
+
+      expect(coreSetup.application.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'space_selector',
+          chromeless: true,
+          appRoute: '/spaces/space_selector',
+          mount: expect.any(Function),
+        })
+      );
+    });
+
+    it('should register the management and feature catalogue sections when the management and home plugins are both available when buildFlavor is traditional', () => {
       const coreSetup = coreMock.createSetup();
       const home = homePluginMock.createSetupContract();
 
@@ -44,7 +63,12 @@ describe('Spaces plugin', () => {
 
       management.sections.section.kibana = mockSection;
 
-      const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        {},
+        { buildFlavor: 'traditional' }
+      );
+
+      const plugin = new SpacesPlugin(mockInitializerContext);
       plugin.setup(coreSetup, {
         management,
         home,
@@ -64,32 +88,56 @@ describe('Spaces plugin', () => {
       );
     });
 
-    it('should register the advanced settings components if the advanced_settings plugin is available', () => {
+    it('should not register spaces in the management plugin or the feature catalog when the management and home plugins are both available when buildFlavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
-      const advancedSettings = advancedSettingsMock.createSetupContract();
+      const home = homePluginMock.createSetupContract();
+
+      const management = managementPluginMock.createSetupContract();
+      const mockSection = createManagementSectionMock();
+      mockSection.registerApp = jest.fn();
+
+      management.sections.section.kibana = mockSection;
 
       const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext());
-      plugin.setup(coreSetup, { advancedSettings });
+      plugin.setup(coreSetup, {
+        management,
+        home,
+      });
 
-      expect(advancedSettings.component.register.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "advanced_settings_page_title",
-            [Function],
-            true,
-          ],
-          Array [
-            "advanced_settings_page_subtitle",
-            [Function],
-            true,
-          ],
-        ]
-      `);
+      expect(mockSection.registerApp).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'spaces' })
+      );
+
+      expect(home.featureCatalogue.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: 'admin',
+          icon: 'spacesApp',
+          id: 'spaces',
+          showOnHomePage: false,
+        })
+      );
     });
   });
 
   describe('#start', () => {
-    it('should register the spaces nav control', () => {
+    it('should register the spaces nav control when buildFlavor is traditional', () => {
+      const coreSetup = coreMock.createSetup();
+      const coreStart = coreMock.createStart();
+
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        {},
+        { buildFlavor: 'traditional' }
+      );
+
+      const plugin = new SpacesPlugin(mockInitializerContext);
+      plugin.setup(coreSetup, {});
+
+      plugin.start(coreStart);
+
+      expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
+    });
+
+    it('should not register the spaces nav control when buildFlavor is serverless', () => {
       const coreSetup = coreMock.createSetup();
       const coreStart = coreMock.createStart();
 
@@ -98,7 +146,31 @@ describe('Spaces plugin', () => {
 
       plugin.start(coreStart);
 
-      expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
+      expect(coreStart.chrome.navControls.registerLeft).not.toHaveBeenCalled();
     });
+  });
+
+  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1', () => {
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+
+    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1 }));
+    const spacesSetup = plugin.setup(coreSetup, {});
+    const spacesStart = plugin.start(coreStart);
+
+    expect(spacesSetup.hasOnlyDefaultSpace).toBe(true);
+    expect(spacesStart.hasOnlyDefaultSpace).toBe(true);
+  });
+
+  it('determines hasOnlyDefaultSpace correctly when maxSpaces=1000', () => {
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+
+    const plugin = new SpacesPlugin(coreMock.createPluginInitializerContext({ maxSpaces: 1000 }));
+    const spacesSetup = plugin.setup(coreSetup, {});
+    const spacesStart = plugin.start(coreStart);
+
+    expect(spacesSetup.hasOnlyDefaultSpace).toBe(false);
+    expect(spacesStart.hasOnlyDefaultSpace).toBe(false);
   });
 });

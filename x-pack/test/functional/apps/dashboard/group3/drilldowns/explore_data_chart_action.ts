@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Explore underlying data - chart action', () => {
     describe('value click action', () => {
       it('action exists in chart click popup menu', async () => {
-        await common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
         await pieChart.clickOnPieSlice('160,000');
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let originalTimeRangeDurationHours: number | undefined;
 
       it('action exists in chart brush popup menu', async () => {
-        await common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
         await dashboard.loadSavedDashboard(drilldowns.DASHBOARD_WITH_AREA_CHART_NAME);
 

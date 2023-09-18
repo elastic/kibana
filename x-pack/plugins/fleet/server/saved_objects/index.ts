@@ -25,6 +25,11 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import {
+  migratePackagePolicyEvictionsFromV8110,
+  migratePackagePolicyToV8110,
+} from './migrations/security_solution/to_v8_11_0';
+
 import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
 
 import { migrateSyntheticsPackagePolicyToV8100 } from './migrations/synthetics/to_v8_10_0';
@@ -90,6 +95,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
         prerelease_integrations_enabled: { type: 'boolean' },
+        secret_storage_requirements_met: { type: 'boolean' },
       },
     },
     migrations: {
@@ -318,6 +324,17 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           forwardCompatibility: migratePackagePolicyEvictionsFromV8100,
         },
       },
+      '2': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV8110,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV8110,
+        },
+      },
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
@@ -453,6 +470,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
         host: { type: 'keyword' },
+        proxy_id: { type: 'keyword' },
       },
     },
   },

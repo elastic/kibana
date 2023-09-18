@@ -6,7 +6,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { ActionsCompletion } from '../types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ActionsConfigMap } from './get_actions_config_map';
 import { SearchMetrics } from './types';
 
@@ -27,6 +27,7 @@ interface State {
       numberOfGeneratedActions: number;
     };
   };
+  hasReachedQueuedActionsLimit: boolean;
 }
 
 export type RuleRunMetrics = Omit<State, 'connectorTypes'> & {
@@ -44,6 +45,7 @@ export class RuleRunMetricsStore {
     numberOfNewAlerts: 0,
     hasReachedAlertLimit: false,
     connectorTypes: {},
+    hasReachedQueuedActionsLimit: false,
   };
 
   // Getters
@@ -90,6 +92,9 @@ export class RuleRunMetricsStore {
   public getHasReachedAlertLimit = () => {
     return this.state.hasReachedAlertLimit;
   };
+  public getHasReachedQueuedActionsLimit = () => {
+    return this.state.hasReachedQueuedActionsLimit;
+  };
 
   // Setters
   public setSearchMetrics = (searchMetrics: SearchMetrics[]) => {
@@ -134,6 +139,9 @@ export class RuleRunMetricsStore {
   };
   public setHasReachedAlertLimit = (hasReachedAlertLimit: boolean) => {
     this.state.hasReachedAlertLimit = hasReachedAlertLimit;
+  };
+  public setHasReachedQueuedActionsLimit = (hasReachedQueuedActionsLimit: boolean) => {
+    this.state.hasReachedQueuedActionsLimit = hasReachedQueuedActionsLimit;
   };
 
   // Checkers
@@ -181,5 +189,14 @@ export class RuleRunMetricsStore {
   public incrementNumberOfGeneratedActionsByConnectorType = (actionTypeId: string) => {
     const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfGeneratedActions || 0;
     set(this.state, `connectorTypes["${actionTypeId}"].numberOfGeneratedActions`, currentVal + 1);
+  };
+
+  // Decrementer
+  public decrementNumberOfTriggeredActions = () => {
+    this.state.numberOfTriggeredActions--;
+  };
+  public decrementNumberOfTriggeredActionsByConnectorType = (actionTypeId: string) => {
+    const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfTriggeredActions || 0;
+    set(this.state, `connectorTypes["${actionTypeId}"].numberOfTriggeredActions`, currentVal - 1);
   };
 }

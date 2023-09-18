@@ -11,16 +11,31 @@
  * 2.0.
  */
 
-const start = '2023-03-17T01:00:00.000Z';
-const end = '2023-03-17T01:05:00.000Z';
-
 describe('Home page', () => {
+  const rangeFrom = '2023-04-18T00:00:00.000Z';
+  const rangeTo = '2023-04-18T00:05:00.000Z';
+
   beforeEach(() => {
     cy.loginAsElastic();
   });
 
+  it('opens Profiling UI when user does not have privileges', () => {
+    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+      body: {
+        has_setup: true,
+        pre_8_9_1_data: false,
+        has_data: true,
+        unauthorized: true,
+      },
+    }).as('getEsResources');
+    cy.visitKibana('/app/profiling', { rangeFrom, rangeTo });
+    cy.wait('@getEsResources');
+    cy.contains('Top 46');
+    cy.contains('User privilege limitation');
+  });
+
   it('navigates through the tabs', () => {
-    cy.visitKibana('/app/profiling', start, end);
+    cy.visitKibana('/app/profiling', { rangeFrom, rangeTo });
     cy.url().should('include', '/app/profiling/stacktraces/threads');
     cy.get('[role="tablist"]').within(() => {
       cy.contains('Traces').click();

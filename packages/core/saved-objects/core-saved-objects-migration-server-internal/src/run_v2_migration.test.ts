@@ -9,6 +9,7 @@
 import buffer from 'buffer';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
   type MigrationResult,
   SavedObjectsSerializer,
@@ -271,5 +272,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
     }),
     serializer: new SavedObjectsSerializer(typeRegistry),
     mappingProperties: buildTypesMappings(typeRegistry.getAllTypes()),
+    esCapabilities: elasticsearchServiceMock.createCapabilities(),
   };
 };

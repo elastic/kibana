@@ -9,8 +9,17 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObject }: FtrProviderContext) {
   const PageObject = getPageObject('common');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Management', function () {
+    before(async () => {
+      await svlCommonPage.login();
+    });
+
+    after(async () => {
+      await svlCommonPage.forceLogout();
+    });
+
     it('redirects from common management url to security specific page', async () => {
       const SUB_URL = '';
       await PageObject.navigateToUrl('management', SUB_URL, {
@@ -19,7 +28,7 @@ export default function ({ getPageObject }: FtrProviderContext) {
         shouldUseHashForSubUrl: false,
       });
 
-      await PageObject.waitUntilUrlIncludes('/security/manage');
+      await PageObject.waitUntilUrlIncludes('/security/project_settings');
     });
   });
 }

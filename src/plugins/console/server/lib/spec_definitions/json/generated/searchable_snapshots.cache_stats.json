@@ -1,5 +1,15 @@
 {
   "searchable_snapshots.cache_stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
+    },
     "methods": [
       "GET"
     ],
@@ -7,6 +17,10 @@
       "_searchable_snapshots/cache/stats",
       "_searchable_snapshots/{node_id}/cache/stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/searchable-snapshots-apis.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

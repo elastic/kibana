@@ -15,6 +15,11 @@ export function useKibana() {
           }
         },
       },
+      http: {
+        basePath: {
+          prepend: () => '',
+        },
+      },
       notifications: {
         toasts: {
           addSuccess: () => {},

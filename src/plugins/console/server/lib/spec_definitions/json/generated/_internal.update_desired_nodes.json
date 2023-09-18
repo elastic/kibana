@@ -1,14 +1,15 @@
 {
   "_internal.update_desired_nodes": {
-    "url_params": {
-      "dry_run": "__flag__"
-    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_internal/desired_nodes/{history_id}/{version}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/update-desired-nodes.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/update-desired-nodes.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
   }
 }

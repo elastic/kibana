@@ -1467,6 +1467,16 @@ describe('Exception helpers', () => {
         capabilities: endpointCapabilties,
       },
       _id: 'b9edb05a090729be2077b99304542d6844973843dec43177ac618f383df44a6d',
+      destination: {
+        port: 443,
+      },
+      source: {
+        ports: [1, 2, 4],
+      },
+      flow: {
+        final: false,
+        skip: true,
+      },
     };
     const expectedHighlightedFields = [
       {
@@ -1560,6 +1570,27 @@ describe('Exception helpers', () => {
       },
       { field: 'process.name', operator: 'included', type: 'match', value: 'malware writer' },
     ];
+    const expectedExceptionEntriesWithCustomHighlightedFields = [
+      {
+        field: 'event.type',
+        operator: 'included',
+        type: 'match',
+        value: 'creation',
+      },
+      {
+        field: 'agent.id',
+        operator: 'included',
+        type: 'match',
+        value: 'f4f86e7c-29bd-4655-b7d0-a3d08ad0c322',
+      },
+      {
+        field: 'process.executable',
+        operator: 'included',
+        type: 'match',
+        value: 'C:/malware.exe',
+      },
+      { field: 'process.name', operator: 'included', type: 'match', value: 'malware writer' },
+    ];
     const entriesWithMatchAny = {
       field: 'Endpoint.capabilities',
       operator,
@@ -1624,6 +1655,68 @@ describe('Exception helpers', () => {
         });
         expect(entries).toEqual(expectedExceptionEntries);
       });
+      it('should build exception entries with "match" operator and  ensure that integer value is converted to a string', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: [
+            ...expectedHighlightedFields,
+            {
+              id: 'destination.port',
+            },
+          ],
+          alertData,
+        });
+        expect(alertData).toEqual(
+          expect.objectContaining({
+            destination: {
+              port: 443,
+            },
+          })
+        );
+        expect(entries).toEqual([
+          ...expectedExceptionEntries,
+          {
+            field: 'destination.port',
+            operator: 'included',
+            type: 'match',
+            value: '443',
+          },
+        ]);
+      });
+      it('should build exception entries with "match" operator and ensure that boolean value is converted to a string', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: [
+            ...expectedHighlightedFields,
+            {
+              id: 'flow.final',
+            },
+            { id: 'flow.skip' },
+          ],
+          alertData,
+        });
+        expect(alertData).toEqual(
+          expect.objectContaining({
+            flow: {
+              final: false,
+              skip: true,
+            },
+          })
+        );
+        expect(entries).toEqual([
+          ...expectedExceptionEntries,
+          {
+            field: 'flow.final',
+            operator: 'included',
+            type: 'match',
+            value: 'false',
+          },
+          {
+            field: 'flow.skip',
+            operator: 'included',
+            type: 'match',
+            value: 'true',
+          },
+        ]);
+      });
       it('should build the exception entries with "match_any" in case the field key has multiple values', () => {
         const entries = buildExceptionEntriesFromAlertFields({
           highlightedFields: [
@@ -1635,6 +1728,26 @@ describe('Exception helpers', () => {
           alertData,
         });
         expect(entries).toEqual([...expectedExceptionEntries, entriesWithMatchAny]);
+      });
+      it('should build the exception entries with "match_any" in case the field key has multiple values and ensure that the array value is converted to a string', () => {
+        const entries = buildExceptionEntriesFromAlertFields({
+          highlightedFields: [
+            ...expectedHighlightedFields,
+            {
+              id: 'source.ports',
+            },
+          ],
+          alertData,
+        });
+        expect(entries).toEqual([
+          ...expectedExceptionEntries,
+          {
+            field: 'source.ports',
+            operator,
+            type: ListOperatorTypeEnum.MATCH_ANY,
+            value: ['1', '2', '4'],
+          },
+        ]);
       });
     });
 
@@ -1739,12 +1852,12 @@ describe('Exception helpers', () => {
         },
       ];
       it('should return the highlighted fields correctly when eventCode, eventCategory and RuleType are in the alertData', () => {
-        const res = getAlertHighlightedFields(alertData);
+        const res = getAlertHighlightedFields(alertData, []);
         expect(res).toEqual(allHighlightFields);
       });
       it('should return highlighted fields without the file.Ext.quarantine_path when "event.code" is not in the alertData', () => {
         const alertDataWithoutEventCode = { ...alertData, 'event.code': null };
-        const res = getAlertHighlightedFields(alertDataWithoutEventCode);
+        const res = getAlertHighlightedFields(alertDataWithoutEventCode, []);
         expect(res).toEqual([
           ...baseGeneratedAlertHighlightedFields,
           {
@@ -1763,7 +1876,7 @@ describe('Exception helpers', () => {
       });
       it('should return highlighted fields without the file and process props when "event.category" is not in the alertData', () => {
         const alertDataWithoutEventCategory = { ...alertData, 'event.category': null };
-        const res = getAlertHighlightedFields(alertDataWithoutEventCategory);
+        const res = getAlertHighlightedFields(alertDataWithoutEventCategory, []);
         expect(res).toEqual([
           ...baseGeneratedAlertHighlightedFields,
           {
@@ -1775,7 +1888,7 @@ describe('Exception helpers', () => {
       });
       it('should return the process highlighted fields correctly when eventCategory is an array', () => {
         const alertDataEventCategoryProcessArray = { ...alertData, 'event.category': ['process'] };
-        const res = getAlertHighlightedFields(alertDataEventCategoryProcessArray);
+        const res = getAlertHighlightedFields(alertDataEventCategoryProcessArray, []);
         expect(res).not.toEqual(
           expect.arrayContaining([
             { id: 'file.name' },
@@ -1793,20 +1906,20 @@ describe('Exception helpers', () => {
       });
       it('should return all highlighted fields even when the "kibana.alert.rule.type" is not in the alertData', () => {
         const alertDataWithoutEventCategory = { ...alertData, 'kibana.alert.rule.type': null };
-        const res = getAlertHighlightedFields(alertDataWithoutEventCategory);
+        const res = getAlertHighlightedFields(alertDataWithoutEventCategory, []);
         expect(res).toEqual(allHighlightFields);
       });
       it('should return all highlighted fields when there are no fields to be filtered out', () => {
         jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
 
-        const res = getAlertHighlightedFields(alertData);
+        const res = getAlertHighlightedFields(alertData, []);
         expect(res).toEqual(allHighlightFields);
       });
       it('should exclude the "agent.id" from highlighted fields when agent.type is not "endpoint"', () => {
         jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
 
         const alertDataWithoutAgentType = { ...alertData, agent: { ...alertData.agent, type: '' } };
-        const res = getAlertHighlightedFields(alertDataWithoutAgentType);
+        const res = getAlertHighlightedFields(alertDataWithoutAgentType, []);
 
         expect(res).toEqual(allHighlightFields.filter((field) => field.id !== AGENT_ID));
       });
@@ -1814,9 +1927,13 @@ describe('Exception helpers', () => {
         jest.mock('./highlighted_fields_config', () => ({ highlightedFieldsPrefixToExclude: [] }));
 
         const alertDataWithoutRuleUUID = { ...alertData, 'kibana.alert.rule.uuid': '' };
-        const res = getAlertHighlightedFields(alertDataWithoutRuleUUID);
+        const res = getAlertHighlightedFields(alertDataWithoutRuleUUID, []);
 
         expect(res).toEqual(allHighlightFields.filter((field) => field.id !== AGENT_ID));
+      });
+      it('should include custom highlighted fields', () => {
+        const res = getAlertHighlightedFields(alertData, ['event.type']);
+        expect(res).toEqual([{ id: 'event.type' }, ...allHighlightFields]);
       });
     });
     describe('getPrepopulatedRuleExceptionWithHighlightFields', () => {
@@ -1826,6 +1943,7 @@ describe('Exception helpers', () => {
         const res = getPrepopulatedRuleExceptionWithHighlightFields({
           alertData: defaultAlertData,
           exceptionItemName: '',
+          ruleCustomHighlightedFields: [],
         });
         expect(res).toBe(null);
       });
@@ -1835,6 +1953,7 @@ describe('Exception helpers', () => {
         const res = getPrepopulatedRuleExceptionWithHighlightFields({
           alertData: defaultAlertData,
           exceptionItemName: '',
+          ruleCustomHighlightedFields: [],
         });
         expect(res).toBe(null);
       });
@@ -1842,10 +1961,26 @@ describe('Exception helpers', () => {
         const exception = getPrepopulatedRuleExceptionWithHighlightFields({
           alertData,
           exceptionItemName: name,
+          ruleCustomHighlightedFields: [],
         });
 
         expect(exception?.entries).toEqual(
           expectedExceptionEntries.map((entry) => ({ ...entry, id: '123' }))
+        );
+        expect(exception?.name).toEqual(name);
+      });
+      it('should create a new exception and populate its entries with the custom highlighted fields', () => {
+        const exception = getPrepopulatedRuleExceptionWithHighlightFields({
+          alertData,
+          exceptionItemName: name,
+          ruleCustomHighlightedFields: ['event.type'],
+        });
+
+        expect(exception?.entries).toEqual(
+          expectedExceptionEntriesWithCustomHighlightedFields.map((entry) => ({
+            ...entry,
+            id: '123',
+          }))
         );
         expect(exception?.name).toEqual(name);
       });

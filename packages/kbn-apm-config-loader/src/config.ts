@@ -20,7 +20,6 @@ const DEFAULT_CONFIG: AgentConfigOptions = {
   active: true,
   contextPropagationOnly: true,
   environment: 'development',
-  logUncaughtExceptions: true,
   globalLabels: {},
 };
 
@@ -145,6 +144,10 @@ export class ApmConfiguration {
 
     if (process.env.ELASTIC_APM_SECRET_TOKEN) {
       config.secretToken = process.env.ELASTIC_APM_SECRET_TOKEN;
+    }
+
+    if (process.env.ELASTIC_APM_API_KEY) {
+      config.apiKey = process.env.ELASTIC_APM_API_KEY;
     }
 
     if (process.env.ELASTIC_APM_GLOBAL_LABELS) {

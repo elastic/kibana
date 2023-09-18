@@ -14,7 +14,7 @@ import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_i
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import type { CloudSetup, CloudStart } from './types';
-import { getFullCloudUrl } from './utils';
+import { getFullCloudUrl } from '../common/utils';
 
 export interface CloudConfigType {
   id?: string;
@@ -31,6 +31,7 @@ export interface CloudConfigType {
   is_elastic_staff_owned?: boolean;
   serverless?: {
     project_id: string;
+    project_name?: string;
   };
 }
 
@@ -91,6 +92,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
         projectId: this.config.serverless?.project_id,
+        projectName: this.config.serverless?.project_name,
       },
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);
@@ -145,6 +147,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       isServerlessEnabled: this.isServerlessEnabled,
       serverless: {
         projectId: this.config.serverless?.project_id,
+        projectName: this.config.serverless?.project_name,
       },
       performanceUrl,
       usersAndRolesUrl,

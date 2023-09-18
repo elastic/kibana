@@ -6,6 +6,7 @@
     "id": "telemetry",
     "server": true,
     "browser": true,
+    "enabledOnAnonymousPages": true,
     "requiredPlugins": [
       "telemetryCollectionManager",
       "usageCollection",

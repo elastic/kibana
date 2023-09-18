@@ -84,6 +84,9 @@
     "@kbn/core-theme-browser-mocks",
     "@kbn/event-annotation-components",
     "@kbn/content-management-utils",
+    "@kbn/serverless",
+    "@kbn/ebt-tools",
+    "@kbn/search-response-warnings",
   ],
   "exclude": [
     "target/**/*",

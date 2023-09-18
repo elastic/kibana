@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { toDuration } from '../../../utils/slo/duration';
 import { CreateSLOForm } from '../types';
 

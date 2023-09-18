@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { type FC } from 'react';
+
 import { EuiToolTip } from '@elastic/eui';
 
-import {
-  createCapabilityFailureMessage,
-  AuthorizationContext,
-} from '../../../../lib/authorization';
+import { i18n } from '@kbn/i18n';
+
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
+
+import { useTransformCapabilities } from '../../../../hooks';
 import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
 export const scheduleNowActionNameText = i18n.translate(
@@ -48,7 +49,7 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
   forceDisable,
   transformNodes,
 }) => {
-  const { canScheduleNowTransform } = useContext(AuthorizationContext).capabilities;
+  const { canScheduleNowTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 
   // Disable schedule-now for batch transforms which have completed.

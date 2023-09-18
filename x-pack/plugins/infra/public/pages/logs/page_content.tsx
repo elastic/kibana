@@ -11,6 +11,7 @@ import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -81,6 +82,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
             >
               {ADD_DATA_LABEL}
             </EuiHeaderLink>
+            <ObservabilityAIAssistantActionMenuItem />
           </EuiHeaderLinks>
         </HeaderMenuPortal>
       )}

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
 
 export const javascriptDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.jsAdvancedConfig,
   apiReference: docLinks.jsApiReference,
   basicConfig: docLinks.jsBasicConfig,
   buildSearchQuery: `// Let's search!
@@ -29,6 +28,12 @@ auth: {
 }
 });`,
   docLink: docLinks.jsClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-js',
+    label: i18n.translate('xpack.serverlessSearch.languages.javascript.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless',
+    }),
+  },
   iconType: 'javascript.svg',
   id: Languages.JAVASCRIPT,
   ingestData: `// Sample flight data

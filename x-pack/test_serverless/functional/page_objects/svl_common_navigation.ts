@@ -104,13 +104,17 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       },
       async expectSectionOpen(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
-        const isOpen = await this.isSectionOpen(sectionId);
-        expect(isOpen).to.be(true);
+        await retry.waitFor(`section ${sectionId} to be open`, async () => {
+          const isOpen = await this.isSectionOpen(sectionId);
+          return isOpen;
+        });
       },
       async expectSectionClosed(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);
-        const isOpen = await this.isSectionOpen(sectionId);
-        expect(isOpen).to.be(false);
+        await retry.waitFor(`section ${sectionId} to be closed`, async () => {
+          const isOpen = await this.isSectionOpen(sectionId);
+          return !isOpen;
+        });
       },
       async openSection(sectionId: NavigationId) {
         await this.expectSectionExists(sectionId);

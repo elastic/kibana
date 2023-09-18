@@ -1,5 +1,22 @@
 title: SLO response
 type: object
+required:
+  - id
+  - name
+  - description
+  - indicator
+  - timeWindow
+  - budgetingMethod
+  - objective
+  - settings
+  - revision
+  - summary
+  - enabled
+  - groupBy
+  - instanceId
+  - tags
+  - createdAt
+  - updatedAt
 properties:
   id:
     description: The identifier of the SLO.
@@ -54,6 +71,11 @@ properties:
     description: the value derived from the groupBy field, if present, otherwise '*'
     type: string
     example: 'host-abcde'
+  tags:
+    description: List of tags
+    type: array
+    items:
+      type: string
   createdAt:
     description: The creation date
     type: string
