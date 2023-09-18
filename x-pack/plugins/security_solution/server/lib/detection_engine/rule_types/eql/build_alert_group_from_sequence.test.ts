@@ -34,10 +34,6 @@ describe('buildAlert', () => {
     jest.clearAllMocks();
   });
 
-  test('it builds an alert composed of a sequence', () => {
-    expect(true).toEqual(true);
-  });
-
   test('it builds an alert as expected without original_event if event does not exist', () => {
     const completeRule = getCompleteRuleMock<QueryRuleParams>(getQueryRuleParams());
     const eqlSequence = {
@@ -146,6 +142,62 @@ describe('buildAlert', () => {
   });
 
   describe('recursive intersection between objects', () => {
+    test.only('should work with arrays with exact matches', () => {
+      const a = {
+        field1: [1],
+      };
+      const b = {
+        field1: [1],
+      };
+      const intersection = objectPairIntersection(a, b);
+      const expected = {
+        field1: [1],
+      };
+      expect(intersection).toEqual(expected);
+    });
+
+    test.only('should work with arrays with differing lengths', () => {
+      const a = {
+        field1: 1,
+      };
+      const b = {
+        field1: [1, 2, 3],
+      };
+      const intersection = objectPairIntersection(a, b);
+      const expected = {
+        field1: [1],
+      };
+      expect(intersection).toEqual(expected);
+    });
+
+    test.only('should work with arrays with same lengths but only one intersecting element', () => {
+      const a = {
+        field1: [3, 4, 5],
+      };
+      const b = {
+        field1: [1, 2, 3],
+      };
+      const intersection = objectPairIntersection(a, b);
+      const expected = {
+        field1: [3],
+      };
+      expect(intersection).toEqual(expected);
+    });
+
+    test.only('should work with arrays with differing lengths and two matching elements', () => {
+      const a = {
+        field1: [3, 4, 5],
+      };
+      const b = {
+        field1: [1, 2, 3, 4],
+      };
+      const intersection = objectPairIntersection(a, b);
+      const expected = {
+        field1: [3, 4],
+      };
+      expect(intersection).toEqual(expected);
+    });
+
     test('should treat numbers and strings as unequal', () => {
       const a = {
         field1: 1,
@@ -427,7 +479,6 @@ describe('buildAlert', () => {
       };
       expect(intersection).toEqual(expected);
     });
-
     test('should work with 3 or more objects', () => {
       const a = {
         field1: 1,
