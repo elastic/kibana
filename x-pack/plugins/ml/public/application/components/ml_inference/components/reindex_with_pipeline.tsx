@@ -32,6 +32,10 @@ import { useMlKibana } from '../../../contexts/kibana';
 import { isValidIndexName } from '../../../../../common/util/es_utils';
 import { createKibanaDataView, checkIndexExists } from '../retry_create_data_view';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
+import {
+  isSecurityHasPrivilegesDisabledResponse,
+  isSecurityHasPrivilegesResponse,
+} from '../../../services/ml_api_service';
 
 const destIndexEmpty = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexEmpty',
@@ -189,9 +193,15 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
             ],
           });
 
-          setCanReindex(
-            privilege.securityDisabled === true || privilege.has_all_requested === true
-          );
+          let ableToReindex: boolean = false;
+          if (isSecurityHasPrivilegesDisabledResponse(privilege)) {
+            ableToReindex = privilege.securityDisabled === true;
+          }
+          if (isSecurityHasPrivilegesResponse(privilege)) {
+            ableToReindex = privilege.has_all_requested === true;
+          }
+
+          setCanReindex(ableToReindex);
         } catch (e) {
           const error = extractErrorMessage(e);
           const errorMessage = i18n.translate(

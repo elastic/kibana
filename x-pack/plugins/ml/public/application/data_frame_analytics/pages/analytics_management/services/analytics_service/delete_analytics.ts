@@ -15,6 +15,10 @@ import {
   isDataFrameAnalyticsFailed,
   DataFrameAnalyticsListRow,
 } from '../../components/analytics_list/common';
+import {
+  isSecurityHasPrivilegesDisabledResponse,
+  isSecurityHasPrivilegesResponse,
+} from '../../../../../services/ml_api_service';
 
 export const deleteAnalytics = async (
   analyticsConfig: DataFrameAnalyticsListRow['config'],
@@ -147,7 +151,14 @@ export const canDeleteIndex = async (
     if (!privilege) {
       return false;
     }
-    return privilege.securityDisabled === true || privilege.has_all_requested === true;
+    let canDelete: boolean = false;
+    if (isSecurityHasPrivilegesDisabledResponse(privilege)) {
+      canDelete = privilege.securityDisabled === true;
+    }
+    if (isSecurityHasPrivilegesResponse(privilege)) {
+      canDelete = privilege.has_all_requested === true;
+    }
+    return canDelete;
   } catch (e) {
     const error = extractErrorMessage(e);
     toastNotificationService.displayDangerToast(

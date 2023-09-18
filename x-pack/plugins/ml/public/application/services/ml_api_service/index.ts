@@ -53,10 +53,21 @@ import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
 
-export interface ExtendedSecurityHasPrivilegesResponse
-  extends estypes.SecurityHasPrivilegesResponse {
-  securityDisabled?: boolean;
+export interface SecurityHasPrivilegesDisabledResponse {
+  securityDisabled: boolean;
   upgradeInProgress: boolean;
+}
+
+export function isSecurityHasPrivilegesDisabledResponse(
+  arg: any
+): arg is SecurityHasPrivilegesDisabledResponse {
+  return arg.hasOwnProperty('securityDisabled') && arg.hasOwnProperty('upgradeInProgress');
+}
+
+export function isSecurityHasPrivilegesResponse(
+  arg: any
+): arg is estypes.SecurityHasPrivilegesResponse {
+  return arg.hasOwnProperty('has_all_requested') && arg.hasOwnProperty('cluster');
 }
 
 export interface MlInfoResponse {
@@ -414,7 +425,9 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
     hasPrivileges(obj: any) {
       const body = JSON.stringify(obj);
-      return httpService.http<ExtendedSecurityHasPrivilegesResponse>({
+      return httpService.http<
+        estypes.SecurityHasPrivilegesResponse | SecurityHasPrivilegesDisabledResponse
+      >({
         path: `${ML_INTERNAL_BASE_PATH}/_has_privileges`,
         method: 'POST',
         body,
