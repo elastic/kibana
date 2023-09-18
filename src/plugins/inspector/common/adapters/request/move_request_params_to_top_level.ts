@@ -14,8 +14,8 @@ interface ErrorResponse {
   err?: {
     [key: string]: unknown;
     requestParams?: ConnectionRequestParams;
-  }
-};
+  };
+}
 
 interface OkResponse {
   [key: string]: unknown;
