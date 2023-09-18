@@ -3,10 +3,14 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/functional/common_cypress.sh
 
 export JOB=kibana-fleet-cypress
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Fleet Cypress tests"
+echo "--- Fleet Cypress tests (Chrome)"
 
 cd x-pack/plugins/fleet
-yarn --cwd x-pack/plugins/fleet cypress:run
+
+set +e
+yarn --cwd x-pack/plugins/fleet cypress:run; status=$?, yarn junit:merge || ;; exit $status
