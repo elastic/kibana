@@ -51,6 +51,8 @@ const euiDataGridCss = {
     '.euiDataGrid__virtualized': {
       height: '100% !important',
       maxHeight: '500px',
+      width: '100% !important',
+      maxWidth: '1200px',
     },
   },
 };
