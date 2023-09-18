@@ -17,7 +17,6 @@ interface ErrorResponse {
   }
 };
 
-// TODO replace IKibanaSearchResponse when its seperated from data plugin
 interface OkResponse {
   [key: string]: unknown;
   requestParams?: ConnectionRequestParams;
