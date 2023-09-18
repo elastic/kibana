@@ -50,7 +50,10 @@ export function registerBsearchRoute(
                   attributes: err.errBody?.error,
                   // TODO remove 'instanceof errors.ResponseError' check when
                   // eql strategy throws KbnServerError (like all of the other strategies)
-                  requestMeta: err instanceof errors.ResponseError ? err.meta?.meta?.request?.params : err.requestMeta,
+                  requestMeta:
+                    err instanceof errors.ResponseError
+                      ? err.meta?.meta?.request?.params
+                      : err.requestMeta,
                 };
               })
             )
