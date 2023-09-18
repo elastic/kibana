@@ -147,7 +147,9 @@ export function registerAnomalyDetectionAlertType({
     RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
-    AnomalyScoreMatchGroupId
+    AnomalyScoreMatchGroupId,
+    'recovered',
+    MlAnomalyDetectionAlert
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
@@ -233,11 +235,11 @@ export function registerAnomalyDetectionAlertType({
       );
 
       const { alertsClient } = services;
-      if (!alertsClient) return;
+      if (!alertsClient) return { state: {} };
 
       const executionResult = await execute(params, spaceId);
 
-      if (!executionResult) return;
+      if (!executionResult) return { state: {} };
 
       const { isHealthy, name, context } = executionResult;
 
