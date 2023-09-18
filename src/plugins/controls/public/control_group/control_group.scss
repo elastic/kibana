@@ -123,12 +123,6 @@ $controlMinWidth: $euiSize * 14;
   &--small {
     width: $smallControl;
     min-width: $smallControl;
-
-    &:not(.controlFrameWrapper--grow) {
-      .controlFrame__labelToolTip {
-        max-width: 20%;
-      }
-    }
   }
 
   &--medium {
