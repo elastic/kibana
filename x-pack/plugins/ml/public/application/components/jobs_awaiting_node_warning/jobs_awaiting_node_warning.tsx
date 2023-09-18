@@ -10,13 +10,15 @@ import React, { FC } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
+import { useIsServerless } from '../../contexts/kibana';
 
 interface Props {
   jobCount: number;
 }
 
 export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
-  if (lazyMlNodesAvailable() === false || jobCount === 0) {
+  const isServerless = useIsServerless();
+  if (isServerless || lazyMlNodesAvailable() === false || jobCount === 0) {
     return null;
   }
 

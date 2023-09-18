@@ -9,10 +9,10 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { COLLAPSE_DETAILS_BUTTON_TEST_ID, EXPAND_DETAILS_BUTTON_TEST_ID } from './test_ids';
 import { LeftPanelKey } from '../../left';
 import { useRightPanelContext } from '../context';
-import { COLLAPSE_DETAILS_BUTTON, EXPAND_DETAILS_BUTTON } from './translations';
 
 /**
  * Button displayed in the top left corner of the panel, to expand the left section of the document details expandable flyout
@@ -43,7 +43,10 @@ export const ExpandDetailButton: FC = memo(() => {
       iconType="arrowEnd"
       data-test-subj={COLLAPSE_DETAILS_BUTTON_TEST_ID}
     >
-      {COLLAPSE_DETAILS_BUTTON}
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
+        defaultMessage="Collapse details"
+      />
     </EuiButtonEmpty>
   ) : (
     <EuiButtonEmpty
@@ -52,7 +55,10 @@ export const ExpandDetailButton: FC = memo(() => {
       iconType="arrowStart"
       data-test-subj={EXPAND_DETAILS_BUTTON_TEST_ID}
     >
-      {EXPAND_DETAILS_BUTTON}
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"
+        defaultMessage="Expand details"
+      />
     </EuiButtonEmpty>
   );
 });

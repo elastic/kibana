@@ -147,16 +147,15 @@ describe('start', () => {
     const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
     service.stop();
     await expect(promise).resolves.toMatchInlineSnapshot(`
-            Array [
-              Array [
-                "kbnBody",
-                "kbnBody--classicLayout",
-                "kbnBody--noHeaderBanner",
-                "kbnBody--chromeHidden",
-                "kbnVersion-1-2-3",
-              ],
-            ]
-          `);
+      Array [
+        Array [
+          "kbnBody",
+          "kbnBody--noHeaderBanner",
+          "kbnBody--chromeHidden",
+          "kbnVersion-1-2-3",
+        ],
+      ]
+    `);
   });
 
   it('strips off "snapshot" from the kibana version if present', async () => {
@@ -166,16 +165,15 @@ describe('start', () => {
     const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
     service.stop();
     await expect(promise).resolves.toMatchInlineSnapshot(`
-            Array [
-              Array [
-                "kbnBody",
-                "kbnBody--classicLayout",
-                "kbnBody--noHeaderBanner",
-                "kbnBody--chromeHidden",
-                "kbnVersion-8-0-0",
-              ],
-            ]
-          `);
+      Array [
+        Array [
+          "kbnBody",
+          "kbnBody--noHeaderBanner",
+          "kbnBody--chromeHidden",
+          "kbnVersion-8-0-0",
+        ],
+      ]
+    `);
   });
 
   it('does not add legacy browser warning if browser supports CSP', async () => {

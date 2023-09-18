@@ -29,7 +29,7 @@ window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 const mockGetInitialConversations = () => ({});
 
-const mockAssistantAvailability: AssistantAvailability = {
+export const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,

@@ -28,6 +28,15 @@ export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProp
 
   const shouldUseSearchCriteria = currentPage.length === 0;
 
+  // prevents requestTs and searchCriteria state from reloading the chart
+  // we want it to reload only once the table has finished loading.
+  // attributes passed to useAfterLoadedState don't need to be memoized
+  const { afterLoadedState } = useAfterLoadedState(loading, {
+    lastReloadRequestTime: requestTs,
+    dateRange: parsedDateRange,
+    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
+  });
+
   const filters = useMemo(() => {
     return shouldUseSearchCriteria
       ? searchCriteria.filters
@@ -39,14 +48,6 @@ export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProp
           }),
         ];
   }, [searchCriteria.filters, currentPage, dataView, shouldUseSearchCriteria]);
-
-  // prevents requestTs and searchCriteria state from reloading the chart
-  // we want it to reload only once the table has finished loading
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    lastReloadRequestTime: requestTs,
-    dateRange: parsedDateRange,
-    query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
-  });
 
   return (
     <LensChart
