@@ -10,6 +10,7 @@ import {
   AgentName,
   ElasticAgentName,
 } from '../../../typings/es_schemas/ui/fields/agent';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface TimeframeMap {
   '1d': number;
@@ -191,6 +192,10 @@ export interface APMUsage {
           };
         };
       };
+      metricset: {
+        withRollUp: DataStreamWithRollup;
+        withoutRollUp: DataStreamWithoutRollup;
+      };
     };
     shards: {
       total: number;
@@ -235,6 +240,53 @@ export interface APMUsage {
     { took: { ms: number } }
   >;
 }
+
+export enum MetricTypes {
+  'service_destination' = 'service_destination',
+  'transaction' = 'transaction',
+  'service_summary' = 'service_summary',
+  'service_transaction' = 'service_transaction',
+  'span_breakdown' = 'span_breakdown',
+  'app' = 'app',
+}
+
+export type MetricRollupIntervals =
+  | RollupInterval.OneMinute
+  | RollupInterval.TenMinutes
+  | RollupInterval.SixtyMinutes;
+
+export type MetricSupportingRollUp =
+  | MetricTypes.transaction
+  | MetricTypes.service_transaction
+  | MetricTypes.service_destination
+  | MetricTypes.service_summary
+  | MetricTypes.span_breakdown;
+
+export type MetricNotSupportingRollup = MetricTypes.app;
+
+export interface CapturedMetricStats {
+  total: {
+    shards: number;
+    docs: {
+      count: number;
+    };
+    store: {
+      size_in_bytes: number;
+    };
+  };
+}
+
+export type RollUpData = {
+  [bucketSize in MetricRollupIntervals]: CapturedMetricStats;
+};
+
+export type DataStreamWithRollup = {
+  [key in MetricSupportingRollUp]: RollUpData;
+};
+
+export type DataStreamWithoutRollup = {
+  [key in MetricNotSupportingRollup]: CapturedMetricStats;
+};
 
 export type APMDataTelemetry = DeepPartial<APMUsage>;
 

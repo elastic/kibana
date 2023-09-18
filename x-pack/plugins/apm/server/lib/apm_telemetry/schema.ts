@@ -6,8 +6,15 @@
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { AggregatedTransactionsCounts, APMUsage, APMPerService } from './types';
+import {
+  AggregatedTransactionsCounts,
+  APMUsage,
+  APMPerService,
+  CapturedMetricStats,
+  RollUpData,
+} from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { RollupInterval } from '../../../common/rollup';
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<
   AggregatedTransactionsCounts,
@@ -25,6 +32,42 @@ const aggregatedTransactionCountSchema: MakeSchemaFrom<
       description: '',
     },
   },
+};
+
+const capturedMetricStatsSchema: MakeSchemaFrom<CapturedMetricStats, true> = {
+  total: {
+    shards: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of shards for the given metricset per rollup interval.',
+      },
+    },
+    docs: {
+      count: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of metric documents for the given metricset per rollup interval',
+        },
+      },
+    },
+    store: {
+      size_in_bytes: {
+        type: 'long',
+        _meta: {
+          description:
+            'Size of the metric index for the given metricset per rollup interval',
+        },
+      },
+    },
+  },
+};
+
+const rollUpMetricStatsSchema: MakeSchemaFrom<RollUpData, true> = {
+  [RollupInterval.OneMinute]: capturedMetricStatsSchema,
+  [RollupInterval.TenMinutes]: capturedMetricStatsSchema,
+  [RollupInterval.SixtyMinutes]: capturedMetricStatsSchema,
 };
 
 const agentSchema: MakeSchemaFrom<APMUsage, true>['agents'][ElasticAgentName] =
@@ -922,6 +965,18 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
               },
             },
           },
+        },
+      },
+      metricset: {
+        withRollUp: {
+          service_destination: rollUpMetricStatsSchema,
+          transaction: rollUpMetricStatsSchema,
+          service_summary: rollUpMetricStatsSchema,
+          service_transaction: rollUpMetricStatsSchema,
+          span_breakdown: rollUpMetricStatsSchema,
+        },
+        withoutRollUp: {
+          app: capturedMetricStatsSchema,
         },
       },
     },
