@@ -32,7 +32,8 @@ import {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 import { find, FindParams } from './methods/find';
-import { aggregate, AggregateParams } from './methods/aggregate';
+import { AggregateParams } from '../application/rule/methods/aggregate/types';
+import { aggregateRules } from '../application/rule/methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
 import {
@@ -110,7 +111,7 @@ export class RulesClient {
   }
 
   public aggregate = <T = Record<string, unknown>>(params: AggregateParams<T>): Promise<T> =>
-    aggregate<T>(this.context, params);
+    aggregateRules<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateRuleParams<Params>) =>

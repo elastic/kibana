@@ -41,8 +41,8 @@ export const Flyout = ({
   });
 
   const handleOnClose = useCallback(() => {
-    closeFlyout();
     setUrlState(null);
+    closeFlyout();
   }, [closeFlyout, setUrlState]);
 
   return (
