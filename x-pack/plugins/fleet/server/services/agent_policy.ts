@@ -83,7 +83,7 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages } from './epm/packages';
-import { getAgentsByKuery } from './agents';
+import { getAgentsByKuery, getLatestAvailableVersion } from './agents';
 import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
@@ -1048,11 +1048,9 @@ class AgentPolicyService {
         },
       };
 
+      const agentVersion = await getLatestAvailableVersion();
       const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, safeDump);
-      const updateManifestVersion = elasticAgentStandaloneManifest.replace(
-        'VERSION',
-        appContextService.getKibanaVersion()
-      );
+      const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
     } else {
@@ -1064,10 +1062,8 @@ class AgentPolicyService {
     fleetServer: string,
     enrolToken: string
   ): Promise<string | null> {
-    const updateManifestVersion = elasticAgentManagedManifest.replace(
-      'VERSION',
-      appContextService.getKibanaVersion()
-    );
+    const agentVersion = await getLatestAvailableVersion();
+    const updateManifestVersion = elasticAgentManagedManifest.replace('VERSION', agentVersion);
     let updateManifest = updateManifestVersion;
     if (fleetServer !== '') {
       updateManifest = updateManifest.replace('https://fleet-server:8220', fleetServer);
