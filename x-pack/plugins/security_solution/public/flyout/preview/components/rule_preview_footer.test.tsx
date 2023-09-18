@@ -30,6 +30,9 @@ describe('<RulePreviewFooter />', () => {
 
     expect(getByTestId(RULE_PREVIEW_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(RULE_PREVIEW_NAVIGATE_TO_RULE_TEST_ID)).toHaveTextContent(
+      'Show rule details'
+    );
   });
 
   it('should not render rule details link when ruleId is not available', () => {

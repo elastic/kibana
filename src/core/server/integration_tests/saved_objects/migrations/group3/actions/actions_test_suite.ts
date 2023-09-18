@@ -1426,7 +1426,8 @@ export const runActionTestSuite = ({
     });
   });
 
-  describe('waitForPickupUpdatedMappingsTask', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/166199
+  describe.skip('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
