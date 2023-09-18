@@ -7,6 +7,9 @@ source .buildkite/scripts/common/util.sh
 BASE_ESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
 
+ES_SERVERLESS_BUCKET=kibana-ci-es-serverless-images
+MANIFEST_FILE_NAME=latest-verified.json
+
 SOURCE_IMAGE_OR_TAG=$1
 if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z_-]+$ ]]; then
   # $SOURCE_IMAGE_OR_TAG was a full image
@@ -44,14 +47,13 @@ echo "Promotion successful! Henceforth, thou shall be named Sir $TARGET_IMAGE"
 
 if [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
   echo "--- Uploading latest-verified manifest to GCS"
-  ES_SERVERLESS_BUCKET=kibana-ci-es-serverless-images
-  MANIFEST_NAME=latest-verified.json
-  cat << EOT >> $MANIFEST_NAME
+  cat << EOT >> $MANIFEST_FILE_NAME
 {
   "build_url": "$BUILDKITE_BUILD_URL",
   "kibana_commit": "$BUILDKITE_COMMIT",
   "kibana_branch": "$BUILDKITE_BRANCH",
   "elasticsearch_serverless_tag": "$SOURCE_IMAGE_OR_TAG",
+  "elasticsearch_serverless_image_url: "$SOURCE_IMAGE",
   "elasticsearch_serverless_commit": "TODO: this currently can't be decided",
   "elasticsearch_commit": "$ELASTIC_COMMIT_HASH",
   "created_at": "`date`",
@@ -59,7 +61,10 @@ if [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-f
 }
 EOT
 
-  gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp latest-verified.json "gs://$ES_SERVERLESS_BUCKET/latest-verified.json"
-else
-  echo "--- Skipping uploading of latest-verified manifest to GCS, flag was not provided"
+  gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" \
+    cp $MANIFEST_FILE_NAME "gs://$ES_SERVERLESS_BUCKET/$MANIFEST_FILE_NAME"
+elif [[ "$UPLOAD_MANIFEST" =~ ^(1|true)$ ]]; then
+  echo "--- Skipping upload of latest-verified manifest to GCS, ES Serverless build tag is not pointing to a hash"
+elif [[ "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0-9a-fA-F]{12}$ ]]; then
+  echo "--- Skipping upload of latest-verified manifest to GCS, flag was not provided"
 fi
