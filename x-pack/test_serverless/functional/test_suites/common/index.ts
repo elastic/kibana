@@ -9,6 +9,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless common UI', function () {
+    // Data View Management
+    loadTestFile(require.resolve('./data_view_mgmt'));
+
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./management'));
 
@@ -19,8 +22,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // Management
     loadTestFile(require.resolve('./index_management'));
     loadTestFile(require.resolve('./advanced_settings'));
-
-    // Data View Management
-    loadTestFile(require.resolve('./data_view_mgmt'));
   });
 }
