@@ -47,8 +47,8 @@ export const getCreateEsoModelVersion =
     instantiateServiceWithLegacyType: (
       typeRegistration: EncryptedSavedObjectTypeRegistration
     ) => EncryptedSavedObjectsService
-  ): CreateEsoModelVersionFn => ({ modelVersion, shouldTransformIfDecryptionFails, inputType, outputType }) => {
-
+  ): CreateEsoModelVersionFn =>
+  ({ modelVersion, shouldTransformIfDecryptionFails, inputType, outputType }) => {
     // If there are no unsafe changes, then there is no reason to create an Encrypted Saved Objects Model Version
     // Throw an error to notify the developer
     const incomingUnsafeChanges = modelVersion.changes.filter(
@@ -82,8 +82,9 @@ export const getCreateEsoModelVersion =
     );
 
     // ToDo: not sure of what the order should be here. I opted to place the merged unsafe transform at the beginning
-    const changes : SavedObjectsModelChange[] = [
-      { type: 'unsafe_transform', transformFn }, ...modelVersion.changes.filter((change) => change.type !== 'unsafe_transform'),
+    const changes: SavedObjectsModelChange[] = [
+      { type: 'unsafe_transform', transformFn },
+      ...modelVersion.changes.filter((change) => change.type !== 'unsafe_transform'),
     ];
 
     return { ...modelVersion, changes };
@@ -135,15 +136,12 @@ function createMergedUnsafeTransformFn(
     const result = mergedUnsafeTransform(documentToTransform, context);
 
     // encrypt
-    const transformedDoc = mapAttributes(
-      result.document,
-      (transformedAttributes) => {
-        return transformedService.encryptAttributesSync<any>(
-          encryptionDescriptor,
-          transformedAttributes
-        );
-      }
-    );
+    const transformedDoc = mapAttributes(result.document, (transformedAttributes) => {
+      return transformedService.encryptAttributesSync<any>(
+        encryptionDescriptor,
+        transformedAttributes
+      );
+    });
 
     // return encrypted doc
     return { ...result, document: transformedDoc };
