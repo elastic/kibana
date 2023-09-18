@@ -421,6 +421,9 @@ export const previewRulesRoute = async (
               );
               break;
             case 'esql':
+              if (config.experimentalFeatures.esqlRulesDisabled) {
+                throw Error('ES|QL rule type is not supported');
+              }
               const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));
               await runExecutors(
                 esqlAlertType.executor,

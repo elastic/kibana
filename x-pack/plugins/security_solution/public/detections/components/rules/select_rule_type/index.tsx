@@ -22,6 +22,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -47,6 +48,8 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
     const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
     const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
     const setEsql = useCallback(() => setType('esql'), [setType]);
+
+    const isEsqlFeatureEnabled = !useIsExperimentalFeatureEnabled('esqlRulesDisabled');
 
     const eqlSelectableConfig = useMemo(
       () => ({
@@ -192,7 +195,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
               />
             </EuiFlexItem>
           )}
-          {(!isUpdateView || esqlSelectableConfig.isSelected) && (
+          {isEsqlFeatureEnabled && (!isUpdateView || esqlSelectableConfig.isSelected) && (
             <EuiFlexItem>
               <EuiCard
                 data-test-subj="esqRuleType"
