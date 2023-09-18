@@ -65,6 +65,7 @@ export const ColorSwatch = ({
     <EuiPopover
       panelPaddingSize="s"
       isOpen={colorPickerVisible}
+      repositionOnScroll={true}
       closePopover={() => dispatch(hideColorPickerVisibility())}
       button={
         <EuiColorPickerSwatch
