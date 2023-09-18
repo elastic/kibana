@@ -19,6 +19,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import {
   Adapters,
   AttributeService,
@@ -351,11 +352,13 @@ export class VisualizeEmbeddable
       this.deps
         .start()
         .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
-          if (
-            warning.type === 'shard_failure' &&
-            warning.reason.type === 'unsupported_aggregation_on_downsampled_index'
-          ) {
-            warnings.push(warning.reason.reason || warning.message);
+          if (hasUnsupportedDownsampledAggregationFailure(warning)) {
+            warnings.push(
+              i18n.translate('visualizations.embeddable.tsdbRollupWarning', {
+                defaultMessage:
+                  'Visualization uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+              })
+            );
             return true;
           }
           if (this.vis.type.suppressWarnings?.()) {
@@ -582,7 +585,7 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
-        disableShardWarnings: true,
+        disableWarningToasts: true,
       },
       variables: {
         embeddableTitle: this.getTitle(),

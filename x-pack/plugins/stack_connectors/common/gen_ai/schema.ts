@@ -60,8 +60,8 @@ export const GenAiRunActionResponseSchema = schema.object(
             },
             { unknowns: 'ignore' }
           ),
-          finish_reason: schema.string(),
-          index: schema.number(),
+          finish_reason: schema.maybe(schema.string()),
+          index: schema.maybe(schema.number()),
         },
         { unknowns: 'ignore' }
       )
