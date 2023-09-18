@@ -10,7 +10,8 @@ import { FieldState } from '@kbn/advanced-settings-plugin/public';
 import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useUiTracker } from '..';
+import { ObservabilityApp } from '../../typings/common';
 
 function getEditableConfig({
   settingsKeys,
@@ -41,15 +42,13 @@ function getEditableConfig({
   return config;
 }
 
-export function useApmEditableSettings(settingsKeys: string[]) {
+export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[]) {
   const { services } = useKibana();
-  const trackApmEvent = useUiTracker({ app: 'apm' });
+  const trackApmEvent = useUiTracker({ app });
   const { uiSettings } = services;
   const [isSaving, setIsSaving] = useState(false);
   const [forceReloadSettings, setForceReloadSettings] = useState(0);
-  const [unsavedChanges, setUnsavedChanges] = useState<
-    Record<string, FieldState>
-  >({});
+  const [unsavedChanges, setUnsavedChanges] = useState<Record<string, FieldState>>({});
 
   const settingsEditableConfig = useMemo(
     () => {

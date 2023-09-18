@@ -24,8 +24,8 @@ import {
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../../../hooks/use_apm_editable_settings';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 
 interface Props {
@@ -48,7 +48,7 @@ export function LabsFlyout({ onClose }: Props) {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(labsItems);
+  } = useEditableSettings('apm', labsItems);
 
   async function handleSave() {
     try {

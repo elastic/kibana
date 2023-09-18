@@ -30,7 +30,8 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "advancedSettings"
     ]
   }
 }

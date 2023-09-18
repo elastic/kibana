@@ -23,8 +23,8 @@ import {
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
 import { BottomBarActions } from '../bottom_bar_actions';
 
 const apmSettingsKeys = [
@@ -50,7 +50,7 @@ export function GeneralSettings() {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(apmSettingsKeys);
+  } = useEditableSettings('apm', apmSettingsKeys);
 
   async function handleSave() {
     try {
