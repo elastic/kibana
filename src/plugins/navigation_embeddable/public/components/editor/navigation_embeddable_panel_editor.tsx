@@ -182,7 +182,7 @@ const NavigationEmbeddablePanelEditor = ({
           </EuiFormRow>
           <EuiFormRow label={NavEmbeddableStrings.editor.panelEditor.getLinksTitle()}>
             {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
-                    to the focus of the inner elements */}
+                to the focus of the inner elements */}
             <div>
               {hasZeroLinks ? (
                 <NavigationEmbeddablePanelEditorEmptyPrompt addLink={() => addOrEditLink()} />
