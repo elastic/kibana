@@ -46,7 +46,7 @@ export interface IWaterfall {
   errorItems: IWaterfallError[];
   exceedsMax: boolean;
   totalErrorsCount: number;
-  traceItemCount: number;
+  traceDocsTotal: number;
   maxTraceItems: number;
 }
 
@@ -427,7 +427,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
       getErrorCount: () => 0,
       exceedsMax: false,
       totalErrorsCount: 0,
-      traceItemCount: 0,
+      traceDocsTotal: 0,
       maxTraceItems: 0,
     };
   }
@@ -476,7 +476,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     getErrorCount: (parentId: string) => errorCountByParentId[parentId] ?? 0,
     exceedsMax: traceItems.exceedsMax,
     totalErrorsCount: traceItems.errorDocs.length,
-    traceItemCount: traceItems.traceItemCount,
+    traceDocsTotal: traceItems.traceDocsTotal,
     maxTraceItems: traceItems.maxTraceItems,
   };
 }

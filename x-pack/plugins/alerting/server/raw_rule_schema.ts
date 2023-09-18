@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
   schema.literal('maxAlerts'),
+  schema.literal('maxQueuedActions'),
 ]);
 
 const executionStatusErrorReason = schema.oneOf([

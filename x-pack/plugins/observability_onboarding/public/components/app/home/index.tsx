@@ -139,11 +139,12 @@ export function Home() {
               paddingSize="l"
               display="plain"
               hasBorder
+              onClick={handleClickSystemLogs}
             >
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
               <EuiSpacer size="m" />
-              <EuiText color="subdued" size="s" textAlign="left">
+              <EuiText color="subdued" size="s" textAlign="center">
                 <p>
                   {i18n.translate(
                     'xpack.observability_onboarding.card.systemLogs.description1',
@@ -177,11 +178,12 @@ export function Home() {
               paddingSize="l"
               display="plain"
               hasBorder
+              onClick={handleClickCustomLogs}
             >
               <EuiSpacer size="s" />
               <EuiBadge color="hollow">{elasticAgentLabel}</EuiBadge>
               <EuiSpacer size="m" />
-              <EuiText color="subdued" size="s" textAlign="left">
+              <EuiText color="subdued" size="s" textAlign="center">
                 <p>
                   {i18n.translate(
                     'xpack.observability_onboarding.card.customLogs.description.text',
@@ -263,6 +265,7 @@ export function Home() {
               paddingSize="m"
               display="plain"
               hasBorder
+              onClick={handleClickKubernetesSetupGuide}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -334,6 +337,7 @@ export function Home() {
                     </StyledItem>
                     <StyledItem>
                       <EuiLink
+                        data-test-subj="observabilityOnboardingHomeAwsFirehoseLink"
                         href="https://www.elastic.co/guide/en/kinesis/current/aws-firehose-setup-guide.html"
                         target="_blank"
                         external
