@@ -24,7 +24,7 @@ export const buildAgentsQuery = ({
 
   const filterQuery = getQueryFilter({ filter });
 
-  const dslQuery = {
+  return {
     allow_no_indices: true,
     index: AGENTS_INDEX,
     ignore_unavailable: true,
@@ -38,11 +38,13 @@ export const buildAgentsQuery = ({
         platforms: {
           terms: {
             field: 'local_metadata.os.platform',
+            size: querySize,
           },
           aggs: {
             policies: {
               terms: {
                 field: 'policy_id',
+                size: querySize,
               },
             },
           },
@@ -50,6 +52,7 @@ export const buildAgentsQuery = ({
         policies: {
           terms: {
             field: 'policy_id',
+            size: querySize,
           },
         },
       },
@@ -65,6 +68,4 @@ export const buildAgentsQuery = ({
       from: cursorStart,
     },
   };
-
-  return dslQuery;
 };
