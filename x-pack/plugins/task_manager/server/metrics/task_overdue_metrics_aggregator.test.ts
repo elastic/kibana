@@ -22,14 +22,14 @@ describe('TaskOverdueMetricsAggregator', () => {
 
   test('should correctly initialize', () => {
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { counts: [], values: [] },
+      overall: { overdue_by: { counts: [], values: [] } },
       by_type: {},
     });
   });
 
   test('should correctly return initialMetrics', () => {
     expect(taskOverdueMetricsAggregator.initialMetric()).toEqual({
-      overall: { counts: [], values: [] },
+      overall: { overdue_by: { counts: [], values: [] } },
       by_type: {},
     });
   });
@@ -50,9 +50,9 @@ describe('TaskOverdueMetricsAggregator', () => {
       })
     );
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { counts: [1, 0, 1], values: [10, 20, 30] },
+      overall: { overdue_by: { counts: [1, 0, 1], values: [10, 20, 30] } },
       by_type: {
-        telemetry: { counts: [1, 0, 1], values: [10, 20, 30] },
+        telemetry: { overdue_by: { counts: [1, 0, 1], values: [10, 20, 30] } },
       },
     });
   });
@@ -66,7 +66,7 @@ describe('TaskOverdueMetricsAggregator', () => {
       })
     );
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { counts: [], values: [] },
+      overall: { overdue_by: { counts: [], values: [] } },
       by_type: {},
     });
   });
@@ -95,9 +95,9 @@ describe('TaskOverdueMetricsAggregator', () => {
       })
     );
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
-      overall: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] },
+      overall: { overdue_by: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] } },
       by_type: {
-        telemetry: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] },
+        telemetry: { overdue_by: { counts: [0, 0, 0, 0, 1], values: [10, 20, 30, 40, 50] } },
       },
     });
   });
@@ -125,33 +125,47 @@ describe('TaskOverdueMetricsAggregator', () => {
 
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
       overall: {
-        counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-        values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+        overdue_by: {
+          counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+          values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+        },
       },
       by_type: {
         'alerting:example': {
-          counts: [0, 0, 0, 0, 1],
-          values: [10, 20, 30, 40, 50],
+          overdue_by: {
+            counts: [0, 0, 0, 0, 1],
+            values: [10, 20, 30, 40, 50],
+          },
         },
         'alerting:__index-threshold': {
-          counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-          values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          overdue_by: {
+            counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          },
         },
         alerting: {
-          counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-          values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          overdue_by: {
+            counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          },
         },
         'actions:webhook': {
-          counts: [2],
-          values: [10],
+          overdue_by: {
+            counts: [2],
+            values: [10],
+          },
         },
         'actions:__email': {
-          counts: [1],
-          values: [10],
+          overdue_by: {
+            counts: [1],
+            values: [10],
+          },
         },
         actions: {
-          counts: [3],
-          values: [10],
+          overdue_by: {
+            counts: [3],
+            values: [10],
+          },
         },
       },
     });
@@ -180,33 +194,48 @@ describe('TaskOverdueMetricsAggregator', () => {
     taskOverdueMetricsAggregator.reset();
     expect(taskOverdueMetricsAggregator.collect()).toEqual({
       overall: {
-        counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-        values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+        overdue_by: {
+          counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+          values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+        },
       },
       by_type: {
         'alerting:example': {
-          counts: [0, 0, 0, 0, 1],
-          values: [10, 20, 30, 40, 50],
+          overdue_by: {
+            counts: [0, 0, 0, 0, 1],
+
+            values: [10, 20, 30, 40, 50],
+          },
         },
         'alerting:__index-threshold': {
-          counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-          values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          overdue_by: {
+            counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          },
         },
         alerting: {
-          counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-          values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          overdue_by: {
+            counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+            values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+          },
         },
         'actions:webhook': {
-          counts: [2],
-          values: [10],
+          overdue_by: {
+            counts: [2],
+            values: [10],
+          },
         },
         'actions:__email': {
-          counts: [1],
-          values: [10],
+          overdue_by: {
+            counts: [1],
+            values: [10],
+          },
         },
         actions: {
-          counts: [3],
-          values: [10],
+          overdue_by: {
+            counts: [3],
+            values: [10],
+          },
         },
       },
     });

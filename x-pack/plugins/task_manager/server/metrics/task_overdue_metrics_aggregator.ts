@@ -22,15 +22,20 @@ import { ITaskMetricsAggregator } from './types';
 const HDR_HISTOGRAM_MAX = 1800; // 30 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
 
+const OVERDUE_BY_KEY = 'overdue_by';
+
 enum TaskOverdueMetricKeys {
   OVERALL = 'overall',
   BY_TYPE = 'by_type',
 }
 
+interface TaskOverdueHistogram extends JsonObject {
+  [OVERDUE_BY_KEY]: SerializedHistogram;
+}
 export interface TaskOverdueMetric extends JsonObject {
-  [TaskOverdueMetricKeys.OVERALL]: SerializedHistogram;
+  [TaskOverdueMetricKeys.OVERALL]: TaskOverdueHistogram;
   [TaskOverdueMetricKeys.BY_TYPE]: {
-    [key: string]: SerializedHistogram;
+    [key: string]: TaskOverdueHistogram;
   };
 }
 
@@ -40,7 +45,7 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
   public initialMetric(): TaskOverdueMetric {
     return {
       by_type: {},
-      overall: { counts: [], values: [] },
+      overall: { overdue_by: { counts: [], values: [] } },
     };
   }
 
@@ -48,7 +53,7 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
     if (keys(this.histograms).length === 0) {
       return {
         by_type: {},
-        overall: { counts: [], values: [] },
+        overall: { overdue_by: { counts: [], values: [] } },
       };
     }
     return unflattenObject(mapValues(this.histograms, (hist) => hist.serialize()));
@@ -71,18 +76,22 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
           hist.record(overdueInSec, bucket.doc_count);
 
           if (key === 'total') {
-            this.histograms[TaskOverdueMetricKeys.OVERALL] = hist;
+            this.histograms[`${TaskOverdueMetricKeys.OVERALL}.${OVERDUE_BY_KEY}`] = hist;
           } else {
             const taskType = key.replaceAll('.', '__');
             const taskTypeGroup = getTaskTypeGroup(taskType);
-            this.histograms[`${TaskOverdueMetricKeys.BY_TYPE}.${taskType}`] = hist;
+            this.histograms[`${TaskOverdueMetricKeys.BY_TYPE}.${taskType}.${OVERDUE_BY_KEY}`] =
+              hist;
 
             if (taskTypeGroup) {
               const groupHist =
-                this.histograms[`${TaskOverdueMetricKeys.BY_TYPE}.${taskTypeGroup}`] ??
-                new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
+                this.histograms[
+                  `${TaskOverdueMetricKeys.BY_TYPE}.${taskTypeGroup}.${OVERDUE_BY_KEY}`
+                ] ?? new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
               groupHist.record(overdueInSec, bucket.doc_count);
-              this.histograms[`${TaskOverdueMetricKeys.BY_TYPE}.${taskTypeGroup}`] = groupHist;
+              this.histograms[
+                `${TaskOverdueMetricKeys.BY_TYPE}.${taskTypeGroup}.${OVERDUE_BY_KEY}`
+              ] = groupHist;
             }
           }
         });

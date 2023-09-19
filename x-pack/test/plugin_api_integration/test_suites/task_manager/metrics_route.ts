@@ -243,8 +243,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(metrics?.task_overdue).not.to.be(null);
         expect(metrics?.task_overdue?.value).not.to.be(null);
         expect(metrics?.task_overdue?.value.overall).not.to.be(null);
-        expect(Array.isArray(metrics?.task_overdue?.value.overall.counts)).to.be(true);
-        expect(Array.isArray(metrics?.task_overdue?.value.overall.values)).to.be(true);
+        expect(metrics?.task_overdue?.value.overall.overdue_by).not.to.be(null);
+        expect(Array.isArray(metrics?.task_overdue?.value.overall.overdue_by.counts)).to.be(true);
+        expect(Array.isArray(metrics?.task_overdue?.value.overall.overdue_by.values)).to.be(true);
       });
     });
   });

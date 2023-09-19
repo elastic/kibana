@@ -1623,33 +1623,47 @@ describe('createAggregator', () => {
               key: 'task_overdue',
               value: {
                 overall: {
-                  counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-                  values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                  overdue_by: {
+                    counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                  },
                 },
                 by_type: {
                   'alerting:example': {
-                    counts: [0, 0, 0, 0, 1],
-                    values: [10, 20, 30, 40, 50],
+                    overdue_by: {
+                      counts: [0, 0, 0, 0, 1],
+                      values: [10, 20, 30, 40, 50],
+                    },
                   },
                   'alerting:__index-threshold': {
-                    counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                    overdue_by: {
+                      counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                    },
                   },
                   alerting: {
-                    counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                    overdue_by: {
+                      counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                    },
                   },
                   'actions:webhook': {
-                    counts: [2],
-                    values: [10],
+                    overdue_by: {
+                      counts: [2],
+                      values: [10],
+                    },
                   },
                   'actions:__email': {
-                    counts: [1],
-                    values: [10],
+                    overdue_by: {
+                      counts: [1],
+                      values: [10],
+                    },
                   },
                   actions: {
-                    counts: [3],
-                    values: [10],
+                    overdue_by: {
+                      counts: [3],
+                      values: [10],
+                    },
                   },
                 },
               },
@@ -1657,7 +1671,7 @@ describe('createAggregator', () => {
             expect(metrics[1]).toEqual({
               key: 'task_overdue',
               value: {
-                overall: { counts: [], values: [] },
+                overall: { overdue_by: { counts: [], values: [] } },
                 by_type: {},
               },
             });
@@ -1665,29 +1679,41 @@ describe('createAggregator', () => {
               key: 'task_overdue',
               value: {
                 overall: {
-                  counts: [16, 0, 1, 2, 0, 1],
-                  values: [10, 20, 30, 40, 50, 60],
+                  overdue_by: {
+                    counts: [16, 0, 1, 2, 0, 1],
+                    values: [10, 20, 30, 40, 50, 60],
+                  },
                 },
                 by_type: {
                   telemetry: {
-                    counts: [1, 0, 1],
-                    values: [10, 20, 30],
+                    overdue_by: {
+                      counts: [1, 0, 1],
+                      values: [10, 20, 30],
+                    },
                   },
                   reporting: {
-                    counts: [1],
-                    values: [10],
+                    overdue_by: {
+                      counts: [1],
+                      values: [10],
+                    },
                   },
                   'actions:webhook': {
-                    counts: [3, 0, 0, 2, 0, 1],
-                    values: [10, 20, 30, 40, 50, 60],
+                    overdue_by: {
+                      counts: [3, 0, 0, 2, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60],
+                    },
                   },
                   'actions:__email': {
-                    counts: [11],
-                    values: [10],
+                    overdue_by: {
+                      counts: [11],
+                      values: [10],
+                    },
                   },
                   actions: {
-                    counts: [14, 0, 0, 2, 0, 1],
-                    values: [10, 20, 30, 40, 50, 60],
+                    overdue_by: {
+                      counts: [14, 0, 0, 2, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60],
+                    },
                   },
                 },
               },
