@@ -57,7 +57,7 @@ export const EntitiesOverview: React.FC = () => {
             tooltip: (
               <FormattedMessage
                 id="xpack.securitySolution.flyout.right.insights.entities.entitiesTooltip"
-                defaultMessage="View all entities"
+                defaultMessage="Show all entities"
               />
             ),
           },
