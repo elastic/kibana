@@ -281,6 +281,11 @@ export class ChromeService {
       projectNavigation.setProjectsUrl(projectsUrl);
     };
 
+    const setProjectName = (projectName: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectName(projectName);
+    };
+
     const isIE = () => {
       const ua = window.navigator.userAgent;
       const msie = ua.indexOf('MSIE '); // IE 10 or older
@@ -374,6 +379,7 @@ export class ChromeService {
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
                 projectsUrl$={projectNavigation.getProjectsUrl$()}
+                projectName$={projectNavigation.getProjectName$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
@@ -507,6 +513,7 @@ export class ChromeService {
       project: {
         setHome: setProjectHome,
         setProjectsUrl,
+        setProjectName,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
