@@ -1101,6 +1101,12 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/observability/cases @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/search/cases/ @elastic/response-ops
+/x-pack/test_serverless/functional/test_suites/security/ftr/cases/ @elastic/response-ops
+/x-pack/test_serverless/api_integration/test_suites/search/cases/ @elastic/response-ops
+/x-pack/test_serverless/api_integration/test_suites/observability/cases/ @elastic/response-ops
+/x-pack/test_serverless/api_integration/test_suites/security/cases/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
