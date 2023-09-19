@@ -72,7 +72,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
             suggestedUserPrompt={'Can you explain this rule execution error and steps to fix?'}
             tooltip={'Add this rule execution error as context'}
           >
-            {'Ask Assistant'}
+            {i18n.ASK_ASSISTANT_ERROR_BUTTON}
           </NewChat>
         </EuiButton>
       </EuiCallOut>

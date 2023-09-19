@@ -48,3 +48,10 @@ export const PARTIAL_FAILURE_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'Warning at',
   }
 );
+
+export const ASK_ASSISTANT_ERROR_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleStatus.askAssistant',
+  {
+    defaultMessage: 'Ask Assistant',
+  }
+);
