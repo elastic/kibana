@@ -9,12 +9,12 @@
 import React, { Fragment } from 'react';
 
 import type { FieldDefinition } from '@kbn/management-settings-types';
-import { FieldRow, OnChangeFn } from '@kbn/management-settings-components-field-row';
+import { FieldRow, RowOnChangeFn } from '@kbn/management-settings-components-field-row';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n/target/types';
 import { BottomBar } from './bottom_bar';
 import { useServices } from './services';
+import { i18n } from '@kbn/i18n';
 
 export interface FormProps {
   fields: Array<FieldDefinition<SettingType>>;
@@ -62,8 +62,8 @@ export const Form = (props: FormProps) => {
     setUnsavedChanges({});
   };
 
-  const onChange: OnChangeFn<SettingType> = (id, change) => {
-    if (!change?.unsavedValue) {
+  const onChange: RowOnChangeFn<SettingType> = (id, change) => {
+    if (!change) {
       const { [id]: unsavedChange, ...rest } = unsavedChanges;
       setUnsavedChanges(rest);
       return;

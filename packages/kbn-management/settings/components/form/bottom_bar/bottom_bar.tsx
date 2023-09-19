@@ -20,7 +20,10 @@ import { i18n } from '@kbn/i18n';
 import { UnsavedCount } from './unsaved_count';
 import { useFormStyles } from '../form.styles';
 
-interface BottomBarProps {
+export const DATA_TEST_SUBJ_SAVE_BUTTON = 'settings-save-button';
+export const DATA_TEST_SUBJ_CANCEL_BUTTON = 'settings-cancel-button';
+
+export interface BottomBarProps {
   saveAll: () => void;
   clearAllUnsaved: () => void;
   hasInvalidChanges: boolean;
@@ -56,8 +59,7 @@ export const BottomBar = ({
             size="s"
             iconType="cross"
             onClick={clearAllUnsaved}
-            aria-describedby="aria-describedby.countOfUnsavedSettings"
-            data-test-subj="advancedSetting-cancelButton"
+            data-test-subj={DATA_TEST_SUBJ_CANCEL_BUTTON}
           >
             {i18n.translate('management.settings.form.cancelButtonLabel', {
               defaultMessage: 'Cancel changes',
@@ -68,7 +70,7 @@ export const BottomBar = ({
           <EuiToolTip
             content={
               hasInvalidChanges &&
-              i18n.translate('advancedSettings.form.saveButtonTooltipWithInvalidChanges', {
+              i18n.translate('management.settings.form.saveButtonTooltipWithInvalidChanges', {
                 defaultMessage: 'Fix invalid settings before saving.',
               })
             }
@@ -81,9 +83,8 @@ export const BottomBar = ({
               size="s"
               iconType="check"
               onClick={saveAll}
-              aria-describedby="aria-describedby.countOfUnsavedSettings"
               isLoading={isLoading}
-              data-test-subj="advancedSetting-saveButton"
+              data-test-subj={DATA_TEST_SUBJ_SAVE_BUTTON}
             >
               {i18n.translate('management.settings.form.saveButtonLabel', {
                 defaultMessage: 'Save changes',

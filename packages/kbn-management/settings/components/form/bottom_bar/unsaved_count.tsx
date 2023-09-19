@@ -22,7 +22,7 @@ export const UnsavedCount = ({ unsavedCount }: UnsavedCountProps) => {
     <p id="aria-describedby.countOfUnsavedSettings">
       <EuiTextColor css={cssFormUnsavedCountMessage} color="ghost">
         <FormattedMessage
-          id="advancedSettings.form.countOfSettingsChanged"
+          id="management.settings.form.countOfSettingsChanged"
           defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
               one {setting}
               other {settings}
