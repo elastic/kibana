@@ -23,7 +23,6 @@ export type FieldType = 'string';
 export enum ERROR_CODES {
   INVALID_ESQL = 'ERR_INVALID_ESQL',
   ERR_MISSING_ID_FIELD_FROM_RESULT = 'ERR_MISSING_ID_FIELD_FROM_RESULT',
-  INVALID_ESQL_SUPPRESS_BY_FIELDS = 'INVALID_ESQL_SUPPRESS_BY_FIELDS',
 }
 
 const constructValidationError = (error: Error) => {
