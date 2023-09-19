@@ -18,7 +18,6 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
 
     cy.getByTestSubj('obltOnboardingLogFilePath-0')
       .find('input')
-      .first()
       .type('mylogs.log');
 
     cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
@@ -147,9 +146,7 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         it('autoDownloadConfig flag is added to installation script', () => {
           cy.getByTestSubj(
             'obltOnboardingInstallElasticAgentAutoDownloadConfig'
-          )
-            .first()
-            .click();
+          ).click();
           cy.getByTestSubj(
             'obltOnboardingInstallElasticAgentAutoDownloadConfigCallout'
           ).should('exist');
@@ -161,9 +158,7 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         it('Download config button is disabled', () => {
           cy.getByTestSubj(
             'obltOnboardingInstallElasticAgentAutoDownloadConfig'
-          )
-            .first()
-            .click();
+          ).click();
           cy.getByTestSubj(
             'obltOnboardingConfigureElasticAgentStepDownloadConfig'
           ).should('be.disabled');
