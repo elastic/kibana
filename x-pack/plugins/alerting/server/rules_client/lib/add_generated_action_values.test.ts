@@ -55,6 +55,12 @@ describe('addGeneratedActionValues()', () => {
     expect(actionWithGeneratedValues[0].uuid).toBe('111-222');
   });
 
+  test('adds uuid to a system action', async () => {
+    const { uuid, ...systemActionWithoutUUID } = systemAction;
+    const actionWithGeneratedValues = addGeneratedActionValues([systemActionWithoutUUID]);
+    expect(actionWithGeneratedValues[0].uuid).toBe('111-222');
+  });
+
   test('does not overrides the uuid of a system action', async () => {
     const actionWithGeneratedValues = addGeneratedActionValues([systemAction]);
     expect(actionWithGeneratedValues[0].uuid).toBe('my-uid');

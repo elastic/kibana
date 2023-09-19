@@ -49,7 +49,6 @@ export function addGeneratedActionValues(
             },
           }
         : {}),
-      // TODO: Fix
     } as NormalizedAlertActionWithGeneratedValues;
   });
 }

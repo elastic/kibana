@@ -31,7 +31,7 @@ interface LegacyGetBulkRuleActionsSavedObject {
  */
 export interface LegacyActionsObj {
   ruleThrottle: string | null;
-  legacyRuleActions: Array<Omit<RuleDefaultAction, 'type'>>;
+  legacyRuleActions: Array<Omit<RuleDefaultAction, 'type' | 'group'> & { group: string }>;
 }
 
 /**
@@ -102,7 +102,12 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
           ruleAlertIdKey,
           legacyRawActions,
           savedObject.references
-        ) // remove uuid from action, as this uuid is not persistent
+        )
+          /**
+           * Remove uuid from action, as this uuid is not persistent.
+           * TS complains about the group being undefined (system actions).
+           * Legacy actions will have a group.
+           */
           .map(({ uuid, ...action }) => action) as RuleDefaultAction[],
       };
     } else {

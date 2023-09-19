@@ -30,7 +30,7 @@ export const transformOperations = ({
         return {
           id: action.id,
           params: action.params,
-          uuid: action.uuid,
+          ...(action.uuid && { frequency: action.uuid }),
           type: RuleActionTypes.SYSTEM,
         };
       }
@@ -40,6 +40,8 @@ export const transformOperations = ({
         group: action.group ?? 'default',
         params: action.params,
         uuid: action.uuid,
+        ...(action.frequency && { frequency: action.frequency }),
+        ...(action.uuid && { frequency: action.uuid }),
         frequency: action.frequency,
         type: RuleActionTypes.DEFAULT,
       };

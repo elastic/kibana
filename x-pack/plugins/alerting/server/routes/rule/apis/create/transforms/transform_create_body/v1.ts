@@ -25,7 +25,7 @@ const transformCreateBodyActions = (
         id: action.id,
         params: action.params,
         actionTypeId: action.actionTypeId,
-        uuid: action.uuid,
+        ...(action.uuid ? { uuid: action.uuid } : {}),
         type: RuleActionTypes.SYSTEM,
       };
     }
