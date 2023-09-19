@@ -24,7 +24,7 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       // but navigateToUrl includes hash in the url which causes test flakiness
       await PageObjects.common.navigateToUrl('canvas', '', {
         ensureCurrentUrl: false,
-        shouldLoginIfPrompted: true,
+        shouldUseHashForSubUrl: false,
       });
       await testSubjects.existOrFail('workpadListing');
     },
