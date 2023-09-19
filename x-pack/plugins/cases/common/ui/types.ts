@@ -25,6 +25,7 @@ import type {
   Attachment,
   ExternalReferenceAttachment,
   PersistableStateAttachment,
+  Configuration,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -118,6 +119,11 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
+export type CasesConfigurationUI = Pick<
+  SnakeToCamelCase<Configuration>,
+  'closureType' | 'connector' | 'mappings' | 'customFields' | 'id' | 'version'
+>;
+
 export type SortOrder = 'asc' | 'desc';
 
 export const SORT_ORDER_VALUES: SortOrder[] = ['asc', 'desc'];
@@ -205,6 +211,7 @@ export type UpdateKey = keyof Pick<
   | 'severity'
   | 'assignees'
   | 'category'
+  | 'customFields'
 >;
 
 export interface UpdateByKey {

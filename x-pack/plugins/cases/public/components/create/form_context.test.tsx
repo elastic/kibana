@@ -15,7 +15,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
@@ -54,7 +54,7 @@ jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
 jest.mock('../connectors/jira/use_get_issue_types');
@@ -67,7 +67,7 @@ jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
@@ -190,7 +190,7 @@ describe('Create case', () => {
     useCreateAttachmentsMock.mockImplementation(() => ({ mutateAsync: createAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
-    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
@@ -386,7 +386,7 @@ describe('Create case', () => {
     });
 
     it('should select the default connector set in the configuration', async () => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         connector: {
           id: 'servicenow-1',
@@ -436,7 +436,7 @@ describe('Create case', () => {
     });
 
     it('should default to none if the default connector does not exist in connectors', async () => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         connector: {
           id: 'not-exist',

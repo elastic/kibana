@@ -18,7 +18,7 @@ import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
 import { useKibana } from '../../common/lib/kibana';
-import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 import {
   connectors,
@@ -35,12 +35,12 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
-jest.mock('../../containers/configure/use_configure');
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_action_types');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
-const useCaseConfigureMock = useCaseConfigure as jest.Mock;
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetUrlSearchMock = jest.fn();
 const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
@@ -67,7 +67,7 @@ describe('ConfigureCases', () => {
   describe('rendering', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
       useGetConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, data: [] }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
@@ -103,7 +103,7 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         closureType: 'close-by-user',
         connector: {
@@ -148,7 +148,7 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mappings: [],
         closureType: 'close-by-user',
@@ -229,7 +229,7 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: null,
         closureType: 'close-by-user',
@@ -305,7 +305,7 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         connector: {
           id: 'servicenow-1',
@@ -353,7 +353,7 @@ describe('ConfigureCases', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         loading: true,
       }));
@@ -381,7 +381,7 @@ describe('ConfigureCases', () => {
 
     beforeEach(() => {
       persistCaseConfigure = jest.fn();
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: null,
         closureType: 'close-by-user',
@@ -430,7 +430,7 @@ describe('ConfigureCases', () => {
     });
 
     test('the text of the update button is changed successfully', () => {
-      useCaseConfigureMock
+      useGetCaseConfigurationMock
         .mockImplementationOnce(() => ({
           ...useCaseConfigureResponse,
           connector: {
@@ -473,7 +473,7 @@ describe('ConfigureCases', () => {
 
     beforeEach(() => {
       persistCaseConfigure = jest.fn();
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: null,
         closureType: 'close-by-user',
@@ -522,7 +522,7 @@ describe('ConfigureCases', () => {
 
   describe('user interactions', () => {
     beforeEach(() => {
-      useCaseConfigureMock.mockImplementation(() => ({
+      useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: null,
         closureType: 'close-by-user',
