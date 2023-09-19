@@ -13,11 +13,19 @@ import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/de
 import { getEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { deleteAllRules, deleteAllAlerts, getPreviewAlerts, previewRule } from '../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  getPreviewAlerts,
+  previewRule,
+  createRule,
+  getOpenSignals as getOpenAlerts,
+} from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { dataGeneratorFactory } from '../../utils/data_generator';
+import { removeRandomValuedProperties } from './utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -51,6 +59,108 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First test creates a real rule - remaining tests use preview API
+    it('should generate 1 alert with during actual rule execution', async () => {
+      const id = uuidv4();
+      const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+      const doc1 = { agent: { name: 'test-1' } };
+      const doc2 = { agent: { name: 'test-2' } };
+      const ruleQuery = `from ecs_compliant [metadata _id, _index, _version] ${internalIdPipe(
+        id
+      )} | where agent.name=="test-1"`;
+      const rule: EsqlRuleCreateProps = {
+        ...getEsqlRulesSchemaMock('rule-1', true),
+        query: ruleQuery,
+        from: '2020-10-28T06:00:00.000Z',
+        interval: '1h',
+      };
+
+      await indexEnhancedDocuments({
+        documents: [doc1, doc2],
+        interval,
+        id,
+      });
+
+      const createdRule = await createRule(supertest, log, rule);
+      const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+      expect(alerts.hits.hits.length).toBe(1);
+      expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).toEqual({
+        'kibana.alert.rule.parameters': {
+          description: 'Detecting root and admin users',
+          risk_score: 55,
+          severity: 'high',
+          author: [],
+          false_positives: [],
+          from: '2020-10-28T06:00:00.000Z',
+          rule_id: 'rule-1',
+          max_signals: 100,
+          risk_score_mapping: [],
+          severity_mapping: [],
+          threat: [],
+          to: 'now',
+          references: [],
+          version: 1,
+          exceptions_list: [],
+          immutable: false,
+          related_integrations: [],
+          required_fields: [],
+          setup: '',
+          type: 'esql',
+          language: 'esql',
+          query: ruleQuery,
+        },
+        'kibana.alert.rule.category': 'ES|QL Rule',
+        'kibana.alert.rule.consumer': 'siem',
+        'kibana.alert.rule.name': 'Query with a rule id',
+        'kibana.alert.rule.producer': 'siem',
+        'kibana.alert.rule.revision': 0,
+        'kibana.alert.rule.rule_type_id': 'siem.esqlRule',
+        'kibana.space_ids': ['default'],
+        'kibana.alert.rule.tags': [],
+        'agent.name': 'test-1',
+        'agent.type': null,
+        'agent.version': null,
+        'host.name': null,
+        id,
+        'event.kind': 'signal',
+        'kibana.alert.original_time': expect.any(String),
+        'kibana.alert.ancestors': [
+          { id: expect.any(String), type: 'event', index: 'ecs_compliant', depth: 0 },
+        ],
+        'kibana.alert.status': 'active',
+        'kibana.alert.workflow_status': 'open',
+        'kibana.alert.depth': 1,
+        'kibana.alert.reason': 'event created high alert Query with a rule id.',
+        'kibana.alert.severity': 'high',
+        'kibana.alert.risk_score': 55,
+        'kibana.alert.rule.actions': [],
+        'kibana.alert.rule.author': [],
+        'kibana.alert.rule.created_by': 'elastic',
+        'kibana.alert.rule.description': 'Detecting root and admin users',
+        'kibana.alert.rule.enabled': true,
+        'kibana.alert.rule.exceptions_list': [],
+        'kibana.alert.rule.false_positives': [],
+        'kibana.alert.rule.from': '2020-10-28T06:00:00.000Z',
+        'kibana.alert.rule.immutable': false,
+        'kibana.alert.rule.interval': '1h',
+        'kibana.alert.rule.indices': [],
+        'kibana.alert.rule.max_signals': 100,
+        'kibana.alert.rule.references': [],
+        'kibana.alert.rule.risk_score_mapping': [],
+        'kibana.alert.rule.rule_id': 'rule-1',
+        'kibana.alert.rule.severity_mapping': [],
+        'kibana.alert.rule.threat': [],
+        'kibana.alert.rule.to': 'now',
+        'kibana.alert.rule.type': 'esql',
+        'kibana.alert.rule.updated_by': 'elastic',
+        'kibana.alert.rule.version': 1,
+        'kibana.alert.workflow_tags': [],
+        'kibana.alert.rule.risk_score': 55,
+        'kibana.alert.rule.severity': 'high',
+        'kibana.alert.original_event.created': null,
+        'kibana.alert.original_event.ingested': null,
+      });
+    });
 
     it('should generate 1 alert', async () => {
       const id = uuidv4();
@@ -152,7 +262,6 @@ export default ({ getService }: FtrProviderContext) => {
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
-        console.log('LOGS', JSON.stringify(logs, null, 2));
         const previewAlerts = await getPreviewAlerts({
           es,
           previewId,
