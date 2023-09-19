@@ -15,10 +15,14 @@ export const createFetchData = async <TResponse, T = {}>(
   searchService: ISearchStart,
   req: IEsSearchRequest
 ): Promise<TResponse> => {
+  let rawResponse: TResponse;
   return new Promise((resolve, reject) => {
     searchService.search<IEsSearchRequest, IKibanaSearchResponse<TResponse>>(req).subscribe({
       next: (response) => {
-        resolve(response.rawResponse);
+        rawResponse = response.rawResponse;
+      },
+      complete: () => {
+        resolve(rawResponse);
       },
       error: (error) => {
         reject(error);
