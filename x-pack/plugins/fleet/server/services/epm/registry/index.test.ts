@@ -316,4 +316,41 @@ describe('fetchList', () => {
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBeNull();
   });
+
+  it('does call registry with kibana.version if not explictly disabled', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          spec: {
+            min: '3.0.0',
+            max: '3.0.0',
+          },
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('kibana.version')).not.toBeNull();
+  });
+
+  it('does not call registry with kibana.version with config internal.registry.kibanaVersionCheckEnabled:false', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          kibanaVersionCheckEnabled: false,
+          spec: {
+            min: '3.0.0',
+            max: '3.0.0',
+          },
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('kibana.version')).toBeNull();
+  });
 });

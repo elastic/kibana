@@ -225,7 +225,8 @@ function setKibanaVersion(url: URL) {
 
   const disableVersionCheck =
     (config?.developer?.disableRegistryVersionCheck ?? false) ||
-    !(config?.internal?.registry?.kibanaVersionCheckEnabled ?? true);
+    config?.internal?.registry?.kibanaVersionCheckEnabled === false;
+
   if (disableVersionCheck) {
     return;
   }
