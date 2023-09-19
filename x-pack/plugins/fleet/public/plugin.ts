@@ -83,8 +83,6 @@ import type {
 } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
-import type { RequestError } from './hooks';
-import { sendGetBulkAssets } from './hooks';
 import { getFleetDeepLinks } from './deep_links';
 
 export type { FleetConfigType } from '../common/types';
