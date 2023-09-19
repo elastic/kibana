@@ -36,6 +36,7 @@ export function ServiceDashboards() {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [selectedDashboard, setSelectedDashboard] =
     useState<SavedServiceDashboard>();
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -52,40 +53,6 @@ export function ServiceDashboards() {
     },
     [serviceName]
   );
-
-  // function getFilters(
-  //   serviceName: string,
-  //   environment: string,
-  // ): Filter[] {
-
-  //   const filter = [];
-
-  //   const environmentField = dataView.getFieldByName(SERVICE_ENVIRONMENT);
-  //   if (
-  //     environmentField &&
-  //     !!environment &&
-  //     environment !== ENVIRONMENT_ALL.value &&
-  //     environment !== ENVIRONMENT_NOT_DEFINED.value
-  //   ) {
-  //     const environmentFilter = buildPhraseFilter(
-  //       environmentField,
-  //       environment,
-  //     );
-  //     filter.push(environmentFilter);
-  //   }
-
-  //   const serviceNameField = dataView.getFieldByName(SERVICE_NAME);
-  //   if (serviceNameField) {
-  //     const serviceNameFilter = buildPhraseFilter(
-  //       serviceNameField,
-  //       serviceName,
-  //       dataView
-  //     );
-  //     filter.push(serviceNameFilter);
-  //   }
-
-  //   return filter;
-  // }
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
@@ -136,45 +103,12 @@ export function ServiceDashboards() {
               {selectedDashboard?.dashboardTitle}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* <EuiComboBox
-                compressed
-                style={{ minWidth: '200px' }}
-                placeholder={i18n.translate(
-                  'xpack.apm.serviceDashboards.selectDashboard.placeholder',
-                  {
-                    defaultMessage: 'Select dasbboard',
-                  }
-                )}
-                prepend={i18n.translate(
-                  'xpack.apm.serviceDashboards.selectDashboard.prepend',
-                  {
-                    defaultMessage: 'Dasbboard',
-                  }
-                )}
-                singleSelection={{ asPlainText: true }}
-                options={options}
-                selectedOptions={[
-                  {
-                    value: selectedDashboard.dashboardSavedObjectId,
-                    label: selectedDashboard.dashboardTitle,
-                  },
-                ]}
-                onChange={([newSelectedDashboard]) =>
-                  setSelectedDashboard(
-                    serviceDashboards.find(
-                      ({ dashboardSavedObjectId }) =>
-                        dashboardSavedObjectId === newSelectedDashboard.value
-                    )
-                  )
-                }
-                isClearable={true}
-              /> */}
+              <ContextMenu
+                handleOnChange={handleOnChange}
+                selectedDashboard={selectedDashboard}
+                serviceDashboards={data?.serviceDashboards}
+              />
             </EuiFlexItem>
-            <ContextMenu
-              handleOnChange={handleOnChange}
-              selectedDashboard={selectedDashboard}
-              serviceDashboards={data?.serviceDashboards}
-            />
           </EuiFlexGroup>
 
           {selectedDashboard && (
@@ -186,7 +120,14 @@ export function ServiceDashboards() {
           )}
         </>
       ) : (
-        <EmptyDashboards actions={<AddDashboard />} />
+        <EmptyDashboards
+          actions={
+            <AddDashboard
+              isModalVisible={isModalVisible}
+              setIsModalVisible={setIsModalVisible}
+            />
+          }
+        />
       )}
     </EuiPanel>
   );

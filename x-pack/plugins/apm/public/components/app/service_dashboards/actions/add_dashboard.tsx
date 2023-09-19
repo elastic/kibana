@@ -7,11 +7,15 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { SelectDashboard } from './select_dashboard';
+import { SelectDashboard } from './select_dashboard_modal';
 
-export function AddDashboard() {
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
+export function AddDashboard({
+  isModalVisible,
+  setIsModalVisible,
+}: {
+  isModalVisible: boolean;
+  setIsModalVisible: (isVisible: boolean) => void;
+}) {
   return (
     <>
       <EuiButton

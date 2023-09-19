@@ -26,7 +26,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { DashboardItem } from '../../../../../../../../src/plugins/dashboard/common/content_management';
 import { DashboardTypeEnum } from '../../../../../common/service_dashboards';
-import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 
 interface Props {
   onClose: () => void;
@@ -164,7 +163,7 @@ export function SelectDashboard({ onClose }: Props) {
         </EuiButton>
         <EuiButton onClick={onSave} fill>
           {i18n.translate('xpack.apm.serviceDashboards.selectDashboard.add', {
-            defaultMessage: 'Add dashboard',
+            defaultMessage: 'Link dashboard',
           })}
         </EuiButton>
       </EuiModalFooter>

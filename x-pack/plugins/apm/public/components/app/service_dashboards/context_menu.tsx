@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -8,9 +9,13 @@ import {
   EuiContextMenuItem,
   EuiPopover,
   EuiComboBox,
+  EuiContextMenu,
+  EuiIcon,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SavedServiceDashboard } from '../../../../common/service_dashboards';
+import { ApmPluginStartDeps } from '../../../plugin';
 
 type Props = {
   serviceDashboards: SavedServiceDashboard[];
@@ -23,6 +28,12 @@ export function ContextMenu({
   selectedDashboard,
   handleOnChange,
 }: Props) {
+  const {
+    services: {
+      dashboard: { locator: dashboardLocator },
+    },
+  } = useKibana<ApmPluginStartDeps>();
+
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -41,50 +52,66 @@ export function ContextMenu({
 
   useEffect(() => {
     if (!selectedDashboard && serviceDashboards.length > 0) {
-      console.log('if- contect menu - serviceDashboards', serviceDashboards);
-      console.log('if- contect menu - selectedDashboard', selectedDashboard);
       const [serviceDashboard] = serviceDashboards;
-      console.log('first service dashboard', serviceDashboard);
       handleOnChange(serviceDashboard.dashboardSavedObjectId);
     }
   }, [selectedDashboard, serviceDashboards]);
 
-  const items = [
-    <EuiContextMenuItem
-      key="plusInCircle"
-      icon="plusInCircle"
-      onClick={closePopover}
-    >
-      {i18n.translate('xpack.apm.serviceDashboards.contextMenu.linkDashboard', {
-        defaultMessage: 'Link new dashboard',
-      })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="visGauge" icon="visGauge" onClick={closePopover}>
-      {i18n.translate('xpack.apm.serviceDashboards.contextMenu.goToDashboard', {
-        defaultMessage: 'Go to dashboard',
-      })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem key="edit" icon="pencil" onClick={closePopover}>
-      {i18n.translate(
-        'xpack.apm.serviceDashboards.contextMenu.visGaugeDashboard',
+  const panels = [
+    {
+      id: 0,
+      title: '',
+      items: [
         {
-          defaultMessage: 'Edit dashboard link',
-        }
-      )}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      color="red"
-      key="unlink"
-      icon="unlink"
-      onClick={closePopover}
-    >
-      {i18n.translate(
-        'xpack.apm.serviceDashboards.contextMenu.unlinkDashboard',
+          name: i18n.translate(
+            'xpack.apm.serviceDashboards.contextMenu.linkDashboard',
+            {
+              defaultMessage: 'Link new dashboard',
+            }
+          ),
+          icon: 'plusInCircle',
+          onClick: () => {
+            closePopover();
+          },
+        },
         {
-          defaultMessage: 'Unlink dashboard',
-        }
-      )}
-    </EuiContextMenuItem>,
+          name: i18n.translate(
+            'xpack.apm.serviceDashboards.contextMenu.goToDashboard',
+            {
+              defaultMessage: 'Go to dashboard',
+            }
+          ),
+          icon: 'visGauge',
+          href: dashboardLocator?.getRedirectUrl({
+            dashboardId: selectedDashboard?.dashboardSavedObjectId,
+          }),
+        },
+        {
+          name: i18n.translate(
+            'xpack.apm.serviceDashboards.contextMenu.visGaugeDashboard',
+            {
+              defaultMessage: 'Edit dashboard link',
+            }
+          ),
+          icon: 'pencil',
+          onClick: () => {
+            closePopover();
+          },
+        },
+        {
+          name: i18n.translate(
+            'xpack.apm.serviceDashboards.contextMenu.unlinkDashboard',
+            {
+              defaultMessage: 'Unlink dashboard',
+            }
+          ),
+          icon: 'unlink',
+          onClick: () => {
+            closePopover();
+          },
+        },
+      ],
+    },
   ];
 
   return (
@@ -120,6 +147,7 @@ export function ContextMenu({
                   : []
               }
               onChange={([newItem]) => handleOnChange(newItem.value)}
+              isClearable={false}
             />
           }
         </EuiFlexItem>
@@ -139,7 +167,7 @@ export function ContextMenu({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <EuiContextMenuPanel size="s" items={items} />
+            <EuiContextMenu initialPanelId={0} panels={panels} />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
