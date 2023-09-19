@@ -33,6 +33,7 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
     (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
     [prefix]
   );
+
   return (
     <Routes>
       <Route path={prefixPath('context/:dataViewId/:id')}>
@@ -74,6 +75,7 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
     () => profileRegistry.get(profile)?.customizationCallbacks,
     [profile, profileRegistry]
   );
+
   if (customizationCallbacks) {
     return (
       <DiscoverRoutes
@@ -104,6 +106,7 @@ export const DiscoverRouter = ({
     () => profileRegistry.get('default')?.customizationCallbacks ?? [],
     [profileRegistry]
   );
+
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
