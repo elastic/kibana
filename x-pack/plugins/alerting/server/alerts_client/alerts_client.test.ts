@@ -11,7 +11,6 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
   RecoveredActionGroup,
   RuleAlertData,
-  RuleNotifyWhen,
 } from '../types';
 import * as LegacyAlertsClientModule from './legacy_alerts_client';
 import { LegacyAlertsClient } from './legacy_alerts_client';
@@ -114,7 +113,7 @@ describe('Alerts Client', () => {
           ruleRunMetricsStore,
           shouldLogAlerts: false,
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-          notifyWhen: RuleNotifyWhen.CHANGE,
+          notifyOnActionGroupChange: true,
           maintenanceWindowIds: [],
         };
       });

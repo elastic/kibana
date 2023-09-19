@@ -155,6 +155,35 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Open the inspect flyout
+   */
+  public async inspectVisualization(index: number = 0) {
+    const inspectButtons = await this.testSubjects.findAll('inspect-action');
+    await inspectButtons[index].click();
+  }
+
+  /**
+   * Edit Visualization title and description in the flyout
+   */
+  public async editVisualizationDetails(
+    { title, description }: { title?: string; description?: string } = {},
+    shouldSave: boolean = true
+  ) {
+    if (title) {
+      await this.testSubjects.setValue('nameInput', title);
+    }
+    if (description) {
+      await this.testSubjects.setValue('descriptionInput', description);
+    }
+    if (shouldSave) {
+      await this.retry.try(async () => {
+        await this.testSubjects.click('saveButton');
+        await this.testSubjects.missingOrFail('flyoutTitle');
+      });
+    }
+  }
+
+  /**
    * Returns items count on landing page
    */
   public async expectItemsCount(appName: AppName, count: number) {

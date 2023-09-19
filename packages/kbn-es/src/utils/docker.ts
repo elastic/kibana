@@ -349,7 +349,7 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     stdio: ['ignore', 'inherit', 'pipe'],
   }).catch(({ message }) => {
     throw createCliError(
-      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.      
+      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
 Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
 
 ${message}`
@@ -622,8 +622,12 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
           }
         : {}),
     });
-    await waitUntilClusterReady({ client, log });
-    log.success('ES is ready');
+    await waitUntilClusterReady({ client, expectedStatus: 'green', log });
+  }
+
+  if (options.teardown) {
+    // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)
+    process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
 
   if (!options.background) {
@@ -631,6 +635,14 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     await execa('docker', ['logs', '-f', SERVERLESS_NODES[0].name], {
       // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
       stdio: ['ignore', 'inherit', 'inherit'],
+    }).catch((error) => {
+      /**
+       * 255 is a generic exit code which is triggered from docker logs command
+       * if we teardown the cluster since the entrypoint doesn't exit normally
+       */
+      if (error.exitCode !== 255) {
+        log.error(error.message);
+      }
     });
   }
 
@@ -700,7 +712,7 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   const dockerCmd = resolveDockerCmd(options, image);
 
   log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`));
-  return await execa('docker', dockerCmd, {
+  await execa('docker', dockerCmd, {
     // inherit is required to show Docker output and Java console output for pw, enrollment token, etc
     stdio: ['ignore', 'inherit', 'inherit'],
   });

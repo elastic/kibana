@@ -15,6 +15,7 @@ const createApiMock = (): jest.Mocked<SpacesApi> => ({
   getActiveSpace$: jest.fn().mockReturnValue(of()),
   getActiveSpace: jest.fn(),
   ui: createApiUiMock(),
+  hasOnlyDefaultSpace: false,
 });
 
 type SpacesApiUiMock = Omit<jest.Mocked<SpacesApiUi>, 'components'> & {

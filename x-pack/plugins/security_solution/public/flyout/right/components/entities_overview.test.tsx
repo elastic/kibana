@@ -54,7 +54,7 @@ describe('<EntitiesOverview />', () => {
   });
 
   it('should render user and host', () => {
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <RightPanelContext.Provider value={mockContextValue}>
           <EntitiesOverview />
@@ -63,6 +63,7 @@ describe('<EntitiesOverview />', () => {
     );
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should only render user when host name is null', () => {
@@ -81,6 +82,7 @@ describe('<EntitiesOverview />', () => {
 
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should only render host when user name is null', () => {
@@ -99,6 +101,7 @@ describe('<EntitiesOverview />', () => {
 
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render no data message if both host name and user name are null/blank', () => {
@@ -116,56 +119,8 @@ describe('<EntitiesOverview />', () => {
     );
 
     expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should not render if eventId is null', () => {
-    const contextValue = {
-      ...mockContextValue,
-      eventId: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <EntitiesOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
+    expect(queryByTestId(INSIGHTS_ENTITIES_NO_DATA_TEST_ID)).toHaveTextContent(
+      'Host and user information are unavailable for this alert.'
     );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should not render if indexName is null', () => {
-    const contextValue = {
-      ...mockContextValue,
-      indexName: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <EntitiesOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should not render if scopeId is null', () => {
-    const contextValue = {
-      ...mockContextValue,
-      scopeId: null,
-    } as unknown as RightPanelContext;
-
-    const { container } = render(
-      <TestProviders>
-        <RightPanelContext.Provider value={contextValue}>
-          <EntitiesOverview />
-        </RightPanelContext.Provider>
-      </TestProviders>
-    );
-
-    expect(container).toBeEmptyDOMElement();
   });
 });

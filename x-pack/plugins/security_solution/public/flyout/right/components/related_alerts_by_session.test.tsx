@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import {
   SUMMARY_ROW_ICON_TEST_ID,
@@ -31,6 +32,13 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID
 );
 
+const renderRelatedAlertsBySession = () =>
+  render(
+    <IntlProvider locale="en">
+      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
+    </IntlProvider>
+  );
+
 describe('<RelatedAlertsBySession />', () => {
   it('should render many related alerts correctly', () => {
     (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
@@ -39,9 +47,7 @@ describe('<RelatedAlertsBySession />', () => {
       dataCount: 2,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsBySession();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -56,9 +62,7 @@ describe('<RelatedAlertsBySession />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsBySession();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
     const value = getByTestId(VALUE_TEST_ID);
     expect(value).toBeInTheDocument();
@@ -71,9 +75,7 @@ describe('<RelatedAlertsBySession />', () => {
       loading: true,
     });
 
-    const { getByTestId } = render(
-      <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
-    );
+    const { getByTestId } = renderRelatedAlertsBySession();
     expect(getByTestId(LOADING_TEST_ID)).toBeInTheDocument();
   });
 
@@ -83,7 +85,7 @@ describe('<RelatedAlertsBySession />', () => {
       error: true,
     });
 
-    const { container } = render(<RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />);
+    const { container } = renderRelatedAlertsBySession();
     expect(container).toBeEmptyDOMElement();
   });
 });

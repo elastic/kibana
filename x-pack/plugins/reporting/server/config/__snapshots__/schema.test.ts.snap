@@ -55,6 +55,9 @@ Object {
     ],
     "enabled": true,
   },
+  "statefulSettings": Object {
+    "enabled": true,
+  },
 }
 `;
 
@@ -110,6 +113,9 @@ Object {
     "allow": Array [
       "reporting_user",
     ],
+    "enabled": true,
+  },
+  "statefulSettings": Object {
     "enabled": true,
   },
 }

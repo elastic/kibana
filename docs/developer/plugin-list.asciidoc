@@ -633,7 +633,7 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/log_explorer/README.md[logExplorer]
-|This plugin provides a LogExplorer component using the Discover customization framework, offering several affordances specifically designed for log consumption.
+|This plugin is home to the <LogExplorer /> component and related types. It implements several of the underlying concepts that the Observability Log Explorer app builds upon.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]
@@ -646,6 +646,10 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/metrics_data_access/README.md[metricsDataAccess]
+|Exposes utilities to access metrics data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]

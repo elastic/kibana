@@ -38,7 +38,12 @@ export const nodesListRouteFactory = (
 const PageWrapper: FC = () => {
   const { context } = useRouteResolver(
     'full',
-    ['canGetJobs', 'canGetDataFrameAnalytics', 'canGetTrainedModels'],
+    // only enabled in non-serverless mode
+    // if a serverless project ever contains all three features
+    // this check will have to be changed to an
+    // explicit isServerless check which will probably
+    // require a change in useRouteResolver
+    ['isADEnabled', 'isDFAEnabled', 'isNLPEnabled'],
     basicResolvers()
   );
 
