@@ -13,7 +13,7 @@ import type { AgentsRequestOptions } from '../../../../../common/search_strategy
 
 export const buildAgentsQuery = ({
   kuery,
-  pagination: { cursorStart, querySize },
+  pagination: { cursorStart },
   sort,
 }: AgentsRequestOptions): ISearchRequestParams => {
   const activeQuery = `active: true`;
@@ -38,21 +38,12 @@ export const buildAgentsQuery = ({
         platforms: {
           terms: {
             field: 'local_metadata.os.platform',
-            size: querySize,
-          },
-          aggs: {
-            policies: {
-              terms: {
-                field: 'policy_id',
-                size: querySize,
-              },
-            },
           },
         },
         policies: {
           terms: {
             field: 'policy_id',
-            size: querySize,
+            size: 2000,
           },
         },
       },
@@ -64,7 +55,7 @@ export const buildAgentsQuery = ({
           },
         },
       ],
-      size: querySize,
+      size: 0,
       from: cursorStart,
     },
   };
