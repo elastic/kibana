@@ -61,7 +61,7 @@ const spawnArgs = [
   `../../../../scripts/${ftrScript}`,
   `--config=./ftr_config.ts`,
   `--kibana-install-dir=${argv.kibanaInstallDir}`,
-  '--openssl-legacy-provider',
+  '--NODE_OPTIONS=openssl-legacy-provider',
   ...(argv.bail ? [`--bail`] : []),
 ];
 
