@@ -22,14 +22,21 @@ import type {
  * @param unsavedChange The unsaved change to compare.
  */
 export const hasUnsavedChange = <T extends SettingType>(
-  field: Pick<FieldDefinition<T>, 'savedValue'>,
+  field: Pick<FieldDefinition<T>, 'savedValue' | 'defaultValue'>,
   unsavedChange?: Pick<UnsavedFieldChange<T>, 'unsavedValue'>
 ) => {
+  // If there's no unsaved change, return false.
   if (!unsavedChange) {
     return false;
   }
 
   const { unsavedValue } = unsavedChange;
-  const { savedValue } = field;
-  return unsavedValue !== undefined && !isEqual(unsavedValue, savedValue);
+
+  const { savedValue, defaultValue } = field;
+  const hasSavedValue = savedValue !== undefined && savedValue !== null;
+
+  // Return a comparison of the unsaved value to:
+  //   the saved value, if the field has a saved value, or
+  //   the default value, if the field does not have a saved value.
+  return !isEqual(unsavedValue, hasSavedValue ? savedValue : defaultValue);
 };
