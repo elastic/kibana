@@ -427,7 +427,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               expect(hosts.length).to.equal(12);
             });
 
-            it('should render 3 charts in the Kubernetes Metrics section', async () => {
+            it('should render 4 charts in the Kubernetes Metrics section', async () => {
               const hosts = await pageObjects.assetDetails.getAssetDetailsKubernetesMetricsCharts();
               expect(hosts.length).to.equal(4);
             });
