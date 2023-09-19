@@ -11,9 +11,8 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
-export function DashboardsDropdownList(selectedDashboard, onChangeDashboard) {
+export function DashboardsDropdownList() {
   const { data, status } = useDashboardFetcher();
-  const [selectedOptions, setSelected] = useState([]);
 
   const onChange = (
     selectedOptions: Array<EuiComboBoxOptionOption<string>>

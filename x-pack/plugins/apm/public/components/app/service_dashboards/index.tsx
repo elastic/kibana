@@ -6,6 +6,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { buildPhraseFilter, Filter, TimeRange } from '@kbn/es-query';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -16,7 +17,7 @@ import {
 
 import { EmptyDashboards } from './empty_dashboards';
 import { AddDashboard } from './actions';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
@@ -24,7 +25,8 @@ import {
   DashboardCreationOptions,
   DashboardRenderer,
 } from '@kbn/dashboard-plugin/public';
-import { SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { SavedServiceDashboard } from '../../../../common/service_dashboards';
+import { ContextMenu } from './context_menu';
 
 export function ServiceDashboards() {
   const {
@@ -33,7 +35,7 @@ export function ServiceDashboards() {
   } = useApmParams('/services/{serviceName}/dashboards');
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [selectedDashboard, setSelectedDashboard] =
-    useState<EuiComboBoxOptionOption<string>>();
+    useState<SavedServiceDashboard>();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -51,63 +53,137 @@ export function ServiceDashboards() {
     [serviceName]
   );
 
-  console.log('data====', data);
+  // function getFilters(
+  //   serviceName: string,
+  //   environment: string,
+  // ): Filter[] {
+
+  //   const filter = [];
+
+  //   const environmentField = dataView.getFieldByName(SERVICE_ENVIRONMENT);
+  //   if (
+  //     environmentField &&
+  //     !!environment &&
+  //     environment !== ENVIRONMENT_ALL.value &&
+  //     environment !== ENVIRONMENT_NOT_DEFINED.value
+  //   ) {
+  //     const environmentFilter = buildPhraseFilter(
+  //       environmentField,
+  //       environment,
+  //     );
+  //     filter.push(environmentFilter);
+  //   }
+
+  //   const serviceNameField = dataView.getFieldByName(SERVICE_NAME);
+  //   if (serviceNameField) {
+  //     const serviceNameFilter = buildPhraseFilter(
+  //       serviceNameField,
+  //       serviceName,
+  //       dataView
+  //     );
+  //     filter.push(serviceNameFilter);
+  //   }
+
+  //   return filter;
+  // }
 
   const getCreationOptions =
     useCallback((): Promise<DashboardCreationOptions> => {
+      console.log('selectedDashboard', selectedDashboard);
       const getInitialInput = () => ({
         viewMode: ViewMode.VIEW,
         timeRange: { from: rangeFrom, to: rangeTo },
         query: { query: kuery, language: 'kuery' },
       });
       return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
-    }, [rangeFrom, rangeTo, kuery]);
+    }, [rangeFrom, rangeTo, kuery, selectedDashboard]);
+
+  const serviceDashboards = data?.serviceDashboards ?? [];
 
   useEffect(() => {
     if (!dashboard) return;
-    console.log('update');
+
     dashboard.updateInput({
       viewMode: ViewMode.VIEW,
       timeRange: { from: rangeFrom, to: rangeTo },
+      // TODO useContextFilter
       query: { query: kuery, language: 'kuery' },
     });
-  }, [kuery, serviceName, environment, rangeFrom, rangeTo, selectedDashboard]);
+  }, [
+    serviceDashboards,
+    kuery,
+    serviceName,
+    environment,
+    rangeFrom,
+    rangeTo,
+    selectedDashboard,
+  ]);
 
-  console.log('///selectedDashboard', selectedDashboard);
+  const handleOnChange = (selectedId: string) => {
+    setSelectedDashboard(
+      serviceDashboards.find(
+        ({ dashboardSavedObjectId }) => dashboardSavedObjectId === selectedId
+      )
+    );
+  };
+
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}> Custom</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AddDashboard />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {data && selectedDashboard ? (
+      {status !== FETCH_STATUS.LOADING && serviceDashboards.length > 0 ? (
         <>
-          <EuiComboBox
-            placeholder={i18n.translate(
-              'xpack.apm.serviceDashboards.selectDashboard.placeholder',
-              {
-                defaultMessage: 'Select dasbboard',
-              }
-            )}
-            singleSelection={{ asPlainText: true }}
-            options={data?.serviceSpecificDashboards.map(
-              (dashboardItem: DashboardItem) => ({
-                label: dashboardItem.dashboardTitle,
-                value: dashboardItem.dashboardSavedObjectId,
-              })
-            )}
-            selectedOptions={selectedDashboard}
-            onChange={(newSelection) => setSelectedDashboard(newSelection)}
-            isClearable={true}
-          />
-          <DashboardRenderer
-            savedObjectId={selectedDashboard.value}
-            getCreationOptions={getCreationOptions}
-            ref={setDashboard}
-          />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {selectedDashboard?.dashboardTitle}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* <EuiComboBox
+                compressed
+                style={{ minWidth: '200px' }}
+                placeholder={i18n.translate(
+                  'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+                  {
+                    defaultMessage: 'Select dasbboard',
+                  }
+                )}
+                prepend={i18n.translate(
+                  'xpack.apm.serviceDashboards.selectDashboard.prepend',
+                  {
+                    defaultMessage: 'Dasbboard',
+                  }
+                )}
+                singleSelection={{ asPlainText: true }}
+                options={options}
+                selectedOptions={[
+                  {
+                    value: selectedDashboard.dashboardSavedObjectId,
+                    label: selectedDashboard.dashboardTitle,
+                  },
+                ]}
+                onChange={([newSelectedDashboard]) =>
+                  setSelectedDashboard(
+                    serviceDashboards.find(
+                      ({ dashboardSavedObjectId }) =>
+                        dashboardSavedObjectId === newSelectedDashboard.value
+                    )
+                  )
+                }
+                isClearable={true}
+              /> */}
+            </EuiFlexItem>
+            <ContextMenu
+              handleOnChange={handleOnChange}
+              selectedDashboard={selectedDashboard}
+              serviceDashboards={data?.serviceDashboards}
+            />
+          </EuiFlexGroup>
+
+          {selectedDashboard && (
+            <DashboardRenderer
+              savedObjectId={selectedDashboard.dashboardSavedObjectId}
+              getCreationOptions={getCreationOptions}
+              ref={setDashboard}
+            />
+          )}
         </>
       ) : (
         <EmptyDashboards actions={<AddDashboard />} />

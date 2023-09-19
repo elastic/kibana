@@ -19,7 +19,7 @@ export function AddDashboard() {
         onClick={() => setIsModalVisible(true)}
       >
         {i18n.translate('xpack.apm.serviceDashboards.addButtonLabel', {
-          defaultMessage: 'Add dashboard',
+          defaultMessage: 'Link dashboard',
         })}
       </EuiButton>
 
