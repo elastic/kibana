@@ -88,7 +88,6 @@ jest.mock('./components/search_and_filter_bar', () => {
 
 const mockedSendGetAgents = sendGetAgents as jest.Mock;
 const mockedSendGetAgentStatus = sendGetAgentStatus as jest.Mock;
-const mockedSendGetAgentPolicies = sendGetAgentPolicies as jest.Mock;
 
 function renderAgentList() {
   const renderer = createFleetTestRendererMock();
