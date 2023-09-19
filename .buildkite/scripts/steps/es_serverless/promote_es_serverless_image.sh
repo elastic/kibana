@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-BASE_ESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
+BASE_ES_SERVERLESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverless
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
 
 ES_SERVERLESS_BUCKET=kibana-ci-es-serverless-images
@@ -16,7 +16,7 @@ if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z_-]+$ ]]; then
   SOURCE_IMAGE=$SOURCE_IMAGE_OR_TAG
 else
   # $SOURCE_IMAGE_OR_TAG was an image tag
-  SOURCE_IMAGE="$BASE_ESS_REPO:$SOURCE_IMAGE_OR_TAG"
+  SOURCE_IMAGE="$BASE_ES_SERVERLESS_REPO:$SOURCE_IMAGE_OR_TAG"
 fi
 
 echo "--- Promoting ${SOURCE_IMAGE_OR_TAG} to ':latest-verified'"
