@@ -129,25 +129,39 @@ export function LensEditConfigurationFlyout({
   }, [activeDatasource, lensAdapters, datasourceState, output$, activeData]);
 
   const attributesChanged: boolean = useMemo(() => {
-    const attrs = previousAttributes.current;
-    const prevLayers = datasourceMap[datasourceId].getCurrentLayersState?.(
-      attrs.state.datasourceStates[datasourceId]
-    );
+    const previousAttrs = previousAttributes.current;
+    const prevDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
+      ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
+          previousAttrs.state.datasourceStates[datasourceId],
+          previousAttrs.references
+        )
+      : previousAttrs.state.datasourceStates[datasourceId];
+
+    const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
+      ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
+          datasourceStates[datasourceId].state,
+          attributes.references
+        )
+      : datasourceStates[datasourceId].state;
 
     const visualizationState = visualization.state;
-    const datasourceLayers = datasourceMap[datasourceId].getCurrentLayersState?.(
-      datasourceStates[datasourceId].state
-    );
     return (
-      !isEqual(visualizationState, attrs.state.visualization) ||
-      !isEqual(datasourceLayers, prevLayers)
+      !isEqual(visualizationState, previousAttrs.state.visualization) ||
+      !isEqual(prevDatasourceState, currentDatasourceState)
     );
-  }, [datasourceId, datasourceMap, datasourceStates, visualization.state]);
+  }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
 
   const onCancel = useCallback(() => {
-    const attrs = previousAttributes.current;
+    const previousAttrs = previousAttributes.current;
+
     if (attributesChanged) {
-      updatePanelState?.(attrs.state.datasourceStates[datasourceId], attrs.state.visualization);
+      const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
+        ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
+            previousAttrs.state.datasourceStates[datasourceId],
+            previousAttrs.references
+          )
+        : previousAttrs.state.datasourceStates[datasourceId];
+      updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
     }
     if (savedObjectId) {
       updateByRefInput?.(savedObjectId);
@@ -157,8 +171,9 @@ export function LensEditConfigurationFlyout({
     attributesChanged,
     savedObjectId,
     closeFlyout,
-    updatePanelState,
+    datasourceMap,
     datasourceId,
+    updatePanelState,
     updateByRefInput,
   ]);
 

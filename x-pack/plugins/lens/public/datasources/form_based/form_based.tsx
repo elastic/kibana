@@ -322,18 +322,6 @@ export function getFormBasedDatasource({
       return Object.keys(state?.layers);
     },
 
-    getCurrentLayersState(state: FormBasedPrivateState) {
-      const layers = { ...state?.layers };
-      const updatedLayers = Object.fromEntries(
-        Object.entries(layers).map(([id, layer]) => {
-          const { indexPatternId, ...newLayer } = layer;
-
-          return [id, newLayer];
-        })
-      );
-      return updatedLayers;
-    },
-
     removeColumn,
 
     initializeDimension(
@@ -869,6 +857,14 @@ export function getFormBasedDatasource({
     },
     getUsedDataViews: (state) => {
       return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
+    injectReferencesToLayers: (state, references) => {
+      const layers =
+        references && state ? injectReferences(state, references).layers : state?.layers;
+      return {
+        ...state,
+        layers,
+      };
     },
 
     getDatasourceInfo: async (state, references, dataViewsService) => {

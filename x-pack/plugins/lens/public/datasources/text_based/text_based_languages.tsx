@@ -304,9 +304,6 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    getCurrentLayersState(state: TextBasedPrivateState) {
-      return state?.layers;
-    },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
       const { layers } = state;
