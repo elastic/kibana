@@ -51,6 +51,12 @@ export interface InternalChromeStart extends ChromeStart {
     setProjectsUrl(projectsUrl: string): void;
 
     /**
+     * Sets the project name.
+     * @param projectName
+     */
+    setProjectName(projectName: string): void;
+
+    /**
      * Sets the project navigation config to be used for rendering project navigation.
      * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
      * @param projectNavigation The project navigation config
