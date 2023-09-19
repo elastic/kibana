@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const nginxRequestsPerConnection: FormulaValueConfig = {
+export const requestsPerConnection: FormulaValueConfig = {
   label: i18n.translate('xpack.infra.assetDetails.formulas.nginx.requestsPerConnection', {
     defaultMessage: 'Requests Per Connection',
   }),
