@@ -29,6 +29,7 @@ describe('Header', () => {
     helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
     projectsUrl$: Rx.of('/projects/'),
+    projectName$: Rx.of('My Project'),
     kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
     navControlsLeft$: Rx.of([]),
@@ -82,5 +83,6 @@ describe('Header', () => {
 
     const projectsLink = await screen.getByTestId('projectsLink');
     expect(projectsLink).toHaveAttribute('href', '/projects/');
+    expect(projectsLink).toHaveTextContent('My Project');
   });
 });

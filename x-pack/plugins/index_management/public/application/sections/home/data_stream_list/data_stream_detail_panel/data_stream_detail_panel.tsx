@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -41,24 +41,16 @@ interface DetailsListProps {
     name: string;
     toolTip: string;
     content: any;
+    dataTestSubj: string;
   }>;
 }
 
 const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => {
-  const groups: any[] = [];
-  let items: any[];
+  const descriptionListItems = details.map((detail, index) => {
+    const { name, toolTip, content, dataTestSubj } = detail;
 
-  details.forEach((detail, index) => {
-    const { name, toolTip, content } = detail;
-
-    if (index % 2 === 0) {
-      items = [];
-
-      groups.push(<EuiFlexGroup key={groups.length}>{items}</EuiFlexGroup>);
-    }
-
-    items.push(
-      <EuiFlexItem key={name}>
+    return (
+      <Fragment key={`${name}-${index}`}>
         <EuiDescriptionListTitle>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>{name}</EuiFlexItem>
@@ -69,12 +61,27 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
           </EuiFlexGroup>
         </EuiDescriptionListTitle>
 
-        <EuiDescriptionListDescription>{content}</EuiDescriptionListDescription>
-      </EuiFlexItem>
+        <EuiDescriptionListDescription data-test-subj={dataTestSubj}>
+          {content}
+        </EuiDescriptionListDescription>
+      </Fragment>
     );
   });
 
-  return <EuiDescriptionList textStyle="reverse">{groups}</EuiDescriptionList>;
+  const midpoint = Math.ceil(descriptionListItems.length / 2);
+  const descriptionListColumnOne = descriptionListItems.slice(0, midpoint);
+  const descriptionListColumnTwo = descriptionListItems.slice(-midpoint);
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiDescriptionList textStyle="reverse">{descriptionListColumnOne}</EuiDescriptionList>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiDescriptionList textStyle="reverse">{descriptionListColumnTwo}</EuiDescriptionList>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 interface Props {
@@ -123,23 +130,64 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       ilmPolicyName,
       storageSize,
       maxTimeStamp,
+      lifecycle,
     } = dataStream;
-    const details = [
+
+    const getManagementDetails = () => {
+      const managementDetails = [];
+
+      if (lifecycle?.data_retention) {
+        managementDetails.push({
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionTitle', {
+            defaultMessage: 'Data retention',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.dataRetentionToolTip', {
+            defaultMessage: 'The amount of time to retain the data in the data stream.',
+          }),
+          content: lifecycle.data_retention,
+          dataTestSubj: 'dataRetentionDetail',
+        });
+      }
+
+      if (ilmPolicyName) {
+        managementDetails.push({
+          name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle', {
+            defaultMessage: 'Index lifecycle policy',
+          }),
+          toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
+            defaultMessage: `The index lifecycle policy that manages the data in the data stream.`,
+          }),
+          content: ilmPolicyLink ? (
+            <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
+              {ilmPolicyName}
+            </EuiLink>
+          ) : (
+            ilmPolicyName
+          ),
+          dataTestSubj: 'ilmPolicyDetail',
+        });
+      }
+
+      return managementDetails;
+    };
+
+    const defaultDetails = [
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthTitle', {
           defaultMessage: 'Health',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.healthToolTip', {
-          defaultMessage: `The health of the data stream's current backing indices`,
+          defaultMessage: `The health of the data stream's current backing indices.`,
         }),
         content: <DataHealth health={health} />,
+        dataTestSubj: 'healthDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampTitle', {
           defaultMessage: 'Last updated',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.maxTimeStampToolTip', {
-          defaultMessage: 'The most recent document to be added to the data stream',
+          defaultMessage: 'The most recent document to be added to the data stream.',
         }),
         content: maxTimeStamp ? (
           humanizeTimeStamp(maxTimeStamp)
@@ -150,22 +198,24 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             })}
           </em>
         ),
+        dataTestSubj: 'lastUpdatedDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeTitle', {
           defaultMessage: 'Storage size',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.storageSizeToolTip', {
-          defaultMessage: `Total size of all shards in the data stream’s backing indices`,
+          defaultMessage: `The total size of all shards in the data stream’s backing indices.`,
         }),
         content: storageSize,
+        dataTestSubj: 'storageSizeDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesTitle', {
           defaultMessage: 'Indices',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesToolTip', {
-          defaultMessage: `The data stream's current backing indices`,
+          defaultMessage: `The data stream's current backing indices.`,
         }),
         content: (
           <EuiLink
@@ -177,24 +227,27 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             {indices.length}
           </EuiLink>
         ),
+        dataTestSubj: 'indicesDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle', {
           defaultMessage: 'Timestamp field',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.timestampFieldToolTip', {
-          defaultMessage: 'Timestamp field shared by all documents in the data stream',
+          defaultMessage: 'The timestamp field shared by all documents in the data stream.',
         }),
         content: timeStampField.name,
+        dataTestSubj: 'timestampDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.generationTitle', {
           defaultMessage: 'Generation',
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.generationToolTip', {
-          defaultMessage: 'Cumulative count of backing indices created for the data stream',
+          defaultMessage: 'The number of backing indices generated for the data stream.',
         }),
         content: generation,
+        dataTestSubj: 'generationDetail',
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexTemplateTitle', {
@@ -202,7 +255,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indexTemplateToolTip', {
           defaultMessage:
-            'The index template that configured the data stream and configures its backing indices',
+            'The index template that configured the data stream and configures its backing indices.',
         }),
         content: (
           <EuiLink
@@ -212,30 +265,12 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             {indexTemplateName}
           </EuiLink>
         ),
-      },
-      {
-        name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle', {
-          defaultMessage: 'Index lifecycle policy',
-        }),
-        toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
-          defaultMessage: `The index lifecycle policy that manages the data stream's data`,
-        }),
-        content:
-          ilmPolicyName && ilmPolicyLink ? (
-            <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
-              {ilmPolicyName}
-            </EuiLink>
-          ) : (
-            ilmPolicyName || (
-              <em>
-                {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
-                  defaultMessage: `None`,
-                })}
-              </em>
-            )
-          ),
+        dataTestSubj: 'indexTemplateDetail',
       },
     ];
+
+    const managementDetails = getManagementDetails();
+    const details = [...defaultDetails, ...managementDetails];
 
     content = <DetailsList details={details} />;
   }
