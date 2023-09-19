@@ -9,6 +9,7 @@ export const KIBANA_HOME = '/app/home#/';
 export const KIBANA_SAVED_OBJECTS = '/app/management/kibana/objects';
 
 export const ALERTS_URL = 'app/security/alerts';
+export const DISCOVER_URL = '/app/discover';
 export const ENDPOINTS_URL = '/app/security/administration/endpoints';
 export const POLICIES_URL = '/app/security/administration/policy';
 export const USERS_URL = '/app/security/users/allUsers';
