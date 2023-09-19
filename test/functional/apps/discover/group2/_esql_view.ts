@@ -91,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         // here Lens suggests a XY so it is rendered
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('xyVisChart')).to.be(true);
@@ -104,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         let cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
         await PageObjects.timePicker.setAbsoluteRange(
@@ -111,9 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 19, 2015 @ 06:31:44.000'
         );
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         expect(await testSubjects.exists('discoverNoResults')).to.be(true);
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
       });
