@@ -67,10 +67,10 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
             category="detection-rules"
             color={color}
             conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-            description={"Rule's execution failure message"}
+            description={i18n.ASK_ASSISTANT_DESCRIPTION}
             getPromptContext={getPromptContext}
-            suggestedUserPrompt={'Can you explain this rule execution error and steps to fix?'}
-            tooltip={'Add this rule execution error as context'}
+            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
           >
             {i18n.ASK_ASSISTANT_ERROR_BUTTON}
           </NewChat>

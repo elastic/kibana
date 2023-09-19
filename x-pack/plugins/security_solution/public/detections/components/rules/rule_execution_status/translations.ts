@@ -55,3 +55,24 @@ export const ASK_ASSISTANT_ERROR_BUTTON = i18n.translate(
     defaultMessage: 'Ask Assistant',
   }
 );
+
+export const ASK_ASSISTANT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleStatus.askAssistantDesc',
+  {
+    defaultMessage: "Rule's execution failure message",
+  }
+);
+
+export const ASK_ASSISTANT_USER_PROMPT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleStatus.askAssistantUserPrompt',
+  {
+    defaultMessage: 'Can you explain this rule execution error and steps to fix?',
+  }
+);
+
+export const ASK_ASSISTANT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleStatus.askAssistantToolTip',
+  {
+    defaultMessage: 'Add this rule execution error as context',
+  }
+);
