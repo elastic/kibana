@@ -5,11 +5,9 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress": "NODE_OPTIONS=--openssl-legacy-provider ../../../../../../node_modules/.bin/cypress",
-    "cypress:open": "yarn cypress open --config-file ./cypress.config.ts",
-    "cypress:run": "yarn cypress run --browser chrome --config-file ./cypress.config.ts",
-    "cypress:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../scripts/functional_tests",
-    "cypress:serverless:open": "yarn cypress:serverless --config ./config_runner.ts",
-    "cypress:serverless:run": "yarn cypress:serverless --config ./config_server.ts"
+    "cypress:open": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../node_modules/.bin/cypress open --config-file ./cypress.config.ts",
+    "cypress:run": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../node_modules/.bin/cypress run --browser chrome --config-file ./cypress.config.ts",
+    "cypress:serverless:open": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../scripts/functional_tests --config ./config_runner.ts",
+    "cypress:serverless:run": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../scripts/functional_tests --config ./config_server.ts"
   }
 }

@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "license": "Elastic License 2.0",
   "scripts": {
-    "cypress": "NODE_OPTIONS=--openssl-legacy-provider ../../../node_modules/.bin/cypress",
-    "cypress:open": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node ../security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../plugins/threat_intelligence/cypress/cypress.config.ts --ftr-config-file ../../test/threat_intelligence_cypress/cli_config_parallel",
+    "cypress": "../../../node_modules/.bin/cypress",
+    "cypress:open": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node  ../security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../plugins/threat_intelligence/cypress/cypress.config.ts --ftr-config-file ../../test/threat_intelligence_cypress/cli_config_parallel",
     "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
     "cypress:run:spec": "yarn cypress:run:reporter --browser chrome --spec ${SPEC_LIST:-'./cypress/e2e/**/*.cy.ts'}; status=$?; yarn junit:merge && exit $status",
     "cypress:run:cases": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/cases/*.cy.ts' --ftr-config-file ../../test/security_solution_cypress/cli_config; status=$?; yarn junit:merge && exit $status",
