@@ -578,7 +578,7 @@ describe('Handler', () => {
     );
 
     const [message] = loggingSystemMock.collect(logger).error[0];
-    expect(message).toEqual('500 Server Error - /');
+    expect(message).toEqual('500 Server Error');
   });
 
   it('captures the error if handler throws', async () => {
@@ -614,7 +614,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - /",
+          "500 Server Error",
           Object {
             "http": Object {
               "response": Object {
@@ -643,7 +643,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "500 Server Error - /",
+          "500 Server Error",
           Object {
             "http": Object {
               "response": Object {
@@ -687,7 +687,7 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          "400 Bad Request - /",
+          "400 Bad Request",
           Object {
             "http": Object {
               "response": Object {
@@ -1171,7 +1171,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "http": Object {
                 "response": Object {
@@ -1584,7 +1584,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "http": Object {
                 "response": Object {
@@ -1660,7 +1660,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "http": Object {
                 "response": Object {
@@ -1807,7 +1807,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "http": Object {
                 "response": Object {
@@ -1840,7 +1840,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "http": Object {
                 "response": Object {
@@ -1872,7 +1872,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "http": Object {
                 "response": Object {
@@ -1904,7 +1904,7 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            "500 Server Error - /",
+            "500 Server Error",
             Object {
               "http": Object {
                 "response": Object {
