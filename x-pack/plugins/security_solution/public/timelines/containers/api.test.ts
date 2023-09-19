@@ -143,6 +143,7 @@ describe('persistTimeline', () => {
         body: JSON.stringify({
           timelineType: initialDraftTimeline.timelineType,
         }),
+        version: '2023-10-31',
       });
     });
 
@@ -345,6 +346,7 @@ describe('importTimelines', () => {
         headers: { 'Content-Type': undefined },
         body: new FormData(),
         signal: undefined,
+        version: '2023-10-31',
       })
     );
   });
@@ -376,6 +378,7 @@ describe('exportSelectedTimeline', () => {
       method: 'POST',
       query: { file_name: 'timelines_export.ndjson' },
       signal: {},
+      version: '2023-10-31',
     });
   });
 });
@@ -399,6 +402,7 @@ describe('getDraftTimeline', () => {
   test('should pass correct args to KibanaServices', () => {
     expect(getMock).toBeCalledWith('/api/timeline/_draft', {
       query: timelineType,
+      version: '2023-10-31',
     });
   });
 });
@@ -424,6 +428,7 @@ describe('cleanDraftTimeline', () => {
 
     expect(postMock).toBeCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
+      version: '2023-10-31',
     });
   });
 
@@ -438,6 +443,7 @@ describe('cleanDraftTimeline', () => {
 
     expect(postMock).toBeCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
+      version: '2023-10-31',
     });
   });
 });
