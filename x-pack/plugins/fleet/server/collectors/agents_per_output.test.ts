@@ -27,24 +27,27 @@ jest.mock('../services', () => {
         ],
       }),
     },
+    outputService: {
+      list: jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'default-output',
+            is_default: true,
+            is_default_monitoring: true,
+            type: 'elasticsearch',
+          },
+          { id: 'logstash1', type: 'logstash' },
+          { id: 'kafka1', type: 'kafka' },
+          { id: 'elasticsearch2', type: 'elasticsearch' },
+          { id: 'es-containerhost', type: 'cloud' },
+        ],
+      }),
+    },
   };
 });
 
 describe('agents_per_output', () => {
-  const soClientMock = {
-    find: jest.fn().mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'default-output',
-          attributes: { is_default: true, is_default_monitoring: true, type: 'elasticsearch' },
-        },
-        { id: 'logstash1', attributes: { type: 'logstash' } },
-        { id: 'kafka1', attributes: { type: 'kafka' } },
-        { id: 'elasticsearch2', attributes: { type: 'elasticsearch' } },
-        { id: '1234', attributes: { output_id: 'es-containerhost', type: 'cloud' } },
-      ],
-    }),
-  } as unknown as SavedObjectsClientContract;
+  const soClientMock = {} as unknown as SavedObjectsClientContract;
 
   it('should return agent count by output type', async () => {
     const res = await getAgentsPerOutput(soClientMock, {} as unknown as ElasticsearchClient);
