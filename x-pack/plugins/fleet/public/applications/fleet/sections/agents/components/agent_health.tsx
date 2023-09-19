@@ -200,7 +200,6 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
                 values={{
                   learnMore: (
                     <div>
-                      {' '}
                       <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
                         <FormattedMessage
                           id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
