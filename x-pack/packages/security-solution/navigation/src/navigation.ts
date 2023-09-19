@@ -34,6 +34,11 @@ export type NavigateTo = (
   param: {
     url?: string;
     appId?: string;
+    /**
+     * Browsers will reset the scroll position to 0 when navigating to a new page.
+     * This option will prevent that from happening.
+     */
+    restoreScroll?: boolean;
   } & NavigateToAppOptions
 ) => void;
 /**
@@ -44,7 +49,10 @@ export const useNavigateTo = () => {
   const { navigateToApp, navigateToUrl } = useNavigationContext().application;
 
   const navigateTo = useCallback<NavigateTo>(
-    ({ url, appId = SECURITY_UI_APP_ID, ...options }) => {
+    ({ url, appId = SECURITY_UI_APP_ID, restoreScroll, ...options }) => {
+      if (restoreScroll) {
+        addScrollRestoration();
+      }
       if (url) {
         navigateToUrl(url);
       } else {
@@ -54,6 +62,16 @@ export const useNavigateTo = () => {
     [navigateToApp, navigateToUrl]
   );
   return { navigateTo };
+};
+
+/**
+ * Expects the browser scroll reset event to be fired after the navigation,
+ * then restores the previous scroll position.
+ */
+const addScrollRestoration = () => {
+  const scrollY = window.scrollY;
+  const handler = () => window.scrollTo(0, scrollY);
+  window.addEventListener('scroll', handler, { once: true });
 };
 
 /**
