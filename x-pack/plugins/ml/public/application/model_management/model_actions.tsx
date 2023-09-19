@@ -83,9 +83,11 @@ export function useModelActions({
         cluster: ['manage_ingest_pipelines'],
       })
       .then((result) => {
-        const canManagePipelines = result.hasPrivileges?.cluster?.manage_ingest_pipelines;
         if (isMounted) {
-          setCanManageIngestPipelines(canManagePipelines);
+          setCanManageIngestPipelines(
+            result.hasPrivileges === undefined ||
+              result.hasPrivileges?.cluster?.manage_ingest_pipelines === true
+          );
         }
       });
     return () => {
