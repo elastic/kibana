@@ -10516,22 +10516,6 @@
                 "path": "x-pack/plugins/lists/server/saved_objects/exception_list.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/notes.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/pinned_events.ts"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/plugins/cases/server/saved_object_types/cases.ts"
               },
@@ -10552,12 +10536,24 @@
                 "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/notes.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/pinned_events.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -10574,6 +10570,10 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
+              },
+              {
+                "plugin": "visualizations",
+                "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
               },
               {
                 "plugin": "maps",

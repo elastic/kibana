@@ -4,7 +4,7 @@
 
 steps:
   - label: ":pipeline::kibana::seedling: Trigger Kibana Serverless Tests for ${ENVIRONMENT}"
-    trigger: appex-qa-kibana-serverless-ftr-tests # https://buildkite.com/elastic/appex-qa-kibana-serverless-ftr-tests
+    trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
     soft_fail: true # Remove this before release or when tests stabilize
     build:
       env:
@@ -16,14 +16,6 @@ steps:
     steps:
       - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/pipeline.sh
-
-      - label: ":judge::seedling: Trigger Manual Tests Phase"
-        command: "make -C /agent trigger-manual-verification-phase"
-        if: build.branch == "main"
-        env:
-          TEAM_CHANNEL: "#kibana-mission-control"
-        agents:
-          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.2"
 
   - label: ":pipeline::ship::seedling: Trigger Fleet serverless smoke tests for ${ENVIRONMENT}"
     trigger: fleet-smoke-tests # https://buildkite.com/elastic/fleet-smoke-tests

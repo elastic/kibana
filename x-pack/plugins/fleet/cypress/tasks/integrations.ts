@@ -78,8 +78,8 @@ export function scrollToIntegration(selector: string) {
   return cy.window().then(async (win) => {
     let found = false;
     let i = 0;
-    while (!found && i < 10) {
-      win.scroll(0, i++ * 500);
+    while (!found && i < 20) {
+      win.scroll(0, i++ * 250);
       await new Promise((resolve) => setTimeout(resolve, 200));
       if (win.document.querySelector(`[data-test-subj="${selector}"]`)) {
         found = true;

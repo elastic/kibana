@@ -31,7 +31,7 @@ import { CreateApiKeyResponse } from './types';
 import './api_key.scss';
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
-  const { http, userProfile } = useKibanaServices();
+  const { http, user } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['apiKey'],
@@ -49,7 +49,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
         <CreateApiKeyFlyout
           onClose={() => setIsFlyoutOpen(false)}
           setApiKey={saveApiKey}
-          username={userProfile.user.full_name || userProfile.user.username}
+          username={user?.full_name || user?.username || ''}
         />
       )}
       {apiKey ? (

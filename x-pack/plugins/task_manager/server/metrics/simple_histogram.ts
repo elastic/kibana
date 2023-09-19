@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
 import { last } from 'lodash';
 
 interface Bucket {
   min: number; // inclusive
   max: number; // exclusive
   count: number;
+}
+
+export interface SerializedHistogram extends JsonObject {
+  counts: number[];
+  values: number[];
 }
 
 export class SimpleHistogram {
@@ -66,6 +72,18 @@ export class SimpleHistogram {
       count: bucket.count,
       value: bucket.max,
     }));
+  }
+
+  public serialize(): SerializedHistogram {
+    const counts: number[] = [];
+    const values: number[] = [];
+
+    for (const { count, value } of this.get(true)) {
+      counts.push(count);
+      values.push(value);
+    }
+
+    return { counts, values };
   }
 
   private initializeBuckets() {

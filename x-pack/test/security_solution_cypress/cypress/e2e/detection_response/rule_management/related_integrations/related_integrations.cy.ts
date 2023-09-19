@@ -47,7 +47,8 @@ import {
 import { ruleDetailsUrl } from '../../../../urls/navigation';
 import { enablesRule, waitForPageToBeLoaded } from '../../../../tasks/rule_details';
 
-describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
   const RULE_RELATED_INTEGRATIONS: IntegrationDefinition[] = [
@@ -189,6 +190,7 @@ describe('Related integrations', { tags: ['@ess', '@brokenInServerless'] }, () =
       });
     });
 
+    // TODO: https://github.com/elastic/kibana/issues/161540
     // Flaky in serverless tests
     // @brokenInServerless tag is not working so a skip was needed
     describe.skip('rule details', { tags: ['@brokenInServerless'] }, () => {

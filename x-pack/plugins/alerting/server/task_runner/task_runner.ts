@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { omit } from 'lodash';
+import { omit, some } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
@@ -49,6 +49,7 @@ import {
   RuleLastRunOutcomeOrderMap,
   RuleAlertData,
   SanitizedRule,
+  RuleNotifyWhen,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -546,7 +547,9 @@ export class TaskRunner<
         ruleRunMetricsStore,
         shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
-        notifyWhen,
+        notifyOnActionGroupChange:
+          notifyWhen === RuleNotifyWhen.CHANGE ||
+          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds,
       });
     });

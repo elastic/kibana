@@ -17,7 +17,7 @@ import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';
-import { aggregateRulesRoute } from './aggregate_rules';
+import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
 import { findRulesRoute, findInternalRulesRoute } from './find_rules';

@@ -186,9 +186,24 @@ describe('<IndexDetailsPage />', () => {
     expect(header).toEqual(testIndexName);
   });
 
-  it('defaults to overview tab', () => {
-    const tabContent = testBed.actions.getActiveTabContent();
-    expect(tabContent).toEqual('Overview');
+  describe('Overview tab', () => {
+    it('renders index details', () => {
+      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
+      expect(testBed.actions.overview.indexStatsContentExists()).toBe(true);
+      expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
+    });
+
+    it('hides index stats from detail panels if enableIndexStats===false', async () => {
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          config: { enableIndexStats: false },
+        });
+      });
+      testBed.component.update();
+
+      expect(testBed.actions.overview.indexDetailsContentExists()).toBe(true);
+      expect(testBed.actions.overview.indexStatsContentExists()).toBe(false);
+    });
   });
 
   it('documents tab', async () => {

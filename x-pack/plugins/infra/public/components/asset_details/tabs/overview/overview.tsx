@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,7 +15,7 @@ import {
 } from './metadata_summary/metadata_summary_list';
 import { AlertsSummaryContent } from './alerts';
 import { KPIGrid } from './kpis/kpi_grid';
-import { MetricsGrid, MetricsGridCompact } from './metrics/metrics_grid';
+import { MetricsSection, MetricsSectionCompact } from './metrics/metrics_section';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
 import { useDataViewsProviderContext } from '../../hooks/use_data_views';
@@ -32,18 +32,18 @@ export const Overview = () => {
   } = useMetadataStateProviderContext();
   const { logs, metrics } = useDataViewsProviderContext();
 
-  const parsedDateRange = getParsedDateRange();
+  const parsedDateRange = useMemo(() => getParsedDateRange(), [getParsedDateRange]);
   const isFullPageView = renderMode.mode !== 'flyout';
 
   const metricsSection = isFullPageView ? (
-    <MetricsGrid
+    <MetricsSection
       dateRange={parsedDateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
       assetName={asset.name}
     />
   ) : (
-    <MetricsGridCompact
+    <MetricsSectionCompact
       dateRange={parsedDateRange}
       logsDataView={logs.dataView}
       metricsDataView={metrics.dataView}
@@ -59,7 +59,7 @@ export const Overview = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={asset.name} timeRange={parsedDateRange} dataView={metrics.dataView} />
+        <KPIGrid assetName={asset.name} dateRange={parsedDateRange} dataView={metrics.dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError ? (
