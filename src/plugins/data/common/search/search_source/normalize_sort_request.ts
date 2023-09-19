@@ -10,9 +10,12 @@ import { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EsQuerySortValue } from './types';
 
-type FieldSortOptions = estypes.FieldSort & estypes.ScoreSort & estypes.GeoDistanceSort & Omit<estypes.ScriptSort, 'script'> & {
-  script?: estypes.Script
-};
+type FieldSortOptions = estypes.FieldSort &
+  estypes.ScoreSort &
+  estypes.GeoDistanceSort &
+  Omit<estypes.ScriptSort, 'script'> & {
+    script?: estypes.Script;
+  };
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
@@ -65,7 +68,7 @@ function normalize(
   return {
     [sortField]: {
       ...order,
-      ...(sortField === '_score' ? otherSortOptions : (defaultSortOptions)),
+      ...(sortField === '_score' ? otherSortOptions : defaultSortOptions),
     },
   };
 }
