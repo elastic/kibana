@@ -33,7 +33,7 @@ export const isScheduleNowActionDisabled = (
   // Disable schedule-now for batch transforms which have completed.
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
 
-  // Disable start for transforms if stats does not exist
+  // Disable for transforms if stats does not exist
   const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 
   return (

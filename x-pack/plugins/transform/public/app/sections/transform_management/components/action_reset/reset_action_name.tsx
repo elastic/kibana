@@ -48,7 +48,7 @@ export const getResetActionDisabledMessage = ({
 }) => {
   const isBulkAction = items.length > 1;
 
-  // Disable start for transforms if stats does not exist
+  // Disable for transforms if stats does not exist
   const hasNoStats = items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 
   if (hasNoStats) {
