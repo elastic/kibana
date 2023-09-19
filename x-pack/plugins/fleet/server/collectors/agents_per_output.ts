@@ -33,7 +33,10 @@ export async function getAgentsPerOutput(
     outputs.find((output) => output.attributes.is_default_monitoring)?.id || '';
 
   const outputsById = _.keyBy(outputs, 'id');
-  const getOutputTypeById = (outputId: string): string => outputsById[outputId]?.attributes.type;
+  const getOutputTypeById = (outputId: string): string =>
+    outputsById[outputId]?.attributes.type ??
+    outputs.find((output) => output.attributes.output_id === outputId)?.attributes.type ??
+    'elasticsearch';
 
   const { items } = await agentPolicyService.list(soClient, {
     esClient,

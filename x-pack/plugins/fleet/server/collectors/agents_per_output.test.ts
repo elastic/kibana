@@ -19,6 +19,11 @@ jest.mock('../services', () => {
           { agents: 1, data_output_id: 'logstash1' },
           { agents: 1, monitoring_output_id: 'kafka1' },
           { agents: 1, data_output_id: 'elasticsearch2', monitoring_output_id: 'elasticsearch2' },
+          {
+            agents: 1,
+            data_output_id: 'es-containerhost',
+            monitoring_output_id: 'es-containerhost',
+          },
         ],
       }),
     },
@@ -36,6 +41,7 @@ describe('agents_per_output', () => {
         { id: 'logstash1', attributes: { type: 'logstash' } },
         { id: 'kafka1', attributes: { type: 'kafka' } },
         { id: 'elasticsearch2', attributes: { type: 'elasticsearch' } },
+        { id: '1234', attributes: { output_id: 'es-containerhost', type: 'cloud' } },
       ],
     }),
   } as unknown as SavedObjectsClientContract;
@@ -46,6 +52,7 @@ describe('agents_per_output', () => {
       { output_type: 'elasticsearch', count_as_data: 3, count_as_monitoring: 3 },
       { output_type: 'logstash', count_as_data: 1, count_as_monitoring: 0 },
       { output_type: 'kafka', count_as_data: 0, count_as_monitoring: 1 },
+      { output_type: 'cloud', count_as_data: 1, count_as_monitoring: 1 },
     ]);
   });
 });
