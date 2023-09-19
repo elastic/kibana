@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
   COLLAPSED_ACTION_BTN,
   CUSTOM_RULES_BTN,
@@ -64,6 +65,7 @@ import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
+import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
@@ -515,4 +517,30 @@ const unselectRuleByName = (ruleName: string) => {
   getRuleRow(ruleName).find(EUI_CHECKBOX).uncheck();
   cy.log(`Make sure rule "${ruleName}" has been unselected`);
   getRuleRow(ruleName).find(EUI_CHECKBOX).should('not.be.checked');
+};
+
+/**
+ * Set Kibana `securitySolution:rulesTableRefresh` setting looking like
+ *
+ * ```
+ * { "on": true, "value": 60000 }
+ * ```
+ *
+ * @param enabled whether the auto-refresh is enabled
+ * @param refreshInterval refresh interval in milliseconds
+ */
+export const setRulesTableAutoRefreshIntervalSetting = ({
+  enabled,
+  refreshInterval,
+}: {
+  enabled: boolean;
+  refreshInterval: number; // milliseconds
+}) => {
+  setKibanaSetting(
+    DEFAULT_RULES_TABLE_REFRESH_SETTING,
+    JSON.stringify({
+      on: enabled,
+      value: refreshInterval,
+    })
+  );
 };
