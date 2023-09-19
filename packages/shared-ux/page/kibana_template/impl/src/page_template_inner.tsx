@@ -68,7 +68,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
       // the following props can be removed to allow the template to auto-handle
       // the fixed header and banner heights.
       offset={0}
-      minHeight={header ? "calc(100vh - var(--euiFixedHeadersOffset, 0))" : 0}
+      minHeight={header ? 'calc(100vh - var(--euiFixedHeadersOffset, 0))' : 0}
       grow={rest.grow ?? (header ? false : undefined)}
       {...rest}
     >
