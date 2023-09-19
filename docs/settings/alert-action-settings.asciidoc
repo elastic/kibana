@@ -234,7 +234,7 @@ Specifies the maximum number of actions that can be queued. Default: 1000000
 [[preconfigured-connector-settings]]
 === Preconfigured connector settings
 
-These settings vary depending on which type of <<pre-configured-connectors,preconfigured connector>> you're adding.
+These settings vary depending on which type of preconfigured connector you're adding.
 For example:
 
 [source,yaml]
@@ -244,6 +244,8 @@ xpack.actions.preconfigured:
     name: preconfigured-server-log-connector-type
     actionTypeId: .server-log
 ----------------------------------------
+
+For more examples, go to <<pre-configured-connectors>>.
 
 `xpack.actions.preconfiguredAlertHistoryEsIndex` {ess-icon}::
 Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Default: `false`.
@@ -266,8 +268,16 @@ A configuration URL that varies by connector:
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
 * For an <<opsgenie-action-type,{opsgenie} connector>>, specifies the {opsgenie} URL. For example, `https://api.opsgenie.com` or `https://api.eu.opsgenie.com`.
 * For a <<pagerduty-action-type,PagerDuty connector>>, specifies the PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`.
+* For a <<swimlane-action-type,{swimlane} connector>>, specifies the {swimlane} instance URL.
 
 NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname in the URL is added to the allowed hosts.
+--
+
+`xpack.actions.preconfigured.<connector-id>.config.appId`::
+An application ID that varies by connector:
++
+--
+* For a <<swimlane-action-type,{swimlane} connector>>, specifies a {swimlane} application identifier.
 --
 
 `xpack.actions.preconfigured.<connector-id>.config.clientId`::
@@ -332,6 +342,37 @@ For an <<email-action-type,email connector>>, specifies the host name of the ser
 
 `xpack.actions.preconfigured.<connector-id>.config.index`::
 For an <<index-action-type,index connector>>, specifies the {es} index.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings`::
+For a <<swimlane-action-type,Swimlane connector>>, specifies field mappings.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.alertIdConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the alert identifier.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.caseIdConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case identifier.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.caseNameConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case name.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.commentsConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case comments.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.descriptionConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the case description.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.ruleNameConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, field mapping for the rule name.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
+
+`xpack.actions.preconfigured.<connector-id>.config.mappings.severityConfig`::
+For a <<swimlane-action-type,Swimlane connector>>, specifies a field mapping for the severity.
+You must provide `fieldtype`, `id`, `key`, and `name` values.
 
 `xpack.actions.preconfigured.<connector-id>.config.method`::
 For a <<webhook-action-type,webhook connector>>, specifies the HTTP request method, either `post` or `put`. Defaults to `post`.
@@ -406,7 +447,7 @@ For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication
 For an <<resilient-action-type,{ibm-r} connector>>, specifies the authentication key secret for HTTP basic authentication.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.apiToken`::
-For a <<jira-action-type,Jira connector>>, specifies the API authentication token for HTTP basic authentication.
+For a <<jira-action-type,Jira>> or <<swimlane-action-type,{swimlane} connector>>, specifies the API authentication token for HTTP basic authentication.
 
 `xpack.actions.preconfigured.<connector-id>.secrets.clientSecret`::
 A client secret that varies by connector:
