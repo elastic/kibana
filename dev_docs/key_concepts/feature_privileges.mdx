@@ -188,3 +188,5 @@ Notice, we've added an `options.tags` property for the API route that returns se
 ```
 
 This tells the Kibana RBAC system that users with the role that has `all` access to your plugin can also access the api that is tagged with `my_closed_example_api`. This now secures your API endpoint and will throw a `403 Unauthorized` error to any users who don’t have the right permissions.
+
+We've successfully added access control to your plugin using the Kibana feature privileges.
