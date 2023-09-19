@@ -39,7 +39,7 @@ jest.mock('../services', () => {
           { id: 'logstash1', type: 'logstash' },
           { id: 'kafka1', type: 'kafka' },
           { id: 'elasticsearch2', type: 'elasticsearch' },
-          { id: 'es-containerhost', type: 'cloud' },
+          { id: 'es-containerhost', type: 'elasticsearch' },
         ],
       }),
     },
@@ -52,10 +52,9 @@ describe('agents_per_output', () => {
   it('should return agent count by output type', async () => {
     const res = await getAgentsPerOutput(soClientMock, {} as unknown as ElasticsearchClient);
     expect(res).toEqual([
-      { output_type: 'elasticsearch', count_as_data: 3, count_as_monitoring: 3 },
+      { output_type: 'elasticsearch', count_as_data: 4, count_as_monitoring: 4 },
       { output_type: 'logstash', count_as_data: 1, count_as_monitoring: 0 },
       { output_type: 'kafka', count_as_data: 0, count_as_monitoring: 1 },
-      { output_type: 'cloud', count_as_data: 1, count_as_monitoring: 1 },
     ]);
   });
 });
