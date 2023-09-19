@@ -192,7 +192,7 @@ export const INDEX_FIELD_LABEL = i18n.translate(
 export const DATA_VIEW_ID_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.dataViewIdFieldLabel',
   {
-    defaultMessage: 'Data view',
+    defaultMessage: 'Data view ID',
   }
 );
 
