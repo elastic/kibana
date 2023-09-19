@@ -55,6 +55,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
+    priority: 80,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -92,6 +93,7 @@ export function registerApmRuleTypes(
     ),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
+    priority: 60,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -124,6 +126,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
+    priority: 70,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -153,5 +156,6 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
+    priority: 90,
   });
 }

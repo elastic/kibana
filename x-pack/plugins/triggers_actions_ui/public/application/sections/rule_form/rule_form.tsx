@@ -71,7 +71,11 @@ import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
-import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
+import {
+  ruleTypeCompare,
+  ruleTypeGroupCompare,
+  ruleTypeUngroupedCompare,
+} from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
@@ -94,13 +98,14 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   actionTypeRegistry: ActionTypeRegistryContract;
   operation: string;
   canChangeTrigger?: boolean; // to hide Change trigger button
+  connectorFeatureId?: string;
+  filteredRuleTypes?: string[];
+  hideGrouping?: boolean;
+  hideInterval?: boolean;
+  metadata?: MetaData;
+  onChangeMetaData: (metadata: MetaData) => void;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
-  metadata?: MetaData;
-  filteredRuleTypes?: string[];
-  hideInterval?: boolean;
-  connectorFeatureId?: string;
-  onChangeMetaData: (metadata: MetaData) => void;
 }
 
 export const RuleForm = ({
@@ -116,6 +121,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
   onChangeMetaData,
@@ -369,81 +375,89 @@ export const RuleForm = ({
     {}
   );
 
-  const ruleTypeNodes = Object.entries(ruleTypesByProducer)
-    .sort((a, b) => ruleTypeGroupCompare(a, b, solutions))
-    .map(([solution, items], groupIndex) => (
-      <Fragment key={`group${groupIndex}`}>
-        <EuiFlexGroup
-          gutterSize="none"
-          alignItems="center"
-          className="triggersActionsUI__ruleTypeNodeHeading"
-        >
-          <EuiFlexItem>
-            <EuiTitle
-              data-test-subj={`ruleType${groupIndex}Group`}
-              size="xxxs"
-              textTransform="uppercase"
-            >
-              <EuiTextColor color="subdued">
-                {(kibanaFeatures
-                  ? getProducerFeatureName(solution, kibanaFeatures)
-                  : capitalize(solution)) ?? capitalize(solution)}
-              </EuiTextColor>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
-          {items
-            .sort((a, b) => ruleTypeCompare(a, b))
-            .map((item, index) => {
-              const ruleTypeListItemHtml = (
-                <span>
-                  <strong>{item.name}</strong>
-                  <EuiText color="subdued" size="s">
-                    <p>{item.ruleTypeItem.description}</p>
-                  </EuiText>
-                </span>
-              );
-              return (
-                <EuiListGroupItem
-                  wrapText
-                  key={index}
-                  data-test-subj={`${item.id}-SelectOption`}
-                  color="primary"
-                  label={
-                    item.checkEnabledResult.isEnabled ? (
-                      ruleTypeListItemHtml
-                    ) : (
-                      <EuiToolTip
-                        position="top"
-                        data-test-subj={`${item.id}-disabledTooltip`}
-                        content={item.checkEnabledResult.message}
-                      >
-                        {ruleTypeListItemHtml}
-                      </EuiToolTip>
-                    )
+  const sortedRuleTypeNodes = hideGrouping
+    ? Object.entries(ruleTypesByProducer).sort((a, b) =>
+        ruleTypeUngroupedCompare(a, b, ruleTypeToFilter)
+      )
+    : Object.entries(ruleTypesByProducer).sort((a, b) => ruleTypeGroupCompare(a, b, solutions));
+
+  const ruleTypeNodes = sortedRuleTypeNodes.map(([solution, items], groupIndex) => (
+    <Fragment key={`group${groupIndex}`}>
+      {!hideGrouping && (
+        <>
+          <EuiFlexGroup
+            gutterSize="none"
+            alignItems="center"
+            className="triggersActionsUI__ruleTypeNodeHeading"
+          >
+            <EuiFlexItem>
+              <EuiTitle
+                data-test-subj={`ruleType${groupIndex}Group`}
+                size="xxxs"
+                textTransform="uppercase"
+              >
+                <EuiTextColor color="subdued">
+                  {(kibanaFeatures
+                    ? getProducerFeatureName(solution, kibanaFeatures)
+                    : capitalize(solution)) ?? capitalize(solution)}
+                </EuiTextColor>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule size="full" margin="xs" />
+        </>
+      )}
+      <EuiListGroup flush={true} gutterSize="m" size="m" maxWidth={false}>
+        {items
+          .sort((a, b) => ruleTypeCompare(a, b))
+          .map((item, index) => {
+            const ruleTypeListItemHtml = (
+              <span>
+                <strong>{item.name}</strong>
+                <EuiText color="subdued" size="s">
+                  <p>{item.ruleTypeItem.description}</p>
+                </EuiText>
+              </span>
+            );
+            return (
+              <EuiListGroupItem
+                wrapText
+                key={index}
+                data-test-subj={`${item.id}-SelectOption`}
+                color="primary"
+                label={
+                  item.checkEnabledResult.isEnabled ? (
+                    ruleTypeListItemHtml
+                  ) : (
+                    <EuiToolTip
+                      position="top"
+                      data-test-subj={`${item.id}-disabledTooltip`}
+                      content={item.checkEnabledResult.message}
+                    >
+                      {ruleTypeListItemHtml}
+                    </EuiToolTip>
+                  )
+                }
+                isDisabled={!item.checkEnabledResult.isEnabled}
+                onClick={() => {
+                  setRuleProperty('ruleTypeId', item.id);
+                  setRuleTypeModel(item.ruleTypeItem);
+                  setActions([]);
+                  setRuleProperty('params', {});
+                  if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
+                    setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
                   }
-                  isDisabled={!item.checkEnabledResult.isEnabled}
-                  onClick={() => {
-                    setRuleProperty('ruleTypeId', item.id);
-                    setRuleTypeModel(item.ruleTypeItem);
-                    setActions([]);
-                    setRuleProperty('params', {});
-                    if (ruleTypeIndex && ruleTypeIndex.has(item.id)) {
-                      setDefaultActionGroupId(ruleTypeIndex.get(item.id)!.defaultActionGroupId);
-                    }
-                  }}
-                />
-              );
-            })}
-        </EuiListGroup>
-        <EuiSpacer />
-      </Fragment>
-    ));
+                }}
+              />
+            );
+          })}
+      </EuiListGroup>
+      <EuiSpacer size="m" />
+    </Fragment>
+  ));
 
   const labelForRuleChecked = [
     i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkFieldLabel', {
