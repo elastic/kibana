@@ -56,6 +56,7 @@ const defaultClusterValues: Cluster = {
   proxyAddress: '',
   proxySocketConnections: 18,
   serverName: '',
+  securityModel: 'certificate',
 };
 
 const ERROR_TITLE_ID = 'removeClustersErrorTitle';
@@ -181,6 +182,7 @@ export class RemoteClusterForm extends Component<Props, State> {
       skipUnavailable,
       mode,
       hasDeprecatedProxySetting: cluster?.hasDeprecatedProxySetting,
+      securityModel: 'certificate',
       ...modeSettings,
     };
   }

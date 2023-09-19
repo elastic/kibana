@@ -66,7 +66,7 @@ describe('Edit Remote cluster', () => {
   test('should populate the form fields with the values from the remote cluster loaded', () => {
     expect(actions.nameInput.getValue()).toBe(REMOTE_CLUSTER_EDIT_NAME);
     // seeds input for sniff connection is not shown on Cloud
-    expect(actions.seedsInput.getValue()).toBe(REMOTE_CLUSTER_EDIT.seeds.join(''));
+    expect(actions.seedsInput.getValue()).toBe(REMOTE_CLUSTER_EDIT.seeds?.join(''));
     expect(actions.skipUnavailableSwitch.isChecked()).toBe(REMOTE_CLUSTER_EDIT.skipUnavailable);
   });
 
@@ -83,6 +83,7 @@ describe('Edit Remote cluster', () => {
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:${defaultCloudPort}`,
         serverName: cloudUrl,
+        securityModel: 'certificate',
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
@@ -101,6 +102,7 @@ describe('Edit Remote cluster', () => {
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:9500`,
         serverName: cloudUrl,
+        securityModel: 'certificate',
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
@@ -121,6 +123,7 @@ describe('Edit Remote cluster', () => {
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:${defaultCloudPort}`,
         serverName: 'another-value',
+        securityModel: 'certificate',
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
