@@ -39792,7 +39792,6 @@
     "visTypeTagCloud.visParams.showLabelToggleLabel": "显示标签",
     "visTypeTagCloud.visParams.textScaleLabel": "文本比例",
     "xpack.cloudChat.chatFrameTitle": "聊天",
-    "xpack.cloudChat.hideChatButtonLabel": "隐藏聊天",
     "xpack.cloudDataMigration.breadcrumb.label": "迁移到 Elastic Cloud",
     "xpack.cloudDataMigration.deployInSeconds.text": "在数分钟内部署并扩展安全的 Elastic Stack",
     "xpack.cloudDataMigration.helpMenuMoveDataTitle": "转移数据到 Elastic Cloud",
