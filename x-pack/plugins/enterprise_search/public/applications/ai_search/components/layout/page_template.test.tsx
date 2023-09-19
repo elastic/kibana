@@ -46,7 +46,9 @@ describe('EnterpriseSearchAISearchPageTemplate', () => {
 
   describe('page telemetry', () => {
     it('takes a metric & renders product-specific telemetry viewed event', () => {
-      const wrapper = shallow(<EnterpriseSearchAISearchPageTemplate pageViewTelemetry="some_page" />);
+      const wrapper = shallow(
+        <EnterpriseSearchAISearchPageTemplate pageViewTelemetry="some_page" />
+      );
 
       expect(wrapper.find(SendEnterpriseSearchTelemetry).prop('action')).toEqual('viewed');
       expect(wrapper.find(SendEnterpriseSearchTelemetry).prop('metric')).toEqual('some_page');
