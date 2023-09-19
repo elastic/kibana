@@ -32,7 +32,7 @@ export JOB=kibana-security-solution-chrome
 
 echo "--- Serverless Security Solution Cypress tests (Chrome)"
 cd x-pack/test/security_solution_cypress
-
+mkdir -p ../../../target/kibana-security-solution/cypress/results/
 set +e
 
 CYPRESS_ELASTICSEARCH_URL=$TEST_ENV_ES_URL CYPRESS_BASE_URL=$TEST_ENV_KB_URL CYPRESS_ELASTICSEARCH_USERNAME=$TEST_ENV_USERNAME CYPRESS_ELASTICSEARCH_PASSWORD=$TEST_ENV_PWD CYPRESS_KIBANA_URL=$CYPRESS_BASE_URL yarn cypress:run:cloud:serverless; status=$?; yarn junit:merge || :; exit $status

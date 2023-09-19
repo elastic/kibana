@@ -22,7 +22,7 @@ import { login, visitWithoutDateRange } from '../../../../tasks/login';
 import { EXCEPTIONS_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539 Do we need to run it in Serverless?
-describe('Shared exception lists - read only', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('Shared exception lists - read only', { tags: ['@ess', '@ignoreInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
   });

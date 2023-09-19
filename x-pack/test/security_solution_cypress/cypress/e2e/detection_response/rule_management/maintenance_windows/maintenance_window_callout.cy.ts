@@ -15,7 +15,7 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Maintenance window callout on Rule Management page',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
   () => {
     let maintenanceWindowId = '';
 

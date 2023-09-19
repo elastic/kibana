@@ -102,7 +102,7 @@ function expectDefaultRulesTableState(): void {
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Rules table: persistent state',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
   () => {
     before(() => {
       cleanKibana();

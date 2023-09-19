@@ -30,7 +30,7 @@ import { getNewRule } from '../../../../objects/rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161540
 // Flaky in serverless tests
-describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@ignoreInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

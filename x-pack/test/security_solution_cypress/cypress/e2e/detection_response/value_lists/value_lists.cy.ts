@@ -37,7 +37,7 @@ const CIDRS_LIST_FILE_NAME = 'cidr_list.txt';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 // FLAKY: https://github.com/elastic/kibana/issues/165699
-describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('value lists', { tags: ['@ess', '@serverless', '@ignoreInServerless'] }, () => {
   // TODO: https://github.com/elastic/kibana/issues/161539
   describe('management modal', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
     beforeEach(() => {
@@ -268,7 +268,7 @@ describe('value lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, 
   // TODO: https://github.com/elastic/kibana/issues/161539
   describe(
     'user with restricted access role',
-    { tags: ['@ess', '@serverless', '@skipInServerless'] },
+    { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
     () => {
       it('Does not allow a t1 analyst user to upload a value list', () => {
         login(ROLES.t1_analyst);

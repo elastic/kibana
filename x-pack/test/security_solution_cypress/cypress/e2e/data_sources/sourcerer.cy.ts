@@ -36,7 +36,7 @@ const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kibana*,fakebeat-*'];
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe('Sourcerer', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Sourcerer', { tags: ['@ess', '@serverless', '@ignoreInServerless'] }, () => {
   before(() => {
     cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));

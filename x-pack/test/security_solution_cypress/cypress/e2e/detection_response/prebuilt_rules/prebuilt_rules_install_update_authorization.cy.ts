@@ -59,7 +59,7 @@ const loadPageAsReadOnlyUser = (url: string) => {
 // TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, Prebuilt Rules Installation and Update - Authorization/RBAC',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
   () => {
     beforeEach(() => {
       login();

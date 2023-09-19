@@ -44,7 +44,7 @@ const EXCEPTION_LIST_NAME = 'Newly created list';
 // FLAKY: https://github.com/elastic/kibana/issues/165640
 describe(
   'Exception list detail page',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
   () => {
     before(() => {
       cy.task('esArchiverResetKibana');

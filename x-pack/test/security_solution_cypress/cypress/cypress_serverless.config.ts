@@ -25,7 +25,7 @@ export default defineCypressConfig({
   numTestsKeptInMemory: 10,
   env: {
     grepFilterSpecs: true,
-    grepTags: '@serverless --@brokenInServerless --@skipInServerless',
+    grepTags: '@serverless --@brokenInServerless --@ignoreInServerless',
   },
   // reporter: '../../../node_modules/@reportportal/agent-js-cypress',
   // reporterOptions: {

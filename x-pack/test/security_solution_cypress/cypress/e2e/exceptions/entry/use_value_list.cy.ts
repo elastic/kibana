@@ -47,7 +47,7 @@ const goToRulesAndOpenValueListModal = () => {
 // Flaky on serverless
 describe(
   'Use Value list in exception entry',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
   () => {
     beforeEach(() => {
       cleanKibana();

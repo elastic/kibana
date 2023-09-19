@@ -37,7 +37,7 @@ const RULE_2 = createRuleAssetSavedObject({
 // FLAKY: https://github.com/elastic/kibana/issues/165643
 describe.skip(
   'Rules table: selection',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@ignoreInServerless'] },
   () => {
     before(() => {
       cleanKibana();
