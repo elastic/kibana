@@ -30,6 +30,7 @@ export interface EmbeddableOutput {
   title?: string;
   description?: string;
   editable?: boolean;
+  // set this to true if the embeddable allows inline editing
   inlineEditable?: boolean;
   // Whether the embeddable can be edited inline by re-requesting the explicit input from the user
   editableWithExplicitInput?: boolean;

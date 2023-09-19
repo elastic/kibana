@@ -263,7 +263,7 @@ export function LensEditConfigurationFlyout({
   return (
     <>
       {displayFlyoutHeader && (
-        <EuiFlyoutHeader hasBorder>
+        <EuiFlyoutHeader hasBorder data-test-subj="editFlyoutHeader">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs">

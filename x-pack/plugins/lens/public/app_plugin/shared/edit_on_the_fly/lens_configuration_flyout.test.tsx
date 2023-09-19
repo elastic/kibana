@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { mountWithProvider } from '../../../mocks';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -122,6 +122,20 @@ describe('LensEditConfigurationFlyout', () => {
     } as unknown as EditConfigPanelProps;
   }
 
+  it('should display the header and the link to editor if necessary props are given', async () => {
+    const navigateToLensEditorSpy = jest.fn();
+    const props = getDefaultProps();
+    const newProps = {
+      ...props,
+      displayFlyoutHeader: true,
+      navigateToLensEditor: navigateToLensEditorSpy,
+    };
+    const { instance } = await prepareAndMountComponent(newProps);
+    expect(instance.find(EuiFlyoutHeader).exists()).toBe(true);
+    instance.find('[data-test-subj="navigateToLensEditorLink"]').at(1).simulate('click');
+    expect(navigateToLensEditorSpy).toHaveBeenCalled();
+  });
+
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
     const props = getDefaultProps();
@@ -133,6 +147,37 @@ describe('LensEditConfigurationFlyout', () => {
     expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
     instance.find('[data-test-subj="cancelFlyoutButton"]').at(1).simulate('click');
     expect(closeFlyoutSpy).toHaveBeenCalled();
+  });
+
+  it('should call the updateByRefInput callback if cancel button is clicked and savedObjectId exists', async () => {
+    const updateByRefInputSpy = jest.fn();
+    const props = getDefaultProps();
+    const newProps = {
+      ...props,
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+    };
+    const { instance } = await prepareAndMountComponent(newProps);
+    instance.find('[data-test-subj="cancelFlyoutButton"]').at(1).simulate('click');
+    expect(updateByRefInputSpy).toHaveBeenCalled();
+  });
+
+  it('should call the saveByRef callback if apply button is clicked and savedObjectId exists', async () => {
+    const updateByRefInputSpy = jest.fn();
+    const saveByRefSpy = jest.fn();
+    const props = getDefaultProps();
+    const newProps = {
+      ...props,
+      closeFlyout: jest.fn(),
+      updateByRefInput: updateByRefInputSpy,
+      savedObjectId: 'id',
+      saveByRef: saveByRefSpy,
+    };
+    const { instance } = await prepareAndMountComponent(newProps);
+    instance.find('[data-test-subj="applyFlyoutButton"]').at(2).simulate('click');
+    expect(updateByRefInputSpy).toHaveBeenCalled();
+    expect(saveByRefSpy).toHaveBeenCalled();
   });
 
   it('should compute the frame public api correctly', async () => {
