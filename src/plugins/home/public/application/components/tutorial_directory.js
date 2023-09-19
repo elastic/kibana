@@ -256,7 +256,6 @@ class TutorialDirectoryUi extends React.Component {
           tabs,
           rightSideItems: headerLinks ? [headerLinks] : [],
         }}
-        minHeight={'460px'}
       >
         <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
       </KibanaPageTemplate>
