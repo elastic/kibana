@@ -175,6 +175,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         // @ts-expect-error doesn't handle total: number
         const value = searchResult.hits.total.value?.value || searchResult.hits.total.value;
         if (value < numDocs) {
+          // @ts-expect-error doesn't handle total: number
           throw new Error(`Expected ${numDocs} but received ${searchResult.hits.total.value}.`);
         }
         return searchResult.hits.hits;

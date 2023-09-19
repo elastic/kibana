@@ -13,6 +13,7 @@ import {
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
+  RecoveredActionGroupId,
 } from '@kbn/alerting-plugin/common';
 import { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { ALERT_NAMESPACE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
@@ -37,6 +38,19 @@ export type AnomalyDetectionAlertBaseContext = AlertInstanceContext & {
   jobIds: string[];
   anomalyExplorerUrl: string;
   message: string;
+};
+
+// Flattened alert payload for alert-as-data
+export type AnomalyDetectionAlertPayload = {
+  job_id: string;
+  anomaly_score?: number;
+  is_interim?: boolean;
+  anomaly_timestamp?: number;
+  top_records?: any;
+  top_influencers?: any;
+} & {
+  [ALERT_URL]: string;
+  [ALERT_REASON]: string;
 };
 
 export type AnomalyDetectionAlertContext = AnomalyDetectionAlertBaseContext & {
@@ -148,7 +162,7 @@ export function registerAnomalyDetectionAlertType({
     AlertInstanceState,
     AnomalyDetectionAlertContext,
     AnomalyScoreMatchGroupId,
-    'recovered',
+    RecoveredActionGroupId,
     MlAnomalyDetectionAlert
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
@@ -241,7 +255,7 @@ export function registerAnomalyDetectionAlertType({
 
       if (!executionResult) return { state: {} };
 
-      const { isHealthy, name, context } = executionResult;
+      const { isHealthy, name, context, payload } = executionResult;
 
       if (!isHealthy) {
         alertsClient.report({
@@ -249,14 +263,14 @@ export function registerAnomalyDetectionAlertType({
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
           context,
           payload: expandFlattenedAlert({
-            [ALERT_URL]: context.anomalyExplorerUrl,
-            [ALERT_REASON]: context.message,
-            [ALERT_ANOMALY_DETECTION_JOB_ID]: context.jobIds[0],
-            [ALERT_ANOMALY_SCORE]: context.score,
-            [ALERT_ANOMALY_IS_INTERIM]: context.isInterim,
-            [ALERT_ANOMALY_TIMESTAMP]: context.timestamp,
-            [ALERT_TOP_RECORDS]: context.topRecords,
-            [ALERT_TOP_INFLUENCERS]: context.topInfluencers,
+            [ALERT_URL]: payload[ALERT_URL],
+            [ALERT_REASON]: payload[ALERT_REASON],
+            [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
+            [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
+            [ALERT_ANOMALY_IS_INTERIM]: payload.is_interim,
+            [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
+            [ALERT_TOP_RECORDS]: payload.top_records,
+            [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
           }),
         });
       }
@@ -269,9 +283,9 @@ export function registerAnomalyDetectionAlertType({
             id: alertId,
             context,
             payload: expandFlattenedAlert({
-              [ALERT_URL]: context.anomalyExplorerUrl,
-              [ALERT_REASON]: context.message,
-              [ALERT_ANOMALY_DETECTION_JOB_ID]: context.jobIds[0],
+              [ALERT_URL]: payload[ALERT_URL],
+              [ALERT_REASON]: payload[ALERT_REASON],
+              [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
             }),
           });
         }
