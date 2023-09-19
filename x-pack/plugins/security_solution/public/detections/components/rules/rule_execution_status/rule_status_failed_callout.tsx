@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -62,14 +62,19 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
-        <NewChat
-          category="detection-rules"
-          conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-          description={"Rule's execution failure message"}
-          getPromptContext={getPromptContext}
-          suggestedUserPrompt={'Can you explain this rule execution error and steps to fix?'}
-          tooltip={'Add this rule execution error as context'}
-        />
+        <EuiButton color={color} size="s">
+          <NewChat
+            category="detection-rules"
+            color={color}
+            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+            description={"Rule's execution failure message"}
+            getPromptContext={getPromptContext}
+            suggestedUserPrompt={'Can you explain this rule execution error and steps to fix?'}
+            tooltip={'Add this rule execution error as context'}
+          >
+            {'Ask Assistant'}
+          </NewChat>
+        </EuiButton>
       </EuiCallOut>
     </div>
   );
