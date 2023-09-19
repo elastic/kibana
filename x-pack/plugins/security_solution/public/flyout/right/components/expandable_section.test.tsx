@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CONTENT_TEST_ID, ExpandableSection, HEADER_TEST_ID } from './expandable_section';
 
-const title = 'title';
+const title = <p>{'title'}</p>;
 const children = <div>{'content'}</div>;
 const testId = 'test';
 const headerTestId = testId + HEADER_TEST_ID;

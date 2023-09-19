@@ -5,44 +5,39 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID } from '@kbn/management-settings-ids';
+import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from '../common';
 
 const ADVANCED_SETTINGS = {
   DISCOVER_SQL: 'discover:enableSql',
 };
 
-const kibanaSettings = (body: Cypress.RequestBody) => {
+export const setKibanaSetting = (key: string, value: boolean | number | string) => {
   rootRequest({
     method: 'POST',
     url: 'internal/kibana/settings',
-    body,
+    body: { changes: { [key]: value } },
     headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 
-const relatedIntegrationsBody = (status: boolean): Cypress.RequestBody => {
-  return { changes: { 'securitySolution:showRelatedIntegrations': status } };
-};
-
 export const enableRelatedIntegrations = () => {
-  kibanaSettings(relatedIntegrationsBody(true));
+  setKibanaSetting(SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID, true);
 };
 
 export const disableRelatedIntegrations = () => {
-  kibanaSettings(relatedIntegrationsBody(false));
+  setKibanaSetting(SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID, false);
 };
 
 export const disableExpandableFlyout = () => {
-  const body = { changes: { 'securitySolution:enableExpandableFlyout': false } };
-  kibanaSettings(body);
+  setKibanaSetting(ENABLE_EXPANDABLE_FLYOUT_SETTING, false);
 };
 
 export const enableDiscoverSQL = () => {
-  const body = { changes: { [ADVANCED_SETTINGS.DISCOVER_SQL]: true } };
-  kibanaSettings(body);
+  setKibanaSetting(ADVANCED_SETTINGS.DISCOVER_SQL, true);
 };
 
 export const disableDiscoverSQL = () => {
-  const body = { changes: { [ADVANCED_SETTINGS.DISCOVER_SQL]: false } };
-  kibanaSettings(body);
+  setKibanaSetting(ADVANCED_SETTINGS.DISCOVER_SQL, false);
 };
