@@ -171,6 +171,8 @@ export interface DataStreamMeta {
   };
 }
 
+const PROVIDER_REGEX = /\$\{.+\}/;
+
 export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: string = '*') {
   let index = dataStream.hidden ? `.${dataStream.type}-` : `${dataStream.type}-`;
 
@@ -184,7 +186,7 @@ export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: s
   }
 
   // Determine namespace
-  if (dataStream.elasticsearch?.dynamic_namespace) {
+  if (PROVIDER_REGEX.test(namespace) || dataStream.elasticsearch?.dynamic_namespace) {
     index += `-*`;
   } else {
     index += `-${namespace}`;
