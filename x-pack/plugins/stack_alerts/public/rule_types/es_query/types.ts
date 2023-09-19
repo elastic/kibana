@@ -27,7 +27,7 @@ export interface CommonRuleParams {
   aggField?: string;
   groupBy?: string;
   termSize?: number;
-  termField?: string;
+  termField?: string | string[];
   excludeHitsFromPreviousRun: boolean;
 }
 
