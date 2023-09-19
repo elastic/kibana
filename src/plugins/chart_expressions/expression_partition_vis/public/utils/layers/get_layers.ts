@@ -137,12 +137,12 @@ function getColorFromMappingFactory(
     // return undefined, we will use the legacy color mapping instead
     return undefined;
   }
-  // if pie/donut/treemap multimetric or has no buckets use the default color mode
+  // if pie/donut/treemap with no buckets use the default color mode
   if (
     (chartType === ChartTypes.DONUT ||
       chartType === ChartTypes.PIE ||
       chartType === ChartTypes.TREEMAP) &&
-    (!dimensions.buckets || dimensions.buckets?.length === 0 || dimensions.metrics.length > 1)
+    (!dimensions.buckets || dimensions.buckets?.length === 0)
   ) {
     return undefined;
   }
