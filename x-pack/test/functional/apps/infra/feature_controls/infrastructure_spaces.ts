@@ -20,6 +20,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+
+
+
+
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
