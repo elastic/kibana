@@ -83,7 +83,9 @@ import type {
 } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
-import { fleetDeepLinks } from './deep_links';
+import type { RequestError } from './hooks';
+import { sendGetBulkAssets } from './hooks';
+import { getFleetDeepLinks } from './deep_links';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -220,7 +222,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9020,
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
-      deepLinks: fleetDeepLinks,
+      deepLinks: getFleetDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const cloud =
