@@ -199,12 +199,15 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
                 defaultMessage="Agent has been updating for a while, and may be stuck. Consider restarting the upgrade. {learnMore}"
                 values={{
                   learnMore: (
-                    <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                      <FormattedMessage
-                        id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
-                        defaultMessage="Learn more"
-                      />
-                    </EuiLink>
+                    <div>
+                      {' '}
+                      <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                        <FormattedMessage
+                          id="xpack.fleet.agentHealth.upgradeAgentsDocLink"
+                          defaultMessage="Learn more"
+                        />
+                      </EuiLink>
+                    </div>
                   ),
                 }}
               />
