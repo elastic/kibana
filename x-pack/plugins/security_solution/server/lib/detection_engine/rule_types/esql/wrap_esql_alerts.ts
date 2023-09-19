@@ -7,8 +7,7 @@
 
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
-
-import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   BaseFieldsLatest,
@@ -19,9 +18,6 @@ import type { CompleteRule, EsqlRuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
-import type { EsqlTable } from './esql_request';
-import { rowToDocument } from './utils';
-
 import type { SignalSource } from '../types';
 
 export const wrapEsqlAlerts = ({
@@ -33,8 +29,12 @@ export const wrapEsqlAlerts = ({
   ruleExecutionLogger,
   publicBaseUrl,
   tuple,
+  sourceDocuments,
+  isRuleAggregating,
 }: {
-  results: EsqlTable;
+  isRuleAggregating: boolean;
+  sourceDocuments: Record<string, { fields: estypes.SearchHit['fields'] }>;
+  results: Array<Record<string, string | null>>;
   spaceId: string | null | undefined;
   completeRule: CompleteRule<EsqlRuleParams>;
   mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -47,60 +47,56 @@ export const wrapEsqlAlerts = ({
     maxSignals: number;
   };
 }): Array<WrappedFieldsLatest<BaseFieldsLatest>> => {
-  const wrapped = results.values
-    .slice(0, completeRule.ruleParams.maxSignals)
-    .map<WrappedFieldsLatest<BaseFieldsLatest>>((row, i) => {
-      const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
-      const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
+  const wrapped = results.map<WrappedFieldsLatest<BaseFieldsLatest>>((document, i) => {
+    const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
 
-      const document = rowToDocument(results.columns, row);
+    // for aggregating rules when metadata _id is present, generate alert based on ES document event id
+    const id =
+      !isRuleAggregating && document._id
+        ? objectHash([
+            document._id,
+            document._version,
+            document._index,
+            `${spaceId}:${completeRule.alertId}`,
+          ])
+        : objectHash([
+            ruleRunId,
+            completeRule.ruleParams.query,
+            `${spaceId}:${completeRule.alertId}`,
+            i,
+          ]);
 
-      // for aggregating rules when metadata _id is present, generate alert based on ES document event id
-      const id =
-        !isRuleAggregating && document._id
-          ? objectHash([
-              document._id,
-              document._version,
-              document._index,
-              `${spaceId}:${completeRule.alertId}`,
-            ])
-          : objectHash([
-              ruleRunId,
-              completeRule.ruleParams.query,
-              `${spaceId}:${completeRule.alertId}`,
-              i,
-            ]);
+    // metadata fields need to be excluded from source, otherwise alerts creation fails
+    const { _id, _version, _index, ...source } = document;
 
-      // metadata fields need to be excluded from source, otherwise alerts creation fails
-      const { _id, _version, _index, ...source } = document;
-
-      const baseAlert: BaseFieldsLatest = buildBulkBody(
-        spaceId,
-        completeRule,
-        {
-          _source: source as SignalSource,
-          _id: _id ?? '',
-          _index: _index ?? '',
-        },
-        mergeStrategy,
-        [],
-        true,
-        buildReasonMessageForNewTermsAlert,
-        [],
-        alertTimestampOverride,
-        ruleExecutionLogger,
-        id,
-        publicBaseUrl
-      );
-
-      return {
-        _id: id,
+    const baseAlert: BaseFieldsLatest = buildBulkBody(
+      spaceId,
+      completeRule,
+      {
+        _source: source as SignalSource,
+        fields: _id ? sourceDocuments[_id]?.fields : undefined,
+        _id: _id ?? '',
         _index: _index ?? '',
-        _source: {
-          ...baseAlert,
-        },
-      };
-    });
+      },
+      mergeStrategy,
+      [],
+      true,
+      buildReasonMessageForNewTermsAlert,
+      [],
+      alertTimestampOverride,
+      ruleExecutionLogger,
+      id,
+      publicBaseUrl
+    );
+
+    return {
+      _id: id,
+      _index: _index ?? '',
+      _source: {
+        ...baseAlert,
+      },
+    };
+  });
 
   return wrapped;
 };

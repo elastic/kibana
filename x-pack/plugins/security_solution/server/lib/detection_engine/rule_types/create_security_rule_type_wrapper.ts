@@ -11,12 +11,12 @@ import agent from 'elastic-apm-node';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import {
   checkPrivilegesFromEsClient,
@@ -219,9 +219,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
            * Esql rules has index in query, which can be retrieved
            */
           if (isEsqlParams(params)) {
-            inputIndex = getIndexPatternFromESQLQuery(params.query)
-              .split(',')
-              .map((index) => index.trim());
+            inputIndex = getIndexListFromEsqlQuery(params.query);
           } else if (!isMachineLearningParams(params)) {
             try {
               const { index, runtimeMappings: dataViewRuntimeMappings } = await getInputIndex({

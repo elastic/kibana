@@ -12,10 +12,16 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 
+import {
+  computeIsESQLQueryAggregating,
+  getIndexListFromEsqlQuery,
+} from '@kbn/securitysolution-utils';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { createEnrichEventsFunction } from '../utils/enrichments';
+import { rowToDocument } from './utils';
+import { fetchSourceDocuments } from './fetch_source_documents';
 
 import type { RunOpts } from '../types';
 
@@ -87,8 +93,24 @@ export const esqlExecutor = async ({
 
     ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
 
+    const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
+    const results = response.values
+      .slice(0, completeRule.ruleParams.maxSignals)
+      .map((row) => rowToDocument(response.columns, row));
+
+    const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
+
+    const sourceDocuments = await fetchSourceDocuments({
+      esClient: services.scopedClusterClient.asCurrentUser,
+      results,
+      index,
+      isRuleAggregating,
+    });
+
     const wrappedAlerts = wrapEsqlAlerts({
-      results: response,
+      sourceDocuments,
+      isRuleAggregating,
+      results,
       spaceId,
       completeRule,
       mergeStrategy,

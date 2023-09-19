@@ -122,6 +122,56 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts.length).toBe(3);
     });
 
+    describe('non-aggregating query rules', () => {
+      it('should add source document to alert', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = {
+          agent: { name: 'test-1', version: '2', type: 'auditbeat' },
+          host: { name: 'my-host' },
+          client: { ip: '127.0.0.1' },
+        };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getEsqlRulesSchemaMock('rule-1', true),
+          // only _id and agent.name is projected at the end of query pipeline
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(id)} | keep _id, agent.name`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({
+          documents: [doc1],
+          interval,
+          id,
+        });
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        console.log('LOGS', JSON.stringify(logs, null, 2));
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        // all fields from source document should be returned
+        expect(previewAlerts[0]._source).toEqual(
+          expect.objectContaining({
+            'agent.name': 'test-1',
+            agent: { version: '2', type: 'auditbeat' },
+            host: { name: 'my-host' },
+            client: { ip: '127.0.0.1' },
+          })
+        );
+      });
+    });
+
     describe('esql query specific syntax', () => {
       it('should return only specified in query fields', async () => {
         const id = uuidv4();

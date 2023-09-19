@@ -614,7 +614,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () =>
       ({
         idAria: 'detectionEngineStepDefineRuleQueryBar',
-        // for ES|QL rule index pattern property does not exist
         indexPattern,
         isDisabled: isLoading,
         isLoading,

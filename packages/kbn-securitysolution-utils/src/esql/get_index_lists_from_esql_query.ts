@@ -5,6 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 
-export * from './compute_if_esql_query_aggregating';
-export * from './get_index_lists_from_esql_query';
+/**
+ * parses ES|QL query and returns array of indices
+ */
+export const getIndexListFromEsqlQuery = (query: string): string[] =>
+  getIndexPatternFromESQLQuery(query)
+    .split(',')
+    .map((index) => index.trim());
