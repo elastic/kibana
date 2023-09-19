@@ -80,12 +80,12 @@ export const NodeContextPopover = ({
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId: node.id,
+      assetType: nodeType,
+      assetId: node.id,
       search: {
         from: nodeDetailFrom,
         to: currentTime,
-        assetName: node.name,
+        name: node.name,
       },
     }),
   });
@@ -148,7 +148,12 @@ export const NodeContextPopover = ({
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon size="s" onClick={onClose} iconType="cross" />
+                    <EuiButtonIcon
+                      data-test-subj="infraNodeContextPopoverButton"
+                      size="s"
+                      onClick={onClose}
+                      iconType="cross"
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

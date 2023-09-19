@@ -11,6 +11,8 @@ import { createAgentDoc } from '../tasks/agents';
 import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
+import { API_VERSIONS } from '../../common/constants';
+
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
 function cleanUp() {
@@ -28,7 +30,7 @@ describe('Fleet add agent flyout', () => {
       cy.request({
         method: 'POST',
         url: '/api/fleet/agent_policies',
-        headers: { 'kbn-xsrf': 'xx' },
+        headers: { 'kbn-xsrf': 'xx', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
         body: {
           id: FLEET_SERVER_POLICY_ID,
           name: 'Fleet Server policy',

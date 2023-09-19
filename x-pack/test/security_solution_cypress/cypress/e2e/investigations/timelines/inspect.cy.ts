@@ -13,7 +13,8 @@ import { executeTimelineKQL, openTimelineInspectButton } from '../../../tasks/ti
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('Inspect', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165688
+describe('Inspect', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   context('Timeline', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';

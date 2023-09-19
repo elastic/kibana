@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, MouseEventHandler, useContext, useState } from 'react';
+import React, { type FC, type MouseEventHandler, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -26,12 +27,10 @@ import {
   useReauthorizeAction,
 } from '../action_reauthorize';
 import type { TransformId } from '../../../../../../common/types/transform';
-import {
-  TRANSFORM_LIST_COLUMN,
-  TransformListRow,
-  useRefreshTransformList,
-} from '../../../../common';
-import { AuthorizationContext } from '../../../../lib/authorization';
+
+import { type TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
+import { useRefreshTransformList, useTransformCapabilities } from '../../../../hooks';
+
 import { CreateTransformButton } from '../create_transform_button';
 import { RefreshTransformListButton } from '../refresh_transform_list_button';
 import {
@@ -83,6 +82,7 @@ function getItemIdToExpandedRowMap(
 }
 
 interface TransformListProps {
+  isLoading: boolean;
   onCreateTransform: MouseEventHandler<HTMLButtonElement>;
   transformNodes: number;
   transforms: TransformListRow[];
@@ -90,13 +90,13 @@ interface TransformListProps {
 }
 
 export const TransformList: FC<TransformListProps> = ({
+  isLoading,
   onCreateTransform,
   transformNodes,
   transforms,
   transformsLoading,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
+  const refreshTransformList = useRefreshTransformList();
   const { setEditAlertRule } = useAlertRuleFlyout();
 
   const [query, setQuery] = useState<Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]>();
@@ -111,7 +111,7 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkStopAction = useStopAction(false);
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
 
-  const { capabilities } = useContext(AuthorizationContext);
+  const capabilities = useTransformCapabilities();
   const disabled =
     !capabilities.canCreateTransform ||
     !capabilities.canPreviewTransform ||
@@ -133,10 +133,6 @@ export const TransformList: FC<TransformListProps> = ({
   const clauses = query?.query?.ast?.clauses ?? [];
   const filteredTransforms =
     clauses.length > 0 ? filterTransforms(transforms, clauses) : transforms;
-
-  if (transforms.length === 0 && transformNodes === 0) {
-    return null;
-  }
 
   if (transforms.length === 0) {
     return (
@@ -305,7 +301,7 @@ export const TransformList: FC<TransformListProps> = ({
   const toolsRight = (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
       <EuiFlexItem>
-        <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
+        <RefreshTransformListButton onClick={refreshTransformList} isLoading={isLoading} />
       </EuiFlexItem>
       <EuiFlexItem>
         <CreateTransformButton onClick={onCreateTransform} transformNodes={transformNodes} />

@@ -489,6 +489,7 @@ export interface DocLinks {
     guide: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
+    esSettings: string;
     settings: string;
     logstashSettings: string;
     kafkaSettings: string;

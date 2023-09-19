@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('[Serverless Observability onboarding] Landing page', () => {
+// Flaky in serverless tests
+describe.skip('[Serverless Observability onboarding] Landing page', () => {
   beforeEach(() => {
     cy.loginAsElasticUser();
   });

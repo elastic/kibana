@@ -26,11 +26,12 @@ export async function getServicesBySignals(
     });
   }
 
+  const apmIndices = await options.getApmIndices(options.soClient);
   const { assets } = await collectServices({
     client: options.esClient,
     from: options.from,
     to: options.to,
-    sourceIndices: options.sourceIndices,
+    apmIndices,
     filters,
   });
 

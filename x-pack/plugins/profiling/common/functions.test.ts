@@ -6,10 +6,8 @@
  */
 
 import { sum } from 'lodash';
-
 import { createTopNFunctions } from './functions';
-import { decodeStackTraceResponse } from './stack_traces';
-
+import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import { stackTraceFixtures } from './__fixtures__/stacktraces';
 
 describe('TopN function operations', () => {

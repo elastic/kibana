@@ -84,5 +84,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.expectItemsCount('visualize', 0);
       });
     });
+
+    describe('Edit', () => {
+      before(async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+      });
+
+      it('should edit the title and description of a visualization', async () => {
+        await listingTable.searchForItemWithName('Hello');
+        await listingTable.inspectVisualization();
+        await listingTable.editVisualizationDetails({
+          title: 'new title',
+          description: 'new description',
+        });
+        await listingTable.searchForItemWithName('new title');
+        await listingTable.expectItemsCount('visualize', 1);
+      });
+    });
   });
 }

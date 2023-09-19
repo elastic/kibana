@@ -11,11 +11,9 @@ import { IBasePath } from '@kbn/core-http-server';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
 
+import { CONNECTOR_DEFINITIONS, ConnectorServerSideDefinition } from '@kbn/search-connectors';
+
 import { ConfigType } from '..';
-import {
-  CONNECTOR_DEFINITIONS,
-  ConnectorServerSideDefinition,
-} from '../../common/connectors/connectors';
 import {
   ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,

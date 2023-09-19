@@ -11,11 +11,19 @@ import { LeftPanelContext } from '../context';
 import { PrevalenceDetails } from './prevalence_details';
 import {
   PREVALENCE_DETAILS_LOADING_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
 } from './test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { TestProviders } from '../../../common/mock';
+import { licenseService } from '../../../common/hooks/use_license';
 
 jest.mock('../../shared/hooks/use_prevalence');
 
@@ -27,6 +35,17 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+jest.mock('../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 const panelContextValue = {
   eventId: 'event id',
@@ -35,8 +54,23 @@ const panelContextValue = {
   dataFormattedForFieldBrowser: [],
 } as unknown as LeftPanelContext;
 
+const renderPrevalenceDetails = () =>
+  render(
+    <TestProviders>
+      <LeftPanelContext.Provider value={panelContextValue}>
+        <PrevalenceDetails />
+      </LeftPanelContext.Provider>
+    </TestProviders>
+  );
+
 describe('PrevalenceDetails', () => {
-  it('should render the table', () => {
+  const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+
+  beforeEach(() => {
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+  });
+
+  it('should render the table with all columns if license is platinum', () => {
     const field1 = 'field1';
     const field2 = 'field2';
     (usePrevalence as jest.Mock).mockReturnValue({
@@ -62,6 +96,43 @@ describe('PrevalenceDetails', () => {
       ],
     });
 
+    const { getByTestId, getAllByTestId, queryByTestId } = renderPrevalenceDetails();
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
+      1
+    );
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render formatted numbers for the alert and document count columns', () => {
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: 'field1',
+          value: 'value1',
+          alertCount: 1000,
+          docCount: 2000000,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+      ],
+    });
+
     const { getByTestId } = render(
       <TestProviders>
         <LeftPanelContext.Provider value={panelContextValue}>
@@ -71,6 +142,63 @@ describe('PrevalenceDetails', () => {
     );
 
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID)).toHaveTextContent('field1');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID)).toHaveTextContent('value1');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID)).toHaveTextContent('1k');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID)).toHaveTextContent('2M');
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID)).toHaveTextContent(
+      '5%'
+    );
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID)).toHaveTextContent(
+      '10%'
+    );
+  });
+
+  it('should render the table with only basic columns if license is not platinum', () => {
+    const field1 = 'field1';
+    const field2 = 'field2';
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: field1,
+          value: 'value1',
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+        {
+          field: field2,
+          value: 'value2',
+          alertCount: 1,
+          docCount: 1,
+          hostPrevalence: 0.5,
+          userPrevalence: 0.05,
+        },
+      ],
+    });
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+
+    const { getByTestId, getAllByTestId } = renderPrevalenceDetails();
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID).length).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
+      1
+    );
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(
+      getAllByTestId(PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID).length
+    ).toBeGreaterThan(1);
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render loading', () => {
@@ -80,88 +208,42 @@ describe('PrevalenceDetails', () => {
       data: [],
     });
 
-    const { getByTestId } = render(
-      <LeftPanelContext.Provider value={panelContextValue}>
-        <PrevalenceDetails />
-      </LeftPanelContext.Provider>
-    );
+    const { getByTestId, queryByTestId } = renderPrevalenceDetails();
 
     expect(getByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_UPSELL_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should render error if call errors out', () => {
+  it('should render no data message if call errors out', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: true,
       data: [],
     });
 
-    const { getByTestId } = render(
-      <LeftPanelContext.Provider value={panelContextValue}>
-        <PrevalenceDetails />
-      </LeftPanelContext.Provider>
-    );
+    const { getByTestId, queryByTestId } = renderPrevalenceDetails();
 
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toHaveTextContent(
+      'No prevalence data available.'
+    );
+    expect(queryByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should render error if event is null', () => {
-    const contextValue = {
-      ...panelContextValue,
-      eventId: null,
-    } as unknown as LeftPanelContext;
+  it('should render no data message if no data', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
-      error: true,
+      error: false,
       data: [],
     });
 
-    const { getByTestId } = render(
-      <LeftPanelContext.Provider value={contextValue}>
-        <PrevalenceDetails />
-      </LeftPanelContext.Provider>
+    const { getByTestId, queryByTestId } = renderPrevalenceDetails();
+
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREVALENCE_DETAILS_TABLE_NO_DATA_TEST_ID)).toHaveTextContent(
+      'No prevalence data available.'
     );
-
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render error if dataFormattedForFieldBrowser is null', () => {
-    const contextValue = {
-      ...panelContextValue,
-      dataFormattedForFieldBrowser: null,
-    };
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: true,
-      data: [],
-    });
-
-    const { getByTestId } = render(
-      <LeftPanelContext.Provider value={contextValue}>
-        <PrevalenceDetails />
-      </LeftPanelContext.Provider>
-    );
-
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render error if browserFields is null', () => {
-    const contextValue = {
-      ...panelContextValue,
-      browserFields: null,
-    };
-    (usePrevalence as jest.Mock).mockReturnValue({
-      loading: false,
-      error: true,
-      data: [],
-    });
-
-    const { getByTestId } = render(
-      <LeftPanelContext.Provider value={contextValue}>
-        <PrevalenceDetails />
-      </LeftPanelContext.Provider>
-    );
-
-    expect(getByTestId(PREVALENCE_DETAILS_TABLE_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(PREVALENCE_DETAILS_LOADING_TEST_ID)).not.toBeInTheDocument();
   });
 });

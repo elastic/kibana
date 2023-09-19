@@ -10,6 +10,8 @@ import {
   LogLevel,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
+// eslint-disable-next-line @kbn/imports/no_unresolvable_imports
+import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
 import del from 'del';
 import { some } from 'lodash';
 import { Readable } from 'stream';
@@ -34,6 +36,8 @@ export function setupNodeEvents(
   });
 
   synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
+
+  initPlugin(on, config);
 
   on('task', {
     // send logs to node process

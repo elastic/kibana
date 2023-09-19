@@ -42,11 +42,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
-import {
-  expectNumberOfRules,
-  goToRuleDetails,
-  goToTheRuleDetailsOf,
-} from '../../../tasks/alerts_detection_rules';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
@@ -60,7 +56,8 @@ import { login, visit } from '../../../tasks/login';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('EQL rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });
@@ -97,7 +94,7 @@ describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
       cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-      goToRuleDetails();
+      goToRuleDetailsOf(rule.name);
 
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
@@ -164,7 +161,7 @@ describe('EQL rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
-      goToTheRuleDetailsOf(rule.name);
+      goToRuleDetailsOf(rule.name);
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 

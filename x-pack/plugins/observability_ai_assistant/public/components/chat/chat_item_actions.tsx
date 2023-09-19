@@ -53,6 +53,7 @@ export function ChatItemActions({
             }
           )}
           color="text"
+          data-test-subj="observabilityAiAssistantChatItemActionsEditPromptButton"
           display={editing ? 'fill' : 'empty'}
           iconType="documentEdit"
           onClick={onToggleEdit}
@@ -68,6 +69,7 @@ export function ChatItemActions({
             }
           )}
           color="text"
+          data-test-subj="observabilityAiAssistantChatItemActionsInspectPromptButton"
           display={expanded ? 'fill' : 'empty'}
           iconType={expanded ? 'eyeClosed' : 'eye'}
           onClick={onToggleExpand}
@@ -85,6 +87,7 @@ export function ChatItemActions({
                 }
               )}
               color="text"
+              data-test-subj="observabilityAiAssistantChatItemActionsCopyMessageButton"
               iconType="copyClipboard"
               display={isPopoverOpen === 'copy' ? 'fill' : 'empty'}
               onClick={() => {

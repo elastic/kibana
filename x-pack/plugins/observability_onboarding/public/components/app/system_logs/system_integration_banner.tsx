@@ -74,6 +74,7 @@ export function SystemIntegrationBanner() {
           </EuiFlexGroup>
         }
         color="primary"
+        data-test-subj="obltOnboardingSystemLogsInstallingIntegration"
       />
     );
   }
@@ -89,6 +90,7 @@ export function SystemIntegrationBanner() {
           )}
           color="warning"
           iconType="warning"
+          data-test-subj="obltOnboardingSystemLogsIntegrationInstallationFailed"
         >
           {error?.message}
         </EuiCallOut>
@@ -106,6 +108,7 @@ export function SystemIntegrationBanner() {
               values={{
                 systemIntegrationTooltip: (
                   <PopoverTooltip
+                    dataTestSubj="obltOnboardingSystemLogsIntegrationInfo"
                     ariaLabel={i18n.translate(
                       'xpack.observability_onboarding.systemIntegration.installed.tooltip.label',
                       {
@@ -161,6 +164,7 @@ export function SystemIntegrationBanner() {
           }
           color="success"
           iconType="check"
+          data-test-subj="obltOnboardingSystemLogsIntegrationInstalled"
         />
       </EuiFlexItem>
     );

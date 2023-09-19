@@ -3,7 +3,10 @@
 ## Disable plugins
 enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
+xpack.infra.enabled: false
 xpack.securitySolution.enabled: false
+xpack.uptime.enabled: false
+xpack.legacy_uptime.enabled: false
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
@@ -24,7 +27,7 @@ xpack.fleet.agentIdVerificationEnabled: false
 xpack.apm.serverlessOnboarding: true
 
 # Fleet specific configuration
-xpack.fleet.internal.capabilities: ['apm', 'uptime', 'observability']
+xpack.fleet.internal.capabilities: ['apm', 'observability']
 
 ## Required for force installation of APM Package
 xpack.fleet.packages:

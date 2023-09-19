@@ -31,6 +31,7 @@ import {
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { API_VERSIONS } from '../../common/constants';
 
 function setupIntegrations() {
   cy.intercept(
@@ -135,7 +136,7 @@ describe('Add Integration - Real API', () => {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
       },
-      headers: { 'kbn-xsrf': 'cypress' },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
 
     cy.request('/api/fleet/agent_policies').then((response: any) => {

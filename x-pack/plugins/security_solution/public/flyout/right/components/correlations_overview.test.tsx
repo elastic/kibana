@@ -14,6 +14,7 @@ import { CorrelationsOverview } from './correlations_overview';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
 import {
+  INSIGHTS_CORRELATIONS_NO_DATA_TEST_ID,
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
   INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID,
@@ -74,7 +75,6 @@ const RELATED_ALERTS_BY_SESSION_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
 const RELATED_CASES_TEST_ID = SUMMARY_ROW_VALUE_TEST_ID(
   INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID
 );
-const CORRELATIONS_ERROR_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}Error`;
 
 const panelContextValue = {
   eventId: 'event id',
@@ -141,12 +141,13 @@ describe('<CorrelationsOverview />', () => {
       dataCount: 1,
     });
 
-    const { getByTestId } = render(renderCorrelationsOverview(panelContextValue));
+    const { getByTestId, queryByTestId } = render(renderCorrelationsOverview(panelContextValue));
     expect(getByTestId(RELATED_ALERTS_BY_ANCESTRY_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(RELATED_CASES_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SUPPRESSED_ALERTS_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_CORRELATIONS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should hide rows and show error message if show values are false', () => {
@@ -168,7 +169,10 @@ describe('<CorrelationsOverview />', () => {
     expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(CORRELATIONS_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_CORRELATIONS_NO_DATA_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(INSIGHTS_CORRELATIONS_NO_DATA_TEST_ID)).toHaveTextContent(
+      'No correlations data available.'
+    );
   });
 
   it('should hide rows if values are null', () => {
@@ -184,6 +188,7 @@ describe('<CorrelationsOverview />', () => {
     expect(queryByTestId(RELATED_ALERTS_BY_SESSION_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(RELATED_CASES_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(SUPPRESSED_ALERTS_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_CORRELATIONS_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should navigate to the left section Insights tab when clicking on button', () => {
