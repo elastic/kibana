@@ -128,7 +128,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
       const isGrepReturnedFilePaths = _.isArray(grepSpecPattern);
       const isGrepReturnedSpecPattern = !isGrepReturnedFilePaths && grepSpecPattern === specPattern;
-      const { grepFilterSpecs } = cypressConfigFile.env;
+      const grepFilterSpecs = cypressConfigFile.env?.grepFilterSpecs;
 
       // IMPORTANT!
       // When grep returns the same spec pattern as it gets in its arguments, we treat it as

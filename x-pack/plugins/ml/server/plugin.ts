@@ -29,10 +29,7 @@ import { notificationsRoutes } from './routes/notifications';
 import type { MlFeatures, PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
-
 import { initMlServerLog } from './lib/log';
-import { initSampleDataSets } from './lib/sample_data_sets';
-
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';
 import { dataFeedRoutes } from './routes/datafeeds';
@@ -68,10 +65,8 @@ import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
-import {
-  CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
-  CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
-} from '../common/constants/cases';
+import { registerCasesPersistableState } from './lib/register_cases';
+import { registerSampleDataSetLinks } from './lib/register_sameple_data_set_links';
 
 type SetFeaturesEnabled = (features: MlFeatures) => void;
 
@@ -104,12 +99,16 @@ export class MlServerPlugin
     dfa: true,
     nlp: true,
   };
+  private isServerless: boolean = false;
+  private registerCases: () => void = () => {};
+  private registerSampleDatasetsIntegration: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -156,8 +155,6 @@ export class MlServerPlugin
         ],
       },
     });
-
-    registerKibanaSettings(coreSetup);
 
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(
@@ -224,7 +221,8 @@ export class MlServerPlugin
         coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
-      enabledFeatures: this.enabledFeatures,
+      getEnabledFeatures: () => Object.assign({}, this.enabledFeatures),
+      isServerless: this.isServerless,
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -268,22 +266,27 @@ export class MlServerPlugin
       });
     }
 
+    this.registerCases = () => {
+      if (plugins.cases) {
+        registerCasesPersistableState(plugins.cases);
+      }
+    };
+
+    this.registerSampleDatasetsIntegration = () => {
+      // called in start once enabledFeatures is available
+      if (this.home) {
+        registerSampleDataSetLinks(this.enabledFeatures, this.home);
+      }
+    };
+
+    registerKibanaSettings(coreSetup);
+
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>
         coreSetup
           .getStartServices()
           .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
       registerCollector(plugins.usageCollection, getIndexForType);
-    }
-
-    if (plugins.cases) {
-      plugins.cases.attachmentFramework.registerPersistableState({
-        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
-      });
-
-      plugins.cases.attachmentFramework.registerPersistableState({
-        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
-      });
     }
 
     const setFeaturesEnabled = (features: MlFeatures) => {
@@ -319,10 +322,10 @@ export class MlServerPlugin
         return;
       }
 
-      if (this.home) {
-        initSampleDataSets(mlLicense, this.home);
+      if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
+        this.registerCases();
+        this.registerSampleDatasetsIntegration();
       }
-
       // check whether the job saved objects exist
       // and create them if needed.
       const { initializeJobs } = jobSavedObjectsInitializationFactory(

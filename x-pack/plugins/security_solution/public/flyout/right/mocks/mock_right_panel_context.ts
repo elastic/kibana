@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { SearchHit } from '../../../../common/search_strategy';
 import type { RightPanelContext } from '../context';
-import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from './mock_context';
+import {
+  mockDataAsNestedObject,
+  mockDataFormattedForFieldBrowser,
+  mockGetFieldsData,
+  mockSearchHit,
+} from './mock_context';
 
 /**
  * Mock contextValue for right panel context
@@ -18,8 +25,8 @@ export const mockContextValue: RightPanelContext = {
   getFieldsData: mockGetFieldsData,
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   browserFields: {},
-  dataAsNestedObject: null,
-  searchHit: undefined,
+  dataAsNestedObject: mockDataAsNestedObject as unknown as Ecs,
+  searchHit: mockSearchHit as unknown as SearchHit,
   investigationFields: [],
   refetchFlyoutData: jest.fn(),
 };

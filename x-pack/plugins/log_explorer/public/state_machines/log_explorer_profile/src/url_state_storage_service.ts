@@ -7,9 +7,13 @@
 import { InvokeCreator } from 'xstate';
 import { pick, mapValues } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { MESSAGE_FIELD } from '../../../../common/constants';
+import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import {
+  DATA_GRID_COLUMNS_PREFERENCES,
+  DATA_GRID_DEFAULT_COLUMNS,
+} from '../../../../common/constants';
 import {
   AllDatasetSelection,
   decodeDatasetSelectionId,
@@ -178,14 +182,27 @@ export const updateStateContainer =
     LogExplorerProfileEvent
   > =>
   async () => {
-    const { columns } = stateContainer.appState.getState();
+    const { columns, grid, rowHeight } = stateContainer.appState.getState();
+    const stateUpdates: DiscoverAppState = {};
 
+    // Update data grid columns list
     const shouldSetDefaultColumns =
       stateContainer.appState.isEmptyURL() || !columns || columns.length === 0;
-
     if (shouldSetDefaultColumns) {
-      stateContainer.appState.update({ columns: [MESSAGE_FIELD] }, true);
+      stateUpdates.columns = DATA_GRID_DEFAULT_COLUMNS;
     }
+
+    // Configure DataGrid columns preferences
+    const initialColumnsPreferences = grid?.columns ?? {};
+    stateUpdates.grid = {
+      columns: { ...DATA_GRID_COLUMNS_PREFERENCES, ...initialColumnsPreferences },
+    };
+
+    // Configure rowHeight preference
+    stateUpdates.rowHeight = rowHeight ?? ROWS_HEIGHT_OPTIONS.single;
+
+    // Finally batch update state app state
+    stateContainer.appState.update(stateUpdates, true);
   };
 
 /**

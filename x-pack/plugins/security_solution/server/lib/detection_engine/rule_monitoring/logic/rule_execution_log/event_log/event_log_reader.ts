@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEventLogClient, IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
+import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -53,20 +54,30 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
     async getExecutionEvents(
       args: GetExecutionEventsArgs
     ): Promise<GetRuleExecutionEventsResponse> {
-      const { ruleId, eventTypes, logLevels, sortOrder, page, perPage } = args;
+      const {
+        ruleId,
+        searchTerm,
+        eventTypes,
+        logLevels,
+        dateStart,
+        dateEnd,
+        sortOrder,
+        page,
+        perPage,
+      } = args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
 
-      // TODO: include Framework events
-      const kqlFilter = kqlAnd([
-        `${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`,
-        eventTypes.length > 0 ? `${f.EVENT_ACTION}:(${kqlOr(eventTypes)})` : '',
-        logLevels.length > 0 ? `${f.LOG_LEVEL}:(${kqlOr(logLevels)})` : '',
-      ]);
-
       const findResult = await withSecuritySpan('findEventsBySavedObjectIds', () => {
         return eventLog.findEventsBySavedObjectIds(soType, soIds, {
-          filter: kqlFilter,
+          // TODO: include Framework events
+          filter: buildEventLogKqlFilter({
+            searchTerm,
+            eventTypes,
+            logLevels,
+            dateStart,
+            dateEnd,
+          }),
           sort: [
             { sort_field: f.TIMESTAMP, sort_order: sortOrder },
             { sort_field: f.EVENT_SEQUENCE, sort_order: sortOrder },
@@ -173,9 +184,10 @@ const normalizeEvent = (rawEvent: IValidatedEvent): RuleExecutionEvent => {
   const sequence = normalizeEventSequence(rawEvent);
   const level = normalizeLogLevel(rawEvent);
   const type = normalizeEventType(rawEvent);
+  const executionId = normalizeExecutionId(rawEvent);
   const message = normalizeEventMessage(rawEvent, type);
 
-  return { timestamp, sequence, level, type, message };
+  return { timestamp, sequence, level, type, message, execution_id: executionId };
 };
 
 type RawEvent = NonNullable<IValidatedEvent>;
@@ -230,9 +242,64 @@ const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): s
   }
 
   if (type === RuleExecutionEventType['execution-metrics']) {
-    return '';
+    invariant(
+      event.kibana?.alert?.rule?.execution?.metrics,
+      'Required "kibana.alert.rule.execution.metrics" field is not found'
+    );
+
+    return JSON.stringify(event.kibana.alert.rule.execution.metrics);
   }
 
   assertUnreachable(type);
   return '';
+};
+
+const normalizeExecutionId = (event: RawEvent): string => {
+  invariant(
+    event.kibana?.alert?.rule?.execution?.uuid,
+    'Required "kibana.alert.rule.execution.uuid" field is not found'
+  );
+
+  return event.kibana.alert.rule.execution.uuid;
+};
+
+const buildEventLogKqlFilter = ({
+  searchTerm,
+  eventTypes,
+  logLevels,
+  dateStart,
+  dateEnd,
+}: Pick<
+  GetExecutionEventsArgs,
+  'searchTerm' | 'eventTypes' | 'logLevels' | 'dateStart' | 'dateEnd'
+>) => {
+  const filters = [`${f.EVENT_PROVIDER}:${RULE_EXECUTION_LOG_PROVIDER}`];
+
+  if (searchTerm?.length) {
+    filters.push(`${f.MESSAGE}:${prepareKQLStringParam(searchTerm)}`);
+  }
+
+  if (eventTypes?.length) {
+    filters.push(`${f.EVENT_ACTION}:(${kqlOr(eventTypes)})`);
+  }
+
+  if (logLevels?.length) {
+    filters.push(`${f.LOG_LEVEL}:(${kqlOr(logLevels)})`);
+  }
+
+  const dateRangeFilter: string[] = [];
+
+  if (dateStart) {
+    dateRangeFilter.push(`${f.TIMESTAMP} >= ${prepareKQLStringParam(dateStart)}`);
+  }
+
+  if (dateEnd) {
+    dateRangeFilter.push(`${f.TIMESTAMP} <= ${prepareKQLStringParam(dateEnd)}`);
+  }
+
+  if (dateRangeFilter.length) {
+    filters.push(kqlAnd(dateRangeFilter));
+  }
+
+  return kqlAnd(filters);
 };
