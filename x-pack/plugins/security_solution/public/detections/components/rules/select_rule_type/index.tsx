@@ -198,7 +198,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
           {isEsqlFeatureEnabled && (!isUpdateView || esqlSelectableConfig.isSelected) && (
             <EuiFlexItem>
               <EuiCard
-                data-test-subj="esqRuleType"
+                data-test-subj="esqlRuleType"
                 title={<TechnicalPreviewBadge label={i18n.ESQL_TYPE_TITLE} />}
                 titleSize="xs"
                 description={i18n.ESQL_TYPE_DESCRIPTION}

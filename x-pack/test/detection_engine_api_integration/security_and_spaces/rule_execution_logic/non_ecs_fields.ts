@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(errors).toEqual([]);
 
       // invalid ECS field is getting removed
-      expect(alertSource).toHaveProperty('threat.enrichments', []);
+      expect(alertSource).not.toHaveProperty('threat.enrichments');
 
       expect(alertSource).toHaveProperty(['threat', 'indicator.port'], 443);
     });
