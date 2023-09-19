@@ -8,14 +8,35 @@
 export const useFetchEsqlOptions = () => {};
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 
 import { useQuery } from '@tanstack/react-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { getEsqlQueryConfig, esqlToOptions } from './validators';
-import type { FieldType } from './validators';
+import { getEsqlQueryConfig } from '../../logic/get_esql_query_config';
+import type { FieldType } from '../../logic/esql_validator';
+
+export const esqlToOptions = (
+  data: { error: unknown } | Datatable | undefined,
+  fieldType?: FieldType
+) => {
+  if (data && 'error' in data) {
+    return [];
+  }
+
+  const options = (data?.columns ?? [])
+    .filter(({ meta }) => {
+      // if fieldType absent, we do not filter columns by type
+      if (!fieldType) {
+        return true;
+      }
+      return fieldType === meta.type;
+    })
+    .map(({ id }) => ({ label: id }));
+
+  return options;
+};
 
 type UseEsqlFieldOptions = (
   esqlQuery: string | undefined,
@@ -25,13 +46,16 @@ type UseEsqlFieldOptions = (
   options: Array<EuiComboBoxOptionOption<string>>;
 };
 
+/**
+ * fetches ES|QL fields and convert them to Combobox options
+ */
 export const useEsqlFieldOptions: UseEsqlFieldOptions = (esqlQuery, fieldType) => {
   const kibana = useKibana<{ expressions: ExpressionsStart }>();
 
   const { expressions } = kibana.services;
 
-  const config = getEsqlQueryConfig({ esqlQuery, expressions });
-  const { data, isLoading } = useQuery(config);
+  const queryConfig = getEsqlQueryConfig({ esqlQuery, expressions });
+  const { data, isLoading } = useQuery(queryConfig);
 
   const options = esqlToOptions(data, fieldType);
 

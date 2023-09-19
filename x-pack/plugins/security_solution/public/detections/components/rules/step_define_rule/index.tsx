@@ -54,7 +54,7 @@ import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
-import { EsqlInfoIcon } from '../esql_info_icon';
+import { EsqlInfoIcon } from '../../../../detection_engine/rule_creation/components/esql_info_icon';
 import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';

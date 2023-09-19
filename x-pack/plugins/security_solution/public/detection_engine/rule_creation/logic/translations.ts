@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ESQL_FIELDS_SELECT_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.esqlFieldsSelectPlaceholder',
-  {
-    defaultMessage: 'All available fields from ES|QL Query response',
-  }
-);
-
 export const ESQL_VALIDATION_UNKNOWN_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.esqlValidation.unknownError',
   {
@@ -27,26 +20,9 @@ export const esqlValidationErrorMessage = (message: string) =>
     defaultMessage: 'Error validating ES|QL: "{message}"',
   });
 
-export const ESQL_VALIDATION_SUPPRESS_BY_GENERAL_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.esqlValidation.suppressByGeneralError',
-  {
-    defaultMessage:
-      'Fields not possible to validate. Likely ES|QL query has failed, so fields are available',
-  }
-);
-
 export const ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.esqlValidation.missingIdInQueryError',
   {
     defaultMessage: `For non-aggregating rules(that don't use STATS..BY function), please write query that returns _id field from [metadata _id, _version, _index] operator`,
   }
 );
-
-export const esqlValidationInvalidSuppressByFields = (fieldNames: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.esqlValidation.invalidSuppressByFieldsError',
-    {
-      values: { fieldNames },
-      defaultMessage: 'Fields are not available in ES|QL response: {fieldNames}',
-    }
-  );

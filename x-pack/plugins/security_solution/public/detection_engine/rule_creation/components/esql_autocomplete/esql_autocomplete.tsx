@@ -25,6 +25,11 @@ interface AutocompleteFieldProps {
   esqlQuery: string | undefined;
 }
 
+/**
+ * autocomplete form component that works with ES|QL query
+ * it receives query as one of the parameters, fetches available fields and convert them to
+ * options, that populate autocomplete component
+ */
 export const EsqlAutocomplete: React.FC<AutocompleteFieldProps> = ({
   dataTestSubj,
   field,
