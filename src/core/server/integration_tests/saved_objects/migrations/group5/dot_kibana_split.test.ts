@@ -235,6 +235,7 @@ describe('split .kibana index into multiple system indices', () => {
             "lens-ui-telemetry",
             "maintenance-window",
             "map",
+            "metrics-data-source",
             "metrics-explorer-view",
             "ml-job",
             "ml-module",
