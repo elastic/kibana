@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import {
   FLEET_APM_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
@@ -203,7 +205,7 @@ export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: s
   };
 }
 
-function universalProfilingPermissions(packagePolicyId: string) {
+function universalProfilingPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
   const profilingIndexPattern = 'profiling-*';
   return [
     packagePolicyId,
@@ -218,7 +220,7 @@ function universalProfilingPermissions(packagePolicyId: string) {
   ];
 }
 
-function apmPermissions(packagePolicyId: string) {
+function apmPermissions(packagePolicyId: string): [string, SecurityRoleDescriptor] {
   return [
     packagePolicyId,
     {
