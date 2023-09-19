@@ -57,6 +57,7 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -227,7 +228,7 @@ describe('xy_visualization', () => {
                 "colorMode": Object {
                   "type": "categorical",
                 },
-                "paletteId": "eui",
+                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
                 "specialAssignments": Array [
                   Object {
                     "color": Object {
