@@ -8,26 +8,20 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import {
-  TimelineEventsQueries,
-  TimelineKpiStrategyResponse,
-} from '../../../../../../common/search_strategy/timeline';
+import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
+import { TimelineKpiStrategyResponse } from '../../../../../../common/search_strategy/timeline';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildTimelineKpiQuery } from './query.kpi.dsl';
-import { parseOptions } from './parse_options';
 
 export const timelineKpi: TimelineFactory<TimelineEventsQueries.kpi> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const options = parseOptions(maybeOptions);
+  buildDsl: (options) => {
     return buildTimelineKpiQuery(options);
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineKpiStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineKpiQuery(options))],
     };

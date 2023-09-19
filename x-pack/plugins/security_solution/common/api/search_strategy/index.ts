@@ -78,6 +78,8 @@ export * from './model/pagination';
 
 export * from './model/factory_query_type';
 
+export * from './model/runtime_mappings';
+
 export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryType', [
   firstLastSeenRequestOptionsSchema,
   allHostsSchema,

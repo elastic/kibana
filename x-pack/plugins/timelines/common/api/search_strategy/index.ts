@@ -13,6 +13,10 @@ import * as timelineSchemas from './timeline/timeline';
 
 export * from './timeline/timeline';
 
+export * from './model/timeline_events_queries';
+
+export * from './model/runtime_mappings';
+
 export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryType', [
   timelineSchemas.timelineEventsAllSchema,
   timelineSchemas.timelineEventsDetailsSchema,

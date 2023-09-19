@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Direction, TimelineEventsQueries } from '../../../../../../common/search_strategy';
+import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
+import { Direction } from '../../../../../../common/search_strategy';
 import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 
 describe('buildTimelineEventsAllQuery', () => {
@@ -16,7 +17,7 @@ describe('buildTimelineEventsAllQuery', () => {
       fields: [],
       defaultIndex,
       filterQuery: '',
-      language: 'eql',
+      language: 'kuery',
       pagination: {
         activePage: 0,
         querySize: 100,

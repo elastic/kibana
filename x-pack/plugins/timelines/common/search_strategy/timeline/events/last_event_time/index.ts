@@ -6,9 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { LastEventIndexKey } from '../../../../api/search_strategy/timeline/events_last_event_time';
 import { Inspect, Maybe } from '../../../common';
-import { TimelineRequestBasicOptions } from '../..';
 
 export interface LastTimeDetails {
   hostName?: Maybe<string>;
@@ -20,8 +18,6 @@ export interface TimelineEventsLastEventTimeStrategyResponse extends IEsSearchRe
   lastSeen: Maybe<string>;
   inspect?: Maybe<Inspect>;
 }
-export type TimelineKpiStrategyRequest = Omit<TimelineRequestBasicOptions, 'runtimeMappings'>;
-
 export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
   destinationIpCount: number;
   inspect?: Maybe<Inspect>;
@@ -29,10 +25,4 @@ export interface TimelineKpiStrategyResponse extends IEsSearchResponse {
   processCount: number;
   sourceIpCount: number;
   userCount: number;
-}
-
-export interface TimelineEventsLastEventTimeRequestOptions
-  extends Omit<TimelineRequestBasicOptions, 'filterQuery' | 'timerange' | 'runtimeMappings'> {
-  indexKey: LastEventIndexKey;
-  details: LastTimeDetails;
 }

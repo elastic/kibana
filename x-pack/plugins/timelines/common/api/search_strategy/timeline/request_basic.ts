@@ -18,4 +18,7 @@ export const timelineRequestBasicOptionsSchema = z.object({
   entityType: z.enum(['events', 'sessions']).optional(),
   runtimeMappings,
   params: z.any().optional(),
+  filterStatus: z
+    .union([z.literal('open'), z.literal('closed'), z.literal('acknowledged')])
+    .optional(),
 });

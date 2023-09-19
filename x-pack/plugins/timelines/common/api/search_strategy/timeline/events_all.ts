@@ -6,10 +6,10 @@
  */
 
 import { z } from 'zod';
-import { TimelineEventsQueries } from '../../../search_strategy';
 import { language } from '../model/language';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { sortItem } from '../model/sort';
+import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { requestPaginated } from './request_paginated';
 
 const extendedSortItem = sortItem.extend({
@@ -33,9 +33,6 @@ export const timelineEventsAllSchema = requestPaginated.extend({
       }),
     ])
   ),
-  filterStatus: z
-    .union([z.literal('open'), z.literal('closed'), z.literal('acknowledged')])
-    .optional(),
   runtimeMappings,
   language,
   factoryQueryType: z.literal(TimelineEventsQueries.all),

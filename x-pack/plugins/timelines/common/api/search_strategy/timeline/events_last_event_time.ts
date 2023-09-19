@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { TimelineEventsQueries } from '../../../search_strategy';
+import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { timelineRequestBasicOptionsSchema } from './request_basic';
 
 export enum LastEventIndexKey {

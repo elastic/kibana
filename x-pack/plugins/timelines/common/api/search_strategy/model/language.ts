@@ -7,4 +7,4 @@
 
 import { z } from 'zod';
 
-export const language = z.union([z.literal('eql'), z.literal('kuery'), z.literal('lucene')]);
+export const language = z.union([z.literal('kuery'), z.literal('lucene')]);

@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import { ESQuery } from '../../typed_json';
 import {
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
-  EntityType,
 } from './events';
-import { PaginationInputPaginated, TimerangeInput, SortField } from '../common';
-import type { RunTimeMappings } from './events/eql';
+import { SortField } from '../common';
 import {
   TimelineEventsAllOptionsInput,
   TimelineEventsDetailsRequestOptionsInput,
   TimelineEventsLastEventTimeRequestOptionsInput,
+  TimelineEventsQueries,
   TimelineKpiRequestOptionsInput,
 } from '../../api/search_strategy';
 
@@ -28,24 +24,9 @@ export * from './events';
 
 export type TimelineFactoryQueryTypes = TimelineEventsQueries;
 
-export interface TimelineRequestBasicOptions extends IEsSearchRequest {
-  timerange?: TimerangeInput;
-  filterQuery: ESQuery | string | undefined;
-  defaultIndex: string[];
-  factoryQueryType?: TimelineFactoryQueryTypes;
-  entityType?: EntityType;
-  runtimeMappings: RunTimeMappings;
-}
-
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
   esTypes: string[];
   type: string;
-}
-
-export interface TimelineRequestOptionsPaginated<Field = string>
-  extends TimelineRequestBasicOptions {
-  pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  sort: Array<TimelineRequestSortField<Field>>;
 }
 
 export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =

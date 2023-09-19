@@ -11,7 +11,7 @@ import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 
 export const eventEnrichmentRequestOptionsSchema = requestBasicOptionsSchema.extend({
-  eventFields: z.record(z.string()),
+  eventFields: z.record(z.unknown()),
   timerange,
   factoryQueryType: z.literal(CtiQueries.eventEnrichment),
 });

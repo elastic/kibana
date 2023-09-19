@@ -8,9 +8,9 @@
 import { merge } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import {
   EventHit,
-  TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
@@ -22,11 +22,9 @@ import {
   getDataSafety,
 } from '../../../../../../common/utils/field_formatters';
 import { buildEcsObjects } from '../../helpers/build_ecs_objects';
-import { parseOptions } from './parse_options';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
-  buildDsl: (request: unknown) => {
-    const parsedRequest = parseOptions(request);
+  buildDsl: (parsedRequest) => {
     const { authFilter, ...options } = parsedRequest;
     const { indexName, eventId, runtimeMappings = {} } = options;
     return buildTimelineDetailsQuery({
@@ -37,11 +35,9 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     });
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     const { indexName, eventId, runtimeMappings = {} } = options;
     const { fields, ...hitsData } = response.rawResponse.hits.hits[0] ?? {};
 

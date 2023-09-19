@@ -8,11 +8,9 @@
 import { map, mergeMap } from 'rxjs/operators';
 import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
 import { EqlSearchStrategyResponse, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
 import { EqlSearchResponse } from '../../../../common/search_strategy';
-import {
-  TimelineEqlRequestOptions,
-  TimelineEqlResponse,
-} from '../../../../common/search_strategy/timeline/events/eql';
+import { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { parseOptions } from './parse_options';
 

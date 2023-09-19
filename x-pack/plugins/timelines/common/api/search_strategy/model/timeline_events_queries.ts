@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { timelineEventsDetailsSchema } from '../../../../../../common/api/search_strategy/timeline/timeline';
-
-export const parseOptions = (options: unknown) => timelineEventsDetailsSchema.parse(options);
+export enum TimelineEventsQueries {
+  all = 'eventsAll',
+  details = 'eventsDetails',
+  kpi = 'eventsKpi',
+  lastEventTime = 'eventsLastEventTime',
+}

@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { MatrixHistogramQuery } from '../model/factory_query_type';
 import { inspect } from '../model/inspect';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
+import { runtimeMappings } from '../model/runtime_mappings';
 import { timerange } from '../model/timerange';
 
 export enum MatrixHistogramType {
@@ -45,8 +46,7 @@ export const matrixHistogramSchema = requestBasicOptionsSchema.extend({
   inspect,
   isPtrIncluded: z.boolean().default(false),
   includeMissingData: z.boolean().default(true),
-  // TODO: add stricter type here
-  runtimeMappings: z.record(z.any()).optional(),
+  runtimeMappings,
   timerange,
   factoryQueryType: z.literal(MatrixHistogramQuery),
 });

@@ -8,10 +8,10 @@
 import { cloneDeep, getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { buildAlertFieldsRequest as buildFieldsRequest } from '@kbn/alerts-as-data-utils';
+import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import {
   EventHit,
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEdges,
 } from '../../../../../../common/search_strategy';
@@ -20,12 +20,9 @@ import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { formatTimelineData } from '../../helpers/format_timeline_data';
 import { TIMELINE_EVENTS_FIELDS } from '../../helpers/constants';
-import { parseOptions } from './parse_options';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
-  buildDsl: (maybeOptions: unknown) => {
-    const { authFilter, ...options } = parseOptions(maybeOptions);
-
+  buildDsl: ({ authFilter, ...options }) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -34,11 +31,9 @@ export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
     return buildTimelineEventsAllQuery({ ...queryOptions, authFilter });
   },
   parse: async (
-    maybeOptions: unknown,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<TimelineEventsAllStrategyResponse> => {
-    const options = parseOptions(maybeOptions);
-
     // eslint-disable-next-line prefer-const
     let { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = buildFieldsRequest(fieldRequested, queryOptions.excludeEcsData);

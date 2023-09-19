@@ -17,12 +17,16 @@ import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { Logger } from '@kbn/logging';
 import { z } from 'zod';
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
-import { TimelineFactoryQueryTypes, EntityType } from '../../../common/search_strategy/timeline';
+import {
+  TimelineFactoryQueryTypes,
+  EntityType,
+  TimelineStrategyRequestType,
+} from '../../../common/search_strategy/timeline';
 import { timelineFactory } from './factory';
 import { TimelineFactory } from './factory/types';
 import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';
 
-export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
+export const timelineSearchStrategyProvider = (
   data: PluginStart,
   logger: Logger,
   security?: SecurityPluginSetup
@@ -35,13 +39,12 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
 
       const searchStrategyRequest = searchStrategyRequestSchema.parse(request);
 
-      const queryFactory: TimelineFactory<T> =
-        timelineFactory[searchStrategyRequest.factoryQueryType];
+      const queryFactory = timelineFactory[searchStrategyRequest.factoryQueryType];
 
       if (entityType != null && entityType === EntityType.SESSIONS) {
         return timelineSessionsSearchStrategy({
           es,
-          request,
+          request: searchStrategyRequest,
           options,
           deps,
           queryFactory,
@@ -73,7 +76,7 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory,
 }: {
   es: ISearchStrategy;
-  request: z.infer<typeof searchStrategyRequestSchema>;
+  request: TimelineStrategyRequestType<T>;
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
@@ -99,7 +102,7 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   queryFactory,
 }: {
   es: ISearchStrategy;
-  request: z.infer<typeof searchStrategyRequestSchema>;
+  request: TimelineStrategyRequestType<T>;
   options: ISearchOptions;
   deps: SearchStrategyDependencies;
   queryFactory: TimelineFactory<T>;
@@ -110,7 +113,7 @@ const timelineSessionsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
     ...request,
     defaultIndex: indices,
     indexName: indices,
-  };
+  } as TimelineStrategyRequestType<T>;
 
   const collapse = {
     field: 'process.entry_leader.entity_id',

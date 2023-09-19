@@ -20,6 +20,7 @@ export const timelineEqlRequestOptionsSchema = requestPaginated.extend({
   fieldRequested: z.array(z.string()),
   size: z.number().optional(),
   runTimeMappings: runtimeMappings.optional(),
+  language: z.literal('eql'),
 });
 
 export type TimelineEqlRequestOptionsInput = z.input<typeof timelineEqlRequestOptionsSchema>;
