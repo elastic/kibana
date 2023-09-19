@@ -3505,10 +3505,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/find.ts"
               },
               {
@@ -3534,10 +3530,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/get_rule.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.ts"
               },
               {
                 "plugin": "alerting",
@@ -4757,22 +4749,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/find_rules.test.ts"
               },
               {
@@ -5090,26 +5066,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/legacy/list_action_types.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/legacy/aggregate.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -6063,7 +6019,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/aggregate_rules.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -7556,6 +7512,22 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/update_objects_spaces.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/aggregate/aggregate_rules_route.test.ts"
               },
               {
                 "plugin": "alerting",

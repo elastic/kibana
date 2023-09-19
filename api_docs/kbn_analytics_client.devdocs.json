@@ -695,12 +695,24 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "@kbn/subscription-tracking",
+                "path": "packages/kbn-subscription-tracking/src/use_go_to_subscription.ts"
+              },
+              {
+                "plugin": "@kbn/subscription-tracking",
+                "path": "packages/kbn-subscription-tracking/src/use_impression.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/types.ts"
               },
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "fleet",
