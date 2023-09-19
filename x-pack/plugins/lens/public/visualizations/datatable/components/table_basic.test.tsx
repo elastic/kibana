@@ -20,10 +20,12 @@ import { DataContext, DatatableComponent } from './table_basic';
 import type { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
+const notifications = notificationServiceMock.createStartContract();
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -118,6 +120,7 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       )
     ).toMatchSnapshot();
@@ -140,6 +143,7 @@ describe('DatatableComponent', () => {
           theme={setUpMockTheme}
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       )
     ).toMatchSnapshot();
@@ -161,6 +165,7 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       )
     ).toMatchSnapshot();
@@ -183,6 +188,7 @@ describe('DatatableComponent', () => {
           theme={setUpMockTheme}
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       )
     ).toMatchSnapshot();
@@ -204,6 +210,7 @@ describe('DatatableComponent', () => {
         interactive
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
+        toasts={notifications.toasts}
       />
     );
 
@@ -245,6 +252,7 @@ describe('DatatableComponent', () => {
         interactive
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
+        toasts={notifications.toasts}
       />
     );
 
@@ -321,6 +329,7 @@ describe('DatatableComponent', () => {
         interactive
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
+        toasts={notifications.toasts}
       />
     );
 
@@ -362,6 +371,7 @@ describe('DatatableComponent', () => {
         interactive={false}
         renderComplete={renderComplete}
         columnFilterable={[true, true, true]}
+        toasts={notifications.toasts}
       />
     );
 
@@ -393,6 +403,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
     expect(component.find(VisualizationContainer)).toHaveLength(1);
@@ -418,6 +429,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -470,6 +482,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -502,6 +515,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -532,6 +546,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -579,6 +594,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -607,6 +623,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
     // mnake a copy of the data, changing only the name of the first column
@@ -646,6 +663,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -683,6 +701,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
     expect(wrapper.find('[data-test-subj="lnsDataTable-footer-a"]').exists()).toEqual(false);
@@ -720,6 +739,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -756,6 +776,7 @@ describe('DatatableComponent', () => {
         theme={setUpMockTheme}
         interactive
         renderComplete={renderComplete}
+        toasts={notifications.toasts}
       />
     );
 
@@ -782,6 +803,7 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       );
 
@@ -820,6 +842,7 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       );
       const newIndex = 3;
@@ -869,6 +892,7 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       );
 
@@ -895,6 +919,7 @@ describe('DatatableComponent', () => {
         renderMode: 'edit' as RenderMode,
         interactive: true,
         renderComplete,
+        toasts: notifications.toasts,
       };
 
       const wrapper = mount(
@@ -932,6 +957,7 @@ describe('DatatableComponent', () => {
           renderMode="edit"
           interactive
           renderComplete={renderComplete}
+          toasts={notifications.toasts}
         />
       );
 
