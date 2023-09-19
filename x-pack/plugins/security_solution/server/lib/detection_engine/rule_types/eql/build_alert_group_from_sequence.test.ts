@@ -150,7 +150,7 @@ describe('buildAlert', () => {
         const b = {
           field1: [1],
         };
-        const intersection = objectArrayIntersection([a, b]);
+        const intersection = objectPairIntersection(a, b);
         const expected = {
           field1: [1],
         };
@@ -164,7 +164,7 @@ describe('buildAlert', () => {
         const b = {
           field1: [1, 2, 3],
         };
-        const intersection = objectArrayIntersection([a, b]);
+        const intersection = objectPairIntersection(a, b);
         const expected = {
           field1: [1],
         };
@@ -178,7 +178,7 @@ describe('buildAlert', () => {
         const b = {
           field1: [1, 2, 3],
         };
-        const intersection = objectArrayIntersection([a, b]);
+        const intersection = objectPairIntersection(a, b);
         const expected = {
           field1: [3],
         };
@@ -192,7 +192,7 @@ describe('buildAlert', () => {
         const b = {
           field1: [1, 2, 3, 4],
         };
-        const intersection = objectArrayIntersection([a, b]);
+        const intersection = objectPairIntersection(a, b);
         const expected = {
           field1: [3, 4],
         };
