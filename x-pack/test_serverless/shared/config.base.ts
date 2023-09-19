@@ -51,8 +51,6 @@ export default async () => {
       from: 'serverless',
       files: [idpPath, jwksPath],
       serverArgs: [
-        'http.host=0.0.0.0',
-
         'xpack.security.authc.realms.file.file1.order=-100',
         `xpack.security.authc.realms.native.native1.enabled=false`,
         `xpack.security.authc.realms.native.native1.order=-97`,
