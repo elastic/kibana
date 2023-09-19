@@ -28,6 +28,7 @@ import {
   EuiDataGridCustomBodyProps,
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
+import { EuiDataGridProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   useDataGridColumnsCellActions,
@@ -684,6 +685,8 @@ export const UnifiedDataTable = ({
         ? {
             allowDensity: false,
             allowRowHeight: true,
+            allowResetButton: false,
+            additionalDisplaySettings: <div>Example extra content</div>,
           }
         : undefined,
     [onUpdateRowHeight]
@@ -760,6 +763,33 @@ export const UnifiedDataTable = ({
     );
   }
 
+  const renderCustomToolbar: EuiDataGridProps['renderCustomToolbar'] = ({
+    columnControl,
+    columnSortingControl,
+    fullScreenControl,
+    keyboardShortcutsControl,
+    displayControl,
+  }) => {
+    return {
+      left: `${totalHits} documents`, // TODO: change to a correct hits count here (also for ES|QL)
+      right: (
+        <>
+          <div className="unifiedDataTable__toolbarControlGroup">
+            <div className="unifiedDataTable__toolbarControl">{columnControl}</div>
+          </div>
+          <div className="unifiedDataTable__toolbarControlGroup">
+            <div className="unifiedDataTable__toolbarControl">{columnSortingControl}</div>
+          </div>
+          <div className="unifiedDataTable__toolbarControlGroup">
+            <div className="unifiedDataTable__toolbarControl">{keyboardShortcutsControl}</div>
+            <div className="unifiedDataTable__toolbarControl">{displayControl}</div>
+            <div className="unifiedDataTable__toolbarControl">{fullScreenControl}</div>
+          </div>
+        </>
+      ),
+    };
+  };
+
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
       <span className="unifiedDataTable__inner">
@@ -791,6 +821,7 @@ export const UnifiedDataTable = ({
             inMemory={inMemory}
             gridStyle={GRID_STYLE}
             renderCustomGridBody={renderCustomGridBody}
+            renderCustomToolbar={renderCustomToolbar}
             trailingControlColumns={trailingControlColumns}
           />
         </div>

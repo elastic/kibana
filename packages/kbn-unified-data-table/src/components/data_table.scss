@@ -161,3 +161,18 @@
     display: none;
   }
 }
+
+.unifiedDataTable__toolbarControlGroup {
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeXS;
+  display: flex;
+  align-items: stretch;
+  flex-direction: row;
+}
+
+.unifiedDataTable__toolbarControl {
+  & + & {
+    border-left: $euiBorderThin;
+  }
+}
