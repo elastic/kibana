@@ -8,8 +8,7 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
-import { createEsClientForTesting } from '@kbn/test';
-import * as Url from 'url';
+import { createEsClientForFtrConfig } from '@kbn/test';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -36,22 +35,46 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
 
-  function createEsClientWithApiKeyAuth({ id, apiKey }: { id: string; apiKey: string }) {
-    return createEsClientForTesting({
-      esUrl: Url.format(config.get('servers.elasticsearch')),
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-      auth: { apiKey: { id, api_key: apiKey } },
+  const API_KEY_NAME = 'apm_api_key_testing';
+  const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
+  const APM_PACKAGE_POLICY_NAME = 'apm_package_policy_testing';
+
+  function createEsClientWithApiKey({ id, apiKey }: { id: string; apiKey: string }) {
+    return createEsClientForFtrConfig(config, { auth: { apiKey: { id, api_key: apiKey } } });
+  }
+
+  function createEsClientWithToken(token: string) {
+    return createEsClientForFtrConfig(config, { auth: { bearer: token } });
+  }
+
+  async function getApiKeyForServiceAccount(
+    serviceAccount: string,
+    permissions: SecurityRoleDescriptor
+  ) {
+    const { token } = await es.security.createServiceToken({
+      namespace: 'elastic',
+      service: serviceAccount,
+    });
+
+    const esClientScoped = createEsClientWithToken(token.value);
+    return esClientScoped.security.createApiKey({
+      body: {
+        name: API_KEY_NAME,
+        role_descriptors: {
+          apmFleetPermissions: permissions,
+        },
+      },
     });
   }
 
-  async function getSynthtraceClientForApiKey({
+  async function getSynthtraceClientWithApiKey({
     id,
     api_key: apiKey,
   }: {
     id: string;
     api_key: string;
   }) {
-    const esClient = createEsClientWithApiKeyAuth({ id, apiKey });
+    const esClient = createEsClientWithApiKey({ id, apiKey });
     const kibanaVersion = await synthtraceKibanaClient.fetchLatestApmPackageVersion();
     return new ApmSynthtraceEsClient({
       client: esClient,
@@ -78,9 +101,6 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       let agentPolicyId: string;
       let packagePolicyId: string;
       let permissions: SecurityRoleDescriptor;
-      const API_KEY_NAME = 'apm_api_key_testing';
-      const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
-      const APM_PACKAGE_POLICY_NAME = 'apm_package_policy_testing';
 
       async function cleanAll() {
         try {
@@ -92,7 +112,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
             packagePolicyName: APM_PACKAGE_POLICY_NAME,
           });
         } catch (e) {
-          // log.info('Could not clean', e.message);
+          log.info('Nothing to clean');
         }
       }
 
@@ -131,20 +151,16 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       it('can ingest APM data given the privileges specified in the agent policy', async () => {
-        const apiKeyRes = await es.security.createApiKey({
-          body: {
-            name: API_KEY_NAME,
-            role_descriptors: {
-              apmFleetPermissions: permissions,
-            },
-          },
-        });
-
         const scenario = getSynthtraceScenario();
-        const customSynthtraceEsClient = await getSynthtraceClientForApiKey(apiKeyRes);
-        await customSynthtraceEsClient.index(scenario.events);
-        const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
 
+        // get api key scoped to the specified permissions and created with the fleet-server service account. This ensures that the api key is not created with more permissions than fleet-server is able to.
+        const apiKey = await getApiKeyForServiceAccount('fleet-server', permissions);
+
+        // create a synthtrace client scoped to the api key. This verifies that the api key has permissions to write to the APM indices.
+        const scopedSynthtraceEsClient = await getSynthtraceClientWithApiKey(apiKey);
+        await scopedSynthtraceEsClient.index(scenario.events);
+
+        const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
         expect(apmServices).to.eql([
           {
             serviceName: 'opbeans-java',
@@ -203,6 +219,13 @@ function getSynthtraceScenario() {
           .timestamp(timestamp)
           .duration(5000)
           .success(),
+
+        opbeansJava
+          .transaction({ transactionName: 'tx-java' })
+          .timestamp(timestamp)
+          .duration(100)
+          .failure()
+          .errors(opbeansJava.error({ message: 'some error' }).timestamp(timestamp + 50)),
       ];
     });
 

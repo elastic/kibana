@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as Url from 'url';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_CONFIG_PATH,
@@ -17,7 +16,7 @@ import expect from '@kbn/expect';
 import { get } from 'lodash';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { createEsClientForTesting } from '@kbn/test';
+import { createEsClientForFtrConfig } from '@kbn/test';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
@@ -41,14 +40,10 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const bettertest = getBettertest(supertest);
+  const configService = getService('config');
 
   function createEsClientWithApiKeyAuth({ id, apiKey }: { id: string; apiKey: string }) {
-    const config = getService('config');
-    return createEsClientForTesting({
-      esUrl: Url.format(config.get('servers.elasticsearch')),
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-      auth: { apiKey: { id, api_key: apiKey } },
-    });
+    return createEsClientForFtrConfig(configService, { auth: { apiKey: { id, api_key: apiKey } } });
   }
 
   async function createConfiguration(configuration: any) {
