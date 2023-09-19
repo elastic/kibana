@@ -106,7 +106,7 @@ export const GroupEditorFlyout = ({
   );
   const onClose = () => (selectedAnnotation ? setSelectedAnnotation(undefined) : parentOnClose());
 
-  const showPreview = !useIsWithinBreakpoints(['xs', 's']);
+  const showPreview = !useIsWithinBreakpoints(['xs', 's', 'm']);
 
   return (
     <EuiFlyout
@@ -134,10 +134,9 @@ export const GroupEditorFlyout = ({
             <EuiTitle size="xs">
               <h2 id={flyoutHeadingId}>
                 {selectedAnnotation ? (
-                  <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="m">
+                  <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        iconSize="l"
                         color="text"
                         iconType="sortLeft"
                         aria-label={i18n.translate('eventAnnotationListing.edit.back', {

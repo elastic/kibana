@@ -83,17 +83,17 @@ export const GroupEditorControls = ({
   return !selectedAnnotation ? (
     <>
       <EuiTitle
-        size="xs"
+        size="xxs"
         css={css`
           margin-bottom: ${euiThemeVars.euiSize};
         `}
       >
-        <h4>
+        <h3>
           <FormattedMessage
             id="eventAnnotationListing.groupEditor.details"
             defaultMessage="Details"
           />
-        </h4>
+        </h3>
       </EuiTitle>
       <EuiForm>
         <EuiFormRow
@@ -214,17 +214,17 @@ export const GroupEditorControls = ({
         `}
       >
         <EuiTitle
-          size="xs"
+          size="xxs"
           css={css`
             margin-bottom: ${euiThemeVars.euiSize};
           `}
         >
-          <h4>
+          <h3>
             <FormattedMessage
               id="eventAnnotationListing.groupEditor.annotations"
               defaultMessage="Annotations"
             />
-          </h4>
+          </h3>
         </EuiTitle>
         <EuiForm>
           <EuiFormRow

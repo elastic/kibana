@@ -123,7 +123,7 @@ export const GroupPreview = ({
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h4
+              <h3
                 css={css`
                   white-space: nowrap;
                 `}
@@ -132,7 +132,7 @@ export const GroupPreview = ({
                   id="eventAnnotationListing.groupPreview.preview"
                   defaultMessage="Preview"
                 />
-              </h4>
+              </h3>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem
@@ -235,12 +235,12 @@ export const GroupPreview = ({
                 color="danger"
                 data-test-subj="missingDataViewPrompt"
                 title={
-                  <h2>
+                  <h4>
                     <FormattedMessage
                       id="eventAnnotationListing.groupPreview.missingDataViewTitle"
                       defaultMessage="Select a valid data view"
                     />
-                  </h2>
+                  </h4>
                 }
                 body={
                   <p>
