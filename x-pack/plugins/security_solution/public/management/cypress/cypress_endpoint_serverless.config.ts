@@ -17,6 +17,7 @@ export default defineCypressConfig({
   env: {
     ...CY_BASE_CONFIG.env,
 
+    IS_SERVERLESS: true,
     grepTags: '@serverless --@brokenInServerless',
 
     'cypress-react-selector': {
