@@ -230,7 +230,9 @@ describe('fetchCategories', () => {
   it('call registry with capabilities if configured', async () => {
     mockGetConfig.mockReturnValue({
       internal: {
-        capabilities: ['apm', 'security'],
+        registry: {
+          capabilities: ['apm', 'security'],
+        },
       },
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
@@ -238,6 +240,25 @@ describe('fetchCategories', () => {
     expect(mockFetchUrl).toBeCalledTimes(1);
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
+  });
+  it('call registry with spec.min spec.max if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          spec: {
+            min: '3.0.0',
+            max: '3.0.0',
+          },
+          capabilities: [],
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchCategories();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('spec.min')).toBe('3.0.0');
+    expect(callUrl.searchParams.get('spec.max')).toBe('3.0.0');
   });
   it('does not call registry with capabilities if none are configured', async () => {
     mockGetConfig.mockReturnValue({});
@@ -257,7 +278,9 @@ describe('fetchList', () => {
   it('call registry with capabilities if configured', async () => {
     mockGetConfig.mockReturnValue({
       internal: {
-        capabilities: ['apm', 'security'],
+        registry: {
+          capabilities: ['apm', 'security'],
+        },
       },
     });
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));
@@ -266,6 +289,25 @@ describe('fetchList', () => {
     const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
     expect(callUrl.searchParams.get('capabilities')).toBe('apm,security');
   });
+  it('call registry with spec.min spec.max if configured', async () => {
+    mockGetConfig.mockReturnValue({
+      internal: {
+        registry: {
+          spec: {
+            min: '3.0.0',
+            max: '3.0.0',
+          },
+        },
+      },
+    });
+    mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+    await fetchList();
+    expect(mockFetchUrl).toBeCalledTimes(1);
+    const callUrl = new URL(mockFetchUrl.mock.calls[0][0]);
+    expect(callUrl.searchParams.get('spec.min')).toBe('3.0.0');
+    expect(callUrl.searchParams.get('spec.max')).toBe('3.0.0');
+  });
+
   it('does not call registry with capabilities if none are configured', async () => {
     mockGetConfig.mockReturnValue({});
     mockFetchUrl.mockResolvedValue(JSON.stringify([]));

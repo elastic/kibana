@@ -27,7 +27,11 @@ xpack.fleet.agentIdVerificationEnabled: false
 xpack.apm.serverlessOnboarding: true
 
 # Fleet specific configuration
-xpack.fleet.internal.capabilities: ['apm', 'observability']
+xpack.fleet.internal.registry.capabilities: ['apm', 'observability']
+xpack.fleet.internal.registry.spec.max: '3.0.0'
+# Disabled until packages implement the new spec TODO github issue
+# xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+# xpack.fleet.internal.registry.spec.min: '3.0.0'
 
 ## Required for force installation of APM Package
 xpack.fleet.packages:
