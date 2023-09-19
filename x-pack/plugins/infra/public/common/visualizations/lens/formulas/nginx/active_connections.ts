@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
-export const activeConnections: FormulaValueConfig = {
-  label: 'Active Connections',
+export const nginxActiveConnections: FormulaValueConfig = {
+  label: i18n.translate('xpack.infra.assetDetails.formulas.nginx.activeConnections', {
+    defaultMessage: 'Active Connections',
+  }),
   value: 'average(nginx.stubstatus.active)',
   format: {
     id: 'number',
