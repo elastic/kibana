@@ -10,16 +10,6 @@ import { getRiskEntityTranslation } from '../../../../explore/components/risk_sc
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 export * from '../../../../explore/components/risk_score/translations';
 
-export const ENTITY_RISK_TOOLTIP = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.riskToolTip', {
-    defaultMessage:
-      '{riskEntity} risk classification is determined by {riskEntityLowercase} risk score. {riskEntity}s classified as Critical or High are indicated as risky.',
-    values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
-      riskEntityLowercase: getRiskEntityTranslation(riskEntity, true),
-    },
-  });
-
 export const ENTITY_NAME = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.nameTitle', {
     defaultMessage: '{riskEntity} Name',
@@ -35,12 +25,13 @@ export const VIEW_ALL = i18n.translate(
   }
 );
 
-export const LEARN_MORE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.riskDashboard.learnMore',
-  {
-    defaultMessage: 'Learn more',
-  }
-);
+export const LEARN_MORE = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.riskDashboard.learnMore', {
+    defaultMessage: 'Learn more about {riskEntity} risk',
+    values: {
+      riskEntity: getRiskEntityTranslation(riskEntity, true),
+    },
+  });
 
 export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.entityAnalytics.riskDashboard.hostsTableTooltip',

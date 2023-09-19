@@ -154,50 +154,51 @@ const RiskDetailsTabBodyComponent: React.FC<
     return <RiskScoresNoDataDetected entityType={riskEntity} refetch={refetch} />;
   }
 
-  return (
-    <>
-      {isNewRiskScoreModuleAvailable ? (
-        <StyledEuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            {data?.[0] && (
-              <TopRiskScoreContributorsAlerts
-                toggleStatus={contributorsToggleStatus}
-                toggleQuery={toggleContributorsQuery}
-                riskScore={data[0]}
-                riskEntity={riskEntity}
-                loading={loading}
-              />
-            )}
-          </EuiFlexItem>
-        </StyledEuiFlexGroup>
-      ) : (
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem grow={2}>
-            <RiskScoreOverTime
-              from={startDate}
-              loading={loading}
-              queryId={queryId}
-              riskEntity={riskEntity}
-              riskScore={data}
-              title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
-              to={endDate}
-              toggleQuery={toggleOverTimeQuery}
-              toggleStatus={overTimeToggleStatus}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={1}>
-            <TopRiskScoreContributors
-              loading={loading}
-              queryId={queryId}
+  if (isNewRiskScoreModuleAvailable) {
+    return (
+      <StyledEuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          {data?.[0] && (
+            <TopRiskScoreContributorsAlerts
               toggleStatus={contributorsToggleStatus}
               toggleQuery={toggleContributorsQuery}
-              rules={rules}
+              riskScore={data[0]}
+              riskEntity={riskEntity}
+              loading={loading}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+          )}
+        </EuiFlexItem>
+      </StyledEuiFlexGroup>
+    );
+  }
 
+  return (
+    <>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={2}>
+          <RiskScoreOverTime
+            from={startDate}
+            loading={loading}
+            queryId={queryId}
+            riskEntity={riskEntity}
+            riskScore={data}
+            title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
+            to={endDate}
+            toggleQuery={toggleOverTimeQuery}
+            toggleStatus={overTimeToggleStatus}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={1}>
+          <TopRiskScoreContributors
+            loading={loading}
+            queryId={queryId}
+            toggleStatus={contributorsToggleStatus}
+            toggleQuery={toggleContributorsQuery}
+            rules={rules}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <StyledEuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton

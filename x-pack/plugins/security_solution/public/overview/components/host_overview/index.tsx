@@ -37,9 +37,13 @@ import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { useRiskScore } from '../../../explore/containers/risk_score';
-import { RiskScore } from '../../../explore/components/risk_score/severity/common';
+import {
+  RiskScoreLevel,
+  RiskScoreValue,
+} from '../../../explore/components/risk_score/severity/common';
 import { RiskScoreHeaderTitle } from '../../../explore/components/risk_score/risk_score_onboarding/risk_score_header_title';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { RiskScoreDocTooltip } from '../common';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -130,23 +134,35 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
           description: (
             <>
-              {hostRiskData
-                ? Math.round(hostRiskData.host.risk.calculated_score_norm)
-                : getEmptyTagValue()}
+              {hostRiskData ? (
+                <RiskScoreValue score={hostRiskData.host.risk.calculated_score_norm} />
+              ) : (
+                getEmptyTagValue()
+              )}
             </>
           ),
         },
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.HOST_RISK_CLASSIFICATION}
-              riskScoreEntity={RiskScoreEntity.host}
-            />
+            <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <RiskScoreHeaderTitle
+                  title={i18n.HOST_RISK_LEVEL}
+                  riskScoreEntity={RiskScoreEntity.host}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
           description: (
             <>
               {hostRiskData ? (
-                <RiskScore severity={hostRiskData.host.risk.calculated_level} hideBackgroundColor />
+                <RiskScoreLevel
+                  severity={hostRiskData.host.risk.calculated_level}
+                  hideBackgroundColor
+                />
               ) : (
                 getEmptyTagValue()
               )}

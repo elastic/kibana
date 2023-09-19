@@ -31,6 +31,7 @@ import type {
   UserRiskScore,
 } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskInformationButtonEmpty } from '../../../components/risk_score/risk_information';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -168,40 +169,49 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   );
 
   return (
-    <PaginatedTable
-      activePage={activePage}
-      columns={columns}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerFilters={
-        <SeverityFilterGroup
-          selectedSeverities={severitySelectionRedux}
-          severityCount={severityCount}
-          onSelect={onSelect}
-          riskEntity={RiskScoreEntity.user}
-        />
-      }
-      headerSupplement={risk}
-      headerTitle={i18nUsers.NAVIGATION_RISK_TITLE}
-      headerTooltip={i18n.USER_RISK_TABLE_TOOLTIP}
-      headerUnit={i18n.UNIT(totalCount)}
-      id={id}
-      isInspect={isInspect}
-      itemsPerRow={rowItems}
-      limit={limit}
-      loading={loading}
-      loadPage={loadPage}
-      onChange={onSort}
-      pageOfItems={data}
-      setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={false}
-      sorting={sort}
-      split={true}
-      stackHeader={true}
-      totalCount={totalCount}
-      updateLimitPagination={updateLimitPagination}
-      updateActivePage={updateActivePage}
-    />
+    <>
+      <PaginatedTable
+        activePage={activePage}
+        columns={columns}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerFilters={
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.user} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SeverityFilterGroup
+                selectedSeverities={severitySelectionRedux}
+                severityCount={severityCount}
+                onSelect={onSelect}
+                riskEntity={RiskScoreEntity.user}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        headerSupplement={risk}
+        headerTitle={i18nUsers.NAVIGATION_RISK_TITLE}
+        headerTooltip={i18n.USER_RISK_TABLE_TOOLTIP}
+        headerUnit={i18n.UNIT(totalCount)}
+        id={id}
+        isInspect={isInspect}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        onChange={onSort}
+        pageOfItems={data}
+        setQuerySkip={setQuerySkip}
+        showMorePagesIndicator={false}
+        sorting={sort}
+        split={true}
+        stackHeader={true}
+        totalCount={totalCount}
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
+      />
+    </>
   );
 };
 
