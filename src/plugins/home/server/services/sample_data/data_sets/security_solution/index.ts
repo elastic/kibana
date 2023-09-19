@@ -37,9 +37,7 @@ const securitysolutionIngestPipelineDescription = i18n.translate(
   }
 );
 
-export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSchema = function (
-  spaceId = 'default'
-): SampleDatasetSchema {
+export const securitySolutionSpecProvider = function (spaceId = 'default'): SampleDatasetSchema {
   return {
     id: 'securitysolution',
     name: securitysolutionName,
@@ -92,7 +90,7 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
           default_pipeline: 'Security_Solution_logs_sample_data_ingest_pipeline',
           mapping: {
             total_fields: {
-              limit: 10000,
+              limit: 6000,
             },
           },
         },
@@ -162,7 +160,7 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
           default_pipeline: 'Security_Solution_alerts_sample_data_ingest_pipeline',
           mapping: {
             total_fields: {
-              limit: 10000,
+              limit: 6000,
             },
           },
         },
@@ -188,6 +186,13 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
               set: {
                 field: 'kibana.alert.severity',
                 value: ['critical'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'kibana.alert.rule.uuid',
+                value: ['6cd9adb6-f751-4add-868f-cfce6e408f32'],
                 ignore_failure: true,
               },
             },
@@ -223,6 +228,13 @@ export const securitySolutionSpecProvider: (spaceId?: string) => SampleDatasetSc
               set: {
                 field: 'updated_at',
                 value: ['{{ _ingest.timestamp }}'],
+                ignore_failure: true,
+              },
+            },
+            {
+              set: {
+                field: 'event.ingested',
+                value: ['{{_ingest.timestamp}}'],
                 ignore_failure: true,
               },
             },
