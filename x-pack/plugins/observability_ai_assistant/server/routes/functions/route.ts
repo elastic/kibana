@@ -11,6 +11,10 @@ import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import {
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { KnowledgeBaseEntry } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
@@ -79,6 +83,7 @@ const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
       }),
       t.partial({
         filter: t.string,
+        includeRecovered: toBooleanRt,
       }),
     ]),
   }),
@@ -95,6 +100,7 @@ const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
       start: startAsDatemath,
       end: endAsDatemath,
       filter,
+      includeRecovered,
     } = resources.params.body;
 
     const racContext = await resources.context.rac;
@@ -120,6 +126,15 @@ const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
               },
             },
             ...kqlQuery,
+            ...(!includeRecovered
+              ? [
+                  {
+                    term: {
+                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+                    },
+                  },
+                ]
+              : []),
           ],
         },
       },
@@ -163,7 +178,7 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
 });
 
 const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/summarise',
+  endpoint: 'POST /internal/observability_ai_assistant/functions/summarize',
   params: t.type({
     body: t.type({
       id: t.string,
@@ -193,7 +208,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       labels,
     } = resources.params.body;
 
-    return client.summarise({
+    return client.summarize({
       entry: {
         confidence,
         id,

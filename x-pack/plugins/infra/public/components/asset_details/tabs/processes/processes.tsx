@@ -12,13 +12,13 @@ import {
   EuiSearchBar,
   EuiEmptyPrompt,
   EuiButton,
-  EuiIconTip,
   EuiTitle,
   Query,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { parseSearchString } from './parse_search_string';
 import { ProcessesTable } from './processes_table';
 import { STATE_NAMES } from './states';
@@ -31,7 +31,9 @@ import {
 import { getFieldByType } from '../../../../../common/inventory_models';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDateRangeProviderContext } from '../../hooks/use_date_range';
+import { ProcessesExplanationMessage } from '../../components/processes_explanation';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { TopProcessesTooltip } from '../../components/top_processes_tooltip';
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
   value,
@@ -44,6 +46,7 @@ export const Processes = () => {
   const { asset, assetType } = useAssetDetailsRenderPropsContext();
 
   const [searchText, setSearchText] = useState(urlState?.processSearch ?? '');
+  const [searchQueryError, setSearchQueryError] = useState<Error | null>(null);
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
     searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
@@ -69,22 +72,28 @@ export const Processes = () => {
 
   const debouncedSearchOnChange = useMemo(() => {
     return debounce<(queryText: string) => void>((queryText) => {
-      setUrlState({ processSearch: queryText });
       setSearchText(queryText);
     }, 500);
-  }, [setUrlState]);
+  }, []);
 
   const searchBarOnChange = useCallback(
-    ({ query, queryText }) => {
-      setSearchBarState(query);
-      debouncedSearchOnChange(queryText);
+    ({ query, queryText, error: queryError }) => {
+      if (queryError) {
+        setSearchQueryError(queryError);
+      } else {
+        setUrlState({ processSearch: queryText });
+        setSearchQueryError(null);
+        setSearchBarState(query);
+        debouncedSearchOnChange(queryText);
+      }
     },
-    [debouncedSearchOnChange]
+    [debouncedSearchOnChange, setUrlState]
   );
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
     setUrlState({ processSearch: '' });
+    setSearchQueryError(null);
     setSearchText('');
   }, [setUrlState]);
 
@@ -110,26 +119,15 @@ export const Processes = () => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIconTip
-                aria-label={i18n.translate(
-                  'xpack.infra.metrics.nodeDetails.processesHeader.tooltipLabel',
-                  {
-                    defaultMessage: 'More info',
-                  }
-                )}
-                size="m"
-                type="iInCircle"
-                content={i18n.translate(
-                  'xpack.infra.metrics.nodeDetails.processesHeader.tooltipBody',
-                  {
-                    defaultMessage:
-                      'The table below aggregates the top CPU and top memory consuming processes. It does not display all processes.',
-                  }
-                )}
-              />
+              <TopProcessesTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {loading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          !error && (response?.processList ?? []).length > 0 && <ProcessesExplanationMessage />
+        )}
         <EuiFlexItem grow={false}>
           <EuiSearchBar
             query={searchBarState}
@@ -160,6 +158,7 @@ export const Processes = () => {
               isLoading={loading || !response}
               processList={response?.processList ?? []}
               sortBy={sortBy}
+              error={searchQueryError?.message}
               setSortBy={setSortBy}
               clearSearchBar={clearSearchBar}
             />

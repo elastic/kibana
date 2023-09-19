@@ -20,7 +20,8 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../../objects/timeline';
 import { cleanKibana } from '../../../tasks/common';
 
-describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165744
+describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();

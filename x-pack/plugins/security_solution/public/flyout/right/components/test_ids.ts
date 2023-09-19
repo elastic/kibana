@@ -99,7 +99,7 @@ export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID = `${ENTITIES_HOST_OVERVI
 export const TECHNICAL_PREVIEW_ICON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutTechnicalPreviewIcon';
 
-/* Insights Threat Intelligence */
+/* Insights Threat intelligence */
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsThreatIntelligence';
@@ -109,23 +109,19 @@ export const INSIGHTS_THREAT_INTELLIGENCE_CONTAINER_TEST_ID = `${INSIGHTS_THREAT
 
 export const INSIGHTS_CORRELATIONS_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsCorrelations';
-export const INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsSupressedAlerts';
-export const SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutSupressedAlertsTechnicalPreview';
-export const INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedCases';
-export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedAlertsBySession';
-export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedAlertsBySameSourceEvent';
-export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
-  'securitySolutionDocumentDetailsFlyoutInsightsCorrelationsRelatedAlertsByAncestry';
+export const INSIGHTS_CORRELATIONS_NO_DATA_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}NoData`;
+export const INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}SuppressedAlerts`;
+export const INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TECHNICAL_PREVIEW_TEST_ID = `${INSIGHTS_CORRELATIONS_SUPPRESSED_ALERTS_TEST_ID}TechnicalPreview`;
+export const INSIGHTS_CORRELATIONS_RELATED_CASES_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}RelatedCases`;
+export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SESSION_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}RelatedAlertsBySession`;
+export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}RelatedAlertsBySameSourceEvent`;
+export const INSIGHTS_CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID = `${INSIGHTS_CORRELATIONS_TEST_ID}RelatedAlertsByAncestry`;
 
 /* Insights Prevalence */
 
 export const INSIGHTS_PREVALENCE_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutInsightsPrevalence';
+export const INSIGHTS_PREVALENCE_NO_DATA_TEST_ID = `${INSIGHTS_PREVALENCE_TEST_ID}NoData`;
 
 /* Visualizations section */
 
@@ -133,7 +129,10 @@ export const VISUALIZATIONS_SECTION_TEST_ID = 'securitySolutionDocumentDetailsVi
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
 export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalyzerPreview';
+export const ANALYZER_PREVIEW_NO_DATA_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}NoData`;
 export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
+export const SESSION_PREVIEW_UPSELL_TEST_ID = `${SESSION_PREVIEW_TEST_ID}UpSell`;
+export const SESSION_PREVIEW_NO_DATA_TEST_ID = `${SESSION_PREVIEW_TEST_ID}NoData`;
 
 /* Response section */
 

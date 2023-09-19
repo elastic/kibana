@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiHorizontalRule, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import {
-  LandingLinksIcons,
+  LandingLinksIconsCategories,
   LandingLinksIconsCategoriesGroups,
 } from '@kbn/security-solution-navigation/landing_links';
-import type { AccordionLinkCategory } from '@kbn/security-solution-navigation';
+import type { AccordionLinkCategory, NavigationLink } from '@kbn/security-solution-navigation';
 import {
   isAccordionLinkCategory,
   isSeparatorLinkCategory,
@@ -25,11 +25,19 @@ export const ProjectSettingsRoute: React.FC = () => {
   const projectSettingsLink = useNavLink(SecurityPageName.projectSettings);
   const { links = [], categories = [], title } = projectSettingsLink ?? {};
 
-  const iconLinkIds =
-    categories.find((category) => isSeparatorLinkCategory(category))?.linkIds ?? [];
-  const iconLinks = links.filter(({ id }) => iconLinkIds.includes(id));
+  const iconLinks = categories.reduce<NavigationLink[]>((acc, category) => {
+    if (isSeparatorLinkCategory(category)) {
+      const categoryLinks = links.filter(({ id }) => category.linkIds.includes(id));
+
+      acc.push(...categoryLinks);
+    }
+    return acc;
+  }, []);
 
   const accordionCategories = (categories.filter((category) => isAccordionLinkCategory(category)) ??
+    []) as AccordionLinkCategory[];
+
+  const separatorCategories = (categories.filter((category) => isSeparatorLinkCategory(category)) ??
     []) as AccordionLinkCategory[];
 
   return (
@@ -39,7 +47,7 @@ export const ProjectSettingsRoute: React.FC = () => {
           <EuiPageHeader pageTitle={title} />
           <EuiSpacer size="l" />
           <EuiSpacer size="xl" />
-          <LandingLinksIcons items={iconLinks} />
+          <LandingLinksIconsCategories links={iconLinks} categories={separatorCategories} />
           <EuiSpacer size="l" />
           <EuiHorizontalRule />
           <LandingLinksIconsCategoriesGroups links={links} categories={accordionCategories} />

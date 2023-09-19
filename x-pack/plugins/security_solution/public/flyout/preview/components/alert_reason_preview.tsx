@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { ALERT_REASON_TITLE } from './translations';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_REASON_PREVIEW_BODY_TEST_ID } from './test_ids';
 import { usePreviewPanelContext } from '../context';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
@@ -29,16 +29,13 @@ export const AlertReasonPreview: React.FC = () => {
   const { dataAsNestedObject, scopeId } = usePreviewPanelContext();
 
   const renderer = useMemo(
-    () =>
-      dataAsNestedObject != null
-        ? getRowRenderer({ data: dataAsNestedObject, rowRenderers: defaultRowRenderers })
-        : null,
+    () => getRowRenderer({ data: dataAsNestedObject, rowRenderers: defaultRowRenderers }),
     [dataAsNestedObject]
   );
 
   const rowRenderer = useMemo(
     () =>
-      renderer && dataAsNestedObject
+      renderer
         ? renderer.renderRow({
             contextId: 'event-details',
             data: dataAsNestedObject,
@@ -49,14 +46,19 @@ export const AlertReasonPreview: React.FC = () => {
     [renderer, dataAsNestedObject, scopeId]
   );
 
-  if (!dataAsNestedObject || !renderer) {
+  if (!renderer) {
     return null;
   }
 
   return (
     <EuiPanel hasShadow={false} data-test-subj={ALERT_REASON_PREVIEW_BODY_TEST_ID}>
       <EuiTitle>
-        <h6>{ALERT_REASON_TITLE}</h6>
+        <h6>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.preview.alertReason.panelTitle"
+            defaultMessage="Alert reason"
+          />
+        </h6>
       </EuiTitle>
       <EuiSpacer size="m" />
       <ReasonPreviewContainerWrapper>

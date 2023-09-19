@@ -5,19 +5,29 @@
  * 2.0.
  */
 
+import { CreateEndpointListItemResponse } from '@kbn/lists-plugin/common/api';
 import type {
   ExceptionListSchema,
   ExceptionListItemSchema,
+  CreateEndpointListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ITEM_URL, ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 import type { ExceptionList, ExceptionListItem, RuleExceptionItem } from '../../objects/exception';
 import { rootRequest } from '../common';
 
-export const createEndpointExceptionList = <T = unknown>() =>
-  rootRequest<T>({
+export const createEndpointExceptionList = () =>
+  rootRequest<ExceptionListSchema>({
     method: 'POST',
-    url: '/api/endpoint_list',
+    url: ENDPOINT_LIST_URL,
     headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
-    failOnStatusCode: false,
+  });
+
+export const createEndpointExceptionListItem = (item: CreateEndpointListItemSchema) =>
+  rootRequest<CreateEndpointListItemResponse>({
+    method: 'POST',
+    url: ENDPOINT_LIST_ITEM_URL,
+    body: item,
+    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 
 export const createExceptionList = (

@@ -49,11 +49,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const navigateTo = async (path: string) =>
     await browser.navigateTo(`${deployment.getHostPort()}${path}`);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/127545
-  describe.skip('ui applications', function describeIndexTests() {
+  describe('ui applications', function describeIndexTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');
+      await PageObjects.common.dismissBanner();
     });
 
     it('starts on home page', async () => {
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
 
       const wrapperHeight = await getAppWrapperHeight();
-      const windowHeight = (await browser.getWindowSize()).height;
+      const windowHeight = (await browser.getWindowInnerSize()).height;
       expect(wrapperHeight).to.eql(windowHeight);
     });
 
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
 
       const wrapperHeight = await getAppWrapperHeight();
-      const windowHeight = (await browser.getWindowSize()).height;
+      const windowHeight = (await browser.getWindowInnerSize()).height;
       expect(wrapperHeight).to.be.below(windowHeight);
     });
   });

@@ -376,7 +376,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
-
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       esClient,
@@ -394,6 +393,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };

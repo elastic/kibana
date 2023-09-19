@@ -5,13 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  AggregateQuery,
+  isOfAggregateQueryType,
+  getAggregateQueryMode,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { computeInterval } from './compute_interval';
+const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
 export const useLensSuggestions = ({
   dataView,
@@ -19,6 +27,8 @@ export const useLensSuggestions = ({
   originalSuggestion,
   isPlainRecord,
   columns,
+  data,
+  timeRange,
   lensSuggestionsApi,
   onSuggestionChange,
 }: {
@@ -27,6 +37,8 @@ export const useLensSuggestions = ({
   originalSuggestion?: Suggestion;
   isPlainRecord?: boolean;
   columns?: DatatableColumn[];
+  data: DataPublicPluginStart;
+  timeRange?: TimeRange;
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
 }) => {
@@ -50,6 +62,63 @@ export const useLensSuggestions = ({
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
 
+  const histogramSuggestion = useMemo(() => {
+    if (
+      !currentSuggestion &&
+      dataView.isTimeBased() &&
+      query &&
+      isOfAggregateQueryType(query) &&
+      getAggregateQueryMode(query) === 'esql' &&
+      timeRange
+    ) {
+      let queryHasTransformationalCommands = false;
+      if ('esql' in query) {
+        TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
+          if (query.esql.toLowerCase().includes(command)) {
+            queryHasTransformationalCommands = true;
+            return;
+          }
+        });
+      }
+
+      if (queryHasTransformationalCommands) return undefined;
+
+      const interval = computeInterval(timeRange, data);
+      const language = getAggregateQueryMode(query);
+      const histogramQuery = `${query[language]} | eval uniqueName = 1
+        | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(uniqueName) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+      const context = {
+        dataViewSpec: dataView?.toSpec(),
+        fieldName: '',
+        textBasedColumns: [
+          {
+            id: `${dataView.timeFieldName} every ${interval}`,
+            name: `${dataView.timeFieldName} every ${interval}`,
+            meta: {
+              type: 'date',
+            },
+          },
+          {
+            id: 'rows',
+            name: 'rows',
+            meta: {
+              type: 'number',
+            },
+          },
+        ] as DatatableColumn[],
+        query: {
+          esql: histogramQuery,
+        },
+      };
+      const sug = lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
+      if (sug.length) {
+        return sug[0];
+      }
+      return undefined;
+    }
+    return undefined;
+  }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
+
   useEffect(() => {
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
 
@@ -70,8 +139,9 @@ export const useLensSuggestions = ({
 
   return {
     allSuggestions,
-    currentSuggestion,
-    suggestionUnsupported: !currentSuggestion && !dataView.isTimeBased(),
+    currentSuggestion: histogramSuggestion ?? currentSuggestion,
+    suggestionUnsupported: !currentSuggestion && !histogramSuggestion && isPlainRecord,
+    isOnHistogramMode: Boolean(histogramSuggestion),
   };
 };
 

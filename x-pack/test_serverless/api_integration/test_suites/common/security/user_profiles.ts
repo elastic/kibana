@@ -17,6 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   describe('security/user_profiles', function () {
     describe('route access', () => {
       describe('internal', () => {
+        // When we run tests on MKI, SAML realm is configured differently, and we cannot handcraft SAML responses to
+        // log in as SAML users.
+        this.tags(['skipMKI']);
+
         it('update', async () => {
           const { status } = await supertestWithoutAuth
             .post(`/internal/security/user_profile/_data`)

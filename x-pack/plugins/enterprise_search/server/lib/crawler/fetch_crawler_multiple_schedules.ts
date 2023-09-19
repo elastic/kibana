@@ -7,8 +7,9 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { Connector } from '@kbn/search-connectors';
+
 import { CONNECTORS_INDEX } from '../..';
-import { Connector } from '../../../common/types/connectors';
 
 const CUSTOM_SCHEDULING = 'custom_scheduling';
 

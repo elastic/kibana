@@ -120,6 +120,15 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_onboarding/])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/observability_onboarding_cypress.yml')
+      );
+    }
+
+    if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/profiling/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -132,6 +141,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
     if (

@@ -7,7 +7,7 @@
 
 import * as Boom from '@hapi/boom';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server/plugin';
-import { createConcreteWriteIndex } from '@kbn/alerting-plugin/server';
+import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
@@ -147,6 +147,7 @@ export class ObservabilityAIAssistantService {
           name: `${conversationAliasName}-000001`,
           template: this.resourceNames.indexTemplate.conversations,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       await esClient.cluster.putComponentTemplate({
@@ -203,6 +204,7 @@ export class ObservabilityAIAssistantService {
           name: `${kbAliasName}-000001`,
           template: this.resourceNames.indexTemplate.kb,
         },
+        dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
       this.kbService = new KnowledgeBaseService({

@@ -20,7 +20,7 @@ jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallbac
 
 describe('<HighlightedFields />', () => {
   beforeEach(() => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: [] });
+    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: undefined });
   });
 
   it('should render the component', () => {
@@ -52,26 +52,6 @@ describe('<HighlightedFields />', () => {
       scopeId: 'scopeId',
     } as unknown as RightPanelContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({});
-
-    const { container } = render(
-      <RightPanelContext.Provider value={panelContextValue}>
-        <HighlightedFields />
-      </RightPanelContext.Provider>
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it('should render empty component if dataFormattedForFieldBrowser is null', () => {
-    const panelContextValue = {
-      dataFormattedForFieldBrowser: null,
-      scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
-    (useHighlightedFields as jest.Mock).mockReturnValue({
-      field: {
-        values: ['value'],
-      },
-    });
 
     const { container } = render(
       <RightPanelContext.Provider value={panelContextValue}>

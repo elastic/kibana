@@ -11,7 +11,7 @@ export interface AlertSummaryField {
   label: ReactNode | string;
   value: ReactNode | string | number;
 }
-export interface AlertSummaryProps {
+interface AlertSummaryProps {
   alertSummaryFields?: AlertSummaryField[];
 }
 

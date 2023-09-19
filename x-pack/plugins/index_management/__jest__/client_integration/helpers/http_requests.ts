@@ -94,14 +94,23 @@ const registerHttpRequestMockHelpers = (
   const setCreateTemplateResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setLoadIndexSettingsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/settings/:name`, response, error);
+  const setLoadIndexSettingsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/settings/${indexName}`, response, error);
 
-  const setLoadIndexMappingResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/mapping/:name`, response, error);
+  const setLoadIndexMappingResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/mapping/${indexName}`, response, error);
 
-  const setLoadIndexStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/stats/:name`, response, error);
+  const setLoadIndexStatsResponse = (
+    indexName: string,
+    response?: HttpResponse,
+    error?: ResponseError
+  ) => mockResponse('GET', `${API_BASE_PATH}/stats/${indexName}`, response, error);
 
   const setUpdateIndexSettingsResponse = (
     indexName: string,
@@ -127,6 +136,9 @@ const registerHttpRequestMockHelpers = (
     error?: ResponseError
   ) => mockResponse('GET', `${INTERNAL_API_BASE_PATH}/indices/${indexName}`, response, error);
 
+  const setCreateIndexResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('PUT', `${INTERNAL_API_BASE_PATH}/indices/create`, response, error);
+
   return {
     setLoadTemplatesResponse,
     setLoadIndicesResponse,
@@ -146,6 +158,7 @@ const registerHttpRequestMockHelpers = (
     setLoadNodesPluginsResponse,
     setLoadTelemetryResponse,
     setLoadIndexDetailsResponse,
+    setCreateIndexResponse,
   };
 };
 

@@ -31,6 +31,7 @@ import {
 import { LOADING_SPINNER, CONFIRM_MODAL } from '../screens/navigation';
 import { ADD_PACKAGE_POLICY_BTN } from '../screens/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { API_VERSIONS } from '../../common/constants';
 
 function setupIntegrations() {
   cy.intercept(
@@ -48,6 +49,28 @@ function setupIntegrations() {
 
   navigateTo(INTEGRATIONS);
   cy.wait('@packages');
+}
+
+// Infinite scroll
+function getAllIntegrations() {
+  const cardItems = new Set<string>();
+
+  for (let i = 0; i < 10; i++) {
+    cy.scrollTo(0, i * 600);
+    cy.wait(50);
+    cy.getBySel(INTEGRATION_LIST)
+      .find('.euiCard')
+      .each((element) => {
+        const attrValue = element.attr('data-test-subj');
+        if (attrValue) {
+          cardItems.add(attrValue);
+        }
+      });
+  }
+
+  return cy.then(() => {
+    return [...cardItems.values()];
+  });
 }
 
 it('should install integration without policy', () => {
@@ -113,7 +136,7 @@ describe('Add Integration - Real API', () => {
         namespace: 'default',
         monitoring_enabled: ['logs', 'metrics'],
       },
-      headers: { 'kbn-xsrf': 'cypress' },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
     });
 
     cy.request('/api/fleet/agent_policies').then((response: any) => {
@@ -175,10 +198,15 @@ describe('Add Integration - Real API', () => {
     cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 29);
+
+    getAllIntegrations().then((items) => {
+      expect(items).to.have.length.greaterThan(29);
+    });
 
     cy.getBySel(INTEGRATIONS_SEARCHBAR.INPUT).clear().type('Cloud');
-    cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 3);
+    getAllIntegrations().then((items) => {
+      expect(items).to.have.length.greaterThan(3);
+    });
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
   });

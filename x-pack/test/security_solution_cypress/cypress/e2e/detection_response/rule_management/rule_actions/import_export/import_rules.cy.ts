@@ -17,7 +17,8 @@ import { login, visitWithoutDateRange } from '../../../../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../../urls/navigation';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-describe('Import rules', { tags: ['@ess', '@brokenInServerless'] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161540
+describe('Import rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
   });

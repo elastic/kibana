@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { sumBy } from 'lodash';
-import { createFrameGroupID, FrameGroupID } from './frame_group';
-import {
-  createStackFrameMetadata,
-  emptyExecutable,
-  emptyStackFrame,
-  emptyStackTrace,
+import type {
   Executable,
   FileID,
+  FrameGroupID,
   StackFrame,
   StackFrameID,
   StackFrameMetadata,
   StackTrace,
   StackTraceID,
-} from './profiling';
+} from '@kbn/profiling-utils';
+import {
+  createFrameGroupID,
+  createStackFrameMetadata,
+  emptyExecutable,
+  emptyStackFrame,
+  emptyStackTrace,
+} from '@kbn/profiling-utils';
+import * as t from 'io-ts';
+import { sumBy } from 'lodash';
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;

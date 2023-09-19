@@ -27,6 +27,8 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiTableRow } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { FORMATTERS } from '../../../../../common/formatters';
 import type { SortBy } from '../../../../pages/metrics/inventory_view/hooks/use_process_list';
 import type { Process } from './types';
@@ -40,6 +42,7 @@ interface TableProps {
   currentTime: number;
   isLoading: boolean;
   sortBy: SortBy;
+  error?: string;
   setSortBy: (s: SortBy) => void;
   clearSearchBar: () => void;
 }
@@ -73,6 +76,7 @@ export const ProcessesTable = ({
   currentTime,
   isLoading,
   sortBy,
+  error,
   setSortBy,
   clearSearchBar,
 }: TableProps) => {
@@ -182,7 +186,11 @@ export const ProcessesTable = ({
           }
         `}
       >
-        <ProcessesTableBody items={currentItems} currentTime={currentTime} />
+        {error ? (
+          <ProcessesTableError error={error} />
+        ) : (
+          <ProcessesTableBody items={currentItems} currentTime={currentTime} />
+        )}
       </EuiTableBody>
     </EuiTable>
   );
@@ -202,6 +210,32 @@ const LoadingPlaceholder = () => {
     >
       <EuiLoadingChart size="xl" />
     </div>
+  );
+};
+
+interface ProcessesTableErrorProps {
+  error: string;
+}
+
+const ProcessesTableError = ({ error }: ProcessesTableErrorProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiTableRow>
+      <EuiTableRowCell
+        data-test-subj="infraAssetDetailsProcessesSearchInputError"
+        style={{
+          paddingTop: `${euiTheme.size.s}`,
+          paddingBottom: `${euiTheme.size.s}`,
+        }}
+        align="center"
+        colSpan={columns.length + 1}
+        mobileOptions={{ width: '100%' }}
+        textOnly={true}
+      >
+        <EuiIcon type="minusInCircle" color="danger" /> {error}
+      </EuiTableRowCell>
+    </EuiTableRow>
   );
 };
 

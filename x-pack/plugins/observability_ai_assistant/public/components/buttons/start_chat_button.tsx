@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 
 export function StartChatButton(props: React.ComponentProps<typeof EuiButton>) {
   return (
-    <EuiButton {...props} fill iconType="discuss" size="s">
+    <EuiButton
+      data-test-subj="observabilityAiAssistantStartChatButton"
+      fill
+      iconType="discuss"
+      size="s"
+      {...props}
+    >
       {i18n.translate('xpack.observabilityAiAssistant.insight.response.startChat', {
         defaultMessage: 'Start chat',
       })}

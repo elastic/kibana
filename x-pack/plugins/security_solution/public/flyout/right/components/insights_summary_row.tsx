@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { ReactElement, VFC } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSkeletonText } from '@elastic/eui';
@@ -31,7 +31,7 @@ export interface InsightsSummaryRowProps {
   /**
    * Text corresponding of the number of results/entries
    */
-  text: string;
+  text: string | ReactElement;
   /**
    * Optional parameter for now, will be used to display a dot on the right side
    * (corresponding to some sort of severity?)
@@ -45,7 +45,7 @@ export interface InsightsSummaryRowProps {
 
 /**
  * Panel showing summary information as an icon, a count and text as well as a severity colored dot.
- * Should be used for Entities, Threat Intelligence, Prevalence, Correlations and Results components under the Insights section.
+ * Should be used for Entities, Threat intelligence, Prevalence, Correlations and Results components under the Insights section.
  * The colored dot is currently optional but will ultimately be mandatory (waiting on PM and UIUX).
  */
 export const InsightsSummaryRow: VFC<InsightsSummaryRowProps> = ({

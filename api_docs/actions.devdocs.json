@@ -2094,7 +2094,9 @@
             "signature": [
               "(requesterId: string, actionsToExecute: ",
               "ExecuteOptions",
-              "[]) => Promise<void>"
+              "[]) => Promise<",
+              "ExecutionResponse",
+              ">"
             ],
             "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
@@ -2967,7 +2969,9 @@
             "signature": [
               "(requesterId: string, actionsToExecute: ",
               "ExecuteOptions",
-              "[]) => Promise<void>"
+              "[]) => Promise<",
+              "ExecutionResponse",
+              ">"
             ],
             "path": "x-pack/plugins/actions/server/unsecured_actions_client/unsecured_actions_client.ts",
             "deprecated": false,
@@ -3247,11 +3251,11 @@
             "section": "def-common.ActionTypeExecutorResult",
             "text": "ActionTypeExecutorResult"
           },
-          "<unknown>>; enqueueExecution: (options: ",
+          "<unknown>>; bulkEnqueueExecution: (options: ",
           "ExecuteOptions",
-          ") => Promise<void>; bulkEnqueueExecution: (options: ",
-          "ExecuteOptions",
-          "[]) => Promise<void>; ephemeralEnqueuedExecution: (options: ",
+          "[]) => Promise<",
+          "ExecutionResponse",
+          ">; ephemeralEnqueuedExecution: (options: ",
           "ExecuteOptions",
           ") => Promise<",
           {
@@ -3261,14 +3265,10 @@
             "section": "def-server.RunNowResult",
             "text": "RunNowResult"
           },
-          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ListTypesOptions) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "common",
-            "docId": "kibActionsPluginApi",
-            "section": "def-common.ActionType",
-            "text": "ActionType"
-          },
+          ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
+          "ListTypesParams",
+          ") => Promise<",
+          "ConnectorType",
           "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
           {
             "pluginId": "actions",
@@ -3514,6 +3514,38 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.setEnabledConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "setEnabledConnectorTypes",
+          "description": [],
+          "signature": [
+            "(connectorTypes: string[]) => void"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginSetupContract.setEnabledConnectorTypes.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "connectorTypes",
+              "description": [],
+              "signature": [
+                "string[]"
+              ],
+              "path": "x-pack/plugins/actions/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         }
       ],

@@ -21,6 +21,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-common.AddMessageVariables",
+        "type": "Function",
+        "tags": [],
+        "label": "AddMessageVariables",
+        "description": [],
+        "signature": [
+          "({ buttonTitle, messageVariables, paramsProperty, onSelectEventHandler, showButtonTitle, }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
+        "path": "packages/kbn-alerts-ui-shared/src/add_message_variables/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-common.AddMessageVariables.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  onSelectEventHandler,\n  showButtonTitle = false,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/add_message_variables/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-common.AlertLifecycleStatusBadge",
         "type": "Function",
         "tags": [],

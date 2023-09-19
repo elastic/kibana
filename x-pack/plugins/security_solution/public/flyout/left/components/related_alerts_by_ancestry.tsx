@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
-import { CORRELATIONS_ANCESTRY_ALERTS } from '../../shared/translations';
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
 import { CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID } from './test_ids';
 
@@ -44,7 +44,6 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
     indices,
     scopeId,
   });
-  const title = `${dataCount} ${CORRELATIONS_ANCESTRY_ALERTS(dataCount)}`;
 
   if (error) {
     return null;
@@ -52,11 +51,23 @@ export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = 
 
   return (
     <CorrelationsDetailsAlertsTable
-      title={title}
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsTitle"
+          defaultMessage="{count} {count, plural, one {alert} other {alerts}} related by ancestry"
+          values={{ count: dataCount }}
+        />
+      }
       loading={loading}
       alertIds={data}
       scopeId={scopeId}
       eventId={eventId}
+      noItemsMessage={
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsNoDataDescription"
+          defaultMessage="No alerts related by ancestry."
+        />
+      }
       data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TEST_ID}
     />
   );

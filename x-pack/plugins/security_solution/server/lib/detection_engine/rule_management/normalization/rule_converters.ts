@@ -476,7 +476,7 @@ export const convertCreateAPIToInternalSchema = (
       description: input.description,
       ruleId: newRuleId,
       falsePositives: input.false_positives ?? [],
-      investigationFields: input.investigation_fields ?? [],
+      investigationFields: input.investigation_fields,
       from: input.from ?? DEFAULT_FROM,
       immutable,
       license: input.license,
