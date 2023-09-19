@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiFlyoutBody } from '@elastic/eui';
 import { mountWithProvider } from '../../../mocks';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -131,7 +131,7 @@ describe('LensEditConfigurationFlyout', () => {
       navigateToLensEditor: navigateToLensEditorSpy,
     };
     const { instance } = await prepareAndMountComponent(newProps);
-    expect(instance.find(EuiFlyoutHeader).exists()).toBe(true);
+    expect(instance.find('[data-test-subj="editFlyoutHeader"]').exists()).toBe(true);
     instance.find('[data-test-subj="navigateToLensEditorLink"]').at(1).simulate('click');
     expect(navigateToLensEditorSpy).toHaveBeenCalled();
   });

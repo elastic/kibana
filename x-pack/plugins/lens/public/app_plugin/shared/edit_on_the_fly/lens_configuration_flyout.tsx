@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiTitle,
   EuiLink,
   EuiIcon,
@@ -262,43 +261,6 @@ export function LensEditConfigurationFlyout({
   };
   return (
     <>
-      {displayFlyoutHeader && (
-        <EuiFlyoutHeader hasBorder data-test-subj="editFlyoutHeader">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h2 id="Edit visualization">
-                      {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                        defaultMessage: 'Edit visualization',
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate('xpack.lens.config.experimentalLabel', {
-                      defaultMessage: 'Technical preview',
-                    })}
-                  >
-                    <EuiIcon type="beaker" size="m" />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {navigateToLensEditor && (
-              <EuiFlexItem grow={false}>
-                <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
-                  {i18n.translate('xpack.lens.config.editLinkLabel', {
-                    defaultMessage: 'Edit in Lens',
-                  })}
-                </EuiLink>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-      )}
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
         css={css`
@@ -315,12 +277,62 @@ export function LensEditConfigurationFlyout({
             }
           }
           .euiFlyoutBody__overflowContent {
-            padding: ${euiTheme.size.s};
+            padding: 0;
           }
         `}
       >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" direction="column">
+          {displayFlyoutHeader && (
+            <EuiFlexItem
+              data-test-subj="editFlyoutHeader"
+              css={css`
+                padding: ${euiThemeVars.euiSizeL};
+                border-block-end: 1px solid ${euiThemeVars.euiBorderColor};
+              `}
+            >
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2 id="Edit visualization">
+                          {i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                            defaultMessage: 'Edit visualization',
+                          })}
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={i18n.translate('xpack.lens.config.experimentalLabel', {
+                          defaultMessage: 'Technical preview',
+                        })}
+                      >
+                        <EuiIcon type="beaker" size="m" />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {navigateToLensEditor && (
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      onClick={navigateToLensEditor}
+                      data-test-subj="navigateToLensEditorLink"
+                    >
+                      {i18n.translate('xpack.lens.config.editLinkLabel', {
+                        defaultMessage: 'Edit in Lens',
+                      })}
+                    </EuiLink>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem
+            css={css`
+              padding: ${euiTheme.size.s};
+            `}
+          >
             {datasourceId === 'textBased' && (
               <EuiCallOut
                 size="s"
@@ -336,7 +348,12 @@ export function LensEditConfigurationFlyout({
               framePublicAPI={framePublicAPI}
             />
             <EuiSpacer size="m" />
-            <ConfigPanelWrapper {...layerPanelsProps} />
+            <ConfigPanelWrapper
+              {...layerPanelsProps}
+              css={css`
+                padding: ${euiTheme.size.s};
+              `}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>

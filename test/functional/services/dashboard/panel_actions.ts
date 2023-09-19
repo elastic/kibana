@@ -99,6 +99,18 @@ export class DashboardPanelActionsService extends FtrService {
     }
   }
 
+  async clickInlineEdit() {
+    this.log.debug('clickInlineEditAction');
+    await this.expectContextMenuToBeOpen();
+    const isInlineEditingActionVisible = await this.testSubjects.exists(
+      INLINE_EDIT_PANEL_DATA_TEST_SUBJ
+    );
+    if (!isInlineEditingActionVisible) await this.clickContextMenuMoreItem();
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
+    await this.header.waitUntilLoadingHasFinished();
+    await this.common.waitForTopNavToBeVisible();
+  }
+
   /** The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
