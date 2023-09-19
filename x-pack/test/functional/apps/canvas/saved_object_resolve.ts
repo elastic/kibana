@@ -18,7 +18,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/saved_object_resolve';
   const browser = getService('browser');
 
-  describe.only('filters', function () {
+  describe('filters', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
@@ -117,7 +117,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     it('handles a conflict match', async () => {
       await PageObjects.common.navigateToUrl(
         'canvas',
-        'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
+        'savworkpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
         {
           basePath: '/s/custom_space',
           shouldUseHashForSubUrl: false,
