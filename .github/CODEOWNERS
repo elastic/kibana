@@ -483,6 +483,7 @@ packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_input @elastic/platform-deployment-management
 packages/kbn-management/settings/components/field_row @elastic/platform-deployment-management
+packages/kbn-management/settings/components/form @elastic/platform-deployment-management @elastic/appex-sharedux
 packages/kbn-management/settings/field_definition @elastic/platform-deployment-management
 packages/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/platform-deployment-management
 packages/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/platform-deployment-management
