@@ -751,6 +751,10 @@
                 "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_client.ts"
               },
@@ -881,6 +885,14 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "infra",

@@ -5067,6 +5067,22 @@
             }
           }
         },
+        "top_traces": {
+          "properties": {
+            "max": {
+              "type": "long",
+              "_meta": {
+                "description": "Max number of documents in top 100 traces withing the last day"
+              }
+            },
+            "median": {
+              "type": "long",
+              "_meta": {
+                "description": "Median number of documents in top 100 traces within the last day"
+              }
+            }
+          }
+        },
         "tasks": {
           "properties": {
             "aggregated_transactions": {
@@ -5273,6 +5289,20 @@
                       "type": "long",
                       "_meta": {
                         "description": "Execution time in milliseconds for the \"per_service\" task"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "top_traces": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Execution time in milliseconds for the \"top_traces\" task"
                       }
                     }
                   }

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { ComponentType, useRef, useState } from 'react';
 import { breadcrumbsApp } from '../../application/app';
-import { Provider as WizardProvider } from '../../components/app/custom_logs/wizard';
+import { Provider as WizardProvider } from '../../components/app/custom_logs';
 import {
   FilmstripFrame,
   FilmstripTransition,

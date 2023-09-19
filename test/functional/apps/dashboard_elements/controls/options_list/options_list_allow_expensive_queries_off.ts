@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await setAllowExpensiveQueries(false);
 
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboard.ensureDashboardIsInEditMode();
       await timePicker.setDefaultDataRange();
