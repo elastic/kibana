@@ -13,4 +13,4 @@ echo "--- Fleet Cypress tests (Chrome)"
 cd x-pack/plugins/fleet
 
 set +e
-yarn cypress:run; status=$?; yarn junit:merge || :; exit $status
+yarn cypress:run:reporter; status=$?; yarn junit:merge || :; exit $status
