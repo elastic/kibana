@@ -20,7 +20,7 @@ export function isValidNamespace(namespace: string): { valid: boolean; error?: s
       }),
     };
   }
-  
+
   // Strip out variables that will be replaced by Agent and check if the result is valid
   const strippedNamespace = namespace.replace(/\$\{.+\}/g, '');
 
