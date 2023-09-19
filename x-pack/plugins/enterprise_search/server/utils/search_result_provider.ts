@@ -107,14 +107,6 @@ export function getSearchResultProvider(
                 url: APP_SEARCH_PLUGIN.URL,
               },
               {
-                keywords: ['workplace', 'search'],
-                name: i18n.translate('xpack.enterpriseSearch.searchProvider.workplaceSearch.name', {
-                  defaultMessage: 'Workplace Search',
-                }),
-                serviceType: 'workplace_search',
-                url: WORKPLACE_SEARCH_PLUGIN.URL,
-              },
-              {
                 keywords: ['esre', 'search'],
                 name: i18n.translate('xpack.enterpriseSearch.searchProvider.esre.name', {
                   defaultMessage: 'ESRE',
