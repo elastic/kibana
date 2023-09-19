@@ -117,7 +117,7 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
     it('handles a conflict match', async () => {
       await PageObjects.common.navigateToUrl(
         'canvas',
-        'savworkpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
+        'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31-conflict-old/page/1',
         {
           basePath: '/s/custom_space',
           shouldUseHashForSubUrl: false,
