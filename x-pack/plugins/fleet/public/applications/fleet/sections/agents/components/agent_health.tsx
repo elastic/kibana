@@ -101,10 +101,6 @@ const WrappedEuiCallOut = styled(EuiCallOut)`
   white-space: wrap !important;
 `;
 
-const StyledDiv = styled.div`
-  white-space: nowrap;
-`;
-
 export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails }) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
@@ -167,11 +163,11 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
         }
       >
         {isStuckInUpdating(agent) && !fromDetails ? (
-          <StyledDiv>
+          <div className="eui-textNoWrap">
             {getStatusComponent(agent.status)}
             &nbsp;
             <EuiIcon type="warning" color="warning" />
-          </StyledDiv>
+          </div>
         ) : (
           <>
             {getStatusComponent(agent.status)}
