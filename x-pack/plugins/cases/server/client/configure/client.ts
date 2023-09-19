@@ -428,6 +428,7 @@ async function create(
       unsecuredSavedObjectsClient,
       attributes: {
         ...validatedConfigurationRequest,
+        customFields: validatedConfigurationRequest.customFields ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,

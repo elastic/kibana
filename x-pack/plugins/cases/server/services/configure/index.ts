@@ -83,7 +83,6 @@ export class CaseConfigureService {
   }: FindCaseConfigureArgs): Promise<SavedObjectsFindResponse<ConfigurationTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to find all case configuration`);
-
       const findResp = await unsecuredSavedObjectsClient.find<ConfigurationPersistedAttributes>({
         ...options,
         // Get the latest configuration
@@ -223,12 +222,16 @@ function transformToExternalModel(
   });
 
   const castedAttributes = configuration.attributes as ConfigurationTransformedAttributes;
+  const customFields = !configuration.attributes.customFields
+    ? []
+    : (configuration.attributes.customFields as ConfigurationTransformedAttributes['customFields']);
 
   return {
     ...configuration,
     attributes: {
       ...castedAttributes,
       connector,
+      customFields,
     },
   };
 }
