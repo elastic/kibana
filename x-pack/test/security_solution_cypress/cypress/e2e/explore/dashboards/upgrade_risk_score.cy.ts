@@ -38,7 +38,8 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
 const spaceId = 'default';
 
-describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
+// Flaky on serverless
+describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   before(() => {
     cleanKibana();
     login();

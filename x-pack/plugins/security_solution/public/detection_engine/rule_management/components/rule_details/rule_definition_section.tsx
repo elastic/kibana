@@ -44,6 +44,7 @@ import { MlJobLink } from '../../../../detections/components/rules/ml_job_link/m
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { BadgeList } from './badge_list';
+import { DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
 interface SavedQueryNameProps {
@@ -497,7 +498,12 @@ export const RuleDefinitionSection = ({ rule }: RuleDefinitionSectionProps) => {
 
   return (
     <div>
-      <EuiDescriptionList type="column" listItems={definitionSectionListItems} />
+      <EuiDescriptionList
+        type="column"
+        listItems={definitionSectionListItems}
+        columnWidths={DESCRIPTION_LIST_COLUMN_WIDTHS}
+        rowGutterSize="m"
+      />
     </div>
   );
 };

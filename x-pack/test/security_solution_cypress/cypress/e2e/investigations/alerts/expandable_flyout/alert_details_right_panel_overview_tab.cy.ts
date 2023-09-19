@@ -101,7 +101,7 @@ describe(
           .within(() => {
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_OPEN_RULE_PREVIEW_BUTTON)
               .should('be.visible')
-              .and('have.text', 'Rule summary');
+              .and('have.text', 'Show rule summary');
           });
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_DESCRIPTION_DETAILS)
           .should('be.visible')
@@ -257,7 +257,7 @@ describe(
         ).scrollIntoView();
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_HEADER)
           .should('be.visible')
-          .and('have.text', 'Threat Intelligence');
+          .and('have.text', 'Threat intelligence');
         cy.get(
           DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_CONTENT
         ).scrollIntoView();
@@ -268,13 +268,13 @@ describe(
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(0)
               .should('be.visible')
-              .and('have.text', '0 threat match detected'); // TODO work on getting proper IoC data to get proper data here
+              .and('have.text', '0 threat matches detected'); // TODO work on getting proper IoC data to get proper data here
 
             // field with threat enrichement
             cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_INSIGHTS_THREAT_INTELLIGENCE_VALUES)
               .eq(1)
               .should('be.visible')
-              .and('have.text', '0 field enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
+              .and('have.text', '0 fields enriched with threat intelligence'); // TODO work on getting proper IoC data to get proper data here
           });
 
         cy.log('should navigate to left panel Threat Intelligence tab');

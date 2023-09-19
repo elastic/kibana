@@ -153,6 +153,7 @@ export const patchRule = async ({
 export const previewRule = async ({ rule, signal }: PreviewRulesProps): Promise<PreviewResponse> =>
   KibanaServices.get().http.fetch<PreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
     method: 'POST',
+    version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
   });
@@ -542,6 +543,7 @@ export const findRuleExceptionReferences = async ({
     DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
     {
       method: 'GET',
+      version: '1',
       query,
       signal,
     }
@@ -570,6 +572,7 @@ export const addRuleExceptions = async ({
     `${DETECTION_ENGINE_RULES_URL}/${ruleId}/exceptions`,
     {
       method: 'POST',
+      version: '2023-10-31',
       body: JSON.stringify({ items }),
       signal,
     }
@@ -602,6 +605,7 @@ export const installFleetPackage = ({
     epmRouteService.getInstallPath(packageName, packageVersion),
     {
       query: { prerelease },
+      version: '2023-10-31',
       body: JSON.stringify({ force }),
     }
   );
@@ -628,6 +632,7 @@ export const bulkInstallFleetPackages = ({
     epmRouteService.getBulkInstallPath(),
     {
       query: { prerelease },
+      version: '2023-10-31',
       body: JSON.stringify({ packages }),
     }
   );

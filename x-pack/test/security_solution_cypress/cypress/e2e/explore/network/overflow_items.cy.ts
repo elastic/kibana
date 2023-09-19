@@ -22,7 +22,8 @@ import { NETWORK_URL } from '../../../urls/navigation';
 const testDomainOne = 'myTest';
 const testDomainTwo = 'myTest2';
 
-describe('Overflow items', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165692
+describe('Overflow items', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   context('Network stats and tables', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'network' });

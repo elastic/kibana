@@ -14,6 +14,7 @@ import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../screens/timelin
 import { selectAlertsHistogram } from '../../tasks/alerts';
 import { createTimeline } from '../../tasks/timelines';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Ransomware Detection Alerts',
   { tags: ['@ess', '@serverless', '@brokenInServerless'] },

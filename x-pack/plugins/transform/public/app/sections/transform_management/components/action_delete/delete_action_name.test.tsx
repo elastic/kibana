@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { DeleteActionName, DeleteActionNameProps } from './delete_action_name';
 
@@ -21,7 +21,7 @@ describe('Transform: Transform List Actions <DeleteAction />', () => {
       isBulkAction: false,
     };
 
-    const wrapper = shallow(<DeleteActionName {...props} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<DeleteActionName {...props} />);
+    expect(container.textContent).toBe('Delete');
   });
 });

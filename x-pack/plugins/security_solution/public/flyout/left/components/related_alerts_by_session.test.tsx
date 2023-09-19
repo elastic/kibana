@@ -100,4 +100,25 @@ describe('<RelatedAlertsBySession />', () => {
     );
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should render no data message', () => {
+    (useFetchRelatedAlertsBySession as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+      dataCount: 0,
+    });
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [],
+    });
+
+    const { getByText } = render(
+      <TestProviders>
+        <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} eventId={eventId} />
+      </TestProviders>
+    );
+    expect(getByText('No alerts related by session.')).toBeInTheDocument();
+  });
 });

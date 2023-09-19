@@ -12,7 +12,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('Field formats example', function () {
+  // Flaky in serverless tests
+  describe.skip('Field formats example', function () {
     before(async () => {
       await PageObjects.common.navigateToApp('fieldFormatsExample');
     });

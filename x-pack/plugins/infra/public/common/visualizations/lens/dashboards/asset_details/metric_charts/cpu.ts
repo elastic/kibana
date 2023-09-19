@@ -45,7 +45,7 @@ export const cpuUsageBreakdown: XYConfig = {
         hostLensFormulas.cpuUsageSystem,
       ],
       options: {
-        seriesType: 'area_percentage_stacked',
+        seriesType: 'area_stacked',
       },
       type: 'visualization',
     },

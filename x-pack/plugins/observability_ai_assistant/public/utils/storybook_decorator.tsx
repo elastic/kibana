@@ -25,11 +25,12 @@ const chatService: ObservabilityAIAssistantChatService = {
   chat: (options: { messages: Message[]; connectorId: string }) => new Observable<PendingMessage>(),
   getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
-  executeFunction: async (
-    name: string,
-    args: string | undefined,
-    signal: AbortSignal
-  ): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
+  executeFunction: async ({}: {
+    name: string;
+    args: string | undefined;
+    messages: Message[];
+    signal: AbortSignal;
+  }): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
   renderFunction: (name: string, args: string | undefined, response: {}) => (
     <div>Hello! {name}</div>
   ),

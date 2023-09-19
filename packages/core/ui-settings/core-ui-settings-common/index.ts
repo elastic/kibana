@@ -8,6 +8,7 @@
 
 export type {
   UiSettingsType,
+  ReadonlyModeType,
   DeprecationSettings,
   UiSettingsParams,
   UserProvidedValues,

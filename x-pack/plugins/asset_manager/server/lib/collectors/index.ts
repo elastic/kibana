@@ -6,6 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AssetManagerConfig } from '../../types';
 import { Asset } from '../../../common/types_api';
@@ -22,6 +23,12 @@ export interface CollectorOptions {
   afterKey?: estypes.SortResults;
   filters?: estypes.QueryDslQueryContainer[];
 }
+
+type OmitSourceIndices<T> = Omit<T, 'sourceIndices'>;
+
+export type ServicesCollectorOptions = OmitSourceIndices<CollectorOptions> & {
+  apmIndices: APMIndices;
+};
 
 export interface CollectorResult {
   assets: Asset[];

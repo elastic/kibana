@@ -81,8 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/139260
-  describe.skip('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -183,6 +182,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Show event/alert details for the first one in the list
         await pageObjects.timeline.showEventDetails();
 
+        // TODO: The index already exists error toast should not show up
+        // close and dismiss it if it does
+        if (await testSubjects.exists('globalToastList')) {
+          await testSubjects.click('toastCloseButton');
+        }
         // Click responder from the take action button
         await testSubjects.click('take-action-dropdown-btn');
         await testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');

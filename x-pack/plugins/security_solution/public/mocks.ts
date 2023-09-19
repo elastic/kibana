@@ -28,6 +28,7 @@ const startMock = (): PluginStart => ({
   ),
   setExtraRoutes: jest.fn(),
   getUpselling: () => upselling,
+  setDashboardsLandingCallout: jest.fn(),
 });
 
 export const securitySolutionMock = {

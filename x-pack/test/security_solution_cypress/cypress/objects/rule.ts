@@ -491,8 +491,6 @@ export const indicatorRuleMatchingDoc = {
   matchedIndex: 'logs-ti_abusech.malware',
 };
 
-export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
-
 export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', 'Critical'];
 
 export const getEditedRule = (): QueryRuleCreateProps =>

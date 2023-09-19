@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-source .buildkite/scripts/lifecycle/pre_command.sh
+if [[ "$BUILDKITE_AGENT_NAME" =~ ^bk-agent ]]; then
+  echo "Pipeline file triggered from outside the kibana executors, skipping pre_command"
+else
+  source .buildkite/scripts/lifecycle/pre_command.sh
+fi

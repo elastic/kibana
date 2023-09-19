@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { ControlType, Workspace } from '../../types';
 
 interface SelectionToolBarProps {
@@ -74,61 +74,62 @@ export const SelectionToolBar = ({ workspace, onSetControl }: SelectionToolBarPr
     >
       <EuiFlexItem grow={false}>
         <EuiToolTip content={selectAllButtonMsg}>
-          <button
+          <EuiButtonEmpty
             data-test-subj="graphSelectAll"
-            type="button"
-            className="kuiButton kuiButton--basic kuiButton--small"
-            disabled={haveNodes}
+            size="s"
+            isDisabled={haveNodes}
+            color="text"
             onClick={onSelectAllClick}
           >
             {i18n.translate('xpack.graph.sidebar.selections.selectAllButtonLabel', {
               defaultMessage: 'all',
             })}
-          </button>
+          </EuiButtonEmpty>
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={selectNoneButtonMsg}>
-          <button
-            type="button"
-            className="kuiButton kuiButton--basic kuiButton--small"
-            disabled={haveNodes}
+          <EuiButtonEmpty
+            data-test-subj="graphSelectNone"
+            size="s"
+            isDisabled={haveNodes}
+            color="text"
             onClick={onSelectNoneClick}
           >
             {i18n.translate('xpack.graph.sidebar.selections.selectNoneButtonLabel', {
               defaultMessage: 'none',
             })}
-          </button>
+          </EuiButtonEmpty>
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={invertSelectionButtonMsg}>
-          <button
+          <EuiButtonEmpty
             data-test-subj="graphInvertSelection"
-            type="button"
-            className="kuiButton kuiButton--basic kuiButton--small"
-            disabled={haveNodes}
+            size="s"
+            isDisabled={haveNodes}
+            color="text"
             onClick={onInvertSelectionClick}
           >
             {i18n.translate('xpack.graph.sidebar.selections.invertSelectionButtonLabel', {
               defaultMessage: 'invert',
             })}
-          </button>
+          </EuiButtonEmpty>
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={selectNeighboursButtonMsg}>
-          <button
-            type="button"
-            className="kuiButton kuiButton--basic kuiButton--small"
-            disabled={workspace.selectedNodes.length === 0}
-            onClick={onSelectNeighboursClick}
+          <EuiButtonEmpty
             data-test-subj="graphLinkedSelection"
+            size="s"
+            isDisabled={workspace.selectedNodes.length === 0}
+            color="text"
+            onClick={onSelectNeighboursClick}
           >
             {i18n.translate('xpack.graph.sidebar.selections.selectNeighboursButtonLabel', {
               defaultMessage: 'linked',
             })}
-          </button>
+          </EuiButtonEmpty>
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>

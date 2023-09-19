@@ -47,7 +47,7 @@ describe(
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
         .should('be.visible')
-        .and('have.text', 'Threat Intelligence');
+        .and('have.text', 'Threat intelligence');
 
       cy.get(INDICATOR_MATCH_ENRICHMENT_SECTION).should('be.visible');
     });

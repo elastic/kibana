@@ -160,7 +160,12 @@ export function FlameGraphTooltip({
                 style={{ background: theme.euiTheme.border.color }}
               />
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" iconType="inspect" onClick={onShowMoreClick}>
+                <EuiButtonEmpty
+                  data-test-subj="profilingFlameGraphTooltipButton"
+                  size="s"
+                  iconType="inspect"
+                  onClick={onShowMoreClick}
+                >
                   <EuiText size="xs">
                     {i18n.translate('xpack.profiling.flameGraphTooltip.showMoreButton', {
                       defaultMessage: `Show more information`,

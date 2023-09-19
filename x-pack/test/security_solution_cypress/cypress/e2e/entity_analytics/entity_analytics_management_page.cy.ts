@@ -39,13 +39,14 @@ import {
   previewErrorButtonClick,
 } from '../../tasks/entity_analytics';
 
+// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Entity analytics management page',
   {
     env: {
       ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled', 'riskScoringPersistence'] },
     },
-    tags: ['@ess', '@brokenInServerless'],
+    tags: ['@ess', '@serverless', '@brokenInServerless'],
   },
   () => {
     before(() => {
