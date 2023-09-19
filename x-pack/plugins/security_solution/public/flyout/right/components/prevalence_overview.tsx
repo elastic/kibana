@@ -31,7 +31,7 @@ export const PrevalenceOverview: FC = () => {
     useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
-  const goToCorrelationsTab = useCallback(() => {
+  const goPrevalenceTab = useCallback(() => {
     openLeftPanel({
       id: LeftPanelKey,
       path: {
@@ -76,7 +76,15 @@ export const PrevalenceOverview: FC = () => {
             defaultMessage="Prevalence"
           />
         ),
-        callback: goToCorrelationsTab,
+        link: {
+          callback: goPrevalenceTab,
+          tooltip: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.insights.prevalence.prevalenceTooltip"
+              defaultMessage="Show all prevalence"
+            />
+          ),
+        },
         iconType: 'arrowStart',
       }}
       content={{ loading, error }}
