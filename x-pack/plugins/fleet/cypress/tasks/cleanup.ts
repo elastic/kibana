@@ -7,7 +7,11 @@
 import { API_VERSIONS } from '../../common/constants';
 
 export function cleanupAgentPolicies() {
-  cy.request('/api/fleet/agent_policies').then((response: any) => {
+  cy.request({
+    method: 'GET',
+    url: '/api/fleet/agent_policies',
+    headers: { 'kbn-xsrf': 'kibana', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
+  }).then((response: any) => {
     response.body.items
       .filter((policy: any) => policy.agents === 0)
       .forEach((policy: any) => {
