@@ -52,7 +52,6 @@ describe('BottomBar', () => {
   // TODO: fix this
   it.skip('renders unsaved changes count', () => {
     // const { getByTestId } = render(wrap(<BottomBar {...defaultProps} />));
-
     // const input = getByTestId(DATA_TEST_SUBJ_UNSAVED_COUNT);
     // expect(input).toBe('3 unsaved settings');
   });

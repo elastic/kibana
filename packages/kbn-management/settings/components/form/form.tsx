@@ -12,9 +12,9 @@ import type { FieldDefinition } from '@kbn/management-settings-types';
 import { FieldRow, RowOnChangeFn } from '@kbn/management-settings-components-field-row';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { BottomBar } from './bottom_bar';
 import { useServices } from './services';
-import { i18n } from '@kbn/i18n';
 
 export interface FormProps {
   fields: Array<FieldDefinition<SettingType>>;
