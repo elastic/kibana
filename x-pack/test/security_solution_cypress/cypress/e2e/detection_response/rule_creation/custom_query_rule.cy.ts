@@ -115,8 +115,7 @@ import {
 import { enablesRule, getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 import { ruleDetailsUrl, ruleEditUrl, RULE_CREATION } from '../../../urls/navigation';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
   });

@@ -125,26 +125,33 @@ import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
+import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
 export const createAndEnableRule = () => {
-  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).click();
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
+
+  // Wait for page to be loaded before performing any actions
+  // Serverless breadcrumbs don't work until the page is loaded
+  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
+  cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
+
+  cy.get(BACK_TO_RULES_TABLE).click();
+  cy.get(BACK_TO_RULES_TABLE).should('have.attr', 'data-test-subj').and('match', /last/);
 };
 
 export const createRuleWithoutEnabling = () => {
-  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
+  cy.get(BACK_TO_RULES_TABLE).click();
   cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {
-  cy.get(RULE_NAME_INPUT).clear({ force: true });
-  cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
-  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true });
-  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
+  cy.get(RULE_NAME_INPUT).clear();
+  cy.get(RULE_NAME_INPUT).type(rule.name);
+  cy.get(RULE_DESCRIPTION_INPUT).clear();
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
 
   if (rule.severity) {
     fillSeverity(rule.severity);

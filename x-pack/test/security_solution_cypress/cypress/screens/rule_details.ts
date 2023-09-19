@@ -142,7 +142,7 @@ export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
 
-export const BACK_TO_RULES_TABLE = '[data-test-subj="breadcrumb"][title="Detection rules (SIEM)"]';
+export const BACK_TO_RULES_TABLE = '[data-test-subj~="breadcrumb"][title="Detection rules (SIEM)"]';
 
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';
