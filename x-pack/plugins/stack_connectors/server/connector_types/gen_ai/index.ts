@@ -16,7 +16,7 @@ import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
 import {
   GEN_AI_CONNECTOR_ID,
-  GEN_AI_TITLE,
+  OPEN_AI_TITLE,
   OpenAiProviderType,
 } from '../../../common/gen_ai/constants';
 import { GenAiConfigSchema, GenAiSecretsSchema } from '../../../common/gen_ai/schema';
@@ -26,7 +26,7 @@ import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<GenAiConfig, GenAiSecrets> => ({
   id: GEN_AI_CONNECTOR_ID,
-  name: GEN_AI_TITLE,
+  name: OPEN_AI_TITLE,
   Service: GenAiConnector,
   schema: {
     config: GenAiConfigSchema,

@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const GEN_AI_TITLE = i18n.translate(
+export const OPEN_AI_TITLE = i18n.translate(
   'xpack.stackConnectors.components.genAi.connectorTypeTitle',
   {
-    defaultMessage: 'Generative AI',
+    defaultMessage: 'OpenAI',
   }
 );
 export const GEN_AI_CONNECTOR_ID = '.gen-ai';

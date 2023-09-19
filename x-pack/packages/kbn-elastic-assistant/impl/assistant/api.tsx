@@ -47,20 +47,19 @@ export const fetchConnectorExecuteAction = async ({
         };
 
   const requestBody =
-    apiConfig.provider != null
+    apiConfig.connectorType === '.bedrock'
       ? {
+          params: {
+            subActionParams: { body: body.messages },
+            subAction: 'runGenAI',
+          },
+        }
+      : {
           params: {
             subActionParams: {
               body: JSON.stringify(body),
             },
             subAction: 'test',
-          },
-        }
-      : // no api provider, is aws Bedrock
-        {
-          params: {
-            subActionParams: { body: body.messages },
-            subAction: 'runGenAI',
           },
         };
 

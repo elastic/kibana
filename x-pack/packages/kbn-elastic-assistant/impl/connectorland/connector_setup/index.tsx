@@ -14,7 +14,7 @@ import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
-import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/public/common';
+import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import { Conversation, Message } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -65,20 +65,8 @@ export const useConnectorSetup = ({
     return conversationHasNoPresentationData(conversation);
   });
   const { data: actionTypes } = useLoadActionTypes({ http });
-  const actionType: ActionType = useMemo(
-    () =>
-      actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
-        enabledInConfig: true,
-        enabledInLicense: true,
-        isSystemActionType: false,
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['general'],
-        id: '.gen-ai',
-        name: 'Generative AI',
-        enabled: true,
-      },
-    [actionTypes]
-  );
+
+  const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
   // User constants
   const userName = useMemo(
@@ -190,6 +178,37 @@ export const useConnectorSetup = ({
     [assistantName, commentBody, conversation.messages, currentMessageIndex, userName]
   );
 
+  const onSaveConnector = useCallback(
+    (connector: ActionConnector) => {
+      const config = getGenAiConfig(connector);
+      // Add connector to all conversations
+      Object.values(conversations).forEach((c) => {
+        setApiConfig({
+          conversationId: c.id,
+          apiConfig: {
+            ...c.apiConfig,
+            connectorId: connector.id,
+            connectorType: connector.actionTypeId,
+            provider: config?.apiProvider,
+            model: config?.defaultModel,
+          },
+        });
+      });
+
+      refetchConnectors?.();
+      setIsConnectorModalVisible(false);
+      appendMessage({
+        conversationId: conversation.id,
+        message: {
+          role: 'assistant',
+          content: 'Connector setup complete!',
+          timestamp: new Date().toLocaleString(),
+        },
+      });
+    },
+    [appendMessage, conversation.id, conversations, refetchConnectors, setApiConfig]
+  );
+
   return {
     comments,
     prompt: (
@@ -212,36 +231,19 @@ export const useConnectorSetup = ({
             </EuiTextAlign>
           </SkipEuiText>
         )}
-        {isConnectorModalVisible && (
-          <ConnectorAddModal
-            actionType={actionType}
+        {isConnectorModalVisible && !selectedActionType && (
+          <ActionTypeSelectorModal
+            actionTypes={actionTypes}
+            actionTypeRegistry={actionTypeRegistry}
             onClose={() => setIsConnectorModalVisible(false)}
-            postSaveEventHandler={(connector: ActionConnector) => {
-              const config = getGenAiConfig(connector);
-              // Add connector to all conversations
-              Object.values(conversations).forEach((c) => {
-                setApiConfig({
-                  conversationId: c.id,
-                  apiConfig: {
-                    ...c.apiConfig,
-                    connectorId: connector.id,
-                    provider: config?.apiProvider,
-                    model: config?.defaultModel,
-                  },
-                });
-              });
-
-              refetchConnectors?.();
-              setIsConnectorModalVisible(false);
-              appendMessage({
-                conversationId: conversation.id,
-                message: {
-                  role: 'assistant',
-                  content: 'Connector setup complete!',
-                  timestamp: new Date().toLocaleString(),
-                },
-              });
-            }}
+            onSelect={(actionType: ActionType) => setSelectedActionType(actionType)}
+          />
+        )}
+        {isConnectorModalVisible && selectedActionType && (
+          <ConnectorAddModal
+            actionType={selectedActionType}
+            onClose={() => setIsConnectorModalVisible(false)}
+            postSaveEventHandler={onSaveConnector}
             actionTypeRegistry={actionTypeRegistry}
           />
         )}
