@@ -103,5 +103,6 @@
     "@kbn/content-management-plugin",
     "@kbn/ml-in-memory-table",
     "@kbn/presentation-util-plugin",
+    "@kbn/react-kibana-mount",
   ],
 }

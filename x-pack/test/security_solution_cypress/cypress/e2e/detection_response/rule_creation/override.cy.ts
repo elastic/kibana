@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { tag } from '../../../tags';
-
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../../helpers/rules';
 import { getIndexPatterns, getNewOverrideRule, getSeveritiesOverride } from '../../../objects/rule';
 
@@ -49,21 +47,22 @@ import {
   TIMESTAMP_OVERRIDE_DETAILS,
 } from '../../../screens/rule_details';
 
-import { expectNumberOfRules, goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../tasks/common';
+import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import {
   createAndEnableRule,
   fillAboutRuleWithOverrideAndContinue,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
   waitForAlertsToPopulate,
-  waitForTheRuleToBeExecuted,
 } from '../../../tasks/create_new_rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { getDetails } from '../../../tasks/rule_details';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
 
 import { RULE_CREATION } from '../../../urls/navigation';
 
-describe('Detection rules, override', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS] }, () => {
+// TODO: https://github.com/elastic/kibana/issues/161539
+describe('Rules override', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   const rule = getNewOverrideRule();
   const expectedUrls = rule.references?.join('');
   const expectedFalsePositives = rule.false_positives?.join('');
@@ -73,6 +72,7 @@ describe('Detection rules, override', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
 
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
   });
 
   it('Creates and enables a new custom rule with override option', function () {
@@ -91,7 +91,7 @@ describe('Detection rules, override', { tags: [tag.ESS, tag.BROKEN_IN_SERVERLESS
     cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
-    goToRuleDetails();
+    goToRuleDetailsOf(rule.name);
 
     cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);

@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  describe('change point detection', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/160986
+  describe.skip('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');

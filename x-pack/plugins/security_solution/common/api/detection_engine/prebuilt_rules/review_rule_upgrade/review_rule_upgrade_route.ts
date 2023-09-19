@@ -6,7 +6,8 @@
  */
 
 import type { RuleObjectId, RuleSignatureId, RuleTagArray } from '../../model';
-import type { DiffableRule, PartialRuleDiff } from '../model';
+import type { PartialRuleDiff } from '../model';
+import type { RuleResponse } from '../../model/rule_schema/rule_schemas';
 
 export interface ReviewRuleUpgradeResponseBody {
   /** Aggregated info about all rules available for upgrade */
@@ -27,8 +28,8 @@ export interface RuleUpgradeStatsForReview {
 export interface RuleUpgradeInfoForReview {
   id: RuleObjectId;
   rule_id: RuleSignatureId;
-  rule: DiffableRule;
-  target_rule: DiffableRule;
+  current_rule: RuleResponse;
+  target_rule: RuleResponse;
   diff: PartialRuleDiff;
   revision: number;
 }

@@ -14,8 +14,8 @@ import type {
   LinkCategory as GenericLinkCategory,
   LinkCategories as GenericLinkCategories,
 } from '@kbn/security-solution-navigation';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import type { UpsellingService } from '../lib/upsellings';
 import type { RequiredCapabilities } from '../lib/capabilities';
 
 /**

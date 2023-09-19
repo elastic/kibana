@@ -57,31 +57,36 @@ const props = {
   timelineId: 'alerts-page',
 };
 
-jest.mock('../../../../common/lib/kibana', () => ({
-  useToasts: jest.fn().mockReturnValue({
-    addError: jest.fn(),
-    addSuccess: jest.fn(),
-    addWarning: jest.fn(),
-    remove: jest.fn(),
-  }),
-  useKibana: () => ({
-    services: {
-      timelines: { ...mockTimelines },
-      application: {
-        capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+    useKibana: () => ({
+      services: {
+        timelines: { ...mockTimelines },
+        application: {
+          capabilities: { siem: { crud_alerts: true, read_alerts: true } },
+        },
+        cases: mockCasesContract(),
       },
-      cases: mockCasesContract(),
-    },
-  }),
-  useGetUserCasesPermissions: jest.fn().mockReturnValue({
-    all: true,
-    create: true,
-    read: true,
-    update: true,
-    delete: true,
-    push: true,
-  }),
-}));
+    }),
+    useGetUserCasesPermissions: jest.fn().mockReturnValue({
+      all: true,
+      create: true,
+      read: true,
+      update: true,
+      delete: true,
+      push: true,
+    }),
+  };
+});
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
   useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),

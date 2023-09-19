@@ -249,7 +249,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
-  const numberOfSelectedRules = isAllSelected ? pagination.total : selectedRuleIds?.length ?? 1;
+  const rulesCount = Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
 
   return (
     <>
@@ -302,7 +302,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
           onConfirm={confirmRuleDuplication}
-          rulesCount={numberOfSelectedRules}
+          rulesCount={rulesCount}
         />
       )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (

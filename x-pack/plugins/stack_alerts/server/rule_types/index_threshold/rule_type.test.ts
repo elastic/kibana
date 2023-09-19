@@ -183,6 +183,7 @@ describe('ruleType', () => {
       threshold: [1],
     };
 
+    const ruleName = uuidv4();
     await ruleType.executor({
       executionId: uuidv4(),
       startedAt: new Date(),
@@ -200,7 +201,7 @@ describe('ruleType', () => {
       spaceId: uuidv4(),
       rule: {
         id: uuidv4(),
-        name: uuidv4(),
+        name: ruleName,
         tags: [],
         consumer: '',
         producer: '',
@@ -225,7 +226,36 @@ describe('ruleType', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
-    expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
+    expect(alertServices.alertsClient.report).toHaveBeenCalledWith({
+      actionGroup: 'threshold met',
+      context: {
+        conditions: 'foo is less than 1',
+        date: '1970-01-01T00:00:00.000Z',
+        group: 'all documents',
+        message: `alert '${ruleName}' is active for group 'all documents':
+
+- Value: 0
+- Conditions Met: foo is less than 1 over 5m
+- Timestamp: 1970-01-01T00:00:00.000Z`,
+        title: `alert ${ruleName} group all documents met threshold`,
+        value: 0,
+      },
+      id: 'all documents',
+      payload: {
+        kibana: {
+          alert: {
+            evaluation: { conditions: 'foo is less than 1', value: 0 },
+            reason: `alert '${ruleName}' is active for group 'all documents':
+
+- Value: 0
+- Conditions Met: foo is less than 1 over 5m
+- Timestamp: 1970-01-01T00:00:00.000Z`,
+            title: `alert ${ruleName} group all documents met threshold`,
+          },
+        },
+      },
+      state: {},
+    });
   });
 
   it('should ensure a null result does not fire actions', async () => {

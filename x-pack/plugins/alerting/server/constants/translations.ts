@@ -21,6 +21,10 @@ export const translations = {
         defaultMessage:
           'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
       }),
+      maxQueuedActions: i18n.translate('xpack.alerting.taskRunner.warning.maxQueuedActions', {
+        defaultMessage:
+          'The maximum number of queued actions was reached; excess actions were not triggered.',
+      }),
     },
   },
 };

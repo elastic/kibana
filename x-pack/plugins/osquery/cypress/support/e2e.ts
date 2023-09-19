@@ -23,22 +23,37 @@
 // ***********************************************************
 
 // force ESM in this module
+import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
+
 export {};
 
 import 'cypress-react-selector';
 import registerCypressGrep from '@cypress/grep';
+
+import type { ServerlessRoleName } from './roles';
+import { login } from '../../../../test_serverless/functional/test_suites/security/cypress/tasks/login';
 
 registerCypressGrep();
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
+    interface SuiteConfigOverrides {
+      env?: {
+        ftrConfig: SecuritySolutionDescribeBlockFtrConfig;
+      };
+    }
+
     interface Chainable {
       getBySel(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+
       getBySelContains(
         ...args: Parameters<Cypress.Chainable['get']>
       ): Chainable<JQuery<HTMLElement>>;
+
       clickOutside(): Chainable<JQuery<HTMLBodyElement>>;
+
+      login(role?: ServerlessRoleName | 'elastic'): void;
     }
   }
 }
@@ -56,6 +71,8 @@ Cypress.Commands.add(
   'clickOutside',
   () => cy.get('body').click(0, 0) // 0,0 here are the x and y coordinates
 );
+
+Cypress.Commands.add('login', login);
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

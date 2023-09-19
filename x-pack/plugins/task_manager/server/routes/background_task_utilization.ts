@@ -117,6 +117,9 @@ export function backgroundTaskUtilizationRoute(
         options: {
           access: 'public', // access must be public to allow "system" users, like metrics collectors, to access these routes
           authRequired: routeOption.isAuthenticated ?? true,
+          // The `security:acceptJWT` tag allows route to be accessed with JWT credentials. It points to
+          // ROUTE_TAG_ACCEPT_JWT from '@kbn/security-plugin/server' that cannot be imported here directly.
+          tags: ['security:acceptJWT'],
         },
       },
       async function (

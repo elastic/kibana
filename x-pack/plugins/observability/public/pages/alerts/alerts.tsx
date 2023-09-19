@@ -33,6 +33,7 @@ import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERTS_URL_STORAGE_KEY } from '../../../common/constants';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -59,10 +60,12 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
   } = kibanaServices;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
+
+  const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const onBrushEnd: BrushEndListener = (brushEvent) => {
     const { x } = brushEvent as XYBrushEvent;
@@ -126,7 +129,7 @@ function InternalAlertsPage() {
     try {
       const response = await loadRuleAggregations({
         http,
-        typesFilter: observabilityRuleTypeRegistry.list(),
+        typesFilter: filteredRuleTypes,
       });
       const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
         response;

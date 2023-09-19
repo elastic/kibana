@@ -45,6 +45,7 @@ import { UsersFields } from '../../../common/search_strategy/security_solution/u
 import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../store/sourcerer';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
+import { getMockDiscoverInTimelineState } from './mock_discover_state';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -478,4 +479,5 @@ export const mockGlobalState: State = {
    * they are cast to mutable versions here.
    */
   management: mockManagementState as ManagementState,
+  discover: getMockDiscoverInTimelineState(),
 };

@@ -6,7 +6,7 @@
  */
 
 import { type Observable } from 'rxjs';
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -21,11 +21,7 @@ import type {
 } from './embeddable_change_point_chart';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 import { FilterQueryContextProvider, useFilerQueryUpdates } from '../hooks/use_filters_query';
-import {
-  DataSourceContextProvider,
-  type DataSourceContextProviderProps,
-  useDataSource,
-} from '../hooks/use_data_source';
+import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
 import { useTimeBuckets } from '../hooks/use_time_buckets';
 import { createMergedEsQuery } from '../application/utils/search_utils';
@@ -59,16 +55,9 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
 }) => {
   const input = useObservable(input$, initialInput);
 
-  const onChange = useCallback<Exclude<DataSourceContextProviderProps['onChange'], undefined>>(
-    ({ dataViews }) => {
-      onOutputChange({ indexPatterns: dataViews });
-    },
-    [onOutputChange]
-  );
-
   return (
     <ReloadContextProvider reload$={reload$}>
-      <DataSourceContextProvider dataViewId={input.dataViewId} onChange={onChange}>
+      <DataSourceContextProvider dataViewId={input.dataViewId}>
         <FilterQueryContextProvider timeRange={input.timeRange}>
           <ChartGridEmbeddableWrapper
             timeRange={input.timeRange}

@@ -62,6 +62,7 @@ export type RuleEventLogListKPIProps = {
   message?: string;
   refreshToken?: RefreshToken;
   namespaces?: Array<string | undefined>;
+  filteredRuleTypes?: string[];
 } & Pick<RuleApis, 'loadExecutionKPIAggregations' | 'loadGlobalExecutionKPIAggregations'>;
 
 export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
@@ -73,6 +74,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
     message,
     refreshToken,
     namespaces,
+    filteredRuleTypes,
     loadExecutionKPIAggregations,
     loadGlobalExecutionKPIAggregations,
   } = props;
@@ -103,6 +105,7 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
         outcomeFilter,
         message,
         ...(namespaces ? { namespaces } : {}),
+        ruleTypeIds: filteredRuleTypes,
       });
       setKpi(newKpi);
     } catch (e) {

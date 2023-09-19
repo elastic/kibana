@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import type {
   RuleTaskState,
+  MutableRuleTaskState,
   TrackedLifecycleAlertState,
   WrappedLifecycleRuleState,
 } from '@kbn/alerting-state-types';
@@ -253,7 +254,7 @@ function addAlertUUID(doc: SavedObjectUnsanitizedDoc<SerializedConcreteTaskInsta
 
 // mutates alerts passed in
 function addAlertUUIDsToAlerts(
-  alerts: RuleTaskState['alertInstances'] | undefined,
+  alerts: MutableRuleTaskState['alertInstances'] | undefined,
   alertToTrackedMap: Map<string, TrackedLifecycleAlertState>,
   currentUUIDs: Map<string, string>
 ): void {

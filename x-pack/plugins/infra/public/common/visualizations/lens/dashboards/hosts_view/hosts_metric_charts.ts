@@ -83,12 +83,12 @@ export const hostsMetricCharts: Array<
   },
   {
     id: 'diskSpaceUsed',
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceUsed', {
-      defaultMessage: 'Disk Space Usage',
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskUsage', {
+      defaultMessage: 'Disk Usage',
     }),
     layers: [
       {
-        data: [hostLensFormulas.diskSpaceUsage],
+        data: [hostLensFormulas.diskUsage],
         options: XY_LAYER_OPTIONS,
         type: 'visualization',
       },

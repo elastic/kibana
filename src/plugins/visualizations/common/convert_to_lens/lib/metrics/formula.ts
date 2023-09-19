@@ -12,6 +12,7 @@ import { Operations } from '../../constants';
 import { isMetricWithField, getStdDeviationFormula, ExtendedColumnConverterArgs } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
 import {
+  getAggIdAndValue,
   getFieldNameFromField,
   getMetricFromParentPipelineAgg,
   isPercentileAgg,
@@ -125,7 +126,7 @@ const getFormulaForPercentile = (
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const percentile = Number(agg.aggId?.split('.')[1]);
+  const percentile = Number(getAggIdAndValue(agg.aggId)[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
   if (!isValidAgg(visType, agg, dataView) || !op) {
     return null;

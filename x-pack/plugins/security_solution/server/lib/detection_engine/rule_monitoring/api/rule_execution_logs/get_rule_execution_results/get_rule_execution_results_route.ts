@@ -23,59 +23,66 @@ import {
  * Accepts rule's saved object ID (`rule.id`), `start`, `end` and `filters` query params.
  */
 export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: GET_RULE_EXECUTION_RESULTS_URL,
-      validate: {
-        params: buildRouteValidation(GetRuleExecutionResultsRequestParams),
-        query: buildRouteValidation(GetRuleExecutionResultsRequestQuery),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (
-      context,
-      request,
-      response
-    ): Promise<IKibanaResponse<GetRuleExecutionResultsResponse>> => {
-      const { ruleId } = request.params;
-      const {
-        start,
-        end,
-        query_text: queryText,
-        status_filters: statusFilters,
-        page,
-        per_page: perPage,
-        sort_field: sortField,
-        sort_order: sortOrder,
-      } = request.query;
-
-      const siemResponse = buildSiemResponse(response);
-
-      try {
-        const ctx = await context.resolve(['securitySolution']);
-        const executionLog = ctx.securitySolution.getRuleExecutionLog();
-        const executionResultsResponse = await executionLog.getExecutionResults({
-          ruleId,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: buildRouteValidation(GetRuleExecutionResultsRequestParams),
+            query: buildRouteValidation(GetRuleExecutionResultsRequestQuery),
+          },
+        },
+      },
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetRuleExecutionResultsResponse>> => {
+        const { ruleId } = request.params;
+        const {
           start,
           end,
-          queryText,
-          statusFilters,
+          query_text: queryText,
+          status_filters: statusFilters,
           page,
-          perPage,
-          sortField,
-          sortOrder,
-        });
+          per_page: perPage,
+          sort_field: sortField,
+          sort_order: sortOrder,
+        } = request.query;
 
-        return response.ok({ body: executionResultsResponse });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+        const siemResponse = buildSiemResponse(response);
+
+        try {
+          const ctx = await context.resolve(['securitySolution']);
+          const executionLog = ctx.securitySolution.getRuleExecutionLog();
+          const executionResultsResponse = await executionLog.getExecutionResults({
+            ruleId,
+            start,
+            end,
+            queryText,
+            statusFilters,
+            page,
+            perPage,
+            sortField,
+            sortOrder,
+          });
+
+          return response.ok({ body: executionResultsResponse });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

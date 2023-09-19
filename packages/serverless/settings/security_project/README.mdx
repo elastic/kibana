@@ -1,0 +1,31 @@
+---
+id: serverless/packages/settings/security_project
+slug: /serverless/packages/settings/security_project
+title: Serverless Security Advanced Settings
+description: A package of settings for the Serverless Security project.
+tags: ['serverless', 'package']
+date: 2023-08-24
+---
+
+This package contains a list of UI settings that are only available in the Serverless Security project.
+This list is consumed by the `security_solution_serverless` plugin, which sets up its project settings:
+
+```ts
+export class SecuritySolutionServerlessPlugin
+  implements
+    Plugin<
+      SecuritySolutionServerlessPluginSetup,
+      SecuritySolutionServerlessPluginStart,
+      SecuritySolutionServerlessPluginSetupDeps,
+      SecuritySolutionServerlessPluginStartDeps
+    >
+{
+  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+    pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
+    return {};
+  }
+}
+```
+
+If you need to register a setting that should be available in the Serverless Security project, make sure to add
+its Id to this list.

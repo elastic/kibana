@@ -21,6 +21,54 @@
     "functions": [
       {
         "parentPluginId": "@kbn/alerts-as-data-utils",
+        "id": "def-common.buildAlertFieldsRequest",
+        "type": "Function",
+        "tags": [],
+        "label": "buildAlertFieldsRequest",
+        "description": [],
+        "signature": [
+          "(fields: string[], excludeEcsData?: boolean | undefined) => { format?: string | undefined; field: string; include_unmapped: boolean; }[]"
+        ],
+        "path": "packages/kbn-alerts-as-data-utils/src/search/security/build_fields_request.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-as-data-utils",
+            "id": "def-common.buildAlertFieldsRequest.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-alerts-as-data-utils/src/search/security/build_fields_request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerts-as-data-utils",
+            "id": "def-common.buildAlertFieldsRequest.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeEcsData",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-alerts-as-data-utils/src/search/security/build_fields_request.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-as-data-utils",
         "id": "def-common.createSchemaFromFieldMap",
         "type": "Function",
         "tags": [],
@@ -166,6 +214,21 @@
           "{ '@timestamp': string; kibana: { alert: { instance: { id: string; }; rule: { category: string; consumer: string; name: string; producer: string; revision: string | number; rule_type_id: string; uuid: string; }; status: string; uuid: string; }; space_ids: string[]; }; } & { event?: { action?: string | undefined; kind?: string | undefined; } | undefined; kibana?: { alert?: { action_group?: string | undefined; case_ids?: string[] | undefined; duration?: { us?: string | number | undefined; } | undefined; end?: string | undefined; flapping?: boolean | undefined; flapping_history?: boolean[] | undefined; last_detected?: string | undefined; maintenance_window_ids?: string[] | undefined; reason?: string | undefined; rule?: { execution?: { uuid?: string | undefined; } | undefined; parameters?: unknown; tags?: string[] | undefined; } | undefined; start?: string | undefined; time_range?: { gte?: string | undefined; lte?: string | undefined; } | undefined; url?: string | undefined; workflow_status?: string | undefined; workflow_tags?: string[] | undefined; } | undefined; version?: string | undefined; } | undefined; tags?: string[] | undefined; }"
         ],
         "path": "packages/kbn-alerts-as-data-utils/src/schemas/generated/alert_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-as-data-utils",
+        "id": "def-common.ALERT_EVENTS_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "ALERT_EVENTS_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-alerts-as-data-utils/src/search/security/fields.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

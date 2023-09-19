@@ -10,15 +10,6 @@ import type React from 'react';
 
 import type { ProductLine } from '../../common/product';
 
-export interface HeaderSection {
-  description?: (params: {
-    totalActiveSteps: number | null;
-    totalStepsLeft: number | null;
-  }) => React.ReactNode | null;
-  icon: EuiIconProps;
-  id: string;
-  title: string;
-}
 export interface Section {
   cards?: Card[];
   icon?: EuiIconProps;
@@ -92,8 +83,11 @@ export interface ActiveCard {
   stepsLeft: number;
   activeStepIds: StepId[] | undefined;
 }
-
-export type ExpandedCardSteps = Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>;
+export interface ExpandedCardStep {
+  isExpanded: boolean;
+  expandedSteps: StepId[];
+}
+export type ExpandedCardSteps = Record<CardId, ExpandedCardStep>;
 export interface TogglePanelReducer {
   activeProducts: Set<ProductLine>;
   activeSections: ActiveSections | null;

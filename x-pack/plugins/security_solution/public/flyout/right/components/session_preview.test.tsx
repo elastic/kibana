@@ -12,24 +12,8 @@ import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
-import { SESSION_PREVIEW_TEST_ID } from './test_ids';
-import { LeftPanelKey, LeftPanelVisualizeTab } from '../../left';
-import { SESSION_VIEW_ID } from '../../left/components/session_view';
-import {
-  EXPANDABLE_PANEL_CONTENT_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
-  EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
-} from '../../shared/components/test_ids';
 
 jest.mock('../hooks/use_process_data');
-
-const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID);
-const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID);
-const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID);
-const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID);
-const CONTENT_TEST_ID = EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID);
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -58,26 +42,6 @@ describe('SessionPreview', () => {
     jest.resetAllMocks();
   });
 
-  it('should render wrapper component', () => {
-    jest.mocked(useProcessData).mockReturnValue({
-      processName: 'process1',
-      userName: 'user1',
-      startAt: '2022-01-01T00:00:00.000Z',
-      ruleName: 'rule1',
-      ruleId: 'id',
-      workdir: '/path/to/workdir',
-      command: 'command1',
-    });
-
-    renderSessionPreview();
-
-    expect(screen.queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
-    expect(screen.getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
-    expect(screen.queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
-  });
-
   it('renders session preview with all data', () => {
     jest.mocked(useProcessData).mockReturnValue({
       processName: 'process1',
@@ -95,7 +59,7 @@ describe('SessionPreview', () => {
     expect(screen.getByText('started')).toBeInTheDocument();
     expect(screen.getByText('process1')).toBeInTheDocument();
     expect(screen.getByText('at')).toBeInTheDocument();
-    expect(screen.getByText('2022-01-01T00:00:00Z')).toBeInTheDocument();
+    expect(screen.getByText('Jan 1, 2022 @ 00:00:00.000')).toBeInTheDocument();
     expect(screen.getByText('with rule')).toBeInTheDocument();
     expect(screen.getByText('rule1')).toBeInTheDocument();
     expect(screen.getByText('by')).toBeInTheDocument();
@@ -121,30 +85,5 @@ describe('SessionPreview', () => {
     expect(screen.queryByText('at')).not.toBeInTheDocument();
     expect(screen.queryByText('with rule')).not.toBeInTheDocument();
     expect(screen.queryByText('by')).not.toBeInTheDocument();
-  });
-
-  it('should navigate to left section Visualize tab when clicking on title', () => {
-    jest.mocked(useProcessData).mockReturnValue({
-      processName: 'process1',
-      userName: 'user1',
-      startAt: '2022-01-01T00:00:00.000Z',
-      ruleName: 'rule1',
-      ruleId: 'id',
-      workdir: '/path/to/workdir',
-      command: 'command1',
-    });
-
-    const { getByTestId } = renderSessionPreview();
-
-    getByTestId(TITLE_LINK_TEST_ID).click();
-    expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: LeftPanelKey,
-      path: { tab: LeftPanelVisualizeTab, subTab: SESSION_VIEW_ID },
-      params: {
-        id: panelContextValue.eventId,
-        indexName: panelContextValue.indexName,
-        scopeId: panelContextValue.scopeId,
-      },
-    });
   });
 });

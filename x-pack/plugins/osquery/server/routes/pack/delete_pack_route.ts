@@ -9,6 +9,7 @@ import { has, filter, unset } from 'lodash';
 import { produce } from 'immer';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { getInternalSavedObjectsClient } from '../utils';
 import type { DeletePacksRequestParamsSchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -42,6 +43,9 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const savedObjectsClient = coreContext.savedObjects.client;
+        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+          osqueryContext.getStartServices
+        );
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
         const currentPackSO = await savedObjectsClient.get<{ name: string }>(
@@ -68,7 +72,7 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         await Promise.all(
           currentPackagePolicies.map((packagePolicy) =>
             packagePolicyService?.update(
-              savedObjectsClient,
+              internalSavedObjectsClient,
               esClient,
               packagePolicy.id,
               produce(packagePolicy, (draft) => {

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { tag } from '../../../tags';
 
 import { INSPECT_MODAL } from '../../../screens/inspect';
 
@@ -14,7 +13,8 @@ import { executeTimelineKQL, openTimelineInspectButton } from '../../../tasks/ti
 
 import { HOSTS_URL } from '../../../urls/navigation';
 
-describe('Inspect', { tags: [tag.ESS, tag.SERVERLESS] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/165688
+describe('Inspect', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   context('Timeline', () => {
     it('inspects the timeline', () => {
       const hostExistsQuery = 'host.name: *';

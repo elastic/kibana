@@ -71,6 +71,9 @@ export const fetchEndpointSecurityDetectionRule = (): Cypress.Chainable<Rule> =>
     qs: {
       rule_id: ELASTIC_SECURITY_RULE_ID,
     },
+    headers: {
+      'elastic-api-version': '2023-10-31',
+    },
   }).then(({ body }) => {
     return body;
   });
@@ -87,6 +90,9 @@ export const stopStartEndpointDetectionsRule = (): Cypress.Chainable<Rule> => {
           action: 'disable',
           ids: [endpointRule.id],
         },
+        headers: {
+          'elastic-api-version': '2023-10-31',
+        },
       }).then(() => {
         return endpointRule;
       });
@@ -101,6 +107,9 @@ export const stopStartEndpointDetectionsRule = (): Cypress.Chainable<Rule> => {
         body: {
           action: 'enable',
           ids: [endpointRule.id],
+        },
+        headers: {
+          'elastic-api-version': '2023-10-31',
         },
       }).then(() => endpointRule);
     })

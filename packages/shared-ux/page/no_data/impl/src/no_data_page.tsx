@@ -33,13 +33,13 @@ export const NoDataPage = ({
       values: { solution },
     });
 
-  const link = (
+  const link = docsLink ? (
     <EuiLink href={docsLink} target="_blank">
       <FormattedMessage id="sharedUXPackages.noDataPage.intro.link" defaultMessage="learn more" />
     </EuiLink>
-  );
+  ) : null;
 
-  const message = (
+  const message = link ? (
     <FormattedMessage
       id="sharedUXPackages.noDataPage.intro"
       defaultMessage="Add your data to get started, or {link} about {solution}."
@@ -47,6 +47,11 @@ export const NoDataPage = ({
         solution,
         link,
       }}
+    />
+  ) : (
+    <FormattedMessage
+      id="sharedUXPackages.noDataPage.introNoDocLink"
+      defaultMessage="Add your data to get started."
     />
   );
 

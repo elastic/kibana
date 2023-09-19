@@ -14,6 +14,7 @@ required:
   - enabled
   - groupBy
   - instanceId
+  - tags
   - createdAt
   - updatedAt
 properties:
@@ -70,6 +71,11 @@ properties:
     description: the value derived from the groupBy field, if present, otherwise '*'
     type: string
     example: 'host-abcde'
+  tags:
+    description: List of tags
+    type: array
+    items:
+      type: string
   createdAt:
     description: The creation date
     type: string

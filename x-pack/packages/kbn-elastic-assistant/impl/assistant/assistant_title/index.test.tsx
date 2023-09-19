@@ -12,20 +12,18 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 
 const testProps = {
   title: 'Test Title',
-  titleIcon: 'globe',
   docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: '7.15' },
   selectedConversation: undefined,
 };
 
 describe('AssistantTitle', () => {
   it('the component renders correctly with valid props', () => {
-    const { getByText, container } = render(
+    const { getByText } = render(
       <TestProviders>
         <AssistantTitle {...testProps} />
       </TestProviders>
     );
     expect(getByText('Test Title')).toBeInTheDocument();
-    expect(container.querySelector('[data-euiicon-type="globe"]')).not.toBeNull();
   });
 
   it('clicking on the popover button opens the popover with the correct link', () => {

@@ -1469,13 +1469,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
       {
-        defaultMessage: 'Press left or right to adjust panels size',
+        defaultMessage: 'Press the left or right arrow keys to adjust panels size',
       }
     ),
     'euiResizableButton.verticalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.verticalResizerAriaLabel',
       {
-        defaultMessage: 'Press up or down to adjust panels size',
+        defaultMessage: 'Press the up or down arrow keys to adjust panels size',
       }
     ),
     'euiResizablePanel.toggleButtonAriaLabel': i18n.translate(

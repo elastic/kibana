@@ -87,14 +87,13 @@ const RiskDetailsTabBodyComponent: React.FC<
     [entityName, riskEntity]
   );
 
-  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled, isAuthorized } =
-    useRiskScore({
-      filterQuery,
-      onlyLatest: false,
-      riskEntity,
-      skip: !overTimeToggleStatus && !contributorsToggleStatus,
-      timerange,
-    });
+  const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
+    filterQuery,
+    onlyLatest: false,
+    riskEntity,
+    skip: !overTimeToggleStatus && !contributorsToggleStatus,
+    timerange,
+  });
 
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
 
@@ -135,10 +134,6 @@ const RiskDetailsTabBodyComponent: React.FC<
     isDisabled: !isModuleEnabled && !loading,
     isDeprecated: isDeprecated && !loading,
   };
-
-  if (!isAuthorized) {
-    return <>{'TODO: Add RiskScore Upsell'}</>;
-  }
 
   if (riskScoreEngineStatus?.isUpdateAvailable) {
     return <RiskScoreUpdatePanel />;

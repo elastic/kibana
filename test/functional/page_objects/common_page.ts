@@ -109,6 +109,18 @@ export class CommonPageObject extends FtrService {
         ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
         : await this.browser.getCurrentUrl();
 
+      if (
+        currentUrl.includes('/app/home') &&
+        disableWelcomePrompt &&
+        (await this.isWelcomeScreen())
+      ) {
+        await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+        // Force a new navigation again
+        const msg = `Found the Welcome page in ${currentUrl}. Skipping it...`;
+        this.log.debug(msg);
+        throw new Error(msg);
+      }
+
       if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
         throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
       }
@@ -227,6 +239,7 @@ export class CommonPageObject extends FtrService {
       search = '',
       disableWelcomePrompt = true,
       insertTimestamp = true,
+      retryOnFatalError = true,
     } = {}
   ) {
     let appUrl: string;
@@ -273,7 +286,7 @@ export class CommonPageObject extends FtrService {
           appName === 'home' &&
           currentUrl.includes('app/home') &&
           disableWelcomePrompt &&
-          (await this.isChromeHidden())
+          (await this.isWelcomeScreen())
         ) {
           await this.browser.setLocalStorageItem('home:welcome:show', 'false');
           const msg = `Failed to skip the Welcome page when navigating the app ${appName}`;
@@ -286,13 +299,20 @@ export class CommonPageObject extends FtrService {
         const navSuccessful = currentUrl
           .replace(':80/', '/')
           .replace(':443/', '/')
-          .startsWith(appUrl);
+          .startsWith(appUrl.replace(':80/', '/').replace(':443/', '/'));
 
         if (!navSuccessful) {
           const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
         }
+
+        if (retryOnFatalError && (await this.isFatalErrorScreen())) {
+          const msg = `Fatal error screen shown. Let's try refreshing the page once more.`;
+          this.log.debug(msg);
+          throw new Error(msg);
+        }
+
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
@@ -402,6 +422,10 @@ export class CommonPageObject extends FtrService {
     return await this.testSubjects.exists('kbnAppWrapper hiddenChrome');
   }
 
+  async isFatalErrorScreen() {
+    return await this.testSubjects.exists('fatalErrorScreen');
+  }
+
   async waitForTopNavToBeVisible() {
     await this.retry.try(async () => {
       const isNavVisible = await this.testSubjects.exists('top-nav');
@@ -491,6 +515,10 @@ export class CommonPageObject extends FtrService {
       const button = await this.find.byButtonText('Dismiss');
       await button.click();
     }
+  }
+
+  async isWelcomeScreen() {
+    return await this.testSubjects.exists('homeWelcomeInterstitial');
   }
 
   /**

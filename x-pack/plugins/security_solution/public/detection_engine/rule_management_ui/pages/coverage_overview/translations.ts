@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const COVERAGE_OVERVIEW_DASHBOARD_TITLE = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.pageTitle',
   {
-    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+    defaultMessage: 'MITRE ATT&CK\u00AE coverage',
   }
 );
 
@@ -152,7 +152,7 @@ export const CoverageOverviewSearchBarPlaceholder = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.searchBarPlaceholder',
   {
     defaultMessage:
-      'Search for the tactic, technique (e.g.,"defence evasion" or "TA0005") or rule name, index pattern (e.g.,"filebeat-*")',
+      'Search for the tactic, technique (e.g.,"defense evasion" or "TA0005") or rule name',
   }
 );
 
@@ -167,5 +167,13 @@ export const CoverageOverviewFilterPopoverClearAll = i18n.translate(
   'xpack.securitySolution.coverageOverviewDashboard.filterPopoverClearAll',
   {
     defaultMessage: 'Clear all',
+  }
+);
+
+export const CoverageOverviewDashboardInformation = i18n.translate(
+  'xpack.securitySolution.coverageOverviewDashboard.dashboardInformation',
+  {
+    defaultMessage:
+      "Your current coverage of MITRE ATT&CK\u00AE tactics and techniques, based on installed rules. Click a cell to view and enable a technique's rules. Rules must be mapped to the MITRE ATT&CK\u00AE framework to be displayed.",
   }
 );

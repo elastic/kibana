@@ -28,9 +28,12 @@ describe('useAssistant', () => {
   let hookResult: RenderHookResult<UseAssistantParams, UseAssistantResult>;
 
   it(`should return showAssistant true and a value for promptContextId`, () => {
-    jest
-      .mocked(useAssistantAvailability)
-      .mockReturnValue({ hasAssistantPrivilege: true, isAssistantEnabled: true });
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantEnabled: true,
+    });
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
@@ -42,9 +45,12 @@ describe('useAssistant', () => {
   });
 
   it(`should return showAssistant false if hasAssistantPrivilege is false`, () => {
-    jest
-      .mocked(useAssistantAvailability)
-      .mockReturnValue({ hasAssistantPrivilege: false, isAssistantEnabled: true });
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasAssistantPrivilege: false,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantEnabled: true,
+    });
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
@@ -56,9 +62,12 @@ describe('useAssistant', () => {
   });
 
   it('returns anonymized prompt context data', async () => {
-    jest
-      .mocked(useAssistantAvailability)
-      .mockReturnValue({ hasAssistantPrivilege: true, isAssistantEnabled: true });
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      isAssistantEnabled: true,
+    });
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });

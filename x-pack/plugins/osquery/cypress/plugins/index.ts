@@ -29,6 +29,8 @@
 module.exports = (on: any, config: any) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@cypress/code-coverage/task')(on, config);
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('@cypress/grep/src/plugin')(config);
 
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config

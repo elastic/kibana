@@ -16,13 +16,18 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions';
 import type { ConfigType } from '../../common/config';
 import type { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
     FleetStartContract,
-    'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
+    | 'agentService'
+    | 'packageService'
+    | 'packagePolicyService'
+    | 'agentPolicyService'
+    | 'createFleetActionsClient'
   >
 > & {
   logger: Logger;
@@ -41,6 +46,7 @@ export class OsqueryAppContextService {
   private packagePolicyService: PackagePolicyClient | undefined;
   private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private ruleRegistryService: RuleRegistryPluginStartContract | undefined;
+  private fleetActionsClient: FleetActionsClientInterface | undefined;
 
   public start(dependencies: OsqueryAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -48,6 +54,7 @@ export class OsqueryAppContextService {
     this.packagePolicyService = dependencies.packagePolicyService;
     this.agentPolicyService = dependencies.agentPolicyService;
     this.ruleRegistryService = dependencies.ruleRegistryService;
+    this.fleetActionsClient = dependencies.createFleetActionsClient?.('osquery');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -71,6 +78,10 @@ export class OsqueryAppContextService {
 
   public getRuleRegistryService(): RuleRegistryPluginStartContract | undefined {
     return this.ruleRegistryService;
+  }
+
+  public getFleetActionsClient(): FleetActionsClientInterface | undefined {
+    return this.fleetActionsClient;
   }
 }
 
