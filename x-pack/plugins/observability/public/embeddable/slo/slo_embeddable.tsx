@@ -12,9 +12,14 @@ import {
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ALL_VALUE, GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SloOverview } from './slo_overview';
 import type { SloEmbeddableDeps, SloEmbeddableInput } from './types';
+
+// import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
 
 export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, EmbeddableOutput> {
@@ -36,6 +41,25 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
       // Optional parent component, this embeddable can optionally be rendered inside a container.
       parent
     );
+
+    this.initOutput().finally(() => this.setInitializationFinished());
+  }
+
+  private async initOutput() {
+    const { sloId, sloInstanceId: instanceId } = this.getInput();
+    console.log(sloId, '!!sloId');
+    console.log(instanceId, '!!sloInstanceId');
+    const http = this.deps.http;
+    try {
+      const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
+        query: {
+          ...(!!instanceId && instanceId !== ALL_VALUE && { instanceId }),
+        },
+      });
+      console.log(response, '!!response');
+    } catch (error) {
+      // ignore error for retrieving slos
+    }
   }
 
   /**
@@ -44,12 +68,16 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
    * @param node
    */
   public render(node: HTMLElement) {
-    const input = this.getInput();
+    const { sloId, sloInstanceId } = this.getInput();
+    const queryClient = new QueryClient();
+
     const I18nContext = this.deps.i18n.Context;
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={this.deps}>
-          <SloOverview slo={input} />
+          <QueryClientProvider client={queryClient}>
+            <SloOverview sloId={sloId} sloInstanceId={sloInstanceId} />
+          </QueryClientProvider>
         </KibanaContextProvider>
       </I18nContext>,
       node

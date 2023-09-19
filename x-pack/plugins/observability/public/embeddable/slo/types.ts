@@ -8,8 +8,13 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 
+// export interface EmbeddableSloProps {
+//   slo: SLOWithSummaryResponse;
+// }
+
 export interface EmbeddableSloProps {
-  slo: SLOWithSummaryResponse;
+  sloId: string;
+  sloInstanceId: string;
 }
 
 export interface SloConfigurationProps {
