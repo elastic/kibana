@@ -7,7 +7,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ComponentType } from 'react';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -172,10 +171,4 @@ export interface ChromeStart {
    * Get an observable of the current style type of the chrome.
    */
   getChromeStyle$(): Observable<ChromeStyle>;
-
-  /**
-   * Set the chat component to be rendered in the chat slot. Used by cloud chat plugin.
-   * @param ChatComponent
-   */
-  setChatComponent(ChatComponent: ComponentType | null): void;
 }

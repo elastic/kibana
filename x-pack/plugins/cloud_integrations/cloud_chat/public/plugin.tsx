@@ -13,7 +13,6 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ReplaySubject } from 'rxjs';
-import { InternalApplicationSetup } from '@kbn/core-application-browser-internal';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -65,14 +64,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
       const chatConfig = useObservable(this.chatConfig$, undefined);
-      return (
-        <ServicesProvider
-          chat={chatConfig}
-          history={(core.application as unknown as InternalApplicationSetup).history}
-        >
-          {children}
-        </ServicesProvider>
-      );
+      return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
     };
     cloud.registerCloudService(CloudChatContextProvider);
   }

@@ -9,7 +9,6 @@
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
 import { shallow, mount } from 'enzyme';
 import React from 'react';
-import { render, act } from '@testing-library/react';
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
@@ -551,32 +550,6 @@ describe('start', () => {
                         ],
                       ]
                   `);
-    });
-  });
-
-  describe('chat', () => {
-    it('returns an empty component', async () => {
-      const { chrome } = await start();
-      const Chat = chrome.getChatComponent();
-      const { container } = render(<Chat />);
-      expect(container).toMatchInlineSnapshot(`<div />`);
-    });
-
-    it('renders a chat component', async () => {
-      const { chrome } = await start();
-      const Chat = chrome.getChatComponent();
-      const { container } = render(<Chat />);
-      act(() => {
-        chrome.setChatComponent(() => <div data-test-subj="chat-component" />);
-      });
-
-      expect(container).toMatchInlineSnapshot(`
-        <div>
-          <div
-            data-test-subj="chat-component"
-          />
-        </div>
-      `);
     });
   });
 });

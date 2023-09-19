@@ -220,7 +220,6 @@ export class ApplicationService {
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
         registerStatusUpdater(allApplicationsFilter, appUpdater$),
-      history: this.history!,
     };
   }
 

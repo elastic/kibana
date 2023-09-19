@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React from 'react';
 // import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -32,10 +32,10 @@ export interface Props {
  */
 export const Chat = ({ onHide = () => {}, onReady, onResize, onPlaybookFired }: Props) => {
   const config = useChatConfig({ onReady, onResize, onPlaybookFired });
-  const ref = useRef<HTMLDivElement>(null);
-  const [isClosed, setIsClosed] = useState(false);
+  // const ref = useRef<HTMLDivElement>(null);
+  // const [isClosed, setIsClosed] = useState(false);
 
-  if (!config.enabled || isClosed) {
+  if (!config.enabled) {
     return null;
   }
 

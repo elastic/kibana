@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
 import type {
   ChromeProjectNavigation,
   ChromeStart,
@@ -31,11 +30,6 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getBodyClasses$(): Observable<string[]>;
-
-  /**
-   * Used only by the rendering service to render the slot of cloud chat UI
-   */
-  getChatComponent(): ComponentType;
 
   /**
    * Used only by the serverless plugin to customize project-style chrome.

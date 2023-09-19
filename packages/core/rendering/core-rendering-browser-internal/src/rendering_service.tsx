@@ -40,7 +40,6 @@ export class RenderingService {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
-    const Chat = chrome.getChatComponent();
 
     const body = document.querySelector('body')!;
     chrome
@@ -68,9 +67,6 @@ export class RenderingService {
             {/* The actual plugin/app */}
             {appComponent}
           </AppWrapper>
-
-          {/* Chat component slot for the component set via chrome.setChatComponent api. */}
-          <Chat />
         </>
       </KibanaRootContextProvider>,
       targetDomElement

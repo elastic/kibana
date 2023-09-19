@@ -80,9 +80,6 @@ export class ChromeService {
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
-  private readonly chatComponent$ = new BehaviorSubject<{ Comp: React.ComponentType | null }>({
-    Comp: null,
-  });
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -427,11 +424,6 @@ export class ChromeService {
       return <HeaderComponent />;
     };
 
-    const Chat: React.FC = () => {
-      const ChatComponent = useObservable(this.chatComponent$, { Comp: null }).Comp;
-      return ChatComponent ? <ChatComponent /> : <></>;
-    };
-
     return {
       navControls,
       navLinks,
@@ -518,11 +510,6 @@ export class ChromeService {
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
-      },
-
-      getChatComponent: () => Chat,
-      setChatComponent: (ChatComponent: React.ComponentType | null) => {
-        this.chatComponent$.next({ Comp: ChatComponent });
       },
     };
   }

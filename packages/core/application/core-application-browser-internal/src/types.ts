@@ -43,12 +43,6 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
     plugin: PluginOpaqueId,
     app: App<HistoryLocationState>
   ): void;
-
-  /**
-   * The global history instance, exposed only to Core.
-   * @internal
-   */
-  history: History<unknown>;
 }
 
 /** @internal */

@@ -73,8 +73,6 @@ export function createPluginSetupContext<
     application: {
       register: (app) => deps.application.register(plugin.opaqueId, app),
       registerAppUpdater: (statusUpdater$) => deps.application.registerAppUpdater(statusUpdater$),
-      // @ts-ignore,
-      history: deps.application.history,
     },
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState, CSSProperties } from 'react';
-import { useChat, useHistory } from '../../services';
+import { useChat } from '../../services';
 import { getChatContext } from './get_chat_context';
 import { Props as ChatProps } from './chat';
 
@@ -31,7 +31,7 @@ const MESSAGE_WIDGET_READY = 'driftWidgetReady';
 const MESSAGE_IFRAME_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
 const MESSAGE_SET_CONTEXT = 'driftSetContext';
-const MESSAGE_UPDATE_CONTEXT = 'driftUpdateContext';
+// const MESSAGE_UPDATE_CONTEXT = 'driftUpdateContext';
 
 type ChatConfigParams = Exclude<ChatProps, 'onHide'>;
 
