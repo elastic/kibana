@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import {
   formatDurationFromTimeUnitChar,
@@ -94,6 +95,7 @@ export function registerErrorCountRuleType({
       actionVariables: {
         context: errorCountActionVariables,
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,

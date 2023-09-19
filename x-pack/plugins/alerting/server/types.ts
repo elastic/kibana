@@ -288,6 +288,7 @@ export interface RuleType<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
     AlertData
   >;
+  category: string;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];

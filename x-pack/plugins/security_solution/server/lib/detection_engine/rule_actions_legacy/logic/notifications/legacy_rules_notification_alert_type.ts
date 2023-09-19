@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import {
@@ -39,6 +40,7 @@ export const legacyRulesNotificationAlertType = ({
   name: 'Security Solution notification (Legacy)',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
+  category: DEFAULT_APP_CATEGORIES.security.id,
   producer: SERVER_APP_ID,
   validate: {
     params: legacyRulesNotificationParams,

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   TimeSeriesQuery,
   TIME_SERIES_BUCKET_SELECTOR_FIELD,
@@ -206,6 +207,7 @@ export function getRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor,
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
     alerts: STACK_ALERTS_AAD_CONFIG,

@@ -25,7 +25,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger } = context;
-  const { title, duration, rRule } = data;
+  const { title, duration, rRule, categoryIds } = data;
 
   try {
     createMaintenanceWindowParamsSchema.validate(params);
@@ -42,6 +42,7 @@ export async function createMaintenanceWindow(
     title,
     enabled: true,
     expirationDate,
+    categoryIds,
     rRule: rRule as MaintenanceWindow['rRule'],
     duration,
     events,

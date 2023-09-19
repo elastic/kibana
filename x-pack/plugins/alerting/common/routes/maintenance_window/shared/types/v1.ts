@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export type { MaintenanceWindowStatus } from './v1';
+import type { TypeOf } from '@kbn/config-schema';
+import { maintenanceWindowCategoryIdsSchemaV1 } from '..';
 
-export { maintenanceWindowStatus } from './v1';
+export type MaintenanceWindowCategoryIds = TypeOf<typeof maintenanceWindowCategoryIdsSchemaV1>;

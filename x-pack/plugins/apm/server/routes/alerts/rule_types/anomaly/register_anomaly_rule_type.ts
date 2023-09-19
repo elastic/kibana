@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
@@ -93,6 +93,7 @@ export function registerAnomalyRuleType({
           apmActionVariables.viewInAppUrl,
         ],
       },
+      category: DEFAULT_APP_CATEGORIES.observability.id,
       producer: 'apm',
       minimumLicenseRequired: 'basic',
       isExportable: true,

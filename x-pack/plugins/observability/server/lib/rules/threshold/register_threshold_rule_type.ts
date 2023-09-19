@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -179,6 +180,7 @@ export function thresholdRuleType(
         };
       },
     },
+    category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>

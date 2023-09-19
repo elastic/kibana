@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-export const maintenanceWindowStatus = {
-  RUNNING: 'running',
-  UPCOMING: 'upcoming',
-  FINISHED: 'finished',
-  ARCHIVED: 'archived',
-} as const;
-
 export const maintenanceWindowCategoryIdTypes = {
   KIBANA: 'kibana',
   OBSERVABILITY: 'observability',
   SECURITY_SOLUTION: 'securitySolution',
 } as const;
+
+export type MaintenanceWindowCategoryIdTypes =
+  typeof maintenanceWindowCategoryIdTypes[keyof typeof maintenanceWindowCategoryIdTypes];

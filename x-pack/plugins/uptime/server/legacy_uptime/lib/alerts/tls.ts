@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
@@ -117,6 +118,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   plugins
 ) => ({
   id: CLIENT_ALERT_TYPES.TLS,
+  category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
   validate: {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
@@ -72,6 +73,7 @@ export const createQueryAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
+    category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const { runOpts, services, spaceId, state } = execOptions;
