@@ -111,6 +111,11 @@ describe('rule helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
         },
+        eqlOptions: {
+          timestampField: undefined,
+          eventCategoryField: undefined,
+          tiebreakerField: undefined,
+        },
         groupByFields: ['host.name'],
         groupByDuration: {
           value: 5,
